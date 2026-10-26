@@ -1,0 +1,22 @@
+{
+  "move": {
+    "up": ["KeyW"],
+    "down": ["KeyS"],
+    "left": ["KeyA"],
+    "right": ["KeyD"]
+  },
+  "buttons": {
+    "attack": ["KeyQ"],
+    "swapWeapon": ["KeyE"],
+    "interact": ["KeyF"],
+    "skill1": ["Digit1", "Numpad1"],
+    "skill2": ["Digit2", "Numpad2"],
+    "skill3": ["Digit3", "Numpad3"],
+    "skill4": ["Digit4", "Numpad4"],
+    "ultimate": ["Digit5", "Numpad5"],
+    "inventory": ["KeyI"],
+    "map": ["Tab"],
+    "pause": ["Escape"]
+  },
+  "debugToggle": ["F1"]
+}

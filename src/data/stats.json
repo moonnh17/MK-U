@@ -1,0 +1,11 @@
+{
+  "startValue": 10,
+  "stats": [
+    { "id": "strength", "nameKey": "stat.strength", "descKey": "stat.strength.desc", "linkedTags": ["physical"] },
+    { "id": "toughness", "nameKey": "stat.toughness", "descKey": "stat.toughness.desc", "linkedTags": [] },
+    { "id": "agility", "nameKey": "stat.agility", "descKey": "stat.agility.desc", "linkedTags": ["charging"] },
+    { "id": "intelligence", "nameKey": "stat.intelligence", "descKey": "stat.intelligence.desc", "linkedTags": ["tech", "chance"] },
+    { "id": "magiPower", "nameKey": "stat.magiPower", "descKey": "stat.magiPower.desc", "linkedTags": ["magic"] },
+    { "id": "willpower", "nameKey": "stat.willpower", "descKey": "stat.willpower.desc", "linkedTags": ["buff"] }
+  ]
+}

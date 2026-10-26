@@ -1,0 +1,26 @@
+{
+  "chapters": 3,
+  "stagesPerChapter": 5,
+  "bossStages": [2, 5],
+  "grid": { "width": 7, "height": 7 },
+  "tileSize": 16,
+  "roomTiles": { "width": 28, "height": 15 },
+  "corridor": { "lengthTiles": 5, "widthTiles": 3 },
+  "stageRules": {
+    "normal": {
+      "combatRooms": [4, 5],
+      "encounterRooms": 1,
+      "bossRooms": 0,
+      "exitRooms": 1,
+      "lastRoom": "exitRoom"
+    },
+    "boss": {
+      "combatRooms": [2, 3],
+      "encounterRooms": 1,
+      "bossRooms": 1,
+      "exitRooms": 0,
+      "lastRoom": "bossRoom"
+    }
+  },
+  "combatWaves": [2, 3]
+}

@@ -1,0 +1,34 @@
+{
+  "waveDelaySec": 0.8,
+  "waves": [
+    { "id": "c1_swarm", "chapter": 1, "weight": 3, "spawns": [{ "enemy": "tomakki", "count": [5, 7] }] },
+    {
+      "id": "c1_pack",
+      "chapter": 1,
+      "weight": 2,
+      "spawns": [
+        { "enemy": "gaedeulgae", "count": [2, 3] },
+        { "enemy": "tomakki", "count": [2, 3] }
+      ]
+    },
+    {
+      "id": "c1_brute",
+      "chapter": 1,
+      "weight": 2,
+      "spawns": [
+        { "enemy": "akgwi", "count": [1, 1] },
+        { "enemy": "tomakki", "count": [3, 4] }
+      ]
+    },
+    {
+      "id": "c1_mixed",
+      "chapter": 1,
+      "weight": 1,
+      "spawns": [
+        { "enemy": "akgwi", "count": [1, 1] },
+        { "enemy": "gaedeulgae", "count": [1, 2] },
+        { "enemy": "tomakki", "count": [2, 3] }
+      ]
+    }
+  ]
+}

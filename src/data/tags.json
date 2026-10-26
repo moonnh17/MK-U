@@ -1,0 +1,104 @@
+{
+  "tags": [
+    {
+      "id": "physical",
+      "nameKey": "tag.physical",
+      "descKey": "tag.physical.desc",
+      "damageGroup": "attribute",
+      "rule": { "kind": "linearStat", "stat": "strength", "pivot": 10, "perPoint": 0.04, "cap": 1.5 },
+      "badgeColor": "#d9663b"
+    },
+    {
+      "id": "magic",
+      "nameKey": "tag.magic",
+      "descKey": "tag.magic.desc",
+      "damageGroup": "attribute",
+      "rule": { "kind": "linearStat", "stat": "magiPower", "pivot": 10, "perPoint": 0.04, "cap": 1.5 },
+      "badgeColor": "#8c5ad9"
+    },
+    {
+      "id": "tech",
+      "nameKey": "tag.tech",
+      "descKey": "tag.tech.desc",
+      "damageGroup": "attribute",
+      "rule": { "kind": "linearStat", "stat": "intelligence", "pivot": 10, "perPoint": 0.04, "cap": 1.5 },
+      "badgeColor": "#3ba7d9"
+    },
+    {
+      "id": "chance",
+      "nameKey": "tag.chance",
+      "descKey": "tag.chance.desc",
+      "damageGroup": "none",
+      "rule": {
+        "kind": "exponentialChance",
+        "stat": "intelligence",
+        "pivot": 10,
+        "base": 1.03,
+        "caps": { "success": 0.98, "greatSuccess": 0.6 }
+      },
+      "badgeColor": "#d9c23b"
+    },
+    {
+      "id": "charging",
+      "nameKey": "tag.charging",
+      "descKey": "tag.charging.desc",
+      "damageGroup": "none",
+      "rule": { "kind": "linearStat", "stat": "agility", "pivot": 10, "perPoint": 0.04, "cap": 1.0 },
+      "badgeColor": "#5ad98c"
+    },
+    {
+      "id": "targeted",
+      "nameKey": "tag.targeted",
+      "descKey": "tag.targeted.desc",
+      "damageGroup": "none",
+      "rule": { "kind": "none" },
+      "badgeColor": "#d95a8c"
+    },
+    {
+      "id": "ranged",
+      "nameKey": "tag.ranged",
+      "descKey": "tag.ranged.desc",
+      "damageGroup": "range",
+      "rule": { "kind": "none" },
+      "badgeColor": "#7fb0c8"
+    },
+    {
+      "id": "melee",
+      "nameKey": "tag.melee",
+      "descKey": "tag.melee.desc",
+      "damageGroup": "range",
+      "rule": { "kind": "none" },
+      "badgeColor": "#c88f7f"
+    },
+    {
+      "id": "buff",
+      "nameKey": "tag.buff",
+      "descKey": "tag.buff.desc",
+      "damageGroup": "none",
+      "rule": { "kind": "linearStat", "stat": "willpower", "pivot": 10, "perPoint": 0.03, "cap": 0.9 },
+      "badgeColor": "#e0e0e0"
+    },
+    {
+      "id": "space",
+      "nameKey": "tag.space",
+      "descKey": "tag.space.desc",
+      "damageGroup": "none",
+      "rule": {
+        "kind": "space",
+        "normal": "instakill",
+        "eliteMaxHpRatio": 0.25,
+        "championMaxHpRatio": 0.1,
+        "bossDamageMultiplier": 2.4
+      },
+      "badgeColor": "#2a2a6a"
+    },
+    {
+      "id": "bleed",
+      "nameKey": "tag.bleed",
+      "descKey": "tag.bleed.desc",
+      "damageGroup": "none",
+      "rule": { "kind": "bleed", "durationSec": 4, "tickIntervalSec": 1, "maxStacks": 3, "refreshOnReapply": true },
+      "badgeColor": "#a01e2a"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "grades": [
+    { "id": "common", "nameKey": "grade.common", "color": "#ffffff", "damageMultiplier": 1.0, "randomOptions": 0 },
+    { "id": "rare", "nameKey": "grade.rare", "color": "#4a8cff", "damageMultiplier": 1.2, "randomOptions": 1 },
+    { "id": "legendary", "nameKey": "grade.legendary", "color": "#ffd23f", "damageMultiplier": 1.45, "randomOptions": 2 },
+    { "id": "unique", "nameKey": "grade.unique", "color": "#a45cff", "damageMultiplier": 1.7, "randomOptions": 0 },
+    { "id": "mythic", "nameKey": "grade.mythic", "color": "#ff3b3b", "damageMultiplier": 2.0, "randomOptions": 0 }
+  ]
+}

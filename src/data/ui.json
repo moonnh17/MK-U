@@ -1,0 +1,36 @@
+{
+  "baseWidth": 480,
+  "baseHeight": 270,
+  "backgroundColor": "#0b0f14",
+  "hud": {
+    "margin": 6,
+    "fontSize": 10,
+    "bars": {
+      "width": 72,
+      "height": 6,
+      "gap": 3,
+      "hpColor": "#d94a4a",
+      "shieldColor": "#8aa4c8",
+      "energyColor": "#3fc8e0",
+      "backColor": "#1d232b"
+    },
+    "minimap": { "width": 72, "height": 44, "backColor": "#10161d", "borderColor": "#5a6a7a" },
+    "skillbar": { "slotSize": 20, "gap": 3, "groupGap": 8, "disabledAlpha": 0.35 },
+    "weapons": { "mainWidth": 52, "mainHeight": 22, "subWidth": 34, "subHeight": 14, "gap": 3 }
+  },
+  "room": { "floorColor": "#1c2430", "wallColor": "#3a4656", "wallThickness": 6 },
+  "mobile": {
+    "edgeMarginDp": 16,
+    "attackDp": 96,
+    "skillDp": 68,
+    "ultimateDp": 84,
+    "swapDp": 56,
+    "bagDp": 48,
+    "pauseDp": 48,
+    "gapDp": 8,
+    "skillFanDeg": [180, 210, 240, 270],
+    "ultimateDeg": 225,
+    "minimapTab": { "widthDp": 72, "heightDp": 40 },
+    "joystick": { "radiusDp": 56, "knobDp": 44, "deadZone": 0.15 }
+  }
+}

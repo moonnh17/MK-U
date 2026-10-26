@@ -1,0 +1,59 @@
+{
+  "startWeapon": "pistol",
+  "weapons": [
+    {
+      "id": "pistol",
+      "nameKey": "weapon.pistol",
+      "category": "gun",
+      "grade": "common",
+      "tags": ["tech", "ranged"],
+      "baseDamage": 4,
+      "fireIntervalSec": 0.3,
+      "energyCost": 0,
+      "pattern": { "kind": "single" },
+      "projectileSpeed": 260,
+      "range": 260,
+      "cutsProjectiles": false,
+      "droppable": true,
+      "spriteKey": "weapon_pistol",
+      "color": "#c8c8c8",
+      "size": 6
+    },
+    {
+      "id": "shotgun",
+      "nameKey": "weapon.shotgun",
+      "category": "gun",
+      "grade": "common",
+      "tags": ["tech", "ranged"],
+      "baseDamage": 3,
+      "fireIntervalSec": 0.6,
+      "energyCost": 3,
+      "pattern": { "kind": "spread", "pellets": [5, 7], "spreadDeg": 40 },
+      "projectileSpeed": 240,
+      "range": 150,
+      "cutsProjectiles": false,
+      "droppable": true,
+      "spriteKey": "weapon_shotgun",
+      "color": "#c89a5a",
+      "size": 8
+    },
+    {
+      "id": "longsword",
+      "nameKey": "weapon.longsword",
+      "category": "blade",
+      "grade": "common",
+      "tags": ["physical", "melee"],
+      "baseDamage": 7,
+      "fireIntervalSec": 0.4,
+      "energyCost": 0,
+      "pattern": { "kind": "arc", "arcDeg": 180, "radius": 28 },
+      "projectileSpeed": 0,
+      "range": 28,
+      "cutsProjectiles": true,
+      "droppable": true,
+      "spriteKey": "weapon_longsword",
+      "color": "#e0e8ff",
+      "size": 10
+    }
+  ]
+}
