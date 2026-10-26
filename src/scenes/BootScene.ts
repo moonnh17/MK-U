@@ -11,7 +11,16 @@ export class BootScene extends Phaser.Scene {
 
   create(): void {
     const { data } = getContext();
-    const refs: SpriteRef[] = [data.player, ...data.weapons.weapons, ...data.enemies.enemies];
+    const refs: SpriteRef[] = [
+      data.player,
+      data.weapons.projectile,
+      ...data.weapons.weapons,
+      ...data.enemies.enemies,
+      data.pickups.energyOrb,
+      data.pickups.coin,
+      data.mapgen.props.exitPortal,
+      data.mapgen.props.encounterCore,
+    ];
     for (const ref of refs) this.makeRectTexture(ref);
 
     this.scene.start('Run');

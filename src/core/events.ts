@@ -7,6 +7,16 @@ export interface GameEvents {
   command: { action: ButtonAction; enabled: boolean };
   uiModeChanged: { mode: UiMode };
   debugToggled: { on: boolean };
+  /** 디버그: 현재 방 즉시 클리어 */
+  debugClearRoom: Record<string, never>;
+  /** 화면 가운데 짧은 알림 */
+  toast: { text: string };
+  /** 근처에 상호작용 대상이 생기거나 사라짐 (모바일 공격 버튼 → 줍기/조사) */
+  interactHint: { kind: 'weapon' | 'core' | null };
+  /** 사망·클리어 화면이 뜨거나(true) 닫힘(false) */
+  overlay: { open: boolean };
+  /** 화면의 '다시 시작' 버튼 */
+  restartRequested: Record<string, never>;
 }
 
 type Handler<T> = (payload: T) => void;
