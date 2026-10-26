@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import './style.css';
 import { makeFallbackSeed, parseLaunchConfig } from './core/config';
 import { setContext } from './core/context';
+import { debugClearRoom, toggleDebug, toggleDebugFlag } from './core/debug';
 import { bus } from './core/events';
 import { DISABLED_ACTIONS } from './core/features';
 import { computeZoom, hexColor } from './core/scale';
@@ -85,7 +86,7 @@ const game = new Phaser.Game({
 
 function applyUiMode(mode: UiMode): void {
   ctx.uiMode = mode;
-  touch.setActive(mode === 'mobile');
+  touch.setActive(mode === 'mobile' && !ctx.session?.outcome);
   game.scale.setZoom(zoomFor(mode));
   bus.emit('uiModeChanged', { mode });
 }
@@ -103,11 +104,23 @@ window.addEventListener(
   { capture: true },
 );
 keyboard.onActivity = () => switchTo('keyboard');
-keyboard.onDebugToggle = () => {
-  ctx.debug = !ctx.debug;
-  bus.emit('debugToggled', { on: ctx.debug });
+keyboard.onDebugKey = (key) => {
+  if (key === 'toggle') toggleDebug(ctx);
+  else if (key === 'clearRoom') debugClearRoom(ctx);
+  else toggleDebugFlag(ctx, key);
 };
+
+// 근처에 줍거나 조사할 것이 있으면 모바일 공격 버튼이 상호작용 버튼이 된다
+bus.on('interactHint', ({ kind }) => {
+  if (kind === 'weapon') touch.setAttackOverride('interact', t('mobile.pickup'));
+  else if (kind === 'core') touch.setAttackOverride('interact', t('mobile.interact'));
+  else touch.setAttackOverride(null, t('mobile.attack'));
+});
+// 사망·클리어 화면에서는 터치 레이어를 걷어 '다시 시작' 버튼을 누를 수 있게 한다
+bus.on('overlay', ({ open }) => touch.setActive(!open && ctx.uiMode === 'mobile'));
 window.addEventListener('resize', () => game.scale.setZoom(zoomFor(ctx.uiMode)));
 
 applyUiMode(ctx.uiMode);
+// 디버그 모드에서만 콘솔 점검용 핸들을 노출한다
+if (config.debug) (window as unknown as { __mku: unknown }).__mku = { ctx, game };
 console.info(`[MKU] seed=${config.seed} ui=${ctx.uiMode} debug=${ctx.debug}`);

@@ -58,6 +58,10 @@ export class TouchSource {
   private joystick: JoystickState | null = null;
   /** pointerId → 누르고 있는 버튼 */
   private buttonPointers = new Map<number, TouchControlId>();
+  /** pointerId → 누른 순간 정해진 명령 (공격 버튼이 '줍기'로 바뀐 경우 interact) */
+  private pointerActions = new Map<number, ButtonAction>();
+  /** 공격 버튼을 대신할 명령. null이면 원래대로 attack */
+  private attackOverride: ButtonAction | null = null;
   private readonly buttons = new Map<TouchControlId, HTMLDivElement>();
   private readonly joyBase: HTMLDivElement;
   private readonly joyKnob: HTMLDivElement;
@@ -105,6 +109,15 @@ export class TouchSource {
     this.buttons.get(id)?.classList.toggle('disabled', disabled);
   }
 
+  /**
+   * 근처에 상호작용 대상이 있으면 공격 버튼이 다른 명령(interact)을 내게 한다.
+   * 이미 누르고 있던 손가락은 누른 순간의 명령을 유지한다(누른 채 다가가도 갑자기 줍지 않음).
+   */
+  setAttackOverride(action: ButtonAction | null, label: string): void {
+    this.attackOverride = action;
+    this.setLabel('attack', label);
+  }
+
   setLabel(id: TouchControlId, label: string): void {
     const el = this.buttons.get(id);
     if (el) el.textContent = label;
@@ -117,7 +130,7 @@ export class TouchSource {
 
   state(): InputSourceState {
     if (!this.active) return { move: { x: 0, y: 0 }, held: new Set() };
-    const held = new Set<ButtonAction>(this.buttonPointers.values());
+    const held = new Set<ButtonAction>(this.pointerActions.values());
     const move = this.joystick
       ? joystickVector(this.joystick.origin, this.joystick.point, this.cfg.joystick.radiusDp, this.cfg.joystick.deadZone)
       : { x: 0, y: 0 };
@@ -147,6 +160,7 @@ export class TouchSource {
     e.stopPropagation();
     capture(e.currentTarget as HTMLElement, e.pointerId);
     this.buttonPointers.set(e.pointerId, id);
+    this.pointerActions.set(e.pointerId, id === 'attack' && this.attackOverride ? this.attackOverride : id);
     this.buttons.get(id)?.classList.add('pressed');
   }
 
@@ -169,6 +183,7 @@ export class TouchSource {
     const id = this.buttonPointers.get(e.pointerId);
     if (id) {
       this.buttonPointers.delete(e.pointerId);
+      this.pointerActions.delete(e.pointerId);
       if (![...this.buttonPointers.values()].includes(id)) this.buttons.get(id)?.classList.remove('pressed');
     }
     if (this.joystick && e.pointerId === this.joystick.pointerId) {
@@ -179,6 +194,7 @@ export class TouchSource {
 
   private releaseAll(): void {
     this.buttonPointers.clear();
+    this.pointerActions.clear();
     for (const el of this.buttons.values()) el.classList.remove('pressed');
     this.joystick = null;
     this.hideJoystick();
