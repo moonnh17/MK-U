@@ -18,5 +18,10 @@
     "map": ["Tab"],
     "pause": ["Escape"]
   },
-  "debugToggle": ["F1"]
+  "debug": {
+    "toggle": ["F1"],
+    "revealMap": ["F2"],
+    "invincible": ["F3"],
+    "clearRoom": ["F4"]
+  }
 }

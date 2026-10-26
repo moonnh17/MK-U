@@ -131,6 +131,7 @@ export function validateGameData(d: GameData): Errors {
   if (!weaponIds.includes(d.weapons.startWeapon)) {
     errors.push(`weapons.startWeapon: '${d.weapons.startWeapon}' 무기 없음`);
   }
+  checkSprite(errors, 'weapons.projectile', d.weapons.projectile);
   for (const wpn of d.weapons.weapons) {
     const w = `weapons.${wpn.id}`;
     checkSprite(errors, w, wpn);
@@ -168,7 +169,7 @@ export function validateGameData(d: GameData): Errors {
     needText(w, e.nameKey);
     if (!Number.isInteger(e.chapter) || e.chapter < 1 || e.chapter > d.mapgen.chapters) errors.push(`${w}: chapter 범위 밖`);
     if (!['normal', 'elite', 'champion', 'boss', 'hiddenBoss'].includes(e.rank)) errors.push(`${w}: rank 잘못됨`);
-    if (e.ai !== 'chase') errors.push(`${w}: 알 수 없는 ai '${e.ai}'`);
+    if (e.ai !== 'chase' && e.ai !== 'idle') errors.push(`${w}: 알 수 없는 ai '${e.ai}'`);
     checkPositive(errors, `${w}.maxHp`, e.maxHp);
     checkPositive(errors, `${w}.moveSpeed`, e.moveSpeed, true);
     checkPositive(errors, `${w}.contactDamage`, e.contactDamage, true);
@@ -199,9 +200,27 @@ export function validateGameData(d: GameData): Errors {
     errors.push(`mapgen.roomTiles: 방(${roomW}×${roomH})이 화면(${d.ui.baseWidth}×${d.ui.baseHeight})보다 큼`);
   }
   if (m.corridor.widthTiles >= m.roomTiles.height) errors.push('mapgen.corridor.widthTiles: 방 높이보다 작아야 함');
+  if (!enemyIds.includes(m.bossPlaceholderEnemy)) errors.push(`mapgen.bossPlaceholderEnemy: '${m.bossPlaceholderEnemy}' 적 없음`);
+  for (const id of m.testWeapons) if (!weaponIds.includes(id)) errors.push(`mapgen.testWeapons: '${id}' 무기 없음`);
+  checkSprite(errors, 'mapgen.props.exitPortal', m.props.exitPortal);
+  checkSprite(errors, 'mapgen.props.encounterCore', m.props.encounterCore);
+  if (!HEX_COLOR.test(m.door.color) || !HEX_COLOR.test(m.door.openColor)) errors.push('mapgen.door: 색은 #RRGGBB');
+  checkPositive(errors, 'mapgen.lockInsetPx', m.lockInsetPx, true);
+
+  // --- 픽업 ---
+  const pk = d.pickups;
+  checkSprite(errors, 'pickups.energyOrb', pk.energyOrb);
+  checkSprite(errors, 'pickups.coin', pk.coin);
+  checkPositive(errors, 'pickups.coin.value', pk.coin.value);
+  for (const k of ['magnetRadius', 'magnetSpeed', 'collectRadius', 'interactRadius'] as const) {
+    checkPositive(errors, `pickups.${k}`, pk[k]);
+  }
+  checkPositive(errors, 'pickups.scatterRadius', pk.scatterRadius, true);
 
   // --- 웨이브 ---
   checkPositive(errors, 'waves.waveDelaySec', d.waves.waveDelaySec, true);
+  checkPositive(errors, 'waves.spawnWarnSec', d.waves.spawnWarnSec, true);
+  checkPositive(errors, 'waves.spawnMinPlayerDistance', d.waves.spawnMinPlayerDistance, true);
   checkUnique(errors, 'waves', d.waves.waves.map((x) => x.id));
   for (const wave of d.waves.waves) {
     const w = `waves.${wave.id}`;
@@ -220,6 +239,8 @@ export function validateGameData(d: GameData): Errors {
   checkPositive(errors, 'player.maxHp', pl.maxHp);
   checkPositive(errors, 'player.moveSpeed', pl.moveSpeed);
   checkPositive(errors, 'player.hurtInvulnSec', pl.hurtInvulnSec, true);
+  checkPositive(errors, 'player.blinkIntervalSec', pl.blinkIntervalSec);
+  checkPositive(errors, 'player.weaponOffset', pl.weaponOffset, true);
   checkPositive(errors, 'player.shieldMax', pl.shieldMax, true);
   checkPositive(errors, 'player.energy.max', pl.energy.max);
   checkPositive(errors, 'player.energy.orbValue', pl.energy.orbValue);
@@ -253,7 +274,7 @@ export function validateGameData(d: GameData): Errors {
     if (!keys?.length) errors.push(`keybindings.buttons.${action}: 키 없음`);
     for (const k of keys ?? []) claim(k, action);
   }
-  for (const k of kb.debugToggle) claim(k, 'debugToggle');
+  for (const [name, codes] of Object.entries(kb.debug)) for (const k of codes) claim(k, `debug.${name}`);
 
   // --- 텍스트 ---
   for (const [k, v] of Object.entries(d.text)) {

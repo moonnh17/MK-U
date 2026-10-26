@@ -1,11 +1,19 @@
 import { BUTTON_ACTIONS, type ButtonAction, type Vec2 } from '../core/actions';
 import type { InputSourceState } from './inputManager';
 
+export type DebugKey = 'toggle' | 'revealMap' | 'invincible' | 'clearRoom';
+
 /** keybindings.json 형태. 키는 KeyboardEvent.code (배열 = 여러 키 허용) */
 export interface KeybindingsData {
   move: { up: string[]; down: string[]; left: string[]; right: string[] };
   buttons: Record<ButtonAction, string[]>;
-  debugToggle: string[];
+  /** 디버그 단축키 (게임 명령이 아님) */
+  debug: Record<DebugKey, string[]>;
+}
+
+function debugKeyOf(code: string, b: KeybindingsData): DebugKey | null {
+  for (const [k, codes] of Object.entries(b.debug) as [DebugKey, string[]][]) if (codes.includes(code)) return k;
+  return null;
 }
 
 /** 눌린 키 코드 집합 → 이동 벡터 + 눌린 버튼 (순수 함수) */
@@ -29,7 +37,7 @@ export function resolveKeyboard(down: ReadonlySet<string>, b: KeybindingsData): 
 
 /** 이 키 코드가 게임에 묶여 있는지 (브라우저 기본 동작을 막을지 판단) */
 export function isBoundKey(code: string, b: KeybindingsData): boolean {
-  if (b.debugToggle.includes(code)) return true;
+  if (debugKeyOf(code, b)) return true;
   if (Object.values(b.move).some((codes) => codes.includes(code))) return true;
   return BUTTON_ACTIONS.some((a) => b.buttons[a].includes(code));
 }
@@ -41,8 +49,9 @@ export class KeyboardSource {
     if (!isBoundKey(e.code, this.bindings)) return;
     e.preventDefault();
     if (e.repeat) return;
-    if (this.bindings.debugToggle.includes(e.code)) {
-      this.onDebugToggle?.();
+    const debugKey = debugKeyOf(e.code, this.bindings);
+    if (debugKey) {
+      this.onDebugKey?.(debugKey);
       return;
     }
     this.down.add(e.code);
@@ -57,7 +66,7 @@ export class KeyboardSource {
 
   /** 키보드를 쓰기 시작했을 때(UI 모드 자동 전환용) */
   onActivity?: () => void;
-  onDebugToggle?: () => void;
+  onDebugKey?: (key: DebugKey) => void;
 
   constructor(private readonly bindings: KeybindingsData) {
     window.addEventListener('keydown', this.onKeyDown);

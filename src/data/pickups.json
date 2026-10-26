@@ -1,0 +1,9 @@
+{
+  "magnetRadius": 48,
+  "magnetSpeed": 220,
+  "collectRadius": 8,
+  "scatterRadius": 10,
+  "interactRadius": 22,
+  "energyOrb": { "spriteKey": "pickup_energy", "color": "#3fc8e0", "size": 4 },
+  "coin": { "spriteKey": "pickup_coin", "color": "#ffd23f", "size": 4, "value": 1 }
+}

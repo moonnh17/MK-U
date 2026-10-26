@@ -6,6 +6,8 @@ export interface LaunchConfig {
   seedFromUrl: boolean;
   debug: boolean;
   ui: UiModeSetting;
+  /** 1-1 시작방에 테스트 무기를 놓는다 (`?testWeapons=0`으로 끔) */
+  testWeapons: boolean;
 }
 
 /**
@@ -26,7 +28,9 @@ export function parseLaunchConfig(search: string, fallbackSeed: number): LaunchC
   const uiRaw = params.get('ui');
   const ui: UiModeSetting = uiRaw === 'pc' || uiRaw === 'mobile' ? uiRaw : 'auto';
 
-  return { seed, seedFromUrl, debug, ui };
+  const testWeapons = params.get('testWeapons') !== '0';
+
+  return { seed, seedFromUrl, debug, ui, testWeapons };
 }
 
 /** URL에 시드가 없을 때 쓸 시드. 이 값 자체는 디스플레이에 표시해 재현할 수 있게 한다. */

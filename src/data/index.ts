@@ -6,6 +6,7 @@ import type {
   EnemiesData,
   GroupMultipliersData,
   MapgenData,
+  PickupsData,
   PlayerData,
   StatsData,
   TagsData,
@@ -24,6 +25,7 @@ import enemiesJson from './enemies.json';
 import mapgenJson from './mapgen.json';
 import wavesJson from './waves.json';
 import playerJson from './player.json';
+import pickupsJson from './pickups.json';
 import uiJson from './ui.json';
 import keybindingsJson from './keybindings.json';
 import koJson from './text/ko.json';
@@ -37,6 +39,7 @@ export interface GameData {
   mapgen: MapgenData;
   waves: WavesData;
   player: PlayerData;
+  pickups: PickupsData;
   ui: UiData;
   keybindings: KeybindingsData;
   text: TextTable;
@@ -52,6 +55,7 @@ export const gameData: GameData = {
   mapgen: mapgenJson as unknown as MapgenData,
   waves: wavesJson as unknown as WavesData,
   player: playerJson as unknown as PlayerData,
+  pickups: pickupsJson as unknown as PickupsData,
   ui: uiJson as unknown as UiData,
   keybindings: keybindingsJson as unknown as KeybindingsData,
   text: koJson as TextTable,

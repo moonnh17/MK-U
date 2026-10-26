@@ -23,6 +23,11 @@ describe('parseLaunchConfig', () => {
     expect(parseLaunchConfig('?ui=tv', 1).ui).toBe('auto');
     expect(parseLaunchConfig('', 1).debug).toBe(false);
   });
+
+  it('테스트 무기는 기본 켜짐, ?testWeapons=0이면 끔', () => {
+    expect(parseLaunchConfig('', 1).testWeapons).toBe(true);
+    expect(parseLaunchConfig('?testWeapons=0', 1).testWeapons).toBe(false);
+  });
 });
 
 describe('computeZoom', () => {

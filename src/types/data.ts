@@ -179,12 +179,15 @@ export interface WeaponDef extends SpriteRef {
 
 export interface WeaponsData {
   startWeapon: string;
+  /** 총알 모양 (공통) */
+  projectile: SpriteRef;
   weapons: WeaponDef[];
 }
 
 // ---------- 적 ----------
 
-export type EnemyAi = 'chase';
+/** chase: 직선 추격 / idle: 움직이지 않음(보스방 임시 더미) */
+export type EnemyAi = 'chase' | 'idle';
 
 export type EnemyRank = 'normal' | 'elite' | 'champion' | 'boss' | 'hiddenBoss';
 
@@ -240,6 +243,29 @@ export interface MapgenData {
   stageRules: Record<StageKind, StageRoomRule>;
   /** 전투 칸 웨이브 수 */
   combatWaves: IntRange;
+  /** 보스방 임시 표적 (보스 패턴은 M3) */
+  bossPlaceholderEnemy: string;
+  /** 1-1 시작방 바닥에 놓는 테스트 무기 (`?testWeapons=0`으로 끔) */
+  testWeapons: string[];
+  /** 문 */
+  door: { color: string; openColor: string };
+  props: { exitPortal: SpriteRef; encounterCore: SpriteRef };
+  /** 플레이어가 방 안쪽으로 이만큼(px) 들어와야 문이 잠긴다 */
+  lockInsetPx: number;
+}
+
+export interface PickupsData {
+  /** 이 거리 안이면 플레이어에게 끌려온다(px) */
+  magnetRadius: number;
+  magnetSpeed: number;
+  /** 획득 거리(px) */
+  collectRadius: number;
+  /** 드롭 시 흩어지는 반지름(px) */
+  scatterRadius: number;
+  energyOrb: SpriteRef;
+  coin: SpriteRef & { value: number };
+  /** 바닥 무기와 상호작용 가능한 거리(px) */
+  interactRadius: number;
 }
 
 export interface WaveSpawn {
@@ -257,6 +283,10 @@ export interface WaveTemplate {
 export interface WavesData {
   /** 다음 웨이브까지 대기(초) */
   waveDelaySec: number;
+  /** 적이 나타난 뒤 공격·접촉 피해가 없는 시간(초) */
+  spawnWarnSec: number;
+  /** 플레이어와 최소 이만큼 떨어진 곳에 소환(px) */
+  spawnMinPlayerDistance: number;
   waves: WaveTemplate[];
 }
 
@@ -268,6 +298,10 @@ export interface PlayerData extends SpriteRef {
   moveSpeed: number;
   /** 피격 후 무적(초) */
   hurtInvulnSec: number;
+  /** 무적 중 깜빡임 간격(초) */
+  blinkIntervalSec: number;
+  /** 무기를 몸에서 이만큼 떨어뜨려 그린다(px) */
+  weaponOffset: number;
   /** 보호막 최대치. 규칙은 나중에 정한다(M1은 바 자리만) */
   shieldMax: number;
   energy: { max: number; start: number; orbValue: number };
@@ -306,9 +340,22 @@ export interface HudLayoutData {
     energyColor: string;
     backColor: string;
   };
-  minimap: { width: number; height: number; backColor: string; borderColor: string };
+  minimap: {
+    width: number;
+    height: number;
+    backColor: string;
+    borderColor: string;
+    maxCell: number;
+    cellGap: number;
+    roomColor: string;
+    visitedColor: string;
+    currentColor: string;
+    corridorColor: string;
+  };
   skillbar: { slotSize: number; gap: number; groupGap: number; disabledAlpha: number };
   weapons: { mainWidth: number; mainHeight: number; subWidth: number; subHeight: number; gap: number };
+  /** 사망·클리어 화면의 다시 시작 버튼 */
+  overlayButton: { width: number; height: number };
 }
 
 export interface UiData {
@@ -317,7 +364,14 @@ export interface UiData {
   backgroundColor: string;
   /** HUD 배치 (기준 해상도 px) */
   hud: HudLayoutData;
-  room: { floorColor: string; wallColor: string; wallThickness: number };
+  room: { floorColor: string; wallColor: string; corridorColor: string };
+  /** 칼 베기 이펙트 표시 시간(초) */
+  slashFxSec: number;
+  /** 카메라 따라가기 보간(0~1) */
+  cameraLerp: number;
+  toastSec: number;
+  /** 에너지 부족 시 HUD 에너지 바를 빨갛게 표시하는 시간(초) */
+  energyEmptyFlashSec: number;
   mobile: MobileLayoutData;
 }
 

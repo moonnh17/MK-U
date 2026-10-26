@@ -2,6 +2,8 @@
   "maxHp": 100,
   "moveSpeed": 90,
   "hurtInvulnSec": 0.5,
+  "blinkIntervalSec": 0.08,
+  "weaponOffset": 8,
   "shieldMax": 0,
   "energy": { "max": 200, "start": 200, "orbValue": 5 },
   "spriteKey": "player_human",

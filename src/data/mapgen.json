@@ -22,5 +22,13 @@
       "lastRoom": "bossRoom"
     }
   },
-  "combatWaves": [2, 3]
+  "combatWaves": [2, 3],
+  "bossPlaceholderEnemy": "trainingDummy",
+  "testWeapons": ["shotgun", "longsword"],
+  "door": { "color": "#c8643a", "openColor": "#2a3340" },
+  "props": {
+    "exitPortal": { "spriteKey": "prop_exit_portal", "color": "#5ae0ff", "size": 20 },
+    "encounterCore": { "spriteKey": "prop_encounter_core", "color": "#ffd23f", "size": 14 }
+  },
+  "lockInsetPx": 20
 }

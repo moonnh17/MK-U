@@ -47,6 +47,22 @@
       "spriteKey": "enemy_akgwi",
       "color": "#b0383a",
       "size": 15
+    },
+    {
+      "id": "trainingDummy",
+      "nameKey": "enemy.trainingDummy",
+      "chapter": 1,
+      "rank": "boss",
+      "ai": "idle",
+      "maxHp": 250,
+      "moveSpeed": 0,
+      "contactDamage": 0,
+      "contactIntervalSec": 1.0,
+      "energyOrbs": [6, 8],
+      "coins": [5, 8],
+      "spriteKey": "enemy_training_dummy",
+      "color": "#8a5ad9",
+      "size": 24
     }
   ]
 }

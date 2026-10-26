@@ -1,5 +1,6 @@
 {
   "startWeapon": "pistol",
+  "projectile": { "spriteKey": "projectile_player", "color": "#fff3a0", "size": 3 },
   "weapons": [
     {
       "id": "pistol",

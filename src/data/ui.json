@@ -14,11 +14,27 @@
       "energyColor": "#3fc8e0",
       "backColor": "#1d232b"
     },
-    "minimap": { "width": 72, "height": 44, "backColor": "#10161d", "borderColor": "#5a6a7a" },
+    "minimap": {
+      "width": 72,
+      "height": 56,
+      "backColor": "#10161d",
+      "borderColor": "#5a6a7a",
+      "maxCell": 9,
+      "cellGap": 3,
+      "roomColor": "#3a4656",
+      "visitedColor": "#7a8a9c",
+      "currentColor": "#ffffff",
+      "corridorColor": "#5a6a7a"
+    },
     "skillbar": { "slotSize": 20, "gap": 3, "groupGap": 8, "disabledAlpha": 0.35 },
-    "weapons": { "mainWidth": 52, "mainHeight": 22, "subWidth": 34, "subHeight": 14, "gap": 3 }
+    "weapons": { "mainWidth": 52, "mainHeight": 22, "subWidth": 34, "subHeight": 14, "gap": 3 },
+    "overlayButton": { "width": 96, "height": 24 }
   },
-  "room": { "floorColor": "#1c2430", "wallColor": "#3a4656", "wallThickness": 6 },
+  "room": { "floorColor": "#1c2430", "wallColor": "#3a4656", "corridorColor": "#18202a" },
+  "slashFxSec": 0.1,
+  "cameraLerp": 0.18,
+  "toastSec": 1.6,
+  "energyEmptyFlashSec": 0.3,
   "mobile": {
     "edgeMarginDp": 16,
     "attackDp": 96,
