@@ -17,6 +17,8 @@ import type { ShieldOpts, SkillHost, SkillObject } from '../skills/host';
 import { isSkillImplemented, passiveImpl, skillImpl, ultimateImpl } from '../skills/registry';
 import { applyCard, drawSkillCards, drawStatCards, runStartOffers, stageEndOffers, type Card } from '../systems/cards';
 import { calcDamage, gradeMultiplier, spaceDamage } from '../systems/damage';
+import { convertSkills, gaugeFromDamage, gaugeFromGreatSuccess, judgeSchool, skillAllowed, ultimateAwakeningReady } from '../systems/advancement';
+import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type CutIn, type CutPage } from '../ui/cutscenePages';
 import { assignElites, eliteCount } from '../systems/elites';
 import { pendingEncounter } from '../systems/encounter';
 import { generateStage, type RoomNode } from '../systems/mapgen';
@@ -35,7 +37,7 @@ import {
   skillValues,
   tickCooldowns,
 } from '../systems/skills';
-import { damageTaken, setStat, statEffect } from '../systems/stats';
+import { addStat, damageTaken, setStat, statEffect } from '../systems/stats';
 import { applyBleed, buffDuration, canAutoCast, chargeTime, skillTags, tickBleed } from '../systems/tags';
 import {
   activeWeapon,
@@ -63,7 +65,7 @@ import {
   type Rect,
   type WorldMetrics,
 } from '../systems/worldLayout';
-import type { BleedRule, CardOfferKind, SkillDef, SpaceRule, TagId, UltimateDef, WeaponDef } from '../types/data';
+import type { BleedRule, CardOfferKind, SchoolId, SkillDef, SpaceRule, TagId, UltimateDef, WeaponDef } from '../types/data';
 
 export interface RunSceneData {
   stage?: StageRef;
@@ -83,7 +85,7 @@ interface Offer {
   boss: boolean;
 }
 
-type Modal = 'cards' | 'inventory' | null;
+type Modal = 'cards' | 'inventory' | 'cutscene' | null;
 
 const SKILL_ACTIONS: ButtonAction[] = ['skill1', 'skill2', 'skill3', 'skill4'];
 
@@ -94,6 +96,8 @@ export class RunScene extends Phaser.Scene {
   private m!: WorldMetrics;
   private rng!: Rng;
   private host!: SkillHost;
+  /** 피해를 준 스킬 id별 SkillHost (학파 궁극기 게이지가 출처를 본다) */
+  private hosts = new Map<string, SkillHost>();
 
   private player!: Phaser.Physics.Arcade.Image;
   private weaponSprite!: Phaser.GameObjects.Image;
@@ -143,6 +147,9 @@ export class RunScene extends Phaser.Scene {
   private offerQueue: Offer[] = [];
   private afterOffers: (() => void)[] = [];
   private currentCards: Card[] | null = null;
+  /** 컷인 → 설명창 대기열과 다 본 뒤 할 일 */
+  private cutQueue: { cut: CutIn; pages: CutPage[] }[] = [];
+  private afterCuts: (() => void) | null = null;
   private cardSeq = 0;
   /** 포털을 탔다(카드를 고르는 동안 포털을 다시 밟지 않게) */
   private leaving = false;
@@ -179,7 +186,8 @@ export class RunScene extends Phaser.Scene {
     this.ctx.session = this.session;
     this.rng = Rng.derive(seed, `combat-${stage.chapter}-${stage.stage}`);
     this.m = metrics(d.mapgen);
-    this.host = this.makeHost();
+    this.hosts = new Map();
+    this.host = this.hostFor(null);
     this.enemyHost = {
       scene: this,
       playerPos: () => ({ x: this.player.x, y: this.player.y }),
@@ -249,6 +257,8 @@ export class RunScene extends Phaser.Scene {
       }),
       bus.on('debugSpawn', ({ enemyId, count, elite }) => this.debugSpawn(enemyId, count, elite ?? null)),
       bus.on('debugBarrage', () => this.debugBarrage()),
+      bus.on('cutsceneDone', () => this.showNextCut()),
+      bus.on('debugAdvance', ({ hectar, acro }) => this.debugAdvance(hectar, acro)),
       bus.on('debugBossHp', ({ ratio }) => {
         for (const e of this.enemies) if (e.def.rank === 'boss') e.hp = Math.max(1, e.maxHp * ratio);
       }),
@@ -298,6 +308,8 @@ export class RunScene extends Phaser.Scene {
     this.offerQueue = [];
     this.afterOffers = [];
     this.currentCards = null;
+    this.cutQueue = [];
+    this.afterCuts = null;
     this.cardSeq = 0;
     this.leaving = false;
   }
@@ -445,7 +457,7 @@ export class RunScene extends Phaser.Scene {
     if (frame.pressed.has('ultimate')) this.castUltimate();
     this.syncPassive();
     this.updateShield(dt);
-    for (const o of [...this.skillObjects]) if (!o.update(dt, this.host)) this.removeObject(o);
+    for (const o of [...this.skillObjects]) if (!o.update(dt, this.hostFor(o.owner))) this.removeObject(o);
     this.updateBleeds(dt);
     this.updateCorruption(dt);
 
@@ -499,7 +511,7 @@ export class RunScene extends Phaser.Scene {
           const end = stageEndOffers(this.session.stage, this.ctx.data.mapgen, this.ctx.data.cards);
           this.queueOffers(
             end.bossRoom.map((kind) => ({ kind, boss: true })),
-            () => this.addPortal(node),
+            () => this.afterBossRoom(node),
           );
         }
       }
@@ -577,23 +589,28 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 피해 한 번. 태그 보정은 이 공격(source)의 태그로 계산한다 */
-  private hit(enemy: Enemy, base: number, tags: readonly TagId[]): boolean {
+  private hit(enemy: Enemy, base: number, tags: readonly TagId[], source: string | null = null): boolean {
     if (enemy.dead) return false;
     const d = this.ctx.data;
     let dmg = calcDamage({ baseDamage: base, tags }, this.session.player.stats, d.tags);
     if (tags.includes('space')) dmg = spaceDamage(enemy.rank, enemy.maxHp, dmg, this.tagRule<SpaceRule>('space'));
-    return this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption));
+    return this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption), source);
   }
 
   /** 계산이 끝난 피해를 넣는다. 환원주의자 등에게 알리고, 죽였으면 true */
-  private applyDamage(enemy: Enemy, dmg: number): boolean {
+  private applyDamage(enemy: Enemy, dmg: number, source: string | null = null): boolean {
     if (enemy.dead) return false;
     // 보스 강화 단계 진입 중 무적
     if (enemy.invuln > 0) return false;
     dmg *= enemy.mods.damageTakenMul;
     const dealt = Math.min(Math.max(0, enemy.hp), dmg);
     const killed = enemy.damage(dmg);
-    for (const o of [...this.skillObjects]) o.onDamageDealt?.(this.host, dealt);
+    for (const o of [...this.skillObjects]) o.onDamageDealt?.(this.host, dealt, enemy);
+    // 학파 궁극기: 정해진 스킬의 피해로 데이터 축적
+    const ult = this.session.player.ultimate;
+    const udef = this.ultimateDef();
+    const gain = gaugeFromDamage(udef, source, dealt);
+    if (gain > 0) ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gain);
     if (killed) this.onEnemyKilled(enemy);
     return killed;
   }
@@ -629,11 +646,11 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
-  private fireBullet(from: Vec2, angle: number, speed: number, range: number, base: number, tags: readonly TagId[]): void {
+  private fireBullet(from: Vec2, angle: number, speed: number, range: number, base: number, tags: readonly TagId[], source: string | null = null): void {
     const proj = this.ctx.data.weapons.projectile;
     const b = this.bullets.create(from.x, from.y, proj.spriteKey) as Phaser.Physics.Arcade.Image;
     b.setDepth(5);
-    b.setData({ base, tags, range, ox: from.x, oy: from.y });
+    b.setData({ base, tags, range, ox: from.x, oy: from.y, source });
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
   }
 
@@ -668,8 +685,9 @@ export class RunScene extends Phaser.Scene {
     if (!b.active || !enemy || enemy.dead) return;
     const base = b.getData('base') as number;
     const tags = b.getData('tags') as TagId[];
+    const source = (b.getData('source') as string | null | undefined) ?? null;
     b.destroy();
-    this.hit(enemy, base, tags);
+    this.hit(enemy, base, tags, source);
   }
 
   private onEnemyKilled(e: Enemy): void {
@@ -692,7 +710,7 @@ export class RunScene extends Phaser.Scene {
     }
     // 궁극기 게이지는 적 처치로 충전
     const ult = this.session.player.ultimate;
-    ult.gauge = gainGauge(ult.gauge, this.ultimateDef().gaugeMax, d.ultimates.gaugePerKill[e.rank]);
+    if (this.ultimateDef().gauge.kind === 'kill') ult.gauge = gainGauge(ult.gauge, this.ultimateDef().gaugeMax, d.ultimates.gaugePerKill[e.rank]);
     this.removeEnemy(e);
     if (roomId !== undefined) this.rooms.get(roomId)?.enemyKilled();
     for (const o of [...this.skillObjects]) o.onKill?.(this.host, e);
@@ -830,7 +848,19 @@ export class RunScene extends Phaser.Scene {
 
   // ---------- 스킬 ----------
 
-  private makeHost(): SkillHost {
+  /** source(스킬 id, 'magiTurret.shell'처럼 하위 오브젝트면 앞부분)를 단 SkillHost */
+  private hostFor(owner: string | null): SkillHost {
+    const source = owner ? owner.split('.')[0]! : null;
+    const key = source ?? '';
+    let h = this.hosts.get(key);
+    if (!h) {
+      h = this.makeHost(source);
+      this.hosts.set(key, h);
+    }
+    return h;
+  }
+
+  private makeHost(source: string | null): SkillHost {
     const ctx = this.ctx;
     return {
       scene: this,
@@ -841,7 +871,20 @@ export class RunScene extends Phaser.Scene {
       enemies: () => this.enemies.filter((e) => !e.dead),
       stats: () => this.session.player.stats,
       area: (r) => this.area(r),
-      hit: (e, base, tags) => this.hit(e, base, tags),
+      hit: (e, base, tags) => this.hit(e, base, tags, source),
+      hitTrue: (e, amount, space) => {
+        if (e.dead) return false;
+        const dmg = space ? spaceDamage(e.rank, e.maxHp, amount, this.tagRule<SpaceRule>('space')) : amount;
+        return this.applyDamage(e, dmg, source);
+      },
+      hurtSelf: (amount) => {
+        this.hurtPlayer(amount);
+      },
+      greatSuccess: () => {
+        const ult = this.session.player.ultimate;
+        const udef = this.ultimateDef();
+        ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gaugeFromGreatSuccess(udef));
+      },
       chargeTime: (sec, tags) => chargeTime(sec, tags, this.session.player.stats, ctx.data.tags),
       buffDuration: (sec, tags) => buffDuration(sec, tags, this.session.player.stats, ctx.data.tags),
       setShield: (shield, opts) => {
@@ -885,7 +928,7 @@ export class RunScene extends Phaser.Scene {
         const perStack = calcDamage({ baseDamage: base, tags }, this.session.player.stats, ctx.data.tags);
         e.bleed = applyBleed(e.bleed, perStack, stacks, this.tagRule<BleedRule>('bleed'));
       },
-      fireBullet: (from, angle, speed, range, base, tags) => this.fireBullet(from, angle, speed, range, base, tags),
+      fireBullet: (from, angle, speed, range, base, tags) => this.fireBullet(from, angle, speed, range, base, tags, source),
       addObject: (o) => this.skillObjects.push(o),
       removeObject: (o) => this.removeObject(o),
       objects: () => this.skillObjects,
@@ -915,7 +958,7 @@ export class RunScene extends Phaser.Scene {
     const impl = id ? passiveImpl(id) : undefined;
     if (!id || !owned || !impl) return;
     const def = findSkill(this.ctx.data.skills, id);
-    impl.activate(this.host, { def, owned, values: skillValues(def, owned).values });
+    impl.activate(this.hostFor(id), { def, owned, values: skillValues(def, owned).values });
   }
 
   /** 보호막 시간, 플레이어 둘레 표시, 각성(벡터굴절역장) 일반 탄 무효화 */
@@ -1000,7 +1043,7 @@ export class RunScene extends Phaser.Scene {
       this.toastThrottled(this.ctx.t('skillMsg.noTarget'));
       return;
     }
-    if (impl.cast(this.host, { def, owned, values: sv.values })) p.cooldowns = { ...p.cooldowns, [id]: sv.cooldownSec };
+    if (impl.cast(this.hostFor(id), { def, owned, values: sv.values })) p.cooldowns = { ...p.cooldowns, [id]: sv.cooldownSec };
   }
 
   private castUltimate(): void {
@@ -1012,7 +1055,8 @@ export class RunScene extends Phaser.Scene {
       this.toastThrottled(this.ctx.t('skillMsg.ultimateNotReady'));
       return;
     }
-    if (impl.cast(this.host, def)) ult.gauge = 0;
+    const values = ult.awakened && def.awakening ? { ...def.values, ...def.awakening.values } : { ...def.values };
+    if (impl.cast(this.hostFor(def.id), { def, awakened: ult.awakened, values })) ult.gauge = 0;
   }
 
   /** HUD·터치 버튼이 그릴 스킬 칸 (액티브 4 + 궁극기 + 패시브) */
@@ -1055,7 +1099,8 @@ export class RunScene extends Phaser.Scene {
       {
         ...empty,
         skillId: ult.id,
-        label: t(ult.shortKey),
+        label: t(p.ultimate.awakened && ult.awakening ? ult.awakening.shortKey : ult.shortKey),
+        awakened: p.ultimate.awakened,
         gauge: p.ultimate.gauge / ult.gaugeMax,
         usable: p.ultimate.gauge >= ult.gaugeMax,
         color: ult.color,
@@ -1113,7 +1158,7 @@ export class RunScene extends Phaser.Scene {
     const rng = Rng.derive(this.ctx.config.seed, `cards-${stage.chapter}-${stage.stage}-${this.cardSeq++}`);
     const cards =
       next.kind === 'skill'
-        ? drawSkillCards(rng, p.loadout, p.stats, d.skills, d.cards, isSkillImplemented)
+        ? drawSkillCards(rng, p.loadout, p.stats, d.skills, d.cards, (id) => isSkillImplemented(id) && skillAllowed(findSkill(d.skills, id), p.advancement))
         : drawStatCards(rng, d.cards.cardCount, d.cards);
     this.currentCards = cards;
     this.setModal('cards');
@@ -1135,10 +1180,97 @@ export class RunScene extends Phaser.Scene {
       const skill = t(def.nameKey);
       if (card.kind === 'skillNew') bus.emit('toast', { text: t('skillMsg.acquired', { skill }) });
       else if (card.kind === 'skillLevelUp') bus.emit('toast', { text: t('skillMsg.levelUp', { skill, level: owned.level }) });
-      else bus.emit('toast', { text: t('skillMsg.awakened', { skill, awakened: t(def.awakening.nameKey) }) });
       if (r.stored) bus.emit('storedNotice', { skillId: card.skillId });
+      if (card.kind === 'awakening') {
+        // 각성: 컷인 → 설명창, 궁극기 각성 조건을 채웠으면 이어서
+        const cuts = [skillAwakeningCut(this.ctx, card.skillId, r.holder.stats)];
+        const u = this.checkUltimateAwakening();
+        if (u) cuts.push(u);
+        this.playCutscenes(cuts, () => this.openNextCards());
+        return;
+      }
     }
     this.openNextCards();
+  }
+
+  // ---------- 연출 ----------
+
+  /** 컷인 → 설명창을 차례로 보여 주고, 다 넘기면 then */
+  private playCutscenes(list: { cut: CutIn; pages: CutPage[] }[], then: () => void): void {
+    if (list.length === 0) {
+      then();
+      return;
+    }
+    this.cutQueue = [...list];
+    this.afterCuts = then;
+    this.showNextCut();
+  }
+
+  private showNextCut(): void {
+    const next = this.cutQueue.shift();
+    if (!next) {
+      const f = this.afterCuts;
+      this.afterCuts = null;
+      if (this.modal === 'cutscene') this.setModal(null);
+      f?.();
+      return;
+    }
+    this.setModal('cutscene');
+    bus.emit('cutsceneShow', next);
+  }
+
+  /** 자기 학파 각성 2개면 궁극기를 자동 각성한다. 이번에 각성했으면 연출을 돌려준다 */
+  private checkUltimateAwakening(): { cut: CutIn; pages: CutPage[] } | null {
+    const d = this.ctx.data;
+    const p = this.session.player;
+    const def = this.ultimateDef();
+    if (p.ultimate.awakened || !def.awakening || !def.school || p.advancement !== def.school) return null;
+    if (!ultimateAwakeningReady(p.loadout, d.skills, def.school, d.ultimates.awakeningNeed)) return null;
+    p.ultimate.awakened = true;
+    const ids = Object.entries(p.loadout.owned)
+      .filter(([id, o]) => o.awakened && findSkill(d.skills, id).school === def.school)
+      .sort((a, b) => a[1].order - b[1].order)
+      .map(([id]) => id);
+    return ultimateAwakeningCut(this.ctx, def, ids, d.ultimates.awakeningNeed);
+  }
+
+  // ---------- 전직 ----------
+
+  /** 보스방 카드 뒤: 챕터1 마지막 보스면 전직, 그다음 포털 */
+  private afterBossRoom(node: RoomNode): void {
+    const d = this.ctx.data;
+    const { stage } = this.session;
+    const last = stage.stage === d.mapgen.stagesPerChapter && stage.chapter === d.jobs.advanceAfterChapter;
+    if (last && this.session.player.advancement === null) this.advance(() => this.addPortal(node));
+    else this.addPortal(node);
+  }
+
+  /** 계열 판정 → 스킬 변환 → 궁극기 교체 → 연출 */
+  private advance(then: () => void): void {
+    const d = this.ctx.data;
+    let p = this.session.player;
+    const job = d.jobs.jobs.find((j) => j.id === p.job)!;
+    const order = job.advancements.map((a) => a.id as SchoolId);
+    const school = judgeSchool(p.schoolPicks, p.lastPickSchool, order);
+    const adv = job.advancements.find((a) => a.id === school)!;
+    const r = convertSkills(Rng.derive(this.ctx.config.seed, 'advancement'), p.loadout, p.stats, d.skills, school, d.jobs.conversionStatAmount);
+    p = { ...p, loadout: r.loadout };
+    // 스탯 포인트는 견고(최대 체력)까지 반영되게 하나씩 더한다
+    for (const s of r.log.stats) p = addStat(p, s.stat, s.amount, d.player.maxHp, d.stats);
+    const removed = new Set(r.log.removed.map((x) => x.skillId));
+    p.cooldowns = Object.fromEntries(Object.entries(p.cooldowns).filter(([id]) => !removed.has(id)));
+    for (const o of this.skillObjects.filter((x) => removed.has(x.owner.split('.')[0]!))) this.removeObject(o);
+    const fromUlt = this.ultimateDef();
+    p.ultimate = { id: adv.ultimate!, gauge: 0, awakened: false };
+    p.advancement = school;
+    p.advancementLog = r.log;
+    this.session.player = p;
+    const cuts = [advancementCut(this.ctx, { jobNameKey: job.nameKey, adv, picks: p.schoolPicks, fromUlt, toUlt: this.ultimateDef(), log: r.log })];
+    const u = this.checkUltimateAwakening();
+    if (u) cuts.push(u);
+    this.refreshSkillView();
+    bus.emit('inventoryChanged', {});
+    this.playCutscenes(cuts, then);
   }
 
   private openInventory(): void {
@@ -1278,6 +1410,14 @@ export class RunScene extends Phaser.Scene {
     if (state) this.handleRoomEvents(rid, state.forceClear());
   }
 
+  /** 디버그: 계열 집계를 정하고 바로 전직 (한 런에 한 번) */
+  private debugAdvance(hectar: number, acro: number): void {
+    const p = this.session.player;
+    if (this.modal || p.advancement !== null) return;
+    p.schoolPicks = { hectar, acro };
+    this.advance(() => {});
+  }
+
   private debugSetSkill(id: string, level: number, awakened: boolean): void {
     const d = this.ctx.data;
     const p = this.session.player;
@@ -1286,6 +1426,8 @@ export class RunScene extends Phaser.Scene {
     if (level <= 0) for (const o of this.skillObjects.filter((x) => x.owner.split('.')[0] === id)) this.removeObject(o);
     this.refreshSkillView();
     bus.emit('inventoryChanged', {});
+    const u = this.checkUltimateAwakening();
+    if (u && !this.modal) this.playCutscenes([u], () => {});
   }
 
   private debugSpawn(enemyId: string, count: number, elite: string | null): void {

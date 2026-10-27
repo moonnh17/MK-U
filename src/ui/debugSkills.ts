@@ -121,6 +121,28 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
       button(t('debug.bossHp'), () => bus.emit('debugBossHp', { ratio: Math.max(1, Math.min(100, Number(bossHpInput.value) || 100)) / 100 })),
     ),
   );
+  // 계열 집계를 정하고 바로 전직
+  const pickInput = (v: string) => {
+    const el = document.createElement('input');
+    el.type = 'number';
+    el.value = v;
+    el.style.width = '32px';
+    return el;
+  };
+  const hectarInput = pickInput('3');
+  const acroInput = pickInput('2');
+  const advHint = document.createElement('span');
+  advHint.textContent = t('debug.advanceHint');
+  body.appendChild(
+    row(
+      advHint,
+      hectarInput,
+      acroInput,
+      button(t('debug.advance'), () =>
+        bus.emit('debugAdvance', { hectar: Number(hectarInput.value) || 0, acro: Number(acroInput.value) || 0 }),
+      ),
+    ),
+  );
   // 입력칸에서 친 키가 게임 조작(WASD 등)으로 새지 않게
   body.addEventListener('keydown', (e) => e.stopPropagation());
   return body;

@@ -5,6 +5,7 @@
  */
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
+import { conversionLines } from './cutscenePages';
 import { findSkill, storedSkills } from '../systems/skills';
 
 type Target = number | 'passive';
@@ -77,7 +78,7 @@ export class InventoryWindow {
     ultEl.className = 'iw-slot fixed';
     ultEl.innerHTML = '<small></small><div class="iw-name"></div>';
     ultEl.querySelector('small')!.textContent = t('inventory.ultimate');
-    ultEl.querySelector('.iw-name')!.textContent = ult ? t(ult.nameKey) : '';
+    ultEl.querySelector('.iw-name')!.textContent = ult ? t(p.ultimate.awakened && ult.awakening ? ult.awakening.nameKey : ult.nameKey) : '';
     equipRow.appendChild(ultEl);
 
     const storedTitle = document.createElement('div');
@@ -95,6 +96,16 @@ export class InventoryWindow {
     for (const id of stored) storedRow.appendChild(this.skillCard(id));
 
     this.root.append(head, hint, equipRow, storedTitle, storedRow);
+    // 전직 후 스킬 변환 기록
+    if (p.advancementLog) {
+      const logTitle = document.createElement('div');
+      logTitle.className = 'iw-sub';
+      logTitle.textContent = t('inventory.advancementLog', { adv: t(`job.adv.${p.advancementLog.school}`) });
+      const logBody = document.createElement('div');
+      logBody.className = 'iw-log';
+      logBody.textContent = conversionLines(p.advancementLog, this.ctx).join(' · ');
+      this.root.append(logTitle, logBody);
+    }
   }
 
   /** 장착 칸 (놓을 수 있는 자리) */

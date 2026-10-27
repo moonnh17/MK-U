@@ -1,3 +1,4 @@
+import type { CutIn, CutPage } from '../ui/cutscenePages';
 import type { ButtonAction } from './actions';
 import type { UiMode } from '../input/uiMode';
 import type { Card } from '../systems/cards';
@@ -21,7 +22,13 @@ export interface GameEvents {
   restartRequested: Record<string, never>;
 
   /** 게임을 멈추는 창(카드 선택·인벤토리)이 열리거나 닫힘 */
-  modal: { kind: 'cards' | 'inventory' | null };
+  modal: { kind: 'cards' | 'inventory' | 'cutscene' | null };
+  /** 컷인 → 설명창 (각성·궁극기 각성·전직) */
+  cutsceneShow: { cut: CutIn; pages: CutPage[] };
+  /** 컷인·설명창을 다 넘겼다 */
+  cutsceneDone: Record<string, never>;
+  /** 디버그: 계열 집계를 정하고 바로 전직 */
+  debugAdvance: { hectar: number; acro: number };
   /** 카드 선택창에 카드를 띄운다 */
   cardsShow: { titleKey: string; cards: Card[] };
   /** 카드 선택창 → 이 카드를 골랐다 */

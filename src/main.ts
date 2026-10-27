@@ -17,6 +17,7 @@ import { BootScene } from './scenes/BootScene';
 import { RunScene } from './scenes/RunScene';
 import { UIScene } from './scenes/UIScene';
 import { CardWindow } from './ui/cardWindow';
+import { CutsceneWindow } from './ui/cutsceneWindow';
 import { InventoryWindow } from './ui/inventoryWindow';
 import type { TouchControlId } from './ui/mobileLayout';
 
@@ -134,6 +135,7 @@ bus.on('modal', ({ kind }) => {
 });
 new CardWindow(ctx);
 new InventoryWindow(ctx);
+new CutsceneWindow(ctx);
 window.addEventListener('resize', () => game.scale.setZoom(zoomFor(ctx.uiMode)));
 
 applyUiMode(ctx.uiMode);
