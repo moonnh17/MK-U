@@ -83,7 +83,10 @@ export const magiCorruption: SkillImpl = {
     const aim = host.aimDir();
     const angle = target ? Math.atan2(target.sprite.y - origin.y, target.sprite.x - origin.x) : Math.atan2(aim.y, aim.x);
     const great = rollChance(host.rng, host.chance(v.greatChance!, 'greatSuccess', tags));
-    if (great) floatText(host, origin.x, origin.y - 10, host.ctx.t('skillMsg.greatSuccess'), '#ffd23f');
+    if (great) {
+      floatText(host, origin.x, origin.y - 10, host.ctx.t('skillMsg.greatSuccess'), '#ffd23f');
+      host.greatSuccess();
+    }
 
     const hitList: Enemy[] = host.enemies().filter((e) => inArc(origin, angle, v.arcDeg!, range, e.sprite, e.radius));
     for (const e of hitList) {

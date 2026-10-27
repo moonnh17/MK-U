@@ -108,6 +108,14 @@ class Subject implements SkillObject {
   }
 }
 
+/** 실험체를 at 둘레에 n마리 (특이점 실험 '증식'도 쓴다) */
+export function spawnSubjects(host: SkillHost, s: SkillCast, at: Vec2, n: number, behavior: 'rush' | 'blast' | 'shot'): void {
+  for (let i = 0; i < n; i++) {
+    const a = (i * Math.PI * 2) / n;
+    host.addObject(new Subject(host, s, { x: at.x + Math.cos(a) * 8, y: at.y + Math.sin(a) * 8 }, behavior));
+  }
+}
+
 export const unstableSubject: SkillImpl = {
   cast(host, s) {
     const v = s.values;
@@ -115,7 +123,10 @@ export const unstableSubject: SkillImpl = {
     const great = rollChance(host.rng, host.chance(v.greatChance!, 'greatSuccess', tags));
     const n = v.count! * (great ? 2 : 1);
     const at = host.playerPos();
-    if (great) floatText(host, at.x, at.y - 10, host.ctx.t('skillMsg.greatSuccess'), '#ffd23f');
+    if (great) {
+      floatText(host, at.x, at.y - 10, host.ctx.t('skillMsg.greatSuccess'), '#ffd23f');
+      host.greatSuccess();
+    }
     for (let i = 0; i < n; i++) {
       const behavior: Behavior = s.owned.awakened
         ? 'blast'

@@ -83,7 +83,10 @@ export const experimentalWeapon: SkillImpl = {
     const picks = pickResults(host.rng, weights, great ? v.greatResults! : v.results!);
     const mult = great ? v.greatMultiplier! : 1;
     const p = host.playerPos();
-    if (great) floatText(host, p.x, p.y - 20, host.ctx.t('skillMsg.greatSuccess'), '#ffd23f');
+    if (great) {
+      floatText(host, p.x, p.y - 20, host.ctx.t('skillMsg.greatSuccess'), '#ffd23f');
+      host.greatSuccess();
+    }
     picks.forEach((id, i) => {
       floatText(host, p.x, p.y - 10 + i * 9, host.ctx.t(`skill.experimentalWeapon.result.${id}`), s.def.color);
       RESULTS[id]?.(host, s, mult);

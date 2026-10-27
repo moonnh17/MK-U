@@ -14,6 +14,8 @@ import { mkPrototype } from './mkPrototype';
 import { purifyingWings } from './purifyingWings';
 import { railgun } from './railgun';
 import { reductionist } from './reductionist';
+import { singularity } from './singularity';
+import { thunderbolt } from './thunderbolt';
 import { unstableSubject } from './unstableSubject';
 
 const SKILLS: Readonly<Record<string, SkillImpl>> = {
@@ -36,6 +38,8 @@ const PASSIVES: Readonly<Record<string, PassiveImpl>> = {
 
 const ULTIMATES: Readonly<Record<string, UltimateImpl>> = {
   firstLaw,
+  thunderbolt,
+  singularity,
 };
 
 export function skillImpl(id: string): SkillImpl | undefined {
@@ -48,6 +52,10 @@ export function passiveImpl(id: string): PassiveImpl | undefined {
 
 export function ultimateImpl(id: string): UltimateImpl | undefined {
   return ULTIMATES[id];
+}
+
+export function isUltimateImplemented(id: string): boolean {
+  return id in ULTIMATES;
 }
 
 export function isSkillImplemented(id: string): boolean {

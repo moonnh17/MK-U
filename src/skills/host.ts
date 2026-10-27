@@ -29,6 +29,12 @@ export interface SkillHost {
   area(radius: number): number;
   /** 피해 한 번. base는 태그 보정 전 값, tags는 이 공격(source)의 태그. 이번에 죽였으면 true */
   hit(enemy: Enemy, base: number, tags: readonly TagId[]): boolean;
+  /** 태그 보정 없는 그대로의 피해(벼락의 보스 최대 체력 비례, 역설 재현). space면 공간격 규칙만 건다 */
+  hitTrue(enemy: Enemy, amount: number, space: boolean): boolean;
+  /** 플레이어 자신이 받는 피해(특이점 실험 대실패) */
+  hurtSelf(amount: number): void;
+  /** 이 스킬이 대성공했다(아크로 궁극기 게이지 보너스) */
+  greatSuccess(): void;
   /** 출혈을 건다. base는 중첩 1개당 틱 피해(태그 보정 전), tags는 출혈 공격 source의 태그 */
   bleed(enemy: Enemy, base: number, stacks: number, tags: readonly TagId[]): void;
   /** 탄 하나 (벽에 막히고, 사거리를 넘으면 사라진다) */
@@ -85,7 +91,7 @@ export interface SkillObject {
   /** 플레이어가 실제로 피해를 받았을 때(보호막으로 막은 공격은 제외). false면 제거된다 */
   onPlayerHurt?(host: SkillHost): boolean;
   /** 플레이어 쪽 공격이 적에게 피해를 줬을 때(실제로 깎인 양) */
-  onDamageDealt?(host: SkillHost, amount: number): void;
+  onDamageDealt?(host: SkillHost, amount: number, enemy: Enemy): void;
   /** 적이 쓰러졌을 때 */
   onKill?(host: SkillHost, enemy: Enemy): void;
   /** 이 오브젝트가 있는 동안 플레이어에게 주는 보정 (MK 슈트 등) */
@@ -108,8 +114,15 @@ export interface PassiveImpl {
   activate(host: SkillHost, s: SkillCast): void;
 }
 
+export interface UltimateCast {
+  def: UltimateDef;
+  awakened: boolean;
+  /** 각성했으면 기본 수치 위에 각성 수치를 덮은 값 */
+  values: Record<string, number>;
+}
+
 export interface UltimateImpl {
-  cast(host: SkillHost, def: UltimateDef): boolean;
+  cast(host: SkillHost, u: UltimateCast): boolean;
 }
 
 /** 가장 가까운 적 (최대 거리 안, 적 몸 반지름 포함) */

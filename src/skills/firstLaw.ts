@@ -7,8 +7,7 @@ import { Explosive } from './explosive';
 import { nearestEnemy, type UltimateImpl } from './host';
 
 export const firstLaw: UltimateImpl = {
-  cast(host, def) {
-    const v = def.values;
+  cast(host, { def, values: v }) {
     const from = host.playerPos();
     const target = nearestEnemy(host, from, v.range!);
     const aim = host.aimDir();
