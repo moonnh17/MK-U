@@ -1,0 +1,30 @@
+{
+  "room": { "x": 24, "y": 22, "w": 432, "h": 228 },
+  "wall": 6,
+  "colors": {
+    "floor": "#16242a",
+    "grid": "#23414a",
+    "wall": "#c8dde2",
+    "light": "#7ae0e0",
+    "monitor": "#2a5a62",
+    "monitorText": "#7ae0e0",
+    "window": "#06090c",
+    "emptyCapsule": "#2a3a40"
+  },
+  "gridStep": 16,
+  "monitors": [64, 396],
+  "interactRadius": 24,
+  "start": { "x": 240, "y": 196 },
+  "wake": { "lidSec": 0.9, "stepSec": 0.6, "stepDistance": 22 },
+  "objects": [
+    { "id": "capsule", "kind": "capsule", "x": 240, "y": 224, "w": 22, "h": 26, "solid": true, "color": "#9ad8e0", "spriteKey": "lab_capsule" },
+    { "id": "jobDevice", "kind": "jobSelect", "x": 240, "y": 136, "w": 28, "h": 18, "solid": true, "color": "#e0c060", "spriteKey": "lab_job_device" },
+    { "id": "portal", "kind": "portal", "x": 240, "y": 56, "w": 34, "h": 22, "solid": false, "color": "#7a5aff", "spriteKey": "lab_portal" },
+    { "id": "codex", "kind": "codex", "x": 70, "y": 140, "w": 20, "h": 24, "solid": true, "color": "#5a9ab0", "spriteKey": "lab_codex" },
+    { "id": "archive", "kind": "archive", "x": 410, "y": 140, "w": 24, "h": 26, "solid": true, "color": "#b07ae0", "spriteKey": "lab_archive" },
+    { "id": "gemini", "kind": "gemini", "x": 140, "y": 70, "w": 14, "h": 22, "solid": false, "color": "#7ae0e0", "spriteKey": "lab_gemini" },
+    { "id": "observation", "kind": "window", "x": 320, "y": 30, "w": 100, "h": 12, "solid": true, "color": "#06090c", "spriteKey": "lab_window" }
+  ],
+  "geminiFlicker": { "minAlpha": 0.35, "maxAlpha": 0.9, "periodSec": 0.12 },
+  "portalPulseSec": 0.8
+}

@@ -889,3 +889,43 @@ export interface MetaData {
   /** 결산 화면 연출 */
   settlement: { lineStepSec: number; countSec: number };
 }
+
+// ---------- 실험장 (시작 방) ----------
+
+/**
+ * capsule: 깨어나는 자리 / jobSelect: 직업 선택 장치 / portal: 시뮬레이션 포털 /
+ * codex: 도감 단말(준비 중) / archive: 기억조각 보관대 / gemini: 미모사 제미니 홀로그램(준비 중) / window: 관측창(장식)
+ */
+export type LabObjectKind = 'capsule' | 'jobSelect' | 'portal' | 'codex' | 'archive' | 'gemini' | 'window';
+
+export interface LabObjectDef {
+  id: string;
+  kind: LabObjectKind;
+  /** 가운데 좌표 (기준 해상도 px) */
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  /** 지나갈 수 없는지 */
+  solid: boolean;
+  color: string;
+  spriteKey: string;
+}
+
+export interface LabData {
+  /** 방 안쪽 */
+  room: { x: number; y: number; w: number; h: number };
+  wall: number;
+  colors: { floor: string; grid: string; wall: string; light: string; monitor: string; monitorText: string; window: string; emptyCapsule: string };
+  gridStep: number;
+  /** 벽면 모니터 x (장식) */
+  monitors: number[];
+  interactRadius: number;
+  /** 캡슐 앞 (첫 실행이 아니면 여기서 시작) */
+  start: { x: number; y: number };
+  /** 첫 실행: 캡슐 뚜껑이 열리고 걸어 나온다 */
+  wake: { lidSec: number; stepSec: number; stepDistance: number };
+  objects: LabObjectDef[];
+  geminiFlicker: { minAlpha: number; maxAlpha: number; periodSec: number };
+  portalPulseSec: number;
+}

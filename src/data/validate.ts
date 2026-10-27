@@ -645,6 +645,22 @@ export function validateGameData(d: GameData): Errors {
   for (const k of ['lineStepSec', 'countSec'] as const) checkPositive(errors, `meta.settlement.${k}`, d.meta.settlement[k]);
   for (const k of ['stages', 'midBoss', 'chapterBoss', 'elites', 'spires', 'hiddenBosses'] as const) needText('meta.crystals', `settlement.crystal.${k}`);
 
+  // --- 실험장 ---
+  const lab = d.lab;
+  checkUnique(errors, 'lab.objects', lab.objects.map((o) => o.id));
+  for (const kind of ['capsule', 'jobSelect', 'portal', 'codex', 'archive', 'gemini', 'window'] as const) {
+    if (lab.objects.filter((o) => o.kind === kind).length !== 1) errors.push(`lab.objects: '${kind}'는 하나여야 함`);
+    needText('lab.objects', `lab.object.${kind}`);
+  }
+  for (const o of lab.objects) {
+    if (!HEX_COLOR.test(o.color)) errors.push(`lab.objects.${o.id}.color: #RRGGBB`);
+    checkPositive(errors, `lab.objects.${o.id}.w`, o.w);
+    checkPositive(errors, `lab.objects.${o.id}.h`, o.h);
+  }
+  for (const [k, c] of Object.entries(lab.colors)) if (!HEX_COLOR.test(c)) errors.push(`lab.colors.${k}: #RRGGBB`);
+  for (const k of ['interactRadius', 'gridStep', 'wall', 'portalPulseSec'] as const) checkPositive(errors, `lab.${k}`, lab[k]);
+  for (const k of ['lidSec', 'stepSec', 'stepDistance'] as const) checkPositive(errors, `lab.wake.${k}`, lab.wake[k]);
+
   // --- 텍스트 ---
   for (const [k, v] of Object.entries(d.text)) {
     if (typeof v !== 'string' || v === '') errors.push(`text: '${k}' 값이 비어 있음`);
