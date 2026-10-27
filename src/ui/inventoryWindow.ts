@@ -1,14 +1,20 @@
 /**
- * 인벤토리 — 스킬 탭 (DOM, 최소 버전). 열려 있는 동안 게임은 멈춘다.
- * 장착 4칸 + 패시브 1칸 + 궁극기(고정) + 보관 목록. 각 스킬의 Lv·각성·요구 스탯 진행도.
- * 교체: 끌어다 놓기(PC) 또는 스킬 탭 → 칸 탭(모바일·PC 공통). 아이템 탭은 M4~M5.
+ * 인벤토리 (DOM). 열려 있는 동안 게임은 멈춘다.
+ * 스킬 탭: 장착 4칸 + 패시브 1칸 + 궁극기(고정) + 보관 목록. 각 스킬의 Lv·각성·요구 스탯 진행도.
+ *   교체: 끌어다 놓기(PC) 또는 스킬 탭 → 칸 탭(모바일·PC 공통).
+ * 아이템 탭: 무기 2칸(버리기), 얻은 아이템, 현재 버프, 코인, 현재 스탯 6종.
  */
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { conversionLines } from './cutscenePages';
+import { gradeMultiplier } from '../systems/damage';
 import { findSkill, storedSkills } from '../systems/skills';
+import { emptyHanded, weaponStats, type WeaponItem } from '../systems/weapons';
+import { STAT_IDS } from '../types/data';
+import { itemDescParams } from './itemCard';
 
 type Target = number | 'passive';
+type Tab = 'skill' | 'items';
 
 const DRAG_START_PX = 6;
 
@@ -19,6 +25,7 @@ export class InventoryWindow {
   private selected: string | null = null;
   private drag: { id: string; x: number; y: number; ghost: HTMLDivElement | null } | null = null;
   private noticeTimer = 0;
+  private tab: Tab = 'skill';
 
   constructor(private readonly ctx: GameContext) {
     this.root = document.createElement('div');
@@ -60,10 +67,27 @@ export class InventoryWindow {
     head.className = 'iw-head';
     const title = document.createElement('b');
     title.textContent = t('inventory.title');
+    const tabs = document.createElement('div');
+    tabs.className = 'iw-tabs';
+    for (const id of ['skill', 'items'] as const) {
+      const b = document.createElement('button');
+      b.textContent = t(`inventory.tab.${id}`);
+      b.classList.toggle('on', this.tab === id);
+      b.addEventListener('click', () => {
+        this.tab = id;
+        this.selected = null;
+        this.render();
+      });
+      tabs.appendChild(b);
+    }
     const close = document.createElement('button');
     close.textContent = t('inventory.close');
     close.addEventListener('click', () => bus.emit('inventoryCloseRequest', {}));
-    head.append(title, close);
+    head.append(title, tabs, close);
+    if (this.tab === 'items') {
+      this.root.append(head, this.itemsTab());
+      return;
+    }
 
     const hint = document.createElement('div');
     hint.className = 'iw-hint';
@@ -106,6 +130,131 @@ export class InventoryWindow {
       logBody.textContent = conversionLines(p.advancementLog, this.ctx).join(' · ');
       this.root.append(logTitle, logBody);
     }
+  }
+
+  /** 아이템 탭 */
+  private itemsTab(): HTMLDivElement {
+    const t = this.ctx.t;
+    const d = this.ctx.data;
+    const s = this.ctx.session!;
+    const p = s.player;
+    const body = document.createElement('div');
+    body.className = 'iw-items';
+    const section = (titleText: string, ...children: HTMLElement[]) => {
+      const sec = document.createElement('div');
+      sec.className = 'iw-sec';
+      const h = document.createElement('div');
+      h.className = 'iw-sub';
+      h.textContent = titleText;
+      sec.append(h, ...children);
+      return sec;
+    };
+    const line = (cls: string, text: string, color?: string) => {
+      const el = document.createElement('div');
+      el.className = cls;
+      el.textContent = text;
+      if (color) el.style.color = color;
+      return el;
+    };
+
+    // 무기 2칸
+    const weapons = document.createElement('div');
+    weapons.className = 'iw-row';
+    ([0, 1] as const).forEach((i) => weapons.appendChild(this.weaponCard(i, p.weapons.slots[i], p.weapons.active === i)));
+    const wsec = section(t('inventory.weapons'), weapons);
+    if (emptyHanded(p.weapons)) {
+      const fist = d.weapons.weapons.find((w) => w.id === d.weapons.fistWeapon)!;
+      wsec.appendChild(line('iw-hint', t('inventory.emptyHands', { fist: t(fist.nameKey) })));
+    }
+
+    // 얻은 아이템
+    const list = document.createElement('div');
+    list.className = 'iw-itemlist';
+    if (p.items.length === 0) list.appendChild(line('iw-none', t('inventory.noItems')));
+    for (const id of p.items) {
+      const def = d.items.items.find((x) => x.id === id);
+      if (!def) continue;
+      const grade = d.groupMultipliers.grades.find((g) => g.id === def.grade);
+      const el = document.createElement('div');
+      el.className = 'iw-item';
+      const name = document.createElement('div');
+      name.className = 'iw-name';
+      const icon = document.createElement('span');
+      icon.className = 'cw-icon';
+      icon.style.background = def.color;
+      name.append(icon, t(def.nameKey));
+      name.style.color = grade?.color ?? '#ffffff';
+      el.append(name, line('iw-grade', grade ? t(grade.nameKey) : ''), line('iw-desc', t(def.descKey, itemDescParams(def, d.groupMultipliers))));
+      list.appendChild(el);
+    }
+
+    // 버프 · 코인 · 스탯
+    const buffs = line('iw-desc', s.buffs.length ? s.buffs.map((b) => `${b.label} ${Math.ceil(b.leftSec)}`).join(' · ') : t('inventory.noBuffs'));
+    const stats = document.createElement('div');
+    stats.className = 'iw-stats';
+    for (const id of STAT_IDS) stats.appendChild(line('iw-stat', `${t(`stat.${id}`)} ${Math.round(s.effStats[id] * 10) / 10}`));
+    const status = document.createElement('div');
+    status.className = 'iw-status';
+    status.append(
+      section(t('inventory.buffs'), buffs),
+      section(t('inventory.coins', { coins: Math.floor(p.coins) })),
+      section(t('inventory.stats'), stats),
+    );
+
+    body.append(wsec, section(t('inventory.items'), list), status);
+    return body;
+  }
+
+  /** 무기 한 칸: 이름·등급·수치·옵션·고유 효과·장착 보너스 + 버리기 */
+  private weaponCard(slot: 0 | 1, item: WeaponItem | null, holding: boolean): HTMLDivElement {
+    const t = this.ctx.t;
+    const d = this.ctx.data;
+    const el = document.createElement('div');
+    el.className = 'iw-slot iw-weapon';
+    const small = document.createElement('small');
+    small.textContent = t('inventory.slot', { n: slot + 1 }) + (holding && item ? ` · ${t('inventory.holding')}` : '');
+    el.appendChild(small);
+    if (!item) {
+      const empty = document.createElement('div');
+      empty.className = 'iw-empty';
+      empty.textContent = t('inventory.empty');
+      el.appendChild(empty);
+      return el;
+    }
+    const def = d.weapons.weapons.find((w) => w.id === item.defId)!;
+    const grade = d.groupMultipliers.grades.find((g) => g.id === item.grade);
+    const st = weaponStats(def, item, gradeMultiplier(item.grade, d.groupMultipliers));
+    const add = (cls: string, text: string, color?: string) => {
+      const x = document.createElement('div');
+      x.className = cls;
+      x.textContent = text;
+      if (color) x.style.color = color;
+      el.appendChild(x);
+    };
+    add('iw-name', t(def.nameKey), grade?.color);
+    add('iw-grade', grade ? t(grade.nameKey) : '');
+    add('iw-desc', t('inventory.weaponStats', { damage: Math.round(st.damage * 10) / 10, interval: Math.round(st.fireIntervalSec * 100) / 100, energy: st.energyCost }));
+    for (const o of item.options) {
+      const odef = d.weapons.options.find((x) => x.id === o.id);
+      if (odef) add('iw-desc', t(odef.nameKey, { value: o.id === 'energyCost' ? o.value : Math.round(o.value * 100) }));
+    }
+    const sig = def.signature;
+    if (sig) {
+      const params: Record<string, string | number> = { every: sig.every };
+      if (sig.kind !== 'space') params.dmg = sig.damageMul;
+      if (sig.kind === 'bigSmash') params.rad = sig.radiusMul;
+      add('iw-desc sig', t(`weapon.sigDesc.${sig.kind}`, params));
+    }
+    const bonus = def.equipBonus;
+    for (const [k, v] of Object.entries(bonus?.stats ?? {})) add('iw-desc sig', t('weapon.bonus.stat', { stat: t(`stat.${k}`), value: v ?? 0 }));
+    if (bonus?.rangedDamage) add('iw-desc sig', t('weapon.bonus.ranged', { value: Math.round(bonus.rangedDamage * 100) }));
+    if (bonus?.meleeDamage) add('iw-desc sig', t('weapon.bonus.melee', { value: Math.round(bonus.meleeDamage * 100) }));
+    const drop = document.createElement('button');
+    drop.className = 'iw-drop';
+    drop.textContent = t('inventory.drop');
+    drop.addEventListener('click', () => bus.emit('inventoryDropWeapon', { slot }));
+    el.appendChild(drop);
+    return el;
   }
 
   /** 장착 칸 (놓을 수 있는 자리) */

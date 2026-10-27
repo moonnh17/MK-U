@@ -51,6 +51,7 @@ import { addStat, damageTaken, maxHpFor, setStat, statEffect } from '../systems/
 import { applyBleed, buffDuration, canAutoCast, chargeTime, skillTags, tickBleed } from '../systems/tags';
 import {
   activeWeapon,
+  dropWeaponAt,
   autoAim,
   gainEnergy,
   gunShots,
@@ -232,6 +233,7 @@ export class RunScene extends Phaser.Scene {
       skillView: [],
       buffs: [],
       encounters: new Map(),
+      effStats: { ...(this.initData.player?.stats ?? newPlayerState(d).stats) },
     };
     this.ctx.session = this.session;
     this.rng = Rng.derive(seed, `combat-${stage.chapter}-${stage.stage}`);
@@ -313,6 +315,7 @@ export class RunScene extends Phaser.Scene {
       bus.on('restartRequested', () => this.restartRun()),
       bus.on('cardPick', ({ index }) => this.pickCard(index)),
       bus.on('inventoryEquip', ({ skillId, target }) => this.equip(skillId, target)),
+      bus.on('inventoryDropWeapon', ({ slot }) => this.dropFromSlot(slot)),
       bus.on('inventoryOpenRequest', () => this.openInventory()),
       bus.on('inventoryCloseRequest', () => this.closeInventory()),
       bus.on('debugSetSkill', (e) => this.debugSetSkill(e.skillId, e.level, e.awakened)),
@@ -756,7 +759,14 @@ export class RunScene extends Phaser.Scene {
 
   /** 들고 있는 무기 (등급·옵션이 붙은 실물) */
   private weaponItem(): WeaponItem {
-    return activeWeapon(this.session.player.weapons)!;
+    // 맨손이면 주먹 (슬롯에 들지 않는다)
+    return activeWeapon(this.session.player.weapons) ?? this.fistItem();
+  }
+
+  private fist: WeaponItem | null = null;
+  private fistItem(): WeaponItem {
+    this.fist ??= plainWeapon(this.weaponDefOf(this.ctx.data.weapons.fistWeapon));
+    return this.fist;
   }
 
   private weaponDef(): WeaponDef {
@@ -1504,6 +1514,7 @@ export class RunScene extends Phaser.Scene {
     };
     const ult = this.ultimateDef();
     this.session.buffs = this.buffViews();
+    this.session.effStats = this.effStats();
     this.session.skillView = [
       ...p.loadout.active.map((id) => slot(id, true)),
       {
@@ -1844,6 +1855,19 @@ export class RunScene extends Phaser.Scene {
   private dropWeapon(item: WeaponItem, x: number, y: number): void {
     const def = this.weaponDefOf(item.defId);
     this.floorWeapons.push(new FloorWeapon(this, item, def.spriteKey, x, y, item.grade === 'common' ? null : this.gradeColor(item.grade)));
+  }
+
+  /** 인벤토리에서 무기 버리기: 발밑에 떨어뜨린다 (마지막 무기를 버리면 맨손) */
+  private dropFromSlot(slot: 0 | 1): void {
+    const p = this.session.player;
+    const r = dropWeaponAt(p.weapons, slot);
+    if (!r.dropped) return;
+    p.weapons = r.slots;
+    this.dropWeapon(r.dropped, this.player.x, this.player.y + 10);
+    this.fireCooldown = 0;
+    this.resetCharge();
+    bus.emit('toast', { text: this.ctx.t('inventory.dropped', { weapon: this.weaponName(r.dropped) }) });
+    bus.emit('inventoryChanged', {});
   }
 
   /** 손에 든다. 슬롯이 차 있으면 들고 있던 무기를 그 자리에 버린다 */

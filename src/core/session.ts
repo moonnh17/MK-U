@@ -92,6 +92,8 @@ export interface RunSession {
   encounters: Map<number, EncounterKindId>;
   /** HUD '현재 버프' (RunScene이 매 프레임 채운다) */
   buffs: BuffView[];
+  /** 실제로 쓰는 스탯 (무기·아이템 보정 포함, 인벤토리 표시용. RunScene이 매 프레임 채운다) */
+  effStats: Stats;
 }
 
 export function newPlayerState(data: GameData): PlayerState {

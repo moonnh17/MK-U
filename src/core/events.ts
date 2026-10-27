@@ -46,6 +46,8 @@ export interface GameEvents {
   cardPick: { index: number };
   /** 인벤토리 → 스킬을 칸에 넣는다 */
   inventoryEquip: { skillId: string; target: number | 'passive' };
+  /** 인벤토리 아이템 탭: 그 슬롯의 무기를 발밑에 버린다 */
+  inventoryDropWeapon: { slot: 0 | 1 };
   /** 인벤토리 열기 요청(보관 알림의 버튼) / 닫기 요청(닫기 버튼) */
   inventoryOpenRequest: Record<string, never>;
   inventoryCloseRequest: Record<string, never>;

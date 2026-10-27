@@ -155,7 +155,8 @@ export class Hud {
     this.coinText.setText(this.ctx.t('hud.coins', { coins: Math.floor(p.coins) }));
 
     const weapons = this.ctx.data.weapons.weapons;
-    const mainItem = activeWeapon(p.weapons);
+    // 맨손이면 주먹
+    const mainItem = activeWeapon(p.weapons) ?? { defId: this.ctx.data.weapons.fistWeapon, grade: 'common' as const, options: [] };
     const subItem = otherWeapon(p.weapons);
     const main = weapons.find((w) => w.id === mainItem?.defId);
     const sub = weapons.find((w) => w.id === subItem?.defId);
