@@ -19,5 +19,21 @@
     "openRadius": 18
   },
   "merchantStand": { "spriteKey": "merchant_stand", "color": "#4a5a6a", "size": 12 },
-  "standSpacing": 64
+  "standSpacing": 64,
+  "spire": {
+    "small": {
+      "sprite": { "spriteKey": "spire_small", "color": "#15151c", "size": 10, "height": 44 },
+      "weights": { "rare": 50, "legendary": 35, "unique": 15 }
+    },
+    "radius": 72,
+    "ringColor": "#b04aff",
+    "fallSec": 0.7,
+    "fallHeight": 220,
+    "riseSec": 1.2,
+    "chargePerKill": { "normal": 0.08, "elite": 0.2, "champion": 0.2 },
+    "minAlive": 2,
+    "spawnGapSec": 1.5,
+    "eliteMul": 2,
+    "cards": 3
+  }
 }

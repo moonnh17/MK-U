@@ -232,6 +232,16 @@ export function validateGameData(d: GameData): Errors {
   checkPositive(errors, 'loot.chest.openRadius', lt.chest.openRadius);
   checkSprite(errors, 'loot.merchantStand', lt.merchantStand);
   checkPositive(errors, 'loot.standSpacing', lt.standSpacing);
+  const sp = lt.spire;
+  checkSprite(errors, 'loot.spire.small.sprite', sp.small.sprite);
+  checkWeights('loot.spire.small.weights', sp.small.weights);
+  if ((sp.small.weights.common ?? 0) > 0 || (sp.small.weights.mythic ?? 0) > 0) errors.push('loot.spire.small.weights: 레어·전설·유니크만 (신화는 따로 판정)');
+  for (const k of ['radius', 'fallSec', 'fallHeight', 'riseSec', 'spawnGapSec', 'eliteMul', 'cards'] as const) checkPositive(errors, `loot.spire.${k}`, sp[k]);
+  checkPositive(errors, 'loot.spire.minAlive', sp.minAlive, true);
+  for (const [k, v] of Object.entries(sp.chargePerKill)) {
+    if (!(typeof v === 'number' && v >= 0 && v <= 1)) errors.push(`loot.spire.chargePerKill.${k}: 0~1`);
+  }
+  if (!((sp.chargePerKill.normal ?? 0) > 0)) errors.push('loot.spire.chargePerKill.normal: 0보다 커야 충전된다');
   // --- 아이템 ---
   const it = d.items;
   for (const k of ['statFlat', 'hpFlat', 'damagePct', 'procDamage', 'area', 'cooldown'] as const) checkPositive(errors, `groupMultipliers.itemGroups.${k}`, d.groupMultipliers.itemGroups?.[k]);

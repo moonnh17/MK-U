@@ -37,6 +37,8 @@ export interface SpriteRef {
   color: string;
   /** 플레이스홀더 크기(px, 기준 해상도) */
   size: number;
+  /** 세로 크기가 다를 때(px). 없으면 size */
+  height?: number;
 }
 
 // ---------- 스탯 ----------
@@ -724,6 +726,26 @@ export interface LootData {
   merchantStand: SpriteRef;
   /** 상인 진열대 간격(px) */
   standSpacing: number;
+  spire: SpireData;
+}
+
+/** 마기수집첨탑. 처치 충전·방해 무리 규칙은 첨탑 크기와 무관하게 같다 (중형은 M6) */
+export interface SpireData {
+  small: { sprite: SpriteRef; weights: Partial<Record<GradeId, number>> };
+  /** 충전 원 반지름(px) */
+  radius: number;
+  ringColor: string;
+  fallSec: number;
+  /** 낙하 시작 높이(px, 착지점 위) */
+  fallHeight: number;
+  riseSec: number;
+  chargePerKill: Partial<Record<EnemyRank, number>>;
+  minAlive: number;
+  spawnGapSec: number;
+  /** 엘리트 수 배율 (평소 웨이브 대비) */
+  eliteMul: number;
+  /** 아이템 선택 카드 수 */
+  cards: number;
 }
 
 // ---------- 직업·전직 ----------
