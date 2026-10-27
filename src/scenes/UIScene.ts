@@ -145,6 +145,7 @@ export class UIScene extends Phaser.Scene {
           `${t('debug.energy')} ${Math.floor(s?.player.energy ?? 0)}`,
           `${t('debug.uiMode')} ${this.ctx.uiMode}`,
           t('debug.schoolPicks', { hectar: s?.player.schoolPicks.hectar ?? 0, acro: s?.player.schoolPicks.acro ?? 0 }),
+          t('debug.items', { list: s?.player.items.length ? s.player.items.map((id) => t(`item.${id}`)).join(', ') : t('debug.itemsNone') }),
         ].join('  '),
       );
     }

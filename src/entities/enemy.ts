@@ -136,7 +136,7 @@ export class Enemy {
       this.sprite.setVelocity(this.aim.x * attack.speed!, this.aim.y * attack.speed!);
       if (!this.actHit && dist <= this.radius + host.playerRadius) {
         this.actHit = true;
-        host.hurtPlayer(attack.damage);
+        host.hurtPlayer(attack.damage, this);
       }
     } else {
       this.sprite.setVelocity(0, 0);
@@ -168,7 +168,7 @@ export class Enemy {
       this.actHit = false;
       if (a.kind === 'slam') {
         const p = host.playerPos();
-        if (Math.hypot(p.x - this.slamAt.x, p.y - this.slamAt.y) <= a.radius! + host.playerRadius) host.hurtPlayer(a.damage);
+        if (Math.hypot(p.x - this.slamAt.x, p.y - this.slamAt.y) <= a.radius! + host.playerRadius) host.hurtPlayer(a.damage, this);
         const flash = this.scene.add.circle(this.slamAt.x, this.slamAt.y, a.radius!, TELEGRAPH_COLOR, 0.5).setDepth(6);
         this.scene.time.delayedCall(120, () => flash.destroy());
       }

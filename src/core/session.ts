@@ -4,8 +4,9 @@ import type { StageMap } from '../systems/mapgen';
 import type { StageRef } from '../systems/run';
 import { emptyLoadout, type Cooldowns, type SkillLoadout } from '../systems/skills';
 import { initialSlots, plainWeapon, type WeaponSlots } from '../systems/weapons';
+import type { ItemState } from '../items/runtime';
 import type { ConversionLog } from '../systems/advancement';
-import type { EncounterKindId, JobId, SchoolId } from '../types/data';
+import { STAT_IDS, type EncounterKindId, type GradeId, type JobId, type SchoolId, type StatId } from '../types/data';
 
 /** 스테이지를 넘어가도 유지되는 플레이어 상태 */
 export interface PlayerState {
@@ -32,6 +33,16 @@ export interface PlayerState {
   advancement: SchoolId | null;
   /** 전직 스킬 변환 기록 (인벤토리 스킬 탭) */
   advancementLog: ConversionLog | null;
+  /** 가진 아이템 */
+  items: string[];
+  /** 이번 런에 얻은 적 있는 아이템 (같은 아이템은 한 번만, 합성 재료 포함) */
+  itemsObtained: string[];
+  /** 아이템별 상태 (재사용 대기·누적·타이머) */
+  itemState: Record<string, ItemState>;
+  /** 확률 이전으로 옮겨진 등급 가중치 */
+  lootShift: Partial<Record<GradeId, number>>;
+  /** 스탯 카드로 올린 양 (LSD-R '가장 많이 투자한 스탯') */
+  statInvest: Record<StatId, number>;
 }
 
 export type RunOutcome = { type: 'dead' } | { type: 'chapterClear'; chapter: number };
@@ -103,6 +114,11 @@ export function newPlayerState(data: GameData): PlayerState {
     job: job.id,
     advancement: null,
     advancementLog: null,
+    items: [],
+    itemsObtained: [],
+    itemState: {},
+    lootShift: {},
+    statInvest: Object.fromEntries(STAT_IDS.map((s) => [s, 0])) as Record<StatId, number>,
   };
 }
 

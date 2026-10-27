@@ -71,7 +71,7 @@ class Singularity implements SkillObject {
     const great = rollChance(host.rng, host.chance(v.greatChance!, 'greatSuccess', u.def.tags));
     const mult = great ? v.greatMultiplier! : 1;
     const weights: Record<string, number> = {};
-    for (const id of RESULTS) weights[id] = great && id === 'failure' ? 0 : (v[`${id}Weight`] ?? 0);
+    for (const id of RESULTS) weights[id] = (great || host.noGreatFailure()) && id === 'failure' ? 0 : (v[`${id}Weight`] ?? 0);
     const result = pickResults(host.rng, weights, 1)[0]!;
     if (great) floatText(host, this.at.x, this.at.y - 18, host.ctx.t('skillMsg.greatSuccess'), '#ffd23f');
     floatText(host, this.at.x, this.at.y - 8, host.ctx.t(`ultimate.singularity.result.${result}`), u.def.color);

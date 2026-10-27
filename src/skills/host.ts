@@ -35,6 +35,8 @@ export interface SkillHost {
   hurtSelf(amount: number): void;
   /** 이 스킬이 대성공했다(아크로 궁극기 게이지 보너스) */
   greatSuccess(): void;
+  /** 대실패가 나오지 않는다 (아크룩스의 십자가, 아크로) */
+  noGreatFailure(): boolean;
   /** 출혈을 건다. base는 중첩 1개당 틱 피해(태그 보정 전), tags는 출혈 공격 source의 태그 */
   bleed(enemy: Enemy, base: number, stacks: number, tags: readonly TagId[]): void;
   /** 탄 하나 (벽에 막히고, 사거리를 넘으면 사라진다) */

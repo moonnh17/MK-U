@@ -12,6 +12,7 @@ import type { BossHost } from '../bosses/host';
 import { Door } from '../entities/door';
 import { Enemy } from '../entities/enemy';
 import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
+import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard, type HazardHost } from '../entities/hazard';
 import { FloorWeapon, Pickup } from '../entities/pickup';
 import { Explosive } from '../skills/explosive';
@@ -23,6 +24,7 @@ import { convertSkills, gaugeFromDamage, gaugeFromGreatSuccess, judgeSchool, ski
 import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type CutIn, type CutPage } from '../ui/cutscenePages';
 import { assignElites, eliteCount } from '../systems/elites';
 import { IMPLEMENTED_ENCOUNTERS } from '../systems/encounter';
+import { effectiveWeights, itemDamageMultiplier, readySet, rollItem, transferWeight } from '../systems/items';
 import { canBuy, merchantStock, rollEncounter, rollGrade, rollOptions, rollWeapon } from '../systems/loot';
 import { lineHits } from '../systems/targeting';
 import { generateStage, type RoomNode } from '../systems/mapgen';
@@ -41,7 +43,7 @@ import {
   skillValues,
   tickCooldowns,
 } from '../systems/skills';
-import { addStat, damageTaken, setStat, statEffect } from '../systems/stats';
+import { addStat, damageTaken, maxHpFor, setStat, statEffect } from '../systems/stats';
 import { applyBleed, buffDuration, canAutoCast, chargeTime, skillTags, tickBleed } from '../systems/tags';
 import {
   activeWeapon,
@@ -142,6 +144,8 @@ export class RunScene extends Phaser.Scene {
   /** 적 쪽 위험 지대(폭발 엘리트 지연 폭발 등) */
   private hazards: Hazard[] = [];
   private enemyHost!: HazardHost;
+  /** 아이템 발동형 효과·상태 */
+  private itemRt!: ItemRuntime;
   private bossHost!: BossHost;
   /** 보스 적 → 패턴 컨트롤러 */
   private bossControllers = new Map<Enemy, BossController>();
@@ -213,11 +217,25 @@ export class RunScene extends Phaser.Scene {
     this.m = metrics(d.mapgen);
     this.hosts = new Map();
     this.host = this.hostFor(null);
+    this.itemRt = new ItemRuntime({
+      scene: this,
+      ctx: this.ctx,
+      player: () => this.session.player,
+      skill: () => this.hostFor('item'),
+      skillFor: (id) => this.hostFor(id),
+      fireBullet: (from, angle, speed, range, base, tags, pierce) => this.fireBullet(from, angle, speed, range, base, tags, 'item', { pierce, crit: 0 }),
+      setInvuln: (sec) => {
+        this.invuln = Math.max(this.invuln, sec);
+      },
+      buffDuration: (sec) => this.hostFor('item').buffDuration(sec, ['buff']),
+      burstArea: (r) => this.burstArea(r),
+      toast: (text) => bus.emit('toast', { text }),
+    });
     this.enemyHost = {
       scene: this,
       playerPos: () => ({ x: this.player.x, y: this.player.y }),
       playerRadius: d.player.size / 2,
-      hurtPlayer: (amount) => this.hurtPlayer(amount),
+      hurtPlayer: (amount, attacker) => this.hurtPlayer(amount, attacker ?? null),
     };
     this.bossHost = {
       ...this.enemyHost,
@@ -274,7 +292,9 @@ export class RunScene extends Phaser.Scene {
       bus.on('inventoryCloseRequest', () => this.closeInventory()),
       bus.on('debugSetSkill', (e) => this.debugSetSkill(e.skillId, e.level, e.awakened)),
       bus.on('debugSetStat', ({ stat, value }) => {
-        this.session.player = setStat(this.session.player, stat, value, d.player.maxHp, d.stats);
+        const before = { hp: this.session.player.hp, maxHp: this.session.player.maxHp };
+        this.session.player = { ...setStat(this.session.player, stat, value, d.player.maxHp, d.stats), ...before };
+        this.syncMaxHp();
       }),
       bus.on('debugOpenCards', ({ kind }) => this.queueOffers([{ kind, boss: false }])),
       bus.on('debugFillUltimate', () => {
@@ -295,6 +315,7 @@ export class RunScene extends Phaser.Scene {
         const options = rollOptions(rng, def, count, d.weapons.options);
         this.dropWeapon({ defId, grade, options }, this.player.x + 16, this.player.y);
       }),
+      bus.on('debugGiveItem', ({ itemId }) => this.giveItem(itemId)),
       bus.on('debugCoins', ({ amount }) => {
         this.session.player.coins += amount;
       }),
@@ -458,7 +479,9 @@ export class RunScene extends Phaser.Scene {
     const mods = this.playerMods();
     p.shieldMax = d.player.shieldMax + mods.shieldMax;
     p.shield = Math.min(p.shield, p.shieldMax);
-    const speed = d.player.moveSpeed * (1 + statEffect('moveSpeed', this.effStats(), d.stats)) * (1 + mods.moveSpeed);
+    this.syncMaxHp();
+    this.itemRt.update(dt);
+    const speed = d.player.moveSpeed * (1 + statEffect('moveSpeed', this.effStats(), d.stats)) * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus());
     if (this.dashLeft > 0) {
       // MK 돌진: 입력 대신 돌진 방향으로
       this.dashLeft -= dt;
@@ -651,26 +674,32 @@ export class RunScene extends Phaser.Scene {
 
   /** 실제로 쓰는 스탯: 기본 스탯 + 들고 있는 무기의 보너스(신궁 환디 힘 +30) */
   private effStats(): Stats {
-    const base = this.session.player.stats;
-    const bonus = this.weaponDef().equipBonus?.stats;
-    if (!bonus) return base;
-    const out = { ...base };
-    for (const [k, v] of Object.entries(bonus)) out[k as StatId] += v ?? 0;
+    const out = { ...this.session.player.stats };
+    for (const [k, v] of Object.entries(this.weaponDef().equipBonus?.stats ?? {})) out[k as StatId] += v ?? 0;
+    // 아이템 스탯 (LSD-R 재편 포함)
+    const items = this.itemRt?.sums.stats;
+    if (items) for (const k of Object.keys(out) as StatId[]) out[k] += items[k];
     return out;
   }
 
-  /** 근접·원거리 피해 증가 (들고 있는 무기. 아이템은 M4-B) */
+  /** 근접·원거리 피해 증가: 들고 있는 무기 + 아이템 (같은 종류라 더한다) */
   private rangeBonus(): RangeBonus {
     const b = this.weaponDef().equipBonus;
-    return { melee: b?.meleeDamage ?? 0, ranged: b?.rangedDamage ?? 0 };
+    const it = this.itemRt.sums.damage;
+    return { melee: (b?.meleeDamage ?? 0) + it.melee, ranged: (b?.rangedDamage ?? 0) + it.ranged };
   }
 
   /** 피해 한 번. 태그 보정은 이 공격(source)의 태그로 계산한다 */
   private hit(enemy: Enemy, base: number, tags: readonly TagId[], source: string | null = null): boolean {
     if (enemy.dead) return false;
     const d = this.ctx.data;
-    let dmg = calcDamage({ baseDamage: base, tags }, this.effStats(), d.tags, this.rangeBonus());
-    if (tags.includes('space')) dmg = spaceDamage(enemy.rank, enemy.maxHp, dmg, this.tagRule<SpaceRule>('space'));
+    const stats = this.effStats();
+    let dmg = calcDamage({ baseDamage: base, tags }, stats, d.tags, this.rangeBonus());
+    // 아이템: 피해 %(더한 뒤 한 번), 보스·적이 받는 피해·스킬 피해, 적중 효과(신검 공간격·참마검)
+    const boss = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss';
+    const hm = this.itemRt.hitMods(this.rng, (c) => skillChance(c, 'success', ['chance'], stats, d.tags));
+    dmg *= itemDamageMultiplier(this.itemRt.sums, this.itemRt.extraDamageAll(), boss, source) * hm.mult;
+    if (tags.includes('space') || hm.space) dmg = spaceDamage(enemy.rank, enemy.maxHp, dmg, this.tagRule<SpaceRule>('space'));
     return this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption), source);
   }
 
@@ -767,7 +796,7 @@ export class RunScene extends Phaser.Scene {
           from: { x: this.player.x, y: this.player.y },
           to,
           speed: st.projectileSpeed,
-          radius: w.pattern.radius,
+          radius: w.pattern.radius * (1 + this.itemRt.sums.area),
           base: st.damage,
           tags: w.tags,
           sprite: this.ctx.data.weapons.projectile,
@@ -815,7 +844,7 @@ export class RunScene extends Phaser.Scene {
     const origin = { x: this.player.x, y: this.player.y };
     const dir = { x: Math.cos(aimAngle), y: Math.sin(aimAngle) };
     const dmgMul = w.charge ? 1 + (w.charge.damageMul - 1) * chargeRatio : 1;
-    const radMul = w.charge ? 1 + (w.charge.radiusMul - 1) * chargeRatio : 1;
+    const radMul = (w.charge ? 1 + (w.charge.radiusMul - 1) * chargeRatio : 1) * (1 + this.itemRt.sums.area);
     const p = w.pattern;
     const enemies = [...this.enemies];
     const g = this.add.graphics().setDepth(6);
@@ -827,13 +856,15 @@ export class RunScene extends Phaser.Scene {
       const half = (p.arcDeg * Math.PI) / 360;
       g.slice(origin.x, origin.y, radius, aimAngle - half, aimAngle + half, false).fillPath();
     } else if (p.kind === 'line') {
-      const idx = lineHits(origin, dir, p.length, p.width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
+      const len = p.length * radMul;
+      const idx = lineHits(origin, dir, len, p.width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
       targets = idx.map((i) => enemies[i]!);
-      g.lineStyle(p.width, 0xffffff, 0.45).lineBetween(origin.x, origin.y, origin.x + dir.x * p.length, origin.y + dir.y * p.length);
+      g.lineStyle(p.width, 0xffffff, 0.45).lineBetween(origin.x, origin.y, origin.x + dir.x * len, origin.y + dir.y * len);
     } else if (p.kind === 'smash') {
       const c = { x: origin.x + dir.x * p.reach, y: origin.y + dir.y * p.reach };
-      targets = enemies.filter((e) => Math.hypot(e.sprite.x - c.x, e.sprite.y - c.y) <= p.radius + e.radius);
-      g.fillCircle(c.x, c.y, p.radius);
+      const r = p.radius * radMul;
+      targets = enemies.filter((e) => Math.hypot(e.sprite.x - c.x, e.sprite.y - c.y) <= r + e.radius);
+      g.fillCircle(c.x, c.y, r);
     }
     for (const e of targets) {
       const at = { x: e.sprite.x, y: e.sprite.y };
@@ -900,6 +931,7 @@ export class RunScene extends Phaser.Scene {
     this.removeEnemy(e);
     if (roomId !== undefined) this.rooms.get(roomId)?.enemyKilled();
     for (const o of [...this.skillObjects]) o.onKill?.(this.host, e);
+    this.itemRt.onKill();
     // 폭발 엘리트: 예고 원 후 지연 폭발 (반역 개체가 된 경우는 제외)
     const blast = e.elite?.deathBlast;
     if (blast && !e.converted) {
@@ -949,11 +981,12 @@ export class RunScene extends Phaser.Scene {
     if (!enemy || enemy.dead || enemy.warn > 0 || enemy.def.contactDamage <= 0) return;
     const now = this.time.now;
     if (now - enemy.lastContactAt < enemy.def.contactIntervalSec * 1000) return;
-    if (this.hurtPlayer(enemy.def.contactDamage)) enemy.lastContactAt = now;
+    if (this.hurtPlayer(enemy.def.contactDamage, enemy)) enemy.lastContactAt = now;
   }
 
   /** 피해를 받았으면 true */
-  private hurtPlayer(amount: number): boolean {
+  /** 피해를 받았으면 true. attacker: 때린 적(반사용, 모르면 null) */
+  private hurtPlayer(amount: number, attacker: Enemy | null = null): boolean {
     if (this.invuln > 0 || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
     // 마기역장: 공격을 막고 잠깐 무적
     const absorbed = absorbHit(this.shield);
@@ -964,7 +997,7 @@ export class RunScene extends Phaser.Scene {
       return true;
     }
     const p = this.session.player;
-    const taken = damageTaken(amount, this.effStats(), this.ctx.data.stats) * (1 - this.playerMods().damageReduction);
+    const taken = damageTaken(amount, this.effStats(), this.ctx.data.stats) * (1 - this.playerMods().damageReduction) * (1 - this.itemRt.sums.damageTaken);
     const v = takeDamage(p, taken);
     p.hp = v.hp;
     p.shield = v.shield;
@@ -972,6 +1005,10 @@ export class RunScene extends Phaser.Scene {
     this.cameras.main.shake(80, 0.004);
     // 피격에 반응하는 스킬 오브젝트 (반물질포 충전 취소 등)
     for (const o of [...this.skillObjects]) if (o.onPlayerHurt && !o.onPlayerHurt(this.host)) this.removeObject(o);
+    // 아이템: 피격 효과 → 낮은 체력 회복 → 부활
+    this.itemRt.onHurt(taken, attacker);
+    if (p.hp > 0) this.itemRt.tryHeal();
+    else if (this.itemRt.tryRevive()) this.cameras.main.flash(200, 255, 255, 255);
     if (p.hp <= 0) this.endRun({ type: 'dead' });
     return true;
   }
@@ -1024,11 +1061,14 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     const p = this.session.player;
     const orb = d.player.energy.orbValue * (1 + statEffect('energyGain', this.effStats(), d.stats));
-    const coin = d.pickups.coin.value * (1 + statEffect('coinGain', this.effStats(), d.stats));
+    const coin = d.pickups.coin.value * (1 + statEffect('coinGain', this.effStats(), d.stats) + this.itemRt.sums.coinGain);
     for (const pk of this.pickups) {
       if (!pk.update(dt, this.player, d.pickups)) continue;
       if (pk.kind === 'energy') p.energy = gainEnergy(p.energy, orb, p.energyMax);
-      else p.coins += coin;
+      else {
+        p.coins += coin;
+        this.itemRt.onCoins(coin);
+      }
     }
     this.pickups = this.pickups.filter((pk) => !pk.collected);
   }
@@ -1073,12 +1113,15 @@ export class RunScene extends Phaser.Scene {
         ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gaugeFromGreatSuccess(udef));
       },
       chargeTime: (sec, tags) => chargeTime(sec, tags, this.effStats(), ctx.data.tags),
-      buffDuration: (sec, tags) => buffDuration(sec, tags, this.effStats(), ctx.data.tags),
+      buffDuration: (sec, tags) => buffDuration(sec, tags, this.effStats(), ctx.data.tags) * (tags.includes('buff') ? 1 + this.itemRt.sums.buffDuration : 1),
       setShield: (shield, opts) => {
         this.shield = shield;
         this.shieldOpts = opts;
       },
-      chance: (base, capKey, tags) => skillChance(base, capKey, tags, this.effStats(), ctx.data.tags),
+      // 아크룩스(아크로): 대성공 +20%p, 상한 무시
+      chance: (base, capKey, tags) =>
+        Math.min(1, skillChance(base, capKey, tags, this.effStats(), ctx.data.tags) + (capKey === 'greatSuccess' ? this.itemRt.greatSuccess().bonus : 0)),
+      noGreatFailure: () => this.itemRt.greatSuccess().noFailure,
       corrupt: (e, state) => {
         if (!e.dead) e.corruption = applyCorruption(e.corruption, state);
       },
@@ -1197,13 +1240,33 @@ export class RunScene extends Phaser.Scene {
       const b = o.buff?.(this.host);
       if (b) out.push(b);
     }
+    out.push(...this.itemRt.buffs());
     return out;
   }
 
   /** 스킬 범위 보정 (마기력) */
   private area(radius: number): number {
     const d = this.ctx.data;
-    return radius * (1 + statEffect('skillArea', this.effStats(), d.stats));
+    return radius * (1 + statEffect('skillArea', this.effStats(), d.stats)) * (1 + this.itemRt.sums.area);
+  }
+
+  /** 기환의 팔: 힘·마기력 범위 보정 (마기력 범위 규칙을 힘에도 같은 식으로) */
+  private burstArea(radius: number): number {
+    const d = this.ctx.data;
+    const st = this.effStats();
+    const byStr = statEffect('skillArea', { ...st, magiPower: st.strength }, d.stats);
+    return radius * (1 + statEffect('skillArea', st, d.stats) + byStr) * (1 + this.itemRt.sums.area);
+  }
+
+  /** 최대 체력 = 기본 + 견고(아이템 스탯 포함) + 아이템. 늘면 그만큼 현재 체력도 채운다 */
+  private syncMaxHp(): void {
+    const d = this.ctx.data;
+    const p = this.session.player;
+    const target = maxHpFor(d.player.maxHp, this.effStats(), d.stats) + this.itemRt.sums.maxHp;
+    if (target === p.maxHp) return;
+    if (target > p.maxHp) p.hp += target - p.maxHp;
+    p.maxHp = target;
+    p.hp = Math.min(p.hp, p.maxHp);
   }
 
   private ultimateDef(): UltimateDef {
@@ -1380,8 +1443,10 @@ export class RunScene extends Phaser.Scene {
     if (!card || this.modal !== 'cards') return;
     const d = this.ctx.data;
     const t = this.ctx.t;
+    const before = { hp: this.session.player.hp, maxHp: this.session.player.maxHp };
     const r = applyCard(this.session.player, card, { skills: d.skills, stats: d.stats, baseMaxHp: d.player.maxHp });
-    this.session.player = r.holder;
+    this.session.player = { ...r.holder, ...before };
+    this.syncMaxHp();
     if (card.kind === 'stat') {
       bus.emit('toast', { text: t('skillMsg.statUp', { stat: t(`stat.${card.stat}`), amount: card.amount }) });
     } else {
@@ -1454,9 +1519,13 @@ export class RunScene extends Phaser.Scene {
     // 보스 처치: 무기 상자 확정 (포털 옆)
     const c = roomCenter(node, this.m);
     const weights = d.loot.weaponChest[String(stage.stage)];
+    const bossId = d.bosses.bosses.find((b) => b.chapter === stage.chapter && b.stage === stage.stage)?.id;
+    const bossItem = d.items.items.find((x) => x.pool === 'boss' && x.bossId === bossId && !this.session.player.itemsObtained.includes(x.id));
     const reward = () => {
       this.addPortal(node);
       if (weights) this.addChest('weapon', c.x - 40, c.y, weights);
+      // 보스 전용 아이템 확정 (무기 상자와 별도)
+      if (bossItem) this.addChest('item', c.x + 40, c.y, {}, bossItem.id);
     };
     if (last && this.session.player.advancement === null) this.advance(reward);
     else reward();
@@ -1473,7 +1542,9 @@ export class RunScene extends Phaser.Scene {
     const r = convertSkills(Rng.derive(this.ctx.config.seed, 'advancement'), p.loadout, p.stats, d.skills, school, d.jobs.conversionStatAmount);
     p = { ...p, loadout: r.loadout };
     // 스탯 포인트는 견고(최대 체력)까지 반영되게 하나씩 더한다
+    const before = { hp: p.hp, maxHp: p.maxHp };
     for (const s of r.log.stats) p = addStat(p, s.stat, s.amount, d.player.maxHp, d.stats);
+    p = { ...p, ...before };
     const removed = new Set(r.log.removed.map((x) => x.skillId));
     p.cooldowns = Object.fromEntries(Object.entries(p.cooldowns).filter(([id]) => !removed.has(id)));
     for (const o of this.skillObjects.filter((x) => removed.has(x.owner.split('.')[0]!))) this.removeObject(o);
@@ -1627,13 +1698,41 @@ export class RunScene extends Phaser.Scene {
       this.dropWeapon(item, chest.x, chest.y + 14);
       return;
     }
-    // 아이템 상자: 아이템은 M4-B
-    bus.emit('toast', { text: this.ctx.t('loot.itemPending') });
+    const d = this.ctx.data;
+    const p = this.session.player;
+    let id = chest.fixedItem;
+    if (!id) {
+      const { stage } = this.session;
+      const rng = Rng.derive(this.ctx.config.seed, `item-${stage.chapter}-${stage.stage}-${this.lootSeq++}`);
+      const weights = effectiveWeights(chest.weights, stage.chapter, d.items.chapterCommonShift, p.lootShift);
+      id = rollItem(rng, weights, d.loot.mythicChance, d.items, new Set(p.itemsObtained)) ?? undefined;
+    }
+    if (id) this.giveItem(id);
   }
 
-  private addChest(kind: ChestKind, x: number, y: number, weights: Partial<Record<GradeId, number>>): void {
+  /** 아이템 획득: 확률 이전 → 세트 합성 → 획득 카드 */
+  private giveItem(id: string): void {
+    const d = this.ctx.data;
+    const p = this.session.player;
+    const def = d.items.items.find((x) => x.id === id);
+    if (!def || p.itemsObtained.includes(id)) return;
+    p.items = [...p.items, id];
+    p.itemsObtained = [...p.itemsObtained, id];
+    if (def.pool === 'normal') p.lootShift = transferWeight(p.lootShift, def.grade, d.items.transferPerPickup);
+    bus.emit('itemGot', { itemId: id, set: false });
+    // 세트: 재료가 모이면 자동 합성, 재료 효과는 사라지고 다시 나오지 않는다
+    const set = readySet(new Set(p.items), new Set(p.itemsObtained), d.items.sets);
+    if (set) {
+      p.items = [...p.items.filter((x) => !set.materials.includes(x)), set.result];
+      p.itemsObtained = [...p.itemsObtained, set.result];
+      bus.emit('itemGot', { itemId: set.result, set: true });
+    }
+    this.itemRt.refresh();
+  }
+
+  private addChest(kind: ChestKind, x: number, y: number, weights: Partial<Record<GradeId, number>>, fixedItem?: string): void {
     const ref = kind === 'weapon' ? this.ctx.data.loot.chest.weapon : this.ctx.data.loot.chest.item;
-    this.chests.push(new Chest(this, kind, ref, x, y, weights));
+    this.chests.push(new Chest(this, kind, ref, x, y, weights, fixedItem));
   }
 
   // ---------- 조우 칸 ----------
@@ -1655,7 +1754,7 @@ export class RunScene extends Phaser.Scene {
     bus.emit('toast', { text: this.ctx.t(`encounter.${kind}`) });
 
     if (kind === 'treasure') {
-      this.addChest('item', c.x, c.y, {});
+      this.addChest('item', c.x, c.y, d.items.treasureWeights);
     } else if (kind === 'merchant') {
       const stock = merchantStock(rng, d.loot, d.weapons.weapons, d.weapons.options, d.groupMultipliers);
       stock.forEach((s, i) => {
@@ -1692,7 +1791,7 @@ export class RunScene extends Phaser.Scene {
   private raidReward(roomId: number): void {
     const d = this.ctx.data;
     const c = roomCenter(this.session.map.rooms[roomId]!, this.m);
-    this.addChest('item', c.x, c.y, {});
+    this.addChest('item', c.x, c.y, d.items.raidWeights);
     const n = this.rng.int(d.loot.raid.coins[0], d.loot.raid.coins[1]);
     for (let i = 0; i < n; i++) {
       const a = this.rng.range(0, Math.PI * 2);

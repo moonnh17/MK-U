@@ -123,6 +123,8 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
   );
   // 다음 조우 칸 유형 강제, 무기 지급, 코인
   const encSel = select([['', t('debug.encounterRandom')], ...(['treasure', 'merchant', 'raid', 'magiSpire', 'hiddenBoss'] as const).map((k): [string, string] => [k, t(`encounter.${k}`)])]);
+  const itemSel = select(d.items.items.map((x): [string, string] => [x.id, t(x.nameKey)]));
+  body.appendChild(row(itemSel, button(t('debug.giveItem'), () => bus.emit('debugGiveItem', { itemId: itemSel.value }))));
   const weaponSel = select(d.weapons.weapons.map((w): [string, string] => [w.id, t(w.nameKey)]));
   const gradeSel = select(d.groupMultipliers.grades.map((g): [string, string] => [g.id, t(g.nameKey)]));
   body.appendChild(

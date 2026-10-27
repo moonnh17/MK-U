@@ -4,13 +4,14 @@
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
+import type { Enemy } from './enemy';
 
 export interface HazardHost {
   readonly scene: Phaser.Scene;
   playerPos(): Vec2;
   readonly playerRadius: number;
-  /** 피해를 받았으면 true */
-  hurtPlayer(amount: number): boolean;
+  /** 피해를 받았으면 true. attacker: 때린 적 (아이템 반사용) */
+  hurtPlayer(amount: number, attacker?: Enemy): boolean;
 }
 
 /** 일정 간격으로 피해를 주는 지대의 공통 처리 */

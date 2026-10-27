@@ -18,8 +18,10 @@ export class Chest {
     ref: SpriteRef,
     x: number,
     y: number,
-    /** 등급 가중치 (무기 상자: 보스 스테이지별 / 아이템 상자: M4-B) */
+    /** 등급 가중치 (무기 상자: 보스 스테이지별 / 아이템 상자: 보물·습격) */
     readonly weights: Partial<Record<GradeId, number>>,
+    /** 정해진 아이템 (보스 전용 아이템 상자) */
+    readonly fixedItem?: string,
   ) {
     this.sprite = scene.add.image(x, y, ref.spriteKey).setDepth(2);
     scene.tweens.add({ targets: this.sprite, scaleX: 1.08, scaleY: 1.08, duration: 500, yoyo: true, repeat: -1 });
