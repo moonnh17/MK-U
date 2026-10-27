@@ -4,7 +4,8 @@ import type { StageMap } from '../systems/mapgen';
 import type { StageRef } from '../systems/run';
 import { emptyLoadout, type Cooldowns, type SkillLoadout } from '../systems/skills';
 import { initialSlots, type WeaponSlots } from '../systems/weapons';
-import type { SchoolId } from '../types/data';
+import type { ConversionLog } from '../systems/advancement';
+import type { JobId, SchoolId } from '../types/data';
 
 /** 스테이지를 넘어가도 유지되는 플레이어 상태 */
 export interface PlayerState {
@@ -21,9 +22,16 @@ export interface PlayerState {
   loadout: SkillLoadout;
   /** 스킬 id → 남은 쿨타임(초) */
   cooldowns: Cooldowns;
-  ultimate: { id: string; gauge: number };
+  ultimate: { id: string; gauge: number; awakened: boolean };
   /** 전직 판정용: 고른 스킬 카드의 계열 횟수 (전직은 M3) */
   schoolPicks: Record<SchoolId, number>;
+  /** 마지막으로 고른 스킬 카드의 계열 (전직 동점 처리) */
+  lastPickSchool: SchoolId | null;
+  job: JobId;
+  /** 전직한 학파. 전직 전 null */
+  advancement: SchoolId | null;
+  /** 전직 스킬 변환 기록 (인벤토리 스킬 탭) */
+  advancementLog: ConversionLog | null;
 }
 
 export type RunOutcome = { type: 'dead' } | { type: 'chapterClear'; chapter: number };
@@ -72,6 +80,9 @@ export interface RunSession {
 }
 
 export function newPlayerState(data: GameData): PlayerState {
+  const job = data.jobs.jobs.find((j) => j.id === data.jobs.startJob)!;
+  const stats = startingStats(data.stats.startValue);
+  for (const [k, v] of Object.entries(job.statBonus)) stats[k as keyof typeof stats] += v ?? 0;
   return {
     hp: data.player.maxHp,
     maxHp: data.player.maxHp,
@@ -80,12 +91,16 @@ export function newPlayerState(data: GameData): PlayerState {
     energy: data.player.energy.start,
     energyMax: data.player.energy.max,
     coins: 0,
-    stats: startingStats(data.stats.startValue),
-    weapons: initialSlots(data.weapons.startWeapon),
+    stats,
+    weapons: initialSlots(job.startWeapon),
     loadout: emptyLoadout(data.skills.activeSlots),
     cooldowns: {},
-    ultimate: { id: data.ultimates.startUltimate, gauge: 0 },
+    ultimate: { id: job.startUltimate, gauge: 0, awakened: false },
     schoolPicks: { hectar: 0, acro: 0 },
+    lastPickSchool: null,
+    job: job.id,
+    advancement: null,
+    advancementLog: null,
   };
 }
 

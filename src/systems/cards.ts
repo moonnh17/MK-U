@@ -113,6 +113,8 @@ export interface CardHolder {
   maxHp: number;
   /** 전직 판정용: 고른 스킬 카드의 계열 횟수 */
   schoolPicks: Record<SchoolId, number>;
+  /** 마지막으로 고른 스킬 카드의 계열 (전직 동점 처리) */
+  lastPickSchool?: SchoolId | null;
 }
 
 export interface CardContext {
@@ -139,5 +141,5 @@ export function applyCard<T extends CardHolder>(h: T, card: Card, c: CardContext
   }
   // 신규·레벨업·각성 모두 계열 1회
   const schoolPicks = { ...h.schoolPicks, [def.school]: h.schoolPicks[def.school] + 1 };
-  return { holder: { ...h, loadout, schoolPicks }, stored };
+  return { holder: { ...h, loadout, schoolPicks, lastPickSchool: def.school }, stored };
 }
