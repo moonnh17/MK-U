@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { BleedState } from '../systems/tags';
 import type { EnemyDef } from '../types/data';
 
 /** 적 하나. 스프라이트에 `enemy` 데이터로 자신을 붙여 충돌 콜백에서 찾는다. */
@@ -10,6 +11,8 @@ export class Enemy {
   /** 마지막 접촉 피해 시각(ms) */
   lastContactAt = -Infinity;
   dead = false;
+  /** 걸려 있는 출혈 */
+  bleed: BleedState | null = null;
 
   constructor(
     scene: Phaser.Scene,

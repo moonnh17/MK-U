@@ -112,6 +112,392 @@ body {
   color: #fff;
 }
 
+#debug-panel details {
+  margin-top: 4px;
+  color: #ddd;
+  font: 11px sans-serif;
+}
+
+#debug-panel summary {
+  cursor: pointer;
+}
+
+#debug-panel select,
+#debug-panel input {
+  font: 11px sans-serif;
+  background: #223;
+  color: #ddd;
+  border: 1px solid #556;
+  margin: 4px 4px 0 0;
+}
+
+/* 모바일 스킬·궁극기 버튼: 쿨타임 원형 게이지 + 숫자, 레벨 점, 각성 별 */
+.tbtn.tskill {
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.tskill-cd {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.tskill-label {
+  position: relative;
+  font-size: 13px;
+}
+
+.tskill-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: bold;
+  text-shadow: 0 0 3px #000, 0 0 3px #000;
+}
+
+.tskill-star {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  display: none;
+  color: #ffd23f;
+  font-size: 12px;
+}
+
+.tskill-dots {
+  position: absolute;
+  bottom: 8px;
+  display: flex;
+  gap: 3px;
+}
+
+.tskill-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.tbtn.tskill.empty {
+  opacity: 0.35;
+}
+
+.tbtn.tskill.dim {
+  opacity: 0.45;
+}
+
+.tbtn.tskill.awakened {
+  border-width: 3px;
+}
+
+.tbtn.tskill.ready {
+  border-width: 3px;
+  box-shadow: 0 0 10px #ff9a3c;
+}
+
+/* 카드 선택창 · 인벤토리 */
+#card-window,
+#inventory-window {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(5, 8, 12, 0.82);
+  color: #fff;
+  font-family: sans-serif;
+  pointer-events: auto;
+  box-sizing: border-box;
+  padding: 12px;
+}
+
+.cw-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.cw-head b {
+  font-size: 20px;
+}
+
+.cw-head small {
+  color: #aaa;
+}
+
+.cw-list {
+  display: flex;
+  gap: 12px;
+}
+
+#card-window.mobile .cw-list {
+  flex-direction: column;
+  width: min(92vw, 560px);
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 74vh;
+}
+
+.cw-card {
+  width: 190px;
+  min-height: 210px;
+  padding: 10px;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  background: #121a24;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.cw-card:hover {
+  background: #1b2734;
+}
+
+#card-window.mobile {
+  gap: 6px;
+  padding: 6px 12px;
+}
+
+#card-window.mobile .cw-head {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 10px;
+}
+
+#card-window.mobile .cw-head b {
+  font-size: 16px;
+}
+
+#card-window.mobile .cw-card {
+  width: 100%;
+  min-height: 0;
+  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 10px;
+}
+
+.cw-left {
+  width: 120px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cw-right {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cw-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+#card-window.mobile .cw-confirm {
+  padding: 6px 36px;
+}
+
+.cw-card.selected {
+  background: #24384c;
+  box-shadow: 0 0 0 3px #ffd23f;
+}
+
+.cw-top {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.cw-name {
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.cw-sub {
+  font-size: 11px;
+  color: #bbb;
+}
+
+.cw-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.cw-badges span {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: #fff;
+  text-shadow: 0 0 2px #000;
+}
+
+.cw-level {
+  font-size: 12px;
+  color: #ffd23f;
+}
+
+.cw-desc {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #ddd;
+}
+
+.cw-confirm,
+.iw-head button,
+#stored-notice button {
+  font: bold 16px sans-serif;
+  padding: 8px 28px;
+  border-radius: 6px;
+  border: 2px solid #ffd23f;
+  background: #2a3a4a;
+  color: #fff;
+}
+
+.cw-confirm:disabled {
+  opacity: 0.35;
+}
+
+.iw-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 18px;
+}
+
+.iw-head button {
+  font-size: 13px;
+  padding: 4px 14px;
+}
+
+.iw-hint,
+.iw-sub {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.iw-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 96vw;
+}
+
+.iw-slot {
+  width: 112px;
+  min-height: 78px;
+  padding: 4px;
+  border: 1px dashed #5a6a7a;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-sizing: border-box;
+}
+
+.iw-slot small {
+  font-size: 10px;
+  color: #8a9aac;
+}
+
+.iw-slot.fixed {
+  border-style: solid;
+  opacity: 0.8;
+}
+
+.iw-empty,
+.iw-none {
+  font-size: 11px;
+  color: #666;
+  margin: auto;
+}
+
+.iw-skill {
+  padding: 4px 6px;
+  border: 2px solid #9aa4b0;
+  border-radius: 5px;
+  background: #121a24;
+  cursor: grab;
+  touch-action: none;
+  min-width: 96px;
+  box-sizing: border-box;
+}
+
+.iw-skill.selected {
+  box-shadow: 0 0 0 3px #ffd23f;
+}
+
+.iw-name {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.iw-lv {
+  font-size: 11px;
+  color: #ffd23f;
+}
+
+.iw-req {
+  font-size: 10px;
+  color: #c88;
+}
+
+.iw-req.met {
+  color: #8c8;
+}
+
+.iw-ghost {
+  position: fixed;
+  z-index: 9;
+  transform: translate(-50%, -50%);
+  padding: 4px 8px;
+  border: 2px solid #ffd23f;
+  border-radius: 5px;
+  background: #24384c;
+  color: #fff;
+  font: bold 13px sans-serif;
+  pointer-events: none;
+}
+
+#stored-notice {
+  position: fixed;
+  left: 50%;
+  bottom: 18%;
+  transform: translateX(-50%);
+  z-index: 9;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font: 13px sans-serif;
+  border-radius: 6px;
+}
+
+#stored-notice button {
+  font-size: 13px;
+  padding: 4px 12px;
+}
+
 #rotate-hint {
   position: fixed;
   inset: 0;

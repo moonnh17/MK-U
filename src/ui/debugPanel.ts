@@ -36,6 +36,15 @@ export class DebugPanel {
     parent.appendChild(this.root);
   }
 
+  /** 접었다 펴는 구획을 붙인다 */
+  addSection(title: string, body: HTMLElement): void {
+    const det = document.createElement('details');
+    const sum = document.createElement('summary');
+    sum.textContent = title;
+    det.append(sum, body);
+    this.root.appendChild(det);
+  }
+
   setVisible(on: boolean): void {
     this.root.style.display = on ? 'block' : 'none';
   }

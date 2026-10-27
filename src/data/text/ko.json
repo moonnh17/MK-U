@@ -178,6 +178,7 @@
   "hud.ultimate": "궁",
   "hud.passive": "P",
   "hud.stage": "{chapter}-{stage}",
+  "hud.stored": "보관 {count}",
 
   "mobile.attack": "공격",
   "mobile.pickup": "줍기",

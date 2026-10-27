@@ -398,6 +398,8 @@ export interface UiData {
   /** 카메라 따라가기 보간(0~1) */
   cameraLerp: number;
   toastSec: number;
+  /** "인벤토리에 보관됨" 알림(교체 버튼) 표시 시간(초) */
+  storedNoticeSec: number;
   /** 에너지 부족 시 HUD 에너지 바를 빨갛게 표시하는 시간(초) */
   energyEmptyFlashSec: number;
   mobile: MobileLayoutData;

@@ -1,5 +1,7 @@
 import type { ButtonAction } from './actions';
 import type { UiMode } from '../input/uiMode';
+import type { Card } from '../systems/cards';
+import type { CardOfferKind, StatId } from '../types/data';
 
 /** 이벤트 이름 → 페이로드 */
 export interface GameEvents {
@@ -17,6 +19,29 @@ export interface GameEvents {
   overlay: { open: boolean };
   /** 화면의 '다시 시작' 버튼 */
   restartRequested: Record<string, never>;
+
+  /** 게임을 멈추는 창(카드 선택·인벤토리)이 열리거나 닫힘 */
+  modal: { kind: 'cards' | 'inventory' | null };
+  /** 카드 선택창에 카드를 띄운다 */
+  cardsShow: { titleKey: string; cards: Card[] };
+  /** 카드 선택창 → 이 카드를 골랐다 */
+  cardPick: { index: number };
+  /** 인벤토리 → 스킬을 칸에 넣는다 */
+  inventoryEquip: { skillId: string; target: number | 'passive' };
+  /** 인벤토리 열기 요청(보관 알림의 버튼) / 닫기 요청(닫기 버튼) */
+  inventoryOpenRequest: Record<string, never>;
+  inventoryCloseRequest: Record<string, never>;
+  /** 장착 상태가 바뀜 → 인벤토리 다시 그리기 */
+  inventoryChanged: Record<string, never>;
+  /** 새 스킬이 칸이 없어 보관됨 */
+  storedNotice: { skillId: string };
+
+  /** 디버그 패널 */
+  debugSetSkill: { skillId: string; level: number; awakened: boolean };
+  debugSetStat: { stat: StatId; value: number };
+  debugOpenCards: { kind: CardOfferKind };
+  debugFillUltimate: Record<string, never>;
+  debugSpawn: { enemyId: string; count: number };
 }
 
 type Handler<T> = (payload: T) => void;

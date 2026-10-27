@@ -5,22 +5,36 @@ import { DISABLED_ACTIONS } from '../core/features';
 import { hexColor } from '../core/scale';
 import type { RunSession } from '../core/session';
 import type { UiMode } from '../input/uiMode';
+import { storedSkills } from '../systems/skills';
 import { activeWeapon, otherWeapon } from '../systems/weapons';
 import { Minimap } from './minimap';
 
-const SKILLBAR: { action: ButtonAction | 'passive'; labelKey?: string; label?: string }[] = [
-  { action: 'skill1', label: '1' },
-  { action: 'skill2', label: '2' },
-  { action: 'skill3', label: '3' },
-  { action: 'skill4', label: '4' },
-  { action: 'ultimate', labelKey: 'hud.ultimate' },
-  { action: 'passive', labelKey: 'hud.passive' },
+/** 스킬바 칸 순서는 RunSession.skillView와 같다 (액티브 4 + 궁극기 + 패시브) */
+const SKILLBAR: { action: ButtonAction | 'passive'; keyLabel: string }[] = [
+  { action: 'skill1', keyLabel: '1' },
+  { action: 'skill2', keyLabel: '2' },
+  { action: 'skill3', keyLabel: '3' },
+  { action: 'skill4', keyLabel: '4' },
+  { action: 'ultimate', keyLabel: '5' },
+  { action: 'passive', keyLabel: 'P' },
 ];
 
 interface Bar {
   fill: Phaser.GameObjects.Rectangle;
   text: Phaser.GameObjects.Text;
   color: number;
+}
+
+interface SlotUi {
+  x: number;
+  y: number;
+  bg: Phaser.GameObjects.Rectangle;
+  label: Phaser.GameObjects.Text;
+  cd: Phaser.GameObjects.Graphics;
+  cdText: Phaser.GameObjects.Text;
+  dots: Phaser.GameObjects.Rectangle[];
+  star: Phaser.GameObjects.Text;
+  container: Phaser.GameObjects.Container;
 }
 
 /**
@@ -37,7 +51,8 @@ export class Hud {
   private readonly coinText: Phaser.GameObjects.Text;
   readonly minimap: Minimap;
   private readonly pcOnly: Phaser.GameObjects.Container;
-  private readonly slots = new Map<string, Phaser.GameObjects.Rectangle>();
+  private readonly slots: SlotUi[] = [];
+  private readonly storedBadge: Phaser.GameObjects.Text;
   private readonly mainWeaponText: Phaser.GameObjects.Text;
   private readonly mainCostText: Phaser.GameObjects.Text;
   private readonly subWeaponText: Phaser.GameObjects.Text;
@@ -82,19 +97,25 @@ export class Hud {
     const totalW = SKILLBAR.length * sb.slotSize + (SKILLBAR.length - 2) * sb.gap + sb.groupGap;
     let x = (W - totalW) / 2;
     const y = H - h.margin - sb.slotSize;
+    const size = sb.slotSize;
+    const small = h.fontSize - 3;
     SKILLBAR.forEach((slot, i) => {
       if (i === 4) x += sb.groupGap - sb.gap;
-      const rect = scene.add.rectangle(x, y, sb.slotSize, sb.slotSize, 0x000000, 0.5).setOrigin(0).setStrokeStyle(1, 0xffffff);
-      const label = text(x + 2, y + 1, slot.labelKey ? ctx.t(slot.labelKey) : (slot.label ?? ''));
-      const disabled = slot.action === 'passive' || DISABLED_ACTIONS.has(slot.action);
-      if (disabled) {
-        rect.setAlpha(sb.disabledAlpha);
-        label.setAlpha(sb.disabledAlpha);
-      }
-      this.slots.set(slot.action, rect);
-      this.pcOnly.add([rect, label]);
-      x += sb.slotSize + sb.gap;
+      const bg = scene.add.rectangle(0, 0, size, size, 0x000000, 0.5).setOrigin(0).setStrokeStyle(1, hexColor(sb.emptyColor));
+      const label = text(size / 2, size / 2 - 1, '', h.fontSize - 2).setOrigin(0.5);
+      const cd = scene.add.graphics();
+      const cdText = text(size / 2, size / 2 - 1, '', h.fontSize).setOrigin(0.5).setStroke('#000000', 2);
+      const key = text(1, 0, slot.keyLabel, small).setAlpha(0.7);
+      const star = text(size - 1, 0, '★', small).setOrigin(1, 0).setColor(sb.awakenedColor);
+      const dots = [0, 1, 2].map((k) => scene.add.rectangle(size / 2 - 5 + k * 4, size - 3, 3, 2, 0x333333).setOrigin(0));
+      const container = scene.add.container(x, y, [bg, label, cd, cdText, key, star, ...dots]);
+      if (DISABLED_ACTIONS.has(slot.action as ButtonAction)) container.setAlpha(sb.disabledAlpha);
+      this.slots.push({ x, y, bg, label, cd, cdText, dots, star, container });
+      this.pcOnly.add(container);
+      x += size + sb.gap;
     });
+    this.storedBadge = text(x + 2, y + size / 2, '', h.fontSize - 2).setOrigin(0, 0.5).setColor(sb.awakenedColor);
+    this.pcOnly.add(this.storedBadge);
 
     const wp = h.weapons;
     const mainX = W - h.margin - wp.mainWidth;
@@ -137,6 +158,54 @@ export class Hud {
     this.subWeaponText.setText(sub ? this.ctx.t(sub.nameKey) : '');
 
     this.minimap.render(s.map, s.visited, s.currentRoomId, this.ctx.debugFlags.revealMap);
+    if (this.pcOnly.visible) this.updateSkillbar(s);
+  }
+
+  private updateSkillbar(s: RunSession): void {
+    const sb = this.ctx.data.ui.hud.skillbar;
+    const size = sb.slotSize;
+    const ultIndex = 4;
+    s.skillView.forEach((v, i) => {
+      const ui = this.slots[i];
+      if (!ui) return;
+      const filled = v.skillId !== null;
+      const borderColor = !filled
+        ? sb.emptyColor
+        : i === ultIndex
+          ? v.usable
+            ? sb.ultimateReadyColor
+            : sb.emptyColor
+          : v.awakened
+            ? sb.awakenedColor
+            : (sb.levelColors[v.level - 1] ?? sb.emptyColor);
+      ui.bg.setStrokeStyle(v.awakened || (i === ultIndex && v.usable) ? 2 : 1, hexColor(borderColor));
+      ui.label.setText(v.label).setColor(filled ? '#ffffff' : '#666666');
+      ui.star.setVisible(v.awakened);
+      ui.dots.forEach((dot, k) => {
+        dot.setVisible(filled && i !== ultIndex);
+        dot.setFillStyle(k < v.level ? hexColor(sb.levelColors[v.level - 1] ?? sb.emptyColor) : 0x333333);
+      });
+
+      // 쿨타임: 위에서부터 시계 방향으로 줄어드는 원형 게이지 + 숫자 / 궁극기: 아래에서 차오르는 게이지
+      ui.cd.clear();
+      ui.cdText.setText('');
+      if (i === ultIndex) {
+        const hgt = Math.round(size * Math.min(1, v.gauge));
+        ui.cd.fillStyle(hexColor(v.color), 0.45);
+        ui.cd.fillRect(1, size - hgt, size - 2, hgt);
+      } else if (v.cooldownLeft > 0 && v.cooldownTotal > 0) {
+        const frac = Math.min(1, v.cooldownLeft / v.cooldownTotal);
+        const start = -Math.PI / 2;
+        ui.cd.fillStyle(hexColor(sb.cooldownColor), sb.cooldownAlpha);
+        ui.cd.slice(size / 2, size / 2, size / 2 - 1, start, start + frac * Math.PI * 2, false);
+        ui.cd.fillPath();
+        ui.cdText.setText(String(Math.ceil(v.cooldownLeft)));
+      }
+      ui.container.setAlpha(filled && !v.usable && i !== ultIndex ? sb.disabledAlpha : 1);
+    });
+    // 보관 중인 스킬이 있으면 스킬바 옆에 개수 배지
+    const stored = storedSkills(s.player.loadout).length;
+    this.storedBadge.setText(stored > 0 ? this.ctx.t('hud.stored', { count: stored }) : '');
   }
 
   applyMode(mode: UiMode, mobileBarsX: number | null, mobileMinimapY: number | null): void {
@@ -153,9 +222,10 @@ export class Hud {
 
   /** 명령 입력이 들어왔음을 슬롯 깜빡임으로 보여준다(확인용) */
   flash(action: ButtonAction): void {
-    const rect = this.slots.get(action);
-    if (!rect) return;
-    rect.setFillStyle(0xffffff, 0.6);
-    this.scene.time.delayedCall(120, () => rect.setFillStyle(0x000000, 0.5));
+    const i = SKILLBAR.findIndex((s) => s.action === action);
+    const bg = this.slots[i]?.bg;
+    if (!bg) return;
+    bg.setFillStyle(0xffffff, 0.6);
+    this.scene.time.delayedCall(120, () => bg.setFillStyle(0x000000, 0.5));
   }
 }

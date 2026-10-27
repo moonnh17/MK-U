@@ -60,6 +60,8 @@ export class TouchSource {
   private buttonPointers = new Map<number, TouchControlId>();
   /** pointerId → 누른 순간 정해진 명령 (공격 버튼이 '줍기'로 바뀐 경우 interact) */
   private pointerActions = new Map<number, ButtonAction>();
+  /** 한 프레임보다 짧은 탭도 놓치지 않게, 누른 명령은 다음 state()까지 한 번은 눌린 것으로 낸다 */
+  private latched = new Set<ButtonAction>();
   /** 공격 버튼을 대신할 명령. null이면 원래대로 attack */
   private attackOverride: ButtonAction | null = null;
   private readonly buttons = new Map<TouchControlId, HTMLDivElement>();
@@ -123,6 +125,11 @@ export class TouchSource {
     if (el) el.textContent = label;
   }
 
+  /** 버튼 DOM (스킬 버튼 위에 쿨타임·레벨을 그릴 때 사용) */
+  element(id: TouchControlId): HTMLDivElement | undefined {
+    return this.buttons.get(id);
+  }
+
   /** 현재 배치(HUD가 버튼을 피해서 그릴 때 사용) */
   currentLayout(): MobileLayout | null {
     return this.layout;
@@ -130,7 +137,8 @@ export class TouchSource {
 
   state(): InputSourceState {
     if (!this.active) return { move: { x: 0, y: 0 }, held: new Set() };
-    const held = new Set<ButtonAction>(this.pointerActions.values());
+    const held = new Set<ButtonAction>([...this.pointerActions.values(), ...this.latched]);
+    this.latched.clear();
     const move = this.joystick
       ? joystickVector(this.joystick.origin, this.joystick.point, this.cfg.joystick.radiusDp, this.cfg.joystick.deadZone)
       : { x: 0, y: 0 };
@@ -160,7 +168,9 @@ export class TouchSource {
     e.stopPropagation();
     capture(e.currentTarget as HTMLElement, e.pointerId);
     this.buttonPointers.set(e.pointerId, id);
-    this.pointerActions.set(e.pointerId, id === 'attack' && this.attackOverride ? this.attackOverride : id);
+    const action = id === 'attack' && this.attackOverride ? this.attackOverride : id;
+    this.pointerActions.set(e.pointerId, action);
+    this.latched.add(action);
     this.buttons.get(id)?.classList.add('pressed');
   }
 
@@ -195,6 +205,7 @@ export class TouchSource {
   private releaseAll(): void {
     this.buttonPointers.clear();
     this.pointerActions.clear();
+    this.latched.clear();
     for (const el of this.buttons.values()) el.classList.remove('pressed');
     this.joystick = null;
     this.hideJoystick();

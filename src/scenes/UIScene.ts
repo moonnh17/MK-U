@@ -3,7 +3,9 @@ import { getContext, type GameContext } from '../core/context';
 import { debugClearRoom, toggleDebugFlag } from '../core/debug';
 import { bus } from '../core/events';
 import { DebugPanel } from '../ui/debugPanel';
+import { buildDebugSkills } from '../ui/debugSkills';
 import { Hud } from '../ui/hud';
+import { TouchSkills } from '../ui/touchSkills';
 
 /** HUD·미니맵·알림·사망/클리어 화면·디버그 표시. Run 씬 위에 겹쳐 돈다. */
 export class UIScene extends Phaser.Scene {
@@ -13,6 +15,8 @@ export class UIScene extends Phaser.Scene {
   private overlay!: Phaser.GameObjects.Container;
   private overlayTitle!: Phaser.GameObjects.Text;
   private debugPanel!: DebugPanel;
+  private touchSkills!: TouchSkills;
+  private touchSkillLabels: string[] = [];
   private unsubs: (() => void)[] = [];
 
   constructor() {
@@ -51,7 +55,10 @@ export class UIScene extends Phaser.Scene {
         clearRoom: () => debugClearRoom(this.ctx),
       },
     );
+    this.debugPanel.addSection(this.ctx.t('debug.skills'), buildDebugSkills(this.ctx));
     this.debugPanel.setVisible(this.ctx.debug);
+    this.touchSkillLabels = ['1', '2', '3', '4', this.ctx.t('mobile.ultimate')];
+    this.touchSkills = new TouchSkills(this.ctx.touch, ui, this.touchSkillLabels);
 
     this.unsubs.push(
       bus.on('uiModeChanged', () => this.relayout()),
@@ -120,7 +127,10 @@ export class UIScene extends Phaser.Scene {
 
   override update(): void {
     const s = this.ctx.session;
-    if (s) this.hud.update(s, this.time.now);
+    if (s) {
+      this.hud.update(s, this.time.now);
+      if (this.ctx.uiMode === 'mobile') this.touchSkills.update(s.skillView, this.touchSkillLabels);
+    }
 
     if (this.ctx.debug) {
       this.debugPanel.setToggle('revealMap', this.ctx.debugFlags.revealMap);
@@ -132,8 +142,9 @@ export class UIScene extends Phaser.Scene {
           `${t('debug.seed')} ${this.ctx.config.seed}`,
           `${t('debug.room')} ${s?.currentRoomId ?? '-'}`,
           `${t('debug.enemies')} ${s?.enemiesAlive ?? 0}`,
-          `${t('debug.energy')} ${s?.player.energy ?? 0}`,
+          `${t('debug.energy')} ${Math.floor(s?.player.energy ?? 0)}`,
           `${t('debug.uiMode')} ${this.ctx.uiMode}`,
+          t('debug.schoolPicks', { hectar: s?.player.schoolPicks.hectar ?? 0, acro: s?.player.schoolPicks.acro ?? 0 }),
         ].join('  '),
       );
     }

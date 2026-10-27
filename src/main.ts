@@ -16,6 +16,8 @@ import { initialUiMode, nextUiMode, type UiMode } from './input/uiMode';
 import { BootScene } from './scenes/BootScene';
 import { RunScene } from './scenes/RunScene';
 import { UIScene } from './scenes/UIScene';
+import { CardWindow } from './ui/cardWindow';
+import { InventoryWindow } from './ui/inventoryWindow';
 import type { TouchControlId } from './ui/mobileLayout';
 
 const config = parseLaunchConfig(window.location.search, makeFallbackSeed());
@@ -86,7 +88,7 @@ const game = new Phaser.Game({
 
 function applyUiMode(mode: UiMode): void {
   ctx.uiMode = mode;
-  touch.setActive(mode === 'mobile' && !ctx.session?.outcome);
+  refreshTouch();
   game.scale.setZoom(zoomFor(mode));
   bus.emit('uiModeChanged', { mode });
 }
@@ -116,8 +118,20 @@ bus.on('interactHint', ({ kind }) => {
   else if (kind === 'core') touch.setAttackOverride('interact', t('mobile.interact'));
   else touch.setAttackOverride(null, t('mobile.attack'));
 });
-// 사망·클리어 화면에서는 터치 레이어를 걷어 '다시 시작' 버튼을 누를 수 있게 한다
-bus.on('overlay', ({ open }) => touch.setActive(!open && ctx.uiMode === 'mobile'));
+// 사망·클리어 화면, 카드 선택창·인벤토리가 떠 있으면 터치 레이어를 걷어 그 화면을 누를 수 있게 한다
+let overlayOpen = false;
+let modalOpen = false;
+const refreshTouch = () => touch.setActive(ctx.uiMode === 'mobile' && !overlayOpen && !modalOpen);
+bus.on('overlay', ({ open }) => {
+  overlayOpen = open;
+  refreshTouch();
+});
+bus.on('modal', ({ kind }) => {
+  modalOpen = kind !== null;
+  refreshTouch();
+});
+new CardWindow(ctx);
+new InventoryWindow(ctx);
 window.addEventListener('resize', () => game.scale.setZoom(zoomFor(ctx.uiMode)));
 
 applyUiMode(ctx.uiMode);

@@ -45,6 +45,7 @@
   "slashFxSec": 0.1,
   "cameraLerp": 0.18,
   "toastSec": 1.6,
+  "storedNoticeSec": 4,
   "energyEmptyFlashSec": 0.3,
   "mobile": {
     "edgeMarginDp": 16,
