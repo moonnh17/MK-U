@@ -115,6 +115,8 @@ export interface CardHolder {
   schoolPicks: Record<SchoolId, number>;
   /** 마지막으로 고른 스킬 카드의 계열 (전직 동점 처리) */
   lastPickSchool?: SchoolId | null;
+  /** 스탯 카드로 올린 양 (LSD-R) */
+  statInvest?: Record<StatId, number>;
 }
 
 export interface CardContext {
@@ -125,7 +127,11 @@ export interface CardContext {
 
 /** 카드를 적용한다. stored: 새 액티브·패시브가 칸이 없어 보관됨 */
 export function applyCard<T extends CardHolder>(h: T, card: Card, c: CardContext): { holder: T; stored: boolean } {
-  if (card.kind === 'stat') return { holder: addStat(h, card.stat, card.amount, c.baseMaxHp, c.stats), stored: false };
+  if (card.kind === 'stat') {
+    const holder = addStat(h, card.stat, card.amount, c.baseMaxHp, c.stats);
+    if (h.statInvest) holder.statInvest = { ...h.statInvest, [card.stat]: h.statInvest[card.stat] + card.amount };
+    return { holder, stored: false };
+  }
 
   const def = findSkill(c.skills, card.skillId);
   let loadout: SkillLoadout;
