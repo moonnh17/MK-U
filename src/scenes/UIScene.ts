@@ -12,8 +12,6 @@ export class UIScene extends Phaser.Scene {
   private ctx!: GameContext;
   private hud!: Hud;
   private toastText!: Phaser.GameObjects.Text;
-  private overlay!: Phaser.GameObjects.Container;
-  private overlayTitle!: Phaser.GameObjects.Text;
   private debugPanel!: DebugPanel;
   private touchSkills!: TouchSkills;
   private touchSkillLabels: string[] = [];
@@ -41,7 +39,6 @@ export class UIScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setVisible(false);
 
-    this.buildOverlay(W, H);
 
     this.debugPanel = new DebugPanel(
       document.body,
@@ -68,7 +65,6 @@ export class UIScene extends Phaser.Scene {
         if (action === 'map' && !this.ctx.session?.outcome) this.hud.toggleMinimap();
       }),
       bus.on('toast', ({ text }) => this.showToast(text)),
-      bus.on('overlay', ({ open }) => this.showOverlay(open)),
     );
     const onResize = () => this.relayout();
     window.addEventListener('resize', onResize);
@@ -76,41 +72,6 @@ export class UIScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.unsubs.forEach((u) => u()));
 
     this.relayout();
-  }
-
-  private buildOverlay(W: number, H: number): void {
-    const fs = this.ctx.data.ui.hud.fontSize;
-    const shade = this.add.rectangle(0, 0, W, H, 0x000000, 0.7).setOrigin(0);
-    this.overlayTitle = this.add
-      .text(W / 2, H * 0.38, '', { fontFamily: 'sans-serif', fontSize: `${fs * 2}px`, color: '#ffffff' })
-      .setOrigin(0.5);
-    const { width: btnW, height: btnH } = this.ctx.data.ui.hud.overlayButton;
-    const btn = this.add
-      .rectangle(W / 2, H * 0.58, btnW, btnH, 0x2a3a4a)
-      .setStrokeStyle(1, 0xffffff)
-      .setInteractive({ useHandCursor: true })
-      .on('pointerdown', () => bus.emit('restartRequested', {}));
-    const btnText = this.add
-      .text(W / 2, H * 0.58, this.ctx.t('screen.restart'), { fontFamily: 'sans-serif', fontSize: `${fs}px`, color: '#ffffff' })
-      .setOrigin(0.5);
-    const hint = this.add
-      .text(W / 2, H * 0.58 + btnH, this.ctx.t('screen.restartHint'), {
-        fontFamily: 'sans-serif',
-        fontSize: `${fs - 2}px`,
-        color: '#aaaaaa',
-      })
-      .setOrigin(0.5, 0);
-    this.overlay = this.add.container(0, 0, [shade, this.overlayTitle, btn, btnText, hint]).setDepth(10).setVisible(false);
-  }
-
-  private showOverlay(open: boolean): void {
-    const outcome = this.ctx.session?.outcome;
-    if (open && outcome) {
-      this.overlayTitle.setText(
-        outcome.type === 'dead' ? this.ctx.t('screen.death') : this.ctx.t('screen.chapterClear', { chapter: outcome.chapter }),
-      );
-    }
-    this.overlay.setVisible(open);
   }
 
   private showToast(text: string): void {

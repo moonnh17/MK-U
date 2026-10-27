@@ -17,6 +17,13 @@ export type CutIn =
   | { kind: 'ultimateAwakening'; from: CutIcon[]; to: CutIcon; flash: string }
   | { kind: 'advancement'; flash: string; emblem: CutIcon; broken: CutIcon[]; gains: (CutIcon & { plus: number })[] };
 
+/** 컷씬 하나: id(현재의 기억 등록) + 컷인 + 설명창 */
+export interface Cutscene {
+  id: string;
+  cut: CutIn;
+  pages: CutPage[];
+}
+
 export interface CutPage {
   title: string;
   lines: string[];
@@ -35,7 +42,7 @@ export function schoolColor(ctx: GameContext, school: SchoolId): string {
   return '#ffffff';
 }
 
-export function skillAwakeningCut(ctx: GameContext, skillId: string, stats: Record<string, number>): { cut: CutIn; pages: CutPage[] } {
+export function skillAwakeningCut(ctx: GameContext, skillId: string, stats: Record<string, number>): Cutscene {
   const t = ctx.t;
   const d = ctx.data;
   const def = findSkill(d.skills, skillId);
@@ -44,6 +51,7 @@ export function skillAwakeningCut(ctx: GameContext, skillId: string, stats: Reco
   const after = skillValues(def, { level: d.skills.maxLevel, awakened: true });
   const a = def.awakening;
   return {
+    id: `skill.${skillId}`,
     cut: { kind: 'skillAwakening', icon: { label: t(def.shortKey), color: def.color }, flash: color },
     pages: [
       {
@@ -59,7 +67,7 @@ export function skillAwakeningCut(ctx: GameContext, skillId: string, stats: Reco
   };
 }
 
-export function ultimateAwakeningCut(ctx: GameContext, ult: UltimateDef, awakenedSkills: string[], need: number): { cut: CutIn; pages: CutPage[] } {
+export function ultimateAwakeningCut(ctx: GameContext, ult: UltimateDef, awakenedSkills: string[], need: number): Cutscene {
   const t = ctx.t;
   const a = ult.awakening!;
   const icons = awakenedSkills.slice(0, need).map((id) => {
@@ -68,6 +76,7 @@ export function ultimateAwakeningCut(ctx: GameContext, ult: UltimateDef, awakene
   });
   const values = fmt({ ...ult.values, ...a.values });
   return {
+    id: `ultimate.${ult.id}`,
     cut: { kind: 'ultimateAwakening', from: icons, to: { label: t(a.shortKey), color: ult.color }, flash: ult.color },
     pages: [
       {
@@ -101,7 +110,7 @@ export function advancementCut(
     toUlt: UltimateDef;
     log: ConversionLog;
   },
-): { cut: CutIn; pages: CutPage[] } {
+): Cutscene {
   const t = ctx.t;
   const { adv, log } = args;
   const icon = (id: string) => {
@@ -112,6 +121,7 @@ export function advancementCut(
   for (const g of log.gains) plus.set(g.skillId, (plus.get(g.skillId) ?? 0) + 1);
   const advName = t(adv.nameKey);
   return {
+    id: `advancement.${args.adv.id}`,
     cut: {
       kind: 'advancement',
       flash: adv.color,

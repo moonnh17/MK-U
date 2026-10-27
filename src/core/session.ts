@@ -6,6 +6,7 @@ import { emptyLoadout, type Cooldowns, type SkillLoadout } from '../systems/skil
 import { initialSlots, plainWeapon, type WeaponSlots } from '../systems/weapons';
 import type { ItemState } from '../items/runtime';
 import type { ConversionLog } from '../systems/advancement';
+import { newRunRecord, type CrystalResult, type RunRecord } from '../systems/runRecord';
 import { STAT_IDS, type EncounterKindId, type GradeId, type JobId, type SchoolId, type StatId } from '../types/data';
 
 /** 스테이지를 넘어가도 유지되는 플레이어 상태 */
@@ -45,6 +46,8 @@ export interface PlayerState {
   statInvest: Record<StatId, number>;
   /** 이번 런에 나온 히든보스 (다시 나오지 않는다) */
   hiddenBossesMet: string[];
+  /** 결산용 런 기록 (스테이지를 넘어가도 유지) */
+  record: RunRecord;
 }
 
 export type RunOutcome = { type: 'dead' } | { type: 'chapterClear'; chapter: number };
@@ -94,6 +97,17 @@ export interface RunSession {
   buffs: BuffView[];
   /** 실제로 쓰는 스탯 (무기·아이템 보정 포함, 인벤토리 표시용. RunScene이 매 프레임 채운다) */
   effStats: Stats;
+  /** 런이 끝났을 때의 결산 (결정은 이미 저장에 더해져 있다) */
+  settlement: Settlement | null;
+}
+
+export interface Settlement {
+  runClear: boolean;
+  crystals: CrystalResult;
+  /** 더한 뒤 보유 결정 */
+  balance: number;
+  /** 지금까지 얻은 과거의 기억 조각 수 */
+  shardsOwned: number;
 }
 
 export function newPlayerState(data: GameData): PlayerState {
@@ -123,6 +137,7 @@ export function newPlayerState(data: GameData): PlayerState {
     itemState: {},
     lootShift: {},
     hiddenBossesMet: [],
+    record: newRunRecord(),
     statInvest: Object.fromEntries(STAT_IDS.map((s) => [s, 0])) as Record<StatId, number>,
   };
 }

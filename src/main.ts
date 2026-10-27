@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import './style.css';
 import { makeFallbackSeed, parseLaunchConfig } from './core/config';
 import { setContext } from './core/context';
+import { browserStore, SaveStore } from './core/save';
 import { debugClearRoom, toggleDebug, toggleDebugFlag } from './core/debug';
 import { bus } from './core/events';
 import { DISABLED_ACTIONS } from './core/features';
@@ -20,6 +21,7 @@ import { CardWindow } from './ui/cardWindow';
 import { CutsceneWindow } from './ui/cutsceneWindow';
 import { InventoryWindow } from './ui/inventoryWindow';
 import { ItemCard } from './ui/itemCard';
+import { SettlementWindow } from './ui/settlementWindow';
 import type { TouchControlId } from './ui/mobileLayout';
 
 const config = parseLaunchConfig(window.location.search, makeFallbackSeed());
@@ -68,6 +70,7 @@ const ctx = setContext({
   touch,
   uiMode: initialUiMode(config.ui, coarse),
   debug: config.debug,
+  save: new SaveStore(browserStore()),
 });
 
 // --- Phaser ---
@@ -139,6 +142,7 @@ new CardWindow(ctx);
 new InventoryWindow(ctx);
 new CutsceneWindow(ctx);
 new ItemCard(ctx);
+new SettlementWindow(ctx);
 window.addEventListener('resize', () => game.scale.setZoom(zoomFor(ctx.uiMode)));
 
 applyUiMode(ctx.uiMode);

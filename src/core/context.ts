@@ -3,6 +3,7 @@ import type { InputManager } from '../input/inputManager';
 import type { TouchSource } from '../input/touch';
 import type { UiMode } from '../input/uiMode';
 import type { LaunchConfig } from './config';
+import type { SaveStore } from './save';
 import type { DebugFlags, RunSession } from './session';
 import { formatText } from './text';
 
@@ -17,6 +18,8 @@ export interface GameContext {
   debugFlags: DebugFlags;
   /** 진행 중인 런 (RunScene이 만든다) */
   session: RunSession | null;
+  /** 영구 저장 (결정·강화·기억) */
+  save: SaveStore;
   t(key: string, vars?: Record<string, string | number>): string;
 }
 

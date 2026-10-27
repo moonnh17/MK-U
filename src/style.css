@@ -859,3 +859,140 @@ body {
   line-height: 1.4;
   color: #dde3ea;
 }
+
+/* 결산 화면 */
+#settlement {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  /* 넘치면 위가 잘리지 않고 위에서부터 스크롤 */
+  justify-content: safe center;
+  gap: 8px;
+  padding: 10px;
+  box-sizing: border-box;
+  background: rgba(5, 8, 12, 0.92);
+  color: #fff;
+  font-family: sans-serif;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+
+.st-title {
+  font-size: 12px;
+  color: #8a9aac;
+  letter-spacing: 4px;
+}
+
+.st-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.st-head b {
+  font-size: 24px;
+}
+
+.st-head span,
+.st-dim {
+  font-size: 11px;
+  color: #aab;
+}
+
+.st-body {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 96vw;
+}
+
+.st-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 300px;
+}
+
+.st-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+  padding: 6px 8px;
+  border: 1px solid #2a3a4a;
+  border-radius: 6px;
+  background: #0e151d;
+}
+
+.st-sub {
+  font-size: 11px;
+  color: #ffd23f;
+  font-weight: bold;
+}
+
+.st-bosses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.st-boss {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.st-face {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid #fff6;
+}
+
+.st-crystals {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.st-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.st-line.total {
+  border-top: 1px solid #4a5a6a;
+  padding-top: 3px;
+  font-weight: bold;
+  color: #7ae0ff;
+}
+
+.st-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.st-balance {
+  font-size: 12px;
+  color: #7ae0ff;
+  text-align: right;
+}
+
+.st-confirm {
+  font: bold 15px sans-serif;
+  padding: 6px 32px;
+  border-radius: 6px;
+  border: 2px solid #ffd23f;
+  background: #2a3a4a;
+  color: #fff;
+}
+
+#settlement.mobile .st-col {
+  width: 46vw;
+}

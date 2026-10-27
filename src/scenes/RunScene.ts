@@ -22,7 +22,7 @@ import { isSkillImplemented, passiveImpl, skillImpl, ultimateImpl } from '../ski
 import { applyCard, drawSkillCards, drawStatCards, runStartOffers, stageEndOffers, type AnyCard } from '../systems/cards';
 import { calcDamage, gradeMultiplier, spaceDamage, type RangeBonus, type Stats } from '../systems/damage';
 import { convertSkills, gaugeFromDamage, gaugeFromGreatSuccess, judgeSchool, skillAllowed, topSchools, ultimateAwakeningReady } from '../systems/advancement';
-import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type CutIn, type CutPage } from '../ui/cutscenePages';
+import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type Cutscene } from '../ui/cutscenePages';
 import { assignElites, eliteCount } from '../systems/elites';
 import { IMPLEMENTED_ENCOUNTERS } from '../systems/encounter';
 import { effectiveWeights, itemDamageMultiplier, readySet, rollItem, transferWeight } from '../systems/items';
@@ -31,6 +31,8 @@ import { lineHits } from '../systems/targeting';
 import { generateStage, type RoomNode } from '../systems/mapgen';
 import { encounterKinds, hiddenChapterMul, pickHiddenBoss } from '../systems/hiddenBoss';
 import { signatureFires, steerToward } from '../systems/motion';
+import { crystalBreakdown, rollShard } from '../systems/runRecord';
+import { registerCutscene } from '../core/save';
 import { inSpireCircle, spireEliteCount, spireItemChoices, type SpireEvent } from '../systems/spire';
 import { planCombatWaves, RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
 import { advanceStage, firstStage, type StageRef } from '../systems/run';
@@ -198,7 +200,7 @@ export class RunScene extends Phaser.Scene {
   private afterOffers: (() => void)[] = [];
   private currentCards: AnyCard[] | null = null;
   /** 컷인 → 설명창 대기열과 다 본 뒤 할 일 */
-  private cutQueue: { cut: CutIn; pages: CutPage[] }[] = [];
+  private cutQueue: Cutscene[] = [];
   private afterCuts: (() => void) | null = null;
   private cardSeq = 0;
   /** 포털을 탔다(카드를 고르는 동안 포털을 다시 밟지 않게) */
@@ -234,6 +236,7 @@ export class RunScene extends Phaser.Scene {
       buffs: [],
       encounters: new Map(),
       effStats: { ...(this.initData.player?.stats ?? newPlayerState(d).stats) },
+      settlement: null,
     };
     this.ctx.session = this.session;
     this.rng = Rng.derive(seed, `combat-${stage.chapter}-${stage.stage}`);
@@ -509,6 +512,7 @@ export class RunScene extends Phaser.Scene {
       this.refreshSkillView();
       return;
     }
+    this.session.player.record.playSec += dt;
 
     const p = this.session.player;
     const d = this.ctx.data;
@@ -1065,6 +1069,7 @@ export class RunScene extends Phaser.Scene {
         this.pickups.push(new Pickup(this, kind, x + Math.cos(a) * r, y + Math.sin(a) * r, d.pickups));
       }
     };
+    this.recordKill(e);
     drop('energy', this.rng.int(e.def.energyOrbs[0], e.def.energyOrbs[1]));
     drop('coin', this.rng.int(e.def.coins[0], e.def.coins[1]));
     if (e.elite) {
@@ -1672,7 +1677,7 @@ export class RunScene extends Phaser.Scene {
   // ---------- 연출 ----------
 
   /** 컷인 → 설명창을 차례로 보여 주고, 다 넘기면 then */
-  private playCutscenes(list: { cut: CutIn; pages: CutPage[] }[], then: () => void): void {
+  private playCutscenes(list: Cutscene[], then: () => void): void {
     if (list.length === 0) {
       then();
       return;
@@ -1691,12 +1696,18 @@ export class RunScene extends Phaser.Scene {
       f?.();
       return;
     }
+    // 현재의 기억: 처음 본 컷씬은 다시보기용으로 저장
+    const save = this.ctx.save;
+    if (registerCutscene(save.data, next.id, next.cut, next.pages)) {
+      this.session.player.record.newCutscenes.push(next.id);
+      save.write();
+    }
     this.setModal('cutscene');
     bus.emit('cutsceneShow', next);
   }
 
   /** 자기 학파 각성 2개면 궁극기를 자동 각성한다. 이번에 각성했으면 연출을 돌려준다 */
-  private checkUltimateAwakening(): { cut: CutIn; pages: CutPage[] } | null {
+  private checkUltimateAwakening(): Cutscene | null {
     const d = this.ctx.data;
     const p = this.session.player;
     const def = this.ultimateDef();
@@ -1855,6 +1866,33 @@ export class RunScene extends Phaser.Scene {
   private dropWeapon(item: WeaponItem, x: number, y: number): void {
     const def = this.weaponDefOf(item.defId);
     this.floorWeapons.push(new FloorWeapon(this, item, def.spriteKey, x, y, item.grade === 'common' ? null : this.gradeColor(item.grade)));
+  }
+
+  /** 결산 기록: 처치·엘리트·보스·히든보스, 보스는 과거의 기억 조각 판정 (분신 등 소환된 적은 세지 않는다) */
+  private recordKill(e: Enemy): void {
+    if (e.def.summon) return;
+    const r = this.session.player.record;
+    r.kills++;
+    if (e.elite) r.eliteKills++;
+    const { stage } = this.session;
+    let shardKind: 'boss' | 'hiddenBoss' | null = null;
+    if (e.rank === 'boss' && this.ctx.data.bosses.bosses.some((b) => b.id === e.def.id)) {
+      r.bossKills.push({ id: e.def.id, stage: stage.stage });
+      shardKind = 'boss';
+    } else if (e.rank === 'hiddenBoss') {
+      r.hiddenBossKills.push(e.def.id);
+      shardKind = 'hiddenBoss';
+    }
+    if (!shardKind) return;
+    const save = this.ctx.save;
+    const mem = this.ctx.data.meta.memory;
+    const rng = Rng.derive(this.ctx.config.seed, `shard-${stage.chapter}-${stage.stage}-${e.def.id}`);
+    if (!rollShard(rng, shardKind, save.data.pastShards, mem)) return;
+    // 과거의 기억: 얻는 즉시 영구 보관
+    save.data.pastShards++;
+    save.write();
+    r.shards++;
+    bus.emit('toast', { text: this.ctx.t('memory.shardGot', { have: save.data.pastShards, slots: mem.pastSlots }) });
   }
 
   /** 인벤토리에서 무기 버리기: 발밑에 떨어뜨린다 (마지막 무기를 버리면 맨손) */
@@ -2048,6 +2086,7 @@ export class RunScene extends Phaser.Scene {
         sp.rise();
       } else {
         this.setRoomLocked(sp.roomId, false);
+        this.session.player.record.spires++;
         this.offerSpireItems(sp);
       }
     }
@@ -2161,6 +2200,7 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     const { afterStage } = stageEndOffers(this.session.stage, d.mapgen, d.cards);
     const adv = advanceStage(this.session.stage, d.mapgen);
+    this.session.player.record.stagesCleared++;
     if (adv.type === 'stage') {
       const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [afterStage] };
       this.scene.restart(data);
@@ -2172,6 +2212,14 @@ export class RunScene extends Phaser.Scene {
 
   private endRun(outcome: NonNullable<RunSession['outcome']>): void {
     this.session.outcome = outcome;
+    // 결산: 결정을 계산해 바로 저장에 더한다 (결산 화면을 닫지 않고 꺼도 남게)
+    const d = this.ctx.data;
+    const save = this.ctx.save;
+    const runClear = outcome.type === 'chapterClear' && outcome.chapter >= d.mapgen.chapters;
+    const crystals = crystalBreakdown(this.session.player.record, runClear, d.meta.crystals);
+    save.data.crystals += crystals.total;
+    save.write();
+    this.session.settlement = { runClear, crystals, balance: save.data.crystals, shardsOwned: save.data.pastShards };
     this.physics.pause();
     this.player.setAlpha(1);
     if (outcome.type === 'dead') this.player.setTint(0x555555);
