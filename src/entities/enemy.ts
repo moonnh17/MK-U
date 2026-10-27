@@ -24,6 +24,10 @@ export class Enemy {
   /** 마지막 접촉 피해 시각(ms) */
   lastContactAt = -Infinity;
   dead = false;
+  /** 남은 무적(초). 보스 강화 단계 진입 연출 중 */
+  invuln = 0;
+  /** 보스 거대화 등 추가 크기 배율 */
+  private extraScale = 1;
   /** 반역 개체가 되어 사라졌다(폭발 엘리트도 터지지 않음) */
   converted = false;
   /** 걸려 있는 출혈 */
@@ -75,7 +79,12 @@ export class Enemy {
   }
 
   get radius(): number {
-    return (this.def.size * this.mods.scale) / 2;
+    return (this.def.size * this.mods.scale * this.extraScale) / 2;
+  }
+
+  setExtraScale(k: number): void {
+    this.extraScale = k;
+    this.sprite.setScale(this.mods.scale * k);
   }
 
   /** 등급 판정용 (엘리트가 붙으면 '엘리트') */
@@ -86,6 +95,10 @@ export class Enemy {
   update(dt: number, host: HazardHost): void {
     if (this.dead) return;
     this.updateLook(dt);
+    if (this.invuln > 0) {
+      this.invuln -= dt;
+      this.sprite.setAlpha(this.invuln > 0 ? 0.5 + 0.5 * Math.abs(Math.sin(this.invuln * 20)) : 1);
+    }
     if (this.warn > 0) {
       this.warn -= dt;
       if (this.warn <= 0) this.sprite.setAlpha(1);
@@ -100,6 +113,8 @@ export class Enemy {
       this.sprite.setVelocity(0, 0);
       return;
     }
+    // 보스는 bosses/의 컨트롤러가 움직인다
+    if (this.def.ai === 'boss') return;
     const r = stepAi(this.ai, dt, dist, this.attacks, this.mods.attackSpeedMul);
     this.ai = r.state;
     for (const e of r.events) this.onEvent(e, host, dist > 0 ? { x: dx / dist, y: dy / dist } : this.aim, dist);

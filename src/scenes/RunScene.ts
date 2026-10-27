@@ -7,6 +7,8 @@ import { DISABLED_ACTIONS } from '../core/features';
 import { Rng } from '../core/rng';
 import { hexColor } from '../core/scale';
 import { newPlayerState, type BuffView, type PlayerState, type RunSession, type SkillSlotView } from '../core/session';
+import { BossController } from '../bosses/bossController';
+import type { BossHost } from '../bosses/host';
 import { Door } from '../entities/door';
 import { Enemy } from '../entities/enemy';
 import { DelayedBlast, type Hazard, type HazardHost } from '../entities/hazard';
@@ -114,6 +116,9 @@ export class RunScene extends Phaser.Scene {
   /** 적 쪽 위험 지대(폭발 엘리트 지연 폭발 등) */
   private hazards: Hazard[] = [];
   private enemyHost!: HazardHost;
+  private bossHost!: BossHost;
+  /** 보스 적 → 패턴 컨트롤러 */
+  private bossControllers = new Map<Enemy, BossController>();
   /** 마기역장 보호막 */
   private shield: ShieldState | null = null;
   private shieldOpts: ShieldOpts | null = null;
@@ -181,6 +186,18 @@ export class RunScene extends Phaser.Scene {
       playerRadius: d.player.size / 2,
       hurtPlayer: (amount) => this.hurtPlayer(amount),
     };
+    this.bossHost = {
+      ...this.enemyHost,
+      rng: this.rng,
+      t: (key) => this.ctx.t(key),
+      addHazard: (h) => this.hazards.push(h),
+      fireEnemyBullet: (from, angle, speed, range, damage, refractable) =>
+        this.fireEnemyBullet(from, angle, speed, range, damage, refractable),
+      arena: () => {
+        const rid = this.session.currentRoomId ?? this.session.map.startId;
+        return interiorRect(this.session.map.rooms[rid]!, this.m);
+      },
+    };
 
     this.walls = this.physics.add.staticGroup();
     this.doorGroup = this.physics.add.staticGroup();
@@ -232,6 +249,9 @@ export class RunScene extends Phaser.Scene {
       }),
       bus.on('debugSpawn', ({ enemyId, count, elite }) => this.debugSpawn(enemyId, count, elite ?? null)),
       bus.on('debugBarrage', () => this.debugBarrage()),
+      bus.on('debugBossHp', ({ ratio }) => {
+        for (const e of this.enemies) if (e.def.rank === 'boss') e.hp = Math.max(1, e.maxHp * ratio);
+      }),
     );
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.unsubs.forEach((u) => u());
@@ -240,6 +260,8 @@ export class RunScene extends Phaser.Scene {
       this.skillObjects = [];
       for (const h of this.hazards) h.destroy();
       this.hazards = [];
+      for (const b of this.bossControllers.values()) b.destroy();
+      this.bossControllers = new Map();
     });
     this.setInteractHint(null);
     this.refreshSkillView();
@@ -260,6 +282,7 @@ export class RunScene extends Phaser.Scene {
     this.cores = [];
     this.skillObjects = [];
     this.hazards = [];
+    this.bossControllers = new Map();
     this.shield = null;
     this.shieldOpts = null;
     this.shieldFx = null;
@@ -311,7 +334,7 @@ export class RunScene extends Phaser.Scene {
         node.id,
         node.kind,
         d.mapgen.combatWaves,
-        d.mapgen.bossPlaceholderEnemy,
+        d.bosses.bosses.find((b) => b.chapter === map.chapter && b.stage === map.stage)?.id ?? d.mapgen.bossPlaceholderEnemy,
         d.waves,
       );
       this.rooms.set(node.id, new RoomState(node.kind, waves, d.waves.waveDelaySec));
@@ -388,6 +411,7 @@ export class RunScene extends Phaser.Scene {
     this.updateRooms(dt);
 
     for (const e of this.enemies) e.update(dt, this.enemyHost);
+    for (const b of this.bossControllers.values()) b.update(dt, this.bossHost);
     for (const h of [...this.hazards]) {
       if (h.update(dt, this.enemyHost)) continue;
       h.destroy();
@@ -451,7 +475,11 @@ export class RunScene extends Phaser.Scene {
       const state = this.rooms.get(rid)!;
       const inner = interiorRect(map.rooms[rid]!, this.m, this.ctx.data.mapgen.lockInsetPx);
       if (state.phase === 'idle' && contains(inner, this.player.x, this.player.y)) {
-        this.handleRoomEvents(rid, state.enter());
+        // 보스방: 경고 배너를 띄우고 그동안 보스 소환을 미룬다
+        const boss = state.kind === 'bossRoom' ? state.waves[0]?.[0] : undefined;
+        const bossDef = boss ? this.ctx.data.enemies.enemies.find((e) => e.id === boss) : undefined;
+        if (bossDef) this.showBossWarning(this.ctx.t(bossDef.nameKey));
+        this.handleRoomEvents(rid, state.enter(bossDef ? this.ctx.data.bosses.bannerSec : 0));
       }
     }
     for (const [id, state] of this.rooms) {
@@ -512,6 +540,8 @@ export class RunScene extends Phaser.Scene {
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
     this.enemies.push(enemy);
     if (countForRoom) this.enemyRoom.set(enemy, roomId);
+    const bossDef = def.ai === 'boss' ? d.bosses.bosses.find((b) => b.id === def.id) : undefined;
+    if (bossDef) this.bossControllers.set(enemy, new BossController(enemy, bossDef));
   }
 
   private spawnPoint(node: RoomNode, rng: Rng, radius: number): Vec2 {
@@ -558,6 +588,8 @@ export class RunScene extends Phaser.Scene {
   /** 계산이 끝난 피해를 넣는다. 환원주의자 등에게 알리고, 죽였으면 true */
   private applyDamage(enemy: Enemy, dmg: number): boolean {
     if (enemy.dead) return false;
+    // 보스 강화 단계 진입 중 무적
+    if (enemy.invuln > 0) return false;
     dmg *= enemy.mods.damageTakenMul;
     const dealt = Math.min(Math.max(0, enemy.hp), dmg);
     const killed = enemy.damage(dmg);
@@ -692,6 +724,8 @@ export class RunScene extends Phaser.Scene {
   }
 
   private removeEnemy(e: Enemy): void {
+    this.bossControllers.get(e)?.destroy();
+    this.bossControllers.delete(e);
     this.enemies = this.enemies.filter((x) => x !== e);
     this.enemyRoom.delete(e);
     e.destroy();
@@ -753,6 +787,33 @@ export class RunScene extends Phaser.Scene {
       const dist = Math.hypot(b.x - (b.getData('ox') as number), b.y - (b.getData('oy') as number));
       if (dist > (b.getData('range') as number)) b.destroy();
     }
+    for (const b of this.enemyBullets.getChildren() as Phaser.Physics.Arcade.Image[]) {
+      const range = b.getData('range') as number | undefined;
+      if (range !== undefined && Math.hypot(b.x - (b.getData('ox') as number), b.y - (b.getData('oy') as number)) > range) b.destroy();
+    }
+  }
+
+  /** 적 탄. refractable=false면 굴절·탄 베기 불가(보스 대형 레이저 등) */
+  private fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean): void {
+    const b = this.enemyBullets.create(from.x, from.y, this.ctx.data.enemies.projectile.spriteKey) as Phaser.Physics.Arcade.Image;
+    b.setDepth(5);
+    b.setData({ damage, refractable, cuttable: refractable, range, ox: from.x, oy: from.y });
+    b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
+  }
+
+  /** 보스방 경고: 화면 가운데 WARNING + 보스 이름 */
+  private showBossWarning(name: string): void {
+    const cam = this.cameras.main;
+    const sec = this.ctx.data.bosses.bannerSec;
+    const style = { fontFamily: 'sans-serif', color: '#ff4a4a', stroke: '#000000', strokeThickness: 3 };
+    const head = this.add.text(cam.width / 2, cam.height / 2 - 10, this.ctx.t('boss.warning'), { ...style, fontSize: '20px' });
+    const sub = this.add.text(cam.width / 2, cam.height / 2 + 12, name, { ...style, fontSize: '12px', color: '#ffffff' });
+    for (const t of [head, sub]) {
+      t.setOrigin(0.5).setScrollFactor(0).setDepth(20);
+      this.tweens.add({ targets: t, alpha: 0.3, duration: 250, yoyo: true, repeat: Math.max(0, Math.round((sec * 1000) / 500) - 1) });
+      this.time.delayedCall(sec * 1000, () => t.destroy());
+    }
+    cam.shake(sec * 1000, 0.002);
   }
 
   private updatePickups(dt: number): void {

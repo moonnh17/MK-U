@@ -111,6 +111,16 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
       button(t('debug.barrage'), () => bus.emit('debugBarrage', {})),
     ),
   );
+  const bossHpInput = document.createElement('input');
+  bossHpInput.type = 'number';
+  bossHpInput.value = '51';
+  bossHpInput.style.width = '40px';
+  body.appendChild(
+    row(
+      bossHpInput,
+      button(t('debug.bossHp'), () => bus.emit('debugBossHp', { ratio: Math.max(1, Math.min(100, Number(bossHpInput.value) || 100)) / 100 })),
+    ),
+  );
   // 입력칸에서 친 키가 게임 조작(WASD 등)으로 새지 않게
   body.addEventListener('keydown', (e) => e.stopPropagation());
   return body;

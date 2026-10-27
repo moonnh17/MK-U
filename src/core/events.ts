@@ -43,6 +43,8 @@ export interface GameEvents {
   debugFillUltimate: Record<string, never>;
   debugSpawn: { enemyId: string; count: number; elite?: string | null };
   debugBarrage: Record<string, never>;
+  /** 보스 체력을 최대 체력의 ratio로 */
+  debugBossHp: { ratio: number };
 }
 
 type Handler<T> = (payload: T) => void;
