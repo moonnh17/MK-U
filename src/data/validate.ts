@@ -191,6 +191,11 @@ export function validateGameData(d: GameData): Errors {
     checkRange(errors, `${w}.coins`, e.coins);
   }
 
+  checkSprite(errors, 'enemies.projectile', d.enemies.projectile);
+  for (const k of ['count', 'distance', 'speed', 'damage'] as const) {
+    checkPositive(errors, `enemies.debugBarrage.${k}`, d.enemies.debugBarrage?.[k]);
+  }
+
   // --- 맵 생성 ---
   const m = d.mapgen;
   checkPositive(errors, 'mapgen.chapters', m.chapters);
@@ -270,6 +275,9 @@ export function validateGameData(d: GameData): Errors {
   };
   checkPositive(errors, 'skills.activeSlots', d.skills.activeSlots);
   checkPositive(errors, 'skills.maxLevel', d.skills.maxLevel);
+  for (const rank of ['normal', 'elite', 'champion', 'boss', 'hiddenBoss'] as const) {
+    checkPositive(errors, `skills.targetWeights.${rank}`, d.skills.targetWeights?.[rank]);
+  }
   checkUnique(errors, 'skills', d.skills.skills.map((s) => s.id));
   for (const s of d.skills.skills) {
     const w = `skills.${s.id}`;

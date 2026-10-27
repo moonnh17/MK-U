@@ -224,6 +224,10 @@ export interface EnemyDef extends SpriteRef {
 }
 
 export interface EnemiesData {
+  /** 적 투사체 모양 (적 공격 패턴은 M3) */
+  projectile: SpriteRef;
+  /** 디버그 '적 탄막': 플레이어 주위에서 플레이어를 향해 일반 탄을 쏜다(벡터굴절역장 확인용) */
+  debugBarrage: { count: number; distance: number; speed: number; damage: number };
   enemies: EnemyDef[];
 }
 
@@ -459,6 +463,8 @@ export interface SkillsData {
   activeSlots: number;
   /** 최대 레벨 (기획서: 3) */
   maxLevel: number;
+  /** 강적·보스 우선 조준(다연장반입자포·군집지성)에 쓰는 등급별 가중치 */
+  targetWeights: Record<EnemyRank, number>;
   skills: SkillDef[];
 }
 

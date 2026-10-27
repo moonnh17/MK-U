@@ -1,6 +1,7 @@
 {
   "activeSlots": 4,
   "maxLevel": 3,
+  "targetWeights": { "normal": 1, "elite": 3, "champion": 4, "boss": 6, "hiddenBoss": 6 },
   "skills": [
     {
       "id": "magiTurret",
@@ -60,7 +61,11 @@
       "descKey": "skill.magiMine.desc",
       "tags": ["tech", "ranged"],
       "sources": { "mine": ["tech", "ranged"], "chainMine": ["tech", "magic", "ranged"] },
-      "levels": [{ "cooldownSec": 8, "values": {} }, { "cooldownSec": 7, "values": {} }, { "cooldownSec": 6, "values": {} }],
+      "levels": [
+        { "cooldownSec": 8, "values": { "count": 3, "damage": 12, "radius": 22, "scatterRadius": 36, "throwSec": 0.25, "armSec": 0.4, "triggerRadius": 10, "maxMines": 15 } },
+        { "cooldownSec": 7, "values": { "count": 4, "damage": 14, "radius": 22, "scatterRadius": 38, "throwSec": 0.25, "armSec": 0.4, "triggerRadius": 10, "maxMines": 15 } },
+        { "cooldownSec": 6, "values": { "count": 5, "damage": 16, "radius": 24, "scatterRadius": 40, "throwSec": 0.25, "armSec": 0.4, "triggerRadius": 10, "maxMines": 15 } }
+      ],
       "awakening": {
         "nameKey": "skill.magiMine.awakened",
         "descKey": "skill.magiMine.awakened.desc",
@@ -68,10 +73,13 @@
         "requiredValue": 20,
         "tags": ["tech", "magic", "ranged"],
         "cooldownSec": 6,
-        "values": {}
+        "values": { "count": 6, "damage": 18, "radius": 26, "scatterRadius": 42, "chainArmSec": 0.2, "maxMines": 24 }
       },
       "color": "#d9a03b",
-      "sprites": {}
+      "sprites": {
+        "mine": { "spriteKey": "skill_mine", "color": "#d9a03b", "size": 5 },
+        "chainMine": { "spriteKey": "skill_mine_chain", "color": "#ff6ad9", "size": 5 }
+      }
     },
     {
       "id": "antimatterCannon",
@@ -83,7 +91,11 @@
       "descKey": "skill.antimatterCannon.desc",
       "tags": ["tech", "ranged", "charging"],
       "sources": { "blast": ["tech", "ranged", "charging"] },
-      "levels": [{ "cooldownSec": 10, "values": {} }, { "cooldownSec": 9, "values": {} }, { "cooldownSec": 8, "values": {} }],
+      "levels": [
+        { "cooldownSec": 10, "values": { "chargeSec": 1.2, "damage": 40, "radius": 36, "projectileSpeed": 200, "range": 260 } },
+        { "cooldownSec": 9, "values": { "chargeSec": 1.1, "damage": 55, "radius": 40, "projectileSpeed": 200, "range": 260 } },
+        { "cooldownSec": 8, "values": { "chargeSec": 1.0, "damage": 70, "radius": 44, "projectileSpeed": 200, "range": 260 } }
+      ],
       "awakening": {
         "nameKey": "skill.antimatterCannon.awakened",
         "descKey": "skill.antimatterCannon.awakened.desc",
@@ -91,10 +103,13 @@
         "requiredValue": 20,
         "tags": ["tech", "ranged", "charging"],
         "cooldownSec": 8,
-        "values": {}
+        "values": { "chargeSec": 1.0, "barrels": 4, "barrelIntervalSec": 0.2, "damage": 40, "radius": 34, "projectileSpeed": 240, "range": 280, "clusterRadius": 40 }
       },
       "color": "#a05ad9",
-      "sprites": {}
+      "sprites": {
+        "charge": { "spriteKey": "skill_antimatter_charge", "color": "#c98aff", "size": 4 },
+        "shell": { "spriteKey": "skill_antimatter_shell", "color": "#a05ad9", "size": 9 }
+      }
     },
     {
       "id": "magiField",
@@ -106,7 +121,11 @@
       "descKey": "skill.magiField.desc",
       "tags": ["buff"],
       "sources": {},
-      "levels": [{ "cooldownSec": 12, "values": {} }, { "cooldownSec": 10, "values": {} }, { "cooldownSec": 8, "values": {} }],
+      "levels": [
+        { "cooldownSec": 12, "values": { "hits": 1, "durationSec": 6, "blockInvulnSec": 0.5, "fxRadius": 12 } },
+        { "cooldownSec": 10, "values": { "hits": 1, "durationSec": 7, "blockInvulnSec": 0.5, "fxRadius": 12 } },
+        { "cooldownSec": 8, "values": { "hits": 1, "durationSec": 8, "blockInvulnSec": 0.5, "fxRadius": 12 } }
+      ],
       "awakening": {
         "nameKey": "skill.magiField.awakened",
         "descKey": "skill.magiField.awakened.desc",
@@ -114,7 +133,7 @@
         "requiredValue": 20,
         "tags": [],
         "cooldownSec": 8,
-        "values": {}
+        "values": { "hits": 1, "durationSec": 8, "refractRadius": 30, "fxRadius": 30 }
       },
       "color": "#8aa4c8",
       "sprites": {}
@@ -128,8 +147,12 @@
       "shortKey": "skill.railgun.short",
       "descKey": "skill.railgun.desc",
       "tags": ["tech", "ranged"],
-      "sources": { "rail": ["tech", "ranged"], "wave": ["tech", "ranged"] },
-      "levels": [{ "cooldownSec": 6, "values": {} }, { "cooldownSec": 5.5, "values": {} }, { "cooldownSec": 5, "values": {} }],
+      "sources": { "rail": ["tech", "ranged"], "wave": ["tech", "ranged"], "chain": ["tech", "ranged"] },
+      "levels": [
+        { "cooldownSec": 6, "values": { "damage": 20, "length": 300, "halfWidth": 4 } },
+        { "cooldownSec": 5.5, "values": { "damage": 28, "length": 300, "halfWidth": 4 } },
+        { "cooldownSec": 5, "values": { "damage": 36, "length": 320, "halfWidth": 5 } }
+      ],
       "awakening": {
         "nameKey": "skill.railgun.awakened",
         "descKey": "skill.railgun.awakened.desc",
@@ -137,7 +160,7 @@
         "requiredValue": 20,
         "tags": ["tech", "ranged"],
         "cooldownSec": 5,
-        "values": {}
+        "values": { "damage": 40, "length": 340, "halfWidth": 6, "waveDamage": 10, "waveRadius": 20, "chainCount": 2, "chainRange": 90, "chainDamage": 24 }
       },
       "color": "#3ba7d9",
       "sprites": {}
@@ -152,7 +175,11 @@
       "descKey": "skill.combatDrone.desc",
       "tags": ["tech", "ranged"],
       "sources": { "droneShot": ["tech", "ranged"] },
-      "levels": [{ "cooldownSec": 0, "values": {} }, { "cooldownSec": 0, "values": {} }, { "cooldownSec": 0, "values": {} }],
+      "levels": [
+        { "cooldownSec": 0, "values": { "count": 1, "damage": 3, "fireIntervalSec": 0.8, "range": 120, "projectileSpeed": 260, "orbitRadius": 18, "orbitSpeed": 2.5 } },
+        { "cooldownSec": 0, "values": { "count": 2, "damage": 3, "fireIntervalSec": 0.75, "range": 120, "projectileSpeed": 260, "orbitRadius": 20, "orbitSpeed": 2.5 } },
+        { "cooldownSec": 0, "values": { "count": 3, "damage": 3.5, "fireIntervalSec": 0.7, "range": 130, "projectileSpeed": 260, "orbitRadius": 22, "orbitSpeed": 2.5 } }
+      ],
       "awakening": {
         "nameKey": "skill.combatDrone.awakened",
         "descKey": "skill.combatDrone.awakened.desc",
@@ -160,10 +187,12 @@
         "requiredValue": 20,
         "tags": ["tech", "ranged"],
         "cooldownSec": 0,
-        "values": {}
+        "values": { "count": 4, "damage": 4, "fireIntervalSec": 0.5, "range": 140, "moveSpeed": 130, "standoff": 36, "searchRange": 220 }
       },
       "color": "#5ad9c0",
-      "sprites": {}
+      "sprites": {
+        "drone": { "spriteKey": "skill_drone", "color": "#5ad9c0", "size": 5 }
+      }
     },
     {
       "id": "unstableSubject",

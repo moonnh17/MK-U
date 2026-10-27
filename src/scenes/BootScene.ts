@@ -16,6 +16,7 @@ export class BootScene extends Phaser.Scene {
       data.weapons.projectile,
       ...data.weapons.weapons,
       ...data.enemies.enemies,
+      data.enemies.projectile,
       data.pickups.energyOrb,
       data.pickups.coin,
       data.mapgen.props.exitPortal,

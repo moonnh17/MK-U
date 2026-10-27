@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { gameData, type GameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
+import { isSkillImplemented } from '../src/skills/registry';
 import { TAG_IDS } from '../src/types/data';
 
 const clone = (): GameData => structuredClone(gameData);
@@ -95,6 +96,27 @@ describe('데이터 검증', () => {
       expect(skill('antimatterCannon').tags).toContain('charging');
       expect(skill('railgun').tags).not.toContain('charging');
       expect(skill('magiField').awakening.tags).toEqual([]);
+      expect(skill('magiField').tags).toEqual(['buff']);
+      // 무한연쇄기폭: 기술·마기·원거리
+      expect(skill('magiMine').awakening.tags).toEqual(['tech', 'magic', 'ranged']);
+      expect(skill('magiMine').sources.chainMine).toEqual(['tech', 'magic', 'ranged']);
+      expect(skill('combatDrone').sources.droneShot).toEqual(['tech', 'ranged']);
+    });
+
+    it('카드로 나오는 스킬은 레벨·각성 수치가 채워져 있다', () => {
+      for (const id of gameData.skills.skills.map((x) => x.id).filter(isSkillImplemented)) {
+        const s = skill(id);
+        s.levels.forEach((lv) => expect(Object.keys(lv.values).length, `${id} 레벨 수치`).toBeGreaterThan(0));
+        expect(Object.keys(s.awakening.values).length, `${id} 각성 수치`).toBeGreaterThan(0);
+      }
+    });
+
+    it('레벨이 오르면 지뢰 수·드론 수가 늘고 역장 쿨타임이 준다', () => {
+      const v = (id: string, k: string) => skill(id).levels.map((lv) => lv.values[k]!);
+      expect(v('magiMine', 'count')).toEqual([...v('magiMine', 'count')].sort((a, b) => a - b));
+      expect(new Set(v('combatDrone', 'count')).size).toBe(3);
+      const cds = skill('magiField').levels.map((lv) => lv.cooldownSec);
+      expect(cds[0]).toBeGreaterThan(cds[2]!);
     });
 
     it('기본 궁극기는 열역학 제1법칙(기술·원거리)', () => {

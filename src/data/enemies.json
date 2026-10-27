@@ -1,4 +1,6 @@
 {
+  "projectile": { "spriteKey": "enemy_bullet", "color": "#ff5a5a", "size": 4 },
+  "debugBarrage": { "count": 12, "distance": 90, "speed": 90, "damage": 5 },
   "enemies": [
     {
       "id": "tomakki",
