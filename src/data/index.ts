@@ -3,6 +3,7 @@
  * 형태 검증은 validate.ts(테스트와 개발 모드 부팅 시 실행)가 맡는다.
  */
 import type {
+  BossesData,
   ElitesData,
   EnemiesData,
   GroupMultipliersData,
@@ -27,6 +28,7 @@ import groupMultipliersJson from './groupMultipliers.json';
 import weaponsJson from './weapons.json';
 import enemiesJson from './enemies.json';
 import elitesJson from './elites.json';
+import bossesJson from './bosses.json';
 import mapgenJson from './mapgen.json';
 import wavesJson from './waves.json';
 import playerJson from './player.json';
@@ -45,6 +47,7 @@ export interface GameData {
   weapons: WeaponsData;
   enemies: EnemiesData;
   elites: ElitesData;
+  bosses: BossesData;
   mapgen: MapgenData;
   waves: WavesData;
   player: PlayerData;
@@ -65,6 +68,7 @@ export const gameData: GameData = {
   weapons: weaponsJson as unknown as WeaponsData,
   enemies: enemiesJson as unknown as EnemiesData,
   elites: elitesJson as unknown as ElitesData,
+  bosses: bossesJson as unknown as BossesData,
   mapgen: mapgenJson as unknown as MapgenData,
   waves: wavesJson as unknown as WavesData,
   player: playerJson as unknown as PlayerData,

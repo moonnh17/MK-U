@@ -57,6 +57,37 @@
       "size": 15
     },
     {
+      "id": "fusionAkgwi",
+      "nameKey": "enemy.fusionAkgwi",
+      "chapter": 1,
+      "rank": "boss",
+      "ai": "boss",
+      "maxHp": 900,
+      "moveSpeed": 40,
+      "contactDamage": 10,
+      "contactIntervalSec": 1.0,
+      "energyOrbs": [8, 10],
+      "coins": [8, 12],
+      "spriteKey": "enemy_fusion_akgwi",
+      "color": "#7a1f3a",
+      "size": 26
+    },
+    {
+      "id": "electricRing",
+      "nameKey": "enemy.electricRing",
+      "chapter": 1,
+      "rank": "boss",
+      "ai": "boss",
+      "maxHp": 1400,
+      "moveSpeed": 30,
+      "contactDamage": 10,
+      "contactIntervalSec": 1.0,
+      "energyOrbs": [10, 12],
+      "coins": [10, 14],
+      "spriteKey": "enemy_electric_ring",
+      "color": "#3a9ad9",
+      "size": 28
+    },    {
       "id": "trainingDummy",
       "nameKey": "enemy.trainingDummy",
       "chapter": 1,

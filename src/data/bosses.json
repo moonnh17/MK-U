@@ -1,0 +1,53 @@
+{
+  "bannerSec": 1.5,
+  "bosses": [
+    {
+      "id": "fusionAkgwi",
+      "chapter": 1,
+      "stage": 2,
+      "enrageAt": 0.5,
+      "gapSec": 0.7,
+      "enrageSec": 1.2,
+      "firstDelaySec": 1,
+      "keepDistance": 30,
+      "enraged": { "moveSpeedMul": 1.5, "scale": 1, "auraColor": "#ff3a3a" },
+      "patterns": [
+        { "id": "claw", "weight": 3, "cooldownSec": 2.5, "durationSec": 1.5, "phase": 1, "maxRange": 80,
+          "values": { "windupSec": 0.5, "secondDelaySec": 0.45, "radius": 46, "arcDeg": 100, "damage": 14 } },
+        { "id": "spiritDash", "weight": 2, "cooldownSec": 5, "durationSec": 1.7, "phase": 1,
+          "values": { "windupSec": 0.6, "length": 220, "speed": 300, "speedEnraged": 400, "damage": 14, "trailEvery": 14, "trailRadius": 10, "trailSec": 3, "trailDamage": 6, "trailTickSec": 0.5 } },
+        { "id": "eruption", "weight": 2, "cooldownSec": 4, "durationSec": 1.6, "phase": 1,
+          "values": { "volleys": 3, "volleysEnraged": 4, "intervalSec": 0.4, "bullets": 7, "bulletsEnraged": 11, "spreadDeg": 70, "speed": 120, "damage": 8, "range": 260 } },
+        { "id": "spiritBlast", "weight": 1, "cooldownSec": 6, "durationSec": 1.4, "phase": 1,
+          "values": { "delaySec": 0.9, "radius": 60, "damage": 20 } }
+      ]
+    },
+    {
+      "id": "electricRing",
+      "chapter": 1,
+      "stage": 5,
+      "enrageAt": 0.5,
+      "gapSec": 0.8,
+      "enrageSec": 1.5,
+      "firstDelaySec": 1,
+      "keepDistance": 60,
+      "enraged": { "moveSpeedMul": 1.2, "scale": 1.3, "auraColor": "#4ab0ff" },
+      "patterns": [
+        { "id": "lightningChase", "weight": 3, "cooldownSec": 4, "durationSec": 2.2, "phase": 1,
+          "values": { "strikes": 5, "strikesEnraged": 7, "intervalSec": 0.35, "delaySec": 0.7, "radius": 16, "damage": 12 } },
+        { "id": "shockRipple", "weight": 2, "cooldownSec": 5, "durationSec": 1.8, "phase": 1,
+          "values": { "rings": 2, "ringsEnraged": 3, "ringGapSec": 0.5, "speed": 90, "maxRadius": 200, "thickness": 8, "damage": 12 } },
+        { "id": "spinLightning", "weight": 2, "cooldownSec": 7, "durationSec": 3.8, "phase": 1,
+          "values": { "beams": 3, "beamsEnraged": 4, "length": 180, "width": 6, "spinSpeed": 1.2, "telegraphSec": 0.6, "liveSec": 3, "damage": 10, "tickSec": 0.5 } },
+        { "id": "prison", "weight": 1, "cooldownSec": 8, "durationSec": 1.2, "phase": 1,
+          "values": { "radius": 40, "thickness": 6, "telegraphSec": 0.6, "liveSec": 3, "damage": 10, "tickSec": 0.5 } },
+        { "id": "blueDash", "weight": 2, "cooldownSec": 4, "durationSec": 1.3, "phase": 2,
+          "values": { "windupSec": 0.5, "length": 260, "speed": 420, "damage": 16 } },
+        { "id": "edgeLock", "weight": 1, "cooldownSec": 10, "durationSec": 1.5, "phase": 2,
+          "values": { "growSec": 1.5, "width": 40, "liveSec": 4, "damage": 10, "tickSec": 0.5 } },
+        { "id": "shrinkCurrent", "weight": 1, "cooldownSec": 8, "durationSec": 2.6, "phase": 2,
+          "values": { "startRadius": 200, "shrinkSec": 2.5, "thickness": 8, "damage": 12 } }
+      ]
+    }
+  ]
+}

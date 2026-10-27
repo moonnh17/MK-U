@@ -182,7 +182,8 @@ export function validateGameData(d: GameData): Errors {
     needText(w, e.nameKey);
     if (!Number.isInteger(e.chapter) || e.chapter < 1 || e.chapter > d.mapgen.chapters) errors.push(`${w}: chapter 범위 밖`);
     if (!['normal', 'elite', 'champion', 'boss', 'hiddenBoss'].includes(e.rank)) errors.push(`${w}: rank 잘못됨`);
-    if (e.ai !== 'chase' && e.ai !== 'idle') errors.push(`${w}: 알 수 없는 ai '${e.ai}'`);
+    if (!['chase', 'idle', 'boss'].includes(e.ai)) errors.push(`${w}: 알 수 없는 ai '${e.ai}'`);
+    if (e.ai === 'boss' && !d.bosses.bosses.some((b) => b.id === e.id)) errors.push(`${w}: 보스 ai인데 bosses.json에 패턴이 없음`);
     checkPositive(errors, `${w}.maxHp`, e.maxHp);
     checkPositive(errors, `${w}.moveSpeed`, e.moveSpeed, true);
     checkPositive(errors, `${w}.contactDamage`, e.contactDamage, true);
@@ -208,6 +209,32 @@ export function validateGameData(d: GameData): Errors {
   for (const e of d.enemies.enemies) checkAttacks(`enemies.${e.id}`, e.attacks);
   checkSprite(errors, 'enemies.projectile', d.enemies.projectile);
 
+  // --- 보스 ---
+  checkPositive(errors, 'bosses.bannerSec', d.bosses.bannerSec, true);
+  checkUnique(errors, 'bosses', d.bosses.bosses.map((b) => b.id));
+  for (const b of d.bosses.bosses) {
+    const w = `bosses.${b.id}`;
+    const e = d.enemies.enemies.find((x) => x.id === b.id);
+    if (!e) errors.push(`${w}: 같은 id의 적이 없음`);
+    else if (e.ai !== 'boss' || e.rank !== 'boss') errors.push(`${w}: 적 '${b.id}'는 ai·rank가 boss여야 함`);
+    if (b.stage < 1 || b.stage > d.mapgen.stagesPerChapter || !d.mapgen.bossStages.includes(b.stage)) errors.push(`${w}: 보스 스테이지가 아님 (${b.stage})`);
+    if (!(b.enrageAt > 0 && b.enrageAt < 1)) errors.push(`${w}.enrageAt: 0~1 사이`);
+    for (const k of ['gapSec', 'enrageSec', 'firstDelaySec', 'keepDistance'] as const) checkPositive(errors, `${w}.${k}`, b[k], true);
+    checkPositive(errors, `${w}.enraged.moveSpeedMul`, b.enraged.moveSpeedMul);
+    checkPositive(errors, `${w}.enraged.scale`, b.enraged.scale);
+    if (!HEX_COLOR.test(b.enraged.auraColor)) errors.push(`${w}.enraged.auraColor: #RRGGBB`);
+    checkUnique(errors, `${w}.patterns`, b.patterns.map((p) => p.id));
+    if (!b.patterns.some((p) => p.phase === 1)) errors.push(`${w}: 처음부터 쓰는 패턴이 없음`);
+    for (const p of b.patterns) {
+      const pw = `${w}.patterns.${p.id}`;
+      checkPositive(errors, `${pw}.weight`, p.weight);
+      checkPositive(errors, `${pw}.cooldownSec`, p.cooldownSec, true);
+      checkPositive(errors, `${pw}.durationSec`, p.durationSec);
+      if (p.phase !== 1 && p.phase !== 2) errors.push(`${pw}.phase: 1 또는 2`);
+      for (const [k, v] of Object.entries(p.values)) if (!isNum(v)) errors.push(`${pw}.values.${k}: 숫자여야 함`);
+      needText(pw, `boss.pattern.${p.id}`);
+    }
+  }
   // --- 엘리트 ---
   const el = d.elites;
   checkPositive(errors, 'elites.common.scale', el.common.scale);

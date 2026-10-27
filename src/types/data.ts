@@ -200,8 +200,8 @@ export interface WeaponsData {
 
 // ---------- 적 ----------
 
-/** chase: 직선 추격 / idle: 움직이지 않음(보스방 임시 더미) */
-export type EnemyAi = 'chase' | 'idle';
+/** chase: 직선 추격 / idle: 움직이지 않음(보스방 임시 더미) / boss: 보스 패턴(bosses.json)이 움직인다 */
+export type EnemyAi = 'chase' | 'idle' | 'boss';
 
 export type EnemyRank = 'normal' | 'elite' | 'champion' | 'boss' | 'hiddenBoss';
 
@@ -274,6 +274,41 @@ export interface ElitesData {
   /** 챕터가 오를 때마다 더할 수 */
   perChapterBonus: number;
   elites: EliteDef[];
+}
+
+/** 보스 패턴 하나. values의 키Enraged가 있으면 강화 단계에서 그 값을 쓴다 */
+export interface BossPatternDef {
+  id: string;
+  weight: number;
+  cooldownSec: number;
+  /** 보스가 이 패턴에 묶여 있는 시간 */
+  durationSec: number;
+  /** 1 = 처음부터, 2 = 강화 단계부터 */
+  phase: 1 | 2;
+  maxRange?: number;
+  values: Record<string, number>;
+}
+
+export interface BossDef {
+  /** 적 id와 같다 */
+  id: string;
+  chapter: number;
+  stage: number;
+  enrageAt: number;
+  gapSec: number;
+  /** 강화 단계 진입 연출 동안 쉬는 시간(무적) */
+  enrageSec: number;
+  firstDelaySec: number;
+  /** 패턴이 없을 때 플레이어와 이 거리까지 다가간다 */
+  keepDistance: number;
+  enraged: { moveSpeedMul: number; scale: number; auraColor: string };
+  patterns: BossPatternDef[];
+}
+
+export interface BossesData {
+  /** 보스방 경고 배너 시간 */
+  bannerSec: number;
+  bosses: BossDef[];
 }
 
 export interface EnemiesData {
