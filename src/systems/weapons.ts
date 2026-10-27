@@ -3,31 +3,77 @@
  */
 import type { Vec2 } from '../core/actions';
 import type { Rng } from '../core/rng';
-import type { WeaponDef } from '../types/data';
+import type { GradeId, WeaponDef, WeaponOptionDef } from '../types/data';
+
+// ---------- 무기 하나 (등급·옵션이 붙은 실물) ----------
+
+export interface WeaponOption {
+  id: WeaponOptionDef['id'];
+  value: number;
+}
+
+export interface WeaponItem {
+  defId: string;
+  grade: GradeId;
+  options: WeaponOption[];
+}
+
+/** 옵션 없는 기본 무기 (시작 무기·테스트 무기) */
+export function plainWeapon(def: Pick<WeaponDef, 'id' | 'grade'>): WeaponItem {
+  return { defId: def.id, grade: def.grade, options: [] };
+}
+
+export interface WeaponStats {
+  /** 태그 보정 전 기준 피해 (등급 배율 적용) */
+  damage: number;
+  fireIntervalSec: number;
+  energyCost: number;
+  projectileSpeed: number;
+  critChance: number;
+}
+
+/** 등급 배율·옵션을 반영한 실제 수치 */
+export function weaponStats(def: WeaponDef, item: WeaponItem, gradeMul: number): WeaponStats {
+  const opt = (id: WeaponOption['id']) => item.options.filter((o) => o.id === id).reduce((s, o) => s + o.value, 0);
+  return {
+    damage: def.baseDamage * gradeMul,
+    fireIntervalSec: def.fireIntervalSec / (1 + opt('attackSpeed')),
+    energyCost: Math.max(0, def.energyCost - opt('energyCost')),
+    projectileSpeed: def.projectileSpeed * (1 + opt('projectileSpeed')),
+    critChance: Math.min(1, opt('crit')),
+  };
+}
+
+/** 치명: 확률로 피해 × 배율 */
+export function rollCrit(rng: Rng, damage: number, chance: number, multiplier: number): { damage: number; crit: boolean } {
+  if (chance <= 0 || !rng.chance(chance)) return { damage, crit: false };
+  return { damage: damage * multiplier, crit: true };
+}
 
 // ---------- 무기 2슬롯 ----------
 
-export interface WeaponSlots {
+/** T는 슬롯에 든 무기 (게임에서는 WeaponItem) */
+export interface WeaponSlots<T = WeaponItem> {
   /** 슬롯 2개. 빈 슬롯은 null */
-  slots: [string | null, string | null];
+  slots: [T | null, T | null];
   /** 들고 있는 슬롯 */
   active: 0 | 1;
 }
 
-export function initialSlots(startWeapon: string): WeaponSlots {
+export function initialSlots<T>(startWeapon: T): WeaponSlots<T> {
   return { slots: [startWeapon, null], active: 0 };
 }
 
-export function activeWeapon(s: WeaponSlots): string | null {
+export function activeWeapon<T>(s: WeaponSlots<T>): T | null {
   return s.slots[s.active];
 }
 
-export function otherWeapon(s: WeaponSlots): string | null {
+export function otherWeapon<T>(s: WeaponSlots<T>): T | null {
   return s.slots[s.active === 0 ? 1 : 0];
 }
 
 /** E: 다른 슬롯이 비어 있으면 그대로 */
-export function swapWeapon(s: WeaponSlots): WeaponSlots {
+export function swapWeapon<T>(s: WeaponSlots<T>): WeaponSlots<T> {
   const other = s.active === 0 ? 1 : 0;
   if (s.slots[other] === null) return s;
   return { slots: [...s.slots], active: other };
@@ -38,14 +84,14 @@ export function swapWeapon(s: WeaponSlots): WeaponSlots {
  * 빈 슬롯이 있으면 거기에 넣고 그 무기를 든다(버리는 무기 없음).
  * 슬롯이 다 찼으면 들고 있던 무기와 교환하고, 버린 무기는 바닥에 남는다.
  */
-export function pickUpWeapon(s: WeaponSlots, floorWeapon: string): { slots: WeaponSlots; dropped: string | null } {
+export function pickUpWeapon<T>(s: WeaponSlots<T>, floorWeapon: T): { slots: WeaponSlots<T>; dropped: T | null } {
   const empty = s.slots.indexOf(null);
   if (empty !== -1) {
-    const slots: [string | null, string | null] = [...s.slots];
+    const slots: [T | null, T | null] = [...s.slots];
     slots[empty] = floorWeapon;
     return { slots: { slots, active: empty as 0 | 1 }, dropped: null };
   }
-  const slots: [string | null, string | null] = [...s.slots];
+  const slots: [T | null, T | null] = [...s.slots];
   const dropped = slots[s.active]!;
   slots[s.active] = floorWeapon;
   return { slots: { slots, active: s.active }, dropped };
@@ -105,7 +151,10 @@ export interface ShotSpec {
 /** 총: 이번 발사에서 나갈 탄들. 산탄은 부채꼴로 고르게 펼친다. */
 export function gunShots(weapon: WeaponDef, aimAngle: number, rng: Rng): ShotSpec[] {
   const p = weapon.pattern;
-  if (p.kind === 'single') return [{ angle: aimAngle, speed: weapon.projectileSpeed, range: weapon.range }];
+  if (p.kind === 'single') {
+    const jitter = p.jitterDeg ? rng.range(-p.jitterDeg / 2, p.jitterDeg / 2) * (Math.PI / 180) : 0;
+    return [{ angle: aimAngle + jitter, speed: weapon.projectileSpeed, range: weapon.range }];
+  }
   if (p.kind === 'spread') {
     const n = rng.int(p.pellets[0], p.pellets[1]);
     const spread = (p.spreadDeg * Math.PI) / 180;
