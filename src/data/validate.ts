@@ -4,7 +4,7 @@
  */
 import { BUTTON_ACTIONS } from '../core/actions';
 import { GRADE_IDS, SCHOOL_IDS, STAT_EFFECT_IDS, STAT_IDS, TAG_IDS } from '../types/data';
-import type { IntRange, SpriteRef } from '../types/data';
+import type { EnemyAttackDef, IntRange, SpriteRef } from '../types/data';
 import type { GameData } from './index';
 
 type Errors = string[];
@@ -191,7 +191,44 @@ export function validateGameData(d: GameData): Errors {
     checkRange(errors, `${w}.coins`, e.coins);
   }
 
+  const checkAttacks = (where: string, attacks: readonly EnemyAttackDef[] | undefined) => {
+    checkUnique(errors, `${where}.attacks`, (attacks ?? []).map((a) => a.id));
+    for (const a of attacks ?? []) {
+      const w = `${where}.attacks.${a.id}`;
+      if (a.kind !== 'lunge' && a.kind !== 'slam') errors.push(`${w}: kind는 lunge 또는 slam`);
+      for (const k of ['triggerRange', 'windupSec', 'actSec', 'damage'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
+      for (const k of ['recoverSec', 'cooldownSec'] as const) checkPositive(errors, `${w}.${k}`, a[k], true);
+      if (a.kind === 'lunge') checkPositive(errors, `${w}.speed`, a.speed);
+      if (a.kind === 'slam') {
+        checkPositive(errors, `${w}.radius`, a.radius);
+        checkPositive(errors, `${w}.reach`, a.reach, true);
+      }
+    }
+  };
+  for (const e of d.enemies.enemies) checkAttacks(`enemies.${e.id}`, e.attacks);
   checkSprite(errors, 'enemies.projectile', d.enemies.projectile);
+
+  // --- 엘리트 ---
+  const el = d.elites;
+  checkPositive(errors, 'elites.common.scale', el.common.scale);
+  checkPositive(errors, 'elites.common.hpMul', el.common.hpMul);
+  checkRange(errors, 'elites.common.bonusEnergyOrbs', el.common.bonusEnergyOrbs);
+  checkRange(errors, 'elites.common.bonusCoins', el.common.bonusCoins);
+  checkPositive(errors, 'elites.perChapterBonus', el.perChapterBonus, true);
+  for (let s = 1; s <= d.mapgen.stagesPerChapter; s++) checkRange(errors, `elites.countByStage.${s}`, el.countByStage[String(s)]);
+  checkUnique(errors, 'elites', el.elites.map((x) => x.id));
+  if (el.elites.length !== 3) errors.push(`elites: 3종이어야 함 (현재 ${el.elites.length})`);
+  for (const x of el.elites) {
+    const w = `elites.${x.id}`;
+    needText(w, x.nameKey);
+    needText(w, x.iconKey);
+    if (!HEX_COLOR.test(x.color)) errors.push(`${w}: color는 #RRGGBB`);
+    checkPositive(errors, `${w}.weight`, x.weight);
+    for (const k of ['moveSpeedMul', 'attackSpeedMul', 'damageTakenMul'] as const) if (x[k] !== undefined) checkPositive(errors, `${w}.${k}`, x[k]);
+    if (!['outline', 'afterimage', 'blink'].includes(x.look)) errors.push(`${w}: look 잘못됨`);
+    checkAttacks(w, x.extraAttacks);
+    if (x.deathBlast) for (const k of ['delaySec', 'radius', 'damage'] as const) checkPositive(errors, `${w}.deathBlast.${k}`, x.deathBlast[k]);
+  }
   for (const k of ['count', 'distance', 'speed', 'damage'] as const) {
     checkPositive(errors, `enemies.debugBarrage.${k}`, d.enemies.debugBarrage?.[k]);
   }

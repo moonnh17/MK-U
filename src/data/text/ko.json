@@ -226,5 +226,12 @@
   "debug.fillUltimate": "궁극기 충전",
   "debug.spawn": "적 소환",
   "debug.barrage": "적 탄막",
+  "debug.eliteNone": "일반",
+  "elite.giant": "거대",
+  "elite.giant.icon": "🛡",
+  "elite.swift": "신속",
+  "elite.swift.icon": "⚡",
+  "elite.explosive": "폭발",
+  "elite.explosive.icon": "💣",
   "debug.schoolPicks": "전직 집계 헥타르 {hectar} / 아크로 {acro}"
 }

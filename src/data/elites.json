@@ -1,0 +1,39 @@
+{
+  "common": { "scale": 1.3, "hpMul": 3, "bonusEnergyOrbs": [2, 3], "bonusCoins": [2, 3] },
+  "countByStage": { "1": [1, 1], "2": [1, 1], "3": [1, 2], "4": [1, 2], "5": [1, 2] },
+  "perChapterBonus": 1,
+  "elites": [
+    {
+      "id": "giant",
+      "nameKey": "elite.giant",
+      "iconKey": "elite.giant.icon",
+      "color": "#c8d0d8",
+      "weight": 1,
+      "damageTakenMul": 0.7,
+      "knockbackImmune": true,
+      "look": "outline"
+    },
+    {
+      "id": "swift",
+      "nameKey": "elite.swift",
+      "iconKey": "elite.swift.icon",
+      "color": "#ffe14a",
+      "weight": 1,
+      "moveSpeedMul": 1.5,
+      "attackSpeedMul": 1.5,
+      "extraAttacks": [
+        { "id": "leap", "kind": "lunge", "triggerRange": 150, "windupSec": 0.3, "actSec": 0.22, "recoverSec": 0.3, "cooldownSec": 4, "damage": 6, "speed": 320 }
+      ],
+      "look": "afterimage"
+    },
+    {
+      "id": "explosive",
+      "nameKey": "elite.explosive",
+      "iconKey": "elite.explosive.icon",
+      "color": "#ff7a3a",
+      "weight": 1,
+      "deathBlast": { "delaySec": 1, "radius": 30, "damage": 12 },
+      "look": "blink"
+    }
+  ]
+}

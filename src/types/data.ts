@@ -221,10 +221,63 @@ export interface EnemyDef extends SpriteRef {
   energyOrbs: IntRange;
   /** 처치 시 코인 개수 범위 */
   coins: IntRange;
+  /** 공격 (목록 순서대로 우선). 없으면 추격·접촉만 */
+  attacks?: EnemyAttackDef[];
+}
+
+/**
+ * 일반 적·엘리트의 공격. 예고(windup) → 실행(act) → 후딜(recover).
+ * lunge: 예고선 방향으로 돌진, 돌진 중 닿으면 피해 / slam: 예고 원 자리에 강타
+ */
+export interface EnemyAttackDef {
+  id: string;
+  kind: 'lunge' | 'slam';
+  triggerRange: number;
+  windupSec: number;
+  actSec: number;
+  recoverSec: number;
+  cooldownSec: number;
+  damage: number;
+  /** lunge: 돌진 속도(px/s) */
+  speed?: number;
+  /** slam: 강타 반지름 */
+  radius?: number;
+  /** slam: 몸에서 강타 중심까지 최대 거리 */
+  reach?: number;
+}
+
+export interface EliteDef {
+  id: string;
+  nameKey: string;
+  /** 머리 위 아이콘 글자 키 (ko.json) */
+  iconKey: string;
+  color: string;
+  weight: number;
+  moveSpeedMul?: number;
+  attackSpeedMul?: number;
+  damageTakenMul?: number;
+  /** 넉백 면역 (넉백은 아직 없음, 표시만) */
+  knockbackImmune?: boolean;
+  /** 엘리트가 더하는 공격 (신속: 도약) */
+  extraAttacks?: EnemyAttackDef[];
+  /** 폭발: 사망 시 지연 폭발 */
+  deathBlast?: { delaySec: number; radius: number; damage: number };
+  /** 표시: outline(두꺼운 외곽선) / afterimage(잔상) / blink(깜빡임) */
+  look: 'outline' | 'afterimage' | 'blink';
+}
+
+export interface ElitesData {
+  /** 공통: 크기·체력 배율, 처치 보상 추가 */
+  common: { scale: number; hpMul: number; bonusEnergyOrbs: IntRange; bonusCoins: IntRange };
+  /** 스테이지 번호(챕터 안) → 전투 칸 웨이브당 엘리트 수 범위 */
+  countByStage: Record<string, IntRange>;
+  /** 챕터가 오를 때마다 더할 수 */
+  perChapterBonus: number;
+  elites: EliteDef[];
 }
 
 export interface EnemiesData {
-  /** 적 투사체 모양 (적 공격 패턴은 M3) */
+  /** 적 투사체 모양 */
   projectile: SpriteRef;
   /** 디버그 '적 탄막': 플레이어 주위에서 플레이어를 향해 일반 탄을 쏜다(벡터굴절역장 확인용) */
   debugBarrage: { count: number; distance: number; speed: number; damage: number };
