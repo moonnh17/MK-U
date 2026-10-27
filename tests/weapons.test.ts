@@ -10,6 +10,8 @@ import {
   inArc,
   initialSlots,
   otherWeapon,
+  dropWeaponAt,
+  emptyHanded,
   pickUpWeapon,
   projectilesCut,
   spendEnergy,
@@ -50,6 +52,41 @@ describe('무기 2슬롯', () => {
     expect(dropped).toBe('shotgun');
     expect(slots.slots).toEqual(['pistol', 'longsword']);
     expect(activeWeapon(slots)).toBe('longsword');
+  });
+});
+
+describe('무기 버리기와 맨손', () => {
+  const two = () => pickUpWeapon(initialSlots('pistol'), 'shotgun').slots; // [권총, 산탄총], 산탄총 들고 있음
+  it('들고 있던 무기를 버리면 다른 무기를 든다', () => {
+    const { slots, dropped } = dropWeaponAt(two(), 1);
+    expect(dropped).toBe('shotgun');
+    expect(slots.slots).toEqual(['pistol', null]);
+    expect(activeWeapon(slots)).toBe('pistol');
+  });
+  it('들고 있지 않은 무기를 버리면 손은 그대로', () => {
+    const { slots, dropped } = dropWeaponAt(two(), 0);
+    expect(dropped).toBe('pistol');
+    expect(activeWeapon(slots)).toBe('shotgun');
+  });
+  it('마지막 무기도 버릴 수 있고, 그러면 맨손(주먹)', () => {
+    const { slots } = dropWeaponAt(initialSlots('pistol'), 0);
+    expect(emptyHanded(slots)).toBe(true);
+    expect(activeWeapon(slots)).toBeNull();
+    expect(swapWeapon(slots)).toEqual(slots);
+  });
+  it('맨손에서 주우면 그 무기를 든다', () => {
+    const empty = dropWeaponAt(initialSlots('pistol'), 0).slots;
+    const { slots, dropped } = pickUpWeapon(empty, 'longsword');
+    expect(dropped).toBeNull();
+    expect(activeWeapon(slots)).toBe('longsword');
+  });
+  it('빈 슬롯을 버리면 아무 일도 없다', () => {
+    const s = initialSlots('pistol');
+    expect(dropWeaponAt(s, 1)).toEqual({ slots: s, dropped: null });
+  });
+  it('주먹: 에너지 없는 칼, 상점·드롭에 나오지 않는다', () => {
+    const f = weapon(gameData.weapons.fistWeapon);
+    expect(f).toMatchObject({ category: 'blade', energyCost: 0, droppable: false });
   });
 });
 

@@ -141,6 +141,9 @@ export function validateGameData(d: GameData): Errors {
   // --- 무기 ---
   const weaponIds = d.weapons.weapons.map((x) => x.id);
   checkUnique(errors, 'weapons', weaponIds);
+  const fist = d.weapons.weapons.find((x) => x.id === d.weapons.fistWeapon);
+  if (!fist) errors.push(`weapons.fistWeapon: '${d.weapons.fistWeapon}' 무기 없음`);
+  else if (fist.droppable || fist.category !== 'blade' || fist.energyCost !== 0) errors.push('weapons.fistWeapon: 에너지 없는 칼, droppable false');
   if (!weaponIds.includes(d.weapons.startWeapon)) {
     errors.push(`weapons.startWeapon: '${d.weapons.startWeapon}' 무기 없음`);
   }

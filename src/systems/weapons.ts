@@ -97,6 +97,25 @@ export function pickUpWeapon<T>(s: WeaponSlots<T>, floorWeapon: T): { slots: Wea
   return { slots: { slots, active: s.active }, dropped };
 }
 
+/**
+ * 무기 버리기 (인벤토리): 그 슬롯을 비운다. 들고 있던 무기를 버렸으면 다른 슬롯 무기를 든다.
+ * 둘 다 비면 맨손(주먹 공격)이다.
+ */
+export function dropWeaponAt<T>(s: WeaponSlots<T>, slot: 0 | 1): { slots: WeaponSlots<T>; dropped: T | null } {
+  const dropped = s.slots[slot];
+  if (dropped === null) return { slots: s, dropped: null };
+  const slots: [T | null, T | null] = [...s.slots];
+  slots[slot] = null;
+  const other = slot === 0 ? 1 : 0;
+  const active = slot === s.active && slots[other] !== null ? other : s.active;
+  return { slots: { slots, active }, dropped };
+}
+
+/** 맨손인가 (두 슬롯 모두 비었다) */
+export function emptyHanded<T>(s: WeaponSlots<T>): boolean {
+  return s.slots[0] === null && s.slots[1] === null;
+}
+
 // ---------- 에너지 ----------
 
 export function canFire(energy: number, weapon: Pick<WeaponDef, 'energyCost'>): boolean {

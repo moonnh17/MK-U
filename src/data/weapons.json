@@ -1,5 +1,6 @@
 {
   "startWeapon": "pistol",
+  "fistWeapon": "fist",
   "projectile": { "spriteKey": "projectile_player", "color": "#fff3a0", "size": 3 },
   "critMultiplier": 1.5,
   "options": [
@@ -141,6 +142,12 @@
       "signature": { "every": 3, "kind": "space" },
       "projectileSpeed": 0, "range": 32, "cutsProjectiles": true, "droppable": false,
       "spriteKey": "weapon_rasalhague_sword", "color": "#e8d24a", "size": 11
+    },
+    {
+      "id": "fist", "nameKey": "weapon.fist", "category": "blade", "grade": "common", "tags": ["physical", "melee"],
+      "baseDamage": 3, "fireIntervalSec": 0.35, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 90, "radius": 18 },
+      "projectileSpeed": 0, "range": 18, "cutsProjectiles": false, "droppable": false,
+      "spriteKey": "weapon_fist", "color": "#e8c8a0", "size": 6
     }
   ]
 }

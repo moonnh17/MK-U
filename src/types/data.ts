@@ -241,6 +241,8 @@ export interface WeaponDef extends SpriteRef {
 
 export interface WeaponsData {
   startWeapon: string;
+  /** 맨손일 때 나가는 공격 (슬롯에 들지 않고 버릴 수 없다) */
+  fistWeapon: string;
   /** 총알 모양 (공통) */
   projectile: SpriteRef;
   /** 치명타 피해 배율 */
