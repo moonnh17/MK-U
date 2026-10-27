@@ -6,7 +6,7 @@
     "right": ["KeyD"]
   },
   "buttons": {
-    "attack": ["KeyQ"],
+    "attack": ["Space"],
     "swapWeapon": ["KeyE"],
     "interact": ["KeyF"],
     "skill1": ["Digit1", "Numpad1"],

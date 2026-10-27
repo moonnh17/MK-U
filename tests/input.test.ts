@@ -24,7 +24,7 @@ describe('키보드 → ActionCommand', () => {
   });
 
   it.each([
-    ['KeyQ', 'attack'],
+    ['Space', 'attack'],
     ['KeyE', 'swapWeapon'],
     ['KeyF', 'interact'],
     ['KeyI', 'inventory'],
