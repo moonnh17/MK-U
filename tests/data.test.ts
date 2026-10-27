@@ -143,7 +143,8 @@ describe('데이터 검증', () => {
     });
 
     it('기본 궁극기는 열역학 제1법칙(기술·원거리)', () => {
-      const u = gameData.ultimates.ultimates.find((x) => x.id === gameData.ultimates.startUltimate)!;
+      const job = gameData.jobs.jobs.find((x) => x.id === gameData.jobs.startJob)!;
+      const u = gameData.ultimates.ultimates.find((x) => x.id === job.startUltimate)!;
       expect(name(u.nameKey)).toBe('열역학 제1법칙');
       expect(u.tags).toEqual(['tech', 'ranged']);
     });

@@ -383,7 +383,7 @@ export function validateGameData(d: GameData): Errors {
   // --- 궁극기 ---
   const u = d.ultimates;
   checkUnique(errors, 'ultimates', u.ultimates.map((x) => x.id));
-  if (!u.ultimates.some((x) => x.id === u.startUltimate)) errors.push(`ultimates.startUltimate: '${u.startUltimate}' 없음`);
+  checkPositive(errors, 'ultimates.awakeningNeed', u.awakeningNeed);
   for (const rank of ['normal', 'elite', 'champion', 'boss', 'hiddenBoss'] as const) {
     checkPositive(errors, `ultimates.gaugePerKill.${rank}`, u.gaugePerKill[rank], true);
   }
@@ -395,7 +395,50 @@ export function validateGameData(d: GameData): Errors {
     checkTags(w, x.tags);
     checkSources(w, x.sources);
     checkPositive(errors, `${w}.gaugeMax`, x.gaugeMax);
+    if (x.gauge?.kind === 'damage') {
+      checkPositive(errors, `${w}.gauge.perDamage`, x.gauge.perDamage);
+      for (const id of x.gauge.skills) if (!d.skills.skills.some((s) => s.id === id)) errors.push(`${w}.gauge.skills: 없는 스킬 '${id}'`);
+    } else if (x.gauge?.kind !== 'kill') {
+      errors.push(`${w}.gauge: kind는 kill 또는 damage`);
+    }
+    if (x.school !== undefined && !(SCHOOL_IDS as readonly string[]).includes(x.school)) errors.push(`${w}.school: 잘못됨`);
+    if (x.awakening) {
+      needText(`${w}.awakening`, x.awakening.nameKey);
+      needText(`${w}.awakening`, x.awakening.shortKey);
+      needText(`${w}.awakening`, x.awakening.descKey);
+      checkTags(`${w}.awakening`, x.awakening.tags);
+    }
     for (const [k, sp] of Object.entries(x.sprites)) checkSprite(errors, `${w}.sprites.${k}`, sp);
+  }
+
+  // --- 직업 ---
+  const jb = d.jobs;
+  checkUnique(errors, 'jobs', jb.jobs.map((x) => x.id));
+  const startJob = jb.jobs.find((x) => x.id === jb.startJob);
+  if (!startJob) errors.push(`jobs.startJob: '${jb.startJob}' 없음`);
+  else if (!startJob.enabled) errors.push('jobs.startJob: 잠긴 직업');
+  checkPositive(errors, 'jobs.advanceAfterChapter', jb.advanceAfterChapter);
+  checkPositive(errors, 'jobs.conversionStatAmount', jb.conversionStatAmount);
+  for (const x of jb.jobs) {
+    const w = `jobs.${x.id}`;
+    needText(w, x.nameKey);
+    if (!weaponIds.includes(x.startWeapon)) errors.push(`${w}.startWeapon: '${x.startWeapon}' 무기 없음`);
+    if (!u.ultimates.some((y) => y.id === x.startUltimate)) errors.push(`${w}.startUltimate: '${x.startUltimate}' 없음`);
+    for (const [k, v] of Object.entries(x.statBonus)) {
+      if (!statIds.has(k)) errors.push(`${w}.statBonus: 알 수 없는 스탯 '${k}'`);
+      if (!isNum(v)) errors.push(`${w}.statBonus.${k}: 숫자여야 함`);
+    }
+    if (x.advancements.length !== 2) errors.push(`${w}: 전직 분기는 2개`);
+    for (const a of x.advancements) {
+      needText(`${w}.advancements.${a.id}`, a.nameKey);
+      if (!HEX_COLOR.test(a.color)) errors.push(`${w}.advancements.${a.id}: color는 #RRGGBB`);
+      if (!x.enabled) continue;
+      const ult = u.ultimates.find((y) => y.id === a.ultimate);
+      if (!ult) errors.push(`${w}.advancements.${a.id}: 학파 궁극기 '${String(a.ultimate)}' 없음`);
+      else if (ult.school !== a.id) errors.push(`${w}.advancements.${a.id}: 궁극기 '${ult.id}'의 학파가 다름`);
+      const ps = d.skills.skills.find((s) => s.id === a.passive);
+      if (!ps || ps.kind !== 'passive' || ps.school !== a.id) errors.push(`${w}.advancements.${a.id}: 패시브 '${String(a.passive)}'가 이 학파 패시브가 아님`);
+    }
   }
 
   // --- 카드 ---

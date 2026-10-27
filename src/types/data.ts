@@ -567,17 +567,58 @@ export interface UltimateDef {
   sources: Record<string, TagId[]>;
   /** 게이지가 이만큼 차면 발동할 수 있다 */
   gaugeMax: number;
+  /** kill: 적 처치로 충전(열역학 제1법칙) / damage: 정해진 스킬의 피해량 × perDamage(+ 대성공 보너스) */
+  gauge: { kind: 'kill' } | { kind: 'damage'; skills: string[]; perDamage: number; perGreatSuccess?: number };
+  /** 학파 궁극기면 그 학파 (궁극기 각성 조건: 이 학파 스킬 각성 수) */
+  school?: SchoolId;
   values: Record<string, number>;
+  /** 궁극기 각성. 없으면 각성판 없음 */
+  awakening?: { nameKey: string; shortKey: string; descKey: string; tags: TagId[]; values: Record<string, number> };
   color: string;
   sprites: Record<string, SpriteRef>;
 }
 
 export interface UltimatesData {
-  /** 전직 전 기본 궁극기 */
-  startUltimate: string;
+  /** 궁극기 각성에 필요한 자기 학파 각성 스킬 수 */
+  awakeningNeed: number;
   /** 적 처치 시 게이지 충전량 (적 등급별) */
   gaugePerKill: Record<EnemyRank, number>;
   ultimates: UltimateDef[];
+}
+
+// ---------- 직업·전직 ----------
+
+/** 전직 분기 (마기학자: 헥타르/아크로). 마기법사·전사는 틀만 */
+export interface AdvancementDef {
+  id: string;
+  nameKey: string;
+  /** 학파 색 (연출·화면 전환) */
+  color: string;
+  /** 학파 궁극기 */
+  ultimate: string | null;
+  /** 이 학파의 패시브 (자동 지급하지 않고 카드로 고른다) */
+  passive: string | null;
+}
+
+export interface JobDef {
+  id: JobId;
+  nameKey: string;
+  enabled: boolean;
+  /** 기본 스탯 보정 */
+  statBonus: Partial<Record<StatId, number>>;
+  startWeapon: string;
+  startUltimate: string;
+  advancements: AdvancementDef[];
+}
+
+export interface JobsData {
+  /** 직업 선택 화면(M5) 전까지 쓰는 직업 */
+  startJob: JobId;
+  /** 이 챕터의 마지막 보스를 잡으면 전직 */
+  advanceAfterChapter: number;
+  /** 전직 스킬 변환에서 받을 스킬이 없을 때 포인트 1개당 무작위 스탯 증가량 */
+  conversionStatAmount: number;
+  jobs: JobDef[];
 }
 
 // ---------- 카드 ----------

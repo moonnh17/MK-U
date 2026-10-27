@@ -1,5 +1,5 @@
 {
-  "startUltimate": "firstLaw",
+  "awakeningNeed": 2,
   "gaugePerKill": { "normal": 5, "elite": 15, "champion": 20, "boss": 30, "hiddenBoss": 30 },
   "ultimates": [
     {
@@ -10,10 +10,77 @@
       "tags": ["tech", "ranged"],
       "sources": { "explosion": ["tech", "ranged"] },
       "gaugeMax": 100,
+      "gauge": { "kind": "kill" },
       "values": { "damage": 40, "radius": 40, "projectileSpeed": 220, "range": 220 },
       "color": "#ff9a3c",
       "sprites": {
         "particle": { "spriteKey": "ult_first_law", "color": "#ff9a3c", "size": 8 }
+      }
+    },
+    {
+      "id": "thunderbolt",
+      "nameKey": "ultimate.thunderbolt",
+      "shortKey": "ultimate.thunderbolt.short",
+      "descKey": "ultimate.thunderbolt.desc",
+      "school": "hectar",
+      "tags": ["tech", "ranged", "space"],
+      "sources": {
+        "cut": ["tech", "ranged", "space"],
+        "strike": ["tech", "ranged", "space"],
+        "slash": ["tech", "ranged", "space"],
+        "surround": ["tech", "ranged", "space"],
+        "collapse": ["tech", "ranged", "space"]
+      },
+      "gaugeMax": 100,
+      "gauge": { "kind": "damage", "skills": ["magiTurret", "magiMine", "combatDrone"], "perDamage": 0.15 },
+      "values": { "damage": 60, "length": 480, "width": 10, "telegraphSec": 0.25, "bossMaxHpRatio": 0.1 },
+      "awakening": {
+        "nameKey": "ultimate.thunderbolt.awakened",
+        "shortKey": "ultimate.thunderbolt.awakened.short",
+        "descKey": "ultimate.thunderbolt.awakened.desc",
+        "tags": ["tech", "ranged", "space"],
+        "values": { "range": 200, "strikeRadius": 30, "slashLength": 120, "slashCount": 3, "slashDelaySec": 0.12, "surroundRadius": 70, "collapseRadius": 90, "collapseDelaySec": 0.4 }
+      },
+      "color": "#4ab0ff",
+      "sprites": {}
+    },
+    {
+      "id": "singularity",
+      "nameKey": "ultimate.singularity",
+      "shortKey": "ultimate.singularity.short",
+      "descKey": "ultimate.singularity.desc",
+      "school": "acro",
+      "tags": ["tech", "chance", "ranged"],
+      "sources": {
+        "collapse": ["tech", "chance", "ranged", "space"],
+        "corrupt": ["tech", "chance", "ranged"],
+        "overload": ["tech", "chance", "ranged"],
+        "failure": ["tech", "chance", "ranged"],
+        "replay": ["tech", "chance", "ranged"],
+        "replayGreat": ["tech", "chance", "ranged", "space"]
+      },
+      "gaugeMax": 100,
+      "gauge": { "kind": "damage", "skills": ["unstableSubject", "magiCorruption", "experimentalWeapon"], "perDamage": 0.15, "perGreatSuccess": 5 },
+      "values": {
+        "range": 160, "pullRadius": 70, "pullSec": 1.0, "pullSpeed": 140,
+        "greatChance": 0.1, "greatMultiplier": 1.5,
+        "collapseWeight": 2, "proliferateWeight": 2, "corruptWeight": 2, "overloadWeight": 2, "failureWeight": 1,
+        "collapseRadius": 50, "collapseDamage": 40,
+        "proliferateCount": 3,
+        "corruptSec": 6, "corruptVulnerability": 0.35, "corruptBurstDamage": 12, "corruptBurstRadius": 26,
+        "overloadRadius": 70, "overloadDamage": 70,
+        "failureRadius": 70, "failureDamage": 35, "failureSelfDamage": 8
+      },
+      "awakening": {
+        "nameKey": "ultimate.singularity.awakened",
+        "shortKey": "ultimate.singularity.awakened.short",
+        "descKey": "ultimate.singularity.awakened.desc",
+        "tags": ["tech", "chance", "ranged"],
+        "values": { "observeSec": 5, "observeRadius": 90, "partialRatio": 0.3, "majorRatio": 0.6, "fullRatio": 1.0, "successChance": 0.5 }
+      },
+      "color": "#ff3a4a",
+      "sprites": {
+        "core": { "spriteKey": "ult_singularity", "color": "#ff3a4a", "size": 10 }
       }
     }
   ]

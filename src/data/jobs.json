@@ -1,0 +1,43 @@
+{
+  "startJob": "magiScholar",
+  "advanceAfterChapter": 1,
+  "conversionStatAmount": 3,
+  "jobs": [
+    {
+      "id": "magiScholar",
+      "nameKey": "job.magiScholar",
+      "enabled": true,
+      "statBonus": {},
+      "startWeapon": "pistol",
+      "startUltimate": "firstLaw",
+      "advancements": [
+        { "id": "hectar", "nameKey": "job.adv.hectar", "color": "#3a7bff", "ultimate": "thunderbolt", "passive": "combatDrone" },
+        { "id": "acro", "nameKey": "job.adv.acro", "color": "#e8323c", "ultimate": "singularity", "passive": "reductionist" }
+      ]
+    },
+    {
+      "id": "magiMage",
+      "nameKey": "job.magiMage",
+      "enabled": false,
+      "statBonus": {},
+      "startWeapon": "pistol",
+      "startUltimate": "firstLaw",
+      "advancements": [
+        { "id": "hwigang", "nameKey": "job.adv.hwigang", "color": "#9a9aff", "ultimate": null, "passive": null },
+        { "id": "baekon", "nameKey": "job.adv.baekon", "color": "#e0e0e0", "ultimate": null, "passive": null }
+      ]
+    },
+    {
+      "id": "warrior",
+      "nameKey": "job.warrior",
+      "enabled": false,
+      "statBonus": {},
+      "startWeapon": "pistol",
+      "startUltimate": "firstLaw",
+      "advancements": [
+        { "id": "barbarian", "nameKey": "job.adv.barbarian", "color": "#c86a3a", "ultimate": null, "passive": null },
+        { "id": "paladin", "nameKey": "job.adv.paladin", "color": "#e8d24a", "ultimate": null, "passive": null }
+      ]
+    }
+  ]
+}
