@@ -8,9 +8,11 @@ import type { GameContext } from '../core/context';
 import type { BuffView } from '../core/session';
 import type { Rng } from '../core/rng';
 import type { Enemy } from '../entities/enemy';
+import type { CorruptionState } from '../systems/acro';
 import type { Stats } from '../systems/damage';
 import type { ShieldState } from '../systems/shield';
 import type { OwnedSkill } from '../systems/skills';
+import type { PlayerMods } from '../systems/vitals';
 import type { SkillDef, SpriteRef, TagId, UltimateDef } from '../types/data';
 
 export interface SkillHost {
@@ -43,6 +45,18 @@ export interface SkillHost {
   setShield(shield: ShieldState, opts: ShieldOpts): void;
   /** 스킬 쿨타임을 전체 쿨타임 × ratio만큼 돌려준다 */
   refundCooldown(skillId: string, ratio: number): void;
+  /** 확률 판정용 확률: 확률 태그가 있으면 지능 보정·상한(capKey: success / greatSuccess) */
+  chance(base: number, capKey: string, tags: readonly TagId[]): number;
+  /** 마기 변질을 건다(다시 걸면 센 쪽·긴 쪽) */
+  corrupt(enemy: Enemy, state: CorruptionState): void;
+  /** 적을 쓰러뜨린 것으로 처리하고 필드에서 치운다(드롭·게이지·방 클리어 집계 포함, 변질 폭발 없음). 반역 개체화에 쓴다 */
+  defeat(enemy: Enemy): void;
+  /** 체력 회복. overflowToShield면 넘치는 양을 보호막으로 */
+  heal(amount: number, overflowToShield: boolean): void;
+  /** 현재 체력의 ratio만큼 소모한다(죽지 않음) */
+  payHp(ratio: number): void;
+  /** 플레이어 돌진: sec 동안 입력 대신 dir 방향으로 speed로 움직인다(벽에는 막힘) */
+  dash(dir: Vec2, speed: number, sec: number): void;
   /** 짧은 이펙트를 fxSec 뒤에 지운다 */
   fx(obj: Phaser.GameObjects.GameObject, sec?: number): void;
   /** 색 사각형 텍스처 스프라이트 */
@@ -70,6 +84,12 @@ export interface SkillObject {
   buff?(host: SkillHost): BuffView | null;
   /** 플레이어가 실제로 피해를 받았을 때(보호막으로 막은 공격은 제외). false면 제거된다 */
   onPlayerHurt?(host: SkillHost): boolean;
+  /** 플레이어 쪽 공격이 적에게 피해를 줬을 때(실제로 깎인 양) */
+  onDamageDealt?(host: SkillHost, amount: number): void;
+  /** 적이 쓰러졌을 때 */
+  onKill?(host: SkillHost, enemy: Enemy): void;
+  /** 이 오브젝트가 있는 동안 플레이어에게 주는 보정 (MK 슈트 등) */
+  playerMods?(): Partial<PlayerMods>;
 }
 
 export interface SkillCast {
@@ -113,4 +133,22 @@ export function trimOldest(host: SkillHost, owner: string, keep: number): void {
     .filter((o) => o.owner === owner)
     .sort((a, b) => a.createdAt - b.createdAt);
   for (let i = 0; i < mine.length - keep; i++) host.removeObject(mine[i]!);
+}
+/** 적 쪽으로 다가간다. 닿을 거리면 그대로. 새 위치를 돌려준다 */
+export function stepToward(from: Vec2, to: Vec2, speed: number, dt: number, stopAt = 0): Vec2 {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const d = Math.hypot(dx, dy);
+  if (d <= stopAt || d === 0) return from;
+  const step = Math.min(d - stopAt, speed * dt);
+  return { x: from.x + (dx / d) * step, y: from.y + (dy / d) * step };
+}
+/** 잠깐 떠 있는 글자 (대성공·실험 결과 이름 등) */
+export function floatText(host: SkillHost, x: number, y: number, text: string, color = '#ffffff', sec = 0.6): void {
+  const t = host.scene.add
+    .text(x, y, text, { fontFamily: 'sans-serif', fontSize: '9px', color, stroke: '#000000', strokeThickness: 2 })
+    .setOrigin(0.5)
+    .setDepth(7);
+  host.scene.tweens.add({ targets: t, y: y - 10, duration: sec * 1000 });
+  host.fx(t, sec);
 }

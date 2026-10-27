@@ -19,6 +19,8 @@ import { generateStage, type RoomNode } from '../systems/mapgen';
 import { RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
 import { advanceStage, firstStage, type StageRef } from '../systems/run';
 import { absorbHit, refracts, tickShield, type ShieldState } from '../systems/shield';
+import { applyCorruption, corruptedDamage, skillChance, tickCorruption } from '../systems/acro';
+import { combineMods, heal, payHp, takeDamage, type PlayerMods } from '../systems/vitals';
 import {
   cooldownLeft,
   equipSkill,
@@ -114,6 +116,9 @@ export class RunScene extends Phaser.Scene {
   /** 지금 깔려 있는 패시브 (id:레벨:각성). 바뀌면 오브젝트를 다시 깐다 */
   private passiveKey = '';
   private passiveId: string | null = null;
+  /** MK 돌진 */
+  private dashLeft = 0;
+  private dashVel: Vec2 = { x: 0, y: 0 };
 
   private aimDir: Vec2 = { x: 1, y: 0 };
   private fireCooldown = 0;
@@ -246,6 +251,7 @@ export class RunScene extends Phaser.Scene {
     this.shieldFx = null;
     this.passiveKey = '';
     this.passiveId = null;
+    this.dashLeft = 0;
     this.aimDir = { x: 1, y: 0 };
     this.fireCooldown = 0;
     this.invuln = 0;
@@ -352,8 +358,17 @@ export class RunScene extends Phaser.Scene {
 
     const p = this.session.player;
     const d = this.ctx.data;
-    const speed = d.player.moveSpeed * (1 + statEffect('moveSpeed', p.stats, d.stats));
-    this.player.setVelocity(frame.move.x * speed, frame.move.y * speed);
+    const mods = this.playerMods();
+    p.shieldMax = d.player.shieldMax + mods.shieldMax;
+    p.shield = Math.min(p.shield, p.shieldMax);
+    const speed = d.player.moveSpeed * (1 + statEffect('moveSpeed', p.stats, d.stats)) * (1 + mods.moveSpeed);
+    if (this.dashLeft > 0) {
+      // MK 돌진: 입력 대신 돌진 방향으로
+      this.dashLeft -= dt;
+      this.player.setVelocity(this.dashVel.x, this.dashVel.y);
+    } else {
+      this.player.setVelocity(frame.move.x * speed, frame.move.y * speed);
+    }
     const moving = frame.move.x !== 0 || frame.move.y !== 0;
 
     this.updateRooms(dt);
@@ -389,6 +404,7 @@ export class RunScene extends Phaser.Scene {
     this.updateShield(dt);
     for (const o of [...this.skillObjects]) if (!o.update(dt, this.host)) this.removeObject(o);
     this.updateBleeds(dt);
+    this.updateCorruption(dt);
 
     this.updateBullets();
     this.updatePickups(dt);
@@ -503,9 +519,22 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     let dmg = calcDamage({ baseDamage: base, tags }, this.session.player.stats, d.tags);
     if (tags.includes('space')) dmg = spaceDamage(enemy.def.rank, enemy.def.maxHp, dmg, this.tagRule<SpaceRule>('space'));
-    if (!enemy.damage(dmg)) return false;
-    this.onEnemyKilled(enemy);
-    return true;
+    return this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption));
+  }
+
+  /** 계산이 끝난 피해를 넣는다. 환원주의자 등에게 알리고, 죽였으면 true */
+  private applyDamage(enemy: Enemy, dmg: number): boolean {
+    if (enemy.dead) return false;
+    const dealt = Math.min(Math.max(0, enemy.hp), dmg);
+    const killed = enemy.damage(dmg);
+    for (const o of [...this.skillObjects]) o.onDamageDealt?.(this.host, dealt);
+    if (killed) this.onEnemyKilled(enemy);
+    return killed;
+  }
+
+  /** 지금 스킬 오브젝트들이 주는 플레이어 보정 */
+  private playerMods(): PlayerMods {
+    return combineMods(this.skillObjects.flatMap((o) => (o.playerMods ? [o.playerMods()] : [])));
   }
 
   private tagRule<T>(id: TagId): T {
@@ -595,6 +624,27 @@ export class RunScene extends Phaser.Scene {
     ult.gauge = gainGauge(ult.gauge, this.ultimateDef().gaugeMax, d.ultimates.gaugePerKill[e.def.rank]);
     this.removeEnemy(e);
     if (roomId !== undefined) this.rooms.get(roomId)?.enemyKilled();
+    for (const o of [...this.skillObjects]) o.onKill?.(this.host, e);
+    // 마기 변질: 변질된 채 죽으면 폭발
+    const c = e.corruption;
+    if (c) {
+      e.corruption = null;
+      this.fxAt(this.add.circle(x, y, c.burstRadius, hexColor(d.ui.corruptionColor), 0.4).setDepth(6));
+      for (const o of [...this.enemies]) {
+        if (Math.hypot(o.sprite.x - x, o.sprite.y - y) <= c.burstRadius + o.radius) this.hit(o, c.burstDamage, c.burstTags);
+      }
+    }
+  }
+
+  /** 변질 시간, 변질된 적 색 */
+  private updateCorruption(dt: number): void {
+    const color = hexColor(this.ctx.data.ui.corruptionColor);
+    for (const e of this.enemies) {
+      if (!e.corruption || e.dead) continue;
+      e.corruption = tickCorruption(e.corruption, dt);
+      if (!e.corruption) e.sprite.clearTint();
+      else if (!e.sprite.tintFill) e.sprite.setTint(color);
+    }
   }
 
   private removeEnemy(e: Enemy): void {
@@ -609,7 +659,7 @@ export class RunScene extends Phaser.Scene {
       if (!e.bleed || e.dead) continue;
       const out = tickBleed(e.bleed, dt, rule);
       e.bleed = out.state;
-      if (out.damage > 0 && e.damage(out.damage)) this.onEnemyKilled(e);
+      if (out.damage > 0) this.applyDamage(e, corruptedDamage(out.damage, e.corruption));
     }
   }
 
@@ -632,7 +682,10 @@ export class RunScene extends Phaser.Scene {
       return true;
     }
     const p = this.session.player;
-    p.hp = Math.max(0, p.hp - damageTaken(amount, p.stats, this.ctx.data.stats));
+    const taken = damageTaken(amount, p.stats, this.ctx.data.stats) * (1 - this.playerMods().damageReduction);
+    const v = takeDamage(p, taken);
+    p.hp = v.hp;
+    p.shield = v.shield;
     this.invuln = this.ctx.data.player.hurtInvulnSec;
     this.cameras.main.shake(80, 0.004);
     // 피격에 반응하는 스킬 오브젝트 (반물질포 충전 취소 등)
@@ -689,6 +742,30 @@ export class RunScene extends Phaser.Scene {
       setShield: (shield, opts) => {
         this.shield = shield;
         this.shieldOpts = opts;
+      },
+      chance: (base, capKey, tags) => skillChance(base, capKey, tags, this.session.player.stats, ctx.data.tags),
+      corrupt: (e, state) => {
+        if (!e.dead) e.corruption = applyCorruption(e.corruption, state);
+      },
+      defeat: (e) => {
+        if (e.dead) return;
+        e.corruption = null;
+        e.bleed = null;
+        this.onEnemyKilled(e);
+      },
+      heal: (amount, overflow) => {
+        const p = this.session.player;
+        const v = heal(p, amount, overflow);
+        p.hp = v.hp;
+        p.shield = v.shield;
+      },
+      payHp: (ratio) => {
+        const p = this.session.player;
+        p.hp = payHp(p.hp, ratio).hp;
+      },
+      dash: (dir, speed, sec) => {
+        this.dashVel = { x: dir.x * speed, y: dir.y * speed };
+        this.dashLeft = sec;
       },
       refundCooldown: (id, ratio) => {
         const p = this.session.player;

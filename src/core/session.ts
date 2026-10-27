@@ -10,6 +10,9 @@ import type { SchoolId } from '../types/data';
 export interface PlayerState {
   hp: number;
   maxHp: number;
+  /** 보호막: 체력보다 먼저 깎인다(지금은 환원주의자 각성이 채움) */
+  shield: number;
+  shieldMax: number;
   energy: number;
   energyMax: number;
   coins: number;
@@ -72,6 +75,8 @@ export function newPlayerState(data: GameData): PlayerState {
   return {
     hp: data.player.maxHp,
     maxHp: data.player.maxHp,
+    shield: 0,
+    shieldMax: data.player.shieldMax,
     energy: data.player.energy.start,
     energyMax: data.player.energy.max,
     coins: 0,

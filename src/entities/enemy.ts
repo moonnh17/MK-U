@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import type { CorruptionState } from '../systems/acro';
 import type { BleedState } from '../systems/tags';
 import type { EnemyDef } from '../types/data';
 
@@ -13,6 +14,8 @@ export class Enemy {
   dead = false;
   /** 걸려 있는 출혈 */
   bleed: BleedState | null = null;
+  /** 걸려 있는 마기 변질 */
+  corruption: CorruptionState | null = null;
 
   constructor(
     scene: Phaser.Scene,

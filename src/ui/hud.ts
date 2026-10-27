@@ -147,7 +147,7 @@ export class Hud {
       bar.text.setText(max > 0 ? `${Math.ceil(value)}/${max}` : '');
     };
     setBar(this.hp, p.hp, p.maxHp);
-    setBar(this.shield, 0, this.ctx.data.player.shieldMax);
+    setBar(this.shield, p.shield, p.shieldMax);
     const empty = now - s.energyEmptyAt < this.ctx.data.ui.energyEmptyFlashSec * 1000;
     setBar(this.energy, p.energy, p.energyMax, empty ? hexColor(this.ctx.data.ui.hud.bars.hpColor) : this.energy.color);
 
