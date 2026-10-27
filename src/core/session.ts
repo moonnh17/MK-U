@@ -3,9 +3,9 @@ import { startingStats, type Stats } from '../systems/damage';
 import type { StageMap } from '../systems/mapgen';
 import type { StageRef } from '../systems/run';
 import { emptyLoadout, type Cooldowns, type SkillLoadout } from '../systems/skills';
-import { initialSlots, type WeaponSlots } from '../systems/weapons';
+import { initialSlots, plainWeapon, type WeaponSlots } from '../systems/weapons';
 import type { ConversionLog } from '../systems/advancement';
-import type { JobId, SchoolId } from '../types/data';
+import type { EncounterKindId, JobId, SchoolId } from '../types/data';
 
 /** 스테이지를 넘어가도 유지되는 플레이어 상태 */
 export interface PlayerState {
@@ -75,6 +75,8 @@ export interface RunSession {
   energyEmptyAt: number;
   /** 액티브 4칸 + 궁극기 + 패시브 (RunScene이 매 프레임 채운다) */
   skillView: SkillSlotView[];
+  /** 유형이 정해진 조우 칸 (방 id → 유형, 미니맵 아이콘) */
+  encounters: Map<number, EncounterKindId>;
   /** HUD '현재 버프' (RunScene이 매 프레임 채운다) */
   buffs: BuffView[];
 }
@@ -92,7 +94,7 @@ export function newPlayerState(data: GameData): PlayerState {
     energyMax: data.player.energy.max,
     coins: 0,
     stats,
-    weapons: initialSlots(job.startWeapon),
+    weapons: initialSlots(plainWeapon(data.weapons.weapons.find((w) => w.id === job.startWeapon)!)),
     loadout: emptyLoadout(data.skills.activeSlots),
     cooldowns: {},
     ultimate: { id: job.startUltimate, gauge: 0, awakened: false },

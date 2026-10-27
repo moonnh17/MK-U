@@ -17,13 +17,13 @@ export class CardWindow {
     this.root.id = 'card-window';
     this.root.addEventListener('pointerdown', (e) => e.stopPropagation());
     document.body.appendChild(this.root);
-    bus.on('cardsShow', ({ titleKey, cards }) => this.show(titleKey, cards));
+    bus.on('cardsShow', ({ titleKey, cards, reroll }) => this.show(titleKey, cards, reroll));
     bus.on('modal', ({ kind }) => {
       if (kind !== 'cards') this.hide();
     });
   }
 
-  private show(titleKey: string, cards: Card[]): void {
+  private show(titleKey: string, cards: Card[], reroll: { cost: number; enabled: boolean; used: boolean }): void {
     const t = this.ctx.t;
     const player = this.ctx.session?.player;
     if (!player) return;
@@ -106,7 +106,17 @@ export class CardWindow {
       list.appendChild(el);
     });
     this.root.appendChild(list);
-    if (mobile) this.root.appendChild(confirm);
+    // 리롤: 카드창마다 1회, 코인
+    const bar = document.createElement('div');
+    bar.className = 'cw-bar';
+    const rr = document.createElement('button');
+    rr.className = 'cw-reroll';
+    rr.textContent = reroll.used ? t('card.rerollUsed') : t('card.reroll', { cost: reroll.cost });
+    rr.disabled = !reroll.enabled;
+    rr.addEventListener('click', () => bus.emit('cardReroll', {}));
+    bar.appendChild(rr);
+    if (mobile) bar.appendChild(confirm);
+    this.root.appendChild(bar);
     this.root.style.display = 'flex';
   }
 

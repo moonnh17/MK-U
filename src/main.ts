@@ -118,7 +118,8 @@ keyboard.onDebugKey = (key) => {
 // 근처에 줍거나 조사할 것이 있으면 모바일 공격 버튼이 상호작용 버튼이 된다
 bus.on('interactHint', ({ kind }) => {
   if (kind === 'weapon') touch.setAttackOverride('interact', t('mobile.pickup'));
-  else if (kind === 'core') touch.setAttackOverride('interact', t('mobile.interact'));
+  else if (kind === 'chest') touch.setAttackOverride('interact', t('mobile.open'));
+  else if (kind === 'merchant') touch.setAttackOverride('interact', t('mobile.buy'));
   else touch.setAttackOverride(null, t('mobile.attack'));
 });
 // 사망·클리어 화면, 카드 선택창·인벤토리가 떠 있으면 터치 레이어를 걷어 그 화면을 누를 수 있게 한다

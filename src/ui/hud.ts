@@ -6,7 +6,7 @@ import { hexColor } from '../core/scale';
 import type { RunSession } from '../core/session';
 import type { UiMode } from '../input/uiMode';
 import { storedSkills } from '../systems/skills';
-import { activeWeapon, otherWeapon } from '../systems/weapons';
+import { activeWeapon, otherWeapon, weaponStats } from '../systems/weapons';
 import { Minimap } from './minimap';
 
 /** 스킬바 칸 순서는 RunSession.skillView와 같다 (액티브 4 + 궁극기 + 패시브) */
@@ -152,17 +152,21 @@ export class Hud {
     setBar(this.energy, p.energy, p.energyMax, empty ? hexColor(this.ctx.data.ui.hud.bars.hpColor) : this.energy.color);
 
     this.stageText.setText(this.ctx.t('hud.stage', { chapter: s.stage.chapter, stage: s.stage.stage }));
-    this.coinText.setText(this.ctx.t('hud.coins', { coins: p.coins }));
+    this.coinText.setText(this.ctx.t('hud.coins', { coins: Math.floor(p.coins) }));
 
     const weapons = this.ctx.data.weapons.weapons;
-    const main = weapons.find((w) => w.id === activeWeapon(p.weapons));
-    const sub = weapons.find((w) => w.id === otherWeapon(p.weapons));
-    this.mainWeaponText.setText(main ? this.ctx.t(main.nameKey) : '');
-    this.mainCostText.setText(String(main?.energyCost ?? 0)).setColor(empty ? '#ff5555' : this.ctx.data.ui.hud.bars.energyColor);
-    this.subWeaponText.setText(sub ? this.ctx.t(sub.nameKey) : '');
+    const mainItem = activeWeapon(p.weapons);
+    const subItem = otherWeapon(p.weapons);
+    const main = weapons.find((w) => w.id === mainItem?.defId);
+    const sub = weapons.find((w) => w.id === subItem?.defId);
+    const gradeColor = (g: string | undefined) => this.ctx.data.groupMultipliers.grades.find((x) => x.id === g)?.color ?? '#ffffff';
+    this.mainWeaponText.setText(main ? this.ctx.t(main.nameKey) : '').setColor(gradeColor(mainItem?.grade));
+    const cost = main && mainItem ? weaponStats(main, mainItem, 1).energyCost : 0;
+    this.mainCostText.setText(String(cost)).setColor(empty ? '#ff5555' : this.ctx.data.ui.hud.bars.energyColor);
+    this.subWeaponText.setText(sub ? this.ctx.t(sub.nameKey) : '').setColor(gradeColor(subItem?.grade));
 
     this.updateBuffs(s);
-    this.minimap.render(s.map, s.visited, s.currentRoomId, this.ctx.debugFlags.revealMap);
+    this.minimap.render(s.map, s.visited, s.currentRoomId, this.ctx.debugFlags.revealMap, s.encounters);
     if (this.pcOnly.visible) this.updateSkillbar(s);
   }
 

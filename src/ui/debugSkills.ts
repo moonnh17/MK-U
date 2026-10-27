@@ -5,7 +5,7 @@
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { isSkillImplemented } from '../skills/registry';
-import { STAT_IDS, type StatId } from '../types/data';
+import { STAT_IDS, type EncounterKindId, type GradeId, type StatId } from '../types/data';
 
 function select(options: [string, string][]): HTMLSelectElement {
   const s = document.createElement('select');
@@ -119,6 +119,24 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
     row(
       bossHpInput,
       button(t('debug.bossHp'), () => bus.emit('debugBossHp', { ratio: Math.max(1, Math.min(100, Number(bossHpInput.value) || 100)) / 100 })),
+    ),
+  );
+  // 다음 조우 칸 유형 강제, 무기 지급, 코인
+  const encSel = select([['', t('debug.encounterRandom')], ...(['treasure', 'merchant', 'raid', 'magiSpire', 'hiddenBoss'] as const).map((k): [string, string] => [k, t(`encounter.${k}`)])]);
+  const weaponSel = select(d.weapons.weapons.map((w): [string, string] => [w.id, t(w.nameKey)]));
+  const gradeSel = select(d.groupMultipliers.grades.map((g): [string, string] => [g.id, t(g.nameKey)]));
+  body.appendChild(
+    row(
+      encSel,
+      button(t('debug.forceEncounter'), () => bus.emit('debugForceEncounter', { kind: encSel.value === '' ? null : (encSel.value as EncounterKindId) })),
+      button(t('debug.coins'), () => bus.emit('debugCoins', { amount: 50 })),
+    ),
+  );
+  body.appendChild(
+    row(
+      weaponSel,
+      gradeSel,
+      button(t('debug.giveWeapon'), () => bus.emit('debugGiveWeapon', { defId: weaponSel.value, grade: gradeSel.value as GradeId })),
     ),
   );
   // 계열 집계를 정하고 바로 전직

@@ -1,4 +1,6 @@
 import Phaser from 'phaser';
+import { hexColor } from '../core/scale';
+import type { WeaponItem } from '../systems/weapons';
 import type { PickupsData } from '../types/data';
 
 export type PickupKind = 'energy' | 'coin';
@@ -44,17 +46,20 @@ export class Pickup {
   }
 }
 
-/** 바닥에 놓인 무기. F(모바일: 줍기)로 교환한다. */
+/** 바닥에 놓인 무기. F(모바일: 줍기)로 교환한다. 일반 등급이 아니면 등급 색 고리 */
 export class FloorWeapon {
   readonly sprite: Phaser.GameObjects.Image;
+  private readonly glow: Phaser.GameObjects.Arc | null;
 
   constructor(
     scene: Phaser.Scene,
-    readonly weaponId: string,
+    readonly item: WeaponItem,
     spriteKey: string,
     x: number,
     y: number,
+    gradeColor: string | null = null,
   ) {
+    this.glow = gradeColor ? scene.add.circle(x, y, 8).setStrokeStyle(1, hexColor(gradeColor), 0.9).setDepth(1) : null;
     this.sprite = scene.add.image(x, y, spriteKey).setDepth(2);
     scene.tweens.add({ targets: this.sprite, y: y - 2, duration: 600, yoyo: true, repeat: -1 });
   }
@@ -70,5 +75,6 @@ export class FloorWeapon {
   destroy(): void {
     this.sprite.scene.tweens.killTweensOf(this.sprite);
     this.sprite.destroy();
+    this.glow?.destroy();
   }
 }

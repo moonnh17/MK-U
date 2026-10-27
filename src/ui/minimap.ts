@@ -26,9 +26,10 @@ export class Minimap {
     this.container.add(this.g);
   }
 
-  render(map: StageMap, visited: ReadonlySet<number>, currentId: number | null, revealAll: boolean): void {
+  /** encounters: 유형이 정해진 조우 칸 (방 id → 유형). 정해지면 ! 대신 유형 아이콘 */
+  render(map: StageMap, visited: ReadonlySet<number>, currentId: number | null, revealAll: boolean, encounters: ReadonlyMap<number, string> = new Map()): void {
     const vis = visibleRooms(map, visited, revealAll);
-    const sig = `${map.chapter}-${map.stage}|${[...vis].sort().join(',')}|${[...visited].sort().join(',')}|${currentId}`;
+    const sig = `${map.chapter}-${map.stage}|${[...vis].sort().join(',')}|${[...visited].sort().join(',')}|${currentId}|${[...encounters].join(',')}`;
     if (sig === this.signature) return;
     this.signature = sig;
 
@@ -76,7 +77,8 @@ export class Minimap {
       exitRoom: 'minimap.exit',
     };
     for (const r of shown) {
-      const key = glyphKey[r.kind];
+      const enc = encounters.get(r.id);
+      const key = enc ? `encounter.icon.${enc}` : glyphKey[r.kind];
       if (!key) continue;
       const p = pos(r.gx, r.gy);
       const t = this.scene.add

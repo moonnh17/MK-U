@@ -706,3 +706,22 @@ body {
   color: #c8d0d8;
   text-align: center;
 }
+
+.cw-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.cw-reroll {
+  font: bold 13px sans-serif;
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 2px solid #8a9aac;
+  background: #1a2532;
+  color: #fff;
+}
+
+.cw-reroll:disabled {
+  opacity: 0.35;
+}

@@ -26,6 +26,9 @@ export class Enemy {
   dead = false;
   /** 남은 무적(초). 보스 강화 단계 진입 연출 중 */
   invuln = 0;
+  /** 넉백 남은 시간·속도 */
+  private kbLeft = 0;
+  private kbVel: Vec2 = { x: 0, y: 0 };
   /** 보스 거대화 등 추가 크기 배율 */
   private extraScale = 1;
   /** 반역 개체가 되어 사라졌다(폭발 엘리트도 터지지 않음) */
@@ -95,6 +98,11 @@ export class Enemy {
   update(dt: number, host: HazardHost): void {
     if (this.dead) return;
     this.updateLook(dt);
+    if (this.kbLeft > 0) {
+      this.kbLeft -= dt;
+      this.sprite.setVelocity(this.kbVel.x, this.kbVel.y);
+      return;
+    }
     if (this.invuln > 0) {
       this.invuln -= dt;
       this.sprite.setAlpha(this.invuln > 0 ? 0.5 + 0.5 * Math.abs(Math.sin(this.invuln * 20)) : 1);
@@ -195,6 +203,17 @@ export class Enemy {
   private clearTelegraph(): void {
     this.telegraph?.destroy();
     this.telegraph = null;
+  }
+
+  /** 넉백: 거대 엘리트·보스는 면역 */
+  get knockbackImmune(): boolean {
+    return !!this.elite?.knockbackImmune || this.def.rank === 'boss' || this.def.rank === 'hiddenBoss';
+  }
+
+  knockback(dir: Vec2, distance: number, sec: number): void {
+    if (this.dead || this.knockbackImmune || sec <= 0) return;
+    this.kbLeft = sec;
+    this.kbVel = { x: (dir.x * distance) / sec, y: (dir.y * distance) / sec };
   }
 
   /** 피해를 주고, 이번에 죽었으면 true */
