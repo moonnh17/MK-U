@@ -178,6 +178,15 @@ export function cooldownLeft(cd: Cooldowns, id: string): number {
   return cd[id] ?? 0;
 }
 
+/** 남은 쿨타임을 sec만큼 돌려준다(0 아래로 내려가면 쿨타임 끝) */
+export function refundCooldown(cd: Cooldowns, id: string, sec: number): Cooldowns {
+  const out = { ...cd };
+  const v = cooldownLeft(cd, id) - sec;
+  if (v > 0) out[id] = v;
+  else delete out[id];
+  return out;
+}
+
 // ---------- 궁극기 게이지 ----------
 
 export function gainGauge(gauge: number, max: number, amount: number): number {

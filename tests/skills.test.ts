@@ -15,6 +15,7 @@ import {
   setSkillLevel,
   skillValues,
   storedSkills,
+  refundCooldown,
   tickCooldowns,
   type Cooldowns,
   type SkillLoadout,
@@ -161,6 +162,13 @@ describe('쿨타임·궁극기 게이지', () => {
     expect(cooldownLeft(cd, 'a')).toBeCloseTo(0.5);
     expect(cooldownLeft(cd, 'b')).toBe(0);
     expect(cooldownLeft(cd, 'none')).toBe(0);
+  });
+
+  it('쿨타임 환급: 남은 시간에서 빼고, 다 돌려받으면 끝', () => {
+    const cd: Cooldowns = { cannon: 9 };
+    expect(cooldownLeft(refundCooldown(cd, 'cannon', 5), 'cannon')).toBeCloseTo(4);
+    expect(cooldownLeft(refundCooldown({ cannon: 3 }, 'cannon', 5), 'cannon')).toBe(0);
+    expect(cd.cannon).toBe(9);
   });
 
   it('게이지는 최대치를 넘지 않는다', () => {

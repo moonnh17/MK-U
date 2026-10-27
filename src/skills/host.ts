@@ -41,6 +41,8 @@ export interface SkillHost {
   buffDuration(baseSec: number, tags: readonly TagId[]): number;
   /** 플레이어 보호막(마기역장)을 씌운다. 다시 쓰면 새것으로 바뀐다 */
   setShield(shield: ShieldState, opts: ShieldOpts): void;
+  /** 스킬 쿨타임을 전체 쿨타임 × ratio만큼 돌려준다 */
+  refundCooldown(skillId: string, ratio: number): void;
   /** 짧은 이펙트를 fxSec 뒤에 지운다 */
   fx(obj: Phaser.GameObjects.GameObject, sec?: number): void;
   /** 색 사각형 텍스처 스프라이트 */
@@ -66,6 +68,8 @@ export interface SkillObject {
   destroy(): void;
   /** HUD에 버프로 보일 상태 (반물질포 충전 등) */
   buff?(host: SkillHost): BuffView | null;
+  /** 플레이어가 실제로 피해를 받았을 때(보호막으로 막은 공격은 제외). false면 제거된다 */
+  onPlayerHurt?(host: SkillHost): boolean;
 }
 
 export interface SkillCast {

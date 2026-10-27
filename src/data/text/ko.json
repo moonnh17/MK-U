@@ -65,9 +65,9 @@
   "skill.magiMine.awakened.desc": "지뢰 {count}개(피해 {damage}). 지뢰로 처치하면 그 자리에 새 지뢰가 생겨 연쇄 폭파한다",
   "skill.antimatterCannon": "반물질포",
   "skill.antimatterCannon.short": "반물",
-  "skill.antimatterCannon.desc": "{chargeSec}초 충전 후 대형 포격을 한다. 피해 {damage}",
+  "skill.antimatterCannon.desc": "누르면 {chargeSec}초 충전한 뒤 대형 포격을 한다(피해 {damage}). 충전 중 피해를 받으면 끊기고 쿨타임 절반을 돌려받는다",
   "skill.antimatterCannon.awakened": "다연장반입자포",
-  "skill.antimatterCannon.awakened.desc": "충전 후 {barrels}포신 연속 포격(발당 {damage}). 밀집 지역·강적을 자동 조준한다",
+  "skill.antimatterCannon.awakened.desc": "충전 후 {barrels}포신 연속 포격(발당 {damage}). 밀집 지역·강적을 자동 조준한다. 충전 중 피해를 받으면 끊긴다",
   "skill.magiField": "마기역장",
   "skill.magiField.short": "역장",
   "skill.magiField.desc": "공격 {hits}회를 막는 보호막을 {durationSec}초 두른다",
@@ -155,6 +155,7 @@
   "skillMsg.statUp": "{stat} +{amount}",
   "skillMsg.noTarget": "사거리 안에 적이 없음",
   "skillMsg.ultimateNotReady": "궁극기 게이지 부족",
+  "skillMsg.chargeInterrupted": "충전 중단 — 쿨타임 절반 회복",
 
   "room.encounterPending": "조우 코어 — 준비 중",
   "room.energyEmpty": "에너지 부족",
@@ -163,7 +164,7 @@
   "screen.death": "사망",
   "screen.chapterClear": "챕터{chapter} 클리어 (임시)",
   "screen.restart": "다시 시작",
-  "screen.restartHint": "Q / F / 화면 탭",
+  "screen.restartHint": "Space / F / 화면 탭",
 
   "minimap.encounter": "!",
   "minimap.boss": "☠",

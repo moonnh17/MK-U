@@ -24,6 +24,7 @@ import {
   equipSkill,
   findSkill,
   gainGauge,
+  refundCooldown,
   setSkillLevel,
   skillValues,
   tickCooldowns,
@@ -634,6 +635,8 @@ export class RunScene extends Phaser.Scene {
     p.hp = Math.max(0, p.hp - damageTaken(amount, p.stats, this.ctx.data.stats));
     this.invuln = this.ctx.data.player.hurtInvulnSec;
     this.cameras.main.shake(80, 0.004);
+    // 피격에 반응하는 스킬 오브젝트 (반물질포 충전 취소 등)
+    for (const o of [...this.skillObjects]) if (o.onPlayerHurt && !o.onPlayerHurt(this.host)) this.removeObject(o);
     if (p.hp <= 0) this.endRun({ type: 'dead' });
     return true;
   }
@@ -686,6 +689,13 @@ export class RunScene extends Phaser.Scene {
       setShield: (shield, opts) => {
         this.shield = shield;
         this.shieldOpts = opts;
+      },
+      refundCooldown: (id, ratio) => {
+        const p = this.session.player;
+        const owned = p.loadout.owned[id];
+        if (!owned) return;
+        const total = skillValues(findSkill(ctx.data.skills, id), owned).cooldownSec;
+        p.cooldowns = refundCooldown(p.cooldowns, id, total * ratio);
       },
       bleed: (e, base, stacks, tags) => {
         if (e.dead) return;

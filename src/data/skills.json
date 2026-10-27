@@ -92,9 +92,9 @@
       "tags": ["tech", "ranged", "charging"],
       "sources": { "blast": ["tech", "ranged", "charging"] },
       "levels": [
-        { "cooldownSec": 10, "values": { "chargeSec": 1.2, "damage": 40, "radius": 36, "projectileSpeed": 200, "range": 260 } },
-        { "cooldownSec": 9, "values": { "chargeSec": 1.1, "damage": 55, "radius": 40, "projectileSpeed": 200, "range": 260 } },
-        { "cooldownSec": 8, "values": { "chargeSec": 1.0, "damage": 70, "radius": 44, "projectileSpeed": 200, "range": 260 } }
+        { "cooldownSec": 10, "values": { "chargeSec": 1.2, "interruptRefund": 0.5, "damage": 40, "radius": 36, "projectileSpeed": 200, "range": 260 } },
+        { "cooldownSec": 9, "values": { "chargeSec": 1.1, "interruptRefund": 0.5, "damage": 55, "radius": 40, "projectileSpeed": 200, "range": 260 } },
+        { "cooldownSec": 8, "values": { "chargeSec": 1.0, "interruptRefund": 0.5, "damage": 70, "radius": 44, "projectileSpeed": 200, "range": 260 } }
       ],
       "awakening": {
         "nameKey": "skill.antimatterCannon.awakened",

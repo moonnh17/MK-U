@@ -1,9 +1,11 @@
 /**
  * 반물질포 (헥타르, 기술·원거리·차징).
- * 누르면 충전(민첩으로 빨라짐)한 뒤 가장 가까운 적에게 대형 포탄을 쏜다. 충전 중에도 움직일 수 있다.
+ * 한 번 누르면 충전(민첩으로 빨라짐)이 시작되고, 충전이 끝나면 가장 가까운 적에게 대형 포탄을 자동으로 쏜다.
+ * 충전 중에도 움직일 수 있다. 충전 중 피해를 받으면 충전이 끊기고 쿨타임의 절반을 돌려받는다.
  * 각성 '다연장반입자포': 충전 뒤 4포신이 연속 포격하고, 매 발 밀집 지역·강적을 자동 조준한다.
  */
 import type Phaser from 'phaser';
+import { bus } from '../core/events';
 import { skillTags } from '../systems/tags';
 import { bestClusterTarget } from '../systems/targeting';
 import { Explosive } from './explosive';
@@ -82,6 +84,14 @@ class Charge implements SkillObject {
         sprite: this.s.def.sprites.shell!,
       }),
     );
+  }
+
+  /** 충전 중에 피해를 받으면 충전이 끊기고 쿨타임 일부를 돌려받는다. 발사가 시작된 뒤에는 끊기지 않는다 */
+  onPlayerHurt(host: SkillHost): boolean {
+    if (this.t >= this.total) return true;
+    host.refundCooldown(ID, this.s.values.interruptRefund!);
+    bus.emit('toast', { text: host.ctx.t('skillMsg.chargeInterrupted') });
+    return false;
   }
 
   buff(host: SkillHost): BuffView | null {
