@@ -27,11 +27,14 @@ export class RoomState {
     this.phase = waves.length > 0 ? 'idle' : 'cleared';
   }
 
-  /** 플레이어가 방 안쪽까지 들어왔을 때. 한 번 깬 방은 다시 잠기지 않는다. */
-  enter(): RoomEvent[] {
+  /**
+   * 플레이어가 방 안쪽까지 들어왔을 때. 한 번 깬 방은 다시 잠기지 않는다.
+   * startDelaySec: 첫 웨이브 전 대기(보스방 경고 배너)
+   */
+  enter(startDelaySec = 0): RoomEvent[] {
     if (this.phase !== 'idle') return [];
     this.phase = 'locked';
-    this.delay = 0;
+    this.delay = startDelaySec;
     return [{ type: 'lock' }];
   }
 
