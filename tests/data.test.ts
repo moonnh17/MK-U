@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { gameData, type GameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
+import { EXPERIMENT_RESULTS } from '../src/skills/experimentalWeapon';
 import { isSkillImplemented } from '../src/skills/registry';
 import { TAG_IDS } from '../src/types/data';
 
@@ -101,6 +102,28 @@ describe('데이터 검증', () => {
       expect(skill('magiMine').awakening.tags).toEqual(['tech', 'magic', 'ranged']);
       expect(skill('magiMine').sources.chainMine).toEqual(['tech', 'magic', 'ranged']);
       expect(skill('combatDrone').sources.droneShot).toEqual(['tech', 'ranged']);
+    });
+
+    it('12개 스킬이 모두 발동 함수를 가진다', () => {
+      expect(gameData.skills.skills.filter((s) => !isSkillImplemented(s.id)).map((s) => s.id)).toEqual([]);
+    });
+
+    it('실험 병기: 결과마다 source가 있고 공간격은 공간 붕괴에만', () => {
+      const s = skill('experimentalWeapon');
+      expect(Object.keys(s.sources).sort()).toEqual([...EXPERIMENT_RESULTS].sort());
+      for (const [id, tags] of Object.entries(s.sources)) {
+        expect(tags.includes('space'), id).toBe(id === 'collapse');
+        expect(s.levels[0]!.values[`${id}Weight`], `${id} 가중치`).toBeGreaterThan(0);
+      }
+    });
+
+    it('대성공을 쓰는 아크로 스킬은 각자 대성공 확률을 갖는다 (확률 태그)', () => {
+      for (const id of ['unstableSubject', 'magiCorruption', 'experimentalWeapon']) {
+        expect(skill(id).tags).toContain('chance');
+        skill(id).levels.forEach((lv) => expect(lv.values.greatChance, id).toBeGreaterThan(0));
+      }
+      expect(skill('mkPrototype').sources.punch).toEqual(['physical', 'melee']);
+      expect(skill('mkPrototype').sources.dash).toEqual(['physical', 'melee']);
     });
 
     it('카드로 나오는 스킬은 레벨·각성 수치가 채워져 있다', () => {

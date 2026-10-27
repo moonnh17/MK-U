@@ -362,6 +362,7 @@ export function validateGameData(d: GameData): Errors {
     checkPositive(errors, `ui.mobile.${k}`, mb[k]);
   }
   if (mb.skillFanDeg.length !== 4) errors.push('ui.mobile.skillFanDeg: 4개여야 함');
+  if (!HEX_COLOR.test(d.ui.corruptionColor)) errors.push('ui.corruptionColor: #RRGGBB');
   const sb = d.ui.hud.skillbar;
   if (sb.levelColors.length !== 3) errors.push('ui.hud.skillbar.levelColors: Lv1~3, 3개여야 함');
   for (const col of [...sb.levelColors, sb.awakenedColor, sb.emptyColor, sb.cooldownColor, sb.ultimateReadyColor]) {

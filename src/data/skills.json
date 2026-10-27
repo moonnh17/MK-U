@@ -204,7 +204,11 @@
       "descKey": "skill.unstableSubject.desc",
       "tags": ["tech", "chance", "ranged"],
       "sources": { "subject": ["tech", "chance", "ranged"] },
-      "levels": [{ "cooldownSec": 9, "values": {} }, { "cooldownSec": 8, "values": {} }, { "cooldownSec": 7, "values": {} }],
+      "levels": [
+        { "cooldownSec": 9, "values": { "count": 1, "lifeSec": 8, "moveSpeed": 110, "rushDamage": 6, "rushIntervalSec": 0.5, "blastDamage": 16, "blastRadius": 22, "shotDamage": 3, "shotIntervalSec": 0.6, "range": 120, "projectileSpeed": 240, "rushWeight": 1, "blastWeight": 1, "shotWeight": 1, "greatChance": 0.1 } },
+        { "cooldownSec": 8, "values": { "count": 1, "lifeSec": 9, "moveSpeed": 115, "rushDamage": 8, "rushIntervalSec": 0.5, "blastDamage": 20, "blastRadius": 24, "shotDamage": 4, "shotIntervalSec": 0.55, "range": 120, "projectileSpeed": 240, "rushWeight": 1, "blastWeight": 1, "shotWeight": 1, "greatChance": 0.1 } },
+        { "cooldownSec": 7, "values": { "count": 1, "lifeSec": 10, "moveSpeed": 120, "rushDamage": 10, "rushIntervalSec": 0.45, "blastDamage": 24, "blastRadius": 26, "shotDamage": 5, "shotIntervalSec": 0.5, "range": 130, "projectileSpeed": 240, "rushWeight": 1, "blastWeight": 1, "shotWeight": 1, "greatChance": 0.1 } }
+      ],
       "awakening": {
         "nameKey": "skill.unstableSubject.awakened",
         "descKey": "skill.unstableSubject.awakened.desc",
@@ -212,10 +216,12 @@
         "requiredValue": 20,
         "tags": ["tech", "chance", "ranged"],
         "cooldownSec": 7,
-        "values": {}
+        "values": { "count": 3, "lifeSec": 8, "moveSpeed": 140, "blastDamage": 24, "blastRadius": 26, "multiplyChance": 0.4, "maxSubjects": 12 }
       },
       "color": "#9ad94a",
-      "sprites": {}
+      "sprites": {
+        "subject": { "spriteKey": "skill_subject", "color": "#9ad94a", "size": 7 }
+      }
     },
     {
       "id": "magiCorruption",
@@ -227,7 +233,11 @@
       "descKey": "skill.magiCorruption.desc",
       "tags": ["magic", "chance", "ranged"],
       "sources": { "corruption": ["magic", "chance", "ranged"] },
-      "levels": [{ "cooldownSec": 8, "values": {} }, { "cooldownSec": 7, "values": {} }, { "cooldownSec": 6, "values": {} }],
+      "levels": [
+        { "cooldownSec": 8, "values": { "damage": 6, "range": 70, "arcDeg": 90, "durationSec": 5, "vulnerability": 0.25, "burstDamage": 8, "burstRadius": 22, "greatChance": 0.1, "greatVulnerabilityMultiplier": 2 } },
+        { "cooldownSec": 7, "values": { "damage": 8, "range": 75, "arcDeg": 90, "durationSec": 5, "vulnerability": 0.3, "burstDamage": 10, "burstRadius": 24, "greatChance": 0.1, "greatVulnerabilityMultiplier": 2 } },
+        { "cooldownSec": 6, "values": { "damage": 10, "range": 80, "arcDeg": 100, "durationSec": 6, "vulnerability": 0.35, "burstDamage": 12, "burstRadius": 26, "greatChance": 0.1, "greatVulnerabilityMultiplier": 2 } }
+      ],
       "awakening": {
         "nameKey": "skill.magiCorruption.awakened",
         "descKey": "skill.magiCorruption.awakened.desc",
@@ -235,7 +245,7 @@
         "requiredValue": 20,
         "tags": ["magic", "chance", "ranged"],
         "cooldownSec": 6,
-        "values": {}
+        "values": { "damage": 12, "range": 85, "arcDeg": 110, "rebelChance": 0.35, "rebelSec": 8, "rebelDamage": 6, "rebelIntervalSec": 0.6, "dominateSec": 14, "dominateDamageMultiplier": 2 }
       },
       "color": "#c83a5a",
       "sprites": {}
@@ -249,8 +259,17 @@
       "shortKey": "skill.experimentalWeapon.short",
       "descKey": "skill.experimentalWeapon.desc",
       "tags": ["tech", "chance", "ranged"],
-      "sources": {},
-      "levels": [{ "cooldownSec": 9, "values": {} }, { "cooldownSec": 8, "values": {} }, { "cooldownSec": 7, "values": {} }],
+      "sources": {
+        "explosion": ["tech", "chance", "ranged"],
+        "barrage": ["tech", "chance", "ranged"],
+        "discharge": ["tech", "chance", "ranged"],
+        "collapse": ["tech", "chance", "ranged", "space"]
+      },
+      "levels": [
+        { "cooldownSec": 9, "values": { "results": 1, "greatResults": 1, "greatChance": 0.1, "greatMultiplier": 1.5, "range": 200, "explosionWeight": 3, "explosionDamage": 20, "explosionRadius": 30, "explosionSpeed": 220, "barrageWeight": 3, "barrageCount": 10, "barrageDamage": 4, "barrageSpeed": 220, "dischargeWeight": 3, "dischargeDamage": 12, "dischargeCount": 3, "dischargeRange": 90, "collapseWeight": 1, "collapseDamage": 10, "collapseRadius": 16 } },
+        { "cooldownSec": 8, "values": { "results": 1, "greatResults": 1, "greatChance": 0.1, "greatMultiplier": 1.5, "range": 200, "explosionWeight": 3, "explosionDamage": 26, "explosionRadius": 32, "explosionSpeed": 220, "barrageWeight": 3, "barrageCount": 12, "barrageDamage": 5, "barrageSpeed": 220, "dischargeWeight": 3, "dischargeDamage": 15, "dischargeCount": 4, "dischargeRange": 90, "collapseWeight": 1, "collapseDamage": 14, "collapseRadius": 18 } },
+        { "cooldownSec": 7, "values": { "results": 1, "greatResults": 1, "greatChance": 0.1, "greatMultiplier": 1.5, "range": 220, "explosionWeight": 3, "explosionDamage": 32, "explosionRadius": 34, "explosionSpeed": 220, "barrageWeight": 3, "barrageCount": 14, "barrageDamage": 6, "barrageSpeed": 220, "dischargeWeight": 3, "dischargeDamage": 18, "dischargeCount": 5, "dischargeRange": 100, "collapseWeight": 1, "collapseDamage": 18, "collapseRadius": 20 } }
+      ],
       "awakening": {
         "nameKey": "skill.experimentalWeapon.awakened",
         "descKey": "skill.experimentalWeapon.awakened.desc",
@@ -258,10 +277,12 @@
         "requiredValue": 20,
         "tags": ["tech", "chance", "ranged"],
         "cooldownSec": 7,
-        "values": {}
+        "values": { "results": 2, "greatResults": 3, "greatMultiplier": 1 }
       },
       "color": "#d9d03b",
-      "sprites": {}
+      "sprites": {
+        "shell": { "spriteKey": "skill_experiment_shell", "color": "#d9d03b", "size": 6 }
+      }
     },
     {
       "id": "purifyingWings",
@@ -313,7 +334,11 @@
       "descKey": "skill.mkPrototype.desc",
       "tags": ["buff", "melee"],
       "sources": { "punch": ["physical", "melee"], "dash": ["physical", "melee"] },
-      "levels": [{ "cooldownSec": 14, "values": {} }, { "cooldownSec": 13, "values": {} }, { "cooldownSec": 12, "values": {} }],
+      "levels": [
+        { "cooldownSec": 14, "values": { "range": 40, "durationSec": 6, "moveSpeed": 0.2, "damageReduction": 0.2, "punchDamage": 8, "punchIntervalSec": 0.5, "fxRadius": 9 } },
+        { "cooldownSec": 13, "values": { "range": 42, "durationSec": 7, "moveSpeed": 0.25, "damageReduction": 0.25, "punchDamage": 10, "punchIntervalSec": 0.45, "fxRadius": 9 } },
+        { "cooldownSec": 12, "values": { "range": 44, "durationSec": 8, "moveSpeed": 0.3, "damageReduction": 0.3, "punchDamage": 12, "punchIntervalSec": 0.4, "fxRadius": 9 } }
+      ],
       "awakening": {
         "nameKey": "skill.mkPrototype.awakened",
         "descKey": "skill.mkPrototype.awakened.desc",
@@ -321,7 +346,7 @@
         "requiredValue": 20,
         "tags": ["buff", "melee"],
         "cooldownSec": 12,
-        "values": {}
+        "values": { "hpCost": 0.15, "durationSec": 8, "moveSpeed": 0.35, "damageReduction": 0.3, "punchDamage": 16, "blastRadius": 24, "dashRange": 100, "dashSpeed": 360, "dashSec": 0.18, "dashDamage": 10, "dashCooldownSec": 1.5, "fxRadius": 11 }
       },
       "color": "#d9783b",
       "sprites": {}
@@ -336,7 +361,11 @@
       "descKey": "skill.reductionist.desc",
       "tags": ["buff"],
       "sources": {},
-      "levels": [{ "cooldownSec": 0, "values": {} }, { "cooldownSec": 0, "values": {} }, { "cooldownSec": 0, "values": {} }],
+      "levels": [
+        { "cooldownSec": 0, "values": { "hitHeal": 0.5, "hitHealIntervalSec": 0.5, "killHeal": 2 } },
+        { "cooldownSec": 0, "values": { "hitHeal": 0.7, "hitHealIntervalSec": 0.5, "killHeal": 3 } },
+        { "cooldownSec": 0, "values": { "hitHeal": 1, "hitHealIntervalSec": 0.5, "killHeal": 4 } }
+      ],
       "awakening": {
         "nameKey": "skill.reductionist.awakened",
         "descKey": "skill.reductionist.awakened.desc",
@@ -344,7 +373,7 @@
         "requiredValue": 20,
         "tags": ["buff"],
         "cooldownSec": 0,
-        "values": {}
+        "values": { "lifesteal": 0.05, "basicUnit": 6, "shieldCap": 30 }
       },
       "color": "#5ad95a",
       "sprites": {}

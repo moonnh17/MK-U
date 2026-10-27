@@ -46,6 +46,7 @@
   "cameraLerp": 0.18,
   "toastSec": 1.6,
   "storedNoticeSec": 4,
+  "corruptionColor": "#c83a5a",
   "energyEmptyFlashSec": 0.3,
   "mobile": {
     "edgeMarginDp": 16,
