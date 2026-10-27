@@ -97,7 +97,7 @@ export const magiCorruption: SkillImpl = {
         burstRadius: host.area(v.burstRadius!),
         burstTags: tags,
       });
-      if (!awakened || !canRebel(e.def.rank)) continue;
+      if (!awakened || !canRebel(e.rank)) continue;
       if (!rollChance(host.rng, host.chance(v.rebelChance!, 'success', tags))) continue;
       const pos = { x: e.sprite.x, y: e.sprite.y };
       host.defeat(e);

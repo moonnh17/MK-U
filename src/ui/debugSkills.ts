@@ -91,6 +91,7 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
 
   // 적 소환 (현재 방)
   const enemySel = select(d.enemies.enemies.map((e) => [e.id, t(e.nameKey)]));
+  const eliteSel = select([['', t('debug.eliteNone')], ...d.elites.elites.map((e): [string, string] => [e.id, t(e.nameKey)])]);
   const countInput = document.createElement('input');
   countInput.type = 'number';
   countInput.value = '3';
@@ -98,8 +99,15 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
   body.appendChild(
     row(
       enemySel,
+      eliteSel,
       countInput,
-      button(t('debug.spawn'), () => bus.emit('debugSpawn', { enemyId: enemySel.value, count: Math.max(1, Number(countInput.value) || 1) })),
+      button(t('debug.spawn'), () =>
+        bus.emit('debugSpawn', {
+          enemyId: enemySel.value,
+          count: Math.max(1, Number(countInput.value) || 1),
+          elite: eliteSel.value === '' ? null : eliteSel.value,
+        }),
+      ),
       button(t('debug.barrage'), () => bus.emit('debugBarrage', {})),
     ),
   );

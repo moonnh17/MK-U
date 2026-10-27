@@ -65,7 +65,7 @@ class Drone implements SkillObject {
     const enemies = host.enemies();
     const i = priorityTarget(
       this.pos,
-      enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius, rank: e.def.rank })),
+      enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius, rank: e.rank })),
       v.searchRange!,
       host.ctx.data.skills.targetWeights,
     );

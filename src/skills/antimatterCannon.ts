@@ -62,7 +62,7 @@ class Charge implements SkillObject {
     if (this.s.owned.awakened) {
       const inRange = enemies.filter((e) => Math.hypot(e.sprite.x - from.x, e.sprite.y - from.y) <= v.range! + e.radius);
       const i = bestClusterTarget(
-        inRange.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius, rank: e.def.rank })),
+        inRange.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius, rank: e.rank })),
         host.area(v.clusterRadius!),
         host.ctx.data.skills.targetWeights,
       );

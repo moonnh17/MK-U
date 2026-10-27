@@ -9,11 +9,13 @@ import { hexColor } from '../core/scale';
 import { newPlayerState, type BuffView, type PlayerState, type RunSession, type SkillSlotView } from '../core/session';
 import { Door } from '../entities/door';
 import { Enemy } from '../entities/enemy';
+import { DelayedBlast, type Hazard, type HazardHost } from '../entities/hazard';
 import { FloorWeapon, Pickup } from '../entities/pickup';
 import type { ShieldOpts, SkillHost, SkillObject } from '../skills/host';
 import { isSkillImplemented, passiveImpl, skillImpl, ultimateImpl } from '../skills/registry';
 import { applyCard, drawSkillCards, drawStatCards, runStartOffers, stageEndOffers, type Card } from '../systems/cards';
 import { calcDamage, gradeMultiplier, spaceDamage } from '../systems/damage';
+import { assignElites, eliteCount } from '../systems/elites';
 import { pendingEncounter } from '../systems/encounter';
 import { generateStage, type RoomNode } from '../systems/mapgen';
 import { RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
@@ -109,6 +111,9 @@ export class RunScene extends Phaser.Scene {
   private portals: Prop[] = [];
   private cores: Prop[] = [];
   private skillObjects: SkillObject[] = [];
+  /** 적 쪽 위험 지대(폭발 엘리트 지연 폭발 등) */
+  private hazards: Hazard[] = [];
+  private enemyHost!: HazardHost;
   /** 마기역장 보호막 */
   private shield: ShieldState | null = null;
   private shieldOpts: ShieldOpts | null = null;
@@ -170,6 +175,12 @@ export class RunScene extends Phaser.Scene {
     this.rng = Rng.derive(seed, `combat-${stage.chapter}-${stage.stage}`);
     this.m = metrics(d.mapgen);
     this.host = this.makeHost();
+    this.enemyHost = {
+      scene: this,
+      playerPos: () => ({ x: this.player.x, y: this.player.y }),
+      playerRadius: d.player.size / 2,
+      hurtPlayer: (amount) => this.hurtPlayer(amount),
+    };
 
     this.walls = this.physics.add.staticGroup();
     this.doorGroup = this.physics.add.staticGroup();
@@ -219,7 +230,7 @@ export class RunScene extends Phaser.Scene {
       bus.on('debugFillUltimate', () => {
         this.session.player.ultimate.gauge = this.ultimateDef().gaugeMax;
       }),
-      bus.on('debugSpawn', ({ enemyId, count }) => this.debugSpawn(enemyId, count)),
+      bus.on('debugSpawn', ({ enemyId, count, elite }) => this.debugSpawn(enemyId, count, elite ?? null)),
       bus.on('debugBarrage', () => this.debugBarrage()),
     );
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -227,6 +238,8 @@ export class RunScene extends Phaser.Scene {
       this.unsubs = [];
       for (const o of this.skillObjects) o.destroy();
       this.skillObjects = [];
+      for (const h of this.hazards) h.destroy();
+      this.hazards = [];
     });
     this.setInteractHint(null);
     this.refreshSkillView();
@@ -246,6 +259,7 @@ export class RunScene extends Phaser.Scene {
     this.portals = [];
     this.cores = [];
     this.skillObjects = [];
+    this.hazards = [];
     this.shield = null;
     this.shieldOpts = null;
     this.shieldFx = null;
@@ -373,7 +387,12 @@ export class RunScene extends Phaser.Scene {
 
     this.updateRooms(dt);
 
-    for (const e of this.enemies) e.update(dt, this.player);
+    for (const e of this.enemies) e.update(dt, this.enemyHost);
+    for (const h of [...this.hazards]) {
+      if (h.update(dt, this.enemyHost)) continue;
+      h.destroy();
+      this.hazards = this.hazards.filter((x) => x !== h);
+    }
     this.session.enemiesAlive = this.enemies.length;
 
     // 조준: 가장 가까운 적. 적이 없으면 마지막 방향(이동 중이면 이동 방향으로 갱신)
@@ -466,15 +485,29 @@ export class RunScene extends Phaser.Scene {
   private spawnWave(roomId: number, wave: Wave, index: number): void {
     const { map } = this.session;
     const rng = Rng.derive(this.ctx.config.seed, `spawn-${map.chapter}-${map.stage}-${roomId}-${index}`);
-    for (const id of wave) this.spawnEnemy(id, roomId, rng, true);
+    // 전투 칸 웨이브의 일반 적 일부를 엘리트로 (보스방 제외)
+    const node = map.rooms[roomId]!;
+    const d = this.ctx.data;
+    const elites =
+      node.kind === 'combatRoom'
+        ? assignElites(
+            Rng.derive(this.ctx.config.seed, `elite-${map.chapter}-${map.stage}-${roomId}-${index}`),
+            wave,
+            eliteCount(Rng.derive(this.ctx.config.seed, `elite-count-${map.chapter}-${map.stage}-${roomId}-${index}`), map.chapter, map.stage, d.elites),
+            (id) => d.enemies.enemies.find((e) => e.id === id)!.rank,
+            d.elites,
+          )
+        : wave.map(() => null);
+    wave.forEach((id, i) => this.spawnEnemy(id, roomId, rng, true, elites[i] ?? null));
   }
 
-  private spawnEnemy(id: string, roomId: number, rng: Rng, countForRoom: boolean): void {
+  private spawnEnemy(id: string, roomId: number, rng: Rng, countForRoom: boolean, eliteId: string | null = null): void {
     const d = this.ctx.data;
     const node = this.session.map.rooms[roomId]!;
     const def = d.enemies.enemies.find((e) => e.id === id)!;
     const pos = def.ai === 'idle' ? roomCenter(node, this.m) : this.spawnPoint(node, rng, def.size / 2);
-    const enemy = new Enemy(this, def, pos.x, pos.y, d.waves.spawnWarnSec);
+    const elite = eliteId ? (d.elites.elites.find((x) => x.id === eliteId) ?? null) : null;
+    const enemy = new Enemy(this, def, pos.x, pos.y, d.waves.spawnWarnSec, elite, d.elites, elite ? this.ctx.t(elite.iconKey) : '');
     this.enemyGroup.add(enemy.sprite);
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
     this.enemies.push(enemy);
@@ -518,13 +551,14 @@ export class RunScene extends Phaser.Scene {
     if (enemy.dead) return false;
     const d = this.ctx.data;
     let dmg = calcDamage({ baseDamage: base, tags }, this.session.player.stats, d.tags);
-    if (tags.includes('space')) dmg = spaceDamage(enemy.def.rank, enemy.def.maxHp, dmg, this.tagRule<SpaceRule>('space'));
+    if (tags.includes('space')) dmg = spaceDamage(enemy.rank, enemy.maxHp, dmg, this.tagRule<SpaceRule>('space'));
     return this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption));
   }
 
   /** 계산이 끝난 피해를 넣는다. 환원주의자 등에게 알리고, 죽였으면 true */
   private applyDamage(enemy: Enemy, dmg: number): boolean {
     if (enemy.dead) return false;
+    dmg *= enemy.mods.damageTakenMul;
     const dealt = Math.min(Math.max(0, enemy.hp), dmg);
     const killed = enemy.damage(dmg);
     for (const o of [...this.skillObjects]) o.onDamageDealt?.(this.host, dealt);
@@ -619,12 +653,22 @@ export class RunScene extends Phaser.Scene {
     };
     drop('energy', this.rng.int(e.def.energyOrbs[0], e.def.energyOrbs[1]));
     drop('coin', this.rng.int(e.def.coins[0], e.def.coins[1]));
+    if (e.elite) {
+      const c = d.elites.common;
+      drop('energy', this.rng.int(c.bonusEnergyOrbs[0], c.bonusEnergyOrbs[1]));
+      drop('coin', this.rng.int(c.bonusCoins[0], c.bonusCoins[1]));
+    }
     // 궁극기 게이지는 적 처치로 충전
     const ult = this.session.player.ultimate;
-    ult.gauge = gainGauge(ult.gauge, this.ultimateDef().gaugeMax, d.ultimates.gaugePerKill[e.def.rank]);
+    ult.gauge = gainGauge(ult.gauge, this.ultimateDef().gaugeMax, d.ultimates.gaugePerKill[e.rank]);
     this.removeEnemy(e);
     if (roomId !== undefined) this.rooms.get(roomId)?.enemyKilled();
     for (const o of [...this.skillObjects]) o.onKill?.(this.host, e);
+    // 폭발 엘리트: 예고 원 후 지연 폭발 (반역 개체가 된 경우는 제외)
+    const blast = e.elite?.deathBlast;
+    if (blast && !e.converted) {
+      this.hazards.push(new DelayedBlast(this, { x, y }, blast.radius, blast.delaySec, blast.damage, hexColor(e.elite!.color)));
+    }
     // 마기 변질: 변질된 채 죽으면 폭발
     const c = e.corruption;
     if (c) {
@@ -751,6 +795,7 @@ export class RunScene extends Phaser.Scene {
         if (e.dead) return;
         e.corruption = null;
         e.bleed = null;
+        e.converted = true;
         this.onEnemyKilled(e);
       },
       heal: (amount, overflow) => {
@@ -1182,12 +1227,12 @@ export class RunScene extends Phaser.Scene {
     bus.emit('inventoryChanged', {});
   }
 
-  private debugSpawn(enemyId: string, count: number): void {
+  private debugSpawn(enemyId: string, count: number, elite: string | null): void {
     const rid = this.session.currentRoomId;
     if (rid === null || this.modal) return;
     const rng = Rng.derive(this.ctx.config.seed, `debug-spawn-${this.time.now}`);
     // 방 웨이브와 무관하게 소환(방 클리어 판정에 넣지 않음)
-    for (let i = 0; i < count; i++) this.spawnEnemy(enemyId, rid, rng, false);
+    for (let i = 0; i < count; i++) this.spawnEnemy(enemyId, rid, rng, false, elite);
   }
 
   /** 플레이어 둘레에서 플레이어를 향해 일반 적 탄을 쏜다 (적 공격은 M3, 역장 확인용) */

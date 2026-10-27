@@ -41,7 +41,7 @@ export interface GameEvents {
   debugSetStat: { stat: StatId; value: number };
   debugOpenCards: { kind: CardOfferKind };
   debugFillUltimate: Record<string, never>;
-  debugSpawn: { enemyId: string; count: number };
+  debugSpawn: { enemyId: string; count: number; elite?: string | null };
   debugBarrage: Record<string, never>;
 }
 
