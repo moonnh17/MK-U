@@ -100,6 +100,7 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
       enemySel,
       countInput,
       button(t('debug.spawn'), () => bus.emit('debugSpawn', { enemyId: enemySel.value, count: Math.max(1, Number(countInput.value) || 1) })),
+      button(t('debug.barrage'), () => bus.emit('debugBarrage', {})),
     ),
   );
   // 입력칸에서 친 키가 게임 조작(WASD 등)으로 새지 않게

@@ -8,7 +8,7 @@ import type { Vec2 } from '../core/actions';
 import { hexColor } from '../core/scale';
 import { skillTags } from '../systems/tags';
 import { Explosive } from './explosive';
-import { nearestEnemy, type SkillCast, type SkillHost, type SkillImpl, type SkillObject } from './host';
+import { nearestEnemy, trimOldest, type SkillCast, type SkillHost, type SkillImpl, type SkillObject } from './host';
 
 const ID = 'magiTurret';
 
@@ -82,12 +82,8 @@ class Turret implements SkillObject {
 
 export const magiTurret: SkillImpl = {
   cast(host, s) {
-    const mine = host
-      .objects()
-      .filter((o) => o.owner === ID)
-      .sort((a, b) => a.createdAt - b.createdAt);
     // 최대 설치 수를 넘으면 오래된 것부터 치운다
-    for (let i = 0; i <= mine.length - s.values.maxCount!; i++) host.removeObject(mine[i]!);
+    trimOldest(host, ID, s.values.maxCount! - 1);
     host.addObject(new Turret(host, host.playerPos(), s));
     return true;
   },

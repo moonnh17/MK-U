@@ -6,18 +6,19 @@ import { bus } from '../core/events';
 import { DISABLED_ACTIONS } from '../core/features';
 import { Rng } from '../core/rng';
 import { hexColor } from '../core/scale';
-import { newPlayerState, type PlayerState, type RunSession, type SkillSlotView } from '../core/session';
+import { newPlayerState, type BuffView, type PlayerState, type RunSession, type SkillSlotView } from '../core/session';
 import { Door } from '../entities/door';
 import { Enemy } from '../entities/enemy';
 import { FloorWeapon, Pickup } from '../entities/pickup';
-import type { SkillHost, SkillObject } from '../skills/host';
-import { isSkillImplemented, skillImpl, ultimateImpl } from '../skills/registry';
+import type { ShieldOpts, SkillHost, SkillObject } from '../skills/host';
+import { isSkillImplemented, passiveImpl, skillImpl, ultimateImpl } from '../skills/registry';
 import { applyCard, drawSkillCards, drawStatCards, runStartOffers, stageEndOffers, type Card } from '../systems/cards';
 import { calcDamage, gradeMultiplier, spaceDamage } from '../systems/damage';
 import { pendingEncounter } from '../systems/encounter';
 import { generateStage, type RoomNode } from '../systems/mapgen';
 import { RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
 import { advanceStage, firstStage, type StageRef } from '../systems/run';
+import { absorbHit, refracts, tickShield, type ShieldState } from '../systems/shield';
 import {
   cooldownLeft,
   equipSkill,
@@ -28,7 +29,7 @@ import {
   tickCooldowns,
 } from '../systems/skills';
 import { damageTaken, setStat, statEffect } from '../systems/stats';
-import { applyBleed, canAutoCast, skillTags, tickBleed } from '../systems/tags';
+import { applyBleed, buffDuration, canAutoCast, chargeTime, skillTags, tickBleed } from '../systems/tags';
 import {
   activeWeapon,
   autoAim,
@@ -105,6 +106,13 @@ export class RunScene extends Phaser.Scene {
   private portals: Prop[] = [];
   private cores: Prop[] = [];
   private skillObjects: SkillObject[] = [];
+  /** 마기역장 보호막 */
+  private shield: ShieldState | null = null;
+  private shieldOpts: ShieldOpts | null = null;
+  private shieldFx: Phaser.GameObjects.Arc | null = null;
+  /** 지금 깔려 있는 패시브 (id:레벨:각성). 바뀌면 오브젝트를 다시 깐다 */
+  private passiveKey = '';
+  private passiveId: string | null = null;
 
   private aimDir: Vec2 = { x: 1, y: 0 };
   private fireCooldown = 0;
@@ -150,6 +158,7 @@ export class RunScene extends Phaser.Scene {
       outcome: null,
       energyEmptyAt: -Infinity,
       skillView: [],
+      buffs: [],
     };
     this.ctx.session = this.session;
     this.rng = Rng.derive(seed, `combat-${stage.chapter}-${stage.stage}`);
@@ -179,6 +188,7 @@ export class RunScene extends Phaser.Scene {
     this.physics.add.collider(this.bullets, this.doorGroup, killBullet);
     this.physics.add.collider(this.enemyBullets, this.walls, killBullet);
     this.physics.add.overlap(this.bullets, this.enemyGroup, (b, e) => this.onBulletHit(b as Phaser.Physics.Arcade.Image, e as Phaser.Physics.Arcade.Image));
+    this.physics.add.overlap(this.player, this.enemyBullets, (_p, b) => this.onEnemyBulletHit(b as Phaser.Physics.Arcade.Image));
     this.physics.add.overlap(this.player, this.enemyGroup, (_p, e) =>
       this.onContact((e as Phaser.GameObjects.GameObject).getData('enemy') as Enemy),
     );
@@ -204,6 +214,7 @@ export class RunScene extends Phaser.Scene {
         this.session.player.ultimate.gauge = this.ultimateDef().gaugeMax;
       }),
       bus.on('debugSpawn', ({ enemyId, count }) => this.debugSpawn(enemyId, count)),
+      bus.on('debugBarrage', () => this.debugBarrage()),
     );
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.unsubs.forEach((u) => u());
@@ -229,6 +240,11 @@ export class RunScene extends Phaser.Scene {
     this.portals = [];
     this.cores = [];
     this.skillObjects = [];
+    this.shield = null;
+    this.shieldOpts = null;
+    this.shieldFx = null;
+    this.passiveKey = '';
+    this.passiveId = null;
     this.aimDir = { x: 1, y: 0 };
     this.fireCooldown = 0;
     this.invuln = 0;
@@ -368,6 +384,8 @@ export class RunScene extends Phaser.Scene {
       if (frame.pressed.has(action)) this.castSlot(i);
     });
     if (frame.pressed.has('ultimate')) this.castUltimate();
+    this.syncPassive();
+    this.updateShield(dt);
     for (const o of [...this.skillObjects]) if (!o.update(dt, this.host)) this.removeObject(o);
     this.updateBleeds(dt);
 
@@ -479,12 +497,14 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 피해 한 번. 태그 보정은 이 공격(source)의 태그로 계산한다 */
-  private hit(enemy: Enemy, base: number, tags: readonly TagId[]): void {
-    if (enemy.dead) return;
+  private hit(enemy: Enemy, base: number, tags: readonly TagId[]): boolean {
+    if (enemy.dead) return false;
     const d = this.ctx.data;
     let dmg = calcDamage({ baseDamage: base, tags }, this.session.player.stats, d.tags);
     if (tags.includes('space')) dmg = spaceDamage(enemy.def.rank, enemy.def.maxHp, dmg, this.tagRule<SpaceRule>('space'));
-    if (enemy.damage(dmg)) this.onEnemyKilled(enemy);
+    if (!enemy.damage(dmg)) return false;
+    this.onEnemyKilled(enemy);
+    return true;
   }
 
   private tagRule<T>(id: TagId): T {
@@ -602,6 +622,14 @@ export class RunScene extends Phaser.Scene {
   /** 피해를 받았으면 true */
   private hurtPlayer(amount: number): boolean {
     if (this.invuln > 0 || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
+    // 마기역장: 공격을 막고 잠깐 무적
+    const absorbed = absorbHit(this.shield);
+    if (absorbed.blocked) {
+      this.shield = absorbed.shield;
+      this.invuln = this.shieldOpts?.blockInvulnSec ?? 0;
+      this.cameras.main.flash(60, 140, 170, 210);
+      return true;
+    }
     const p = this.session.player;
     p.hp = Math.max(0, p.hp - damageTaken(amount, p.stats, this.ctx.data.stats));
     this.invuln = this.ctx.data.player.hurtInvulnSec;
@@ -653,6 +681,12 @@ export class RunScene extends Phaser.Scene {
       stats: () => this.session.player.stats,
       area: (r) => this.area(r),
       hit: (e, base, tags) => this.hit(e, base, tags),
+      chargeTime: (sec, tags) => chargeTime(sec, tags, this.session.player.stats, ctx.data.tags),
+      buffDuration: (sec, tags) => buffDuration(sec, tags, this.session.player.stats, ctx.data.tags),
+      setShield: (shield, opts) => {
+        this.shield = shield;
+        this.shieldOpts = opts;
+      },
       bleed: (e, base, stacks, tags) => {
         if (e.dead) return;
         const perStack = calcDamage({ baseDamage: base, tags }, this.session.player.stats, ctx.data.tags);
@@ -672,6 +706,75 @@ export class RunScene extends Phaser.Scene {
   private removeObject(o: SkillObject): void {
     this.skillObjects = this.skillObjects.filter((x) => x !== o);
     o.destroy();
+  }
+
+  /** 장착 패시브가 바뀌면(장착·해제·레벨·각성) 이전 오브젝트를 치우고 다시 깐다 */
+  private syncPassive(): void {
+    const p = this.session.player;
+    const id = p.loadout.passive;
+    const owned = id ? p.loadout.owned[id] : undefined;
+    const key = id && owned ? `${id}:${owned.level}:${owned.awakened}` : '';
+    if (key === this.passiveKey) return;
+    const prev = this.passiveId;
+    if (prev) for (const o of this.skillObjects.filter((x) => x.owner.split('.')[0] === prev)) this.removeObject(o);
+    this.passiveKey = key;
+    this.passiveId = id;
+    const impl = id ? passiveImpl(id) : undefined;
+    if (!id || !owned || !impl) return;
+    const def = findSkill(this.ctx.data.skills, id);
+    impl.activate(this.host, { def, owned, values: skillValues(def, owned).values });
+  }
+
+  /** 보호막 시간, 플레이어 둘레 표시, 각성(벡터굴절역장) 일반 탄 무효화 */
+  private updateShield(dt: number): void {
+    if (this.shield) this.shield = tickShield(this.shield, dt);
+    const s = this.shield;
+    const opts = this.shieldOpts;
+    if (!s || !opts) {
+      this.shieldFx?.destroy();
+      this.shieldFx = null;
+      return;
+    }
+    if (!this.shieldFx) this.shieldFx = this.add.circle(0, 0, opts.fxRadius).setDepth(5);
+    const color = hexColor(opts.color);
+    this.shieldFx
+      .setRadius(opts.fxRadius)
+      .setPosition(this.player.x, this.player.y)
+      .setStrokeStyle(s.hits > 0 ? 2 : 1, color, 0.9)
+      .setFillStyle(color, s.refractRadius > 0 ? 0.15 : 0.08);
+    if (s.refractRadius <= 0) return;
+    for (const b of [...this.enemyBullets.getChildren()] as Phaser.Physics.Arcade.Image[]) {
+      const dist = Math.hypot(b.x - this.player.x, b.y - this.player.y);
+      if (!refracts(s, dist, b.getData('refractable') !== false)) continue;
+      this.fxAt(this.add.circle(b.x, b.y, 3, color, 0.8).setDepth(6));
+      b.destroy();
+    }
+  }
+
+  private fxAt(obj: Phaser.GameObjects.GameObject): void {
+    this.time.delayedCall(this.ctx.data.ui.slashFxSec * 1000, () => obj.destroy());
+  }
+
+  private onEnemyBulletHit(b: Phaser.Physics.Arcade.Image): void {
+    if (!b.active) return;
+    const damage = b.getData('damage') as number;
+    b.destroy();
+    this.hurtPlayer(damage);
+  }
+
+  /** HUD '현재 버프': 보호막 + 스킬 오브젝트가 알리는 상태(충전 등) */
+  private buffViews(): BuffView[] {
+    const out: BuffView[] = [];
+    const s = this.shield;
+    if (s && this.shieldOpts) {
+      const key = s.refractRadius > 0 ? 'buff.magiField.refract' : 'buff.magiField';
+      out.push({ id: 'magiField', label: this.ctx.t(key), color: this.shieldOpts.color, leftSec: s.leftSec, totalSec: s.totalSec });
+    }
+    for (const o of this.skillObjects) {
+      const b = o.buff?.(this.host);
+      if (b) out.push(b);
+    }
+    return out;
   }
 
   /** 스킬 범위 보정 (마기력) */
@@ -753,6 +856,7 @@ export class RunScene extends Phaser.Scene {
       };
     };
     const ult = this.ultimateDef();
+    this.session.buffs = this.buffViews();
     this.session.skillView = [
       ...p.loadout.active.map((id) => slot(id, true)),
       {
@@ -997,6 +1101,22 @@ export class RunScene extends Phaser.Scene {
     const rng = Rng.derive(this.ctx.config.seed, `debug-spawn-${this.time.now}`);
     // 방 웨이브와 무관하게 소환(방 클리어 판정에 넣지 않음)
     for (let i = 0; i < count; i++) this.spawnEnemy(enemyId, rid, rng, false);
+  }
+
+  /** 플레이어 둘레에서 플레이어를 향해 일반 적 탄을 쏜다 (적 공격은 M3, 역장 확인용) */
+  private debugBarrage(): void {
+    if (this.modal || this.session.outcome) return;
+    const d = this.ctx.data.enemies;
+    const cfg = d.debugBarrage;
+    for (let i = 0; i < cfg.count; i++) {
+      const a = (i * Math.PI * 2) / cfg.count;
+      const x = this.player.x + Math.cos(a) * cfg.distance;
+      const y = this.player.y + Math.sin(a) * cfg.distance;
+      const b = this.enemyBullets.create(x, y, d.projectile.spriteKey) as Phaser.Physics.Arcade.Image;
+      b.setDepth(5);
+      b.setData({ damage: cfg.damage, refractable: true, cuttable: true });
+      b.setVelocity(-Math.cos(a) * cfg.speed, -Math.sin(a) * cfg.speed);
+    }
   }
 
   private updateCamera(): void {

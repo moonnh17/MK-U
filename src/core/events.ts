@@ -42,6 +42,7 @@ export interface GameEvents {
   debugOpenCards: { kind: CardOfferKind };
   debugFillUltimate: Record<string, never>;
   debugSpawn: { enemyId: string; count: number };
+  debugBarrage: Record<string, never>;
 }
 
 type Handler<T> = (payload: T) => void;

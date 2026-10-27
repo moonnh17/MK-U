@@ -85,6 +85,8 @@ const game = new Phaser.Game({
   input: { keyboard: false, gamepad: false },
   scene: [BootScene, RunScene, UIScene],
 });
+// 디버그: 콘솔에서 상태를 보거나 프레임을 직접 돌릴 수 있게
+if (config.debug) Object.assign(window, { __game: game, __ctx: ctx });
 
 function applyUiMode(mode: UiMode): void {
   ctx.uiMode = mode;

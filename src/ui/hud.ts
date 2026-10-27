@@ -57,6 +57,8 @@ export class Hud {
   private readonly mainCostText: Phaser.GameObjects.Text;
   private readonly subWeaponText: Phaser.GameObjects.Text;
   private minimapVisible = true;
+  private readonly buffY: number;
+  private readonly buffTexts: Phaser.GameObjects.Text[] = [];
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -86,6 +88,8 @@ export class Hud {
     this.stageText = text(0, barsBottom, '');
     this.coinText = text(0, barsBottom + h.fontSize + 2, '');
     this.bars.add([this.stageText, this.coinText]);
+    // 현재 버프: 코인 아래 한 줄
+    this.buffY = barsBottom + 2 * (h.fontSize + 2) + 2;
 
     // --- 미니맵 ---
     this.minimap = new Minimap(scene, ctx);
@@ -157,8 +161,28 @@ export class Hud {
     this.mainCostText.setText(String(main?.energyCost ?? 0)).setColor(empty ? '#ff5555' : this.ctx.data.ui.hud.bars.energyColor);
     this.subWeaponText.setText(sub ? this.ctx.t(sub.nameKey) : '');
 
+    this.updateBuffs(s);
     this.minimap.render(s.map, s.visited, s.currentRoomId, this.ctx.debugFlags.revealMap);
     if (this.pcOnly.visible) this.updateSkillbar(s);
+  }
+
+  /** 현재 버프: 색 칸에 짧은 이름 + 남은 초 */
+  private updateBuffs(s: RunSession): void {
+    const h = this.ctx.data.ui.hud;
+    let x = 0;
+    s.buffs.forEach((b, i) => {
+      let t = this.buffTexts[i];
+      if (!t) {
+        t = this.scene.add
+          .text(0, this.buffY, '', { fontFamily: 'sans-serif', fontSize: `${h.fontSize - 2}px`, color: '#ffffff', padding: { x: 2, y: 1 } })
+          .setStroke('#000000', 2);
+        this.buffTexts.push(t);
+        this.bars.add(t);
+      }
+      t.setVisible(true).setX(x).setBackgroundColor(b.color).setText(`${b.label} ${Math.ceil(b.leftSec)}`);
+      x += t.width + 2;
+    });
+    for (let i = s.buffs.length; i < this.buffTexts.length; i++) this.buffTexts[i]!.setVisible(false);
   }
 
   private updateSkillbar(s: RunSession): void {

@@ -42,6 +42,15 @@ export interface SkillSlotView {
   color: string;
 }
 
+/** HUD '현재 버프' 한 칸 */
+export interface BuffView {
+  id: string;
+  label: string;
+  color: string;
+  leftSec: number;
+  totalSec: number;
+}
+
 /** 현재 런 상태. RunScene이 쓰고 UIScene(HUD·미니맵)이 읽는다. */
 export interface RunSession {
   stage: StageRef;
@@ -55,6 +64,8 @@ export interface RunSession {
   energyEmptyAt: number;
   /** 액티브 4칸 + 궁극기 + 패시브 (RunScene이 매 프레임 채운다) */
   skillView: SkillSlotView[];
+  /** HUD '현재 버프' (RunScene이 매 프레임 채운다) */
+  buffs: BuffView[];
 }
 
 export function newPlayerState(data: GameData): PlayerState {
