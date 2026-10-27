@@ -3,7 +3,7 @@
  * Phaser에 의존하지 않으며 테스트와 개발 모드 부팅에서 함께 쓴다.
  */
 import { BUTTON_ACTIONS } from '../core/actions';
-import { GRADE_IDS, STAT_IDS, TAG_IDS } from '../types/data';
+import { GRADE_IDS, SCHOOL_IDS, STAT_EFFECT_IDS, STAT_IDS, TAG_IDS } from '../types/data';
 import type { IntRange, SpriteRef } from '../types/data';
 import type { GameData } from './index';
 
@@ -61,6 +61,19 @@ export function validateGameData(d: GameData): Errors {
     for (const t of s.linkedTags) if (!tagIds.has(t)) errors.push(`stats.${s.id}: 알 수 없는 태그 '${t}'`);
     needText(`stats.${s.id}`, s.nameKey);
     needText(`stats.${s.id}`, s.descKey);
+  }
+
+  for (const id of STAT_EFFECT_IDS) {
+    const r = d.stats.effects?.[id];
+    const w = `stats.effects.${id}`;
+    if (!r) {
+      errors.push(`${w}: 없음`);
+      continue;
+    }
+    if (!statIds.has(r.stat)) errors.push(`${w}: 알 수 없는 스탯 '${r.stat}'`);
+    checkPositive(errors, `${w}.pivot`, r.pivot, true);
+    checkPositive(errors, `${w}.perPoint`, r.perPoint);
+    checkPositive(errors, `${w}.cap`, r.cap);
   }
 
   // --- 태그 ---
@@ -248,6 +261,87 @@ export function validateGameData(d: GameData): Errors {
     errors.push('player.energy.start: 0~max 사이여야 함');
   }
 
+  // --- 스킬 ---
+  const checkTags = (where: string, tags: readonly string[]) => {
+    for (const t of tags) if (!tagIds.has(t)) errors.push(`${where}: 알 수 없는 태그 '${t}'`);
+  };
+  const checkSources = (where: string, sources: Record<string, readonly string[]>) => {
+    for (const [k, tags] of Object.entries(sources)) checkTags(`${where}.sources.${k}`, tags);
+  };
+  checkUnique(errors, 'skills', d.skills.skills.map((s) => s.id));
+  for (const s of d.skills.skills) {
+    const w = `skills.${s.id}`;
+    if (!(SCHOOL_IDS as readonly string[]).includes(s.school)) errors.push(`${w}: 계열 태그(school) 없음 또는 잘못됨`);
+    if (s.kind !== 'active' && s.kind !== 'passive') errors.push(`${w}: kind는 active 또는 passive`);
+    if (!HEX_COLOR.test(s.color)) errors.push(`${w}: color는 #RRGGBB`);
+    needText(w, s.nameKey);
+    needText(w, s.shortKey);
+    needText(w, s.descKey);
+    checkTags(w, s.tags);
+    checkSources(w, s.sources);
+    if (s.levels.length !== 3) errors.push(`${w}: 레벨은 Lv1~3, 3개여야 함 (현재 ${s.levels.length})`);
+    s.levels.forEach((lv, i) => {
+      if (s.kind === 'active') checkPositive(errors, `${w}.levels[${i}].cooldownSec`, lv.cooldownSec);
+      for (const [k, v] of Object.entries(lv.values)) if (!isNum(v)) errors.push(`${w}.levels[${i}].${k}: 숫자여야 함`);
+    });
+    const a = s.awakening;
+    if (!a) {
+      errors.push(`${w}: awakening 없음`);
+    } else {
+      if (!statIds.has(a.requiredStat)) errors.push(`${w}.awakening: 요구 스탯 없음 또는 잘못됨 '${String(a.requiredStat)}'`);
+      checkPositive(errors, `${w}.awakening.requiredValue`, a.requiredValue);
+      if (s.kind === 'active') checkPositive(errors, `${w}.awakening.cooldownSec`, a.cooldownSec);
+      checkTags(`${w}.awakening`, a.tags);
+      needText(`${w}.awakening`, a.nameKey);
+      needText(`${w}.awakening`, a.descKey);
+    }
+    // 근접 스킬은 사거리 안 적 판정에 range 값이 필요하다
+    if (s.tags.includes('melee')) {
+      s.levels.forEach((lv, i) => {
+        if (Object.keys(lv.values).length > 0 && !isNum(lv.values.range)) errors.push(`${w}.levels[${i}]: 근접 스킬은 range 필요`);
+      });
+    }
+    for (const [k, sp] of Object.entries(s.sprites)) checkSprite(errors, `${w}.sprites.${k}`, sp);
+  }
+
+  // --- 궁극기 ---
+  const u = d.ultimates;
+  checkUnique(errors, 'ultimates', u.ultimates.map((x) => x.id));
+  if (!u.ultimates.some((x) => x.id === u.startUltimate)) errors.push(`ultimates.startUltimate: '${u.startUltimate}' 없음`);
+  for (const rank of ['normal', 'elite', 'champion', 'boss', 'hiddenBoss'] as const) {
+    checkPositive(errors, `ultimates.gaugePerKill.${rank}`, u.gaugePerKill[rank], true);
+  }
+  for (const x of u.ultimates) {
+    const w = `ultimates.${x.id}`;
+    needText(w, x.nameKey);
+    needText(w, x.shortKey);
+    needText(w, x.descKey);
+    checkTags(w, x.tags);
+    checkSources(w, x.sources);
+    checkPositive(errors, `${w}.gaugeMax`, x.gaugeMax);
+    for (const [k, sp] of Object.entries(x.sprites)) checkSprite(errors, `${w}.sprites.${k}`, sp);
+  }
+
+  // --- 카드 ---
+  const c = d.cards;
+  checkPositive(errors, 'cards.cardCount', c.cardCount);
+  checkPositive(errors, 'cards.maxAwakeningCards', c.maxAwakeningCards, true);
+  if (c.maxAwakeningCards > c.cardCount) errors.push('cards.maxAwakeningCards: cardCount보다 클 수 없음');
+  const offerKinds = ['skill', 'stat'];
+  if (c.afterStageCycle.length === 0) errors.push('cards.afterStageCycle: 비어 있음');
+  for (const k of [c.runStart, c.bossBonus, ...c.afterStageCycle]) {
+    if (!offerKinds.includes(k)) errors.push(`cards: 알 수 없는 카드 종류 '${k}'`);
+  }
+  for (const [k, v] of Object.entries(c.skillWeights)) checkPositive(errors, `cards.skillWeights.${k}`, v, true);
+  if (c.statGrades.length === 0) errors.push('cards.statGrades: 비어 있음');
+  checkUnique(errors, 'cards.statGrades', c.statGrades.map((g) => g.id));
+  for (const g of c.statGrades) {
+    checkPositive(errors, `cards.statGrades.${g.id}.amount`, g.amount);
+    checkPositive(errors, `cards.statGrades.${g.id}.weight`, g.weight);
+    if (!HEX_COLOR.test(g.color)) errors.push(`cards.statGrades.${g.id}: color는 #RRGGBB`);
+  }
+  if (c.cardCount > STAT_IDS.length) errors.push('cards.cardCount: 스탯 수보다 클 수 없음(스탯 카드는 서로 다른 스탯)');
+
   // --- UI ---
   checkPositive(errors, 'ui.baseWidth', d.ui.baseWidth);
   checkPositive(errors, 'ui.baseHeight', d.ui.baseHeight);
@@ -256,6 +350,11 @@ export function validateGameData(d: GameData): Errors {
     checkPositive(errors, `ui.mobile.${k}`, mb[k]);
   }
   if (mb.skillFanDeg.length !== 4) errors.push('ui.mobile.skillFanDeg: 4개여야 함');
+  const sb = d.ui.hud.skillbar;
+  if (sb.levelColors.length !== 3) errors.push('ui.hud.skillbar.levelColors: Lv1~3, 3개여야 함');
+  for (const col of [...sb.levelColors, sb.awakenedColor, sb.emptyColor, sb.cooldownColor, sb.ultimateReadyColor]) {
+    if (!HEX_COLOR.test(col)) errors.push(`ui.hud.skillbar: 색은 #RRGGBB (값: ${col})`);
+  }
 
   // --- 키 바인딩 ---
   const kb = d.keybindings;

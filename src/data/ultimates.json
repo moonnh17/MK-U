@@ -1,0 +1,20 @@
+{
+  "startUltimate": "firstLaw",
+  "gaugePerKill": { "normal": 5, "elite": 15, "champion": 20, "boss": 30, "hiddenBoss": 30 },
+  "ultimates": [
+    {
+      "id": "firstLaw",
+      "nameKey": "ultimate.firstLaw",
+      "shortKey": "ultimate.firstLaw.short",
+      "descKey": "ultimate.firstLaw.desc",
+      "tags": ["tech", "ranged"],
+      "sources": { "explosion": ["tech", "ranged"] },
+      "gaugeMax": 100,
+      "values": { "damage": 40, "radius": 40, "projectileSpeed": 220, "range": 220 },
+      "color": "#ff9a3c",
+      "sprites": {
+        "particle": { "spriteKey": "ult_first_law", "color": "#ff9a3c", "size": 8 }
+      }
+    }
+  ]
+}

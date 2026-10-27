@@ -1,0 +1,322 @@
+{
+  "skills": [
+    {
+      "id": "magiTurret",
+      "job": "magiScholar",
+      "school": "hectar",
+      "kind": "active",
+      "nameKey": "skill.magiTurret",
+      "shortKey": "skill.magiTurret.short",
+      "descKey": "skill.magiTurret.desc",
+      "tags": ["tech", "ranged"],
+      "sources": {
+        "shot": ["tech", "ranged"],
+        "bigBullet": ["physical", "ranged"],
+        "laser": ["tech", "ranged"],
+        "shell": ["tech", "ranged"]
+      },
+      "levels": [
+        { "cooldownSec": 8, "values": { "maxCount": 1, "damage": 3, "fireIntervalSec": 0.6, "range": 140, "projectileSpeed": 260 } },
+        { "cooldownSec": 7, "values": { "maxCount": 2, "damage": 3.5, "fireIntervalSec": 0.55, "range": 140, "projectileSpeed": 260 } },
+        { "cooldownSec": 6, "values": { "maxCount": 3, "damage": 4, "fireIntervalSec": 0.5, "range": 150, "projectileSpeed": 260 } }
+      ],
+      "awakening": {
+        "nameKey": "skill.magiTurret.awakened",
+        "descKey": "skill.magiTurret.awakened.desc",
+        "requiredStat": "strength",
+        "requiredValue": 20,
+        "tags": ["physical", "tech", "ranged"],
+        "cooldownSec": 6,
+        "values": {
+          "maxCount": 1,
+          "range": 170,
+          "projectileSpeed": 300,
+          "bulletDamage": 3,
+          "bulletIntervalSec": 0.25,
+          "laserDamage": 10,
+          "laserIntervalSec": 1.5,
+          "shellDamage": 14,
+          "shellIntervalSec": 2.5,
+          "shellRadius": 32,
+          "shellSpeed": 160
+        }
+      },
+      "color": "#4fb3d9",
+      "sprites": {
+        "turret": { "spriteKey": "skill_turret", "color": "#4fb3d9", "size": 8 },
+        "bigTurret": { "spriteKey": "skill_turret_big", "color": "#8ae0ff", "size": 16 },
+        "shell": { "spriteKey": "skill_turret_shell", "color": "#ffb04a", "size": 5 }
+      }
+    },
+    {
+      "id": "magiMine",
+      "job": "magiScholar",
+      "school": "hectar",
+      "kind": "active",
+      "nameKey": "skill.magiMine",
+      "shortKey": "skill.magiMine.short",
+      "descKey": "skill.magiMine.desc",
+      "tags": ["tech", "ranged"],
+      "sources": { "mine": ["tech", "ranged"], "chainMine": ["tech", "magic", "ranged"] },
+      "levels": [{ "cooldownSec": 8, "values": {} }, { "cooldownSec": 7, "values": {} }, { "cooldownSec": 6, "values": {} }],
+      "awakening": {
+        "nameKey": "skill.magiMine.awakened",
+        "descKey": "skill.magiMine.awakened.desc",
+        "requiredStat": "magiPower",
+        "requiredValue": 20,
+        "tags": ["tech", "magic", "ranged"],
+        "cooldownSec": 6,
+        "values": {}
+      },
+      "color": "#d9a03b",
+      "sprites": {}
+    },
+    {
+      "id": "antimatterCannon",
+      "job": "magiScholar",
+      "school": "hectar",
+      "kind": "active",
+      "nameKey": "skill.antimatterCannon",
+      "shortKey": "skill.antimatterCannon.short",
+      "descKey": "skill.antimatterCannon.desc",
+      "tags": ["tech", "ranged", "charging"],
+      "sources": { "blast": ["tech", "ranged", "charging"] },
+      "levels": [{ "cooldownSec": 10, "values": {} }, { "cooldownSec": 9, "values": {} }, { "cooldownSec": 8, "values": {} }],
+      "awakening": {
+        "nameKey": "skill.antimatterCannon.awakened",
+        "descKey": "skill.antimatterCannon.awakened.desc",
+        "requiredStat": "magiPower",
+        "requiredValue": 20,
+        "tags": ["tech", "ranged", "charging"],
+        "cooldownSec": 8,
+        "values": {}
+      },
+      "color": "#a05ad9",
+      "sprites": {}
+    },
+    {
+      "id": "magiField",
+      "job": "magiScholar",
+      "school": "hectar",
+      "kind": "active",
+      "nameKey": "skill.magiField",
+      "shortKey": "skill.magiField.short",
+      "descKey": "skill.magiField.desc",
+      "tags": ["buff"],
+      "sources": {},
+      "levels": [{ "cooldownSec": 12, "values": {} }, { "cooldownSec": 10, "values": {} }, { "cooldownSec": 8, "values": {} }],
+      "awakening": {
+        "nameKey": "skill.magiField.awakened",
+        "descKey": "skill.magiField.awakened.desc",
+        "requiredStat": "willpower",
+        "requiredValue": 20,
+        "tags": [],
+        "cooldownSec": 8,
+        "values": {}
+      },
+      "color": "#8aa4c8",
+      "sprites": {}
+    },
+    {
+      "id": "railgun",
+      "job": "magiScholar",
+      "school": "hectar",
+      "kind": "active",
+      "nameKey": "skill.railgun",
+      "shortKey": "skill.railgun.short",
+      "descKey": "skill.railgun.desc",
+      "tags": ["tech", "ranged"],
+      "sources": { "rail": ["tech", "ranged"], "wave": ["tech", "ranged"] },
+      "levels": [{ "cooldownSec": 6, "values": {} }, { "cooldownSec": 5.5, "values": {} }, { "cooldownSec": 5, "values": {} }],
+      "awakening": {
+        "nameKey": "skill.railgun.awakened",
+        "descKey": "skill.railgun.awakened.desc",
+        "requiredStat": "intelligence",
+        "requiredValue": 20,
+        "tags": ["tech", "ranged"],
+        "cooldownSec": 5,
+        "values": {}
+      },
+      "color": "#3ba7d9",
+      "sprites": {}
+    },
+    {
+      "id": "combatDrone",
+      "job": "magiScholar",
+      "school": "hectar",
+      "kind": "passive",
+      "nameKey": "skill.combatDrone",
+      "shortKey": "skill.combatDrone.short",
+      "descKey": "skill.combatDrone.desc",
+      "tags": ["tech", "ranged"],
+      "sources": { "droneShot": ["tech", "ranged"] },
+      "levels": [{ "cooldownSec": 0, "values": {} }, { "cooldownSec": 0, "values": {} }, { "cooldownSec": 0, "values": {} }],
+      "awakening": {
+        "nameKey": "skill.combatDrone.awakened",
+        "descKey": "skill.combatDrone.awakened.desc",
+        "requiredStat": "agility",
+        "requiredValue": 20,
+        "tags": ["tech", "ranged"],
+        "cooldownSec": 0,
+        "values": {}
+      },
+      "color": "#5ad9c0",
+      "sprites": {}
+    },
+    {
+      "id": "unstableSubject",
+      "job": "magiScholar",
+      "school": "acro",
+      "kind": "active",
+      "nameKey": "skill.unstableSubject",
+      "shortKey": "skill.unstableSubject.short",
+      "descKey": "skill.unstableSubject.desc",
+      "tags": ["tech", "chance", "ranged"],
+      "sources": { "subject": ["tech", "chance", "ranged"] },
+      "levels": [{ "cooldownSec": 9, "values": {} }, { "cooldownSec": 8, "values": {} }, { "cooldownSec": 7, "values": {} }],
+      "awakening": {
+        "nameKey": "skill.unstableSubject.awakened",
+        "descKey": "skill.unstableSubject.awakened.desc",
+        "requiredStat": "agility",
+        "requiredValue": 20,
+        "tags": ["tech", "chance", "ranged"],
+        "cooldownSec": 7,
+        "values": {}
+      },
+      "color": "#9ad94a",
+      "sprites": {}
+    },
+    {
+      "id": "magiCorruption",
+      "job": "magiScholar",
+      "school": "acro",
+      "kind": "active",
+      "nameKey": "skill.magiCorruption",
+      "shortKey": "skill.magiCorruption.short",
+      "descKey": "skill.magiCorruption.desc",
+      "tags": ["magic", "chance", "ranged"],
+      "sources": { "corruption": ["magic", "chance", "ranged"] },
+      "levels": [{ "cooldownSec": 8, "values": {} }, { "cooldownSec": 7, "values": {} }, { "cooldownSec": 6, "values": {} }],
+      "awakening": {
+        "nameKey": "skill.magiCorruption.awakened",
+        "descKey": "skill.magiCorruption.awakened.desc",
+        "requiredStat": "magiPower",
+        "requiredValue": 20,
+        "tags": ["magic", "chance", "ranged"],
+        "cooldownSec": 6,
+        "values": {}
+      },
+      "color": "#c83a5a",
+      "sprites": {}
+    },
+    {
+      "id": "experimentalWeapon",
+      "job": "magiScholar",
+      "school": "acro",
+      "kind": "active",
+      "nameKey": "skill.experimentalWeapon",
+      "shortKey": "skill.experimentalWeapon.short",
+      "descKey": "skill.experimentalWeapon.desc",
+      "tags": ["tech", "chance", "ranged"],
+      "sources": {},
+      "levels": [{ "cooldownSec": 9, "values": {} }, { "cooldownSec": 8, "values": {} }, { "cooldownSec": 7, "values": {} }],
+      "awakening": {
+        "nameKey": "skill.experimentalWeapon.awakened",
+        "descKey": "skill.experimentalWeapon.awakened.desc",
+        "requiredStat": "intelligence",
+        "requiredValue": 20,
+        "tags": ["tech", "chance", "ranged"],
+        "cooldownSec": 7,
+        "values": {}
+      },
+      "color": "#d9d03b",
+      "sprites": {}
+    },
+    {
+      "id": "purifyingWings",
+      "job": "magiScholar",
+      "school": "acro",
+      "kind": "active",
+      "nameKey": "skill.purifyingWings",
+      "shortKey": "skill.purifyingWings.short",
+      "descKey": "skill.purifyingWings.desc",
+      "tags": ["physical", "melee"],
+      "sources": {
+        "slash": ["physical", "melee"],
+        "awakenedSlash": ["physical", "melee", "bleed"],
+        "bleed": ["physical", "bleed"]
+      },
+      "levels": [
+        { "cooldownSec": 5, "values": { "damage": 14, "range": 40, "arcDeg": 150 } },
+        { "cooldownSec": 4.5, "values": { "damage": 18, "range": 44, "arcDeg": 150 } },
+        { "cooldownSec": 4, "values": { "damage": 22, "range": 48, "arcDeg": 160 } }
+      ],
+      "awakening": {
+        "nameKey": "skill.purifyingWings.awakened",
+        "descKey": "skill.purifyingWings.awakened.desc",
+        "requiredStat": "strength",
+        "requiredValue": 20,
+        "tags": ["physical", "melee", "bleed"],
+        "cooldownSec": 4,
+        "values": {
+          "hit1Damage": 16,
+          "hit2Damage": 16,
+          "hit3Damage": 28,
+          "range": 52,
+          "arcDeg": 180,
+          "hitDelaySec": 0.18,
+          "bleedDamage": 3,
+          "bleedStacksPerHit": 1
+        }
+      },
+      "color": "#d93a3a",
+      "sprites": {}
+    },
+    {
+      "id": "mkPrototype",
+      "job": "magiScholar",
+      "school": "acro",
+      "kind": "active",
+      "nameKey": "skill.mkPrototype",
+      "shortKey": "skill.mkPrototype.short",
+      "descKey": "skill.mkPrototype.desc",
+      "tags": ["buff", "melee"],
+      "sources": { "punch": ["physical", "melee"], "dash": ["physical", "melee"] },
+      "levels": [{ "cooldownSec": 14, "values": {} }, { "cooldownSec": 13, "values": {} }, { "cooldownSec": 12, "values": {} }],
+      "awakening": {
+        "nameKey": "skill.mkPrototype.awakened",
+        "descKey": "skill.mkPrototype.awakened.desc",
+        "requiredStat": "toughness",
+        "requiredValue": 20,
+        "tags": ["buff", "melee"],
+        "cooldownSec": 12,
+        "values": {}
+      },
+      "color": "#d9783b",
+      "sprites": {}
+    },
+    {
+      "id": "reductionist",
+      "job": "magiScholar",
+      "school": "acro",
+      "kind": "passive",
+      "nameKey": "skill.reductionist",
+      "shortKey": "skill.reductionist.short",
+      "descKey": "skill.reductionist.desc",
+      "tags": ["buff"],
+      "sources": {},
+      "levels": [{ "cooldownSec": 0, "values": {} }, { "cooldownSec": 0, "values": {} }, { "cooldownSec": 0, "values": {} }],
+      "awakening": {
+        "nameKey": "skill.reductionist.awakened",
+        "descKey": "skill.reductionist.awakened.desc",
+        "requiredStat": "willpower",
+        "requiredValue": 20,
+        "tags": ["buff"],
+        "cooldownSec": 0,
+        "values": {}
+      },
+      "color": "#5ad95a",
+      "sprites": {}
+    }
+  ]
+}

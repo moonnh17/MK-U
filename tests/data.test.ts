@@ -47,6 +47,81 @@ describe('데이터 검증', () => {
     expect(gameData.mapgen.bossStages).toEqual([2, 5]);
   });
 
+  describe('스킬 데이터 (기획서 마기학자 표)', () => {
+    const skill = (id: string) => gameData.skills.skills.find((s) => s.id === id)!;
+    const name = (key: string) => gameData.text[key];
+
+    it('헥타르 6개·아크로 6개, 패시브는 전투 드론·환원주의자', () => {
+      const by = (school: string) => gameData.skills.skills.filter((s) => s.school === school).map((s) => s.id);
+      expect(by('hectar')).toHaveLength(6);
+      expect(by('acro')).toHaveLength(6);
+      expect(gameData.skills.skills.filter((s) => s.kind === 'passive').map((s) => s.id).sort()).toEqual([
+        'combatDrone',
+        'reductionist',
+      ]);
+    });
+
+    it('이름·각성 이름·요구 스탯이 표와 같다', () => {
+      const table: [string, string, string, string, number][] = [
+        ['magiTurret', '마기 자동포탑', '대형권역사수주포', 'strength', 20],
+        ['magiMine', '마기 지뢰', '무한연쇄기폭', 'magiPower', 20],
+        ['antimatterCannon', '반물질포', '다연장반입자포', 'magiPower', 20],
+        ['magiField', '마기역장', '벡터굴절역장', 'willpower', 20],
+        ['railgun', '레일건', '초전도 레일건', 'intelligence', 20],
+        ['combatDrone', '전투 드론', '군집지성', 'agility', 20],
+        ['unstableSubject', '불안정 실험체', '증식하는 실패작', 'agility', 20],
+        ['magiCorruption', '마기 변질', '적색 반역', 'magiPower', 20],
+        ['experimentalWeapon', '실험 병기', '판도라 장치', 'intelligence', 20],
+        ['purifyingWings', '정화의 날개', '첫 사람의 날개', 'strength', 20],
+        ['mkPrototype', 'MK : 프로토타입', 'MK : 오버드라이브', 'toughness', 20],
+        ['reductionist', '환원주의자', '제1원리', 'willpower', 20],
+      ];
+      for (const [id, n, an, stat, value] of table) {
+        const s = skill(id);
+        expect(name(s.nameKey)).toBe(n);
+        expect(name(s.awakening.nameKey)).toBe(an);
+        expect(s.awakening.requiredStat).toBe(stat);
+        expect(s.awakening.requiredValue).toBe(value);
+      }
+    });
+
+    it('태그가 표와 같다 (source별 예외 포함)', () => {
+      expect(skill('magiTurret').tags).toEqual(['tech', 'ranged']);
+      expect(skill('magiTurret').sources.bigBullet).toEqual(['physical', 'ranged']);
+      expect(skill('purifyingWings').tags).toEqual(['physical', 'melee']);
+      expect(skill('purifyingWings').awakening.tags).toEqual(['physical', 'melee', 'bleed']);
+      // 출혈 공격 source는 물리·출혈, 근접 없음
+      expect(skill('purifyingWings').sources.bleed).toEqual(['physical', 'bleed']);
+      expect(skill('antimatterCannon').tags).toContain('charging');
+      expect(skill('railgun').tags).not.toContain('charging');
+      expect(skill('magiField').awakening.tags).toEqual([]);
+    });
+
+    it('기본 궁극기는 열역학 제1법칙(기술·원거리)', () => {
+      const u = gameData.ultimates.ultimates.find((x) => x.id === gameData.ultimates.startUltimate)!;
+      expect(name(u.nameKey)).toBe('열역학 제1법칙');
+      expect(u.tags).toEqual(['tech', 'ranged']);
+    });
+
+    it('요구 스탯이 빠진 스킬을 잡아낸다', () => {
+      const d = clone();
+      (d.skills.skills[0]!.awakening as { requiredStat?: string }).requiredStat = undefined;
+      expect(validateGameData(d).join('\n')).toMatch(/요구 스탯/);
+    });
+
+    it('계열 태그가 빠진 스킬을 잡아낸다', () => {
+      const d = clone();
+      (d.skills.skills[0] as { school?: string }).school = undefined;
+      expect(validateGameData(d).join('\n')).toMatch(/계열 태그/);
+    });
+
+    it('레벨이 3개가 아닌 스킬을 잡아낸다', () => {
+      const d = clone();
+      d.skills.skills[0]!.levels.pop();
+      expect(validateGameData(d).join('\n')).toMatch(/Lv1~3/);
+    });
+  });
+
   describe('잘못된 데이터를 잡아낸다', () => {
     it('없는 태그를 쓰는 무기', () => {
       const d = clone();

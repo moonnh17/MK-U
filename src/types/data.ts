@@ -49,10 +49,24 @@ export interface StatDef {
   linkedTags: TagId[];
 }
 
+/** 스탯 하나로 정하는 효과: 기준점을 넘는 1포인트당 perPoint, 최대 cap */
+export interface StatRule {
+  stat: StatId;
+  pivot: number;
+  perPoint: number;
+  cap: number;
+}
+
+/** 스탯 표의 태그 외 효과 */
+export const STAT_EFFECT_IDS = ['maxHp', 'damageReduction', 'moveSpeed', 'skillArea', 'energyGain', 'mentalResist'] as const;
+export type StatEffectId = (typeof STAT_EFFECT_IDS)[number];
+
 export interface StatsData {
   /** 시작 스탯 (기획서: 전부 10) */
   startValue: number;
   stats: StatDef[];
+  /** maxHp는 더하는 값, 나머지는 비율(0.01 = 1%) */
+  effects: Record<StatEffectId, StatRule>;
 }
 
 // ---------- 태그 ----------
@@ -352,7 +366,21 @@ export interface HudLayoutData {
     currentColor: string;
     corridorColor: string;
   };
-  skillbar: { slotSize: number; gap: number; groupGap: number; disabledAlpha: number };
+  skillbar: {
+    slotSize: number;
+    gap: number;
+    groupGap: number;
+    disabledAlpha: number;
+    /** Lv1·2·3 테두리 색 */
+    levelColors: string[];
+    awakenedColor: string;
+    emptyColor: string;
+    /** 쿨타임 원형 게이지 색 */
+    cooldownColor: string;
+    cooldownAlpha: number;
+    /** 궁극기 게이지가 다 찼을 때 테두리 */
+    ultimateReadyColor: string;
+  };
   weapons: { mainWidth: number; mainHeight: number; subWidth: number; subHeight: number; gap: number };
   /** 사망·클리어 화면의 다시 시작 버튼 */
   overlayButton: { width: number; height: number };
@@ -373,6 +401,109 @@ export interface UiData {
   /** 에너지 부족 시 HUD 에너지 바를 빨갛게 표시하는 시간(초) */
   energyEmptyFlashSec: number;
   mobile: MobileLayoutData;
+}
+
+// ---------- 스킬 ----------
+
+export type JobId = 'magiScholar' | 'magiMage' | 'warrior';
+export const SCHOOL_IDS = ['hectar', 'acro'] as const;
+export type SchoolId = (typeof SCHOOL_IDS)[number];
+export type SkillSlotKind = 'active' | 'passive';
+
+export interface SkillLevelDef {
+  /** 쿨타임(초). 패시브는 0 */
+  cooldownSec: number;
+  /** 레벨별 수치. 스킬마다 의미가 다르고, 설명 문구의 {이름} 자리에 들어간다 */
+  values: Record<string, number>;
+}
+
+export interface SkillAwakeningDef {
+  nameKey: string;
+  descKey: string;
+  /** 각성 조건: Lv3 + 이 스탯이 requiredValue 이상 */
+  requiredStat: StatId;
+  requiredValue: number;
+  /** 각성 후 카드·인벤토리에 보이는 태그 */
+  tags: TagId[];
+  cooldownSec: number;
+  values: Record<string, number>;
+}
+
+export interface SkillDef {
+  id: string;
+  job: JobId;
+  /** 계열 태그 (전직 판정 집계) */
+  school: SchoolId;
+  kind: SkillSlotKind;
+  nameKey: string;
+  /** HUD 슬롯에 들어가는 짧은 이름 */
+  shortKey: string;
+  descKey: string;
+  /** 카드·인벤토리에 보이는 태그 */
+  tags: TagId[];
+  /** 실제 공격(source)별 태그. 피해 계산은 이것만 본다(부모 스킬 태그를 복사하지 않는다) */
+  sources: Record<string, TagId[]>;
+  /** Lv1~3 */
+  levels: SkillLevelDef[];
+  awakening: SkillAwakeningDef;
+  /** 아이콘 자리 색 */
+  color: string;
+  /** 스킬이 만드는 오브젝트 모양 */
+  sprites: Record<string, SpriteRef>;
+}
+
+export interface SkillsData {
+  skills: SkillDef[];
+}
+
+export interface UltimateDef {
+  id: string;
+  nameKey: string;
+  shortKey: string;
+  descKey: string;
+  tags: TagId[];
+  sources: Record<string, TagId[]>;
+  /** 게이지가 이만큼 차면 발동할 수 있다 */
+  gaugeMax: number;
+  values: Record<string, number>;
+  color: string;
+  sprites: Record<string, SpriteRef>;
+}
+
+export interface UltimatesData {
+  /** 전직 전 기본 궁극기 */
+  startUltimate: string;
+  /** 적 처치 시 게이지 충전량 (적 등급별) */
+  gaugePerKill: Record<EnemyRank, number>;
+  ultimates: UltimateDef[];
+}
+
+// ---------- 카드 ----------
+
+export type CardOfferKind = 'skill' | 'stat';
+
+export interface StatCardGrade {
+  id: string;
+  amount: number;
+  /** 등장 가중치 */
+  weight: number;
+  color: string;
+}
+
+export interface CardsData {
+  /** 한 번에 보여주는 카드 수 */
+  cardCount: number;
+  /** 런 시작 카드 */
+  runStart: CardOfferKind;
+  /** 스테이지를 끝낼 때마다 이 순서로 돈다 (런 전체 스테이지 번호 1부터) */
+  afterStageCycle: CardOfferKind[];
+  /** 보스(X-2, X-5)를 잡으면 보스방에서 한 번 더 */
+  bossBonus: CardOfferKind;
+  /** 각성 카드는 조건을 채운 만큼 넣되 이 수까지 */
+  maxAwakeningCards: number;
+  /** 스킬 카드 종류별 뽑기 가중치 */
+  skillWeights: { new: number; levelUp: number; passiveNew: number; passiveLevelUp: number };
+  statGrades: StatCardGrade[];
 }
 
 // ---------- 텍스트 ----------

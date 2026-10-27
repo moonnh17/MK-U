@@ -26,7 +26,18 @@
       "currentColor": "#ffffff",
       "corridorColor": "#5a6a7a"
     },
-    "skillbar": { "slotSize": 20, "gap": 3, "groupGap": 8, "disabledAlpha": 0.35 },
+    "skillbar": {
+      "slotSize": 24,
+      "gap": 3,
+      "groupGap": 8,
+      "disabledAlpha": 0.35,
+      "levelColors": ["#9aa4b0", "#5ab0ff", "#c77dff"],
+      "awakenedColor": "#ffd23f",
+      "emptyColor": "#4a5562",
+      "cooldownColor": "#000000",
+      "cooldownAlpha": 0.65,
+      "ultimateReadyColor": "#ff9a3c"
+    },
     "weapons": { "mainWidth": 52, "mainHeight": 22, "subWidth": 34, "subHeight": 14, "gap": 3 },
     "overlayButton": { "width": 96, "height": 24 }
   },
