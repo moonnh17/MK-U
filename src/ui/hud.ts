@@ -57,6 +57,9 @@ export class Hud {
   private readonly mainCostText: Phaser.GameObjects.Text;
   private readonly subWeaponText: Phaser.GameObjects.Text;
   private minimapVisible = true;
+  /** 런 중에만 보인다 (실험장에서는 숨김) */
+  private shown = true;
+  private mode: UiMode = 'pc';
   private readonly buffY: number;
   private readonly buffTexts: Phaser.GameObjects.Text[] = [];
 
@@ -237,9 +240,18 @@ export class Hud {
     this.storedBadge.setText(stored > 0 ? this.ctx.t('hud.stored', { count: stored }) : '');
   }
 
+  setShown(on: boolean): void {
+    if (this.shown === on) return;
+    this.shown = on;
+    this.bars.setVisible(on);
+    this.minimap.container.setVisible(on && this.minimapVisible);
+    this.pcOnly.setVisible(on && this.mode === 'pc');
+  }
+
   applyMode(mode: UiMode, mobileBarsX: number | null, mobileMinimapY: number | null): void {
     const h = this.ctx.data.ui.hud;
-    this.pcOnly.setVisible(mode === 'pc');
+    this.mode = mode;
+    this.pcOnly.setVisible(this.shown && mode === 'pc');
     this.bars.setX(mode === 'mobile' && mobileBarsX !== null ? mobileBarsX : h.margin);
     this.minimap.container.setY(mode === 'mobile' && mobileMinimapY !== null ? mobileMinimapY : h.margin);
   }

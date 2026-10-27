@@ -110,8 +110,9 @@ export interface Settlement {
   shardsOwned: number;
 }
 
-export function newPlayerState(data: GameData): PlayerState {
-  const job = data.jobs.jobs.find((j) => j.id === data.jobs.startJob)!;
+/** jobId: 실험장에서 고른 직업 (없으면 데이터의 시작 직업) */
+export function newPlayerState(data: GameData, jobId: string = data.jobs.startJob): PlayerState {
+  const job = data.jobs.jobs.find((j) => j.id === jobId) ?? data.jobs.jobs.find((j) => j.id === data.jobs.startJob)!;
   const stats = startingStats(data.stats.startValue);
   for (const [k, v] of Object.entries(job.statBonus)) stats[k as keyof typeof stats] += v ?? 0;
   return {

@@ -29,8 +29,10 @@ export class BootScene extends Phaser.Scene {
       ...data.ultimates.ultimates.flatMap((u) => Object.values(u.sprites)),
     ];
     for (const ref of refs) this.makeRectTexture(ref);
+    for (const o of data.lab.objects) this.makeRectTexture({ spriteKey: o.spriteKey, color: o.color, size: o.w, height: o.h });
 
-    this.scene.start('Run');
+    // 게임은 실험장에서 시작한다
+    this.scene.start('Lab');
     this.scene.launch('UI');
   }
 

@@ -15,14 +15,14 @@ export interface GameEvents {
   /** 화면 가운데 짧은 알림 */
   toast: { text: string };
   /** 근처에 상호작용 대상이 생기거나 사라짐 (모바일 공격 버튼 → 줍기/조사) */
-  interactHint: { kind: 'weapon' | 'chest' | 'merchant' | null };
+  interactHint: { kind: 'weapon' | 'chest' | 'merchant' | 'lab' | null };
   /** 사망·클리어 화면이 뜨거나(true) 닫힘(false) */
   overlay: { open: boolean };
   /** 화면의 '다시 시작' 버튼 */
   restartRequested: Record<string, never>;
 
   /** 게임을 멈추는 창(카드 선택·인벤토리)이 열리거나 닫힘 */
-  modal: { kind: 'cards' | 'inventory' | 'cutscene' | null };
+  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | null };
   /** 컷인 → 설명창 (각성·궁극기 각성·전직) */
   cutsceneShow: { cut: CutIn; pages: CutPage[] };
   /** 컷인·설명창을 다 넘겼다 */
@@ -46,6 +46,10 @@ export interface GameEvents {
   cardPick: { index: number };
   /** 인벤토리 → 스킬을 칸에 넣는다 */
   inventoryEquip: { skillId: string; target: number | 'passive' };
+  /** 실험장: 직업 선택 창 열기·고르기·닫기 */
+  jobWindowShow: { selected: string | null };
+  labJobPicked: { jobId: string };
+  jobWindowClose: Record<string, never>;
   /** 인벤토리 아이템 탭: 그 슬롯의 무기를 발밑에 버린다 */
   inventoryDropWeapon: { slot: 0 | 1 };
   /** 인벤토리 열기 요청(보관 알림의 버튼) / 닫기 요청(닫기 버튼) */

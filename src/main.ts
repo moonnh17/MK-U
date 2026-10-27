@@ -15,12 +15,14 @@ import { KeyboardSource } from './input/keyboard';
 import { TouchSource } from './input/touch';
 import { initialUiMode, nextUiMode, type UiMode } from './input/uiMode';
 import { BootScene } from './scenes/BootScene';
+import { LabScene } from './scenes/LabScene';
 import { RunScene } from './scenes/RunScene';
 import { UIScene } from './scenes/UIScene';
 import { CardWindow } from './ui/cardWindow';
 import { CutsceneWindow } from './ui/cutsceneWindow';
 import { InventoryWindow } from './ui/inventoryWindow';
 import { ItemCard } from './ui/itemCard';
+import { JobWindow } from './ui/jobWindow';
 import { SettlementWindow } from './ui/settlementWindow';
 import type { TouchControlId } from './ui/mobileLayout';
 
@@ -88,7 +90,7 @@ const game = new Phaser.Game({
   scale: { mode: Phaser.Scale.NONE, zoom: zoomFor(ctx.uiMode) },
   physics: { default: 'arcade', arcade: { debug: false } },
   input: { keyboard: false, gamepad: false },
-  scene: [BootScene, RunScene, UIScene],
+  scene: [BootScene, LabScene, RunScene, UIScene],
 });
 // 디버그: 콘솔에서 상태를 보거나 프레임을 직접 돌릴 수 있게
 if (config.debug) Object.assign(window, { __game: game, __ctx: ctx });
@@ -124,6 +126,7 @@ bus.on('interactHint', ({ kind }) => {
   if (kind === 'weapon') touch.setAttackOverride('interact', t('mobile.pickup'));
   else if (kind === 'chest') touch.setAttackOverride('interact', t('mobile.open'));
   else if (kind === 'merchant') touch.setAttackOverride('interact', t('mobile.buy'));
+  else if (kind === 'lab') touch.setAttackOverride('interact', t('mobile.check'));
   else touch.setAttackOverride(null, t('mobile.attack'));
 });
 // 사망·클리어 화면, 카드 선택창·인벤토리가 떠 있으면 터치 레이어를 걷어 그 화면을 누를 수 있게 한다
@@ -143,6 +146,7 @@ new InventoryWindow(ctx);
 new CutsceneWindow(ctx);
 new ItemCard(ctx);
 new SettlementWindow(ctx);
+new JobWindow(ctx);
 window.addEventListener('resize', () => game.scale.setZoom(zoomFor(ctx.uiMode)));
 
 applyUiMode(ctx.uiMode);

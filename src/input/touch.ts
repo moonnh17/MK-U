@@ -111,6 +111,11 @@ export class TouchSource {
     this.buttons.get(id)?.classList.toggle('disabled', disabled);
   }
 
+  /** 버튼을 숨긴다 (실험장에서는 런 전용 버튼을 감춘다) */
+  setHidden(id: TouchControlId, hidden: boolean): void {
+    this.buttons.get(id)?.classList.toggle('hidden', hidden);
+  }
+
   /**
    * 근처에 상호작용 대상이 있으면 공격 버튼이 다른 명령(interact)을 내게 한다.
    * 이미 누르고 있던 손가락은 누른 순간의 명령을 유지한다(누른 채 다가가도 갑자기 줍지 않음).

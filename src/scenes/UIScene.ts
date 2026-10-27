@@ -7,7 +7,7 @@ import { buildDebugSkills } from '../ui/debugSkills';
 import { Hud } from '../ui/hud';
 import { TouchSkills } from '../ui/touchSkills';
 
-/** HUD·미니맵·알림·사망/클리어 화면·디버그 표시. Run 씬 위에 겹쳐 돈다. */
+/** HUD·미니맵·알림·디버그 표시. Run·Lab 씬 위에 겹쳐 돈다(HUD는 런 중에만). */
 export class UIScene extends Phaser.Scene {
   private ctx!: GameContext;
   private hud!: Hud;
@@ -88,6 +88,7 @@ export class UIScene extends Phaser.Scene {
 
   override update(): void {
     const s = this.ctx.session;
+    this.hud.setShown(s !== null);
     if (s) {
       this.hud.update(s, this.time.now);
       if (this.ctx.uiMode === 'mobile') this.touchSkills.update(s.skillView, this.touchSkillLabels);

@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
 import type { ActionFrame, ButtonAction, Vec2 } from '../core/actions';
-import { makeFallbackSeed } from '../core/config';
 import { getContext, type GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { DISABLED_ACTIONS } from '../core/features';
@@ -90,6 +89,8 @@ export interface RunSceneData {
   player?: PlayerState;
   /** 이 스테이지 시작방에서 고를 카드 */
   offers?: CardOfferKind[];
+  /** 새 런: 실험장에서 고른 직업 */
+  job?: string;
 }
 
 interface Prop {
@@ -228,7 +229,7 @@ export class RunScene extends Phaser.Scene {
       map,
       visited: new Set([map.startId]),
       currentRoomId: map.startId,
-      player: this.initData.player ?? newPlayerState(d),
+      player: this.initData.player ?? newPlayerState(d, this.initData.job),
       enemiesAlive: 0,
       outcome: null,
       energyEmptyAt: -Infinity,
@@ -2227,12 +2228,13 @@ export class RunScene extends Phaser.Scene {
     bus.emit('overlay', { open: true });
   }
 
+  /** 결산 확인 → 실험장으로 돌아간다 */
   private restartRun(): void {
-    if (!this.ctx.config.seedFromUrl) this.ctx.config.seed = makeFallbackSeed();
     this.time.paused = false;
     bus.emit('overlay', { open: false });
     if (this.modal) bus.emit('modal', { kind: null });
-    this.scene.restart({});
+    this.ctx.session = null;
+    this.scene.start('Lab');
   }
 
   // ---------- 디버그 ----------
