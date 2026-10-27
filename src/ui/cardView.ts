@@ -1,9 +1,10 @@
 /** 카드 한 장을 화면에 그릴 문구·배지로 바꾼다 (카드 선택창과 테스트에서 쓴다). */
 import type { GameContext } from '../core/context';
 import type { PlayerState } from '../core/session';
-import type { Card } from '../systems/cards';
+import type { AnyCard } from '../systems/cards';
 import { findSkill, skillValues } from '../systems/skills';
 import { skillTags, tagBadges, type TagBadge } from '../systems/tags';
+import { itemDescParams } from './itemCard';
 
 export interface CardView {
   /** 신규 · 액티브 / Lv1 → Lv2 / 각성 / 스탯 */
@@ -18,6 +19,8 @@ export interface CardView {
   accent: string;
   /** 계열 (스탯 카드는 빈 문자열) */
   school: string;
+  /** 아이템 카드: 그림(지금은 색 사각형) */
+  icon?: { color: string };
 }
 
 /** 숫자 수치를 설명 문구에 넣을 때 소수점 정리 */
@@ -27,9 +30,24 @@ function fmtValues(values: Record<string, number>): Record<string, string> {
   return out;
 }
 
-export function describeCard(card: Card, player: PlayerState, ctx: GameContext): CardView {
+export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContext): CardView {
   const t = ctx.t;
   const d = ctx.data;
+  if (card.kind === 'item') {
+    const def = d.items.items.find((x) => x.id === card.itemId)!;
+    const grade = d.groupMultipliers.grades.find((g) => g.id === def.grade);
+    return {
+      kindLabel: t('card.item'),
+      name: t(def.nameKey),
+      subName: '',
+      levelText: grade ? t(grade.nameKey) : '',
+      desc: t(def.descKey, itemDescParams(def, d.groupMultipliers)),
+      badges: tagBadges(def.tags, d.tags),
+      accent: grade?.color ?? '#ffffff',
+      school: '',
+      icon: { color: def.color },
+    };
+  }
   if (card.kind === 'stat') {
     const grade = d.cards.statGrades.find((g) => g.id === card.grade);
     const now = player.stats[card.stat];

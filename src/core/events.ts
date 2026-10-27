@@ -1,7 +1,7 @@
 import type { CutIn, CutPage } from '../ui/cutscenePages';
 import type { ButtonAction } from './actions';
 import type { UiMode } from '../input/uiMode';
-import type { Card } from '../systems/cards';
+import type { AnyCard } from '../systems/cards';
 import type { CardOfferKind, EncounterKindId, GradeId, StatId } from '../types/data';
 
 /** 이벤트 이름 → 페이로드 */
@@ -30,7 +30,7 @@ export interface GameEvents {
   /** 디버그: 계열 집계를 정하고 바로 전직 */
   debugAdvance: { hectar: number; acro: number };
   /** 카드 선택창에 카드를 띄운다 */
-  cardsShow: { titleKey: string; cards: Card[]; reroll: { cost: number; enabled: boolean; used: boolean } };
+  cardsShow: { titleKey: string; cards: AnyCard[]; reroll: { cost: number; enabled: boolean; used: boolean } | null };
   /** 카드창 리롤 (코인) */
   cardReroll: Record<string, never>;
   /** 디버그: 다음 조우 칸 유형 / 무기 지급 / 코인 */

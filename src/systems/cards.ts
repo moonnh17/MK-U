@@ -21,6 +21,10 @@ export type Card =
   | { kind: SkillCardKind; skillId: string }
   | { kind: 'stat'; stat: StatId; amount: number; grade: string };
 
+/** 아이템 선택 카드(마기수집첨탑). 스킬·스탯 카드와 같은 창에 뜨지만 고르면 아이템을 얻는다 */
+export type ItemChoiceCard = { kind: 'item'; itemId: string };
+export type AnyCard = Card | ItemChoiceCard;
+
 // ---------- 스케줄 ----------
 
 export function runStartOffers(cards: CardsData): CardOfferKind[] {

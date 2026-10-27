@@ -20,6 +20,7 @@ export class BootScene extends Phaser.Scene {
       data.loot.chest.weapon,
       data.loot.chest.item,
       data.loot.merchantStand,
+      data.loot.spire.small.sprite,
       data.pickups.energyOrb,
       data.pickups.coin,
       data.mapgen.props.exitPortal,
@@ -37,8 +38,8 @@ export class BootScene extends Phaser.Scene {
     if (this.textures.exists(ref.spriteKey)) return;
     const g = this.make.graphics({}, false);
     g.fillStyle(hexColor(ref.color), 1);
-    g.fillRect(0, 0, ref.size, ref.size);
-    g.generateTexture(ref.spriteKey, ref.size, ref.size);
+    g.fillRect(0, 0, ref.size, ref.height ?? ref.size);
+    g.generateTexture(ref.spriteKey, ref.size, ref.height ?? ref.size);
     g.destroy();
   }
 }

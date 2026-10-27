@@ -12,13 +12,14 @@ import type { BossHost } from '../bosses/host';
 import { Door } from '../entities/door';
 import { Enemy } from '../entities/enemy';
 import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
+import { Spire } from '../entities/spire';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard, type HazardHost } from '../entities/hazard';
 import { FloorWeapon, Pickup } from '../entities/pickup';
 import { Explosive } from '../skills/explosive';
 import { nearestEnemy, type ShieldOpts, type SkillHost, type SkillObject } from '../skills/host';
 import { isSkillImplemented, passiveImpl, skillImpl, ultimateImpl } from '../skills/registry';
-import { applyCard, drawSkillCards, drawStatCards, runStartOffers, stageEndOffers, type Card } from '../systems/cards';
+import { applyCard, drawSkillCards, drawStatCards, runStartOffers, stageEndOffers, type AnyCard } from '../systems/cards';
 import { calcDamage, gradeMultiplier, spaceDamage, type RangeBonus, type Stats } from '../systems/damage';
 import { convertSkills, gaugeFromDamage, gaugeFromGreatSuccess, judgeSchool, skillAllowed, ultimateAwakeningReady } from '../systems/advancement';
 import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type CutIn, type CutPage } from '../ui/cutscenePages';
@@ -28,6 +29,7 @@ import { effectiveWeights, itemDamageMultiplier, readySet, rollItem, transferWei
 import { canBuy, merchantStock, rollEncounter, rollGrade, rollOptions, rollWeapon } from '../systems/loot';
 import { lineHits } from '../systems/targeting';
 import { generateStage, type RoomNode } from '../systems/mapgen';
+import { inSpireCircle, spireEliteCount, spireItemChoices, type SpireEvent } from '../systems/spire';
 import { planCombatWaves, RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
 import { advanceStage, firstStage, type StageRef } from '../systems/run';
 import { absorbHit, refracts, tickShield, type ShieldState } from '../systems/shield';
@@ -92,8 +94,10 @@ interface Prop {
 }
 
 interface Offer {
-  kind: CardOfferKind;
+  kind: CardOfferKind | 'item';
   boss: boolean;
+  /** 아이템 선택 카드(첨탑): 미리 뽑아 둔 아이템 */
+  items?: string[];
 }
 
 type Modal = 'cards' | 'inventory' | 'cutscene' | null;
@@ -131,6 +135,10 @@ export class RunScene extends Phaser.Scene {
   private stands: MerchantStand[] = [];
   /** 대규모 습격이 벌어진 조우 칸 */
   private raidRooms = new Set<number>();
+  /** 마기수집첨탑 (조우 칸 하나에 하나) */
+  private spires: Spire[] = [];
+  /** 처치 중에 생긴 첨탑 이벤트 (다음 updateSpires에서 처리) */
+  private spireEvents: { sp: Spire; e: SpireEvent }[] = [];
   /** 대검 차지 */
   private charging = false;
   private chargeT = 0;
@@ -174,7 +182,7 @@ export class RunScene extends Phaser.Scene {
   private modal: Modal = null;
   private offerQueue: Offer[] = [];
   private afterOffers: (() => void)[] = [];
-  private currentCards: Card[] | null = null;
+  private currentCards: AnyCard[] | null = null;
   /** 컷인 → 설명창 대기열과 다 본 뒤 할 일 */
   private cutQueue: { cut: CutIn; pages: CutPage[] }[] = [];
   private afterCuts: (() => void) | null = null;
@@ -354,6 +362,8 @@ export class RunScene extends Phaser.Scene {
     this.chests = [];
     this.stands = [];
     this.raidRooms = new Set();
+    this.spires = [];
+    this.spireEvents = [];
     this.charging = false;
     this.chargeT = 0;
     this.chargeFx = null;
@@ -492,6 +502,7 @@ export class RunScene extends Phaser.Scene {
     const moving = frame.move.x !== 0 || frame.move.y !== 0;
 
     this.updateRooms(dt);
+    this.updateSpires(dt);
 
     for (const e of this.enemies) e.update(dt, this.enemyHost);
     for (const b of this.bossControllers.values()) b.update(dt, this.bossHost);
@@ -928,6 +939,11 @@ export class RunScene extends Phaser.Scene {
     // 궁극기 게이지는 적 처치로 충전
     const ult = this.session.player.ultimate;
     if (this.ultimateDef().gauge.kind === 'kill') ult.gauge = gainGauge(ult.gauge, this.ultimateDef().gaugeMax, d.ultimates.gaugePerKill[e.rank]);
+    // 첨탑: 원 안에서 잡으면 충전 (결과는 다음 프레임에 처리)
+    const sp = roomId === undefined ? undefined : this.spires.find((x) => x.roomId === roomId);
+    if (sp) {
+      for (const ev of sp.state.onKill(e.rank, inSpireCircle(x - sp.x, y - sp.y, sp.radius, e.radius))) this.spireEvents.push({ sp, e: ev });
+    }
     this.removeEnemy(e);
     if (roomId !== undefined) this.rooms.get(roomId)?.enemyKilled();
     for (const o of [...this.skillObjects]) o.onKill?.(this.host, e);
@@ -1414,6 +1430,14 @@ export class RunScene extends Phaser.Scene {
     const p = this.session.player;
     const { stage } = this.session;
     const rng = Rng.derive(this.ctx.config.seed, `cards-${stage.chapter}-${stage.stage}-${this.cardSeq++}`);
+    if (next.kind === 'item') {
+      // 아이템 선택 카드(첨탑): 미리 뽑아 둔 아이템, 리롤 없음
+      const cards = (next.items ?? []).map((itemId) => ({ kind: 'item' as const, itemId }));
+      this.currentCards = cards;
+      this.setModal('cards');
+      bus.emit('cardsShow', { titleKey: 'card.title.spire', cards, reroll: null });
+      return;
+    }
     const cards =
       next.kind === 'skill'
         ? drawSkillCards(rng, p.loadout, p.stats, d.skills, d.cards, (id) => isSkillImplemented(id) && skillAllowed(findSkill(d.skills, id), p.advancement))
@@ -1432,7 +1456,7 @@ export class RunScene extends Phaser.Scene {
   private rerollCards(): void {
     const p = this.session.player;
     const cost = this.ctx.data.cards.rerollCost;
-    if (this.modal !== 'cards' || this.rerolled || !this.currentOffer || Math.floor(p.coins) < cost) return;
+    if (this.modal !== 'cards' || this.rerolled || !this.currentOffer || this.currentOffer.kind === 'item' || Math.floor(p.coins) < cost) return;
     p.coins -= cost;
     this.rerolled = true;
     this.showCards();
@@ -1441,6 +1465,11 @@ export class RunScene extends Phaser.Scene {
   private pickCard(index: number): void {
     const card = this.currentCards?.[index];
     if (!card || this.modal !== 'cards') return;
+    if (card.kind === 'item') {
+      this.giveItem(card.itemId);
+      this.openNextCards();
+      return;
+    }
     const d = this.ctx.data;
     const t = this.ctx.t;
     const before = { hp: this.session.player.hp, maxHp: this.session.player.maxHp };
@@ -1774,7 +1803,73 @@ export class RunScene extends Phaser.Scene {
       this.rooms.set(roomId, state);
       this.raidRooms.add(roomId);
       this.handleRoomEvents(roomId, state.enter());
+    } else if (kind === 'magiSpire') {
+      // 첨탑이 방 가운데로 떨어지고 문이 잠긴다
+      this.setRoomLocked(roomId, true);
+      this.spires.push(new Spire(this, roomId, c.x, c.y, d.loot.spire));
     }
+  }
+
+  // ---------- 마기수집첨탑 ----------
+
+  private updateSpires(dt: number): void {
+    for (const { sp, e } of this.spireEvents.splice(0)) this.handleSpireEvents(sp, [e]);
+    for (const sp of this.spires) {
+      if (sp.state.phase === 'done') continue;
+      const alive = this.enemies.filter((e) => !e.dead && this.enemyRoom.get(e) === sp.roomId).length;
+      this.handleSpireEvents(sp, sp.state.update(dt, alive));
+      sp.draw();
+    }
+  }
+
+  private handleSpireEvents(sp: Spire, events: SpireEvent[]): void {
+    const t = this.ctx.t;
+    for (const e of events) {
+      if (e.type === 'landed') {
+        sp.land();
+        bus.emit('toast', { text: t('spire.landed') });
+      } else if (e.type === 'spawn') {
+        this.spawnSpireBatch(sp, e.index);
+      } else if (e.type === 'charged') {
+        // 상승: 남은 적은 보상 없이 사라진다
+        bus.emit('toast', { text: t('spire.charged') });
+        for (const en of this.enemies.filter((x) => this.enemyRoom.get(x) === sp.roomId)) this.removeEnemy(en);
+        sp.rise();
+      } else {
+        this.setRoomLocked(sp.roomId, false);
+        this.offerSpireItems(sp);
+      }
+    }
+  }
+
+  /** 방해 무리: 현재 챕터 웨이브 하나, 엘리트는 평소의 eliteMul배 (헥타르 전투원은 M6) */
+  private spawnSpireBatch(sp: Spire, index: number): void {
+    const d = this.ctx.data;
+    const { map } = this.session;
+    const seed = this.ctx.config.seed;
+    const label = `spire-${map.chapter}-${map.stage}-${sp.roomId}-${index}`;
+    const wave = planCombatWaves(Rng.derive(seed, `${label}-wave`), map.chapter, [1, 1], d.waves)[0]!;
+    const normal = eliteCount(Rng.derive(seed, `${label}-elite-count`), map.chapter, map.stage, d.elites);
+    const elites = assignElites(
+      Rng.derive(seed, `${label}-elite`),
+      wave,
+      spireEliteCount(normal, d.loot.spire.eliteMul),
+      (id) => d.enemies.enemies.find((e) => e.id === id)!.rank,
+      d.elites,
+    );
+    const rng = Rng.derive(seed, label);
+    wave.forEach((id, i) => this.spawnEnemy(id, sp.roomId, rng, true, elites[i] ?? null));
+  }
+
+  /** 충전 완료 보상: 아이템 카드 3장 중 1장 (확률 이전 반영, 신화는 따로) */
+  private offerSpireItems(sp: Spire): void {
+    const d = this.ctx.data;
+    const p = this.session.player;
+    const { stage } = this.session;
+    const rng = Rng.derive(this.ctx.config.seed, `spire-items-${stage.chapter}-${stage.stage}-${sp.roomId}`);
+    const weights = effectiveWeights(d.loot.spire.small.weights, stage.chapter, d.items.chapterCommonShift, p.lootShift);
+    const items = spireItemChoices(rng, weights, d.loot.mythicChance, d.items, new Set(p.itemsObtained), d.loot.spire.cards);
+    if (items.length > 0) this.queueOffers([{ kind: 'item', boss: false, items }]);
   }
 
   /** 전투 칸을 깼을 때 낮은 확률로 무기 */
@@ -1870,6 +1965,8 @@ export class RunScene extends Phaser.Scene {
     for (const e of this.enemies.filter((x) => this.enemyRoom.get(x) === rid)) this.removeEnemy(e);
     const state = this.rooms.get(rid);
     if (state) this.handleRoomEvents(rid, state.forceClear());
+    const sp = this.spires.find((x) => x.roomId === rid);
+    if (sp) for (const e of sp.state.forceCharge()) this.spireEvents.push({ sp, e });
   }
 
   /** 디버그: 계열 집계를 정하고 바로 전직 (한 런에 한 번) */

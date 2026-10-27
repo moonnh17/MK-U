@@ -5,7 +5,7 @@
  */
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
-import type { Card } from '../systems/cards';
+import type { AnyCard } from '../systems/cards';
 import { describeCard } from './cardView';
 
 export class CardWindow {
@@ -23,7 +23,7 @@ export class CardWindow {
     });
   }
 
-  private show(titleKey: string, cards: Card[], reroll: { cost: number; enabled: boolean; used: boolean }): void {
+  private show(titleKey: string, cards: AnyCard[], reroll: { cost: number; enabled: boolean; used: boolean } | null): void {
     const t = this.ctx.t;
     const player = this.ctx.session?.player;
     if (!player) return;
@@ -61,6 +61,12 @@ export class CardWindow {
       name.className = 'cw-name';
       name.textContent = v.name;
       name.style.color = v.accent;
+      if (v.icon) {
+        const icon = document.createElement('span');
+        icon.className = 'cw-icon';
+        icon.style.background = v.icon.color;
+        name.prepend(icon);
+      }
       const sub = document.createElement('div');
       sub.className = 'cw-sub';
       sub.textContent = [v.subName, v.school].filter(Boolean).join(' · ');
@@ -106,15 +112,17 @@ export class CardWindow {
       list.appendChild(el);
     });
     this.root.appendChild(list);
-    // 리롤: 카드창마다 1회, 코인
     const bar = document.createElement('div');
     bar.className = 'cw-bar';
-    const rr = document.createElement('button');
-    rr.className = 'cw-reroll';
-    rr.textContent = reroll.used ? t('card.rerollUsed') : t('card.reroll', { cost: reroll.cost });
-    rr.disabled = !reroll.enabled;
-    rr.addEventListener('click', () => bus.emit('cardReroll', {}));
-    bar.appendChild(rr);
+    // 리롤: 카드창마다 1회, 코인 (아이템 선택 카드에는 없다)
+    if (reroll) {
+      const rr = document.createElement('button');
+      rr.className = 'cw-reroll';
+      rr.textContent = reroll.used ? t('card.rerollUsed') : t('card.reroll', { cost: reroll.cost });
+      rr.disabled = !reroll.enabled;
+      rr.addEventListener('click', () => bus.emit('cardReroll', {}));
+      bar.appendChild(rr);
+    }
     if (mobile) bar.appendChild(confirm);
     this.root.appendChild(bar);
     this.root.style.display = 'flex';
