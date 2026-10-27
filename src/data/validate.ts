@@ -635,6 +635,16 @@ export function validateGameData(d: GameData): Errors {
   }
   for (const [name, codes] of Object.entries(kb.debug)) for (const k of codes) claim(k, `debug.${name}`);
 
+  // --- 결산·영구 진행 ---
+  const cr = d.meta.crystals;
+  for (const k of ['perStage', 'perElite', 'perSpire', 'perHiddenBoss'] as const) checkPositive(errors, `meta.crystals.${k}`, cr[k], true);
+  if (!(cr.clearMultiplier >= 1)) errors.push('meta.crystals.clearMultiplier: 1 이상');
+  for (const s of d.mapgen.bossStages) if (cr.bossByStage[String(s)] === undefined) errors.push(`meta.crystals.bossByStage: ${s} 스테이지 보스 결정 없음`);
+  checkPositive(errors, 'meta.memory.pastSlots', d.meta.memory.pastSlots);
+  if (!(d.meta.memory.bossShardChance >= 0 && d.meta.memory.bossShardChance <= 1)) errors.push('meta.memory.bossShardChance: 0~1');
+  for (const k of ['lineStepSec', 'countSec'] as const) checkPositive(errors, `meta.settlement.${k}`, d.meta.settlement[k]);
+  for (const k of ['stages', 'midBoss', 'chapterBoss', 'elites', 'spires', 'hiddenBosses'] as const) needText('meta.crystals', `settlement.crystal.${k}`);
+
   // --- 텍스트 ---
   for (const [k, v] of Object.entries(d.text)) {
     if (typeof v !== 'string' || v === '') errors.push(`text: '${k}' 값이 비어 있음`);

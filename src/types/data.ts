@@ -545,8 +545,6 @@ export interface HudLayoutData {
     ultimateReadyColor: string;
   };
   weapons: { mainWidth: number; mainHeight: number; subWidth: number; subHeight: number; gap: number };
-  /** 사망·클리어 화면의 다시 시작 버튼 */
-  overlayButton: { width: number; height: number };
 }
 
 export interface UiData {
@@ -862,3 +860,32 @@ export interface CardsData {
 // ---------- 텍스트 ----------
 
 export type TextTable = Record<string, string>;
+
+// ---------- 결산·영구 진행 ----------
+
+/** 결산 마기력 결정 산식 (기획서 표) */
+export interface CrystalRules {
+  /** 스테이지 클리어 1개당 */
+  perStage: number;
+  /** 보스 처치: 스테이지 번호 → 결정 (X-2, X-5) */
+  bossByStage: Record<string, number>;
+  perElite: number;
+  perSpire: number;
+  perHiddenBoss: number;
+  /** 런 클리어(3-5) 보너스: 합계 × 배율 */
+  clearMultiplier: number;
+}
+
+export interface MetaData {
+  crystals: CrystalRules;
+  memory: {
+    /** 과거의 기억 칸 수 (내용은 미공개, 칸·순서·잠금만) */
+    pastSlots: number;
+    /** 보스 처치 시 기억조각 확률 */
+    bossShardChance: number;
+    /** 히든보스 처치 시 확정 */
+    hiddenBossShard: boolean;
+  };
+  /** 결산 화면 연출 */
+  settlement: { lineStepSec: number; countSec: number };
+}

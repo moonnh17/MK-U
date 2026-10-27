@@ -11,6 +11,7 @@ import type {
   JobsData,
   LootData,
   MapgenData,
+  MetaData,
   PickupsData,
   PlayerData,
   CardsData,
@@ -44,6 +45,7 @@ import ultimatesJson from './ultimates.json';
 import cardsJson from './cards.json';
 import uiJson from './ui.json';
 import keybindingsJson from './keybindings.json';
+import metaJson from './meta.json';
 import koJson from './text/ko.json';
 
 export interface GameData {
@@ -66,6 +68,7 @@ export interface GameData {
   cards: CardsData;
   ui: UiData;
   keybindings: KeybindingsData;
+  meta: MetaData;
   text: TextTable;
 }
 
@@ -90,5 +93,6 @@ export const gameData: GameData = {
   cards: cardsJson as unknown as CardsData,
   ui: uiJson as unknown as UiData,
   keybindings: keybindingsJson as unknown as KeybindingsData,
+  meta: metaJson as unknown as MetaData,
   text: koJson as TextTable,
 };
