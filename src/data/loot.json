@@ -1,0 +1,23 @@
+{
+  "mythicChance": 0.001,
+  "uniqueWeaponFallback": "legendary",
+  "weaponChest": {
+    "2": { "rare": 60, "legendary": 35, "unique": 5 },
+    "5": { "legendary": 60, "unique": 40 }
+  },
+  "combatDrop": { "chance": 0.03, "weights": { "common": 80, "rare": 20 } },
+  "merchant": {
+    "count": 3,
+    "weights": { "common": 50, "rare": 40, "legendary": 10 },
+    "prices": { "common": 15, "rare": 30, "legendary": 60, "unique": 120, "mythic": 300 }
+  },
+  "encounter": { "weights": { "treasure": 31, "merchant": 25, "raid": 25, "magiSpire": 18, "hiddenBoss": 1 } },
+  "raid": { "waves": [3, 4], "sizeMul": 1.5, "elitesPerWave": 2, "coins": [15, 20] },
+  "chest": {
+    "weapon": { "spriteKey": "chest_weapon", "color": "#a07a3a", "size": 14 },
+    "item": { "spriteKey": "chest_item", "color": "#5a8ad9", "size": 14 },
+    "openRadius": 18
+  },
+  "merchantStand": { "spriteKey": "merchant_stand", "color": "#4a5a6a", "size": 12 },
+  "standSpacing": 64
+}

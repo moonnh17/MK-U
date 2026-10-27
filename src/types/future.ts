@@ -15,5 +15,3 @@ export interface ItemDef {
   spriteKey: string;
 }
 
-/** 조우 칸 유형 (판정 로직은 M4) */
-export type EncounterKind = 'treasure' | 'merchant' | 'ambush' | 'magiSpire' | 'hiddenBoss';

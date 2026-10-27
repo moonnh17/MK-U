@@ -1,6 +1,13 @@
 {
   "startWeapon": "pistol",
   "projectile": { "spriteKey": "projectile_player", "color": "#fff3a0", "size": 3 },
+  "critMultiplier": 1.5,
+  "options": [
+    { "id": "crit", "nameKey": "weaponOpt.crit", "value": [0.08, 0.15], "categories": ["gun", "blade"] },
+    { "id": "projectileSpeed", "nameKey": "weaponOpt.projectileSpeed", "value": [0.15, 0.3], "categories": ["gun"] },
+    { "id": "energyCost", "nameKey": "weaponOpt.energyCost", "value": [1, 1], "categories": ["gun"], "needsEnergy": true },
+    { "id": "attackSpeed", "nameKey": "weaponOpt.attackSpeed", "value": [0.1, 0.2], "categories": ["gun", "blade"] }
+  ],
   "weapons": [
     {
       "id": "pistol",
@@ -55,6 +62,63 @@
       "spriteKey": "weapon_longsword",
       "color": "#e0e8ff",
       "size": 10
+    },
+    {
+      "id": "smg", "nameKey": "weapon.smg", "category": "gun", "grade": "common", "tags": ["tech", "ranged"],
+      "baseDamage": 2, "fireIntervalSec": 0.09, "energyCost": 1, "pattern": { "kind": "single", "jitterDeg": 12 },
+      "projectileSpeed": 280, "range": 220, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_smg", "color": "#9ab0c8", "size": 7
+    },
+    {
+      "id": "rifle", "nameKey": "weapon.rifle", "category": "gun", "grade": "common", "tags": ["tech", "ranged"],
+      "baseDamage": 5, "fireIntervalSec": 0.22, "energyCost": 1, "pattern": { "kind": "single" },
+      "projectileSpeed": 340, "range": 300, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_rifle", "color": "#7a9a6a", "size": 9
+    },
+    {
+      "id": "sniper", "nameKey": "weapon.sniper", "category": "gun", "grade": "common", "tags": ["tech", "ranged"],
+      "baseDamage": 18, "fireIntervalSec": 0.9, "energyCost": 4, "pattern": { "kind": "single" }, "pierce": 3,
+      "projectileSpeed": 520, "range": 420, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_sniper", "color": "#5a6a8a", "size": 10
+    },
+    {
+      "id": "grenadeLauncher", "nameKey": "weapon.grenadeLauncher", "category": "gun", "grade": "common", "tags": ["tech", "ranged"],
+      "baseDamage": 12, "fireIntervalSec": 0.8, "energyCost": 4, "pattern": { "kind": "lob", "radius": 30 },
+      "projectileSpeed": 200, "range": 220, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_grenade_launcher", "color": "#8a7a3a", "size": 9
+    },
+    {
+      "id": "dagger", "nameKey": "weapon.dagger", "category": "blade", "grade": "common", "tags": ["physical", "melee"],
+      "baseDamage": 4, "fireIntervalSec": 0.16, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 70, "radius": 20 },
+      "projectileSpeed": 0, "range": 20, "cutsProjectiles": true, "droppable": true,
+      "spriteKey": "weapon_dagger", "color": "#d0d8e8", "size": 6
+    },
+    {
+      "id": "greatsword", "nameKey": "weapon.greatsword", "category": "blade", "grade": "common", "tags": ["physical", "melee"],
+      "baseDamage": 12, "fireIntervalSec": 0.7, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 220, "radius": 36 },
+      "charge": { "maxSec": 1.0, "damageMul": 2.5, "radiusMul": 1.4 },
+      "projectileSpeed": 0, "range": 36, "cutsProjectiles": true, "droppable": true,
+      "spriteKey": "weapon_greatsword", "color": "#b0b8d0", "size": 12
+    },
+    {
+      "id": "spear", "nameKey": "weapon.spear", "category": "blade", "grade": "common", "tags": ["physical", "melee"],
+      "baseDamage": 9, "fireIntervalSec": 0.45, "energyCost": 0, "pattern": { "kind": "line", "length": 52, "width": 8 },
+      "projectileSpeed": 0, "range": 52, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_spear", "color": "#c8b07a", "size": 12
+    },
+    {
+      "id": "hammer", "nameKey": "weapon.hammer", "category": "blade", "grade": "common", "tags": ["physical", "melee"],
+      "baseDamage": 14, "fireIntervalSec": 0.8, "energyCost": 0, "pattern": { "kind": "smash", "reach": 18, "radius": 22 },
+      "knockback": { "distance": 30, "sec": 0.15 },
+      "projectileSpeed": 0, "range": 40, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_hammer", "color": "#8a8a9a", "size": 10
+    },
+    {
+      "id": "handi", "nameKey": "weapon.handi", "category": "gun", "grade": "mythic", "tags": ["physical", "ranged"],
+      "baseDamage": 10, "fireIntervalSec": 0.35, "energyCost": 1, "pattern": { "kind": "single" }, "pierce": 99,
+      "equipBonus": { "stats": { "strength": 30 }, "rangedDamage": 3 },
+      "projectileSpeed": 400, "range": 360, "cutsProjectiles": false, "droppable": false,
+      "spriteKey": "weapon_handi", "color": "#ff3b3b", "size": 12
     }
   ]
 }

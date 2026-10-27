@@ -151,8 +151,10 @@ export function validateGameData(d: GameData): Errors {
     needText(w, wpn.nameKey);
     if (!gradeIds.has(wpn.grade)) errors.push(`${w}: 알 수 없는 등급 '${wpn.grade}'`);
     for (const t of wpn.tags) if (!tagIds.has(t)) errors.push(`${w}: 알 수 없는 태그 '${t}'`);
-    // 기획서: 총 = 기술·원거리, 칼 = 물리·근접
-    const required = wpn.category === 'gun' ? ['tech', 'ranged'] : wpn.category === 'blade' ? ['physical', 'melee'] : null;
+    // 기획서: 총 = 기술·원거리, 칼 = 물리·근접. 이름 있는 유니크·신화 무기는 자기 태그(환디 물리·원거리 등), 원거리/근접만 맞춘다
+    const named = wpn.grade === 'unique' || wpn.grade === 'mythic';
+    const required =
+      wpn.category === 'gun' ? (named ? ['ranged'] : ['tech', 'ranged']) : wpn.category === 'blade' ? (named ? ['melee'] : ['physical', 'melee']) : null;
     if (!required) errors.push(`${w}: category는 gun 또는 blade`);
     else for (const t of required) if (!wpn.tags.includes(t as never)) errors.push(`${w}: ${wpn.category}는 '${t}' 태그 필요`);
     checkPositive(errors, `${w}.baseDamage`, wpn.baseDamage);
@@ -168,11 +170,68 @@ export function validateGameData(d: GameData): Errors {
     } else if (p.kind === 'arc') {
       checkPositive(errors, `${w}.pattern.arcDeg`, p.arcDeg);
       checkPositive(errors, `${w}.pattern.radius`, p.radius);
+    } else if (p.kind === 'lob') {
+      checkPositive(errors, `${w}.pattern.radius`, p.radius);
+    } else if (p.kind === 'line') {
+      checkPositive(errors, `${w}.pattern.length`, p.length);
+      checkPositive(errors, `${w}.pattern.width`, p.width);
+    } else if (p.kind === 'smash') {
+      checkPositive(errors, `${w}.pattern.reach`, p.reach, true);
+      checkPositive(errors, `${w}.pattern.radius`, p.radius);
     } else if (p.kind !== 'single') {
       errors.push(`${w}: 알 수 없는 pattern.kind`);
     }
+    if ((p.kind === 'lob' || p.kind === 'single' || p.kind === 'spread') && wpn.category !== 'gun') errors.push(`${w}: ${p.kind}는 총 패턴`);
+    if ((p.kind === 'arc' || p.kind === 'line' || p.kind === 'smash') && wpn.category !== 'blade') errors.push(`${w}: ${p.kind}는 칼 패턴`);
+    if (wpn.charge) for (const k of ['maxSec', 'damageMul', 'radiusMul'] as const) checkPositive(errors, `${w}.charge.${k}`, wpn.charge[k]);
+    if (wpn.knockback) for (const k of ['distance', 'sec'] as const) checkPositive(errors, `${w}.knockback.${k}`, wpn.knockback[k]);
+    for (const [k, v] of Object.entries(wpn.equipBonus?.stats ?? {})) if (!statIds.has(k) || !isNum(v)) errors.push(`${w}.equipBonus.stats.${k}: 잘못됨`);
   }
 
+  checkPositive(errors, 'weapons.critMultiplier', d.weapons.critMultiplier);
+  checkUnique(errors, 'weapons.options', d.weapons.options.map((o) => o.id));
+  for (const o of d.weapons.options) {
+    needText(`weapons.options.${o.id}`, o.nameKey);
+    if (!Array.isArray(o.value) || o.value.length !== 2 || !(o.value[0] > 0) || o.value[0] > o.value[1]) errors.push(`weapons.options.${o.id}: value는 [최소, 최대]`);
+  }
+  if (!d.weapons.weapons.some((x) => x.droppable)) errors.push('weapons: 상점·드롭 무기가 없음');
+
+  // --- 전리품·조우 ---
+  const lt = d.loot;
+  if (!(lt.mythicChance >= 0 && lt.mythicChance <= 1)) errors.push('loot.mythicChance: 0~1');
+  if (!gradeIds.has(lt.uniqueWeaponFallback)) errors.push('loot.uniqueWeaponFallback: 알 수 없는 등급');
+  const checkWeights = (where: string, w: Record<string, number | undefined>) => {
+    let sum = 0;
+    for (const [k, v] of Object.entries(w)) {
+      if (!gradeIds.has(k)) errors.push(`${where}: 알 수 없는 등급 '${k}'`);
+      checkPositive(errors, `${where}.${k}`, v, true);
+      sum += v ?? 0;
+    }
+    if (sum <= 0) errors.push(`${where}: 가중치 합이 0`);
+  };
+  for (const [stage, w] of Object.entries(lt.weaponChest)) {
+    if (!d.mapgen.bossStages.includes(Number(stage))) errors.push(`loot.weaponChest.${stage}: 보스 스테이지가 아님`);
+    checkWeights(`loot.weaponChest.${stage}`, w);
+  }
+  for (const s of d.mapgen.bossStages) if (!lt.weaponChest[String(s)]) errors.push(`loot.weaponChest: ${s} 스테이지 가중치 없음`);
+  if (!(lt.combatDrop.chance >= 0 && lt.combatDrop.chance <= 1)) errors.push('loot.combatDrop.chance: 0~1');
+  checkWeights('loot.combatDrop.weights', lt.combatDrop.weights);
+  checkPositive(errors, 'loot.merchant.count', lt.merchant.count);
+  checkWeights('loot.merchant.weights', lt.merchant.weights);
+  for (const g of GRADE_IDS) checkPositive(errors, `loot.merchant.prices.${g}`, lt.merchant.prices[g]);
+  for (const k of ['treasure', 'merchant', 'raid', 'magiSpire', 'hiddenBoss'] as const) {
+    checkPositive(errors, `loot.encounter.weights.${k}`, lt.encounter.weights[k], true);
+    needText(`loot.encounter.${k}`, `encounter.${k}`);
+  }
+  checkRange(errors, 'loot.raid.waves', lt.raid.waves, 1);
+  checkRange(errors, 'loot.raid.coins', lt.raid.coins);
+  checkPositive(errors, 'loot.raid.sizeMul', lt.raid.sizeMul);
+  checkPositive(errors, 'loot.raid.elitesPerWave', lt.raid.elitesPerWave, true);
+  checkSprite(errors, 'loot.chest.weapon', lt.chest.weapon);
+  checkSprite(errors, 'loot.chest.item', lt.chest.item);
+  checkPositive(errors, 'loot.chest.openRadius', lt.chest.openRadius);
+  checkSprite(errors, 'loot.merchantStand', lt.merchantStand);
+  checkPositive(errors, 'loot.standSpacing', lt.standSpacing);
   // --- 적 ---
   const enemyIds = d.enemies.enemies.map((e) => e.id);
   checkUnique(errors, 'enemies', enemyIds);
@@ -444,6 +503,7 @@ export function validateGameData(d: GameData): Errors {
   // --- 카드 ---
   const c = d.cards;
   checkPositive(errors, 'cards.cardCount', c.cardCount);
+  checkPositive(errors, 'cards.rerollCost', c.rerollCost, true);
   checkPositive(errors, 'cards.maxAwakeningCards', c.maxAwakeningCards, true);
   if (c.maxAwakeningCards > c.cardCount) errors.push('cards.maxAwakeningCards: cardCount보다 클 수 없음');
   const offerKinds = ['skill', 'stat'];

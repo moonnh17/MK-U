@@ -1,5 +1,6 @@
 {
   "cardCount": 3,
+  "rerollCost": 10,
   "runStart": "skill",
   "afterStageCycle": ["stat", "skill"],
   "bossBonus": "skill",

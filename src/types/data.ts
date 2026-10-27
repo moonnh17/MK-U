@@ -58,7 +58,7 @@ export interface StatRule {
 }
 
 /** 스탯 표의 태그 외 효과 */
-export const STAT_EFFECT_IDS = ['maxHp', 'damageReduction', 'moveSpeed', 'skillArea', 'energyGain', 'mentalResist'] as const;
+export const STAT_EFFECT_IDS = ['maxHp', 'damageReduction', 'moveSpeed', 'skillArea', 'energyGain', 'coinGain', 'mentalResist'] as const;
 export type StatEffectId = (typeof STAT_EFFECT_IDS)[number];
 
 export interface StatsData {
@@ -163,10 +163,29 @@ export interface GroupMultipliersData {
 
 export type WeaponCategory = 'gun' | 'blade';
 
+/**
+ * single: 한 발(jitterDeg면 매번 조금씩 흩어짐) / spread: 부채꼴 여러 발 / arc: 부채꼴 베기
+ * lob: 목표 지점에 떨어져 터지는 폭발탄(자해 없음) / line: 직선 찌르기(관통) / smash: 앞쪽 원 내려찍기
+ */
 export type WeaponPattern =
-  | { kind: 'single' }
+  | { kind: 'single'; jitterDeg?: number }
   | { kind: 'spread'; pellets: IntRange; spreadDeg: number }
-  | { kind: 'arc'; arcDeg: number; radius: number };
+  | { kind: 'arc'; arcDeg: number; radius: number }
+  | { kind: 'lob'; radius: number }
+  | { kind: 'line'; length: number; width: number }
+  | { kind: 'smash'; reach: number; radius: number };
+
+/** 무기 무작위 옵션 (레어 1개·전설 2개) */
+export interface WeaponOptionDef {
+  id: 'crit' | 'projectileSpeed' | 'energyCost' | 'attackSpeed';
+  nameKey: string;
+  /** 값 범위 [최소, 최대]. crit = 확률, projectileSpeed·attackSpeed = 비율, energyCost = 줄어드는 양 */
+  value: [number, number];
+  /** 붙을 수 있는 분류 */
+  categories: WeaponCategory[];
+  /** 에너지를 쓰는 무기에만 */
+  needsEnergy?: boolean;
+}
 
 export interface WeaponDef extends SpriteRef {
   id: string;
@@ -187,14 +206,25 @@ export interface WeaponDef extends SpriteRef {
   range: number;
   /** 칼: 적의 일반 투사체를 지우는지 */
   cutsProjectiles: boolean;
-  /** 상점·드롭에서 나올 수 있는지 (테스트 전용 무기 등은 false) */
+  /** 상점·드롭에서 나올 수 있는지 (신화·유니크처럼 따로 판정하는 무기는 false) */
   droppable: boolean;
+  /** 총: 탄이 적을 몇 마리 더 뚫는지 */
+  pierce?: number;
+  /** 칼: 누르고 있으면 차지(대검). 놓으면 휘두른다 */
+  charge?: { maxSec: number; damageMul: number; radiusMul: number };
+  /** 맞은 적을 밀어낸다(해머). 거대 엘리트·보스는 면역 */
+  knockback?: { distance: number; sec: number };
+  /** 들고 있는 동안 효과 (신궁 환디) */
+  equipBonus?: { stats?: Partial<Record<StatId, number>>; rangedDamage?: number; meleeDamage?: number };
 }
 
 export interface WeaponsData {
   startWeapon: string;
   /** 총알 모양 (공통) */
   projectile: SpriteRef;
+  /** 치명타 피해 배율 */
+  critMultiplier: number;
+  options: WeaponOptionDef[];
   weapons: WeaponDef[];
 }
 
@@ -586,6 +616,28 @@ export interface UltimatesData {
   ultimates: UltimateDef[];
 }
 
+// ---------- 전리품·조우 ----------
+
+export type EncounterKindId = 'treasure' | 'merchant' | 'raid' | 'magiSpire' | 'hiddenBoss';
+
+export interface LootData {
+  /** 아이템·무기를 얻을 때마다 신화로 바뀌는 고정 확률 */
+  mythicChance: number;
+  /** 유니크 무기 목록이 없을 때 대신 줄 등급 */
+  uniqueWeaponFallback: GradeId;
+  /** 보스 무기 상자 등급 가중치 (스테이지 번호별) */
+  weaponChest: Record<string, Partial<Record<GradeId, number>>>;
+  /** 전투 칸을 깼을 때 무기가 떨어질 확률과 등급 */
+  combatDrop: { chance: number; weights: Partial<Record<GradeId, number>> };
+  merchant: { count: number; weights: Partial<Record<GradeId, number>>; prices: Record<GradeId, number> };
+  encounter: { weights: Record<EncounterKindId, number> };
+  raid: { waves: IntRange; sizeMul: number; elitesPerWave: number; coins: IntRange };
+  chest: { weapon: SpriteRef; item: SpriteRef; openRadius: number };
+  merchantStand: SpriteRef;
+  /** 상인 진열대 간격(px) */
+  standSpacing: number;
+}
+
 // ---------- 직업·전직 ----------
 
 /** 전직 분기 (마기학자: 헥타르/아크로). 마기법사·전사는 틀만 */
@@ -636,6 +688,8 @@ export interface StatCardGrade {
 export interface CardsData {
   /** 한 번에 보여주는 카드 수 */
   cardCount: number;
+  /** 카드창마다 1회 리롤 비용(코인) */
+  rerollCost: number;
   /** 런 시작 카드 */
   runStart: CardOfferKind;
   /** 스테이지를 끝낼 때마다 이 순서로 돈다 (런 전체 스테이지 번호 1부터) */
