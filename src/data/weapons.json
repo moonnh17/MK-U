@@ -3,10 +3,10 @@
   "projectile": { "spriteKey": "projectile_player", "color": "#fff3a0", "size": 3 },
   "critMultiplier": 1.5,
   "options": [
-    { "id": "crit", "nameKey": "weaponOpt.crit", "value": [0.08, 0.15], "categories": ["gun", "blade"] },
-    { "id": "projectileSpeed", "nameKey": "weaponOpt.projectileSpeed", "value": [0.15, 0.3], "categories": ["gun"] },
-    { "id": "energyCost", "nameKey": "weaponOpt.energyCost", "value": [1, 1], "categories": ["gun"], "needsEnergy": true },
-    { "id": "attackSpeed", "nameKey": "weaponOpt.attackSpeed", "value": [0.1, 0.2], "categories": ["gun", "blade"] }
+    { "id": "crit", "nameKey": "weaponOpt.crit", "value": [0.08, 0.15], "categories": ["gun", "blade", "staff"] },
+    { "id": "projectileSpeed", "nameKey": "weaponOpt.projectileSpeed", "value": [0.15, 0.3], "categories": ["gun", "staff"] },
+    { "id": "energyCost", "nameKey": "weaponOpt.energyCost", "value": [1, 1], "categories": ["gun", "staff"], "needsEnergy": true },
+    { "id": "attackSpeed", "nameKey": "weaponOpt.attackSpeed", "value": [0.1, 0.2], "categories": ["gun", "blade", "staff"] }
   ],
   "weapons": [
     {
@@ -119,6 +119,28 @@
       "equipBonus": { "stats": { "strength": 30 }, "rangedDamage": 3 },
       "projectileSpeed": 400, "range": 360, "cutsProjectiles": false, "droppable": false,
       "spriteKey": "weapon_handi", "color": "#ff3b3b", "size": 12
+    },
+    {
+      "id": "rasalgethiClub", "nameKey": "weapon.rasalgethiClub", "category": "blade", "grade": "unique", "tags": ["physical", "melee"],
+      "baseDamage": 16, "fireIntervalSec": 0.75, "energyCost": 0, "pattern": { "kind": "smash", "reach": 18, "radius": 24 },
+      "knockback": { "distance": 34, "sec": 0.15 },
+      "signature": { "every": 3, "kind": "bigSmash", "damageMul": 3, "radiusMul": 1.6 },
+      "projectileSpeed": 0, "range": 42, "cutsProjectiles": false, "droppable": false,
+      "spriteKey": "weapon_rasalgethi_club", "color": "#b0583a", "size": 11
+    },
+    {
+      "id": "aviorStaff", "nameKey": "weapon.aviorStaff", "category": "staff", "grade": "unique", "tags": ["magic", "ranged"],
+      "baseDamage": 6, "fireIntervalSec": 0.25, "energyCost": 1, "pattern": { "kind": "homing", "turnRate": 5 },
+      "signature": { "every": 5, "kind": "laser", "damageMul": 2.5, "length": 240, "width": 8 },
+      "projectileSpeed": 260, "range": 300, "cutsProjectiles": false, "droppable": false,
+      "spriteKey": "weapon_avior_staff", "color": "#8a6aff", "size": 11
+    },
+    {
+      "id": "rasalhagueSword", "nameKey": "weapon.rasalhagueSword", "category": "blade", "grade": "unique", "tags": ["physical", "melee"],
+      "baseDamage": 13, "fireIntervalSec": 0.55, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 150, "radius": 32 },
+      "signature": { "every": 3, "kind": "space" },
+      "projectileSpeed": 0, "range": 32, "cutsProjectiles": true, "droppable": false,
+      "spriteKey": "weapon_rasalhague_sword", "color": "#e8d24a", "size": 11
     }
   ]
 }

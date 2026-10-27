@@ -42,9 +42,15 @@ export function initialBoss(firstDelaySec: number): BossBrainState {
 }
 
 /** 지금 쓸 수 있는 패턴 */
-export function availablePatterns(s: BossBrainState, patterns: readonly BossPatternRule[], dist: number): BossPatternRule[] {
+/** blocked: 지금은 못 쓰는 패턴 (분신이 살아 있는 동안의 분신 소환 등) */
+export function availablePatterns(
+  s: BossBrainState,
+  patterns: readonly BossPatternRule[],
+  dist: number,
+  blocked: ReadonlySet<string> = new Set(),
+): BossPatternRule[] {
   const ok = patterns.filter(
-    (p) => p.phase <= s.phase && (s.cooldowns[p.id] ?? 0) <= 0 && (p.maxRange === undefined || dist <= p.maxRange),
+    (p) => p.phase <= s.phase && !blocked.has(p.id) && (s.cooldowns[p.id] ?? 0) <= 0 && (p.maxRange === undefined || dist <= p.maxRange),
   );
   const fresh = ok.filter((p) => p.id !== s.last);
   return fresh.length > 0 ? fresh : ok;
@@ -58,6 +64,7 @@ export function stepBoss(
   patterns: readonly BossPatternRule[],
   cfg: BossBrainConfig,
   rng: Rng,
+  blocked: ReadonlySet<string> = new Set(),
 ): { state: BossBrainState; events: BossEvent[] } {
   const cooldowns: Record<string, number> = {};
   for (const [id, v] of Object.entries(s.cooldowns)) cooldowns[id] = Math.max(0, v - dt);
@@ -79,7 +86,7 @@ export function stepBoss(
 
   const idle = st.idle - dt;
   if (idle > 0) return { state: { ...st, idle }, events };
-  const pool = availablePatterns(st, patterns, dist);
+  const pool = availablePatterns(st, patterns, dist, blocked);
   if (pool.length === 0) return { state: { ...st, idle: 0 }, events };
   const p = rng.weighted(pool.map((x) => ({ item: x, weight: x.weight })));
   events.push({ type: 'start', id: p.id });

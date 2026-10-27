@@ -19,7 +19,8 @@ export function scaleEffect(e: ItemEffect, groups: GroupMultipliersData): ItemEf
   const g = groups.itemGroups;
   const out = { ...e } as Record<string, unknown>;
   if ('group' in e) out.value = e.value * g[e.group];
-  if ('damage' in e && e.kind !== 'tempRoar') out.damage = (e.damage as number) * g.procDamage;
+  // 함성의 damage는 피해 %라 발동 피해 배율을 받지 않는다
+  if ('damage' in e && e.kind !== 'tempRoar' && e.kind !== 'roomRoar') out.damage = (e.damage as number) * g.procDamage;
   if ('radius' in e) out.radius = (e.radius as number) * g.area;
   if ('everySec' in e) out.everySec = (e.everySec as number) * g.cooldown;
   if ('cooldownSec' in e) out.cooldownSec = (e.cooldownSec as number) * g.cooldown;
@@ -218,4 +219,29 @@ export function pickHeal(cands: readonly HealCandidate[], hpRatio: number): Heal
 /** 재료가 다 모인 세트 (결과를 아직 얻지 않았으면) */
 export function readySet(owned: ReadonlySet<string>, obtained: ReadonlySet<string>, sets: ItemsData['sets']): ItemsData['sets'][number] | null {
   return sets.find((s) => !obtained.has(s.result) && s.materials.every((m) => owned.has(m))) ?? null;
+}
+
+type Eff<K extends ItemEffect['kind']> = Extract<ItemEffect, { kind: K }>;
+
+/** 함성(바바리안 데스 휘슬): 직업 변형의 함성 효과 증가를 곱한 값. 없으면 null */
+export function roarValues(effects: readonly ItemEffect[]): Eff<'roomRoar'> | null {
+  const base = effects.find((e): e is Eff<'roomRoar'> => e.kind === 'roomRoar');
+  if (!base) return null;
+  const k = 1 + effects.reduce((s, e) => s + (e.kind === 'roarBoost' ? e.value : 0), 0);
+  return { ...base, damage: base.damage * k, moveSpeed: base.moveSpeed * k };
+}
+
+/** 순간 회피(특무 인장): 직업 변형 재사용이 더 짧으면 그것. 없으면 null */
+export function dodgeValues(effects: readonly ItemEffect[]): Eff<'dodgeBlink'> | null {
+  const base = effects.find((e): e is Eff<'dodgeBlink'> => e.kind === 'dodgeBlink');
+  if (!base) return null;
+  const cds = effects.filter((e): e is Eff<'dodgeCooldown'> => e.kind === 'dodgeCooldown').map((e) => e.cooldownSec);
+  return { ...base, cooldownSec: Math.min(base.cooldownSec, ...cds) };
+}
+
+/** 방패 투척(오리온의 방패): 직업 변형 튕김 증가를 더한 값. 없으면 null */
+export function shieldValues(effects: readonly ItemEffect[]): Eff<'shieldThrow'> | null {
+  const base = effects.find((e): e is Eff<'shieldThrow'> => e.kind === 'shieldThrow');
+  if (!base) return null;
+  return { ...base, bounces: base.bounces + effects.reduce((s, e) => s + (e.kind === 'shieldBounces' ? e.value : 0), 0) };
 }

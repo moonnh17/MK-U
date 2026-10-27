@@ -168,7 +168,17 @@ export interface GroupMultipliersData {
 
 // ---------- 무기 ----------
 
-export type WeaponCategory = 'gun' | 'blade';
+/** gun: 총 / blade: 칼(둔기 포함) / staff: 마법 지팡이(탄을 쏘고 에너지를 쓴다, 아비오르의 지팡이) */
+export type WeaponCategory = 'gun' | 'blade' | 'staff';
+
+/**
+ * 유니크 무기의 고유 효과: every번째 공격마다 발동.
+ * bigSmash: 내려찍기 피해·범위 증가(네메아의 종말) / laser: 탄 대신 직선 레이저 / space: 그 공격이 공간격
+ */
+export type WeaponSignature =
+  | { every: number; kind: 'bigSmash'; damageMul: number; radiusMul: number }
+  | { every: number; kind: 'laser'; damageMul: number; length: number; width: number }
+  | { every: number; kind: 'space' };
 
 /**
  * single: 한 발(jitterDeg면 매번 조금씩 흩어짐) / spread: 부채꼴 여러 발 / arc: 부채꼴 베기
@@ -180,7 +190,9 @@ export type WeaponPattern =
   | { kind: 'arc'; arcDeg: number; radius: number }
   | { kind: 'lob'; radius: number }
   | { kind: 'line'; length: number; width: number }
-  | { kind: 'smash'; reach: number; radius: number };
+  | { kind: 'smash'; reach: number; radius: number }
+  /** 지팡이: 가까운 적을 따라 휘는 탄 (turnRate rad/s) */
+  | { kind: 'homing'; turnRate: number };
 
 /** 무기 무작위 옵션 (레어 1개·전설 2개) */
 export interface WeaponOptionDef {
@@ -223,6 +235,8 @@ export interface WeaponDef extends SpriteRef {
   knockback?: { distance: number; sec: number };
   /** 들고 있는 동안 효과 (신궁 환디) */
   equipBonus?: { stats?: Partial<Record<StatId, number>>; rangedDamage?: number; meleeDamage?: number };
+  /** 유니크 고유 효과 */
+  signature?: WeaponSignature;
 }
 
 export interface WeaponsData {
@@ -260,6 +274,8 @@ export interface EnemyDef extends SpriteRef {
   coins: IntRange;
   /** 공격 (목록 순서대로 우선). 없으면 추격·접촉만 */
   attacks?: EnemyAttackDef[];
+  /** 보스가 부르는 적(분신). 챕터 로스터·웨이브에 들지 않는다 */
+  summon?: boolean;
 }
 
 /**
@@ -326,11 +342,10 @@ export interface BossPatternDef {
   values: Record<string, number>;
 }
 
-export interface BossDef {
+/** 보스 행동 (스테이지 보스·히든보스 공통) */
+export interface BossCore {
   /** 적 id와 같다 */
   id: string;
-  chapter: number;
-  stage: number;
   enrageAt: number;
   gapSec: number;
   /** 강화 단계 진입 연출 동안 쉬는 시간(무적) */
@@ -342,10 +357,27 @@ export interface BossDef {
   patterns: BossPatternDef[];
 }
 
+/** 스테이지 보스 (X-2, X-5) */
+export interface BossDef extends BossCore {
+  chapter: number;
+  stage: number;
+}
+
+/** 히든보스: 챕터와 상관없이 같은 패턴, 체력·피해만 챕터 배율. 처치하면 전용 무기·아이템 */
+export interface HiddenBossDef extends BossCore {
+  weaponId: string;
+  itemId: string;
+}
+
 export interface BossesData {
   /** 보스방 경고 배너 시간 */
   bannerSec: number;
   bosses: BossDef[];
+  hiddenBosses: HiddenBossDef[];
+  /** 히든보스 체력·피해 배율 (챕터 번호 → 배율) */
+  hiddenChapterMul: Record<string, number>;
+  /** 지면 파괴 잔해 색 */
+  rubbleColor: string;
 }
 
 export interface EnemiesData {
@@ -670,6 +702,18 @@ export type ItemEffect =
   | { kind: 'hurtInvuln'; sec: number; cooldownSec: number }
   /** 피격 시 사방 공격 (힘·마기력 범위 보정) */
   | { kind: 'hurtBurst'; damage: number; radius: number; tags: TagId[] }
+  /** 전투 칸에 들어갈 때·엘리트를 잡을 때 함성: 피해·이동속도 증가 (버프 태그). 바바리안 데스 휘슬 */
+  | { kind: 'roomRoar'; durationSec: number; damage: number; moveSpeed: number }
+  /** 함성 효과(피해·이동속도) 배율 증가 (직업 변형) */
+  | { kind: 'roarBoost'; value: number }
+  /** 피해를 받기 직전 그 피해를 없애고 짧게 순간이동, 이후 기본공격 attacks회 피해 +bonus. 특무 인장 */
+  | { kind: 'dodgeBlink'; cooldownSec: number; distance: number; attacks: number; bonus: number }
+  /** 순간 회피 재사용을 이 값으로 (직업 변형, 짧은 쪽) */
+  | { kind: 'dodgeCooldown'; cooldownSec: number }
+  /** 주기적으로 벽에 튕기는 방패 투척. 날아가 있는 동안 받는 피해 −guard. 오리온의 방패 */
+  | { kind: 'shieldThrow'; everySec: number; damage: number; bounces: number; speed: number; size: number; maxSec: number; guard: number; tags: TagId[] }
+  /** 방패 튕김 횟수 증가 (직업 변형) */
+  | { kind: 'shieldBounces'; value: number }
   /** 기본 스탯을 base로, 정신력을 willpower로 재편하고 줄어든 양을 가장 많이 투자한 스탯에 옮김 */
   | { kind: 'statReshuffle'; base: number; willpower: number };
 

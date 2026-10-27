@@ -23,7 +23,9 @@ export type Card =
 
 /** 아이템 선택 카드(마기수집첨탑). 스킬·스탯 카드와 같은 창에 뜨지만 고르면 아이템을 얻는다 */
 export type ItemChoiceCard = { kind: 'item'; itemId: string };
-export type AnyCard = Card | ItemChoiceCard;
+/** 학파 선택 카드(전직 동점) */
+export type SchoolChoiceCard = { kind: 'school'; school: SchoolId };
+export type AnyCard = Card | ItemChoiceCard | SchoolChoiceCard;
 
 // ---------- 스케줄 ----------
 

@@ -8,6 +8,7 @@ import {
   gaugeFromDamage,
   gaugeFromGreatSuccess,
   judgeSchool,
+  topSchools,
   paradoxRatio,
   skillAllowed,
   ultimateAwakeningReady,
@@ -28,12 +29,14 @@ function loadout(entries: [string, number, boolean?][]): SkillLoadout {
 
 describe('전직 판정', () => {
   it('많은 쪽으로', () => {
-    expect(judgeSchool({ hectar: 3, acro: 2 }, 'acro', ORDER)).toBe('hectar');
-    expect(judgeSchool({ hectar: 1, acro: 4 }, 'hectar', ORDER)).toBe('acro');
+    expect(judgeSchool({ hectar: 3, acro: 2 }, ORDER)).toBe('hectar');
+    expect(judgeSchool({ hectar: 1, acro: 4 }, ORDER)).toBe('acro');
   });
-  it('동점이면 마지막으로 고른 카드의 계열', () => {
-    expect(judgeSchool({ hectar: 3, acro: 3 }, 'acro', ORDER)).toBe('acro');
-    expect(judgeSchool({ hectar: 3, acro: 3 }, 'hectar', ORDER)).toBe('hectar');
+  it('동점이면 정하지 않는다 (플레이어가 직접 선택)', () => {
+    expect(judgeSchool({ hectar: 3, acro: 3 }, ORDER)).toBeNull();
+    expect(topSchools({ hectar: 3, acro: 3 }, ORDER)).toEqual(['hectar', 'acro']);
+    expect(topSchools({ hectar: 0, acro: 0 }, ORDER)).toEqual(['hectar', 'acro']);
+    expect(topSchools({ hectar: 4, acro: 2 }, ORDER)).toEqual(['hectar']);
   });
 });
 

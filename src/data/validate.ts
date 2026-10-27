@@ -152,16 +152,29 @@ export function validateGameData(d: GameData): Errors {
     if (!gradeIds.has(wpn.grade)) errors.push(`${w}: 알 수 없는 등급 '${wpn.grade}'`);
     for (const t of wpn.tags) if (!tagIds.has(t)) errors.push(`${w}: 알 수 없는 태그 '${t}'`);
     // 기획서: 총 = 기술·원거리, 칼 = 물리·근접. 이름 있는 유니크·신화 무기는 자기 태그(환디 물리·원거리 등), 원거리/근접만 맞춘다
+    // 지팡이 = 마기·원거리 (지금은 이름 있는 지팡이만)
     const named = wpn.grade === 'unique' || wpn.grade === 'mythic';
     const required =
-      wpn.category === 'gun' ? (named ? ['ranged'] : ['tech', 'ranged']) : wpn.category === 'blade' ? (named ? ['melee'] : ['physical', 'melee']) : null;
-    if (!required) errors.push(`${w}: category는 gun 또는 blade`);
+      wpn.category === 'gun'
+        ? named ? ['ranged'] : ['tech', 'ranged']
+        : wpn.category === 'blade'
+          ? named ? ['melee'] : ['physical', 'melee']
+          : wpn.category === 'staff'
+            ? named ? ['ranged'] : ['magic', 'ranged']
+            : null;
+    if (!required) errors.push(`${w}: category는 gun · blade · staff`);
     else for (const t of required) if (!wpn.tags.includes(t as never)) errors.push(`${w}: ${wpn.category}는 '${t}' 태그 필요`);
     checkPositive(errors, `${w}.baseDamage`, wpn.baseDamage);
     checkPositive(errors, `${w}.fireIntervalSec`, wpn.fireIntervalSec);
     checkPositive(errors, `${w}.energyCost`, wpn.energyCost, true);
     checkPositive(errors, `${w}.range`, wpn.range);
-    if (wpn.category === 'gun') checkPositive(errors, `${w}.projectileSpeed`, wpn.projectileSpeed);
+    if (wpn.category !== 'blade') checkPositive(errors, `${w}.projectileSpeed`, wpn.projectileSpeed);
+    const sig = wpn.signature;
+    if (sig) {
+      checkPositive(errors, `${w}.signature.every`, sig.every);
+      if (sig.kind === 'bigSmash' && wpn.pattern.kind !== 'smash') errors.push(`${w}: bigSmash는 내려찍기 무기만`);
+      if (sig.kind === 'laser' && wpn.category === 'blade') errors.push(`${w}: laser는 탄을 쏘는 무기만`);
+    }
     if (wpn.category === 'blade' && wpn.energyCost !== 0) errors.push(`${w}: 칼은 에너지를 소모하지 않음`);
     const p = wpn.pattern;
     if (p.kind === 'spread') {
@@ -178,11 +191,14 @@ export function validateGameData(d: GameData): Errors {
     } else if (p.kind === 'smash') {
       checkPositive(errors, `${w}.pattern.reach`, p.reach, true);
       checkPositive(errors, `${w}.pattern.radius`, p.radius);
+    } else if (p.kind === 'homing') {
+      checkPositive(errors, `${w}.pattern.turnRate`, p.turnRate);
     } else if (p.kind !== 'single') {
       errors.push(`${w}: 알 수 없는 pattern.kind`);
     }
     if ((p.kind === 'lob' || p.kind === 'single' || p.kind === 'spread') && wpn.category !== 'gun') errors.push(`${w}: ${p.kind}는 총 패턴`);
     if ((p.kind === 'arc' || p.kind === 'line' || p.kind === 'smash') && wpn.category !== 'blade') errors.push(`${w}: ${p.kind}는 칼 패턴`);
+    if (p.kind === 'homing' && wpn.category !== 'staff') errors.push(`${w}: homing은 지팡이 패턴`);
     if (wpn.charge) for (const k of ['maxSec', 'damageMul', 'radiusMul'] as const) checkPositive(errors, `${w}.charge.${k}`, wpn.charge[k]);
     if (wpn.knockback) for (const k of ['distance', 'sec'] as const) checkPositive(errors, `${w}.knockback.${k}`, wpn.knockback[k]);
     for (const [k, v] of Object.entries(wpn.equipBonus?.stats ?? {})) if (!statIds.has(k) || !isNum(v)) errors.push(`${w}.equipBonus.stats.${k}: 잘못됨`);
@@ -268,6 +284,7 @@ export function validateGameData(d: GameData): Errors {
     if (!['normal', 'boss', 'hiddenBoss', 'set'].includes(x.pool)) errors.push(`${w}: pool 잘못됨`);
     for (const t of x.tags) if (!tagIds.has(t)) errors.push(`${w}: 알 수 없는 태그 '${t}'`);
     if (x.pool === 'boss' && !d.bosses.bosses.some((b) => b.id === x.bossId)) errors.push(`${w}: bossId '${String(x.bossId)}' 보스 없음`);
+    if (x.pool === 'hiddenBoss' && !d.bosses.hiddenBosses.some((b) => b.id === x.bossId)) errors.push(`${w}: bossId '${String(x.bossId)}' 히든보스 없음`);
     if (x.effects.length === 0) errors.push(`${w}: 효과 없음`);
     for (const e of [...x.effects, ...(x.variants ?? []).flatMap((v) => v.effects)]) {
       if (e.kind === 'stat' && e.stat !== 'all' && !statIds.has(e.stat)) errors.push(`${w}: 알 수 없는 스탯 '${e.stat}'`);
@@ -288,7 +305,7 @@ export function validateGameData(d: GameData): Errors {
     if (!Number.isInteger(e.chapter) || e.chapter < 1 || e.chapter > d.mapgen.chapters) errors.push(`${w}: chapter 범위 밖`);
     if (!['normal', 'elite', 'champion', 'boss', 'hiddenBoss'].includes(e.rank)) errors.push(`${w}: rank 잘못됨`);
     if (!['chase', 'idle', 'boss'].includes(e.ai)) errors.push(`${w}: 알 수 없는 ai '${e.ai}'`);
-    if (e.ai === 'boss' && !d.bosses.bosses.some((b) => b.id === e.id)) errors.push(`${w}: 보스 ai인데 bosses.json에 패턴이 없음`);
+    if (e.ai === 'boss' && ![...d.bosses.bosses, ...d.bosses.hiddenBosses].some((b) => b.id === e.id)) errors.push(`${w}: 보스 ai인데 bosses.json에 패턴이 없음`);
     checkPositive(errors, `${w}.maxHp`, e.maxHp);
     checkPositive(errors, `${w}.moveSpeed`, e.moveSpeed, true);
     checkPositive(errors, `${w}.contactDamage`, e.contactDamage, true);
@@ -316,13 +333,27 @@ export function validateGameData(d: GameData): Errors {
 
   // --- 보스 ---
   checkPositive(errors, 'bosses.bannerSec', d.bosses.bannerSec, true);
-  checkUnique(errors, 'bosses', d.bosses.bosses.map((b) => b.id));
+  checkUnique(errors, 'bosses', [...d.bosses.bosses, ...d.bosses.hiddenBosses].map((b) => b.id));
   for (const b of d.bosses.bosses) {
+    if (b.stage < 1 || b.stage > d.mapgen.stagesPerChapter || !d.mapgen.bossStages.includes(b.stage)) errors.push(`bosses.${b.id}: 보스 스테이지가 아님 (${b.stage})`);
+  }
+  for (const [k, v] of Object.entries(d.bosses.hiddenChapterMul)) checkPositive(errors, `bosses.hiddenChapterMul.${k}`, v);
+  if (d.bosses.hiddenChapterMul['1'] === undefined) errors.push('bosses.hiddenChapterMul: 챕터 1 배율 필요');
+  for (const h of d.bosses.hiddenBosses) {
+    const w = `bosses.hiddenBosses.${h.id}`;
+    const wpn = d.weapons.weapons.find((x) => x.id === h.weaponId);
+    if (!wpn) errors.push(`${w}: 없는 무기 '${h.weaponId}'`);
+    else if (wpn.droppable) errors.push(`${w}: 전용 무기 '${h.weaponId}'는 droppable false여야 함`);
+    const it = d.items.items.find((x) => x.id === h.itemId);
+    if (!it || it.pool !== 'hiddenBoss' || it.bossId !== h.id) errors.push(`${w}: 전용 아이템 '${h.itemId}'는 pool hiddenBoss·bossId ${h.id}여야 함`);
+  }
+  for (const b of [...d.bosses.bosses, ...d.bosses.hiddenBosses]) {
+    const hidden = d.bosses.hiddenBosses.includes(b as never);
     const w = `bosses.${b.id}`;
     const e = d.enemies.enemies.find((x) => x.id === b.id);
+    const rank = hidden ? 'hiddenBoss' : 'boss';
     if (!e) errors.push(`${w}: 같은 id의 적이 없음`);
-    else if (e.ai !== 'boss' || e.rank !== 'boss') errors.push(`${w}: 적 '${b.id}'는 ai·rank가 boss여야 함`);
-    if (b.stage < 1 || b.stage > d.mapgen.stagesPerChapter || !d.mapgen.bossStages.includes(b.stage)) errors.push(`${w}: 보스 스테이지가 아님 (${b.stage})`);
+    else if (e.ai !== 'boss' || e.rank !== rank) errors.push(`${w}: 적 '${b.id}'는 ai boss·rank ${rank}여야 함`);
     if (!(b.enrageAt > 0 && b.enrageAt < 1)) errors.push(`${w}.enrageAt: 0~1 사이`);
     for (const k of ['gapSec', 'enrageSec', 'firstDelaySec', 'keepDistance'] as const) checkPositive(errors, `${w}.${k}`, b[k], true);
     checkPositive(errors, `${w}.enraged.moveSpeedMul`, b.enraged.moveSpeedMul);

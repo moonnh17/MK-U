@@ -43,6 +43,8 @@ export interface PlayerState {
   lootShift: Partial<Record<GradeId, number>>;
   /** 스탯 카드로 올린 양 (LSD-R '가장 많이 투자한 스탯') */
   statInvest: Record<StatId, number>;
+  /** 이번 런에 나온 히든보스 (다시 나오지 않는다) */
+  hiddenBossesMet: string[];
 }
 
 export type RunOutcome = { type: 'dead' } | { type: 'chapterClear'; chapter: number };
@@ -118,6 +120,7 @@ export function newPlayerState(data: GameData): PlayerState {
     itemsObtained: [],
     itemState: {},
     lootShift: {},
+    hiddenBossesMet: [],
     statInvest: Object.fromEntries(STAT_IDS.map((s) => [s, 0])) as Record<StatId, number>,
   };
 }

@@ -11,16 +11,16 @@ import { STAT_IDS, type SchoolId, type SkillDef, type SkillsData, type StatId, t
 import type { Stats } from './damage';
 import { findSkill, type SkillLoadout } from './skills';
 
-export function judgeSchool(
-  picks: Readonly<Record<SchoolId, number>>,
-  lastPick: SchoolId | null,
-  order: readonly SchoolId[],
-): SchoolId {
-  const sorted = [...order].sort((a, b) => picks[b] - picks[a]);
-  const top = sorted[0]!;
-  const tied = sorted.filter((s) => picks[s] === picks[top]);
-  if (tied.length > 1 && lastPick && tied.includes(lastPick)) return lastPick;
-  return top;
+/** 계열 집계가 가장 많은 학파들 (2개 이상이면 동점 → 플레이어가 직접 고른다, 원본 규칙) */
+export function topSchools(picks: Readonly<Record<SchoolId, number>>, order: readonly SchoolId[]): SchoolId[] {
+  const max = Math.max(...order.map((s) => picks[s]));
+  return order.filter((s) => picks[s] === max);
+}
+
+/** 많은 쪽으로 전직. 동점이면 null (선택창) */
+export function judgeSchool(picks: Readonly<Record<SchoolId, number>>, order: readonly SchoolId[]): SchoolId | null {
+  const top = topSchools(picks, order);
+  return top.length === 1 ? top[0]! : null;
 }
 
 export interface ConversionLog {

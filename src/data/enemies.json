@@ -102,6 +102,30 @@
       "spriteKey": "enemy_training_dummy",
       "color": "#8a5ad9",
       "size": 24
+    },
+    {
+      "id": "ancestorEcho", "nameKey": "enemy.ancestorEcho", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
+      "maxHp": 1600, "moveSpeed": 45, "contactDamage": 12, "contactIntervalSec": 1.0,
+      "energyOrbs": [10, 12], "coins": [12, 16],
+      "spriteKey": "enemy_ancestor_echo", "color": "#b0583a", "size": 28
+    },
+    {
+      "id": "royalMage", "nameKey": "enemy.royalMage", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
+      "maxHp": 1400, "moveSpeed": 35, "contactDamage": 10, "contactIntervalSec": 1.0,
+      "energyOrbs": [10, 12], "coins": [12, 16],
+      "spriteKey": "enemy_royal_mage", "color": "#6a4ad9", "size": 22
+    },
+    {
+      "id": "royalMageClone", "nameKey": "enemy.royalMageClone", "chapter": 1, "rank": "normal", "ai": "idle", "summon": true,
+      "maxHp": 1, "moveSpeed": 0, "contactDamage": 0, "contactIntervalSec": 1.0,
+      "energyOrbs": [0, 0], "coins": [0, 0],
+      "spriteKey": "enemy_royal_mage", "color": "#6a4ad9", "size": 22
+    },
+    {
+      "id": "orionCrusader", "nameKey": "enemy.orionCrusader", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
+      "maxHp": 1800, "moveSpeed": 32, "contactDamage": 12, "contactIntervalSec": 1.0,
+      "energyOrbs": [10, 12], "coins": [12, 16],
+      "spriteKey": "enemy_orion_crusader", "color": "#d9c25a", "size": 28
     }
   ]
 }
