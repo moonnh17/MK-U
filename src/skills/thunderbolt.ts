@@ -2,7 +2,7 @@
  * 벼락 (헥타르 학파 궁극기, 기술·원거리·공간격). 조준 방향으로 두 공간 사이를 직선으로 절단한다.
  * 공간격 규칙: 일반 몬스터 즉사, 엘리트·정예는 최대 체력 비율. 보스는 공간격 ×2.4 대신 최대 체력의 일정 비율(벼락 전용).
  * 각성 '케라우노스': 푸른 벼락 강림 → 절단선 → 사선 참격 연속 → 주변 추가 타격 → 공간 균열 붕괴.
- * 보스 최대 체력 비례는 절단선에만 적용하고, 나머지 타격은 공간격 기본 규칙(×2.4)을 따른다.
+ * 보스에게는 절단선(최대 체력 비례)만 들어가고, 나머지 타격은 보스에게 피해가 없다.
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
@@ -40,6 +40,8 @@ function cut(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: nu
 function area(host: SkillHost, u: UltimateCast, at: Vec2, radius: number, source: string, alpha = 0.4): void {
   host.fx(host.scene.add.circle(at.x, at.y, radius, hexColor(u.def.color), alpha).setDepth(6), 0.2);
   for (const e of [...host.enemies()]) {
+    // 케라우노스: 보스에게는 절단선만 들어간다
+    if (isBoss(e)) continue;
     if (Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= radius + e.radius) host.hit(e, u.values.damage!, u.def.sources[source]!);
   }
 }
@@ -113,7 +115,7 @@ class Keraunos implements SkillObject {
         const enemies = [...host.enemies()];
         const hits = lineHits(from, d, v.slashLength!, v.width! / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
         line(host, color, from, { x: from.x + d.x * v.slashLength!, y: from.y + d.y * v.slashLength! }, v.width! / 2, 0.15);
-        for (const k of hits) host.hit(enemies[k]!, v.damage!, u.def.sources.slash!);
+        for (const k of hits) if (!isBoss(enemies[k]!)) host.hit(enemies[k]!, v.damage!, u.def.sources.slash!);
       });
     }
     const afterSlash = 0.3 + v.slashCount! * v.slashDelaySec!;
