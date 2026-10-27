@@ -13,7 +13,7 @@ function num(v: number): string {
   return String(Math.round(v * 10) / 10);
 }
 
-/** 설명 문구의 자리: v{i} 주 값(%는 100배) · d{i} 피해 · r{i} 반경 · s{i} 주기·재사용 · th/to/a{i} 회복 · dur/per/n{i} */
+/** 설명 문구의 자리: v{i} 주 값(%는 100배) · d{i} 피해 · r{i} 반경 · s{i} 주기·재사용 · th/to/a{i} 회복 · dur/per/n{i} · pd/pm/b/c/g{i} */
 export function itemDescParams(def: ItemDef, groups: GroupMultipliersData): Record<string, string> {
   const out: Record<string, string> = {};
   def.effects.forEach((raw, i) => {
@@ -30,6 +30,15 @@ export function itemDescParams(def: ItemDef, groups: GroupMultipliersData): Reco
     if (typeof e.perCoins === 'number') out[`per${i}`] = num(e.perCoins);
     if (typeof e.perKills === 'number') out[`per${i}`] = num(e.perKills);
     if (typeof e.shots === 'number') out[`n${i}`] = num(e.shots);
+    if (typeof e.attacks === 'number') out[`n${i}`] = num(e.attacks);
+    // 함성: pd 피해 %, pm 이동속도 % / 순간 회피: b 피해 % / 방패: c 튕김, g 받는 피해 감소 %
+    if (e.kind === 'roomRoar') {
+      out[`pd${i}`] = num((e.damage as number) * 100);
+      out[`pm${i}`] = num((e.moveSpeed as number) * 100);
+    }
+    if (typeof e.bonus === 'number') out[`b${i}`] = num(e.bonus * 100);
+    if (typeof e.bounces === 'number') out[`c${i}`] = num(e.bounces);
+    if (typeof e.guard === 'number') out[`g${i}`] = num(e.guard * 100);
   });
   return out;
 }

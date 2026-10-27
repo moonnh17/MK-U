@@ -12,7 +12,9 @@ import type { Enemy } from '../entities/enemy';
 import type { SkillHost, SkillObject } from '../skills/host';
 import { nearestEnemy } from '../skills/host';
 import { skillImpl } from '../skills/registry';
-import { activeEffects, itemTotals, pickHeal, type ItemTotals } from '../systems/items';
+import type { Rect } from '../entities/hazard';
+import { activeEffects, dodgeValues, itemTotals, pickHeal, roarValues, shieldValues, type ItemTotals } from '../systems/items';
+import { bounceStep } from '../systems/motion';
 import { findSkill, skillValues } from '../systems/skills';
 import type { ItemEffect, TagId } from '../types/data';
 
@@ -31,10 +33,12 @@ export interface ItemState {
   timer: number;
   /** 임시 함성 남은 시간 */
   roarLeft: number;
+  /** 순간 회피 뒤 남은 강화 기본공격 수 (특무 인장) */
+  empower: number;
 }
 
 export function newItemState(): ItemState {
-  return { cd: 0, used: false, stacks: 0, kills: 0, coinAcc: 0, timer: 0, roarLeft: 0 };
+  return { cd: 0, used: false, stacks: 0, kills: 0, coinAcc: 0, timer: 0, roarLeft: 0, empower: 0 };
 }
 
 export interface ItemHost {
@@ -54,6 +58,63 @@ export interface ItemHost {
   /** 피격 사방 공격 범위 보정 (힘·마기력) */
   burstArea(radius: number): number;
   toast(text: string): void;
+  /** 플레이어가 있는 방 안쪽 (방패 튕김) */
+  arena(): Rect;
+  /** 플레이어 짧은 순간이동 (특무 인장) */
+  blink(distance: number): void;
+}
+
+/** 오리온의 방패: 방 벽에 튕기며 닿는 적에게 피해. 튕길 때마다 다시 맞힐 수 있다 */
+class ShieldDisc implements SkillObject {
+  readonly owner = 'item';
+  readonly createdAt: number;
+  private readonly img: Phaser.GameObjects.Arc;
+  private pos: Vec2;
+  private vel: Vec2;
+  private left: number;
+  private life: number;
+  private hitSet = new Set<Enemy>();
+
+  constructor(
+    host: SkillHost,
+    from: Vec2,
+    angle: number,
+    private readonly e: Extract<ItemEffect, { kind: 'shieldThrow' }>,
+    private readonly arena: Rect,
+    private readonly onEnd: () => void,
+    color: number,
+  ) {
+    this.createdAt = host.scene.time.now;
+    this.pos = { ...from };
+    this.vel = { x: Math.cos(angle) * e.speed, y: Math.sin(angle) * e.speed };
+    this.left = e.bounces;
+    // 다 튕기지 못해도 maxSec 뒤에는 사라진다
+    this.life = e.maxSec;
+    this.img = host.scene.add.circle(from.x, from.y, e.size, color, 0.95).setStrokeStyle(1, 0xffffff, 0.9).setDepth(5);
+  }
+
+  update(dt: number, host: SkillHost): boolean {
+    this.life -= dt;
+    const r = bounceStep(this.pos, this.vel, dt, this.arena, this.e.size);
+    this.pos = r.pos;
+    this.vel = r.vel;
+    if (r.bounces > 0) {
+      this.left -= r.bounces;
+      this.hitSet = new Set();
+    }
+    this.img.setPosition(this.pos.x, this.pos.y);
+    for (const en of [...host.enemies()]) {
+      if (this.hitSet.has(en) || Math.hypot(en.sprite.x - this.pos.x, en.sprite.y - this.pos.y) > this.e.size + en.radius) continue;
+      this.hitSet.add(en);
+      host.hit(en, this.e.damage, this.e.tags);
+    }
+    return this.left >= 0 && this.life > 0;
+  }
+
+  destroy(): void {
+    this.img.destroy();
+    this.onEnd();
+  }
 }
 
 /** 인력탄: 날아가 터지며 둘레 적을 가운데로 끌어당긴다 */
@@ -109,6 +170,12 @@ class GravityShot implements SkillObject {
 export class ItemRuntime {
   private totals!: ItemTotals;
   private effects: { id: string; e: ItemEffect }[] = [];
+  /** 직업 변형까지 합친 함성·순간 회피·방패 (각각 가진 아이템 하나) */
+  private roar: { id: string; e: Extract<ItemEffect, { kind: 'roomRoar' }> } | null = null;
+  private dodge: { id: string; e: Extract<ItemEffect, { kind: 'dodgeBlink' }> } | null = null;
+  private shield: { id: string; e: Extract<ItemEffect, { kind: 'shieldThrow' }> } | null = null;
+  /** 날아가는 방패 수 */
+  private shieldsOut = 0;
   private key = '';
 
   constructor(private readonly host: ItemHost) {
@@ -134,6 +201,16 @@ export class ItemRuntime {
       const def = d.items.items.find((x) => x.id === id);
       return def ? activeEffects(def, ctx, d.groupMultipliers).map((e) => ({ id, e })) : [];
     });
+    const pick = <T>(f: (effs: ItemEffect[]) => T | null): { id: string; e: T } | null => {
+      for (const id of p.items) {
+        const e = f(this.effects.filter((x) => x.id === id).map((x) => x.e));
+        if (e) return { id, e };
+      }
+      return null;
+    };
+    this.roar = pick(roarValues);
+    this.dodge = pick(dodgeValues);
+    this.shield = pick(shieldValues);
   }
 
   get sums(): ItemTotals {
@@ -152,13 +229,50 @@ export class ItemRuntime {
     for (const { id, e } of this.each('lowHpHeal')) if (e.afterDamage && this.state(id).used) v += e.afterDamage;
     for (const { id } of this.each('killStacks')) v += this.state(id).stacks;
     for (const { id, e } of this.each('tempRoar')) if (this.state(id).roarLeft > 0) v += e.damage;
+    if (this.roar && this.state(this.roar.id).roarLeft > 0) v += this.roar.e.damage;
     return v;
   }
 
   moveSpeedBonus(): number {
     let v = 0;
     for (const { id, e } of this.each('tempRoar')) if (this.state(id).roarLeft > 0) v += e.moveSpeed;
+    if (this.roar && this.state(this.roar.id).roarLeft > 0) v += this.roar.e.moveSpeed;
     return v;
+  }
+
+  /** 방패가 날아가는 동안 받는 피해 감소 */
+  guard(): number {
+    this.refresh();
+    return this.shield && this.shieldsOut > 0 ? this.shield.e.guard : 0;
+  }
+
+  /** 함성(바바리안 데스 휘슬): 전투 칸에 들어갈 때·엘리트를 처치할 때 */
+  triggerRoar(): void {
+    this.refresh();
+    if (!this.roar) return;
+    this.state(this.roar.id).roarLeft = this.host.buffDuration(this.roar.e.durationSec);
+  }
+
+  /** 순간 회피(특무 인장): 피해를 받기 직전. 재사용이 찼으면 피하고 true */
+  tryDodge(): boolean {
+    this.refresh();
+    if (!this.dodge) return false;
+    const s = this.state(this.dodge.id);
+    if (s.cd > 0) return false;
+    s.cd = this.dodge.e.cooldownSec;
+    s.empower = this.dodge.e.attacks;
+    this.host.blink(this.dodge.e.distance);
+    return true;
+  }
+
+  /** 기본공격 1회의 피해 배율 (순간 회피 직후 강화 공격을 하나 쓴다) */
+  consumeEmpowered(): number {
+    this.refresh();
+    if (!this.dodge) return 1;
+    const s = this.state(this.dodge.id);
+    if (s.empower <= 0) return 1;
+    s.empower--;
+    return 1 + this.dodge.e.bonus;
   }
 
   /** 적중 효과: 공간격(신검), 확률 피해 ×1.5(참마검, 지능 보정) */
@@ -190,7 +304,7 @@ export class ItemRuntime {
     }
     // 주기 발동
     for (const { id, e } of this.effects) {
-      if (e.kind !== 'autoCast' && e.kind !== 'tempRoar' && e.kind !== 'gravityShot') continue;
+      if (e.kind !== 'autoCast' && e.kind !== 'tempRoar' && e.kind !== 'gravityShot' && e.kind !== 'shieldThrow') continue;
       const s = this.state(id);
       s.timer += dt;
       if (s.timer < e.everySec) continue;
@@ -198,6 +312,8 @@ export class ItemRuntime {
         if (!this.autoCast(e)) continue;
       } else if (e.kind === 'tempRoar') {
         s.roarLeft = this.host.buffDuration(e.durationSec);
+      } else if (e.kind === 'shieldThrow') {
+        if (!this.throwShield()) continue;
       } else if (!this.gravityShot(e)) {
         continue;
       }
@@ -220,6 +336,21 @@ export class ItemRuntime {
     const target = nearestEnemy(host, from, e.range);
     if (!target) return false;
     host.addObject(new GravityShot(host, from, { x: target.sprite.x, y: target.sprite.y }, e, hexColor('#5ad9ff')));
+    return true;
+  }
+
+  /** 방패 투척: 가장 가까운 적 쪽 (적이 없으면 던지지 않음). 튕김 횟수는 직업 변형까지 합친 값 */
+  private throwShield(): boolean {
+    const sh = this.shield;
+    if (!sh) return false;
+    const host = this.host.skill();
+    const from = host.playerPos();
+    const target = nearestEnemy(host, from, Infinity);
+    if (!target) return false;
+    const angle = Math.atan2(target.sprite.y - from.y, target.sprite.x - from.x);
+    const def = this.host.ctx.data.items.items.find((x) => x.id === sh.id)!;
+    this.shieldsOut++;
+    host.addObject(new ShieldDisc(host, from, angle, sh.e, this.host.arena(), () => this.shieldsOut--, hexColor(def.color)));
     return true;
   }
 
@@ -278,7 +409,8 @@ export class ItemRuntime {
     return false;
   }
 
-  onKill(): void {
+  onKill(elite: boolean): void {
+    if (elite) this.triggerRoar();
     for (const { id, e } of this.each('killStacks')) {
       const s = this.state(id);
       s.kills++;
@@ -312,6 +444,11 @@ export class ItemRuntime {
     for (const { id, e } of this.each('tempRoar')) {
       const s = this.state(id);
       if (s.roarLeft > 0) out.push({ id: `item.${id}`, label: this.host.ctx.t('item.roar'), color: '#6a9a3a', leftSec: s.roarLeft, totalSec: this.host.buffDuration(e.durationSec) });
+    }
+    if (this.roar) {
+      const s = this.state(this.roar.id);
+      const def = this.host.ctx.data.items.items.find((x) => x.id === this.roar!.id)!;
+      if (s.roarLeft > 0) out.push({ id: `item.${this.roar.id}`, label: this.host.ctx.t('item.roar'), color: def.color, leftSec: s.roarLeft, totalSec: this.host.buffDuration(this.roar.e.durationSec) });
     }
     return out;
   }

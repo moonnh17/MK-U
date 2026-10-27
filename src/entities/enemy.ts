@@ -18,7 +18,9 @@ const TELEGRAPH_COLOR = 0xff4040;
 export class Enemy {
   readonly sprite: Phaser.Physics.Arcade.Image;
   hp: number;
-  readonly maxHp: number;
+  maxHp: number;
+  /** 접촉 피해 배율 (히든보스 챕터 배율·자기 강화) */
+  damageMul = 1;
   /** 소환 직후 공격·접촉 피해가 없는 남은 시간(초) */
   warn: number;
   /** 마지막 접촉 피해 시각(ms) */
@@ -83,6 +85,12 @@ export class Enemy {
 
   get radius(): number {
     return (this.def.size * this.mods.scale * this.extraScale) / 2;
+  }
+
+  /** 체력 배율 (히든보스 챕터 배율·분신 체력) — 소환 직후에만 */
+  setMaxHp(v: number): void {
+    this.maxHp = v;
+    this.hp = v;
   }
 
   setExtraScale(k: number): void {

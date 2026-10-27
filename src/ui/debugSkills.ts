@@ -123,6 +123,9 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
   );
   // 다음 조우 칸 유형 강제, 무기 지급, 코인
   const encSel = select([['', t('debug.encounterRandom')], ...(['treasure', 'merchant', 'raid', 'magiSpire', 'hiddenBoss'] as const).map((k): [string, string] => [k, t(`encounter.${k}`)])]);
+  // 히든보스: 다음 조우 칸을 그 히든보스로
+  const hbSel = select(d.bosses.hiddenBosses.map((h): [string, string] => [h.id, t(`enemy.${h.id}`)]));
+  body.appendChild(row(hbSel, button(t('debug.hiddenBoss'), () => bus.emit('debugHiddenBoss', { id: hbSel.value }))));
   const itemSel = select(d.items.items.map((x): [string, string] => [x.id, t(x.nameKey)]));
   body.appendChild(row(itemSel, button(t('debug.giveItem'), () => bus.emit('debugGiveItem', { itemId: itemSel.value }))));
   const weaponSel = select(d.weapons.weapons.map((w): [string, string] => [w.id, t(w.nameKey)]));

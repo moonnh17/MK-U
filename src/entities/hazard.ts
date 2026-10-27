@@ -4,6 +4,7 @@
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
+import { bounceStep } from '../systems/motion';
 import type { Enemy } from './enemy';
 
 export interface HazardHost {
@@ -315,5 +316,49 @@ export class DelayedBlast implements Hazard {
   destroy(): void {
     this.ring.destroy();
     this.fill.destroy();
+  }
+}
+
+/** 방 벽에 bounces번 튕기는 원반 (성전사 방패 투척). 닿으면 피해, 튕김을 다 쓰면 사라진다 */
+export class BouncingDisc implements Hazard {
+  private readonly img: Phaser.GameObjects.Arc;
+  private pos: Vec2;
+  private vel: Vec2;
+  private left: number;
+  private life: number;
+
+  constructor(
+    scene: Phaser.Scene,
+    from: Vec2,
+    angle: number,
+    speed: number,
+    private readonly arena: Rect,
+    bounces: number,
+    private readonly radius: number,
+    private readonly damage: number,
+    maxSec: number,
+    color: number,
+  ) {
+    this.pos = { ...from };
+    this.vel = { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed };
+    this.left = bounces;
+    this.life = maxSec;
+    this.img = scene.add.circle(from.x, from.y, radius, color, 0.9).setStrokeStyle(1, 0xffffff, 0.8).setDepth(5);
+  }
+
+  update(dt: number, host: HazardHost): boolean {
+    this.life -= dt;
+    const r = bounceStep(this.pos, this.vel, dt, this.arena, this.radius);
+    this.pos = r.pos;
+    this.vel = r.vel;
+    this.left -= r.bounces;
+    this.img.setPosition(this.pos.x, this.pos.y).setRotation(this.img.rotation + dt * 12);
+    const p = host.playerPos();
+    if (Math.hypot(p.x - this.pos.x, p.y - this.pos.y) <= this.radius + host.playerRadius) host.hurtPlayer(this.damage);
+    return this.left >= 0 && this.life > 0;
+  }
+
+  destroy(): void {
+    this.img.destroy();
   }
 }

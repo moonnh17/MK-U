@@ -20,7 +20,7 @@ export class Chest {
     y: number,
     /** 등급 가중치 (무기 상자: 보스 스테이지별 / 아이템 상자: 보물·습격) */
     readonly weights: Partial<Record<GradeId, number>>,
-    /** 정해진 아이템 (보스 전용 아이템 상자) */
+    /** 정해진 것: 아이템 상자 = 아이템 id(보스 전용), 무기 상자 = 무기 id(히든보스 전용) */
     readonly fixedItem?: string,
   ) {
     this.sprite = scene.add.image(x, y, ref.spriteKey).setDepth(2);

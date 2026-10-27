@@ -1,10 +1,10 @@
 /**
- * 챕터1 보스 패턴. 패턴 id → 실행 객체. 수치는 bosses.json의 values(강화 단계는 `키Enraged`).
+ * 보스 패턴 (챕터1 보스·히든보스). 패턴 id → 실행 객체. 수치는 bosses.json의 values(강화 단계는 `키Enraged`).
  * 패턴은 보스를 멈추거나 돌진시키고, 피해는 entities/hazard.ts의 위험 지대·적 탄으로 준다.
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
-import { DelayedBlast, Beams, EdgeBand, Ring, SectorBlast, Zone } from '../entities/hazard';
+import { BouncingDisc, DelayedBlast, Beams, EdgeBand, Ring, SectorBlast, Zone } from '../entities/hazard';
 import type { BossHost, PatternRun } from './host';
 
 /** 패턴이 다루는 보스 */
@@ -14,14 +14,23 @@ export interface BossBody {
   setVelocity(x: number, y: number): void;
   /** 이번 프레임에 벽에 막혔는지 */
   blocked(): boolean;
+  /** 순간이동 */
+  teleport(x: number, y: number): void;
+  setAlpha(a: number): void;
   color: number;
 }
 
 export interface PatternCtx {
   boss: BossBody;
   host: BossHost;
-  /** 수치 (강화 단계면 `키Enraged` 우선) */
+  /** 수치 (강화 단계면 `키Enraged` 우선, 피해는 챕터 배율·자기 강화 반영) */
   v(key: string): number;
+  /** 자기 강화 (전장의 함성): sec 동안 피해 ×damageMul, 이동 ×speedMul */
+  buff(sec: number, damageMul: number, speedMul: number): void;
+  /** 분신 소환 (수치는 'clones' 패턴 values) */
+  summonClones(): void;
+  /** 지나갈 수 없는 잔해 (개수 상한·갇힘 방지는 컨트롤러가) */
+  rubble(at: Vec2, radius: number): void;
 }
 
 /** 시간표대로 일을 하는 패턴 바탕 */
@@ -73,6 +82,8 @@ class Claw extends Timed {
 
 /** 예고선 → 돌진. trail이면 지나간 자리에 마기 영역 (원혼 돌진 / 청뢰 돌진) */
 class Dash extends Timed {
+  /** 돌진을 마쳤다 (연속 돌진·마기 강타가 다음 동작으로 넘어간다) */
+  finished = false;
   private dir: Vec2 = { x: 1, y: 0 };
   private traveled = 0;
   private dashing = false;
@@ -83,6 +94,8 @@ class Dash extends Timed {
   constructor(
     c: PatternCtx,
     private readonly trail: boolean,
+    /** 플레이어와 이만큼 가까워지면 멈춘다 (0이면 끝까지) */
+    private readonly stopDist = 0,
   ) {
     super(c);
     const p = c.boss.pos();
@@ -104,8 +117,12 @@ class Dash extends Timed {
       return;
     }
     const speed = c.v('speed');
-    if (this.traveled >= c.v('length') || (this.traveled > 4 && c.boss.blocked())) {
+    const pl0 = c.host.playerPos();
+    const b0 = c.boss.pos();
+    const near = this.stopDist > 0 && Math.hypot(pl0.x - b0.x, pl0.y - b0.y) <= this.stopDist + c.boss.radius();
+    if (this.traveled >= c.v('length') || (this.traveled > 4 && c.boss.blocked()) || near) {
       this.dashing = false;
+      this.finished = true;
       c.boss.setVelocity(0, 0);
       return;
     }
@@ -274,6 +291,263 @@ class ShrinkCurrent extends Timed {
   }
 }
 
+// ---------- 히든보스 ----------
+
+/** 방 안쪽 점으로 자른다 */
+function clampTo(p: Vec2, c: PatternCtx, margin: number): Vec2 {
+  const a = c.host.arena();
+  return { x: Math.min(a.x + a.w - margin, Math.max(a.x + margin, p.x)), y: Math.min(a.y + a.h - margin, Math.max(a.y + margin, p.y)) };
+}
+
+/** 플레이어 둘레 무작위 점 (첫 점은 플레이어 자리) */
+function around(c: PatternCtx, i: number, spread: number, margin: number): Vec2 {
+  const p = c.host.playerPos();
+  if (i === 0) return clampTo(p, c, margin);
+  const a = c.host.rng.range(0, Math.PI * 2);
+  const r = c.host.rng.range(spread * 0.3, spread);
+  return clampTo({ x: p.x + Math.cos(a) * r, y: p.y + Math.sin(a) * r }, c, margin);
+}
+
+/** 전장의 함성 (선조의 잔상): 포효 후 자기 강화 */
+class WarCry extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    this.at(c.v('windupSec'), () => {
+      c.buff(c.v('buffSec'), c.v('damageMul'), c.v('speedMul'));
+      const p = c.boss.pos();
+      const ring = c.host.scene.add.circle(p.x, p.y, c.boss.radius()).setStrokeStyle(3, c.boss.color, 0.9).setDepth(6);
+      c.host.scene.tweens.add({ targets: ring, scale: 4, alpha: 0, duration: 400, onComplete: () => ring.destroy() });
+      c.host.scene.cameras.main.shake(250, 0.006);
+    });
+  }
+}
+
+/** 소용돌이 돌진 (선조의 잔상): 다시 조준하며 여러 번 돌진 */
+class WhirlDash implements PatternRun {
+  private cur: Dash;
+  private n = 1;
+  private spin = 0;
+
+  constructor(private readonly c: PatternCtx) {
+    this.cur = new Dash(c, false);
+  }
+
+  update(dt: number): void {
+    this.cur.update(dt);
+    this.spin += dt * 20;
+    this.c.boss.setAlpha(0.75 + 0.25 * Math.sin(this.spin));
+    if (this.cur.finished && this.n < this.c.v('dashes')) {
+      this.cur.destroy();
+      this.cur = new Dash(this.c, false);
+      this.n++;
+    }
+  }
+
+  destroy(): void {
+    this.cur.destroy();
+    this.c.boss.setAlpha(1);
+  }
+}
+
+/** 출혈 장판 (선조의 잔상): 예고 원 → 지속 피해 장판 */
+class BleedField extends Timed {
+  private readonly marks: Phaser.GameObjects.Arc[] = [];
+  constructor(c: PatternCtx) {
+    super(c);
+    const r = c.v('radius');
+    const spots = Array.from({ length: c.v('fields') }, (_, i) => around(c, i, c.v('spread'), r));
+    for (const s of spots) this.marks.push(c.host.scene.add.circle(s.x, s.y, r).setStrokeStyle(1, c.boss.color, 0.8).setDepth(2));
+    this.at(c.v('delaySec'), () => {
+      for (const m of this.marks) m.destroy();
+      this.marks.length = 0;
+      for (const s of spots) c.host.addHazard(new Zone(c.host.scene, s, r, c.v('liveSec'), c.v('damage'), c.v('tickSec'), c.boss.color));
+    });
+  }
+  override destroy(): void {
+    super.destroy();
+    for (const m of this.marks) m.destroy();
+  }
+}
+
+/** 지면 파괴 (선조의 잔상): 플레이어 자리 내려찍기 → 지나갈 수 없는 잔해 */
+class GroundBreak extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const at = clampTo(c.host.playerPos(), c, c.v('radius'));
+    c.host.addHazard(new DelayedBlast(c.host.scene, at, c.v('radius'), c.v('delaySec'), c.v('damage'), c.boss.color));
+    this.at(c.v('delaySec'), () => {
+      c.rubble(at, c.v('rubbleRadius'));
+      c.host.scene.cameras.main.shake(150, 0.005);
+    });
+  }
+}
+
+/** 연속 내려찍기 (선조의 잔상 광폭): 플레이어 쪽으로 이어지는 강타 */
+class EarthShatter extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const from = c.boss.pos();
+    const a = angleTo(from, c.host.playerPos());
+    for (let i = 0; i < c.v('count'); i++) {
+      const at = clampTo({ x: from.x + Math.cos(a) * c.v('gap') * (i + 1), y: from.y + Math.sin(a) * c.v('gap') * (i + 1) }, c, c.v('radius'));
+      this.at(i * c.v('stepSec'), () => c.host.addHazard(new DelayedBlast(c.host.scene, at, c.v('radius'), c.v('delaySec'), c.v('damage'), c.boss.color)));
+    }
+  }
+}
+
+/** 순간이동 탄막 (왕실특무마기법사): 사라졌다가 떨어진 곳에 나타나 원형 탄막 */
+class BlinkBarrage extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const fade = c.v('fadeSec');
+    c.boss.setAlpha(0.2);
+    this.at(fade, () => {
+      const a = c.host.arena();
+      const pl = c.host.playerPos();
+      const m = c.boss.radius() + 4;
+      let best = c.boss.pos();
+      let bestD = -1;
+      for (let i = 0; i < 20; i++) {
+        const p = { x: c.host.rng.range(a.x + m, a.x + a.w - m), y: c.host.rng.range(a.y + m, a.y + a.h - m) };
+        const d = Math.hypot(p.x - pl.x, p.y - pl.y);
+        if (d >= c.v('minDist')) {
+          best = p;
+          break;
+        }
+        if (d > bestD) {
+          best = p;
+          bestD = d;
+        }
+      }
+      c.boss.teleport(best.x, best.y);
+      c.boss.setAlpha(1);
+    });
+    for (let i = 0; i < c.v('rings'); i++) {
+      this.at(fade + i * c.v('ringGapSec'), () => {
+        const p = c.boss.pos();
+        const n = c.v('bullets');
+        for (let k = 0; k < n; k++) {
+          const ang = ((k + (i % 2) * 0.5) * Math.PI * 2) / n;
+          c.host.fireEnemyBullet(p, ang, c.v('speed'), c.v('range'), c.v('damage'), true);
+        }
+      });
+    }
+  }
+  override destroy(): void {
+    super.destroy();
+    this.c.boss.setAlpha(1);
+  }
+}
+
+/** 강력한 레이저 (왕실특무마기법사): 예고선 → 굵은 직선 (대형 레이저: 굴절 불가) */
+class GreatLaser extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    c.host.addHazard(
+      new Beams(c.host.scene, {
+        center: () => p,
+        count: 1,
+        length: c.v('length'),
+        width: c.v('width'),
+        spin: 0,
+        startAngle: angleTo(p, c.host.playerPos()),
+        telegraphSec: c.v('telegraphSec'),
+        liveSec: c.v('liveSec'),
+        damage: c.v('damage'),
+        tickSec: c.v('tickSec'),
+        color: c.boss.color,
+      }),
+    );
+  }
+}
+
+/** 분신 (왕실특무마기법사) */
+class Clones extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    this.at(0.3, () => c.summonClones());
+  }
+}
+
+/** 마기 강타 (왕실특무마기법사 마기화): 플레이어에게 돌진 → 부채꼴 연타 */
+class MagiStrike implements PatternRun {
+  private readonly dash: Dash;
+  private t = 0;
+  private swipes = 0;
+
+  constructor(private readonly c: PatternCtx) {
+    this.dash = new Dash(c, false, c.v('stopDist'));
+  }
+
+  update(dt: number): void {
+    const c = this.c;
+    this.dash.update(dt);
+    if (!this.dash.finished || this.swipes >= c.v('swipes')) return;
+    this.t -= dt;
+    if (this.t > 0) return;
+    this.t = c.v('swipeGapSec');
+    this.swipes++;
+    const p = c.boss.pos();
+    c.host.addHazard(
+      new SectorBlast(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('radius'), c.v('arcDeg'), c.v('swipeWindupSec'), c.v('swipeDamage'), c.boss.color),
+    );
+  }
+
+  destroy(): void {
+    this.dash.destroy();
+  }
+}
+
+/** 성검 낙하 (오리온의 성전사): 플레이어 둘레에 차례로 떨어지는 예고 원 */
+class HolySwords extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    for (let i = 0; i < c.v('swords'); i++) {
+      this.at(i * c.v('stepSec'), () =>
+        c.host.addHazard(new DelayedBlast(c.host.scene, around(c, i, c.v('spread'), c.v('radius')), c.v('radius'), c.v('delaySec'), c.v('damage'), c.boss.color)),
+      );
+    }
+  }
+}
+
+/** 메이스 강타 (오리온의 성전사): 가까울 때 앞쪽 큰 부채꼴 */
+class MaceSmash extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    c.host.addHazard(new SectorBlast(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('radius'), c.v('arcDeg'), c.v('windupSec'), c.v('damage'), c.boss.color));
+  }
+}
+
+/** 방패 투척 (오리온의 성전사): 방 벽에 튕기는 방패 */
+class ShieldThrow extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    c.host.addHazard(
+      new BouncingDisc(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('speed'), c.host.arena(), c.v('bounces'), c.v('radius'), c.v('damage'), c.v('maxSec'), c.boss.color),
+    );
+  }
+}
+
+/** 성검 십자 낙하 (오리온의 성전사 성광): 플레이어를 지나는 가로·세로 줄로 성검이 떨어진다 */
+class Judgment extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const a = c.host.arena();
+    const p = c.host.playerPos();
+    const gap = c.v('gap');
+    const r = c.v('radius');
+    const spots: Vec2[] = [];
+    for (let x = a.x + r; x <= a.x + a.w - r; x += gap) spots.push({ x, y: p.y });
+    for (let y = a.y + r; y <= a.y + a.h - r; y += gap) spots.push({ x: p.x, y });
+    // 플레이어에게서 가까운 것부터
+    spots.sort((u, v) => Math.hypot(u.x - p.x, u.y - p.y) - Math.hypot(v.x - p.x, v.y - p.y));
+    spots.forEach((s, i) => this.at(i * c.v('stepSec'), () => c.host.addHazard(new DelayedBlast(c.host.scene, s, r, c.v('delaySec'), c.v('damage'), c.boss.color))));
+  }
+}
+
 const PATTERNS: Readonly<Record<string, (c: PatternCtx) => PatternRun>> = {
   claw: (c) => new Claw(c),
   spiritDash: (c) => new Dash(c, true),
@@ -286,6 +560,19 @@ const PATTERNS: Readonly<Record<string, (c: PatternCtx) => PatternRun>> = {
   blueDash: (c) => new Dash(c, false),
   edgeLock: (c) => new EdgeLock(c),
   shrinkCurrent: (c) => new ShrinkCurrent(c),
+  warCry: (c) => new WarCry(c),
+  whirlDash: (c) => new WhirlDash(c),
+  bleedField: (c) => new BleedField(c),
+  groundBreak: (c) => new GroundBreak(c),
+  earthShatter: (c) => new EarthShatter(c),
+  blinkBarrage: (c) => new BlinkBarrage(c),
+  greatLaser: (c) => new GreatLaser(c),
+  clones: (c) => new Clones(c),
+  magiStrike: (c) => new MagiStrike(c),
+  holySwords: (c) => new HolySwords(c),
+  maceSmash: (c) => new MaceSmash(c),
+  shieldThrow: (c) => new ShieldThrow(c),
+  judgment: (c) => new Judgment(c),
 };
 
 export function makePattern(id: string, c: PatternCtx): PatternRun | null {

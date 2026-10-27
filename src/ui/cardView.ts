@@ -33,6 +33,24 @@ function fmtValues(values: Record<string, number>): Record<string, string> {
 export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContext): CardView {
   const t = ctx.t;
   const d = ctx.data;
+  if (card.kind === 'school') {
+    // 전직 동점: 학파 이름·색, 학파 궁극기, 사라질 반대 학파 스킬 수
+    const job = d.jobs.jobs.find((j) => j.id === player.job)!;
+    const adv = job.advancements.find((a) => a.id === card.school)!;
+    const ult = d.ultimates.ultimates.find((u) => u.id === adv.ultimate);
+    const others = new Set(job.advancements.map((a) => a.id).filter((id) => id !== card.school));
+    const lose = Object.keys(player.loadout.owned).filter((id) => others.has(findSkill(d.skills, id).school)).length;
+    return {
+      kindLabel: t('card.school'),
+      name: t(adv.nameKey),
+      subName: '',
+      levelText: t('card.schoolPicks', { n: player.schoolPicks[card.school] }),
+      desc: t('card.schoolDesc', { ult: ult ? t(ult.nameKey) : '', n: lose }),
+      badges: [],
+      accent: adv.color,
+      school: '',
+    };
+  }
   if (card.kind === 'item') {
     const def = d.items.items.find((x) => x.id === card.itemId)!;
     const grade = d.groupMultipliers.grades.find((g) => g.id === def.grade);

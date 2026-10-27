@@ -35,6 +35,8 @@ export interface GameEvents {
   cardReroll: Record<string, never>;
   /** 디버그: 다음 조우 칸 유형 / 무기 지급 / 코인 */
   debugForceEncounter: { kind: EncounterKindId | null };
+  /** 다음 조우 칸을 이 히든보스로 */
+  debugHiddenBoss: { id: string };
   debugGiveWeapon: { defId: string; grade: GradeId };
   debugCoins: { amount: number };
   debugGiveItem: { itemId: string };

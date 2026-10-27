@@ -21,7 +21,7 @@ import { nearestEnemy, type ShieldOpts, type SkillHost, type SkillObject } from 
 import { isSkillImplemented, passiveImpl, skillImpl, ultimateImpl } from '../skills/registry';
 import { applyCard, drawSkillCards, drawStatCards, runStartOffers, stageEndOffers, type AnyCard } from '../systems/cards';
 import { calcDamage, gradeMultiplier, spaceDamage, type RangeBonus, type Stats } from '../systems/damage';
-import { convertSkills, gaugeFromDamage, gaugeFromGreatSuccess, judgeSchool, skillAllowed, ultimateAwakeningReady } from '../systems/advancement';
+import { convertSkills, gaugeFromDamage, gaugeFromGreatSuccess, judgeSchool, skillAllowed, topSchools, ultimateAwakeningReady } from '../systems/advancement';
 import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type CutIn, type CutPage } from '../ui/cutscenePages';
 import { assignElites, eliteCount } from '../systems/elites';
 import { IMPLEMENTED_ENCOUNTERS } from '../systems/encounter';
@@ -29,6 +29,8 @@ import { effectiveWeights, itemDamageMultiplier, readySet, rollItem, transferWei
 import { canBuy, merchantStock, rollEncounter, rollGrade, rollOptions, rollWeapon } from '../systems/loot';
 import { lineHits } from '../systems/targeting';
 import { generateStage, type RoomNode } from '../systems/mapgen';
+import { encounterKinds, hiddenChapterMul, pickHiddenBoss } from '../systems/hiddenBoss';
+import { signatureFires, steerToward } from '../systems/motion';
 import { inSpireCircle, spireEliteCount, spireItemChoices, type SpireEvent } from '../systems/spire';
 import { planCombatWaves, RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
 import { advanceStage, firstStage, type StageRef } from '../systems/run';
@@ -78,7 +80,7 @@ import {
   type Rect,
   type WorldMetrics,
 } from '../systems/worldLayout';
-import type { BleedRule, CardOfferKind, EncounterKindId, GradeId, SchoolId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
+import type { BleedRule, CardOfferKind, EncounterKindId, GradeId, HiddenBossDef, WeaponSignature, SchoolId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
 
 export interface RunSceneData {
   stage?: StageRef;
@@ -94,10 +96,12 @@ interface Prop {
 }
 
 interface Offer {
-  kind: CardOfferKind | 'item';
+  kind: CardOfferKind | 'item' | 'school';
   boss: boolean;
   /** 아이템 선택 카드(첨탑): 미리 뽑아 둔 아이템 */
   items?: string[];
+  /** 학파 선택 카드(전직 동점): 동점인 학파 */
+  schools?: SchoolId[];
 }
 
 type Modal = 'cards' | 'inventory' | 'cutscene' | null;
@@ -135,6 +139,15 @@ export class RunScene extends Phaser.Scene {
   private stands: MerchantStand[] = [];
   /** 대규모 습격이 벌어진 조우 칸 */
   private raidRooms = new Set<number>();
+  /** 히든보스가 나온 조우 칸 → 그 히든보스 */
+  private hiddenBossRooms = new Map<number, HiddenBossDef>();
+  /** 디버그: 다음 히든보스 지정 */
+  private forcedHiddenBoss: string | null = null;
+  /** 유니크 고유 효과: 지금 무기로 한 공격 수 */
+  private sigItem: WeaponItem | null = null;
+  private sigCount = 0;
+  /** 학파 선택 카드를 고른 뒤 전직을 마치고 할 일 */
+  private pendingAdvance: (() => void) | null = null;
   /** 마기수집첨탑 (조우 칸 하나에 하나) */
   private spires: Spire[] = [];
   /** 처치 중에 생긴 첨탑 이벤트 (다음 updateSpires에서 처리) */
@@ -238,6 +251,8 @@ export class RunScene extends Phaser.Scene {
       buffDuration: (sec) => this.hostFor('item').buffDuration(sec, ['buff']),
       burstArea: (r) => this.burstArea(r),
       toast: (text) => bus.emit('toast', { text }),
+      arena: () => this.currentArena(),
+      blink: (distance) => this.blinkPlayer(distance),
     });
     this.enemyHost = {
       scene: this,
@@ -252,10 +267,12 @@ export class RunScene extends Phaser.Scene {
       addHazard: (h) => this.hazards.push(h),
       fireEnemyBullet: (from, angle, speed, range, damage, refractable) =>
         this.fireEnemyBullet(from, angle, speed, range, damage, refractable),
-      arena: () => {
-        const rid = this.session.currentRoomId ?? this.session.map.startId;
-        return interiorRect(this.session.map.rooms[rid]!, this.m);
+      spawnMinion: (id, at, maxHp) => this.spawnMinion(id, at, maxHp),
+      removeMinion: (e) => {
+        if (!e.dead) this.removeEnemy(e);
       },
+      addObstacle: (at, radius, doorClear) => this.addObstacle(at, radius, doorClear),
+      arena: () => this.currentArena(),
     };
 
     this.walls = this.physics.add.staticGroup();
@@ -315,6 +332,10 @@ export class RunScene extends Phaser.Scene {
       bus.on('debugForceEncounter', ({ kind }) => {
         this.forcedEncounter = kind;
       }),
+      bus.on('debugHiddenBoss', ({ id }) => {
+        this.forcedEncounter = 'hiddenBoss';
+        this.forcedHiddenBoss = id;
+      }),
       bus.on('debugGiveWeapon', ({ defId, grade }) => {
         const d = this.ctx.data;
         const def = this.weaponDefOf(defId);
@@ -329,7 +350,7 @@ export class RunScene extends Phaser.Scene {
       }),
       bus.on('debugAdvance', ({ hectar, acro }) => this.debugAdvance(hectar, acro)),
       bus.on('debugBossHp', ({ ratio }) => {
-        for (const e of this.enemies) if (e.def.rank === 'boss') e.hp = Math.max(1, e.maxHp * ratio);
+        for (const e of this.enemies) if (e.def.rank === 'boss' || e.def.rank === 'hiddenBoss') e.hp = Math.max(1, e.maxHp * ratio);
       }),
     );
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -362,6 +383,7 @@ export class RunScene extends Phaser.Scene {
     this.chests = [];
     this.stands = [];
     this.raidRooms = new Set();
+    this.hiddenBossRooms = new Map();
     this.spires = [];
     this.spireEvents = [];
     this.charging = false;
@@ -388,6 +410,7 @@ export class RunScene extends Phaser.Scene {
     this.currentCards = null;
     this.cutQueue = [];
     this.afterCuts = null;
+    this.pendingAdvance = null;
     this.cardSeq = 0;
     this.leaving = false;
   }
@@ -543,7 +566,7 @@ export class RunScene extends Phaser.Scene {
     this.updateBleeds(dt);
     this.updateCorruption(dt);
 
-    this.updateBullets();
+    this.updateBullets(dt);
     this.updatePickups(dt);
     this.updateInvuln(dt);
     this.updateInteractHint();
@@ -578,6 +601,8 @@ export class RunScene extends Phaser.Scene {
         const bossDef = boss ? this.ctx.data.enemies.enemies.find((e) => e.id === boss) : undefined;
         if (bossDef) this.showBossWarning(this.ctx.t(bossDef.nameKey));
         this.handleRoomEvents(rid, state.enter(bossDef ? this.ctx.data.bosses.bannerSec : 0));
+        // 바바리안 데스 휘슬: 전투 칸에 들어갈 때 함성
+        if (state.kind === 'combatRoom') this.itemRt.triggerRoar();
       }
     }
     for (const [id, state] of this.rooms) {
@@ -594,6 +619,7 @@ export class RunScene extends Phaser.Scene {
         const node = this.session.map.rooms[roomId]!;
         if (node.kind === 'combatRoom') this.combatRoomDrop(roomId);
         if (this.raidRooms.has(roomId)) this.raidReward(roomId);
+        if (this.hiddenBossRooms.has(roomId)) this.hiddenBossReward(roomId);
         // 보스 스테이지: 보스방에서 스킬 카드를 1회 더 고른 뒤 포털이 생긴다(보스방이 출구를 겸함)
         if (node.kind === 'bossRoom') {
           const end = stageEndOffers(this.session.stage, this.ctx.data.mapgen, this.ctx.data.cards);
@@ -642,8 +668,67 @@ export class RunScene extends Phaser.Scene {
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
     this.enemies.push(enemy);
     if (countForRoom) this.enemyRoom.set(enemy, roomId);
-    const bossDef = def.ai === 'boss' ? d.bosses.bosses.find((b) => b.id === def.id) : undefined;
-    if (bossDef) this.bossControllers.set(enemy, new BossController(enemy, bossDef));
+    if (def.ai === 'boss') {
+      // 히든보스: 어느 챕터든 같은 패턴, 체력·피해만 챕터 배율
+      const hidden = d.bosses.hiddenBosses.find((b) => b.id === def.id);
+      const core = hidden ?? d.bosses.bosses.find((b) => b.id === def.id);
+      const mul = hidden ? hiddenChapterMul(d.bosses, this.session.stage.chapter) : 1;
+      if (hidden) {
+        enemy.setMaxHp(enemy.maxHp * mul);
+        enemy.damageMul = mul;
+      }
+      if (core) this.bossControllers.set(enemy, new BossController(enemy, core, mul));
+    }
+  }
+
+  /** 플레이어가 있는 방 안쪽 */
+  private currentArena(): Rect {
+    const rid = this.session.currentRoomId ?? this.session.map.startId;
+    return interiorRect(this.session.map.rooms[rid]!, this.m);
+  }
+
+  /** 특무 인장: 방 안, 벽·잔해가 없는 쪽으로 짧게 순간이동 */
+  private blinkPlayer(distance: number): void {
+    const a = this.currentArena();
+    const r = this.ctx.data.player.size / 2;
+    const base = this.rng.range(0, Math.PI * 2);
+    for (let i = 0; i < 8; i++) {
+      const ang = base + (i * Math.PI) / 4;
+      const x = this.player.x + Math.cos(ang) * distance;
+      const y = this.player.y + Math.sin(ang) * distance;
+      if (x < a.x + r || x > a.x + a.w - r || y < a.y + r || y > a.y + a.h - r) continue;
+      if (this.physics.overlapRect(x - r, y - r, r * 2, r * 2, false, true).length > 0) continue;
+      const from = { x: this.player.x, y: this.player.y };
+      this.fxAt(this.add.circle(from.x, from.y, r + 3, 0x8a6aff, 0.5).setDepth(6));
+      (this.player.body as Phaser.Physics.Arcade.Body).reset(x, y);
+      break;
+    }
+    this.floatLabel({ x: this.player.x, y: this.player.y }, this.ctx.t('item.dodged'), '#b0a0ff');
+  }
+
+  /** 보스가 부르는 적(분신): 방 웨이브 수에 들어가지 않는다 */
+  private spawnMinion(id: string, at: Vec2, maxHp: number): Enemy {
+    const d = this.ctx.data;
+    const def = d.enemies.enemies.find((e) => e.id === id)!;
+    const enemy = new Enemy(this, def, at.x, at.y, 0, null, d.elites);
+    enemy.setMaxHp(maxHp);
+    this.enemyGroup.add(enemy.sprite);
+    if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
+    this.enemies.push(enemy);
+    return enemy;
+  }
+
+  /** 지면 파괴 잔해: 벽처럼 막는다. 플레이어 자리·문 근처에는 만들지 않는다(갇힘 방지) */
+  private addObstacle(at: Vec2, radius: number, doorClear: number): { destroy(): void } | null {
+    const d = this.ctx.data;
+    if (Math.hypot(this.player.x - at.x, this.player.y - at.y) <= radius + d.player.size / 2 + 2) return null;
+    const rid = this.session.currentRoomId;
+    for (const door of rid === null ? [] : (this.doorsByRoom.get(rid) ?? [])) {
+      if (Math.hypot(door.rect.x - at.x, door.rect.y - at.y) <= doorClear + radius) return null;
+    }
+    const rect = this.add.rectangle(at.x, at.y, radius * 2, radius * 2, hexColor(d.bosses.rubbleColor)).setDepth(1);
+    this.walls.add(rect);
+    return { destroy: () => this.walls.remove(rect, true, true) };
   }
 
   private spawnPoint(node: RoomNode, rng: Rng, radius: number): Vec2 {
@@ -783,9 +868,16 @@ export class RunScene extends Phaser.Scene {
     const st = this.weaponStatsOf(item);
     const p = this.session.player;
     this.fireCooldown = st.fireIntervalSec;
+    // 유니크 고유 효과: 들고 있는 무기의 공격을 센다 (바꾸면 처음부터)
+    if (this.sigItem !== item) {
+      this.sigItem = item;
+      this.sigCount = 0;
+    }
+    const sig = w.signature && signatureFires(++this.sigCount, w.signature.every) ? w.signature : null;
 
     if (w.category === 'blade') {
-      this.melee(w, st, aimAngle, chargeRatio);
+      // 특무 인장: 순간 회피 직후 기본공격 피해 증가
+      this.melee(w, st, aimAngle, chargeRatio, sig, this.itemRt.consumeEmpowered());
       return;
     }
 
@@ -796,6 +888,15 @@ export class RunScene extends Phaser.Scene {
       return;
     }
     p.energy = left;
+    const emp = this.itemRt.consumeEmpowered();
+    if (sig?.kind === 'laser') {
+      this.weaponLaser(w, st.damage * sig.damageMul * emp, st.critChance, aimAngle, sig.length, sig.width);
+      return;
+    }
+    if (w.pattern.kind === 'homing') {
+      this.fireBullet(this.player, aimAngle, st.projectileSpeed, w.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, homing: w.pattern.turnRate });
+      return;
+    }
     if (w.pattern.kind === 'lob') {
       // 유탄: 사거리 안 가장 가까운 적(없으면 조준 방향) 자리에 떨어져 터진다. 자해 없음
       const host = this.hostFor('weapon');
@@ -808,7 +909,7 @@ export class RunScene extends Phaser.Scene {
           to,
           speed: st.projectileSpeed,
           radius: w.pattern.radius * (1 + this.itemRt.sums.area),
-          base: st.damage,
+          base: st.damage * emp,
           tags: w.tags,
           sprite: this.ctx.data.weapons.projectile,
         }),
@@ -816,8 +917,24 @@ export class RunScene extends Phaser.Scene {
       return;
     }
     for (const shot of gunShots(w, aimAngle, this.rng)) {
-      this.fireBullet(this.player, shot.angle, st.projectileSpeed, shot.range, st.damage, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance });
+      this.fireBullet(this.player, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance });
     }
+  }
+
+  /** 지팡이 고유 효과: 조준 방향 직선 레이저 (관통, 치명 판정) */
+  private weaponLaser(w: WeaponDef, base: number, crit: number, aimAngle: number, length: number, width: number): void {
+    const origin = { x: this.player.x, y: this.player.y };
+    const dir = { x: Math.cos(aimAngle), y: Math.sin(aimAngle) };
+    const len = length * (1 + this.itemRt.sums.area);
+    const enemies = [...this.enemies];
+    const idx = lineHits(origin, dir, len, width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
+    for (const i of idx) {
+      const e = enemies[i]!;
+      this.hit(e, this.critRoll(base, crit, { x: e.sprite.x, y: e.sprite.y }), w.tags);
+    }
+    const g = this.add.graphics().setDepth(6);
+    g.lineStyle(width, hexColor(w.color), 0.8).lineBetween(origin.x, origin.y, origin.x + dir.x * len, origin.y + dir.y * len);
+    this.time.delayedCall(this.ctx.data.ui.slashFxSec * 1000, () => g.destroy());
   }
 
   private fireBullet(
@@ -828,12 +945,12 @@ export class RunScene extends Phaser.Scene {
     base: number,
     tags: readonly TagId[],
     source: string | null = null,
-    opts: { pierce: number; crit: number } = { pierce: 0, crit: 0 },
+    opts: { pierce: number; crit: number; homing?: number } = { pierce: 0, crit: 0 },
   ): void {
     const proj = this.ctx.data.weapons.projectile;
     const b = this.bullets.create(from.x, from.y, proj.spriteKey) as Phaser.Physics.Arcade.Image;
     b.setDepth(5);
-    b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, hitSet: new Set<Enemy>() });
+    b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>() });
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
   }
 
@@ -850,12 +967,21 @@ export class RunScene extends Phaser.Scene {
     return r.damage;
   }
 
-  /** 칼: 베기(arc) · 찌르기(line, 관통) · 내려찍기(smash, 넉백) */
-  private melee(w: WeaponDef, st: WeaponStats, aimAngle: number, chargeRatio: number): void {
+  /**
+   * 칼: 베기(arc) · 찌르기(line, 관통) · 내려찍기(smash, 넉백).
+   * sig: 이번 공격에 발동한 유니크 고유 효과(네메아의 종말 = 피해·범위 증가, 공간 가르기 = 공간격) / emp: 피해 배율(특무 인장)
+   */
+  private melee(w: WeaponDef, st: WeaponStats, aimAngle: number, chargeRatio: number, sig: WeaponSignature | null, emp: number): void {
     const origin = { x: this.player.x, y: this.player.y };
     const dir = { x: Math.cos(aimAngle), y: Math.sin(aimAngle) };
-    const dmgMul = w.charge ? 1 + (w.charge.damageMul - 1) * chargeRatio : 1;
-    const radMul = (w.charge ? 1 + (w.charge.radiusMul - 1) * chargeRatio : 1) * (1 + this.itemRt.sums.area);
+    const big = sig?.kind === 'bigSmash' ? sig : null;
+    const dmgMul = (w.charge ? 1 + (w.charge.damageMul - 1) * chargeRatio : 1) * (big ? big.damageMul : 1) * emp;
+    const radMul = (w.charge ? 1 + (w.charge.radiusMul - 1) * chargeRatio : 1) * (1 + this.itemRt.sums.area) * (big ? big.radiusMul : 1);
+    const tags: readonly TagId[] = sig?.kind === 'space' ? [...w.tags, 'space'] : w.tags;
+    if (big) {
+      this.cameras.main.shake(120, 0.006);
+      this.floatLabel(origin, this.ctx.t('weapon.sig.bigSmash'), w.color);
+    }
     const p = w.pattern;
     const enemies = [...this.enemies];
     const g = this.add.graphics().setDepth(6);
@@ -879,7 +1005,7 @@ export class RunScene extends Phaser.Scene {
     }
     for (const e of targets) {
       const at = { x: e.sprite.x, y: e.sprite.y };
-      this.hit(e, this.critRoll(st.damage * dmgMul, st.critChance, at), w.tags);
+      this.hit(e, this.critRoll(st.damage * dmgMul, st.critChance, at), tags);
       if (w.knockback && !e.dead) {
         const d = Math.hypot(at.x - origin.x, at.y - origin.y) || 1;
         e.knockback({ x: (at.x - origin.x) / d, y: (at.y - origin.y) / d }, w.knockback.distance, w.knockback.sec);
@@ -947,7 +1073,7 @@ export class RunScene extends Phaser.Scene {
     this.removeEnemy(e);
     if (roomId !== undefined) this.rooms.get(roomId)?.enemyKilled();
     for (const o of [...this.skillObjects]) o.onKill?.(this.host, e);
-    this.itemRt.onKill();
+    this.itemRt.onKill(e.elite !== null);
     // 폭발 엘리트: 예고 원 후 지연 폭발 (반역 개체가 된 경우는 제외)
     const blast = e.elite?.deathBlast;
     if (blast && !e.converted) {
@@ -997,13 +1123,18 @@ export class RunScene extends Phaser.Scene {
     if (!enemy || enemy.dead || enemy.warn > 0 || enemy.def.contactDamage <= 0) return;
     const now = this.time.now;
     if (now - enemy.lastContactAt < enemy.def.contactIntervalSec * 1000) return;
-    if (this.hurtPlayer(enemy.def.contactDamage, enemy)) enemy.lastContactAt = now;
+    if (this.hurtPlayer(enemy.def.contactDamage * enemy.damageMul, enemy)) enemy.lastContactAt = now;
   }
 
   /** 피해를 받았으면 true */
   /** 피해를 받았으면 true. attacker: 때린 적(반사용, 모르면 null) */
   private hurtPlayer(amount: number, attacker: Enemy | null = null): boolean {
     if (this.invuln > 0 || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
+    // 특무 인장: 피해를 받기 직전 순간이동으로 피한다 (피격 무적과 같은 시간)
+    if (this.itemRt.tryDodge()) {
+      this.invuln = this.ctx.data.player.hurtInvulnSec;
+      return true;
+    }
     // 마기역장: 공격을 막고 잠깐 무적
     const absorbed = absorbHit(this.shield);
     if (absorbed.blocked) {
@@ -1013,7 +1144,7 @@ export class RunScene extends Phaser.Scene {
       return true;
     }
     const p = this.session.player;
-    const taken = damageTaken(amount, this.effStats(), this.ctx.data.stats) * (1 - this.playerMods().damageReduction) * (1 - this.itemRt.sums.damageTaken);
+    const taken = damageTaken(amount, this.effStats(), this.ctx.data.stats) * (1 - this.playerMods().damageReduction) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard());
     const v = takeDamage(p, taken);
     p.hp = v.hp;
     p.shield = v.shield;
@@ -1039,10 +1170,23 @@ export class RunScene extends Phaser.Scene {
     this.player.setAlpha(Math.floor(this.invuln / blink) % 2 === 0 ? 0.3 : 1);
   }
 
-  private updateBullets(): void {
+  private updateBullets(dt: number): void {
     for (const b of this.bullets.getChildren() as Phaser.Physics.Arcade.Image[]) {
       const dist = Math.hypot(b.x - (b.getData('ox') as number), b.y - (b.getData('oy') as number));
-      if (dist > (b.getData('range') as number)) b.destroy();
+      if (dist > (b.getData('range') as number)) {
+        b.destroy();
+        continue;
+      }
+      // 유도탄(지팡이): 남은 사거리 안 가장 가까운 적 쪽으로 휜다
+      const turn = b.getData('homing') as number;
+      if (turn > 0) {
+        const t = nearestEnemy(this.hostFor('weapon'), b, (b.getData('range') as number) - dist);
+        if (t) {
+          const body = b.body as Phaser.Physics.Arcade.Body;
+          const v = steerToward(body.velocity, b, t.sprite, turn, dt);
+          b.setVelocity(v.x, v.y);
+        }
+      }
     }
     for (const b of this.enemyBullets.getChildren() as Phaser.Physics.Arcade.Image[]) {
       const range = b.getData('range') as number | undefined;
@@ -1430,6 +1574,14 @@ export class RunScene extends Phaser.Scene {
     const p = this.session.player;
     const { stage } = this.session;
     const rng = Rng.derive(this.ctx.config.seed, `cards-${stage.chapter}-${stage.stage}-${this.cardSeq++}`);
+    if (next.kind === 'school') {
+      // 학파 선택 카드(전직 동점): 리롤 없음
+      const cards = (next.schools ?? []).map((school) => ({ kind: 'school' as const, school }));
+      this.currentCards = cards;
+      this.setModal('cards');
+      bus.emit('cardsShow', { titleKey: 'card.title.school', cards, reroll: null });
+      return;
+    }
     if (next.kind === 'item') {
       // 아이템 선택 카드(첨탑): 미리 뽑아 둔 아이템, 리롤 없음
       const cards = (next.items ?? []).map((itemId) => ({ kind: 'item' as const, itemId }));
@@ -1456,7 +1608,7 @@ export class RunScene extends Phaser.Scene {
   private rerollCards(): void {
     const p = this.session.player;
     const cost = this.ctx.data.cards.rerollCost;
-    if (this.modal !== 'cards' || this.rerolled || !this.currentOffer || this.currentOffer.kind === 'item' || Math.floor(p.coins) < cost) return;
+    if (this.modal !== 'cards' || this.rerolled || !this.currentOffer || this.currentOffer.kind === 'item' || this.currentOffer.kind === 'school' || Math.floor(p.coins) < cost) return;
     p.coins -= cost;
     this.rerolled = true;
     this.showCards();
@@ -1468,6 +1620,15 @@ export class RunScene extends Phaser.Scene {
     if (card.kind === 'item') {
       this.giveItem(card.itemId);
       this.openNextCards();
+      return;
+    }
+    if (card.kind === 'school') {
+      const then = this.pendingAdvance ?? (() => {});
+      this.pendingAdvance = null;
+      this.advanceTo(card.school, () => {
+        this.openNextCards();
+        then();
+      });
       return;
     }
     const d = this.ctx.data;
@@ -1560,13 +1721,25 @@ export class RunScene extends Phaser.Scene {
     else reward();
   }
 
-  /** 계열 판정 → 스킬 변환 → 궁극기 교체 → 연출 */
+  /** 계열 판정. 동점이면 학파 선택 카드(원본 규칙: 플레이어가 직접 고른다) */
   private advance(then: () => void): void {
+    const p = this.session.player;
+    const job = this.ctx.data.jobs.jobs.find((j) => j.id === p.job)!;
+    const order = job.advancements.map((a) => a.id as SchoolId);
+    const school = judgeSchool(p.schoolPicks, order);
+    if (school) {
+      this.advanceTo(school, then);
+      return;
+    }
+    this.pendingAdvance = then;
+    this.queueOffers([{ kind: 'school', boss: false, schools: topSchools(p.schoolPicks, order) }]);
+  }
+
+  /** 스킬 변환 → 궁극기 교체 → 연출 */
+  private advanceTo(school: SchoolId, then: () => void): void {
     const d = this.ctx.data;
     let p = this.session.player;
     const job = d.jobs.jobs.find((j) => j.id === p.job)!;
-    const order = job.advancements.map((a) => a.id as SchoolId);
-    const school = judgeSchool(p.schoolPicks, p.lastPickSchool, order);
     const adv = job.advancements.find((a) => a.id === school)!;
     const r = convertSkills(Rng.derive(this.ctx.config.seed, 'advancement'), p.loadout, p.stats, d.skills, school, d.jobs.conversionStatAmount);
     p = { ...p, loadout: r.loadout };
@@ -1723,7 +1896,8 @@ export class RunScene extends Phaser.Scene {
   private openChest(chest: Chest): void {
     chest.open();
     if (chest.kind === 'weapon') {
-      const item = this.rollWeaponItem(chest.weights, 'chest');
+      // 히든보스 전용 무기는 정해진 유니크 (무작위 옵션 없음)
+      const item = chest.fixedItem ? plainWeapon(this.weaponDefOf(chest.fixedItem)) : this.rollWeaponItem(chest.weights, 'chest');
       this.dropWeapon(item, chest.x, chest.y + 14);
       return;
     }
@@ -1772,7 +1946,8 @@ export class RunScene extends Phaser.Scene {
     const { map, stage } = this.session;
     const node = map.rooms[roomId]!;
     const rng = Rng.derive(this.ctx.config.seed, `encounter-${stage.chapter}-${stage.stage}-${roomId}`);
-    const kind = this.forcedEncounter ?? rollEncounter(rng, d.loot.encounter.weights, IMPLEMENTED_ENCOUNTERS);
+    const met = this.session.player.hiddenBossesMet;
+    const kind = this.forcedEncounter ?? rollEncounter(rng, d.loot.encounter.weights, encounterKinds(IMPLEMENTED_ENCOUNTERS, d.bosses.hiddenBosses, met));
     this.forcedEncounter = null;
     this.session.encounters.set(roomId, kind);
     const c = roomCenter(node, this.m);
@@ -1802,6 +1977,18 @@ export class RunScene extends Phaser.Scene {
       const state = new RoomState('encounterRoom', waves, d.waves.waveDelaySec);
       this.rooms.set(roomId, state);
       this.raidRooms.add(roomId);
+      this.handleRoomEvents(roomId, state.enter());
+    } else if (kind === 'hiddenBoss') {
+      // 경고 없이 바로 보스전: 아직 안 나온 히든보스 중 하나 (디버그 지정이면 그것)
+      const p = this.session.player;
+      const forced = d.bosses.hiddenBosses.find((h) => h.id === this.forcedHiddenBoss);
+      this.forcedHiddenBoss = null;
+      const hb = forced ?? pickHiddenBoss(rng, d.bosses.hiddenBosses, p.hiddenBossesMet) ?? rng.pick(d.bosses.hiddenBosses);
+      if (!p.hiddenBossesMet.includes(hb.id)) p.hiddenBossesMet = [...p.hiddenBossesMet, hb.id];
+      // TODO(M6): 히든보스 등장 시 미모사 제미니 대사 (내용 미작성)
+      const state = new RoomState('encounterRoom', [[hb.id]], d.waves.waveDelaySec);
+      this.rooms.set(roomId, state);
+      this.hiddenBossRooms.set(roomId, hb);
       this.handleRoomEvents(roomId, state.enter());
     } else if (kind === 'magiSpire') {
       // 첨탑이 방 가운데로 떨어지고 문이 잠긴다
@@ -1872,6 +2059,16 @@ export class RunScene extends Phaser.Scene {
     if (items.length > 0) this.queueOffers([{ kind: 'item', boss: false, items }]);
   }
 
+  /** 히든보스 처치: 보스 스킬 카드 1장 → 전용 무기 상자(왼쪽)·전용 아이템 상자(오른쪽) */
+  private hiddenBossReward(roomId: number): void {
+    const hb = this.hiddenBossRooms.get(roomId)!;
+    const c = roomCenter(this.session.map.rooms[roomId]!, this.m);
+    this.queueOffers([{ kind: this.ctx.data.cards.bossBonus, boss: true }], () => {
+      this.addChest('weapon', c.x - 40, c.y, {}, hb.weaponId);
+      if (!this.session.player.itemsObtained.includes(hb.itemId)) this.addChest('item', c.x + 40, c.y, {}, hb.itemId);
+    });
+  }
+
   /** 전투 칸을 깼을 때 낮은 확률로 무기 */
   private combatRoomDrop(roomId: number): void {
     const d = this.ctx.data;
@@ -1903,6 +2100,15 @@ export class RunScene extends Phaser.Scene {
   private setInteractHint(kind: 'weapon' | 'chest' | 'merchant' | null): void {
     this.interactKind = kind;
     bus.emit('interactHint', { kind });
+  }
+
+  /** 머리 위 잠깐 뜨는 글자 */
+  private floatLabel(at: Vec2, text: string, color: string): void {
+    const t = this.add
+      .text(at.x, at.y - 12, text, { fontFamily: 'sans-serif', fontSize: '8px', color, stroke: '#000000', strokeThickness: 2 })
+      .setOrigin(0.5)
+      .setDepth(7);
+    this.tweens.add({ targets: t, y: t.y - 8, alpha: 0, duration: 600, onComplete: () => t.destroy() });
   }
 
   /** 같은 알림은 toastSec에 한 번만 */
