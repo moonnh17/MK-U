@@ -453,6 +453,10 @@ export interface SkillDef {
 }
 
 export interface SkillsData {
+  /** 액티브 장착 칸 수 (기획서: 4) */
+  activeSlots: number;
+  /** 최대 레벨 (기획서: 3) */
+  maxLevel: number;
   skills: SkillDef[];
 }
 

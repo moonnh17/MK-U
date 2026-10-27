@@ -1,9 +1,19 @@
 /**
- * 피해 계산 (순수 함수). M1은 태그 배율만 구현한다.
- * 물리·마기·기술(attribute 그룹)의 스탯 보정은 더한 뒤 한 번만 곱한다.
- * 아이템 피해 증가, 근접·원거리 증가, 치명타 등 별도 단계는 M2 이후.
+ * 피해 계산 (순수 함수).
+ * 1단계: 물리·마기·기술(attribute 그룹)의 스탯 보정은 더한 뒤 한 번만 곱한다.
+ * 2단계: 근접·원거리 증가(range 그룹)를 따로 곱한다. 증가량은 아이템(M4)이 채운다.
+ * 피해 계산은 부모 스킬이 아니라 실제 공격(source)의 태그로 한다.
  */
-import type { GradeId, GroupMultipliersData, StatId, TagDef, TagId, TagsData } from '../types/data';
+import type {
+  EnemyRank,
+  GradeId,
+  GroupMultipliersData,
+  SpaceRule,
+  StatId,
+  TagDef,
+  TagId,
+  TagsData,
+} from '../types/data';
 
 export type Stats = Record<StatId, number>;
 
@@ -43,8 +53,41 @@ export function tagMultiplier(tags: readonly TagId[], stats: Stats, tagData: Tag
   return 1 + sum;
 }
 
-export function calcDamage(source: DamageSource, stats: Stats, tagData: TagsData): number {
-  return source.baseDamage * tagMultiplier(source.tags, stats, tagData);
+/** 근접·원거리 피해 증가 (별도 단계). 0.2 = +20% */
+export interface RangeBonus {
+  melee: number;
+  ranged: number;
+}
+
+export const NO_RANGE_BONUS: RangeBonus = { melee: 0, ranged: 0 };
+
+export function rangeMultiplier(tags: readonly TagId[], bonus: RangeBonus = NO_RANGE_BONUS): number {
+  let m = 1;
+  if (tags.includes('melee')) m *= 1 + bonus.melee;
+  if (tags.includes('ranged')) m *= 1 + bonus.ranged;
+  return m;
+}
+
+export function calcDamage(source: DamageSource, stats: Stats, tagData: TagsData, bonus: RangeBonus = NO_RANGE_BONUS): number {
+  return source.baseDamage * tagMultiplier(source.tags, stats, tagData) * rangeMultiplier(source.tags, bonus);
+}
+
+/**
+ * 공간격 피해. 일반 몬스터 즉사(최대 체력만큼), 엘리트·집행자/집정관은 최대 체력 비율,
+ * 보스·히든보스는 즉사 없이 피해 배율.
+ */
+export function spaceDamage(rank: EnemyRank, enemyMaxHp: number, damage: number, rule: SpaceRule): number {
+  switch (rank) {
+    case 'normal':
+      return enemyMaxHp;
+    case 'elite':
+      return enemyMaxHp * rule.eliteMaxHpRatio;
+    case 'champion':
+      return enemyMaxHp * rule.championMaxHpRatio;
+    case 'boss':
+    case 'hiddenBoss':
+      return damage * rule.bossDamageMultiplier;
+  }
 }
 
 /** 기준값 × 그룹(등급) 배율 */

@@ -268,6 +268,8 @@ export function validateGameData(d: GameData): Errors {
   const checkSources = (where: string, sources: Record<string, readonly string[]>) => {
     for (const [k, tags] of Object.entries(sources)) checkTags(`${where}.sources.${k}`, tags);
   };
+  checkPositive(errors, 'skills.activeSlots', d.skills.activeSlots);
+  checkPositive(errors, 'skills.maxLevel', d.skills.maxLevel);
   checkUnique(errors, 'skills', d.skills.skills.map((s) => s.id));
   for (const s of d.skills.skills) {
     const w = `skills.${s.id}`;
@@ -279,7 +281,9 @@ export function validateGameData(d: GameData): Errors {
     needText(w, s.descKey);
     checkTags(w, s.tags);
     checkSources(w, s.sources);
-    if (s.levels.length !== 3) errors.push(`${w}: 레벨은 Lv1~3, 3개여야 함 (현재 ${s.levels.length})`);
+    if (s.levels.length !== d.skills.maxLevel) {
+      errors.push(`${w}: 레벨은 Lv1~${d.skills.maxLevel}, ${d.skills.maxLevel}개여야 함 (현재 ${s.levels.length})`);
+    }
     s.levels.forEach((lv, i) => {
       if (s.kind === 'active') checkPositive(errors, `${w}.levels[${i}].cooldownSec`, lv.cooldownSec);
       for (const [k, v] of Object.entries(lv.values)) if (!isNum(v)) errors.push(`${w}.levels[${i}].${k}: 숫자여야 함`);

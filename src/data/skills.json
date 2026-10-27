@@ -1,4 +1,6 @@
 {
+  "activeSlots": 4,
+  "maxLevel": 3,
   "skills": [
     {
       "id": "magiTurret",
