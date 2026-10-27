@@ -154,9 +154,14 @@ export interface GradeDef {
   randomOptions: number;
 }
 
+/** 아이템 효과 그룹. 실제 값 = 기준값 × 그룹 배율 */
+export type ItemGroupId = 'statFlat' | 'hpFlat' | 'damagePct' | 'procDamage' | 'area' | 'cooldown';
+
 export interface GroupMultipliersData {
   /** 초기값은 임시. 밸런스 조정 시 이 표만 바꾼다. */
   grades: GradeDef[];
+  /** 아이템 효과 그룹 배율 (기획서 '수치를 유동적으로 두는 방법') */
+  itemGroups: Record<ItemGroupId, number>;
 }
 
 // ---------- 무기 ----------
@@ -614,6 +619,89 @@ export interface UltimatesData {
   /** 적 처치 시 게이지 충전량 (적 등급별) */
   gaugePerKill: Record<EnemyRank, number>;
   ultimates: UltimateDef[];
+}
+
+// ---------- 아이템 ----------
+
+/**
+ * 아이템 효과. 값은 기획서 기준값이고 실제 값은 그룹 배율을 곱한다:
+ * value → group, damage → procDamage, radius·range → area, everySec·cooldownSec → cooldown.
+ */
+export type ItemEffect =
+  | { kind: 'stat'; stat: StatId | 'all'; value: number; group: 'statFlat' }
+  | { kind: 'maxHp'; value: number; group: 'hpFlat' }
+  /** 피해 증가. all·melee·ranged·boss(보스에게) */
+  | { kind: 'damage'; scope: 'all' | 'melee' | 'ranged' | 'boss'; value: number; group: 'damagePct' }
+  /** 모든 적이 받는 피해 증가 (피해 증가와 따로 곱한다) */
+  | { kind: 'enemyTaken'; value: number; group: 'damagePct' }
+  /** 받는 피해 감소 */
+  | { kind: 'damageTaken'; value: number; group: 'damagePct' }
+  | { kind: 'coinGain'; value: number; group: 'damagePct' }
+  /** 공격 범위(스킬 범위·근접 무기 범위·폭발 반지름) */
+  | { kind: 'area'; value: number; group: 'damagePct' }
+  | { kind: 'buffDuration'; value: number; group: 'damagePct' }
+  /** 체력이 threshold 이하가 되면 healTo까지(추가가 아니라 그 비율까지) 회복. cooldownSec 0이면 1회. afterDamage: 쓴 뒤 피해 증가 */
+  | { kind: 'lowHpHeal'; threshold: number; healTo: number; cooldownSec: number; priority: number; afterDamage?: number }
+  /** 사망 시 완전 회복 + 무적 (school이면 그 학파로 전직했을 때만) */
+  | { kind: 'revive'; invulnSec: number; school?: SchoolId }
+  /** 특정 스킬 피해 증가 (school이면 그 학파로 전직했을 때만) */
+  | { kind: 'skillDamage'; skillId: string; value: number; group: 'damagePct'; school?: SchoolId }
+  /** 주기적으로 스킬 자동 발동 (notSchool로 전직했으면 꺼짐) */
+  | { kind: 'autoCast'; skillId: string; level: number; everySec: number; notSchool?: SchoolId }
+  /** 주기적 임시 함성: 피해·이동속도 증가 (버프 태그) */
+  | { kind: 'tempRoar'; everySec: number; durationSec: number; damage: number; moveSpeed: number }
+  /** 주기적 인력탄: 맞은 자리 둘레 적을 끌어당기며 피해 */
+  | { kind: 'gravityShot'; everySec: number; damage: number; radius: number; pull: number; range: number; tags: TagId[] }
+  /** 코인을 perCoins만큼 얻을 때마다 관통탄 shots발 (남은 양 이월) */
+  | { kind: 'coinShots'; perCoins: number; shots: number; damage: number; range: number; tags: TagId[] }
+  /** perKills 처치마다 피해 +value (최대 max), 피격 시 누적분 hurtKeep 비율만 남김 */
+  | { kind: 'killStacks'; perKills: number; value: number; max: number; hurtKeep: number }
+  /** 받은 피해를 공격한 적에게 반사 */
+  | { kind: 'reflect'; ratio: number }
+  /** 대성공 확률 +bonus(상한 무시), noFailure면 대실패 없음 (school로 전직했을 때만) */
+  | { kind: 'greatSuccess'; bonus: number; noFailure: boolean; school: SchoolId }
+  /** 적중마다 chance 확률로 공간격 */
+  | { kind: 'spaceOnHit'; chance: number }
+  /** 공격마다 chance(확률 태그, 지능 보정) 확률로 피해 ×mult */
+  | { kind: 'luckyHit'; chance: number; mult: number }
+  /** 피격 후 sec 무적(반투명), 재사용 cooldownSec */
+  | { kind: 'hurtInvuln'; sec: number; cooldownSec: number }
+  /** 피격 시 사방 공격 (힘·마기력 범위 보정) */
+  | { kind: 'hurtBurst'; damage: number; radius: number; tags: TagId[] }
+  /** 기본 스탯을 base로, 정신력을 willpower로 재편하고 줄어든 양을 가장 많이 투자한 스탯에 옮김 */
+  | { kind: 'statReshuffle'; base: number; willpower: number };
+
+export type ItemPool = 'normal' | 'boss' | 'hiddenBoss' | 'set';
+
+export interface ItemDef extends SpriteRef {
+  id: string;
+  nameKey: string;
+  descKey: string;
+  grade: GradeId;
+  /** normal: 상자·첨탑 / boss: 그 보스 처치로만 / hiddenBoss: 히든보스 처치로만 / set: 세트 합성으로만 */
+  pool: ItemPool;
+  tags: TagId[];
+  effects: ItemEffect[];
+  /** 직업·학파별 추가 효과 (아직 없는 직업은 데이터만) */
+  variants?: { job: string; effects: ItemEffect[] }[];
+  /** boss: 이 보스 처치 시 확정 */
+  bossId?: string;
+}
+
+export interface ItemsData {
+  /** 등급 가중치 (보물 상자) */
+  treasureWeights: Partial<Record<GradeId, number>>;
+  /** 대규모 습격 상자 (레어 이상) */
+  raidWeights: Partial<Record<GradeId, number>>;
+  /** 획득 1회당 그 등급에서 바로 위 등급으로 옮기는 가중치 (확률 이전) */
+  transferPerPickup: number;
+  /** 챕터가 오를 때마다 일반에서 빼서 상위 등급에 나누는 가중치 */
+  chapterCommonShift: number;
+  /** 세트 합성: 재료 → 결과 */
+  sets: { materials: string[]; result: string }[];
+  /** 획득 카드 표시 시간(초) */
+  pickupCardSec: number;
+  items: ItemDef[];
 }
 
 // ---------- 전리품·조우 ----------

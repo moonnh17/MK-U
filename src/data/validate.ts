@@ -232,6 +232,42 @@ export function validateGameData(d: GameData): Errors {
   checkPositive(errors, 'loot.chest.openRadius', lt.chest.openRadius);
   checkSprite(errors, 'loot.merchantStand', lt.merchantStand);
   checkPositive(errors, 'loot.standSpacing', lt.standSpacing);
+  // --- 아이템 ---
+  const it = d.items;
+  for (const k of ['statFlat', 'hpFlat', 'damagePct', 'procDamage', 'area', 'cooldown'] as const) checkPositive(errors, `groupMultipliers.itemGroups.${k}`, d.groupMultipliers.itemGroups?.[k]);
+  checkUnique(errors, 'items', it.items.map((x) => x.id));
+  checkPositive(errors, 'items.transferPerPickup', it.transferPerPickup, true);
+  checkPositive(errors, 'items.chapterCommonShift', it.chapterCommonShift, true);
+  checkPositive(errors, 'items.pickupCardSec', it.pickupCardSec);
+  for (const [k, v] of Object.entries({ ...it.treasureWeights, ...it.raidWeights })) {
+    if (!gradeIds.has(k)) errors.push(`items: 알 수 없는 등급 '${k}'`);
+    checkPositive(errors, `items.weights.${k}`, v, true);
+  }
+  if ((it.raidWeights.common ?? 0) > 0) errors.push('items.raidWeights: 레어 이상만');
+  const itemIds = new Set(it.items.map((x) => x.id));
+  for (const s of it.sets) {
+    for (const m of [...s.materials, s.result]) if (!itemIds.has(m)) errors.push(`items.sets: 없는 아이템 '${m}'`);
+    if (it.items.find((x) => x.id === s.result)?.pool !== 'set') errors.push(`items.sets: '${s.result}'는 pool set이어야 함`);
+  }
+  for (const x of it.items) {
+    const w = `items.${x.id}`;
+    checkSprite(errors, w, x);
+    needText(w, x.nameKey);
+    needText(w, x.descKey);
+    if (!gradeIds.has(x.grade)) errors.push(`${w}: 알 수 없는 등급`);
+    if (!['normal', 'boss', 'hiddenBoss', 'set'].includes(x.pool)) errors.push(`${w}: pool 잘못됨`);
+    for (const t of x.tags) if (!tagIds.has(t)) errors.push(`${w}: 알 수 없는 태그 '${t}'`);
+    if (x.pool === 'boss' && !d.bosses.bosses.some((b) => b.id === x.bossId)) errors.push(`${w}: bossId '${String(x.bossId)}' 보스 없음`);
+    if (x.effects.length === 0) errors.push(`${w}: 효과 없음`);
+    for (const e of [...x.effects, ...(x.variants ?? []).flatMap((v) => v.effects)]) {
+      if (e.kind === 'stat' && e.stat !== 'all' && !statIds.has(e.stat)) errors.push(`${w}: 알 수 없는 스탯 '${e.stat}'`);
+      if ((e.kind === 'autoCast' || e.kind === 'skillDamage') && !d.skills.skills.some((s) => s.id === e.skillId)) errors.push(`${w}: 없는 스킬 '${e.skillId}'`);
+      if ((e.kind === 'hurtBurst' || e.kind === 'gravityShot' || e.kind === 'coinShots') && e.tags.some((t) => !tagIds.has(t))) errors.push(`${w}: 알 수 없는 태그`);
+      for (const [k, v] of Object.entries(e)) if (typeof v === 'number' && !Number.isFinite(v)) errors.push(`${w}.${e.kind}.${k}: 숫자여야 함`);
+    }
+  }
+  if (!it.items.some((x) => x.pool === 'normal' && x.grade === 'mythic')) errors.push('items: 신화 아이템이 없음');
+
   // --- 적 ---
   const enemyIds = d.enemies.enemies.map((e) => e.id);
   checkUnique(errors, 'enemies', enemyIds);

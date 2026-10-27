@@ -7,6 +7,7 @@ import type {
   ElitesData,
   EnemiesData,
   GroupMultipliersData,
+  ItemsData,
   JobsData,
   LootData,
   MapgenData,
@@ -33,6 +34,7 @@ import elitesJson from './elites.json';
 import bossesJson from './bosses.json';
 import jobsJson from './jobs.json';
 import lootJson from './loot.json';
+import itemsJson from './items.json';
 import mapgenJson from './mapgen.json';
 import wavesJson from './waves.json';
 import playerJson from './player.json';
@@ -54,6 +56,7 @@ export interface GameData {
   bosses: BossesData;
   jobs: JobsData;
   loot: LootData;
+  items: ItemsData;
   mapgen: MapgenData;
   waves: WavesData;
   player: PlayerData;
@@ -77,6 +80,7 @@ export const gameData: GameData = {
   bosses: bossesJson as unknown as BossesData,
   jobs: jobsJson as unknown as JobsData,
   loot: lootJson as unknown as LootData,
+  items: itemsJson as unknown as ItemsData,
   mapgen: mapgenJson as unknown as MapgenData,
   waves: wavesJson as unknown as WavesData,
   player: playerJson as unknown as PlayerData,
