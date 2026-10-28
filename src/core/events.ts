@@ -37,6 +37,8 @@ export interface GameEvents {
   debugForceEncounter: { kind: EncounterKindId | null };
   /** 다음 조우 칸을 이 히든보스로 */
   debugHiddenBoss: { id: string };
+  /** 디버그: 지금 빌드 그대로 이 스테이지로 */
+  debugGoStage: { chapter: number; stage: number };
   debugGiveWeapon: { defId: string; grade: GradeId };
   debugCoins: { amount: number };
   debugGiveItem: { itemId: string };

@@ -123,6 +123,23 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
   );
   // 다음 조우 칸 유형 강제, 무기 지급, 코인
   const encSel = select([['', t('debug.encounterRandom')], ...(['treasure', 'merchant', 'raid', 'magiSpire', 'hiddenBoss'] as const).map((k): [string, string] => [k, t(`encounter.${k}`)])]);
+  // 스테이지 이동 (지금 빌드 그대로)
+  const stageSel = select(
+    Array.from({ length: d.mapgen.chapters * d.mapgen.stagesPerChapter }, (_, i): [string, string] => {
+      const c = Math.floor(i / d.mapgen.stagesPerChapter) + 1;
+      const s = (i % d.mapgen.stagesPerChapter) + 1;
+      return [`${c}-${s}`, `${c}-${s}`];
+    }),
+  );
+  body.appendChild(
+    row(
+      stageSel,
+      button(t('debug.goStage'), () => {
+        const [c, s] = stageSel.value.split('-').map(Number);
+        bus.emit('debugGoStage', { chapter: c!, stage: s! });
+      }),
+    ),
+  );
   // 히든보스: 다음 조우 칸을 그 히든보스로
   const hbSel = select(d.bosses.hiddenBosses.map((h): [string, string] => [h.id, t(`enemy.${h.id}`)]));
   body.appendChild(row(hbSel, button(t('debug.hiddenBoss'), () => bus.emit('debugHiddenBoss', { id: hbSel.value }))));

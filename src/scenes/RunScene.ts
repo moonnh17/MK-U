@@ -9,11 +9,11 @@ import { newPlayerState, type BuffView, type PlayerState, type RunSession, type 
 import { BossController } from '../bosses/bossController';
 import type { BossHost } from '../bosses/host';
 import { Door } from '../entities/door';
-import { Enemy } from '../entities/enemy';
+import { Enemy, type EnemyHost } from '../entities/enemy';
 import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
 import { Spire } from '../entities/spire';
 import { ItemRuntime } from '../items/runtime';
-import { DelayedBlast, type Hazard, type HazardHost } from '../entities/hazard';
+import { DelayedBlast, type Hazard } from '../entities/hazard';
 import { FloorWeapon, Pickup } from '../entities/pickup';
 import { Explosive } from '../skills/explosive';
 import { nearestEnemy, type ShieldOpts, type SkillHost, type SkillObject } from '../skills/host';
@@ -34,7 +34,7 @@ import { crystalBreakdown, rollShard } from '../systems/runRecord';
 import { registerCutscene } from '../core/save';
 import { inSpireCircle, spireEliteCount, spireItemChoices, type SpireEvent } from '../systems/spire';
 import { planCombatWaves, RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
-import { advanceStage, firstStage, type StageRef } from '../systems/run';
+import { advanceStage, playableChapters, firstStage, type StageRef } from '../systems/run';
 import { absorbHit, refracts, tickShield, type ShieldState } from '../systems/shield';
 import { applyCorruption, corruptedDamage, skillChance, tickCorruption } from '../systems/acro';
 import { combineMods, heal, payHp, takeDamage, type PlayerMods } from '../systems/vitals';
@@ -168,7 +168,7 @@ export class RunScene extends Phaser.Scene {
   private skillObjects: SkillObject[] = [];
   /** 적 쪽 위험 지대(폭발 엘리트 지연 폭발 등) */
   private hazards: Hazard[] = [];
-  private enemyHost!: HazardHost;
+  private enemyHost!: EnemyHost;
   /** 아이템 발동형 효과·상태 */
   private itemRt!: ItemRuntime;
   private bossHost!: BossHost;
@@ -265,6 +265,9 @@ export class RunScene extends Phaser.Scene {
       playerPos: () => ({ x: this.player.x, y: this.player.y }),
       playerRadius: d.player.size / 2,
       hurtPlayer: (amount, attacker) => this.hurtPlayer(amount, attacker ?? null),
+      fireEnemyBullet: (from, angle, speed, range, damage, refractable) => this.fireEnemyBullet(from, angle, speed, range, damage, refractable),
+      addHazard: (h) => this.hazards.push(h),
+      linkWindup: (e, attackId) => this.linkWindup(e, attackId),
     };
     this.bossHost = {
       ...this.enemyHost,
@@ -338,6 +341,10 @@ export class RunScene extends Phaser.Scene {
       bus.on('cardReroll', () => this.rerollCards()),
       bus.on('debugForceEncounter', ({ kind }) => {
         this.forcedEncounter = kind;
+      }),
+      bus.on('debugGoStage', ({ chapter, stage }) => {
+        if (this.modal || this.session.outcome) return;
+        this.scene.restart({ stage: { chapter, stage }, player: this.session.player, offers: [] } satisfies RunSceneData);
       }),
       bus.on('debugHiddenBoss', ({ id }) => {
         this.forcedEncounter = 'hiddenBoss';
@@ -427,9 +434,11 @@ export class RunScene extends Phaser.Scene {
   private buildWorld(): void {
     const d = this.ctx.data;
     const { map } = this.session;
-    const floor = hexColor(d.ui.room.floorColor);
-    const wall = hexColor(d.ui.room.wallColor);
-    const corridorColor = hexColor(d.ui.room.corridorColor);
+    // 챕터가 바뀌면 방 색(타일 자리)도 바뀐다
+    const theme = d.ui.chapterRooms[String(this.session.stage.chapter)] ?? d.ui.room;
+    const floor = hexColor(theme.floorColor);
+    const wall = hexColor(theme.wallColor);
+    const corridorColor = hexColor(theme.corridorColor);
     const doorColor = hexColor(d.mapgen.door.color);
 
     for (const c of corridors(map, this.m)) {
@@ -714,6 +723,18 @@ export class RunScene extends Phaser.Scene {
     this.floatLabel({ x: this.player.x, y: this.player.y }, this.ctx.t('item.dodged'), '#b0a0ff');
   }
 
+  /** 전술 연계: 같은 방의 같은 적 중 연계 거리 안에 있는 것이 함께 조준한다 */
+  private linkWindup(src: Enemy, attackId: string): void {
+    const a = src.def.attacks?.find((x) => x.id === attackId);
+    const r = a?.linkRadius;
+    if (!r) return;
+    const room = this.enemyRoom.get(src);
+    for (const e of this.enemies) {
+      if (e === src || e.def.id !== src.def.id || this.enemyRoom.get(e) !== room) continue;
+      if (Math.hypot(e.sprite.x - src.sprite.x, e.sprite.y - src.sprite.y) <= r) e.tryLink(attackId, this.enemyHost);
+    }
+  }
+
   /** 보스가 부르는 적(분신): 방 웨이브 수에 들어가지 않는다 */
   private spawnMinion(id: string, at: Vec2, maxHp: number): Enemy {
     const d = this.ctx.data;
@@ -819,7 +840,7 @@ export class RunScene extends Phaser.Scene {
     if (enemy.dead) return false;
     // 보스 강화 단계 진입 중 무적
     if (enemy.invuln > 0) return false;
-    dmg *= enemy.mods.damageTakenMul;
+    dmg *= enemy.takenMul;
     const dealt = Math.min(Math.max(0, enemy.hp), dmg);
     const killed = enemy.damage(dmg);
     for (const o of [...this.skillObjects]) o.onDamageDealt?.(this.host, dealt, enemy);
@@ -2111,6 +2132,10 @@ export class RunScene extends Phaser.Scene {
     );
     const rng = Rng.derive(seed, label);
     wave.forEach((id, i) => this.spawnEnemy(id, sp.roomId, rng, true, elites[i] ?? null));
+    // 원본 첨탑 규칙: 헥타르 전투원이 항상 섞여 나온다
+    const tr = d.loot.spire.troopers;
+    const n = rng.int(tr.count[0], tr.count[1]);
+    for (let i = 0; i < n; i++) this.spawnEnemy(tr.enemy, sp.roomId, rng, true);
   }
 
   /** 충전 완료 보상: 아이템 카드 3장 중 1장 (확률 이전 반영, 신화는 따로) */
@@ -2201,9 +2226,10 @@ export class RunScene extends Phaser.Scene {
     this.leaving = true;
     const d = this.ctx.data;
     const { afterStage } = stageEndOffers(this.session.stage, d.mapgen, d.cards);
-    const adv = advanceStage(this.session.stage, d.mapgen);
+    const adv = advanceStage(this.session.stage, d.mapgen, playableChapters(d.waves, d.mapgen));
     this.session.player.record.stagesCleared++;
-    if (adv.type === 'stage') {
+    // TODO(M6-D): 2장 종료 — 미모사 제미니 미니 대사 (내용 미작성)
+    if (adv.type === 'stage' || adv.type === 'chapter') {
       const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [afterStage] };
       this.scene.restart(data);
     } else {
