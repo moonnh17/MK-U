@@ -137,6 +137,21 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
       button(t('debug.coins'), () => bus.emit('debugCoins', { amount: 50 })),
     ),
   );
+  // 영구 저장: 마기력 결정 지급·저장 초기화
+  body.appendChild(
+    row(
+      button(t('debug.crystals'), () => {
+        ctx.save.data.crystals += 100;
+        ctx.save.write();
+        bus.emit('saveChanged', {});
+      }),
+      button(t('debug.resetSave'), () => {
+        ctx.save.reset();
+        bus.emit('saveChanged', {});
+        bus.emit('toast', { text: t('debug.saveReset') });
+      }),
+    ),
+  );
   body.appendChild(
     row(
       weaponSel,

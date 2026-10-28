@@ -14,7 +14,7 @@ const JOB_KEYS = ['skill1', 'skill2', 'skill3'] as const;
 
 /**
  * 미모사 제미니의 실험장 (시작 방). 걸어 다니며 캡슐 → 직업 선택 장치 → 포털로 런에 들어간다.
- * 도감 단말·제미니 홀로그램은 '준비 중', 관측창은 장식. 기억조각 보관대는 M5-D.
+ * 도감 단말·제미니 홀로그램은 '준비 중', 관측창은 장식. 기억조각 보관대는 3탭 창(과거·현재·실험체의 기억).
  * 런이 끝나면(결산 확인) 여기로 돌아온다.
  */
 export class LabScene extends Phaser.Scene {
@@ -28,6 +28,7 @@ export class LabScene extends Phaser.Scene {
   private hintOn = false;
   private waking = false;
   private jobOpen = false;
+  private archiveOpen = false;
   private unsubs: (() => void)[] = [];
   /** 고른 직업 (실험장에 돌아와도 기억한다) */
   private job: string | null = null;
@@ -44,6 +45,7 @@ export class LabScene extends Phaser.Scene {
     this.near = null;
     this.hintOn = false;
     this.jobOpen = false;
+    this.archiveOpen = false;
     const d = this.ctx.data;
     const L = d.lab;
     const c = L.colors;
@@ -89,6 +91,8 @@ export class LabScene extends Phaser.Scene {
     this.unsubs.push(
       bus.on('labJobPicked', ({ jobId }) => this.pickJob(jobId)),
       bus.on('jobWindowClose', () => this.closeJobWindow()),
+      bus.on('archiveClose', () => this.closeArchive()),
+      bus.on('saveChanged', () => this.crystalText.setText(this.ctx.t('lab.crystals', { n: this.ctx.save.data.crystals }))),
     );
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.unsubs.forEach((u) => u());
@@ -196,6 +200,10 @@ export class LabScene extends Phaser.Scene {
       if (frame.pressed.has('pause') || frame.pressed.has('interact')) this.closeJobWindow();
       return;
     }
+    if (this.archiveOpen) {
+      if (frame.pressed.has('pause') || frame.pressed.has('interact')) this.closeArchive();
+      return;
+    }
     if (this.waking) {
       this.player.setVelocity(0, 0);
       return;
@@ -239,10 +247,21 @@ export class LabScene extends Phaser.Scene {
     } else if (o.kind === 'portal') {
       if (portalActive(this.ctx.data.jobs.jobs, this.job)) this.enterRun();
       else bus.emit('toast', { text: t('lab.pickJobFirst') });
+    } else if (o.kind === 'archive') {
+      this.archiveOpen = true;
+      this.player.setVelocity(0, 0);
+      bus.emit('modal', { kind: 'archive' });
+      bus.emit('archiveShow', {});
     } else {
-      // 도감 단말·제미니 홀로그램·기억조각 보관대(M5-D)
+      // 도감 단말·제미니 홀로그램
       bus.emit('toast', { text: t('lab.notReady', { name }) });
     }
+  }
+
+  private closeArchive(): void {
+    if (!this.archiveOpen) return;
+    this.archiveOpen = false;
+    bus.emit('modal', { kind: null });
   }
 
   private openJobWindow(): void {

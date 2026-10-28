@@ -207,7 +207,8 @@ body {
 /* 카드 선택창 · 인벤토리 */
 #card-window,
 #inventory-window,
-#job-window {
+#job-window,
+#archive-window {
   position: fixed;
   inset: 0;
   z-index: 8;
@@ -1015,4 +1016,123 @@ body {
 
 #job-window .cw-card.selected {
   box-shadow: 0 0 0 3px #ffd23f;
+}
+
+/* 기억조각 보관대 */
+.ar-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 96vw;
+  max-height: 72vh;
+  overflow-y: auto;
+}
+
+.ar-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 104px);
+  gap: 6px;
+}
+
+.ar-cell {
+  min-height: 52px;
+  padding: 5px;
+  border: 1px dashed #3a4a5a;
+  border-radius: 5px;
+  background: #0b1016;
+  color: #556;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+}
+
+.ar-cell small {
+  font-size: 10px;
+}
+
+.ar-cell.open {
+  border: 1px solid #b07ae0;
+  color: #e8dcff;
+  background: #1a1426;
+  cursor: pointer;
+}
+
+.ar-upgrades {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 12px;
+}
+
+.ar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border: 1px solid #2a3a4a;
+  border-radius: 5px;
+  background: #0e151d;
+  min-width: 250px;
+}
+
+.ar-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  font-size: 12px;
+}
+
+.ar-info small {
+  font-size: 10px;
+  color: #aab;
+}
+
+.ar-dots {
+  font-size: 10px;
+  color: #ffd23f;
+}
+
+.ar-buy {
+  font: bold 11px sans-serif;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #7ae0ff;
+  background: #12303a;
+  color: #fff;
+  min-width: 64px;
+}
+
+.ar-buy:disabled,
+.iw-drop:disabled {
+  opacity: 0.35;
+}
+
+/* 잠긴 직업 탭: 읽을 수 있게 조금만 흐리게 */
+.iw-tabs button:disabled {
+  opacity: 0.55;
+  border-color: #556;
+}
+
+.ar-foot {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.ar-crystals {
+  color: #7ae0ff;
+  font-size: 13px;
+}
+
+#archive-window.mobile .ar-grid {
+  grid-template-columns: repeat(5, 18vw);
+}
+
+#archive-window.mobile .ar-upgrades {
+  grid-template-columns: 1fr 1fr;
+}
+
+#archive-window.mobile .ar-row {
+  min-width: 0;
 }

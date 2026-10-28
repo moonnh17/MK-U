@@ -229,7 +229,7 @@ export class RunScene extends Phaser.Scene {
       map,
       visited: new Set([map.startId]),
       currentRoomId: map.startId,
-      player: this.initData.player ?? newPlayerState(d, this.initData.job),
+      player: this.initData.player ?? newPlayerState(d, this.initData.job, this.ctx.save.data.upgrades[this.initData.job ?? d.jobs.startJob]),
       enemiesAlive: 0,
       outcome: null,
       energyEmptyAt: -Infinity,
@@ -518,7 +518,7 @@ export class RunScene extends Phaser.Scene {
     const p = this.session.player;
     const d = this.ctx.data;
     const mods = this.playerMods();
-    p.shieldMax = d.player.shieldMax + mods.shieldMax;
+    p.shieldMax = d.player.shieldMax + p.meta.shield + mods.shieldMax;
     p.shield = Math.min(p.shield, p.shieldMax);
     this.syncMaxHp();
     this.itemRt.update(dt);
@@ -1438,7 +1438,8 @@ export class RunScene extends Phaser.Scene {
   private syncMaxHp(): void {
     const d = this.ctx.data;
     const p = this.session.player;
-    const target = maxHpFor(d.player.maxHp, this.effStats(), d.stats) + this.itemRt.sums.maxHp;
+    // 기본 체력(+영구 강화) + 견고 + 아이템
+    const target = maxHpFor(d.player.maxHp + p.meta.maxHp, this.effStats(), d.stats) + this.itemRt.sums.maxHp;
     if (target === p.maxHp) return;
     if (target > p.maxHp) p.hp += target - p.maxHp;
     p.maxHp = target;

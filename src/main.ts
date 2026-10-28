@@ -23,6 +23,7 @@ import { CutsceneWindow } from './ui/cutsceneWindow';
 import { InventoryWindow } from './ui/inventoryWindow';
 import { ItemCard } from './ui/itemCard';
 import { JobWindow } from './ui/jobWindow';
+import { ArchiveWindow } from './ui/archiveWindow';
 import { SettlementWindow } from './ui/settlementWindow';
 import type { TouchControlId } from './ui/mobileLayout';
 
@@ -147,6 +148,7 @@ new CutsceneWindow(ctx);
 new ItemCard(ctx);
 new SettlementWindow(ctx);
 new JobWindow(ctx);
+new ArchiveWindow(ctx);
 window.addEventListener('resize', () => game.scale.setZoom(zoomFor(ctx.uiMode)));
 
 applyUiMode(ctx.uiMode);
