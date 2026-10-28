@@ -3,7 +3,9 @@ import type { Vec2 } from '../core/actions';
 import { makeFallbackSeed } from '../core/config';
 import { getContext, type GameContext } from '../core/context';
 import { bus } from '../core/events';
+import { registerGemini } from '../core/save';
 import { hexColor } from '../core/scale';
+import { hasLines, storyFor } from '../systems/gemini';
 import { jobChoices, nearestInteractable, portalActive } from '../systems/lab';
 import type { LabObjectDef } from '../types/data';
 import type { TouchControlId } from '../ui/mobileLayout';
@@ -29,6 +31,8 @@ export class LabScene extends Phaser.Scene {
   private waking = false;
   private jobOpen = false;
   private archiveOpen = false;
+  /** 첫 만남 스토리 대화가 떠 있다 */
+  private storyOpen = false;
   private unsubs: (() => void)[] = [];
   /** 고른 직업 (실험장에 돌아와도 기억한다) */
   private job: string | null = null;
@@ -92,6 +96,11 @@ export class LabScene extends Phaser.Scene {
       bus.on('labJobPicked', ({ jobId }) => this.pickJob(jobId)),
       bus.on('jobWindowClose', () => this.closeJobWindow()),
       bus.on('archiveClose', () => this.closeArchive()),
+      bus.on('storyDone', () => {
+        if (!this.storyOpen) return;
+        this.storyOpen = false;
+        bus.emit('modal', { kind: null });
+      }),
       bus.on('saveChanged', () => this.crystalText.setText(this.ctx.t('lab.crystals', { n: this.ctx.save.data.crystals }))),
     );
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -180,11 +189,22 @@ export class LabScene extends Phaser.Scene {
             this.waking = false;
             this.ctx.save.data.firstRunDone = true;
             this.ctx.save.write();
-            // TODO(M6): 첫 실행 — 미모사 제미니와 처음 만나는 대화
+            this.playFirstRunStory();
           },
         });
       },
     });
+  }
+
+  /** 첫 실행: 캡슐에서 깨어난 뒤 미모사 제미니와 처음 만나는 대화 (내용이 비어 있으면 건너뜀) */
+  private playFirstRunStory(): void {
+    const d = this.ctx.data;
+    const story = storyFor(d.gemini, 'firstRun');
+    if (!story || !hasLines(story.lines, d.text)) return;
+    if (registerGemini(this.ctx.save.data, `gemini.${story.id}`, story.lines)) this.ctx.save.write();
+    this.storyOpen = true;
+    bus.emit('modal', { kind: 'story' });
+    bus.emit('storyShow', { lines: story.lines.map((k) => this.ctx.t(k)) });
   }
 
   // ---------- 루프 ----------
@@ -204,7 +224,7 @@ export class LabScene extends Phaser.Scene {
       if (frame.pressed.has('pause') || frame.pressed.has('interact')) this.closeArchive();
       return;
     }
-    if (this.waking) {
+    if (this.waking || this.storyOpen) {
       this.player.setVelocity(0, 0);
       return;
     }

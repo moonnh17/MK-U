@@ -33,7 +33,8 @@ import { generateStage, type RoomNode } from '../systems/mapgen';
 import { encounterKinds, hiddenChapterMul, pickHiddenBoss } from '../systems/hiddenBoss';
 import { signatureFires, steerToward } from '../systems/motion';
 import { crystalBreakdown, rollShard } from '../systems/runRecord';
-import { registerCutscene } from '../core/save';
+import { registerCutscene, registerGemini } from '../core/save';
+import { hasLines, MiniQueue, pickMini, saidKeys, storyFor } from '../systems/gemini';
 import { inSpireCircle, spireEliteCount, spireItemChoices, spireSize, type SpireEvent } from '../systems/spire';
 import { planCombatWaves, RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
 import { advanceStage, playableChapters, firstStage, type StageRef } from '../systems/run';
@@ -84,7 +85,7 @@ import {
   type Rect,
   type WorldMetrics,
 } from '../systems/worldLayout';
-import type { BleedRule, CardOfferKind, EncounterKindId, GradeId, HiddenBossDef, WeaponSignature, SchoolId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
+import type { BleedRule, CardOfferKind, EncounterKindId, GeminiEventId, GradeId, HiddenBossDef, WeaponSignature, SchoolId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
 
 export interface RunSceneData {
   stage?: StageRef;
@@ -110,7 +111,7 @@ interface Offer {
   schools?: SchoolId[];
 }
 
-type Modal = 'cards' | 'inventory' | 'cutscene' | null;
+type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | null;
 
 const SKILL_ACTIONS: ButtonAction[] = ['skill1', 'skill2', 'skill3', 'skill4'];
 
@@ -208,6 +209,9 @@ export class RunScene extends Phaser.Scene {
   private afterOffers: (() => void)[] = [];
   private currentCards: AnyCard[] | null = null;
   /** 컷인 → 설명창 대기열과 다 본 뒤 할 일 */
+  /** 미모사 제미니 미니 대사 순서, 스토리 대화가 끝난 뒤 할 일 */
+  private mini!: MiniQueue;
+  private storyThen: (() => void) | null = null;
   private cutQueue: Cutscene[] = [];
   private afterCuts: (() => void) | null = null;
   private cardSeq = 0;
@@ -248,6 +252,11 @@ export class RunScene extends Phaser.Scene {
     };
     this.ctx.session = this.session;
     this.rng = Rng.derive(seed, `combat-${stage.chapter}-${stage.stage}`);
+    this.mini = new MiniQueue(d.gemini.mini.showSec, d.gemini.mini.fadeSec);
+    this.storyThen = null;
+    bus.emit('geminiMini', { line: null });
+    // 챕터를 끝내고 넘어왔다 (2장 종료 미니 대사)
+    if (!newRun && stage.stage === 1 && stage.chapter > 1) this.say('chapterEnd', String(stage.chapter - 1));
     this.m = metrics(d.mapgen);
     this.hosts = new Map();
     this.host = this.hostFor(null);
@@ -355,6 +364,7 @@ export class RunScene extends Phaser.Scene {
       bus.on('debugSpawn', ({ enemyId, count, elite }) => this.debugSpawn(enemyId, count, elite ?? null)),
       bus.on('debugBarrage', () => this.debugBarrage()),
       bus.on('cutsceneDone', () => this.showNextCut()),
+      bus.on('storyDone', () => this.finishStory()),
       bus.on('cardReroll', () => this.rerollCards()),
       bus.on('debugForceEncounter', ({ kind }) => {
         this.forcedEncounter = kind;
@@ -542,6 +552,9 @@ export class RunScene extends Phaser.Scene {
       this.refreshSkillView();
       return;
     }
+    // 미니 대사: 창이 열린 동안은 표시 시간도 멈춘다
+    const ml = this.mini.update(dt);
+    if (ml) bus.emit('geminiMini', ml);
     this.session.player.record.playSec += dt;
 
     const p = this.session.player;
@@ -666,9 +679,13 @@ export class RunScene extends Phaser.Scene {
         // 보스 스테이지: 보스방에서 스킬 카드를 1회 더 고른 뒤 포털이 생긴다(보스방이 출구를 겸함)
         if (node.kind === 'bossRoom') {
           const end = stageEndOffers(this.session.stage, this.ctx.data.mapgen, this.ctx.data.cards);
-          this.queueOffers(
-            end.bossRoom.map((kind) => ({ kind, boss: true })),
-            () => this.afterBossRoom(node),
+          const bossId = this.rooms.get(roomId)?.waves[0]?.[0];
+          // 식광·마기카이저: 처치 후 일반 스토리 대화 (내용이 비어 있으면 건너뜀)
+          this.playStory('bossKill', bossId, () =>
+            this.queueOffers(
+              end.bossRoom.map((kind) => ({ kind, boss: true })),
+              () => this.afterBossRoom(node),
+            ),
           );
         }
       }
@@ -706,8 +723,8 @@ export class RunScene extends Phaser.Scene {
       : node.kind === 'combatRoom'
         ? [championWaves(Rng.derive(this.ctx.config.seed, champLabel), map.chapter, map.stage, total, d.waves.champions)[index] ?? null].filter((x): x is string => x !== null)
         : [];
-    // TODO(M6-D): 집행자·집정관 첫 조우 미니 대사
     for (const id of champs) this.spawnEnemy(id, roomId, rng, true);
+    if (champs.length > 0) this.say('championMet');
     this.rooms.get(roomId)?.addAlive(champs.length);
   }
 
@@ -1850,6 +1867,45 @@ export class RunScene extends Phaser.Scene {
     bus.emit('cutsceneShow', next);
   }
 
+  // ---------- 미모사 제미니 ----------
+
+  /** 미니 대사: 이벤트에 맞는 대사를 골라 순서에 넣는다 (같은 런 반복 없음, 빈 대사는 건너뜀). 복선 대사는 현재의 기억에 */
+  private say(event: GeminiEventId, arg?: string): void {
+    const d = this.ctx.data;
+    const p = this.session.player;
+    const rng = Rng.derive(this.ctx.config.seed, `gemini-${event}-${arg ?? ''}-${p.geminiSaid.length}`);
+    const pick = pickMini(d.gemini, event, arg, new Set(p.geminiSaid), rng, d.text);
+    if (!pick) return;
+    p.geminiSaid = [...p.geminiSaid, ...saidKeys(event, arg, pick)];
+    this.mini.push(
+      pick.lines.map((k) => ({ text: this.ctx.t(k), mood: pick.def.mood })),
+      pick.def.priority,
+    );
+    if (pick.def.record && registerGemini(this.ctx.save.data, `gemini.${pick.def.id}`, pick.lines)) this.ctx.save.write();
+  }
+
+  /** 일반 스토리 대화: 게임을 멈추고 띄운 뒤 then. 정해진 대화가 없거나 내용이 비어 있으면 바로 then */
+  private playStory(event: GeminiEventId, arg: string | undefined, then: () => void): void {
+    const d = this.ctx.data;
+    const story = storyFor(d.gemini, event, arg);
+    if (!story || !hasLines(story.lines, d.text)) {
+      then();
+      return;
+    }
+    if (registerGemini(this.ctx.save.data, `gemini.${story.id}`, story.lines)) this.ctx.save.write();
+    this.storyThen = then;
+    this.setModal('story');
+    bus.emit('storyShow', { lines: story.lines.map((k) => this.ctx.t(k)) });
+  }
+
+  private finishStory(): void {
+    if (this.modal !== 'story') return;
+    this.setModal(null);
+    const f = this.storyThen;
+    this.storyThen = null;
+    f?.();
+  }
+
   /** 자기 학파 각성 2개면 궁극기를 자동 각성한다. 이번에 각성했으면 연출을 돌려준다 */
   private checkUltimateAwakening(): Cutscene | null {
     const d = this.ctx.data;
@@ -1928,7 +1984,10 @@ export class RunScene extends Phaser.Scene {
     if (u) cuts.push(u);
     this.refreshSkillView();
     bus.emit('inventoryChanged', {});
-    this.playCutscenes(cuts, then);
+    this.playCutscenes(cuts, () => {
+      this.say('advancement', school);
+      then();
+    });
   }
 
   private openInventory(): void {
@@ -2024,6 +2083,7 @@ export class RunScene extends Phaser.Scene {
     let shardKind: 'boss' | 'hiddenBoss' | null = null;
     if (e.rank === 'boss' && this.ctx.data.bosses.bosses.some((b) => b.id === e.def.id)) {
       r.bossKills.push({ id: e.def.id, stage: stage.stage });
+      this.say('bossKill', e.def.id);
       shardKind = 'boss';
     } else if (e.rank === 'hiddenBoss') {
       r.hiddenBossKills.push(e.def.id);
@@ -2193,7 +2253,7 @@ export class RunScene extends Phaser.Scene {
       this.forcedHiddenBoss = null;
       const hb = forced ?? pickHiddenBoss(rng, d.bosses.hiddenBosses, p.hiddenBossesMet) ?? rng.pick(d.bosses.hiddenBosses);
       if (!p.hiddenBossesMet.includes(hb.id)) p.hiddenBossesMet = [...p.hiddenBossesMet, hb.id];
-      // TODO(M6): 히든보스 등장 시 미모사 제미니 대사 (내용 미작성)
+      this.say('hiddenBoss', hb.id);
       const state = new RoomState('encounterRoom', [[hb.id]], d.waves.waveDelaySec);
       this.rooms.set(roomId, state);
       this.hiddenBossRooms.set(roomId, hb);
@@ -2271,6 +2331,7 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     if (d.waves.champions.stages[String(this.session.stage.chapter)]) {
       this.spawnEnemy(rng.pick(d.waves.champions.ids), sp.roomId, rng, true);
+      this.say('championMet');
       return;
     }
     const roster = this.chapterRoster();
@@ -2369,7 +2430,6 @@ export class RunScene extends Phaser.Scene {
     const { afterStage } = stageEndOffers(this.session.stage, d.mapgen, d.cards);
     const adv = advanceStage(this.session.stage, d.mapgen, playableChapters(d.waves, d.mapgen));
     this.session.player.record.stagesCleared++;
-    // TODO(M6-D): 2장 종료 — 미모사 제미니 미니 대사 (내용 미작성)
     if (adv.type === 'stage' || adv.type === 'chapter') {
       const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [afterStage] };
       this.scene.restart(data);

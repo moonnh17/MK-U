@@ -47,6 +47,8 @@ export interface PlayerState {
   statInvest: Record<StatId, number>;
   /** 이번 런에 나온 히든보스 (다시 나오지 않는다) */
   hiddenBossesMet: string[];
+  /** 이번 런에 띄운 제미니 미니 대사 (이벤트·대사 키, 같은 런에 반복하지 않는다) */
+  geminiSaid: string[];
   /** 결산용 런 기록 (스테이지를 넘어가도 유지) */
   record: RunRecord;
   /** 영구 강화로 더한 기본 체력·보호막 최대치 (스탯은 시작 스탯에 이미 들어 있다) */
@@ -147,6 +149,7 @@ export function newPlayerState(data: GameData, jobId: string = data.jobs.startJo
     itemState: {},
     lootShift: {},
     hiddenBossesMet: [],
+    geminiSaid: [],
     record: newRunRecord(),
     statInvest: Object.fromEntries(STAT_IDS.map((s) => [s, 0])) as Record<StatId, number>,
   };

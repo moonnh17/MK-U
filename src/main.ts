@@ -24,6 +24,8 @@ import { InventoryWindow } from './ui/inventoryWindow';
 import { ItemCard } from './ui/itemCard';
 import { JobWindow } from './ui/jobWindow';
 import { ArchiveWindow } from './ui/archiveWindow';
+import { GeminiMini } from './ui/geminiMini';
+import { StoryWindow } from './ui/storyWindow';
 import { SettlementWindow } from './ui/settlementWindow';
 import type { TouchControlId } from './ui/mobileLayout';
 
@@ -149,6 +151,8 @@ new ItemCard(ctx);
 new SettlementWindow(ctx);
 new JobWindow(ctx);
 new ArchiveWindow(ctx);
+new StoryWindow(ctx);
+new GeminiMini(ctx);
 window.addEventListener('resize', () => game.scale.setZoom(zoomFor(ctx.uiMode)));
 
 applyUiMode(ctx.uiMode);

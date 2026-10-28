@@ -1136,3 +1136,112 @@ body {
 #archive-window.mobile .ar-row {
   min-width: 0;
 }
+
+/* ---------- 미모사 제미니 ---------- */
+#story {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 16px 16px;
+  background: rgba(3, 6, 12, 0.72);
+  font-family: sans-serif;
+  color: #fff;
+  pointer-events: auto;
+}
+.sw-portrait {
+  position: relative;
+  flex: 0 0 auto;
+  width: min(26vw, 180px);
+  aspect-ratio: 3 / 4;
+  margin-bottom: 6px;
+  background: linear-gradient(180deg, var(--gemini), #10243a);
+  border: 2px solid var(--gemini);
+  box-shadow: 0 0 18px var(--gemini);
+  image-rendering: pixelated;
+  opacity: 0.92;
+}
+.sw-portrait i,
+.gm-icon i {
+  position: absolute;
+  top: 38%;
+  width: 12%;
+  height: 7%;
+  background: #e8fbff;
+}
+.sw-portrait i:first-child,
+.gm-icon i:first-child {
+  left: 28%;
+}
+.sw-portrait i:last-child,
+.gm-icon i:last-child {
+  right: 28%;
+}
+.sw-box {
+  flex: 1 1 auto;
+  max-width: 640px;
+  min-height: 96px;
+  padding: 10px 14px;
+  background: rgba(8, 16, 28, 0.95);
+  border: 2px solid var(--gemini);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sw-box b {
+  color: var(--gemini);
+}
+.sw-text {
+  font-size: 15px;
+  line-height: 1.5;
+  flex: 1;
+}
+.sw-box small {
+  align-self: flex-end;
+  opacity: 0.6;
+}
+#gemini-mini {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: min(60vw, 420px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--fade, 0.3s);
+  font-family: sans-serif;
+}
+#gemini-mini.show {
+  opacity: 1;
+}
+.gm-icon {
+  position: relative;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  background: var(--gemini);
+  border: 1px solid #000;
+  image-rendering: pixelated;
+}
+#gemini-mini.ominous .gm-icon {
+  background: #1c3a5a;
+}
+#gemini-mini.ominous .gm-icon i {
+  background: #ff5a5a;
+  height: 4%;
+}
+.gm-bubble {
+  padding: 4px 8px;
+  background: rgba(6, 12, 22, 0.85);
+  border: 1px solid var(--gemini);
+  color: #f2fbff;
+  font-size: 12px;
+  text-shadow: 1px 1px 0 #000;
+}

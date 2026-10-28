@@ -22,11 +22,16 @@ export interface GameEvents {
   restartRequested: Record<string, never>;
 
   /** 게임을 멈추는 창(카드 선택·인벤토리)이 열리거나 닫힘 */
-  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | 'archive' | null };
+  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | 'archive' | 'story' | null };
   /** 컷인 → 설명창 (각성·궁극기 각성·전직) */
   cutsceneShow: { cut: CutIn; pages: CutPage[] };
   /** 컷인·설명창을 다 넘겼다 */
   cutsceneDone: Record<string, never>;
+  /** 미모사 제미니 일반 스토리 대화 (게임을 멈춘다). lines: 차례로 넘길 문장 */
+  storyShow: { lines: string[] };
+  storyDone: Record<string, never>;
+  /** 미모사 제미니 미니 대사 한 문장을 띄우거나(null이면) 숨긴다 */
+  geminiMini: { line: { text: string; mood: 'calm' | 'ominous' } | null };
   /** 디버그: 계열 집계를 정하고 바로 전직 */
   debugAdvance: { hectar: number; acro: number };
   /** 카드 선택창에 카드를 띄운다 */

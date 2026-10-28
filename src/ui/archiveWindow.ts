@@ -1,12 +1,13 @@
 /**
  * 기억조각 보관대 (DOM). 실험장에서 조사하면 열린다.
  * 과거의 기억: 칸·순서·잠금만 (내용은 미공개)
- * 현재의 기억: 처음 본 컷씬 다시 보기, 안 본 칸은 ???, 연출이 없는 칸은 준비 중
+ * 현재의 기억: 처음 본 컷씬·제미니 대사 다시 보기, 안 본 칸은 ???, 연출·대사 내용이 없는 칸은 준비 중
  * 실험체의 기억: 직업별 영구 강화 (마기학자만 열림), 초기화(전액 반환)
  */
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { isSkillImplemented, isUltimateImplemented } from '../skills/registry';
+import { geminiSlots } from '../systems/gemini';
 import { cutsceneSlots, pastSlots } from '../systems/memories';
 import { buyUpgrade, nextCost, resetUpgrades, spentOn, upgradeLevel } from '../systems/upgrades';
 import type { UpgradeDef } from '../types/data';
@@ -38,6 +39,9 @@ export class ArchiveWindow {
     });
     // 다시 보기를 마치면 창을 다시 보여 준다
     bus.on('cutsceneDone', () => {
+      if (this.open) this.root.style.display = 'flex';
+    });
+    bus.on('storyDone', () => {
       if (this.open) this.root.style.display = 'flex';
     });
   }
@@ -107,6 +111,21 @@ export class ArchiveWindow {
           // 저장해 둔 컷인·설명창 그대로 다시 본다 (보관대는 잠깐 숨김)
           this.root.style.display = 'none';
           bus.emit('cutsceneShow', { cut: saved.cut, pages: saved.pages });
+        });
+      }
+      grid.appendChild(cell);
+    }
+    // 미모사 제미니: 스토리 대화·복선 미니 대사 (본 문장 그대로 다시 본다)
+    const said = this.ctx.save.data.gemini;
+    for (const s of geminiSlots(this.ctx.data.gemini, this.ctx.data.text)) {
+      const saved = said[s.id];
+      const cell = this.el('div', saved ? 'ar-cell open' : 'ar-cell');
+      cell.append(this.el('small', '', t('archive.group.gemini')));
+      cell.append(this.el('b', '', !s.ready ? t('archive.present.notReady') : saved ? t(s.nameKey) : t('archive.present.unseen')));
+      if (saved) {
+        cell.addEventListener('click', () => {
+          this.root.style.display = 'none';
+          bus.emit('storyShow', { lines: saved.lines.map((k) => t(k)) });
         });
       }
       grid.appendChild(cell);
