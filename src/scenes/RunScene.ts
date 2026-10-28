@@ -12,6 +12,7 @@ import { Door } from '../entities/door';
 import { Enemy, type EnemyHost } from '../entities/enemy';
 import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
 import { Spire } from '../entities/spire';
+import { Darkness } from '../entities/darkness';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
 import { FloorWeapon, Pickup } from '../entities/pickup';
@@ -23,6 +24,7 @@ import { calcDamage, gradeMultiplier, spaceDamage, type RangeBonus, type Stats }
 import { convertSkills, gaugeFromDamage, gaugeFromGreatSuccess, judgeSchool, skillAllowed, topSchools, ultimateAwakeningReady } from '../systems/advancement';
 import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type Cutscene } from '../ui/cutscenePages';
 import { assignElites, eliteCount, pickTwoElites } from '../systems/elites';
+import { championWaves, raidChampions } from '../systems/champions';
 import { IMPLEMENTED_ENCOUNTERS } from '../systems/encounter';
 import { effectiveWeights, itemDamageMultiplier, readySet, rollItem, transferWeight } from '../systems/items';
 import { canBuy, merchantStock, rollEncounter, rollGrade, rollOptions, rollWeapon } from '../systems/loot';
@@ -154,6 +156,9 @@ export class RunScene extends Phaser.Scene {
   private pendingAdvance: (() => void) | null = null;
   /** 마기수집첨탑 (조우 칸 하나에 하나) */
   private spires: Spire[] = [];
+  /** 일식 어둠과 그 보스 (식광) */
+  private darkness: Darkness | null = null;
+  private darknessBoss: Enemy | null = null;
   /** 강적이 나올 중형 첨탑 (첫 무리 때 소환) */
   private spireStrong = new Set<Spire>();
   /** 처치 중에 생긴 첨탑 이벤트 (다음 updateSpires에서 처리) */
@@ -261,6 +266,7 @@ export class RunScene extends Phaser.Scene {
       toast: (text) => bus.emit('toast', { text }),
       arena: () => this.currentArena(),
       blink: (distance) => this.blinkPlayer(distance),
+      absorbEnemyBullets: (at, radius) => this.absorbEnemyBullets(at, radius),
     });
     this.enemyHost = {
       scene: this,
@@ -270,6 +276,8 @@ export class RunScene extends Phaser.Scene {
       fireEnemyBullet: (from, angle, speed, range, damage, refractable) => this.fireEnemyBullet(from, angle, speed, range, damage, refractable),
       addHazard: (h) => this.hazards.push(h),
       linkWindup: (e, attackId) => this.linkWindup(e, attackId),
+      rng: this.rng,
+      pullPlayer: (to, speed) => this.pullPlayer(to, speed),
     };
     this.bossHost = {
       ...this.enemyHost,
@@ -278,6 +286,12 @@ export class RunScene extends Phaser.Scene {
       addHazard: (h) => this.hazards.push(h),
       fireEnemyBullet: (from, angle, speed, range, damage, refractable) =>
         this.fireEnemyBullet(from, angle, speed, range, damage, refractable),
+      fireEnemyMissile: (from, angle, speed, range, damage, turnRate) => this.fireEnemyBullet(from, angle, speed, range, damage, true, turnRate),
+      pushPlayer: (v) => {
+        const body = this.player.body as Phaser.Physics.Arcade.Body;
+        body.velocity.x += v.x;
+        body.velocity.y += v.y;
+      },
       spawnMinion: (id, at, maxHp) => this.spawnMinion(id, at, maxHp),
       removeMinion: (e) => {
         if (!e.dead) this.removeEnemy(e);
@@ -403,6 +417,8 @@ export class RunScene extends Phaser.Scene {
     this.hiddenBossRooms = new Map();
     this.spires = [];
     this.spireStrong = new Set();
+    this.darkness = null;
+    this.darknessBoss = null;
     this.spireEvents = [];
     this.charging = false;
     this.chargeT = 0;
@@ -548,7 +564,11 @@ export class RunScene extends Phaser.Scene {
     this.updateRooms(dt);
     this.updateSpires(dt);
 
-    for (const e of this.enemies) e.update(dt, this.enemyHost);
+    for (const e of this.enemies) {
+      // 집정관: 플레이어가 그 방을 나가면 흡수 초기화
+      if (e.def.absorb && this.enemyRoom.get(e) !== this.session.currentRoomId) e.resetAbsorb();
+      e.update(dt, this.enemyHost);
+    }
     for (const b of this.bossControllers.values()) b.update(dt, this.bossHost);
     for (const h of [...this.hazards]) {
       if (h.update(dt, this.enemyHost)) continue;
@@ -600,6 +620,8 @@ export class RunScene extends Phaser.Scene {
       .setRotation(aimAngle);
 
     this.updateCamera();
+    const cam = this.cameras.main;
+    this.darkness?.update(dt, this.player.x - cam.scrollX, this.player.y - cam.scrollY);
     this.refreshSkillView();
     if (frame.pressed.has('inventory')) this.openInventory();
   }
@@ -676,6 +698,17 @@ export class RunScene extends Phaser.Scene {
           )
         : wave.map(() => null);
     wave.forEach((id, i) => this.spawnEnemy(id, roomId, rng, true, elites[i] ?? null));
+    // 정예(집행자·집정관): 3장 일부 전투 칸 웨이브에 1마리, 습격은 한 웨이브에 하나 또는 둘 (엘리트 없음)
+    const total = this.rooms.get(roomId)?.waves.length ?? 0;
+    const champLabel = `champion-${map.chapter}-${map.stage}-${roomId}`;
+    const champs = this.raidRooms.has(roomId)
+      ? (raidChampions(Rng.derive(this.ctx.config.seed, champLabel), map.chapter, total, d.waves.champions)[index] ?? [])
+      : node.kind === 'combatRoom'
+        ? [championWaves(Rng.derive(this.ctx.config.seed, champLabel), map.chapter, map.stage, total, d.waves.champions)[index] ?? null].filter((x): x is string => x !== null)
+        : [];
+    // TODO(M6-D): 집행자·집정관 첫 조우 미니 대사
+    for (const id of champs) this.spawnEnemy(id, roomId, rng, true);
+    this.rooms.get(roomId)?.addAlive(champs.length);
   }
 
   /** extraEliteId: 두 번째 엘리트 (중형 첨탑 강적) */
@@ -702,6 +735,13 @@ export class RunScene extends Phaser.Scene {
         enemy.damageMul = mul;
       }
       if (core) this.bossControllers.set(enemy, new BossController(enemy, core, mul));
+      // 식광: 일식 어둠
+      const dk = core?.darkness;
+      if (dk) {
+        this.darkness?.destroy();
+        this.darkness = new Darkness(this, dk.lightRadius, dk.alpha, dk.color);
+        this.darknessBoss = enemy;
+      }
     }
   }
 
@@ -1109,13 +1149,21 @@ export class RunScene extends Phaser.Scene {
       }
     };
     this.recordKill(e);
-    drop('energy', this.rng.int(e.def.energyOrbs[0], e.def.energyOrbs[1]));
+    // 집정관: 같은 방에서 죽은 적의 에너지를 흡수한다 (그 적의 에너지 구슬은 떨어지지 않음)
+    const absorbed = this.archonAbsorb(e, roomId);
+    if (!absorbed) drop('energy', this.rng.int(e.def.energyOrbs[0], e.def.energyOrbs[1]));
     drop('coin', this.rng.int(e.def.coins[0], e.def.coins[1]));
     // 엘리트마다 추가 보상 (2종이 겹친 개체는 두 번)
     for (const _ of e.elites) {
       const c = d.elites.common;
-      drop('energy', this.rng.int(c.bonusEnergyOrbs[0], c.bonusEnergyOrbs[1]));
+      if (!absorbed) drop('energy', this.rng.int(c.bonusEnergyOrbs[0], c.bonusEnergyOrbs[1]));
       drop('coin', this.rng.int(c.bonusCoins[0], c.bonusCoins[1]));
+    }
+    // 정예: 낮은 확률로 아이템 상자
+    if (e.rank === 'champion' && !e.noReward) {
+      const { stage } = this.session;
+      const chestRng = Rng.derive(this.ctx.config.seed, `champion-chest-${stage.chapter}-${stage.stage}-${this.lootSeq++}`);
+      if (chestRng.chance(d.waves.champions.itemChestChance)) this.addChest('item', x, y, d.items.treasureWeights);
     }
     // 궁극기 게이지는 적 처치로 충전
     const ult = this.session.player.ultimate;
@@ -1145,6 +1193,20 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
+  /** 집정관 흡수: 같은 방의 살아 있는 집정관 중 가장 가까운 하나가 죽은 적의 최대 체력만큼. 흡수했으면 true */
+  private archonAbsorb(dead: Enemy, roomId: number | undefined): boolean {
+    if (roomId === undefined) return false;
+    const { x, y } = dead.sprite;
+    const archons = this.enemies.filter((a) => a !== dead && !a.dead && a.def.absorb && this.enemyRoom.get(a) === roomId);
+    const a = archons.sort((p, q) => Math.hypot(p.sprite.x - x, p.sprite.y - y) - Math.hypot(q.sprite.x - x, q.sprite.y - y))[0];
+    if (!a) return false;
+    const stage = a.absorb(dead.maxHp);
+    const line = this.add.line(0, 0, x, y, a.sprite.x, a.sprite.y, hexColor(a.def.absorb!.haloColor), 0.6).setOrigin(0, 0).setDepth(6);
+    this.fxAt(line);
+    if (stage !== null) this.floatLabel({ x: a.sprite.x, y: a.sprite.y - a.radius - 6 }, this.ctx.t('enemy.archon.stage', { n: stage }), a.def.absorb!.haloColor);
+    return true;
+  }
+
   /** 변질 시간, 변질된 적 색 */
   private updateCorruption(dt: number): void {
     const color = hexColor(this.ctx.data.ui.corruptionColor);
@@ -1157,6 +1219,11 @@ export class RunScene extends Phaser.Scene {
   }
 
   private removeEnemy(e: Enemy): void {
+    if (e === this.darknessBoss) {
+      this.darkness?.lift();
+      this.darkness = null;
+      this.darknessBoss = null;
+    }
     this.bossControllers.get(e)?.destroy();
     this.bossControllers.delete(e);
     this.enemies = this.enemies.filter((x) => x !== e);
@@ -1245,15 +1312,49 @@ export class RunScene extends Phaser.Scene {
     }
     for (const b of this.enemyBullets.getChildren() as Phaser.Physics.Arcade.Image[]) {
       const range = b.getData('range') as number | undefined;
-      if (range !== undefined && Math.hypot(b.x - (b.getData('ox') as number), b.y - (b.getData('oy') as number)) > range) b.destroy();
+      if (range !== undefined && Math.hypot(b.x - (b.getData('ox') as number), b.y - (b.getData('oy') as number)) > range) {
+        b.destroy();
+        continue;
+      }
+      const turn = (b.getData('homing') as number | undefined) ?? 0;
+      if (turn > 0) {
+        const v = steerToward((b.body as Phaser.Physics.Arcade.Body).velocity, b, this.player, turn, dt);
+        b.setVelocity(v.x, v.y);
+      }
     }
   }
 
-  /** 적 탄. refractable=false면 굴절·탄 베기 불가(보스 대형 레이저 등) */
-  private fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean): void {
+  /** 식광의 핵: at 둘레의 약한 적 탄(굴절 가능)을 지운다 */
+  private absorbEnemyBullets(at: Vec2, radius: number): number {
+    let n = 0;
+    for (const b of [...(this.enemyBullets.getChildren() as Phaser.Physics.Arcade.Image[])]) {
+      if (b.getData('refractable') === false || Math.hypot(b.x - at.x, b.y - at.y) > radius) continue;
+      b.destroy();
+      n++;
+    }
+    return n;
+  }
+
+  /** 집행자 밧줄: 플레이어를 to까지 끌어당긴다 (그동안 입력 무시). 걸리는 시간 */
+  private pullPlayer(to: Vec2, speed: number): number {
+    const dx = to.x - this.player.x;
+    const dy = to.y - this.player.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 1) return 0;
+    const sec = dist / speed;
+    this.dashVel = { x: (dx / dist) * speed, y: (dy / dist) * speed };
+    this.dashLeft = sec;
+    return sec;
+  }
+
+  /** 적 탄. refractable=false면 굴절·탄 베기 불가(보스 대형 레이저 등). homing: 플레이어 쪽으로 휘는 속도(rad/s, 유도 미사일) */
+  private fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, homing = 0): void {
     const b = this.enemyBullets.create(from.x, from.y, this.ctx.data.enemies.projectile.spriteKey) as Phaser.Physics.Arcade.Image;
     b.setDepth(5);
-    b.setData({ damage, refractable, cuttable: refractable, range, ox: from.x, oy: from.y });
+    b.setData({ damage, refractable, cuttable: refractable, range, ox: from.x, oy: from.y, homing });
+    // 굴절 불가 탄은 붉게, 유도 미사일은 크게
+    if (!refractable) b.setTint(0xff2a2a);
+    if (homing > 0) b.setScale(1.5);
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
   }
 
@@ -2165,12 +2266,13 @@ export class RunScene extends Phaser.Scene {
     for (let i = 0; i < n; i++) this.spawnEnemy(tr.enemy, sp.roomId, rng, true);
   }
 
-  /**
-   * 중형 첨탑 강적: 1~2장은 엘리트 2종이 겹친 지금 챕터 일반 적.
-   * TODO(M6-C): 3장은 집행자 또는 집정관
-   */
+  /** 중형 첨탑 강적: 정예가 나오는 챕터(3장)는 집행자 또는 집정관, 그 전에는 엘리트 2종이 겹친 지금 챕터 일반 적 */
   private spawnSpireStrong(sp: Spire, rng: Rng): void {
     const d = this.ctx.data;
+    if (d.waves.champions.stages[String(this.session.stage.chapter)]) {
+      this.spawnEnemy(rng.pick(d.waves.champions.ids), sp.roomId, rng, true);
+      return;
+    }
     const roster = this.chapterRoster();
     if (roster.length === 0) return;
     const [a, b] = pickTwoElites(rng, d.elites);
@@ -2271,8 +2373,11 @@ export class RunScene extends Phaser.Scene {
     if (adv.type === 'stage' || adv.type === 'chapter') {
       const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [afterStage] };
       this.scene.restart(data);
+    } else if (adv.chapter >= d.mapgen.chapters) {
+      // 3-5 런 클리어: 더 쓸 곳이 없는 카드는 건너뛰고 바로 결산
+      this.endRun({ type: 'chapterClear', chapter: adv.chapter });
     } else {
-      // 마지막 스테이지: 카드를 고른 뒤 클리어 화면
+      // 임시 마지막 챕터: 카드를 고른 뒤 클리어 화면
       this.queueOffers([{ kind: afterStage, boss: false }], () => this.endRun({ type: 'chapterClear', chapter: adv.chapter }));
     }
   }

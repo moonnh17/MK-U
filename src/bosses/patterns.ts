@@ -1,10 +1,10 @@
 /**
- * 보스 패턴 (챕터1 보스·히든보스). 패턴 id → 실행 객체. 수치는 bosses.json의 values(강화 단계는 `키Enraged`).
+ * 보스 패턴 (챕터1~3 보스·히든보스). 같은 동작은 패턴 id만 달리 해 다시 쓴다(예: 마기카이저 기계 펀치 = 대지 분쇄). 패턴 id → 실행 객체. 수치는 bosses.json의 values(강화 단계는 `키Enraged`).
  * 패턴은 보스를 멈추거나 돌진시키고, 피해는 entities/hazard.ts의 위험 지대·적 탄으로 준다.
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
-import { BouncingDisc, DelayedBlast, Beams, EdgeBand, RectBlast, Ring, SectorBlast, Zone } from '../entities/hazard';
+import { BouncingDisc, DelayedBlast, Beams, EdgeBand, FollowBlast, OrbitBlades, RectBlast, Ring, SafeZoneBlast, SectorBlast, Zone } from '../entities/hazard';
 import type { BossHost, PatternRun } from './host';
 
 /** 패턴이 다루는 보스 */
@@ -757,6 +757,158 @@ class DoomFault extends Timed {
   }
 }
 
+// ---------- 챕터3 보스 ----------
+
+/** 그림자 추적 (식광): 플레이어 발밑에서 따라오는 그림자가 잠시 뒤 터진다 */
+class ShadowChase extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    c.host.addHazard(new FollowBlast(c.host.scene, c.host.playerPos(), c.v('radius'), c.v('speed'), c.v('followSec'), c.v('damage'), c.boss.color));
+  }
+}
+
+/** 고리 탄막: 회전하며 퍼지는 원형 탄 (식광 일식의 파편 / 마기카이저 붉은 탄막: refractable 0이면 굴절·탄 베기 불가) */
+class RingBarrage extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const start = c.host.rng.range(0, Math.PI * 2);
+    const n = c.v('bullets');
+    for (let i = 0; i < c.v('volleys'); i++) {
+      this.at(i * c.v('intervalSec'), () => {
+        for (let k = 0; k < n; k++) {
+          const a = start + i * c.v('rotRad') + (k * Math.PI * 2) / n;
+          c.host.fireEnemyBullet(c.boss.pos(), a, c.v('speed'), c.v('range'), c.v('damage'), c.v('refractable') > 0);
+        }
+      });
+    }
+  }
+}
+
+/** 중력 붕괴 (식광): 플레이어를 보스 쪽으로 끌어당긴 뒤 중심 폭발 */
+class GravityCollapse extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    c.host.addHazard(new DelayedBlast(c.host.scene, c.boss.pos(), c.v('radius'), c.v('pullSec'), c.v('damage'), c.boss.color));
+  }
+
+  protected override tick(dt: number): void {
+    super.tick(dt);
+    if (this.t > this.c.v('pullSec')) return;
+    const b = this.c.boss.pos();
+    const p = this.c.host.playerPos();
+    const d = Math.hypot(b.x - p.x, b.y - p.y);
+    if (d < 1) return;
+    const s = this.c.v('pullSpeed');
+    this.c.host.pushPlayer({ x: ((b.x - p.x) / d) * s, y: ((b.y - p.y) / d) * s });
+  }
+}
+
+/** 궤도 절단 (식광 강화): 보스 둘레를 도는 칼날, 궤도가 넓어졌다 좁아진다 */
+class OrbitCut extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    c.host.addHazard(
+      new OrbitBlades(c.host.scene, {
+        center: () => c.boss.pos(),
+        blades: c.v('blades'),
+        minRadius: c.v('minRadius'),
+        maxRadius: c.v('maxRadius'),
+        breathSec: c.v('breathSec'),
+        spin: c.v('spinSpeed') * (c.host.rng.chance(0.5) ? 1 : -1),
+        bladeRadius: c.v('bladeRadius'),
+        telegraphSec: c.v('telegraphSec'),
+        liveSec: c.v('liveSec'),
+        damage: c.v('damage'),
+        color: c.boss.color,
+      }),
+    );
+  }
+}
+
+/** 유도 미사일 (마기카이저): 플레이어 쪽으로 휘는 탄 (일반 탄: 굴절·탄 베기 가능) */
+class HomingMissiles extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const n = c.v('count');
+    for (let i = 0; i < n; i++) {
+      this.at(i * c.v('intervalSec'), () => {
+        const p = c.boss.pos();
+        // 양옆으로 벌려 쏜 뒤 휘어 들어온다
+        const a = angleTo(p, c.host.playerPos()) + (i % 2 === 0 ? 1 : -1) * (0.6 + 0.3 * Math.floor(i / 2));
+        c.host.fireEnemyMissile(p, a, c.v('speed'), c.v('range'), c.v('damage'), c.v('turnRate'));
+      });
+    }
+  }
+}
+
+/** 직선 레이저 (마기카이저): 예고선 → 플레이어 쪽으로 굵은 레이저 */
+class LineLaser extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    c.host.addHazard(
+      new Beams(c.host.scene, {
+        center: () => p,
+        count: 1,
+        length: c.v('length'),
+        width: c.v('width'),
+        spin: 0,
+        startAngle: angleTo(p, c.host.playerPos()),
+        telegraphSec: c.v('telegraphSec'),
+        liveSec: c.v('liveSec'),
+        damage: c.v('damage'),
+        tickSec: c.v('tickSec'),
+        color: c.boss.color,
+      }),
+    );
+  }
+}
+
+/** 양팔 교차 (마기카이저): 플레이어 양옆에서 시작한 레이저 두 줄이 안쪽으로 좁혀 와 엇갈린다 */
+class CrossLaser extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    const base = angleTo(p, c.host.playerPos());
+    const off = (c.v('offsetDeg') * Math.PI) / 180;
+    for (const side of [-1, 1]) {
+      c.host.addHazard(
+        new Beams(c.host.scene, {
+          center: () => c.boss.pos(),
+          count: 1,
+          length: c.v('length'),
+          width: c.v('width'),
+          spin: -side * c.v('spinSpeed'),
+          startAngle: base + side * off,
+          telegraphSec: c.v('telegraphSec'),
+          liveSec: c.v('liveSec'),
+          damage: c.v('damage'),
+          tickSec: c.v('tickSec'),
+          color: c.boss.color,
+        }),
+      );
+    }
+  }
+}
+
+/** 종말 명령 (마기카이저): 방 전체 예고, 안전지대 몇 곳만 남기고 대폭발 */
+class DoomCommand extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const a = c.host.arena();
+    const r = c.v('safeRadius');
+    const m = r + 10;
+    const safe: Vec2[] = [];
+    for (let tries = 0; safe.length < c.v('safeZones') && tries < 60; tries++) {
+      const at = { x: c.host.rng.range(a.x + m, a.x + a.w - m), y: c.host.rng.range(a.y + m, a.y + a.h - m) };
+      // 안전지대끼리 겹치지 않게
+      if (safe.every((s) => Math.hypot(s.x - at.x, s.y - at.y) > r * 3)) safe.push(at);
+    }
+    c.host.addHazard(new SafeZoneBlast(c.host.scene, a, safe, r, c.v('delaySec'), c.v('damage'), c.boss.color));
+    c.host.scene.cameras.main.shake(c.v('delaySec') * 1000, 0.002);
+  }
+}
+
 const PATTERNS: Readonly<Record<string, (c: PatternCtx) => PatternRun>> = {
   claw: (c) => new Claw(c),
   spiritDash: (c) => new Dash(c, true),
@@ -794,6 +946,22 @@ const PATTERNS: Readonly<Record<string, (c: PatternCtx) => PatternRun>> = {
   crustCrack: (c) => new CrustCrack(c),
   collapseZone: (c) => new CollapseZone(c),
   doomFault: (c) => new DoomFault(c),
+  sunspotFall: (c) => new Bombard(c),
+  shadowChase: (c) => new ShadowChase(c),
+  eclipseShards: (c) => new RingBarrage(c),
+  gravityCollapse: (c) => new GravityCollapse(c),
+  orbitCut: (c) => new OrbitCut(c),
+  wideErosion: (c) => new EdgeLock(c),
+  kaiserBarrage: (c) => new Eruption(c),
+  homingMissiles: (c) => new HomingMissiles(c),
+  lineLaser: (c) => new LineLaser(c),
+  kaiserPunch: (c) => new EarthCrush(c),
+  groundShock: (c) => new Repulse(c),
+  kaiserDash: (c) => new Dash(c, false),
+  spinLaser: (c) => new SpinLightning(c),
+  crossLaser: (c) => new CrossLaser(c),
+  redBarrage: (c) => new RingBarrage(c),
+  doomCommand: (c) => new DoomCommand(c),
 };
 
 export function makePattern(id: string, c: PatternCtx): PatternRun | null {

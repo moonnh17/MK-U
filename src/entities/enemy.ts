@@ -1,19 +1,24 @@
 import Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
+import type { Rng } from '../core/rng';
 import { hexColor } from '../core/scale';
+import { archonMods, archonStage, rescaleHp } from '../systems/champions';
 import type { CorruptionState } from '../systems/acro';
 import { effectiveRank, eliteMods, type EliteMods } from '../systems/elites';
-import { forceWindup, initialAi, keepDistanceStep, stepAi, type AiEvent, type AiState } from '../systems/enemyAi';
+import { aimLocked, chainWindup, forceWindup, initialAi, keepDistanceStep, stepAi, type AiEvent, type AiState } from '../systems/enemyAi';
 import type { BleedState } from '../systems/tags';
 import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank } from '../types/data';
-import { Zone, type Hazard, type HazardHost } from './hazard';
+import { Beams, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
 
-/** 적이 전투 씬에 바라는 것 (원거리 탄·장판·전술 연계) */
+/** 적이 전투 씬에 바라는 것 (원거리 탄·장판·전술 연계·밧줄) */
 export interface EnemyHost extends HazardHost {
+  readonly rng: Rng;
   fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean): void;
   addHazard(h: Hazard): void;
   /** 전술 연계: 이 적이 조준을 시작했다 (같은 방의 동료도 함께 조준) */
   linkWindup(e: Enemy, attackId: string): void;
+  /** 집행자 밧줄: 플레이어를 to까지 speed로 끌어당긴다. 걸리는 시간(초) */
+  pullPlayer(to: Vec2, speed: number): number;
 }
 
 /** 거리 유지 적이 멈추는 폭 */
@@ -73,6 +78,16 @@ export class Enemy {
   readonly elites: EliteDef[];
   /** 보스가 부른 적: 처치 보상·기록이 없다 */
   noReward = false;
+  /** 증오의 파편: 이어서 남은 돌진 수 */
+  private chainLeft = 0;
+  /** 집행자: 밧줄이 뻗은 길이·적중 여부, 끌어당긴 뒤 도끼까지 멈춰 있는 시간 */
+  private ropeLen = 0;
+  private ropeHit = false;
+  private holdLeft = 0;
+  /** 집정관: 흡수량·단계·후광 */
+  private absorbed = 0;
+  absorbStage = 0;
+  private halo: Phaser.GameObjects.Arc | null = null;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -190,9 +205,25 @@ export class Enemy {
       if (this.stunLeft <= 0) this.sprite.clearTint();
       return;
     }
+    // 집행자: 끌어당긴 플레이어에게 도끼가 떨어질 때까지 제자리
+    if (this.holdLeft > 0) {
+      this.holdLeft -= dt;
+      this.sprite.setVelocity(0, 0);
+      return;
+    }
     const r = stepAi(this.ai, dt, dist, this.attacks, this.mods.attackSpeedMul);
     this.ai = r.state;
-    for (const e of r.events) this.onEvent(e, host, dist > 0 ? { x: dx / dist, y: dy / dist } : this.aim, dist, true);
+    const dir = dist > 0 ? { x: dx / dist, y: dy / dist } : this.aim;
+    for (const e of r.events) {
+      this.onEvent(e, host, dir, dist, true);
+      // 증오의 파편: 돌진이 끝나면 쿨타임 없이 다시 조준해 이어 돌진
+      const a = this.attacks.find((x) => x.id === e.attackId);
+      if (e.type === 'end' && a?.chain && this.chainLeft > 0 && this.stunLeft <= 0) {
+        this.chainLeft--;
+        this.ai = chainWindup(this.ai, a, a.chainWindupSec ?? a.windupSec, this.mods.attackSpeedMul);
+        this.onEvent({ type: 'windup', attackId: a.id }, host, dir, dist, false, true);
+      }
+    }
 
     const attack = this.attacks.find((a) => a.id === this.ai.attackId);
     if (this.ai.phase === 'chase') {
@@ -206,7 +237,7 @@ export class Enemy {
       this.sprite.setVelocity(this.aim.x * attack.speed!, this.aim.y * attack.speed!);
       if (!this.actHit && dist <= this.radius + host.playerRadius) {
         this.actHit = true;
-        host.hurtPlayer(attack.damage, this);
+        host.hurtPlayer(attack.damage * this.damageMul, this);
       }
       const body = this.sprite.body as Phaser.Physics.Arcade.Body | null;
       if (attack.wallStunSec && body && !body.blocked.none) {
@@ -219,6 +250,9 @@ export class Enemy {
       this.sprite.setVelocity(0, 0);
       this.shotTimer -= dt;
       if (this.shotsFired < attack.shots! && this.shotTimer <= 0) this.fireShot(attack, host);
+    } else if (this.ai.phase === 'act' && attack?.kind === 'rope') {
+      this.sprite.setVelocity(0, 0);
+      this.updateRope(dt, attack, host);
     } else {
       this.sprite.setVelocity(0, 0);
     }
@@ -227,13 +261,81 @@ export class Enemy {
       const p2 = host.playerPos();
       this.telegraph.clear().lineStyle(1, TELEGRAPH_COLOR, 0.7).lineBetween(this.sprite.x, this.sprite.y, p2.x, p2.y);
     }
+    // 집정관 저격: 조준선이 따라오다 끝 lockSec 동안 고정된다(굵고 밝게)
+    if (this.ai.phase === 'windup' && attack?.kind === 'snipe' && this.telegraph) {
+      const locked = aimLocked(this.ai, attack.lockSec! / this.mods.attackSpeedMul);
+      if (!locked) {
+        const p2 = host.playerPos();
+        const d2 = Math.hypot(p2.x - this.sprite.x, p2.y - this.sprite.y) || 1;
+        this.aim = { x: (p2.x - this.sprite.x) / d2, y: (p2.y - this.sprite.y) / d2 };
+      }
+      const len = attack.range!;
+      this.telegraph
+        .clear()
+        .lineStyle(locked ? 2 : 1, locked ? 0xffffff : TELEGRAPH_COLOR, locked ? 0.9 : 0.6)
+        .lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + this.aim.x * len, this.sprite.y + this.aim.y * len);
+    }
+  }
+
+  /** 집행자 밧줄: 끝이 플레이어에 닿으면 끌어당기고, 끌려온 자리에 도끼 예고 */
+  private updateRope(dt: number, a: EnemyAttackDef, host: EnemyHost): void {
+    if (this.ropeHit) return;
+    this.ropeLen = Math.min(a.range!, this.ropeLen + a.speed! * dt);
+    const from = { x: this.sprite.x, y: this.sprite.y };
+    const tip = { x: from.x + this.aim.x * this.ropeLen, y: from.y + this.aim.y * this.ropeLen };
+    this.telegraph ??= this.scene.add.graphics().setDepth(4);
+    this.telegraph.clear().lineStyle(2, hexColor(this.def.color), 1).lineBetween(from.x, from.y, tip.x, tip.y);
+    const p = host.playerPos();
+    if (Math.hypot(p.x - tip.x, p.y - tip.y) > host.playerRadius + 3) return;
+    this.ropeHit = true;
+    this.clearTelegraph();
+    host.hurtPlayer(a.damage * this.damageMul, this);
+    // 집행자 바로 앞까지 끌어당긴다
+    const to = { x: from.x + this.aim.x * (this.radius + host.playerRadius + 4), y: from.y + this.aim.y * (this.radius + host.playerRadius + 4) };
+    const pullSec = host.pullPlayer(to, a.pullSpeed!);
+    const delay = pullSec + a.axeDelaySec!;
+    this.holdLeft = delay;
+    host.addHazard(new SectorBlast(this.scene, from, Math.atan2(this.aim.y, this.aim.x), a.radius!, a.arcDeg!, delay, a.axeDamage! * this.damageMul, TELEGRAPH_COLOR));
+  }
+
+  /**
+   * 집정관 흡수: 같은 방에서 죽은 적의 최대 체력만큼. 단계가 오르면 체력(비율 유지)·공격력·후광이 커진다.
+   * 단계가 바뀌었으면 새 단계를 돌려준다.
+   */
+  absorb(amount: number): number | null {
+    const def = this.def.absorb;
+    if (!def || this.dead) return null;
+    this.absorbed += amount;
+    const stage = archonStage(this.absorbed, def);
+    if (stage === this.absorbStage) return null;
+    this.setAbsorbStage(stage);
+    return stage;
+  }
+
+  /** 방을 나가면 흡수가 초기화된다 */
+  resetAbsorb(): void {
+    if (!this.def.absorb || this.absorbed === 0) return;
+    this.absorbed = 0;
+    this.setAbsorbStage(0);
+  }
+
+  private setAbsorbStage(stage: number): void {
+    const def = this.def.absorb!;
+    const m = archonMods(stage, def);
+    const max = this.def.maxHp * this.mods.hpMul * m.hpMul;
+    this.hp = rescaleHp(this.hp, this.maxHp, max);
+    this.maxHp = max;
+    this.damageMul = m.damageMul;
+    this.absorbStage = stage;
+    this.halo?.destroy();
+    this.halo = m.haloRadius > 0 ? this.scene.add.circle(this.sprite.x, this.sprite.y, m.haloRadius, hexColor(def.haloColor), 0.25).setStrokeStyle(1, hexColor(def.haloColor), 0.9).setDepth(2) : null;
   }
 
   /** burst 한 발: 지금 플레이어 쪽으로 */
   private fireShot(a: EnemyAttackDef, host: EnemyHost): void {
     const p = host.playerPos();
     const from = { x: this.sprite.x, y: this.sprite.y };
-    host.fireEnemyBullet(from, Math.atan2(p.y - from.y, p.x - from.x), a.speed!, a.range!, a.damage, true);
+    host.fireEnemyBullet(from, Math.atan2(p.y - from.y, p.x - from.x), a.speed!, a.range!, a.damage * this.damageMul, true);
     this.shotsFired++;
     this.shotTimer = a.shotGapSec ?? 0;
   }
@@ -248,15 +350,28 @@ export class Enemy {
     host.addHazard(new Zone(this.scene, { x: this.sprite.x, y: this.sprite.y }, t.radius, t.liveSec, t.damage, t.tickSec, hexColor(this.def.color)));
   }
 
-  /** link: 이 조준이 동료에게 연계를 거는지 (연계로 시작한 조준은 다시 걸지 않는다) */
-  private onEvent(e: AiEvent, host: EnemyHost, dir: Vec2, dist: number, link: boolean): void {
+  /**
+   * link: 이 조준이 동료에게 연계를 거는지 (연계로 시작한 조준은 다시 걸지 않는다)
+   * chained: 연속 돌진의 이어지는 예고 (남은 횟수를 다시 뽑지 않는다)
+   */
+  private onEvent(e: AiEvent, host: EnemyHost, dir: Vec2, dist: number, link: boolean, chained = false): void {
     const a = this.attacks.find((x) => x.id === e.attackId);
     if (!a) return;
     if (e.type === 'windup') {
       this.aim = dir;
       this.clearTelegraph();
+      if (a.chain && !chained) this.chainLeft = host.rng.int(a.chain[0], a.chain[1]) - 1;
       const g = this.scene.add.graphics().setDepth(2);
-      if (a.kind === 'burst') {
+      if (a.kind === 'fan') {
+        const half = (a.spreadDeg! * Math.PI) / 360;
+        const base = Math.atan2(dir.y, dir.x);
+        g.lineStyle(1, TELEGRAPH_COLOR, 0.5);
+        for (const s of [-half, 0, half]) g.lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + Math.cos(base + s) * 40, this.sprite.y + Math.sin(base + s) * 40);
+      } else if (a.kind === 'rope') {
+        g.lineStyle(1, TELEGRAPH_COLOR, 0.8).lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + dir.x * a.range!, this.sprite.y + dir.y * a.range!);
+      } else if (a.kind === 'snipe') {
+        // 조준선은 update에서 그린다
+      } else if (a.kind === 'burst') {
         g.lineStyle(1, TELEGRAPH_COLOR, 0.7).lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + dir.x * dist, this.sprite.y + dir.y * dist);
         if (link) host.linkWindup(this, a.id);
       } else if (a.kind === 'puddle') {
@@ -276,6 +391,9 @@ export class Enemy {
         g.fillCircle(this.slamAt.x, this.slamAt.y, a.radius!);
       }
       this.telegraph = g;
+    } else if (e.type === 'end') {
+      // 밧줄이 빗나갔으면 거둔다
+      if (a.kind === 'rope') this.clearTelegraph();
     } else if (e.type === 'strike') {
       this.clearTelegraph();
       this.actHit = false;
@@ -285,10 +403,41 @@ export class Enemy {
         this.fireShot(a, host);
       } else if (a.kind === 'puddle') {
         host.addHazard(new Zone(this.scene, this.slamAt, a.radius!, a.liveSec!, a.damage, a.tickSec!, hexColor(this.def.color)));
+      } else if (a.kind === 'fan') {
+        // 부채꼴 탄막: 예고 때 정한 방향으로 (일반 탄: 굴절·탄 베기 가능)
+        const base = Math.atan2(this.aim.y, this.aim.x);
+        const spread = (a.spreadDeg! * Math.PI) / 180;
+        const n = a.shots!;
+        const from = { x: this.sprite.x, y: this.sprite.y };
+        for (let k = 0; k < n; k++) {
+          const ang = n === 1 ? base : base - spread / 2 + (spread * k) / (n - 1);
+          host.fireEnemyBullet(from, ang, a.speed!, a.range!, a.damage * this.damageMul, true);
+        }
+      } else if (a.kind === 'rope') {
+        this.ropeLen = 0;
+        this.ropeHit = false;
+      } else if (a.kind === 'snipe') {
+        // 고정된 방향으로 직선 레이저 (대형 레이저: 굴절 불가), 한 번만 맞힌다
+        const from = { x: this.sprite.x, y: this.sprite.y };
+        host.addHazard(
+          new Beams(this.scene, {
+            center: () => from,
+            count: 1,
+            length: a.range!,
+            width: a.width!,
+            spin: 0,
+            startAngle: Math.atan2(this.aim.y, this.aim.x),
+            telegraphSec: 0,
+            liveSec: a.actSec,
+            damage: a.damage * this.damageMul,
+            tickSec: a.actSec + 1,
+            color: hexColor(this.def.color),
+          }),
+        );
       }
       if (a.kind === 'slam') {
         const p = host.playerPos();
-        if (Math.hypot(p.x - this.slamAt.x, p.y - this.slamAt.y) <= a.radius! + host.playerRadius) host.hurtPlayer(a.damage, this);
+        if (Math.hypot(p.x - this.slamAt.x, p.y - this.slamAt.y) <= a.radius! + host.playerRadius) host.hurtPlayer(a.damage * this.damageMul, this);
         const flash = this.scene.add.circle(this.slamAt.x, this.slamAt.y, a.radius!, TELEGRAPH_COLOR, 0.5).setDepth(6);
         this.scene.time.delayedCall(120, () => flash.destroy());
       }
@@ -297,6 +446,7 @@ export class Enemy {
 
   /** 엘리트 표시: 머리 위 아이콘, 두꺼운 외곽선 / 잔상 / 깜빡임 */
   private updateLook(dt: number): void {
+    this.halo?.setPosition(this.sprite.x, this.sprite.y);
     if (!this.elite) return;
     const { x, y } = this.sprite;
     this.icon?.setPosition(x, y - this.radius - 1);
@@ -354,6 +504,7 @@ export class Enemy {
   destroy(): void {
     this.dead = true;
     this.clearTelegraph();
+    this.halo?.destroy();
     this.icon?.destroy();
     this.outline?.destroy();
     this.sprite.destroy();

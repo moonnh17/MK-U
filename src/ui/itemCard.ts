@@ -27,6 +27,7 @@ export function itemDescParams(def: ItemDef, groups: GroupMultipliersData): Reco
     if (typeof e.healTo === 'number') out[`to${i}`] = num(e.healTo * 100);
     if (typeof e.afterDamage === 'number') out[`a${i}`] = num(e.afterDamage * 100);
     if (typeof e.durationSec === 'number') out[`dur${i}`] = num(e.durationSec);
+    if (typeof e.absorbSec === 'number') out[`dur${i}`] = num(e.absorbSec);
     if (typeof e.perCoins === 'number') out[`per${i}`] = num(e.perCoins);
     if (typeof e.perKills === 'number') out[`per${i}`] = num(e.perKills);
     if (typeof e.shots === 'number') out[`n${i}`] = num(e.shots);

@@ -12,6 +12,10 @@ export interface BossHost extends HazardHost {
   addHazard(h: Hazard): void;
   /** 적 탄. refractable=false면 벡터굴절역장·칼 탄 베기로 지울 수 없다 */
   fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean): void;
+  /** 유도 미사일: 플레이어 쪽으로 초당 turnRate(rad)까지 휜다. 일반 탄처럼 굴절·탄 베기 가능 */
+  fireEnemyMissile(from: Vec2, angle: number, speed: number, range: number, damage: number, turnRate: number): void;
+  /** 이번 프레임 플레이어 이동에 속도를 더한다 (중력 붕괴) */
+  pushPlayer(v: Vec2): void;
   /** 보스가 있는 방 안쪽 */
   arena(): Rect;
   /** 보스가 부르는 적. 방 웨이브 수에 들어가지 않고 보상이 없다. maxHp가 없으면 데이터 값 */

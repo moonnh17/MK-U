@@ -2,6 +2,7 @@
  * 보스 한 마리를 움직인다: 패턴 선택기(systems/bossBrain.ts) → 패턴 실행(patterns.ts).
  * 패턴이 없을 때는 keepDistance까지 다가간다. 체력 50% 이하에서 강화 단계(잠깐 무적 + 연출).
  * 히든보스: 피해에 챕터 배율, 자기 강화(전장의 함성), 분신, 지면 파괴 잔해를 여기서 관리한다.
+ * 시간 단계(마기카이저): 첫 단계가 열리기 전에는 구속구에 갇혀 움직이지 않고, 단계가 열릴 때마다 연출한다.
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
@@ -38,6 +39,8 @@ export class BossController {
   private host: BossHost | null = null;
   /** 파성 돌진: 핵이 드러난 동안의 표시 */
   private coreFx: Phaser.GameObjects.Arc | null = null;
+  /** 구속구 (시간 단계 보스, 첫 단계 전) */
+  private restraint: Phaser.GameObjects.Graphics | null = null;
 
   constructor(
     readonly enemy: Enemy,
@@ -72,6 +75,11 @@ export class BossController {
     return this.brain.phase === 2;
   }
 
+  /** 시간 단계 보스가 아직 구속돼 있다 */
+  get restrained(): boolean {
+    return (this.def.unlocks?.length ?? 0) > 0 && this.brain.unlocked === 0;
+  }
+
   update(dt: number, host: BossHost): void {
     this.host = host;
     const e = this.enemy;
@@ -87,6 +95,8 @@ export class BossController {
       if (ev.type === 'end') {
         this.run?.destroy();
         this.run = null;
+      } else if (ev.type === 'unlock') {
+        this.unlock(host, ev.stage);
       } else if (ev.type === 'start') {
         this.run = makePattern(ev.id, {
           boss: this.body,
@@ -105,7 +115,9 @@ export class BossController {
       }
     }
     if (this.run) this.run.update(dt);
+    else if (this.restrained) e.sprite.setVelocity(0, 0);
     else this.approach(dist, p);
+    this.drawRestraint(host);
     this.aura?.setPosition(e.sprite.x, e.sprite.y).setRadius(e.radius + 4);
     this.coreFx?.setPosition(e.sprite.x, e.sprite.y);
     this.buffFx?.setPosition(e.sprite.x, e.sprite.y).setRadius(e.radius + 7);
@@ -229,6 +241,35 @@ export class BossController {
     while (this.rubble.length > v('maxRubble')) this.rubble.shift()!.destroy();
   }
 
+  /** 구속구: 몸을 감싼 틀과 사슬 (첫 단계가 열리면 부서진다) */
+  private drawRestraint(host: BossHost): void {
+    if (!this.restrained) return;
+    const e = this.enemy;
+    this.restraint ??= host.scene.add.graphics().setDepth(4);
+    const r = e.radius + 3;
+    const { x, y } = e.sprite;
+    const g = this.restraint.clear().lineStyle(2, 0x8a8a8a, 1).strokeRect(x - r, y - r, r * 2, r * 2);
+    g.lineStyle(1, 0xb0b0b0, 0.9).lineBetween(x - r, y - r, x + r, y + r).lineBetween(x + r, y - r, x - r, y + r);
+    // 바닥에 박힌 사슬
+    g.lineStyle(1, 0x6a6a6a, 0.9);
+    for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]] as const) g.lineBetween(x + dx * r, y + dy * r, x + dx * (r + 12), y + dy * (r + 12));
+  }
+
+  /** 시간 단계 개방: 이름 표시·흔들림, 첫 단계면 구속이 풀린다 */
+  private unlock(host: BossHost, stage: number): void {
+    const e = this.enemy;
+    if (stage === 1) {
+      this.restraint?.destroy();
+      this.restraint = null;
+      const burst = host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius + 3).setStrokeStyle(3, 0xb0b0b0, 1).setDepth(6);
+      host.scene.tweens.add({ targets: burst, scale: 3, alpha: 0, duration: 400, onComplete: () => burst.destroy() });
+    }
+    this.aura?.destroy();
+    this.aura = host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius + 4).setStrokeStyle(stage, hexColor(this.def.enraged.auraColor), 0.8).setDepth(2);
+    host.scene.cameras.main.shake(400, 0.008);
+    this.label(host, host.t(`boss.unlock.${this.def.id}.${stage}`), this.def.enraged.auraColor);
+  }
+
   private enrage(host: BossHost): void {
     const e = this.enemy;
     const en = this.def.enraged;
@@ -259,6 +300,8 @@ export class BossController {
     this.buffFx = null;
     this.coreFx?.destroy();
     this.coreFx = null;
+    this.restraint?.destroy();
+    this.restraint = null;
     for (const m of this.minions) this.host?.removeMinion(m.e);
     this.minions = [];
     for (const r of this.rubble) r.destroy();

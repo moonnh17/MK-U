@@ -35,10 +35,12 @@ export interface ItemState {
   roarLeft: number;
   /** 순간 회피 뒤 남은 강화 기본공격 수 (특무 인장) */
   empower: number;
+  /** 흡수 중 남은 시간 (식광의 핵) */
+  absorbLeft: number;
 }
 
 export function newItemState(): ItemState {
-  return { cd: 0, used: false, stacks: 0, kills: 0, coinAcc: 0, timer: 0, roarLeft: 0, empower: 0 };
+  return { cd: 0, used: false, stacks: 0, kills: 0, coinAcc: 0, timer: 0, roarLeft: 0, empower: 0, absorbLeft: 0 };
 }
 
 export interface ItemHost {
@@ -62,7 +64,13 @@ export interface ItemHost {
   arena(): Rect;
   /** 플레이어 짧은 순간이동 (특무 인장) */
   blink(distance: number): void;
+  /** at 둘레 radius 안의 약한 적 탄(굴절 가능한 탄)을 지운다. 지운 수 */
+  absorbEnemyBullets(at: Vec2, radius: number): number;
 }
+
+/** 식광의 핵이 플레이어 둘레를 도는 반지름·속도(rad/s) */
+const CORE_ORBIT = 12;
+const CORE_SPIN = 2.5;
 
 /** 오리온의 방패: 방 벽에 튕기며 닿는 적에게 피해. 튕길 때마다 다시 맞힐 수 있다 */
 class ShieldDisc implements SkillObject {
@@ -176,6 +184,10 @@ export class ItemRuntime {
   private shield: { id: string; e: Extract<ItemEffect, { kind: 'shieldThrow' }> } | null = null;
   /** 날아가는 방패 수 */
   private shieldsOut = 0;
+  /** 식광의 핵: 따라다니는 핵과 흡수 범위 표시 */
+  private core: Phaser.GameObjects.Arc | null = null;
+  private coreRing: Phaser.GameObjects.Arc | null = null;
+  private coreT = 0;
   private key = '';
 
   constructor(private readonly host: ItemHost) {
@@ -310,6 +322,7 @@ export class ItemRuntime {
       s.cd = Math.max(0, s.cd - dt);
       s.roarLeft = Math.max(0, s.roarLeft - dt);
     }
+    this.updateCore(dt);
     // 주기 발동
     for (const { id, e } of this.effects) {
       if (e.kind !== 'autoCast' && e.kind !== 'tempRoar' && e.kind !== 'gravityShot' && e.kind !== 'shieldThrow') continue;
@@ -327,6 +340,46 @@ export class ItemRuntime {
       }
       s.timer = 0;
     }
+  }
+
+  /**
+   * 식광의 핵: 플레이어 둘레를 돌다가 everySec마다 absorbSec 동안 둘레의 약한 적 탄을 흡수하고, 끝나면 그 범위에 폭발.
+   */
+  private updateCore(dt: number): void {
+    const entry = this.each('absorbCore')[0];
+    if (!entry) {
+      this.core?.destroy();
+      this.coreRing?.destroy();
+      this.core = null;
+      this.coreRing = null;
+      return;
+    }
+    const { id, e } = entry;
+    const host = this.host.skill();
+    const def = this.host.ctx.data.items.items.find((x) => x.id === id)!;
+    const color = hexColor(def.color);
+    this.coreT += dt;
+    const pp = host.playerPos();
+    const at = { x: pp.x + Math.cos(this.coreT * CORE_SPIN) * CORE_ORBIT, y: pp.y + Math.sin(this.coreT * CORE_SPIN) * CORE_ORBIT };
+    this.core ??= this.host.scene.add.circle(at.x, at.y, 3, color, 1).setStrokeStyle(1, 0x000000, 1).setDepth(5);
+    this.core.setPosition(at.x, at.y);
+    const s = this.state(id);
+    if (s.absorbLeft > 0) {
+      s.absorbLeft -= dt;
+      this.coreRing ??= this.host.scene.add.circle(at.x, at.y, e.radius).setStrokeStyle(1, color, 0.6).setFillStyle(color, 0.08).setDepth(2);
+      this.coreRing.setPosition(at.x, at.y);
+      this.host.absorbEnemyBullets(at, e.radius);
+      if (s.absorbLeft > 0) return;
+      this.coreRing.destroy();
+      this.coreRing = null;
+      host.fx(this.host.scene.add.circle(at.x, at.y, e.radius, color, 0.35).setDepth(6), 0.3);
+      for (const en of [...host.enemies()]) if (Math.hypot(en.sprite.x - at.x, en.sprite.y - at.y) <= e.radius + en.radius) host.hit(en, e.damage, e.tags);
+      return;
+    }
+    s.timer += dt;
+    if (s.timer < e.everySec) return;
+    s.timer = 0;
+    s.absorbLeft = e.absorbSec;
   }
 
   private autoCast(e: Extract<ItemEffect, { kind: 'autoCast' }>): boolean {

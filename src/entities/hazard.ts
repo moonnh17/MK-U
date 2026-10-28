@@ -397,3 +397,148 @@ export class RectBlast implements Hazard {
     this.g.destroy();
   }
 }
+
+/** 플레이어를 따라오는 그림자 원이 followSec 뒤 그 자리에서 터진다 (식광 그림자 추적) */
+export class FollowBlast implements Hazard {
+  private readonly ring: Phaser.GameObjects.Arc;
+  private readonly fill: Phaser.GameObjects.Arc;
+  private pos: Vec2;
+  private left: number;
+
+  constructor(
+    scene: Phaser.Scene,
+    from: Vec2,
+    private readonly radius: number,
+    private readonly speed: number,
+    private readonly followSec: number,
+    private readonly damage: number,
+    private readonly color: number,
+  ) {
+    this.pos = { ...from };
+    this.left = followSec;
+    this.ring = scene.add.circle(from.x, from.y, radius).setStrokeStyle(1, color, 0.9).setDepth(2);
+    this.fill = scene.add.circle(from.x, from.y, radius, color, 0.15).setDepth(2);
+  }
+
+  update(dt: number, host: HazardHost): boolean {
+    this.left -= dt;
+    const p = host.playerPos();
+    const dx = p.x - this.pos.x;
+    const dy = p.y - this.pos.y;
+    const d = Math.hypot(dx, dy);
+    const step = Math.min(d, this.speed * dt);
+    if (d > 0) this.pos = { x: this.pos.x + (dx / d) * step, y: this.pos.y + (dy / d) * step };
+    this.ring.setPosition(this.pos.x, this.pos.y);
+    this.fill.setPosition(this.pos.x, this.pos.y).setAlpha(0.15 + 0.45 * (1 - Math.max(0, this.left) / this.followSec));
+    if (this.left > 0) return true;
+    if (Math.hypot(p.x - this.pos.x, p.y - this.pos.y) <= this.radius + host.playerRadius) host.hurtPlayer(this.damage);
+    const f = host.scene.add.circle(this.pos.x, this.pos.y, this.radius, this.color, 0.6).setDepth(6);
+    flash(host, f);
+    return false;
+  }
+
+  destroy(): void {
+    this.ring.destroy();
+    this.fill.destroy();
+  }
+}
+
+export interface OrbitSpec {
+  center: () => Vec2;
+  blades: number;
+  /** 궤도 반지름이 min ↔ max를 breathSec 주기로 오간다 */
+  minRadius: number;
+  maxRadius: number;
+  breathSec: number;
+  spin: number;
+  bladeRadius: number;
+  telegraphSec: number;
+  liveSec: number;
+  damage: number;
+  color: number;
+}
+
+/** 보스 둘레를 도는 칼날 (식광 궤도 절단). 예고 중에는 궤도만 보인다 */
+export class OrbitBlades implements Hazard {
+  private readonly g: Phaser.GameObjects.Graphics;
+  private t = 0;
+
+  constructor(
+    scene: Phaser.Scene,
+    private readonly s: OrbitSpec,
+  ) {
+    this.g = scene.add.graphics().setDepth(5);
+  }
+
+  update(dt: number, host: HazardHost): boolean {
+    const s = this.s;
+    this.t += dt;
+    if (this.t > s.telegraphSec + s.liveSec) return false;
+    const live = this.t >= s.telegraphSec;
+    const lt = Math.max(0, this.t - s.telegraphSec);
+    const r = s.minRadius + (s.maxRadius - s.minRadius) * (0.5 - 0.5 * Math.cos((lt * Math.PI * 2) / s.breathSec));
+    const c = s.center();
+    const p = host.playerPos();
+    this.g.clear();
+    if (!live) {
+      this.g.lineStyle(1, s.color, 0.5).strokeCircle(c.x, c.y, s.minRadius).strokeCircle(c.x, c.y, s.maxRadius);
+      return true;
+    }
+    this.g.lineStyle(1, s.color, 0.25).strokeCircle(c.x, c.y, r);
+    let hit = false;
+    for (let i = 0; i < s.blades; i++) {
+      const a = s.spin * lt + (i * Math.PI * 2) / s.blades;
+      const b = { x: c.x + Math.cos(a) * r, y: c.y + Math.sin(a) * r };
+      this.g.fillStyle(s.color, 0.95).fillCircle(b.x, b.y, s.bladeRadius);
+      if (Math.hypot(p.x - b.x, p.y - b.y) <= s.bladeRadius + host.playerRadius) hit = true;
+    }
+    if (hit) host.hurtPlayer(s.damage);
+    return true;
+  }
+
+  destroy(): void {
+    this.g.destroy();
+  }
+}
+
+/** 방 전체 예고 → 안전지대 몇 곳 밖이면 큰 피해 (마기카이저 종말 명령) */
+export class SafeZoneBlast implements Hazard {
+  private readonly g: Phaser.GameObjects.Graphics;
+  private left: number;
+
+  constructor(
+    scene: Phaser.Scene,
+    private readonly arena: Rect,
+    private readonly safe: readonly Vec2[],
+    private readonly safeRadius: number,
+    private readonly delaySec: number,
+    private readonly damage: number,
+    private readonly color: number,
+  ) {
+    this.left = delaySec;
+    this.g = scene.add.graphics().setDepth(2);
+  }
+
+  update(dt: number, host: HazardHost): boolean {
+    this.left -= dt;
+    const a = this.arena;
+    const k = 1 - Math.max(0, this.left) / this.delaySec;
+    this.g.clear().fillStyle(this.color, 0.1 + 0.3 * k).fillRect(a.x, a.y, a.w, a.h);
+    for (const s of this.safe) {
+      this.g.fillStyle(0xffffff, 0.25).fillCircle(s.x, s.y, this.safeRadius);
+      this.g.lineStyle(2, 0xffffff, 0.9).strokeCircle(s.x, s.y, this.safeRadius);
+    }
+    if (this.left > 0) return true;
+    const p = host.playerPos();
+    const safe = this.safe.some((s) => Math.hypot(p.x - s.x, p.y - s.y) + host.playerRadius <= this.safeRadius);
+    if (!safe) host.hurtPlayer(this.damage);
+    const f = host.scene.add.rectangle(a.x + a.w / 2, a.y + a.h / 2, a.w, a.h, this.color, 0.6).setDepth(6);
+    flash(host, f, 250);
+    host.scene.cameras.main.shake(300, 0.01);
+    return false;
+  }
+
+  destroy(): void {
+    this.g.destroy();
+  }
+}
