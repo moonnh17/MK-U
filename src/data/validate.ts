@@ -321,7 +321,7 @@ export function validateGameData(d: GameData): Errors {
     checkUnique(errors, `${where}.attacks`, (attacks ?? []).map((a) => a.id));
     for (const a of attacks ?? []) {
       const w = `${where}.attacks.${a.id}`;
-      if (a.kind !== 'lunge' && a.kind !== 'slam') errors.push(`${w}: kind는 lunge 또는 slam`);
+      if (!['lunge', 'slam', 'burst', 'puddle'].includes(a.kind)) errors.push(`${w}: kind는 lunge · slam · burst · puddle`);
       for (const k of ['triggerRange', 'windupSec', 'actSec', 'damage'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
       for (const k of ['recoverSec', 'cooldownSec'] as const) checkPositive(errors, `${w}.${k}`, a[k], true);
       if (a.kind === 'lunge') checkPositive(errors, `${w}.speed`, a.speed);
@@ -329,9 +329,21 @@ export function validateGameData(d: GameData): Errors {
         checkPositive(errors, `${w}.radius`, a.radius);
         checkPositive(errors, `${w}.reach`, a.reach, true);
       }
+      if (a.kind === 'burst') {
+        for (const k of ['shots', 'speed', 'range'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
+        checkPositive(errors, `${w}.shotGapSec`, a.shotGapSec, true);
+        if ((a.shots ?? 1) > 1 && (a.shotGapSec ?? 0) * ((a.shots ?? 1) - 1) > a.actSec) errors.push(`${w}: 마지막 발이 actSec 안에 나가야 함`);
+      }
+      if (a.kind === 'puddle') for (const k of ['radius', 'liveSec', 'tickSec'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
     }
   };
-  for (const e of d.enemies.enemies) checkAttacks(`enemies.${e.id}`, e.attacks);
+  for (const e of d.enemies.enemies) {
+    checkAttacks(`enemies.${e.id}`, e.attacks);
+    if (e.trail) for (const k of ['everyPx', 'radius', 'liveSec', 'damage', 'tickSec'] as const) checkPositive(errors, `enemies.${e.id}.trail.${k}`, e.trail[k]);
+    if (e.keepDistance !== undefined) checkPositive(errors, `enemies.${e.id}.keepDistance`, e.keepDistance);
+  }
+  for (const [c, room] of Object.entries(d.ui.chapterRooms)) for (const [k, col] of Object.entries(room)) if (!HEX_COLOR.test(col)) errors.push(`ui.chapterRooms.${c}.${k}: #RRGGBB`);
+  if (!d.enemies.enemies.some((x) => x.id === d.loot.spire.troopers.enemy)) errors.push('loot.spire.troopers.enemy: 없는 적');
   checkSprite(errors, 'enemies.projectile', d.enemies.projectile);
 
   // --- 보스 ---

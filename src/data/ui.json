@@ -41,6 +41,10 @@
     "weapons": { "mainWidth": 52, "mainHeight": 22, "subWidth": 34, "subHeight": 14, "gap": 3 }
   },
   "room": { "floorColor": "#1c2430", "wallColor": "#3a4656", "corridorColor": "#18202a" },
+  "chapterRooms": {
+    "2": { "floorColor": "#1e2630", "wallColor": "#5a6a7a", "corridorColor": "#182028" },
+    "3": { "floorColor": "#1a0c0e", "wallColor": "#5a1a1e", "corridorColor": "#120708" }
+  },
   "slashFxSec": 0.1,
   "cameraLerp": 0.18,
   "toastSec": 1.6,

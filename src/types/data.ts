@@ -278,15 +278,19 @@ export interface EnemyDef extends SpriteRef {
   attacks?: EnemyAttackDef[];
   /** 보스가 부르는 적(분신). 챕터 로스터·웨이브에 들지 않는다 */
   summon?: boolean;
+  /** 원거리 적: 플레이어와 이 거리를 유지한다 */
+  keepDistance?: number;
+  trail?: EnemyTrailDef;
 }
 
 /**
  * 일반 적·엘리트의 공격. 예고(windup) → 실행(act) → 후딜(recover).
  * lunge: 예고선 방향으로 돌진, 돌진 중 닿으면 피해 / slam: 예고 원 자리에 강타
+ * burst: 조준선 → 조준탄 여러 발 (헥타르 전투원) / puddle: 플레이어 자리 예고 원 → 지속 피해 장판 (어느 기억)
  */
 export interface EnemyAttackDef {
   id: string;
-  kind: 'lunge' | 'slam';
+  kind: 'lunge' | 'slam' | 'burst' | 'puddle';
   triggerRange: number;
   windupSec: number;
   actSec: number;
@@ -299,6 +303,27 @@ export interface EnemyAttackDef {
   radius?: number;
   /** slam: 몸에서 강타 중심까지 최대 거리 */
   reach?: number;
+  /** lunge: 벽에 부딪히면 이 시간 기절, 그동안 받는 피해 ×stunTakenMul (마기갑충) */
+  wallStunSec?: number;
+  stunTakenMul?: number;
+  /** burst: 발 수·간격·탄속·사거리 */
+  shots?: number;
+  shotGapSec?: number;
+  range?: number;
+  /** burst: 같은 방의 같은 적이 이 거리 안이면 함께 조준을 시작한다 (전술 연계) */
+  linkRadius?: number;
+  /** puddle: 장판 지속·피해 간격 (반지름은 radius) */
+  liveSec?: number;
+  tickSec?: number;
+}
+
+/** 지나간 자리에 남기는 장판 (어느 기억) */
+export interface EnemyTrailDef {
+  everyPx: number;
+  radius: number;
+  liveSec: number;
+  damage: number;
+  tickSec: number;
 }
 
 export interface EliteDef {
@@ -554,6 +579,8 @@ export interface UiData {
   /** HUD 배치 (기준 해상도 px) */
   hud: HudLayoutData;
   room: { floorColor: string; wallColor: string; corridorColor: string };
+  /** 챕터별 방 색 (없으면 room) */
+  chapterRooms: Record<string, { floorColor: string; wallColor: string; corridorColor: string }>;
   /** 칼 베기 이펙트 표시 시간(초) */
   slashFxSec: number;
   /** 카메라 따라가기 보간(0~1) */
@@ -788,6 +815,8 @@ export interface SpireData {
   spawnGapSec: number;
   /** 엘리트 수 배율 (평소 웨이브 대비) */
   eliteMul: number;
+  /** 무리마다 항상 섞이는 헥타르 전투원 (원본 첨탑 규칙) */
+  troopers: { enemy: string; count: IntRange };
   /** 아이템 선택 카드 수 */
   cards: number;
 }

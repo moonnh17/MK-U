@@ -122,3 +122,22 @@ describe('엘리트', () => {
     expect(validateGameData(d2).some((e) => e.includes('akgwi.attacks.slam.radius'))).toBe(true);
   });
 });
+
+describe('전술 연계·거리 유지', () => {
+  it('쫓는 중이고 쿨타임이 끝났으면 바로 예고, 아니면 그대로', async () => {
+    const { forceWindup, initialAi } = await import('../src/systems/enemyAi');
+    const a = { id: 'burst', triggerRange: 100, windupSec: 0.6, actSec: 0.4, recoverSec: 0.5, cooldownSec: 2 };
+    const s = initialAi([a]);
+    const r = forceWindup(s, a);
+    expect(r.started).toBe(true);
+    expect(r.state).toMatchObject({ phase: 'windup', attackId: 'burst', left: 0.6 });
+    expect(forceWindup(r.state, a).started).toBe(false);
+    expect(forceWindup({ ...s, cooldowns: { burst: 1 } }, a).started).toBe(false);
+  });
+  it('거리 유지: 멀면 다가가고 가까우면 물러난다', async () => {
+    const { keepDistanceStep } = await import('../src/systems/enemyAi');
+    expect(keepDistanceStep(200, 90, 30)).toBe(1);
+    expect(keepDistanceStep(100, 90, 30)).toBe(0);
+    expect(keepDistanceStep(60, 90, 30)).toBe(-1);
+  });
+});

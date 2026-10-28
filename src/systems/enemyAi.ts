@@ -70,3 +70,22 @@ export function stepAi(
   }
   return { state: { phase: 'chase', attackId: null, left: 0, cooldowns }, events };
 }
+
+/**
+ * 전술 연계: 쫓는 중이고 그 공격 쿨타임이 끝났으면 바로 예고를 시작한다 (동료가 쏘기 시작할 때).
+ * 이미 공격 중이거나 쿨타임이면 그대로.
+ */
+export function forceWindup(s: AiState, attack: AiAttack, speedMul = 1): { state: AiState; started: boolean } {
+  if (s.phase !== 'chase' || (s.cooldowns[attack.id] ?? 0) > 0) return { state: s, started: false };
+  return { state: { phase: 'windup', attackId: attack.id, left: attack.windupSec / speedMul, cooldowns: s.cooldowns }, started: true };
+}
+
+/**
+ * 거리 유지 (원거리 적): 1 = 다가감, -1 = 물러남, 0 = 멈춤.
+ * keep보다 band 이상 멀면 다가가고, keep보다 가까우면 물러난다.
+ */
+export function keepDistanceStep(dist: number, keep: number, band: number): -1 | 0 | 1 {
+  if (dist > keep + band) return 1;
+  if (dist < keep) return -1;
+  return 0;
+}

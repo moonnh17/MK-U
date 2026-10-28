@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Rng } from '../src/core/rng';
 import { gameData } from '../src/data/index';
-import { advanceStage, firstStage } from '../src/systems/run';
+import { advanceStage, playableChapters, firstStage } from '../src/systems/run';
 import { RoomState, planCombatWaves, wavesForRoom } from '../src/systems/roomState';
 
 const DELAY = 0.5;
@@ -96,18 +96,37 @@ describe('웨이브 계획', () => {
 });
 
 describe('스테이지 진행', () => {
-  it('1-1 → 1-5 다음은 챕터 클리어', () => {
+  const walk = (last: number) => {
     let cur = firstStage();
     const seen = [`${cur.chapter}-${cur.stage}`];
     for (;;) {
-      const adv = advanceStage(cur, gameData.mapgen);
-      if (adv.type === 'chapterClear') {
-        expect(adv.chapter).toBe(1);
-        break;
-      }
+      const adv = advanceStage(cur, gameData.mapgen, last);
+      if (adv.type === 'chapterClear') return { seen, end: adv.chapter };
       cur = adv.next;
       seen.push(`${cur.chapter}-${cur.stage}`);
     }
-    expect(seen).toEqual(['1-1', '1-2', '1-3', '1-4', '1-5']);
+  };
+  it('1-1 → 3-5, 챕터가 바뀌면 다음 챕터 1스테이지 (15스테이지)', () => {
+    const r = walk(3);
+    expect(r.seen).toHaveLength(15);
+    expect(r.seen.slice(4, 7)).toEqual(['1-5', '2-1', '2-2']);
+    expect(r.seen.at(-1)).toBe('3-5');
+    expect(r.end).toBe(3);
+  });
+  it('아직 없는 챕터 앞에서 끝난다 (임시 클리어)', () => {
+    const r = walk(2);
+    expect(r.seen.at(-1)).toBe('2-5');
+    expect(r.end).toBe(2);
+  });
+  it('챕터가 바뀌는 순간은 chapter, 같은 챕터 안은 stage', () => {
+    expect(advanceStage({ chapter: 1, stage: 5 }, gameData.mapgen, 3).type).toBe('chapter');
+    expect(advanceStage({ chapter: 2, stage: 3 }, gameData.mapgen, 3).type).toBe('stage');
+  });
+  it('플레이할 수 있는 챕터: 1장부터 웨이브 데이터가 이어진 곳까지', () => {
+    const w = (chs: number[]) => ({ ...gameData.waves, waves: chs.map((c, i) => ({ id: String(i), chapter: c, weight: 1, spawns: [] })) });
+    expect(playableChapters(w([1]), gameData.mapgen)).toBe(1);
+    expect(playableChapters(w([1, 2]), gameData.mapgen)).toBe(2);
+    expect(playableChapters(w([1, 3]), gameData.mapgen)).toBe(1);
+    expect(playableChapters(w([1, 2, 3]), gameData.mapgen)).toBe(3);
   });
 });
