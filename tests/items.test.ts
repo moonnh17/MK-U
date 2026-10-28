@@ -25,13 +25,15 @@ const totals = (ids: string[], school: 'hectar' | 'acro' | null = null) =>
   itemTotals(ids, I, { school, job: 'magiScholar' }, G, { startValue: 10, invest: noInvest });
 
 describe('아이템 목록 (기획서 표)', () => {
-  it('일반 6·레어 5·전설 5·유니크 5·신화 1 + 세트 1 + 챕터1 보스 전용 2', () => {
+  it('일반 6·레어 5·전설 5·유니크 5·신화 1 + 세트 1 + 보스 전용', () => {
     const by = (g: string) => I.items.filter((x) => x.pool === 'normal' && x.grade === g).length;
     expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([6, 5, 5, 5, 1]);
     expect(I.items.filter((x) => x.pool === 'set').map((x) => x.id)).toEqual(['alGulBlade']);
     expect(I.items.filter((x) => x.pool === 'boss').map((x) => [x.id, x.bossId])).toEqual([
       ['wonhonLump', 'fusionAkgwi'],
       ['gihwanArm', 'electricRing'],
+      ['hectarRam', 'hectarChief'],
+      ['ancientCore', 'magiGolem'],
     ]);
   });
   it('데이터 검증 통과', () => {

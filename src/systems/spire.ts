@@ -3,10 +3,10 @@
  *  falling ──착지──▶ charging ──충전 100%──▶ rising ──▶ done
  * 충전: 첨탑 주변 원 안에서 처치한 적만 충전율을 올린다(원 밖 처치는 0).
  * 방해: 충전이 끝날 때까지 남은 적이 적으면 다음 무리가 나온다.
- * M4는 소형 첨탑만. 중형은 M6(SpireRules에 등급 가중치만 바꿔 붙인다).
+ * 크기(소형·중형)는 spireSize. 진행 규칙은 같고 등급 가중치·모습·강적만 다르다.
  */
 import type { Rng } from '../core/rng';
-import type { EnemyRank, GradeId, ItemsData } from '../types/data';
+import type { EnemyRank, GradeId, ItemsData, SpireData } from '../types/data';
 import { rollItem } from './items';
 
 export type SpirePhase = 'falling' | 'charging' | 'rising' | 'done';
@@ -115,4 +115,13 @@ export function spireItemChoices(
     taken.add(id);
   }
   return out;
+}
+
+export type SpireSize = 'small' | 'medium';
+
+/** 첨탑 크기: 중형은 챕터별로 그 스테이지부터 확률 (2장 후반 50%, 3장 100%), 아니면 소형 */
+export function spireSize(rng: Rng, chapter: number, stage: number, medium: SpireData['medium']): SpireSize {
+  const rule = medium.chance[String(chapter)];
+  if (!rule || stage < rule.fromStage) return 'small';
+  return rng.chance(rule.chance) ? 'medium' : 'small';
 }

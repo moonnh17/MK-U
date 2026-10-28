@@ -25,6 +25,12 @@
       "sprite": { "spriteKey": "spire_small", "color": "#15151c", "size": 10, "height": 44 },
       "weights": { "rare": 50, "legendary": 35, "unique": 15 }
     },
+    "medium": {
+      "sprite": { "spriteKey": "spire_medium", "color": "#3a0e12", "size": 16, "height": 48 },
+      "weights": { "rare": 30, "legendary": 45, "unique": 25 },
+      "chance": { "2": { "fromStage": 3, "chance": 0.5 }, "3": { "fromStage": 1, "chance": 1 } },
+      "strongChance": 0.75
+    },
     "radius": 72,
     "ringColor": "#b04aff",
     "fallSec": 0.7,

@@ -154,6 +154,15 @@
     { "id": "orionShield", "nameKey": "item.orionShield", "descKey": "item.orionShield.desc", "grade": "unique", "pool": "hiddenBoss", "bossId": "orionCrusader", "tags": ["physical", "ranged"],
       "effects": [{ "kind": "shieldThrow", "everySec": 6, "damage": 300, "bounces": 3, "speed": 320, "size": 6, "maxSec": 5, "guard": 0.1, "tags": ["physical", "ranged"] }],
       "variants": [{ "job": "paladin", "effects": [{ "kind": "shieldBounces", "value": 2 }] }],
-      "spriteKey": "item_orion_shield", "color": "#d9c25a", "size": 8 }
+      "spriteKey": "item_orion_shield", "color": "#d9c25a", "size": 8 },
+    { "id": "hectarRam", "nameKey": "item.hectarRam", "descKey": "item.hectarRam.desc", "grade": "rare", "pool": "boss", "bossId": "hectarChief", "dropChance": 0.2, "tags": [],
+      "effects": [
+        { "kind": "stat", "stat": "magiPower", "value": 4, "group": "statFlat" },
+        { "kind": "coinGain", "value": 0.1, "group": "damagePct" }
+      ],
+      "spriteKey": "item_hectar_ram", "color": "#3a9aff", "size": 8 },
+    { "id": "ancientCore", "nameKey": "item.ancientCore", "descKey": "item.ancientCore.desc", "grade": "legendary", "pool": "boss", "bossId": "magiGolem", "tags": ["magic", "ranged"],
+      "effects": [{ "kind": "ultimateBurst", "shots": 24, "damage": 200, "speed": 240, "range": 300, "tags": ["magic", "ranged"] }],
+      "spriteKey": "item_ancient_core", "color": "#9a4aff", "size": 8 }
   ]
 }

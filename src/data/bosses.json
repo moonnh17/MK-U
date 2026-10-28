@@ -48,6 +48,56 @@
         { "id": "shrinkCurrent", "weight": 1, "cooldownSec": 8, "durationSec": 2.6, "phase": 2,
           "values": { "startRadius": 200, "shrinkSec": 2.5, "thickness": 8, "damage": 12 } }
       ]
+    },
+    {
+      "id": "hectarChief",
+      "chapter": 2,
+      "stage": 2,
+      "enrageAt": 0.5,
+      "gapSec": 0.7,
+      "enrageSec": 1.5,
+      "firstDelaySec": 1,
+      "keepDistance": 100,
+      "enraged": { "moveSpeedMul": 1.2, "scale": 1, "auraColor": "#7ac0ff" },
+      "patterns": [
+        { "id": "repulse", "weight": 2, "cooldownSec": 4, "durationSec": 1.4, "phase": 1,
+          "values": { "windupSec": 0.4, "speed": 220, "maxRadius": 190, "thickness": 10, "damage": 12 } },
+        { "id": "spiralBarrage", "weight": 3, "cooldownSec": 4, "durationSec": 2.2, "phase": 1,
+          "values": { "volleys": 20, "intervalSec": 0.09, "arms": 3, "stepRad": 0.22, "speed": 110, "range": 280, "damage": 7 } },
+        { "id": "antimatter", "weight": 2, "cooldownSec": 6, "durationSec": 1.6, "phase": 1,
+          "values": { "count": 1, "countEnraged": 2, "gapSec": 0.6, "radius": 50, "delaySec": 1.2, "damage": 26 } },
+        { "id": "callTroopers", "weight": 1, "cooldownSec": 12, "durationSec": 1.0, "phase": 1, "summon": "hectarTrooper",
+          "values": { "windupSec": 0.4, "count": 2 } }
+      ]
+    },
+    {
+      "id": "magiGolem",
+      "chapter": 2,
+      "stage": 5,
+      "enrageAt": 0.5,
+      "gapSec": 0.8,
+      "enrageSec": 1.6,
+      "firstDelaySec": 1,
+      "keepDistance": 40,
+      "enraged": { "moveSpeedMul": 1.25, "scale": 1.1, "auraColor": "#ff7a3a" },
+      "patterns": [
+        { "id": "earthCrush", "weight": 3, "cooldownSec": 3, "durationSec": 1.3, "phase": 1, "maxRange": 110,
+          "values": { "radius": 70, "arcDeg": 120, "windupSec": 0.8, "damage": 24 } },
+        { "id": "bombard", "weight": 2, "cooldownSec": 5, "durationSec": 1.8, "phase": 1,
+          "values": { "shells": 6, "shellsEnraged": 9, "stepSec": 0.12, "spread": 80, "radius": 20, "delaySec": 0.9, "damage": 16 } },
+        { "id": "ruinBeam", "weight": 2, "cooldownSec": 8, "durationSec": 4.2, "phase": 1,
+          "values": { "length": 500, "width": 16, "spinSpeed": 0.5, "telegraphSec": 1.0, "liveSec": 3, "damage": 12, "tickSec": 0.4 } },
+        { "id": "breakerDash", "weight": 2, "cooldownSec": 6, "durationSec": 3.6, "phase": 1,
+          "values": { "windupSec": 0.7, "length": 340, "speed": 360, "damage": 20, "exposeSec": 2, "exposeMul": 2 } },
+        { "id": "ruinLegion", "weight": 1, "cooldownSec": 14, "durationSec": 1.2, "phase": 1,
+          "values": { "windupSec": 0.6, "count": 3 } },
+        { "id": "crustCrack", "weight": 2, "cooldownSec": 6, "durationSec": 3.0, "phase": 2,
+          "values": { "lines": 3, "spreadDeg": 40, "length": 420, "width": 12, "telegraphSec": 0.8, "liveSec": 2, "damage": 10, "tickSec": 0.5 } },
+        { "id": "collapseZone", "weight": 2, "cooldownSec": 7, "durationSec": 2.0, "phase": 2,
+          "values": { "rocks": 10, "stepSec": 0.08, "radius": 18, "delaySec": 1.0, "damage": 18 } },
+        { "id": "doomFault", "weight": 1, "cooldownSec": 9, "durationSec": 1.8, "phase": 2,
+          "values": { "width": 40, "delaySec": 1.2, "damage": 30 } }
+      ]
     }
   ],
   "hiddenChapterMul": { "1": 1, "2": 1.5, "3": 2 },

@@ -253,6 +253,13 @@ export function validateGameData(d: GameData): Errors {
   checkPositive(errors, 'loot.standSpacing', lt.standSpacing);
   const sp = lt.spire;
   checkSprite(errors, 'loot.spire.small.sprite', sp.small.sprite);
+  checkSprite(errors, 'loot.spire.medium.sprite', sp.medium.sprite);
+  checkWeights('loot.spire.medium.weights', sp.medium.weights);
+  if (!(sp.medium.strongChance >= 0 && sp.medium.strongChance <= 1)) errors.push('loot.spire.medium.strongChance: 0~1');
+  for (const [c, r] of Object.entries(sp.medium.chance)) {
+    if (!(r.chance >= 0 && r.chance <= 1)) errors.push(`loot.spire.medium.chance.${c}: 0~1`);
+    if (!(r.fromStage >= 1 && r.fromStage <= d.mapgen.stagesPerChapter)) errors.push(`loot.spire.medium.chance.${c}.fromStage: 1~${d.mapgen.stagesPerChapter}`);
+  }
   checkWeights('loot.spire.small.weights', sp.small.weights);
   if ((sp.small.weights.common ?? 0) > 0 || (sp.small.weights.mythic ?? 0) > 0) errors.push('loot.spire.small.weights: 레어·전설·유니크만 (신화는 따로 판정)');
   for (const k of ['radius', 'fallSec', 'fallHeight', 'riseSec', 'spawnGapSec', 'eliteMul', 'cards'] as const) checkPositive(errors, `loot.spire.${k}`, sp[k]);

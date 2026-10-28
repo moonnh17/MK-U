@@ -157,6 +157,18 @@
           "damage": 5, "radius": 22, "liveSec": 3, "tickSec": 0.5 }
       ],
       "spriteKey": "enemy_a_memory", "color": "#8a7ab0", "size": 13
+    },
+    {
+      "id": "hectarChief", "nameKey": "enemy.hectarChief", "chapter": 2, "rank": "boss", "ai": "boss",
+      "maxHp": 1800, "moveSpeed": 34, "contactDamage": 12, "contactIntervalSec": 1.0,
+      "energyOrbs": [10, 12], "coins": [12, 16],
+      "spriteKey": "enemy_hectar_chief", "color": "#3a9aff", "size": 24
+    },
+    {
+      "id": "magiGolem", "nameKey": "enemy.magiGolem", "chapter": 2, "rank": "boss", "ai": "boss",
+      "maxHp": 2800, "moveSpeed": 26, "contactDamage": 14, "contactIntervalSec": 1.0,
+      "energyOrbs": [12, 14], "coins": [14, 18],
+      "spriteKey": "enemy_magi_golem", "color": "#8a6a4a", "size": 32
     }
   ]
 }

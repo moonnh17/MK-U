@@ -367,6 +367,8 @@ export interface BossPatternDef {
   phase: 1 | 2;
   maxRange?: number;
   values: Record<string, number>;
+  /** 소환 패턴이 부를 적 id (헥타르 전투원 호출) */
+  summon?: string;
 }
 
 /** 보스 행동 (스테이지 보스·히든보스 공통) */
@@ -741,6 +743,8 @@ export type ItemEffect =
   | { kind: 'shieldThrow'; everySec: number; damage: number; bounces: number; speed: number; size: number; maxSec: number; guard: number; tags: TagId[] }
   /** 방패 튕김 횟수 증가 (직업 변형) */
   | { kind: 'shieldBounces'; value: number }
+  /** 궁극기를 쓸 때 관통 탄환 shots발 전방위 (고대병기의 코어) */
+  | { kind: 'ultimateBurst'; shots: number; damage: number; speed: number; range: number; tags: TagId[] }
   /** 기본 스탯을 base로, 정신력을 willpower로 재편하고 줄어든 양을 가장 많이 투자한 스탯에 옮김 */
   | { kind: 'statReshuffle'; base: number; willpower: number };
 
@@ -757,8 +761,10 @@ export interface ItemDef extends SpriteRef {
   effects: ItemEffect[];
   /** 직업·학파별 추가 효과 (아직 없는 직업은 데이터만) */
   variants?: { job: string; effects: ItemEffect[] }[];
-  /** boss: 이 보스 처치 시 확정 */
+  /** boss: 이 보스 처치 시 확정 (dropChance가 있으면 그 확률) */
   bossId?: string;
+  /** 보스 전용 아이템이 나올 확률 (헥타르 RAM 20%). 없으면 확정 */
+  dropChance?: number;
 }
 
 export interface ItemsData {
@@ -803,6 +809,16 @@ export interface LootData {
 /** 마기수집첨탑. 처치 충전·방해 무리 규칙은 첨탑 크기와 무관하게 같다 (중형은 M6) */
 export interface SpireData {
   small: { sprite: SpriteRef; weights: Partial<Record<GradeId, number>> };
+  /**
+   * 중형 첨탑: 챕터별 등장(그 스테이지부터 확률), 75% 확률로 강적 1마리
+   * (1~2장: 엘리트 2종이 겹친 개체 / 3장: 집행자 또는 집정관)
+   */
+  medium: {
+    sprite: SpriteRef;
+    weights: Partial<Record<GradeId, number>>;
+    chance: Record<string, { fromStage: number; chance: number }>;
+    strongChance: number;
+  };
   /** 충전 원 반지름(px) */
   radius: number;
   ringColor: string;
