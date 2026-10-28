@@ -1,7 +1,10 @@
 {
   "crystals": {
     "perStage": 10,
-    "bossByStage": { "2": 30, "5": 50 },
+    "bossByStage": {
+      "2": 30,
+      "5": 50
+    },
     "perElite": 2,
     "perSpire": 15,
     "perHiddenBoss": 100,
@@ -15,5 +18,61 @@
   "settlement": {
     "lineStepSec": 0.45,
     "countSec": 0.35
-  }
+  },
+  "upgrades": [
+    {
+      "id": "strength",
+      "kind": "stat",
+      "stat": "strength",
+      "perLevel": 1,
+      "costs": [30, 60, 120, 200, 300]
+    },
+    {
+      "id": "toughness",
+      "kind": "stat",
+      "stat": "toughness",
+      "perLevel": 1,
+      "costs": [30, 60, 120, 200, 300]
+    },
+    {
+      "id": "agility",
+      "kind": "stat",
+      "stat": "agility",
+      "perLevel": 1,
+      "costs": [30, 60, 120, 200, 300]
+    },
+    {
+      "id": "intelligence",
+      "kind": "stat",
+      "stat": "intelligence",
+      "perLevel": 1,
+      "costs": [30, 60, 120, 200, 300]
+    },
+    {
+      "id": "magiPower",
+      "kind": "stat",
+      "stat": "magiPower",
+      "perLevel": 1,
+      "costs": [30, 60, 120, 200, 300]
+    },
+    {
+      "id": "willpower",
+      "kind": "stat",
+      "stat": "willpower",
+      "perLevel": 1,
+      "costs": [30, 60, 120, 200, 300]
+    },
+    {
+      "id": "maxHp",
+      "kind": "maxHp",
+      "perLevel": 5,
+      "costs": [40, 80, 150, 250, 400]
+    },
+    {
+      "id": "shield",
+      "kind": "shield",
+      "perLevel": 1,
+      "costs": [100, 250, 500]
+    }
+  ]
 }

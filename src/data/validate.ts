@@ -645,6 +645,19 @@ export function validateGameData(d: GameData): Errors {
   for (const k of ['lineStepSec', 'countSec'] as const) checkPositive(errors, `meta.settlement.${k}`, d.meta.settlement[k]);
   for (const k of ['stages', 'midBoss', 'chapterBoss', 'elites', 'spires', 'hiddenBosses'] as const) needText('meta.crystals', `settlement.crystal.${k}`);
 
+  checkUnique(errors, 'meta.upgrades', d.meta.upgrades.map((u) => u.id));
+  for (const u of d.meta.upgrades) {
+    const w = `meta.upgrades.${u.id}`;
+    if (u.kind === 'stat' && !statIds.has(u.stat)) errors.push(`${w}.stat: 알 수 없는 스탯`);
+    if (u.kind !== 'stat') needText(w, `upgrade.${u.kind}`);
+    checkPositive(errors, `${w}.perLevel`, u.perLevel);
+    if (u.costs.length === 0) errors.push(`${w}.costs: 비어 있음`);
+    u.costs.forEach((c, i) => {
+      checkPositive(errors, `${w}.costs[${i}]`, c);
+      if (i > 0 && c < u.costs[i - 1]!) errors.push(`${w}.costs: 레벨이 오를수록 비용이 커야 함`);
+    });
+  }
+
   // --- 실험장 ---
   const lab = d.lab;
   checkUnique(errors, 'lab.objects', lab.objects.map((o) => o.id));

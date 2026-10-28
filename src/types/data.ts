@@ -888,7 +888,14 @@ export interface MetaData {
   };
   /** 결산 화면 연출 */
   settlement: { lineStepSec: number; countSec: number };
+  /** 실험체의 기억: 직업별 영구 강화 (최대 레벨 = 비용 표 길이) */
+  upgrades: UpgradeDef[];
 }
+
+/** stat: 시작 스탯 +perLevel / maxHp: 기본 체력 +perLevel / shield: 보호막 최대치 +perLevel */
+export type UpgradeDef =
+  | { id: string; kind: 'stat'; stat: StatId; perLevel: number; costs: number[] }
+  | { id: string; kind: 'maxHp' | 'shield'; perLevel: number; costs: number[] };
 
 // ---------- 실험장 (시작 방) ----------
 

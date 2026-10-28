@@ -7,6 +7,7 @@ import { initialSlots, plainWeapon, type WeaponSlots } from '../systems/weapons'
 import type { ItemState } from '../items/runtime';
 import type { ConversionLog } from '../systems/advancement';
 import { newRunRecord, type CrystalResult, type RunRecord } from '../systems/runRecord';
+import { upgradeBonus, type UpgradeLevels } from '../systems/upgrades';
 import { STAT_IDS, type EncounterKindId, type GradeId, type JobId, type SchoolId, type StatId } from '../types/data';
 
 /** 스테이지를 넘어가도 유지되는 플레이어 상태 */
@@ -48,6 +49,8 @@ export interface PlayerState {
   hiddenBossesMet: string[];
   /** 결산용 런 기록 (스테이지를 넘어가도 유지) */
   record: RunRecord;
+  /** 영구 강화로 더한 기본 체력·보호막 최대치 (스탯은 시작 스탯에 이미 들어 있다) */
+  meta: { maxHp: number; shield: number };
 }
 
 export type RunOutcome = { type: 'dead' } | { type: 'chapterClear'; chapter: number };
@@ -110,16 +113,22 @@ export interface Settlement {
   shardsOwned: number;
 }
 
-/** jobId: 실험장에서 고른 직업 (없으면 데이터의 시작 직업) */
-export function newPlayerState(data: GameData, jobId: string = data.jobs.startJob): PlayerState {
+/**
+ * jobId: 실험장에서 고른 직업 (없으면 데이터의 시작 직업)
+ * upgrades: 그 직업의 영구 강화 레벨 (실험체의 기억)
+ */
+export function newPlayerState(data: GameData, jobId: string = data.jobs.startJob, upgrades?: UpgradeLevels): PlayerState {
   const job = data.jobs.jobs.find((j) => j.id === jobId) ?? data.jobs.jobs.find((j) => j.id === data.jobs.startJob)!;
   const stats = startingStats(data.stats.startValue);
   for (const [k, v] of Object.entries(job.statBonus)) stats[k as keyof typeof stats] += v ?? 0;
+  const bonus = upgradeBonus(upgrades, data.meta.upgrades);
+  for (const [k, v] of Object.entries(bonus.stats)) stats[k as keyof typeof stats] += v ?? 0;
   return {
-    hp: data.player.maxHp,
-    maxHp: data.player.maxHp,
+    hp: data.player.maxHp + bonus.maxHp,
+    maxHp: data.player.maxHp + bonus.maxHp,
     shield: 0,
-    shieldMax: data.player.shieldMax,
+    shieldMax: data.player.shieldMax + bonus.shield,
+    meta: { maxHp: bonus.maxHp, shield: bonus.shield },
     energy: data.player.energy.start,
     energyMax: data.player.energy.max,
     coins: 0,
