@@ -281,16 +281,25 @@ export interface EnemyDef extends SpriteRef {
   /** 원거리 적: 플레이어와 이 거리를 유지한다 */
   keepDistance?: number;
   trail?: EnemyTrailDef;
+  /** 집정관: 같은 방에서 죽은 적의 최대 체력을 흡수해 단계가 오른다 */
+  absorb?: ArchonAbsorbDef;
+}
+
+/** 집정관 흡수 단계. stages[i]: i+1단계가 되는 누적 흡수량과 그 단계의 배율 */
+export interface ArchonAbsorbDef {
+  stages: { absorb: number; hpMul: number; damageMul: number; haloRadius: number }[];
+  haloColor: string;
 }
 
 /**
  * 일반 적·엘리트의 공격. 예고(windup) → 실행(act) → 후딜(recover).
  * lunge: 예고선 방향으로 돌진, 돌진 중 닿으면 피해 / slam: 예고 원 자리에 강타
  * burst: 조준선 → 조준탄 여러 발 (헥타르 전투원) / puddle: 플레이어 자리 예고 원 → 지속 피해 장판 (어느 기억)
+ * fan: 부채꼴 탄막 (고대인) / rope: 밧줄 → 끌어당김 → 도끼 강타 (집행자) / snipe: 따라오는 조준선 → 고정 → 직선 레이저 (집정관)
  */
 export interface EnemyAttackDef {
   id: string;
-  kind: 'lunge' | 'slam' | 'burst' | 'puddle';
+  kind: 'lunge' | 'slam' | 'burst' | 'puddle' | 'fan' | 'rope' | 'snipe';
   triggerRange: number;
   windupSec: number;
   actSec: number;
@@ -315,6 +324,19 @@ export interface EnemyAttackDef {
   /** puddle: 장판 지속·피해 간격 (반지름은 radius) */
   liveSec?: number;
   tickSec?: number;
+  /** lunge: 연속 돌진 총 횟수 범위와 이어지는 돌진의 예고 (증오의 파편) */
+  chain?: IntRange;
+  chainWindupSec?: number;
+  /** fan: 부채꼴 각도 (발 수는 shots) */
+  spreadDeg?: number;
+  /** rope: 끌어당기는 속도, 끌려온 뒤 도끼까지, 도끼 부채꼴(반지름은 radius)·피해 */
+  pullSpeed?: number;
+  axeDelaySec?: number;
+  arcDeg?: number;
+  axeDamage?: number;
+  /** snipe: 예고 끝 이 시간 동안 조준선이 고정된다, 레이저 폭 (길이는 range) */
+  lockSec?: number;
+  width?: number;
 }
 
 /** 지나간 자리에 남기는 장판 (어느 기억) */
@@ -369,6 +391,8 @@ export interface BossPatternDef {
   values: Record<string, number>;
   /** 소환 패턴이 부를 적 id (헥타르 전투원 호출) */
   summon?: string;
+  /** 시간 단계(BossCore.unlocks)가 이 값 이상일 때부터 (마기카이저) */
+  unlock?: number;
 }
 
 /** 보스 행동 (스테이지 보스·히든보스 공통) */
@@ -384,6 +408,10 @@ export interface BossCore {
   keepDistance: number;
   enraged: { moveSpeedMul: number; scale: number; auraColor: string };
   patterns: BossPatternDef[];
+  /** 전투 시작 후 이 초마다 다음 단계가 열린다 (마기카이저: 25·50·75). 첫 단계 전에는 움직이지 않는다(구속) */
+  unlocks?: number[];
+  /** 일식 어둠 (식광): 방을 어둡게, 플레이어 둘레만 밝게. 보스가 죽으면 걷힌다 */
+  darkness?: { lightRadius: number; alpha: number; color: string };
 }
 
 /** 스테이지 보스 (X-2, X-5) */
@@ -484,9 +512,24 @@ export interface WaveTemplate {
   spawns: WaveSpawn[];
 }
 
+/** 정예(집행자·집정관) 등장 규칙. 엘리트 효과는 붙지 않는다 */
+export interface ChampionRules {
+  ids: string[];
+  /** 챕터 → 전투 칸에 나오는 스테이지 */
+  stages: Record<string, number[]>;
+  /** 전투 칸 웨이브 하나에 정예 1마리가 섞일 확률, 방 하나의 상한 */
+  waveChance: number;
+  maxPerRoom: number;
+  /** 대규모 습격: 한 웨이브에 정예가 나오고, 이 확률로 둘이 함께 */
+  raidBothChance: number;
+  /** 처치 시 아이템 상자 확률 */
+  itemChestChance: number;
+}
+
 export interface WavesData {
   /** 다음 웨이브까지 대기(초) */
   waveDelaySec: number;
+  champions: ChampionRules;
   /** 적이 나타난 뒤 공격·접촉 피해가 없는 시간(초) */
   spawnWarnSec: number;
   /** 플레이어와 최소 이만큼 떨어진 곳에 소환(px) */
@@ -731,6 +774,8 @@ export type ItemEffect =
   | { kind: 'hurtInvuln'; sec: number; cooldownSec: number }
   /** 피격 시 사방 공격 (힘·마기력 범위 보정) */
   | { kind: 'hurtBurst'; damage: number; radius: number; tags: TagId[] }
+  /** 따라다니는 핵이 everySec마다 absorbSec 동안 둘레(radius)의 약한 적 탄을 흡수한 뒤 폭발 (식광의 핵) */
+  | { kind: 'absorbCore'; everySec: number; absorbSec: number; damage: number; radius: number; tags: TagId[] }
   /** 전투 칸에 들어갈 때·엘리트를 잡을 때 함성: 피해·이동속도 증가 (버프 태그). 바바리안 데스 휘슬 */
   | { kind: 'roomRoar'; durationSec: number; damage: number; moveSpeed: number }
   /** 함성 효과(피해·이동속도) 배율 증가 (직업 변형) */

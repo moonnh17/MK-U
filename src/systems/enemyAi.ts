@@ -81,6 +81,19 @@ export function forceWindup(s: AiState, attack: AiAttack, speedMul = 1): { state
 }
 
 /**
+ * 연속 돌진: 방금 끝난 공격을 쿨타임 없이 바로 다시 예고한다 (증오의 파편). 남은 횟수는 엔티티가 센다.
+ */
+export function chainWindup(s: AiState, attack: AiAttack, windupSec: number, speedMul = 1): AiState {
+  const cooldowns = { ...s.cooldowns, [attack.id]: 0 };
+  return { phase: 'windup', attackId: attack.id, left: windupSec / speedMul, cooldowns };
+}
+
+/** 예고 중 남은 시간이 lockSec 이하면 조준이 고정된다 (집정관 저격) */
+export function aimLocked(s: AiState, lockSec: number): boolean {
+  return s.phase === 'windup' && s.left <= lockSec;
+}
+
+/**
  * 거리 유지 (원거리 적): 1 = 다가감, -1 = 물러남, 0 = 멈춤.
  * keep보다 band 이상 멀면 다가가고, keep보다 가까우면 물러난다.
  */

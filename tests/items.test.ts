@@ -34,6 +34,7 @@ describe('아이템 목록 (기획서 표)', () => {
       ['gihwanArm', 'electricRing'],
       ['hectarRam', 'hectarChief'],
       ['ancientCore', 'magiGolem'],
+      ['eclipseCore', 'eclipse'],
     ]);
   });
   it('데이터 검증 통과', () => {

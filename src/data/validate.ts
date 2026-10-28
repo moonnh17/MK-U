@@ -299,7 +299,8 @@ export function validateGameData(d: GameData): Errors {
     for (const e of [...x.effects, ...(x.variants ?? []).flatMap((v) => v.effects)]) {
       if (e.kind === 'stat' && e.stat !== 'all' && !statIds.has(e.stat)) errors.push(`${w}: 알 수 없는 스탯 '${e.stat}'`);
       if ((e.kind === 'autoCast' || e.kind === 'skillDamage') && !d.skills.skills.some((s) => s.id === e.skillId)) errors.push(`${w}: 없는 스킬 '${e.skillId}'`);
-      if ((e.kind === 'hurtBurst' || e.kind === 'gravityShot' || e.kind === 'coinShots') && e.tags.some((t) => !tagIds.has(t))) errors.push(`${w}: 알 수 없는 태그`);
+      if ((e.kind === 'hurtBurst' || e.kind === 'gravityShot' || e.kind === 'coinShots' || e.kind === 'absorbCore') && e.tags.some((t) => !tagIds.has(t))) errors.push(`${w}: 알 수 없는 태그`);
+      if (e.kind === 'absorbCore' && e.absorbSec >= e.everySec) errors.push(`${w}: absorbSec는 everySec보다 짧아야 함`);
       for (const [k, v] of Object.entries(e)) if (typeof v === 'number' && !Number.isFinite(v)) errors.push(`${w}.${e.kind}.${k}: 숫자여야 함`);
     }
   }
@@ -328,10 +329,23 @@ export function validateGameData(d: GameData): Errors {
     checkUnique(errors, `${where}.attacks`, (attacks ?? []).map((a) => a.id));
     for (const a of attacks ?? []) {
       const w = `${where}.attacks.${a.id}`;
-      if (!['lunge', 'slam', 'burst', 'puddle'].includes(a.kind)) errors.push(`${w}: kind는 lunge · slam · burst · puddle`);
+      if (!['lunge', 'slam', 'burst', 'puddle', 'fan', 'rope', 'snipe'].includes(a.kind)) errors.push(`${w}: kind는 lunge · slam · burst · puddle · fan · rope · snipe`);
       for (const k of ['triggerRange', 'windupSec', 'actSec', 'damage'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
       for (const k of ['recoverSec', 'cooldownSec'] as const) checkPositive(errors, `${w}.${k}`, a[k], true);
       if (a.kind === 'lunge') checkPositive(errors, `${w}.speed`, a.speed);
+      if (a.chain) {
+        checkRange(errors, `${w}.chain`, a.chain);
+        checkPositive(errors, `${w}.chainWindupSec`, a.chainWindupSec);
+      }
+      if (a.kind === 'fan') for (const k of ['shots', 'spreadDeg', 'speed', 'range'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
+      if (a.kind === 'rope') {
+        for (const k of ['speed', 'range', 'pullSpeed', 'radius', 'arcDeg', 'axeDamage'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
+        checkPositive(errors, `${w}.axeDelaySec`, a.axeDelaySec, true);
+      }
+      if (a.kind === 'snipe') {
+        for (const k of ['lockSec', 'width', 'range'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
+        if ((a.lockSec ?? 0) >= a.windupSec) errors.push(`${w}: lockSec는 windupSec보다 짧아야 함`);
+      }
       if (a.kind === 'slam') {
         checkPositive(errors, `${w}.radius`, a.radius);
         checkPositive(errors, `${w}.reach`, a.reach, true);
@@ -348,7 +362,24 @@ export function validateGameData(d: GameData): Errors {
     checkAttacks(`enemies.${e.id}`, e.attacks);
     if (e.trail) for (const k of ['everyPx', 'radius', 'liveSec', 'damage', 'tickSec'] as const) checkPositive(errors, `enemies.${e.id}.trail.${k}`, e.trail[k]);
     if (e.keepDistance !== undefined) checkPositive(errors, `enemies.${e.id}.keepDistance`, e.keepDistance);
+    if (e.absorb) {
+      const w = `enemies.${e.id}.absorb`;
+      if (e.absorb.stages.length === 0) errors.push(`${w}.stages: 비어 있음`);
+      e.absorb.stages.forEach((st, i) => {
+        for (const k of ['absorb', 'hpMul', 'damageMul', 'haloRadius'] as const) checkPositive(errors, `${w}.stages[${i}].${k}`, st[k]);
+        if (i > 0 && st.absorb <= e.absorb!.stages[i - 1]!.absorb) errors.push(`${w}.stages[${i}].absorb: 앞 단계보다 커야 함`);
+      });
+      if (!HEX_COLOR.test(e.absorb.haloColor)) errors.push(`${w}.haloColor: #RRGGBB`);
+    }
   }
+  // 정예
+  const ch = d.waves.champions;
+  for (const id of ch.ids) if (d.enemies.enemies.find((x) => x.id === id)?.rank !== 'champion') errors.push(`waves.champions.ids: '${id}'는 rank champion인 적이어야 함`);
+  for (const [c, stages] of Object.entries(ch.stages)) {
+    for (const s of stages) if (!Number.isInteger(s) || s < 1 || s > d.mapgen.stagesPerChapter) errors.push(`waves.champions.stages.${c}: 스테이지 범위 밖 (${s})`);
+  }
+  for (const k of ['waveChance', 'raidBothChance', 'itemChestChance'] as const) if (!(ch[k] >= 0 && ch[k] <= 1)) errors.push(`waves.champions.${k}: 0~1`);
+  if (!(Number.isInteger(ch.maxPerRoom) && ch.maxPerRoom >= 1)) errors.push('waves.champions.maxPerRoom: 1 이상 정수');
   for (const [c, room] of Object.entries(d.ui.chapterRooms)) for (const [k, col] of Object.entries(room)) if (!HEX_COLOR.test(col)) errors.push(`ui.chapterRooms.${c}.${k}: #RRGGBB`);
   if (!d.enemies.enemies.some((x) => x.id === d.loot.spire.troopers.enemy)) errors.push('loot.spire.troopers.enemy: 없는 적');
   checkSprite(errors, 'enemies.projectile', d.enemies.projectile);
@@ -376,7 +407,21 @@ export function validateGameData(d: GameData): Errors {
     const rank = hidden ? 'hiddenBoss' : 'boss';
     if (!e) errors.push(`${w}: 같은 id의 적이 없음`);
     else if (e.ai !== 'boss' || e.rank !== rank) errors.push(`${w}: 적 '${b.id}'는 ai boss·rank ${rank}여야 함`);
-    if (!(b.enrageAt > 0 && b.enrageAt < 1)) errors.push(`${w}.enrageAt: 0~1 사이`);
+    // 0이면 체력 강화 단계가 없다 (시간 단계 보스)
+    if (!(b.enrageAt >= 0 && b.enrageAt < 1)) errors.push(`${w}.enrageAt: 0~1 사이`);
+    if (b.enrageAt === 0 && b.patterns.some((p) => p.phase === 2)) errors.push(`${w}: enrageAt 0이면 강화 단계 패턴을 둘 수 없음`);
+    const unlocks = b.unlocks ?? [];
+    unlocks.forEach((t, i) => {
+      checkPositive(errors, `${w}.unlocks[${i}]`, t);
+      if (i > 0 && t <= unlocks[i - 1]!) errors.push(`${w}.unlocks: 오름차순이어야 함`);
+      needText(w, `boss.unlock.${b.id}.${i + 1}`);
+    });
+    if (b.darkness) {
+      checkPositive(errors, `${w}.darkness.lightRadius`, b.darkness.lightRadius);
+      if (!(b.darkness.alpha > 0 && b.darkness.alpha <= 1)) errors.push(`${w}.darkness.alpha: 0~1`);
+      if (!HEX_COLOR.test(b.darkness.color)) errors.push(`${w}.darkness.color: #RRGGBB`);
+    }
+    if (b.enrageAt > 0) needText(w, `boss.enraged.${b.id}`);
     for (const k of ['gapSec', 'enrageSec', 'firstDelaySec', 'keepDistance'] as const) checkPositive(errors, `${w}.${k}`, b[k], true);
     checkPositive(errors, `${w}.enraged.moveSpeedMul`, b.enraged.moveSpeedMul);
     checkPositive(errors, `${w}.enraged.scale`, b.enraged.scale);
@@ -389,6 +434,7 @@ export function validateGameData(d: GameData): Errors {
       checkPositive(errors, `${pw}.cooldownSec`, p.cooldownSec, true);
       checkPositive(errors, `${pw}.durationSec`, p.durationSec);
       if (p.phase !== 1 && p.phase !== 2) errors.push(`${pw}.phase: 1 또는 2`);
+      if (p.unlock !== undefined && !(Number.isInteger(p.unlock) && p.unlock >= 0 && p.unlock <= unlocks.length)) errors.push(`${pw}.unlock: 0~${unlocks.length} 정수`);
       for (const [k, v] of Object.entries(p.values)) if (!isNum(v)) errors.push(`${pw}.values.${k}: 숫자여야 함`);
       needText(pw, `boss.pattern.${p.id}`);
     }

@@ -54,6 +54,11 @@ export class RoomState {
     return [{ type: 'cleared' }];
   }
 
+  /** 웨이브 목록 밖에서 함께 나온 적 (3장 정예): 이 적도 잡아야 다음 웨이브 */
+  addAlive(n: number): void {
+    if (this.phase === 'locked') this.alive += n;
+  }
+
   enemyKilled(): void {
     if (this.alive <= 0) return;
     this.alive--;

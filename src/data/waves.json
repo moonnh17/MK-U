@@ -2,6 +2,14 @@
   "waveDelaySec": 0.8,
   "spawnWarnSec": 0.5,
   "spawnMinPlayerDistance": 90,
+  "champions": {
+    "ids": ["executor", "archon"],
+    "stages": { "3": [1, 3, 4] },
+    "waveChance": 0.4,
+    "maxPerRoom": 2,
+    "raidBothChance": 0.5,
+    "itemChestChance": 0.1
+  },
   "waves": [
     { "id": "c1_swarm", "chapter": 1, "weight": 3, "spawns": [{ "enemy": "tomakki", "count": [5, 7] }] },
     {
@@ -35,6 +43,10 @@
     { "id": "c2_squad", "chapter": 2, "weight": 3, "spawns": [{ "enemy": "hectarTrooper", "count": [3, 4] }] },
     { "id": "c2_charge", "chapter": 2, "weight": 2, "spawns": [{ "enemy": "magiBeetle", "count": [2, 3] }, { "enemy": "hectarTrooper", "count": [1, 2] }] },
     { "id": "c2_haunt", "chapter": 2, "weight": 2, "spawns": [{ "enemy": "aMemory", "count": [2, 2] }, { "enemy": "magiBeetle", "count": [1, 1] }] },
-    { "id": "c2_mixed", "chapter": 2, "weight": 1, "spawns": [{ "enemy": "aMemory", "count": [1, 1] }, { "enemy": "magiBeetle", "count": [1, 2] }, { "enemy": "hectarTrooper", "count": [2, 2] }] }
+    { "id": "c2_mixed", "chapter": 2, "weight": 1, "spawns": [{ "enemy": "aMemory", "count": [1, 1] }, { "enemy": "magiBeetle", "count": [1, 2] }, { "enemy": "hectarTrooper", "count": [2, 2] }] },
+    { "id": "c3_volley", "chapter": 3, "weight": 3, "spawns": [{ "enemy": "ancientOne", "count": [3, 4] }] },
+    { "id": "c3_hatred", "chapter": 3, "weight": 2, "spawns": [{ "enemy": "hatredShard", "count": [3, 4] }, { "enemy": "ancientOne", "count": [1, 1] }] },
+    { "id": "c3_mixed", "chapter": 3, "weight": 2, "spawns": [{ "enemy": "ancientOne", "count": [2, 2] }, { "enemy": "hatredShard", "count": [2, 3] }] },
+    { "id": "c3_swarm", "chapter": 3, "weight": 1, "spawns": [{ "enemy": "hatredShard", "count": [5, 6] }] }
   ]
 }

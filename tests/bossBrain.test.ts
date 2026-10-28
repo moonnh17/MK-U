@@ -21,6 +21,7 @@ function run(s: BossBrainState, sec: number, hp: number, dist: number, seed = 1)
     const r = stepBoss(s, 0.05, hp, dist, P, cfg, rng);
     s = r.state;
     for (const e of r.events) {
+      if (e.type === 'unlock') continue;
       all.push(e.type === 'enrage' ? 'enrage' : `${e.type}:${e.id}`);
       if (e.type === 'start') starts.push(e.id);
     }
@@ -109,7 +110,8 @@ describe('챕터1 보스 데이터 (기획서 보스 패턴 표)', () => {
   });
 
   it('강화 단계는 체력 50% 이하', () => {
-    for (const b of gameData.bosses.bosses) expect(b.enrageAt).toBe(0.5);
+    // 시간 단계 보스(마기카이저)는 체력 강화 단계가 없다
+    for (const b of gameData.bosses.bosses) expect(b.enrageAt).toBe(b.unlocks ? 0 : 0.5);
     // 폭주: 이동·돌진 가속, 분출 증가 / 거대화
     const f = boss('fusionAkgwi');
     expect(f.enraged.moveSpeedMul).toBeGreaterThan(1);

@@ -163,6 +163,9 @@
       "spriteKey": "item_hectar_ram", "color": "#3a9aff", "size": 8 },
     { "id": "ancientCore", "nameKey": "item.ancientCore", "descKey": "item.ancientCore.desc", "grade": "legendary", "pool": "boss", "bossId": "magiGolem", "tags": ["magic", "ranged"],
       "effects": [{ "kind": "ultimateBurst", "shots": 24, "damage": 200, "speed": 240, "range": 300, "tags": ["magic", "ranged"] }],
-      "spriteKey": "item_ancient_core", "color": "#9a4aff", "size": 8 }
+      "spriteKey": "item_ancient_core", "color": "#9a4aff", "size": 8 },
+    { "id": "eclipseCore", "nameKey": "item.eclipseCore", "descKey": "item.eclipseCore.desc", "grade": "legendary", "pool": "boss", "bossId": "eclipse", "tags": ["magic"],
+      "effects": [{ "kind": "absorbCore", "everySec": 12, "absorbSec": 2.5, "damage": 220, "radius": 510, "tags": ["magic"] }],
+      "spriteKey": "item_eclipse_core", "color": "#c8a8ff", "size": 8 }
   ]
 }
