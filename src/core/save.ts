@@ -1,5 +1,5 @@
 /**
- * 영구 저장 (localStorage). 런 사이에 남는 것만: 마기력 결정, 직업별 강화, 처음 본 컷씬, 과거의 기억 조각, 첫 실행 여부.
+ * 영구 저장 (localStorage). 런 사이에 남는 것만: 마기력 결정, 직업별 강화, 처음 본 컷씬·제미니 대사, 과거의 기억 조각, 첫 실행 여부.
  * 읽다가 실패하거나 내용이 깨져 있으면 기본값으로 시작한다(게임은 저장 없이도 돌아간다).
  */
 import type { CutIn, CutPage } from '../ui/cutscenePages';
@@ -25,10 +25,12 @@ export interface SaveData {
   pastShards: number;
   /** 캡슐에서 깨어나는 첫 실행 연출을 봤는지 (M5-C) */
   firstRunDone: boolean;
+  /** 현재의 기억에 남은 미모사 제미니 대사: 칸 id → 본 문장(텍스트 키)·처음 본 순서 */
+  gemini: Record<string, { lines: string[]; order: number }>;
 }
 
 export function defaultSave(): SaveData {
-  return { version: SAVE_VERSION, crystals: 0, upgrades: {}, cutscenes: {}, pastShards: 0, firstRunDone: false };
+  return { version: SAVE_VERSION, crystals: 0, upgrades: {}, cutscenes: {}, pastShards: 0, firstRunDone: false, gemini: {} };
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -59,8 +61,15 @@ export function parseSave(raw: string | null): SaveData {
       if (isObj(c) && isObj(c.cut) && Array.isArray(c.pages)) cutscenes[id] = { cut: c.cut as unknown as CutIn, pages: c.pages as CutPage[], order: nonNeg(c.order, 0) };
     }
   }
+  const gemini: SaveData['gemini'] = {};
+  if (isObj(o.gemini)) {
+    for (const [id, g] of Object.entries(o.gemini)) {
+      if (isObj(g) && Array.isArray(g.lines) && g.lines.every((x) => typeof x === 'string')) gemini[id] = { lines: g.lines as string[], order: nonNeg(g.order, 0) };
+    }
+  }
   return {
     version: SAVE_VERSION,
+    gemini,
     crystals: nonNeg(o.crystals, 0),
     upgrades,
     cutscenes,
@@ -73,6 +82,13 @@ export function parseSave(raw: string | null): SaveData {
 export function registerCutscene(s: SaveData, id: string, cut: CutIn, pages: CutPage[]): boolean {
   if (s.cutscenes[id]) return false;
   s.cutscenes[id] = { cut, pages, order: Object.keys(s.cutscenes).length };
+  return true;
+}
+
+/** 제미니 대사를 처음 봤으면 현재의 기억에 등록하고 true */
+export function registerGemini(s: SaveData, id: string, lines: readonly string[]): boolean {
+  if (s.gemini[id]) return false;
+  s.gemini[id] = { lines: [...lines], order: Object.keys(s.gemini).length };
   return true;
 }
 

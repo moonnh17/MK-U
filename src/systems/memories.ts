@@ -1,7 +1,8 @@
 /**
  * 기억조각 보관대의 칸 목록 (순수 함수).
  * 과거의 기억: 칸 수만큼, 얻은 수만큼 순서대로 열린다(내용은 미공개라 비워 둔다).
- * 현재의 기억: 지금 나올 수 있는 컷씬마다 한 칸. 아직 연출이 없는 것(보스 등장·제미니 대사)은 '준비 중' 칸.
+ * 현재의 기억: 지금 나올 수 있는 컷씬마다 한 칸. 아직 연출이 없는 보스 등장은 '준비 중' 칸.
+ * 미모사 제미니 대사 칸은 systems/gemini.ts geminiSlots.
  */
 import type { GameData } from '../data/index';
 
@@ -40,6 +41,6 @@ export function cutsceneSlots(
   }
   for (const j of jobs) for (const a of j.advancements) out.push({ id: `advancement.${a.id}`, group: 'advancement', nameKey: a.nameKey });
   // 연출이 생기면 채운다
-  out.push({ id: null, group: 'boss', nameKey: 'archive.slot.boss' }, { id: null, group: 'gemini', nameKey: 'archive.slot.gemini' });
+  out.push({ id: null, group: 'boss', nameKey: 'archive.slot.boss' });
   return out;
 }

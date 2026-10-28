@@ -739,10 +739,35 @@ export function validateGameData(d: GameData): Errors {
   for (const k of ['interactRadius', 'gridStep', 'wall', 'portalPulseSec'] as const) checkPositive(errors, `lab.${k}`, lab[k]);
   for (const k of ['lidSec', 'stepSec', 'stepDistance'] as const) checkPositive(errors, `lab.wake.${k}`, lab.wake[k]);
 
-  // --- 텍스트 ---
+  // --- 텍스트 --- (제미니 대사는 미공개 설정이면 빈 자리로 둔다)
   for (const [k, v] of Object.entries(d.text)) {
-    if (typeof v !== 'string' || v === '') errors.push(`text: '${k}' 값이 비어 있음`);
+    if (typeof v !== 'string' || (v === '' && !k.startsWith('gemini.story.') && !k.startsWith('gemini.mini.'))) errors.push(`text: '${k}' 값이 비어 있음`);
   }
+
+  // --- 미모사 제미니 대사 ---
+  const gm = d.gemini;
+  checkPositive(errors, 'gemini.mini.showSec', gm.mini.showSec);
+  checkPositive(errors, 'gemini.mini.fadeSec', gm.mini.fadeSec, true);
+  if (!HEX_COLOR.test(gm.color)) errors.push('gemini.color: #RRGGBB');
+  checkUnique(errors, 'gemini', [...gm.stories, ...gm.minis].map((x) => x.id));
+  const events = ['firstRun', 'advancement', 'bossKill', 'championMet', 'chapterEnd', 'hiddenBoss'];
+  for (const s of gm.stories) {
+    const w = `gemini.stories.${s.id}`;
+    if (!events.includes(s.event)) errors.push(`${w}: 알 수 없는 이벤트 '${s.event}'`);
+    if (s.lines.length === 0) errors.push(`${w}.lines: 비어 있음`);
+    needText(w, s.nameKey);
+    for (const k of s.lines) needText(w, k);
+  }
+  for (const m of gm.minis) {
+    const w = `gemini.minis.${m.id}`;
+    if (!events.includes(m.event)) errors.push(`${w}: 알 수 없는 이벤트 '${m.event}'`);
+    if (!['calm', 'ominous'].includes(m.mood)) errors.push(`${w}.mood: calm · ominous`);
+    checkPositive(errors, `${w}.priority`, m.priority);
+    if (m.candidates.length === 0 || m.candidates.some((c) => c.length === 0)) errors.push(`${w}.candidates: 빈 후보`);
+    needText(w, m.nameKey);
+    for (const c of m.candidates) for (const k of c) needText(w, k);
+  }
+
   for (const { where, key } of textKeys) {
     if (!(key in d.text)) errors.push(`${where}: 텍스트 키 '${key}'가 ko.json에 없음`);
   }

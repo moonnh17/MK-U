@@ -1,0 +1,23 @@
+{
+  "mini": { "showSec": 5, "fadeSec": 0.3 },
+  "color": "#4ab0ff",
+  "stories": [
+    { "id": "firstRun", "nameKey": "gemini.story.firstRun.name", "event": "firstRun", "lines": ["gemini.story.firstRun.1"] },
+    { "id": "eclipseKill", "nameKey": "gemini.story.eclipseKill.name", "event": "bossKill", "when": "eclipse", "lines": ["gemini.story.eclipseKill.1"] },
+    { "id": "ending", "nameKey": "gemini.story.ending.name", "event": "bossKill", "when": "magiKaiser", "lines": ["gemini.story.ending.1"] }
+  ],
+  "minis": [
+    { "id": "advancementHectar", "nameKey": "gemini.mini.advancementHectar.name", "event": "advancement", "when": "hectar", "priority": 2, "record": false, "mood": "calm",
+      "candidates": [["gemini.mini.advancementHectar.1"]] },
+    { "id": "advancementAcro", "nameKey": "gemini.mini.advancementAcro.name", "event": "advancement", "when": "acro", "priority": 2, "record": false, "mood": "calm",
+      "candidates": [["gemini.mini.advancementAcro.1"]] },
+    { "id": "bossKill", "nameKey": "gemini.mini.bossKill.name", "event": "bossKill", "priority": 1, "record": false, "mood": "calm",
+      "candidates": [["gemini.mini.bossKill.1"], ["gemini.mini.bossKill.2"]] },
+    { "id": "championMet", "nameKey": "gemini.mini.championMet.name", "event": "championMet", "priority": 3, "record": true, "mood": "ominous",
+      "candidates": [["gemini.mini.championMet.1", "gemini.mini.championMet.2"]] },
+    { "id": "chapterEnd2", "nameKey": "gemini.mini.chapterEnd2.name", "event": "chapterEnd", "when": "2", "priority": 3, "record": true, "mood": "ominous",
+      "candidates": [["gemini.mini.chapterEnd2.1"]] },
+    { "id": "hiddenBoss", "nameKey": "gemini.mini.hiddenBoss.name", "event": "hiddenBoss", "priority": 3, "record": true, "mood": "ominous",
+      "candidates": [["gemini.mini.hiddenBoss.1"]] }
+  ]
+}

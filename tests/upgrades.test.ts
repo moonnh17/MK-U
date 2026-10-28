@@ -93,7 +93,7 @@ describe('기억조각 보관대 칸', () => {
     expect(s).toHaveLength(10);
     expect(s.filter((x) => x.open).map((x) => x.index)).toEqual([0, 1, 2]);
   });
-  it('현재의 기억: 구현된 스킬 각성·궁극기 각성·전직, 보스 등장·제미니는 준비 중 칸', async () => {
+  it('현재의 기억: 구현된 스킬 각성·궁극기 각성·전직, 보스 등장은 준비 중 칸 (제미니 칸은 gemini.test)', async () => {
     const { cutsceneSlots } = await import('../src/systems/memories');
     const { isSkillImplemented, isUltimateImplemented } = await import('../src/skills/registry');
     const slots = cutsceneSlots(gameData, { skill: isSkillImplemented, ultimate: isUltimateImplemented });
@@ -102,7 +102,7 @@ describe('기억조각 보관대 칸', () => {
     expect(ids).toContain('advancement.hectar');
     expect(ids).toContain('advancement.acro');
     expect(ids.filter((x) => x?.startsWith('advancement.'))).toHaveLength(2); // 잠긴 직업의 전직은 없음
-    expect(slots.filter((s) => s.id === null).map((s) => s.group)).toEqual(['boss', 'gemini']);
+    expect(slots.filter((s) => s.id === null).map((s) => s.group)).toEqual(['boss']);
     expect(new Set(ids.filter(Boolean)).size).toBe(ids.filter(Boolean).length);
   });
 });

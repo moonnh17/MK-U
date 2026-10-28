@@ -10,6 +10,7 @@ import type {
   ItemsData,
   JobsData,
   LabData,
+  GeminiData,
   LootData,
   MapgenData,
   MetaData,
@@ -48,6 +49,7 @@ import uiJson from './ui.json';
 import keybindingsJson from './keybindings.json';
 import metaJson from './meta.json';
 import labJson from './lab.json';
+import geminiJson from './gemini.json';
 import koJson from './text/ko.json';
 
 export interface GameData {
@@ -72,6 +74,7 @@ export interface GameData {
   keybindings: KeybindingsData;
   meta: MetaData;
   lab: LabData;
+  gemini: GeminiData;
   text: TextTable;
 }
 
@@ -98,5 +101,6 @@ export const gameData: GameData = {
   keybindings: keybindingsJson as unknown as KeybindingsData,
   meta: metaJson as unknown as MetaData,
   lab: labJson as unknown as LabData,
+  gemini: geminiJson as unknown as GeminiData,
   text: koJson as TextTable,
 };

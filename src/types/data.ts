@@ -1026,3 +1026,41 @@ export interface LabData {
   geminiFlicker: { minAlpha: number; maxAlpha: number; periodSec: number };
   portalPulseSec: number;
 }
+
+// ---------- 미모사 제미니 대화 ----------
+
+/** 대사가 나오는 게임 이벤트. arg: 전직 학파 / 보스 id / 끝난 챕터 번호 */
+export type GeminiEventId = 'firstRun' | 'advancement' | 'bossKill' | 'championMet' | 'chapterEnd' | 'hiddenBoss';
+
+/** 게임을 멈추는 일반 스토리 대화. lines: 차례로 넘기는 문장(텍스트 키). 내용이 비어 있으면 띄우지 않는다 */
+export interface GeminiStoryDef {
+  id: string;
+  nameKey: string;
+  event: GeminiEventId;
+  when?: string;
+  lines: string[];
+}
+
+/**
+ * 멈추지 않는 미니 대사. candidates 중 하나를 무작위로(같은 런에 나온 것 제외), 후보 하나는 차례로 띄우는 문장 목록.
+ * record: 현재의 기억에 남는 복선 대사 / mood: 아이콘 표정(평범·불길)
+ */
+export interface GeminiMiniDef {
+  id: string;
+  nameKey: string;
+  event: GeminiEventId;
+  when?: string;
+  priority: number;
+  record: boolean;
+  mood: 'calm' | 'ominous';
+  candidates: string[][];
+}
+
+export interface GeminiData {
+  /** 미니 대사 한 문장 표시 시간·페이드(초) */
+  mini: { showSec: number; fadeSec: number };
+  /** 초상화·아이콘 색 (헥타르 연구원의 푸른 분위기) */
+  color: string;
+  stories: GeminiStoryDef[];
+  minis: GeminiMiniDef[];
+}
