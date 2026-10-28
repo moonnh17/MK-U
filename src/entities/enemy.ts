@@ -69,6 +69,10 @@ export class Enemy {
   private shotTimer = 0;
   /** 어느 기억: 장판을 남긴 뒤 움직인 거리 */
   private trailDist = 0;
+  /** 붙은 엘리트 전부 (보통 0~1, 중형 첨탑 강적은 2) */
+  readonly elites: EliteDef[];
+  /** 보스가 부른 적: 처치 보상·기록이 없다 */
+  noReward = false;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -77,14 +81,17 @@ export class Enemy {
     y: number,
     warnSec: number,
     readonly elite: EliteDef | null,
-    elites: ElitesData,
+    elitesData: ElitesData,
     iconText = '',
+    /** 두 번째 엘리트 (엘리트 2종이 겹친 개체) */
+    extraElite: EliteDef | null = null,
   ) {
-    this.mods = eliteMods(elite, elites);
+    this.elites = [elite, extraElite].filter((x): x is EliteDef => x !== null);
+    this.mods = eliteMods(this.elites, elitesData);
     this.maxHp = def.maxHp * this.mods.hpMul;
     this.hp = this.maxHp;
     this.warn = warnSec;
-    this.attacks = [...(elite?.extraAttacks ?? []), ...(def.attacks ?? [])];
+    this.attacks = [...this.elites.flatMap((x) => x.extraAttacks ?? []), ...(def.attacks ?? [])];
     // 첫 공격은 등장 직후 바로 나오지 않게
     this.ai = initialAi(this.attacks, warnSec);
     this.sprite = scene.physics.add.image(x, y, def.spriteKey);
@@ -98,7 +105,7 @@ export class Enemy {
         .text(x, y, iconText, { fontFamily: 'sans-serif', fontSize: '8px', color: elite.color })
         .setOrigin(0.5, 1)
         .setDepth(7);
-      if (elite.look === 'outline') this.outline = scene.add.graphics().setDepth(4);
+      if (this.elites.some((x) => x.look === 'outline')) this.outline = scene.add.graphics().setDepth(4);
     }
   }
 
@@ -120,6 +127,12 @@ export class Enemy {
   /** 등급 판정용 (엘리트가 붙으면 '엘리트') */
   get rank(): EnemyRank {
     return effectiveRank(this.def.rank, this.elite);
+  }
+
+  /** 핵 노출·기절: sec 동안 받는 피해 ×mul (보스 파성 돌진) */
+  setExposed(sec: number, mul: number): void {
+    this.stunLeft = sec;
+    this.stunMul = mul;
   }
 
   /** 받는 피해 배율 (거대 엘리트·기절) */
@@ -165,8 +178,11 @@ export class Enemy {
       this.sprite.setVelocity(0, 0);
       return;
     }
-    // 보스는 bosses/의 컨트롤러가 움직인다
-    if (this.def.ai === 'boss') return;
+    // 보스는 bosses/의 컨트롤러가 움직인다 (핵 노출 시간만 여기서 줄인다)
+    if (this.def.ai === 'boss') {
+      if (this.stunLeft > 0) this.stunLeft -= dt;
+      return;
+    }
     // 마기갑충: 벽에 부딪혀 기절
     if (this.stunLeft > 0) {
       this.stunLeft -= dt;
@@ -286,19 +302,21 @@ export class Enemy {
     this.icon?.setPosition(x, y - this.radius - 1);
     if (this.outline) {
       const s = this.radius * 2 + 4;
-      this.outline.clear().lineStyle(2, hexColor(this.elite.color), 1).strokeRect(x - s / 2, y - s / 2, s, s);
+      const ol = this.elites.find((e) => e.look === 'outline')!;
+      this.outline.clear().lineStyle(2, hexColor(ol.color), 1).strokeRect(x - s / 2, y - s / 2, s, s);
     }
-    if (this.elite.look === 'afterimage') {
+    const ghost = this.elites.find((e) => e.look === 'afterimage');
+    if (ghost) {
       this.ghostTimer -= dt;
       const body = this.sprite.body as Phaser.Physics.Arcade.Body | null;
       if (this.ghostTimer <= 0 && body && body.speed > 10) {
         this.ghostTimer = 0.08;
         const g = this.scene.add.image(x, y, this.def.spriteKey).setScale(this.mods.scale).setAlpha(0.35).setDepth(2);
-        g.setTint(hexColor(this.elite.color));
+        g.setTint(hexColor(ghost.color));
         this.scene.tweens.add({ targets: g, alpha: 0, duration: 250, onComplete: () => g.destroy() });
       }
     }
-    if (this.elite.look === 'blink' && this.warn <= 0) {
+    if (this.elites.some((e) => e.look === 'blink') && this.warn <= 0) {
       this.blinkT += dt;
       this.sprite.setAlpha(0.6 + 0.4 * Math.abs(Math.sin(this.blinkT * 8)));
     }
@@ -311,7 +329,7 @@ export class Enemy {
 
   /** 넉백: 거대 엘리트·보스는 면역 */
   get knockbackImmune(): boolean {
-    return !!this.elite?.knockbackImmune || this.def.rank === 'boss' || this.def.rank === 'hiddenBoss';
+    return this.elites.some((e) => e.knockbackImmune) || this.def.rank === 'boss' || this.def.rank === 'hiddenBoss';
   }
 
   knockback(dir: Vec2, distance: number, sec: number): void {

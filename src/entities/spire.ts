@@ -1,11 +1,11 @@
 /**
- * 마기수집첨탑의 모습: 검고 얇은 비석 + 충전 원 + 충전율 호·숫자.
+ * 마기수집첨탑의 모습: 소형은 검고 얇은 비석, 중형은 검은 구조물 + 붉은 기계. 충전 원 + 충전율 호·숫자.
  * 진행 규칙은 systems/spire.ts(SpireState), 소환·카드는 RunScene이 한다.
  */
 import type Phaser from 'phaser';
 import { hexColor } from '../core/scale';
 import type { SpireData } from '../types/data';
-import { SpireState } from '../systems/spire';
+import { SpireState, type SpireSize } from '../systems/spire';
 
 export class Spire {
   readonly state: SpireState;
@@ -21,10 +21,12 @@ export class Spire {
     readonly x: number,
     readonly y: number,
     private readonly data: SpireData,
+    /** 소형: 검고 얇은 비석 / 중형: 검은 구조물 + 붉은 아크로식 기계 */
+    readonly size: SpireSize = 'small',
   ) {
     this.state = new SpireState(data);
     this.color = hexColor(data.ringColor);
-    const s = data.small.sprite;
+    const s = data[size].sprite;
     // 바닥이 착지점에 오도록 아래쪽 기준
     this.body = scene.add.image(x, y - data.fallHeight, s.spriteKey).setOrigin(0.5, 1).setDepth(4);
     scene.tweens.add({ targets: this.body, y, duration: data.fallSec * 1000, ease: 'Quad.easeIn' });

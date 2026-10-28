@@ -4,7 +4,7 @@
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
-import { BouncingDisc, DelayedBlast, Beams, EdgeBand, Ring, SectorBlast, Zone } from '../entities/hazard';
+import { BouncingDisc, DelayedBlast, Beams, EdgeBand, RectBlast, Ring, SectorBlast, Zone } from '../entities/hazard';
 import type { BossHost, PatternRun } from './host';
 
 /** 패턴이 다루는 보스 */
@@ -29,6 +29,12 @@ export interface PatternCtx {
   buff(sec: number, damageMul: number, speedMul: number): void;
   /** 분신 소환 (수치는 'clones' 패턴 values) */
   summonClones(): void;
+  /** 이 패턴이 부를 적 (데이터의 summon) */
+  summonId?: string;
+  /** 적 무리 소환 (보상 없음, 살아 있는 동안 이 패턴은 다시 쓰지 않는다) */
+  summon(enemyIds: readonly string[]): void;
+  /** 핵 노출: sec 동안 멈추고 받는 피해 ×mul */
+  expose(sec: number, mul: number): void;
   /** 지나갈 수 없는 잔해 (개수 상한·갇힘 방지는 컨트롤러가) */
   rubble(at: Vec2, radius: number): void;
 }
@@ -548,6 +554,209 @@ class Judgment extends Timed {
   }
 }
 
+// ---------- 챕터2 보스 ----------
+
+/** 척력 방출 (헥타르 수석 연구원): 자기 둘레에서 빠르게 퍼지는 고리 */
+class Repulse extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    this.at(c.v('windupSec'), () => {
+      const from = c.boss.radius();
+      const to = c.v('maxRadius');
+      c.host.addHazard(
+        new Ring(c.host.scene, {
+          center: c.boss.pos(),
+          fromR: from,
+          toR: to,
+          moveSec: (to - from) / c.v('speed'),
+          telegraphSec: 0,
+          holdSec: 0,
+          thickness: c.v('thickness'),
+          damage: c.v('damage'),
+          tickSec: 0,
+          color: c.boss.color,
+        }),
+      );
+    });
+  }
+}
+
+/** 마기 탄막 (헥타르 수석 연구원): 회전하는 나선 (일반 탄: 굴절·탄 베기 가능) */
+class SpiralBarrage extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const start = c.host.rng.range(0, Math.PI * 2);
+    const arms = c.v('arms');
+    const dir = c.host.rng.chance(0.5) ? 1 : -1;
+    for (let i = 0; i < c.v('volleys'); i++) {
+      this.at(i * c.v('intervalSec'), () => {
+        for (let k = 0; k < arms; k++) {
+          const a = start + dir * i * c.v('stepRad') + (k * Math.PI * 2) / arms;
+          c.host.fireEnemyBullet(c.boss.pos(), a, c.v('speed'), c.v('range'), c.v('damage'), true);
+        }
+      });
+    }
+  }
+}
+
+/** 반물질 폭발 (헥타르 수석 연구원): 플레이어 자리 큰 예고 원 (강화: 2연속) */
+class Antimatter extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    for (let i = 0; i < c.v('count'); i++) {
+      this.at(i * c.v('gapSec'), () =>
+        c.host.addHazard(new DelayedBlast(c.host.scene, clampTo(c.host.playerPos(), c, c.v('radius') / 2), c.v('radius'), c.v('delaySec'), c.v('damage'), c.boss.color)),
+      );
+    }
+  }
+}
+
+/** 헥타르 전투원 호출 (헥타르 수석 연구원): 살아 있는 동안 다시 부르지 않는다 */
+class CallTroopers extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    this.at(c.v('windupSec'), () => {
+      const id = c.summonId;
+      if (id) c.summon(Array.from({ length: c.v('count') }, () => id));
+    });
+  }
+}
+
+/** 대지 분쇄 (마기골렘): 앞쪽 큰 부채꼴 */
+class EarthCrush extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    c.host.addHazard(new SectorBlast(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('radius'), c.v('arcDeg'), c.v('windupSec'), c.v('damage'), c.boss.color));
+  }
+}
+
+/** 마기 포격 (마기골렘): 플레이어 둘레에 포격 예고 원 여러 개 */
+class Bombard extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    for (let i = 0; i < c.v('shells'); i++) {
+      this.at(i * c.v('stepSec'), () =>
+        c.host.addHazard(new DelayedBlast(c.host.scene, around(c, i, c.v('spread'), c.v('radius')), c.v('radius'), c.v('delaySec'), c.v('damage'), c.boss.color)),
+      );
+    }
+  }
+}
+
+/** 파멸 광선 (마기골렘): 굵은 레이저가 천천히 돈다 (대형 레이저: 굴절 불가) */
+class RuinBeam extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    c.host.addHazard(
+      new Beams(c.host.scene, {
+        center: () => c.boss.pos(),
+        count: 1,
+        length: c.v('length'),
+        width: c.v('width'),
+        spin: c.v('spinSpeed') * (c.host.rng.chance(0.5) ? 1 : -1),
+        startAngle: angleTo(p, c.host.playerPos()),
+        telegraphSec: c.v('telegraphSec'),
+        liveSec: c.v('liveSec'),
+        damage: c.v('damage'),
+        tickSec: c.v('tickSec'),
+        color: c.boss.color,
+      }),
+    );
+  }
+}
+
+/** 파성 돌진 (마기골렘): 긴 돌진, 벽에 부딪히면 멈추고 핵이 드러난다 */
+class BreakerDash implements PatternRun {
+  private readonly dash: Dash;
+  private checked = false;
+
+  constructor(private readonly c: PatternCtx) {
+    this.dash = new Dash(c, false);
+  }
+
+  update(dt: number): void {
+    this.dash.update(dt);
+    if (!this.dash.finished || this.checked) return;
+    this.checked = true;
+    if (this.c.boss.blocked()) {
+      this.c.expose(this.c.v('exposeSec'), this.c.v('exposeMul'));
+      this.c.host.scene.cameras.main.shake(200, 0.008);
+    }
+  }
+
+  destroy(): void {
+    this.dash.destroy();
+  }
+}
+
+/** 폐허의 군세 (마기골렘): 지금 챕터 일반 적을 부른다 */
+class RuinLegion extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    this.at(c.v('windupSec'), () => {
+      const roster = c.host.chapterRoster();
+      if (roster.length > 0) c.summon(Array.from({ length: c.v('count') }, () => c.host.rng.pick(roster)));
+    });
+  }
+}
+
+/** 지각 균열 (마기골렘 광폭화): 플레이어 쪽으로 뻗는 직선 균열 여러 줄 */
+class CrustCrack extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    const base = angleTo(p, c.host.playerPos());
+    const n = c.v('lines');
+    const spread = (c.v('spreadDeg') * Math.PI) / 180;
+    for (let i = 0; i < n; i++) {
+      const a = n === 1 ? base : base - spread / 2 + (spread * i) / (n - 1);
+      c.host.addHazard(
+        new Beams(c.host.scene, {
+          center: () => p,
+          count: 1,
+          length: c.v('length'),
+          width: c.v('width'),
+          spin: 0,
+          startAngle: a,
+          telegraphSec: c.v('telegraphSec'),
+          liveSec: c.v('liveSec'),
+          damage: c.v('damage'),
+          tickSec: c.v('tickSec'),
+          color: c.boss.color,
+        }),
+      );
+    }
+  }
+}
+
+/** 붕괴 지대 (마기골렘 광폭화): 방 곳곳에 낙석 예고 원 */
+class CollapseZone extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const a = c.host.arena();
+    const r = c.v('radius');
+    for (let i = 0; i < c.v('rocks'); i++) {
+      this.at(i * c.v('stepSec'), () => {
+        const at = { x: c.host.rng.range(a.x + r, a.x + a.w - r), y: c.host.rng.range(a.y + r, a.y + a.h - r) };
+        c.host.addHazard(new DelayedBlast(c.host.scene, at, r, c.v('delaySec'), c.v('damage'), c.boss.color));
+      });
+    }
+  }
+}
+
+/** 종말의 단층 (마기골렘 광폭화): 플레이어를 지나 방을 가로지르는 넓은 띠 (가로·세로 무작위) */
+class DoomFault extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const a = c.host.arena();
+    const p = c.host.playerPos();
+    const w = c.v('width');
+    const rect = c.host.rng.chance(0.5) ? { x: a.x, y: p.y - w / 2, w: a.w, h: w } : { x: p.x - w / 2, y: a.y, w, h: a.h };
+    c.host.addHazard(new RectBlast(c.host.scene, rect, c.v('delaySec'), c.v('damage'), c.boss.color));
+  }
+}
+
 const PATTERNS: Readonly<Record<string, (c: PatternCtx) => PatternRun>> = {
   claw: (c) => new Claw(c),
   spiritDash: (c) => new Dash(c, true),
@@ -573,6 +782,18 @@ const PATTERNS: Readonly<Record<string, (c: PatternCtx) => PatternRun>> = {
   maceSmash: (c) => new MaceSmash(c),
   shieldThrow: (c) => new ShieldThrow(c),
   judgment: (c) => new Judgment(c),
+  repulse: (c) => new Repulse(c),
+  spiralBarrage: (c) => new SpiralBarrage(c),
+  antimatter: (c) => new Antimatter(c),
+  callTroopers: (c) => new CallTroopers(c),
+  earthCrush: (c) => new EarthCrush(c),
+  bombard: (c) => new Bombard(c),
+  ruinBeam: (c) => new RuinBeam(c),
+  breakerDash: (c) => new BreakerDash(c),
+  ruinLegion: (c) => new RuinLegion(c),
+  crustCrack: (c) => new CrustCrack(c),
+  collapseZone: (c) => new CollapseZone(c),
+  doomFault: (c) => new DoomFault(c),
 };
 
 export function makePattern(id: string, c: PatternCtx): PatternRun | null {

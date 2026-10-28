@@ -21,6 +21,7 @@ export class BootScene extends Phaser.Scene {
       data.loot.chest.item,
       data.loot.merchantStand,
       data.loot.spire.small.sprite,
+      data.loot.spire.medium.sprite,
       data.pickups.energyOrb,
       data.pickups.coin,
       data.mapgen.props.exitPortal,

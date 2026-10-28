@@ -240,6 +240,14 @@ export class ItemRuntime {
     return v;
   }
 
+  /** 궁극기를 썼을 때 (고대병기의 코어: 관통 탄환 전방위) */
+  onUltimate(): void {
+    const from = this.host.skill().playerPos();
+    for (const { e } of this.each('ultimateBurst')) {
+      for (let i = 0; i < e.shots; i++) this.host.fireBullet(from, (i * Math.PI * 2) / e.shots, e.speed, e.range, e.damage, e.tags, 99);
+    }
+  }
+
   /** 방패가 날아가는 동안 받는 피해 감소 */
   guard(): number {
     this.refresh();

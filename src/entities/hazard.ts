@@ -362,3 +362,38 @@ export class BouncingDisc implements Hazard {
     this.img.destroy();
   }
 }
+
+/** 사각형 예고 → 한 번 강타 (마기골렘 종말의 단층: 방을 가로지르는 띠) */
+export class RectBlast implements Hazard {
+  private readonly g: Phaser.GameObjects.Graphics;
+  private left: number;
+
+  constructor(
+    scene: Phaser.Scene,
+    private readonly rect: Rect,
+    private readonly delaySec: number,
+    private readonly damage: number,
+    private readonly color: number,
+  ) {
+    this.left = delaySec;
+    this.g = scene.add.graphics().setDepth(2);
+  }
+
+  update(dt: number, host: HazardHost): boolean {
+    this.left -= dt;
+    const r = this.rect;
+    const k = 1 - Math.max(0, this.left) / this.delaySec;
+    this.g.clear().lineStyle(1, this.color, 0.9).strokeRect(r.x, r.y, r.w, r.h).fillStyle(this.color, 0.1 + 0.25 * k).fillRect(r.x, r.y, r.w, r.h);
+    if (this.left > 0) return true;
+    const p = host.playerPos();
+    const pr = host.playerRadius;
+    if (p.x + pr >= r.x && p.x - pr <= r.x + r.w && p.y + pr >= r.y && p.y - pr <= r.y + r.h) host.hurtPlayer(this.damage);
+    const flash = host.scene.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, this.color, 0.6).setDepth(6);
+    host.scene.time.delayedCall(150, () => flash.destroy());
+    return false;
+  }
+
+  destroy(): void {
+    this.g.destroy();
+  }
+}

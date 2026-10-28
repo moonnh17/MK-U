@@ -12,13 +12,15 @@ import type { BossCore } from '../types/data';
 import type { BossHost, PatternRun } from './host';
 import { makePattern, type BossBody } from './patterns';
 
-const NONE: ReadonlySet<string> = new Set();
-const CLONES_BLOCKED: ReadonlySet<string> = new Set(['clones']);
-
+/**
+ * 보스가 부른 적. pattern: 부른 패턴(살아 있는 동안 그 패턴은 다시 쓰지 않는다)
+ * left·shot: 분신만 (시간이 지나면 사라지고 스스로 조준탄을 쏜다). 나머지는 자기 AI대로 싸우다 보스와 함께 사라진다.
+ */
 interface Minion {
   e: Enemy;
-  left: number;
-  shot: number;
+  pattern: string;
+  left: number | null;
+  shot: number | null;
 }
 
 export class BossController {
@@ -34,6 +36,8 @@ export class BossController {
   private minions: Minion[] = [];
   private rubble: { destroy(): void }[] = [];
   private host: BossHost | null = null;
+  /** 파성 돌진: 핵이 드러난 동안의 표시 */
+  private coreFx: Phaser.GameObjects.Arc | null = null;
 
   constructor(
     readonly enemy: Enemy,
@@ -76,7 +80,7 @@ export class BossController {
     this.updateBuff(dt);
     const p = host.playerPos();
     const dist = Math.hypot(p.x - e.sprite.x, p.y - e.sprite.y);
-    const blocked = this.minions.length > 0 ? CLONES_BLOCKED : NONE;
+    const blocked = new Set(this.minions.map((m) => m.pattern));
     const r = stepBoss(this.brain, dt, e.hp / e.maxHp, dist, this.def.patterns, this.def, host.rng, blocked);
     this.brain = r.state;
     for (const ev of r.events) {
@@ -88,8 +92,11 @@ export class BossController {
           boss: this.body,
           host,
           v: (k) => this.value(ev.id, k),
+          summonId: this.def.patterns.find((x) => x.id === ev.id)?.summon,
           buff: (sec, dmg, speed) => this.startBuff(host, sec, dmg, speed),
           summonClones: () => this.summonClones(host),
+          summon: (ids) => this.summonGroup(host, ev.id, ids),
+          expose: (sec, mul) => this.expose(host, sec, mul),
           rubble: (at, radius) => this.addRubble(host, at, radius),
         });
         this.label(host, host.t(`boss.pattern.${ev.id}`));
@@ -100,6 +107,7 @@ export class BossController {
     if (this.run) this.run.update(dt);
     else this.approach(dist, p);
     this.aura?.setPosition(e.sprite.x, e.sprite.y).setRadius(e.radius + 4);
+    this.coreFx?.setPosition(e.sprite.x, e.sprite.y);
     this.buffFx?.setPosition(e.sprite.x, e.sprite.y).setRadius(e.radius + 7);
   }
 
@@ -157,8 +165,37 @@ export class BossController {
       };
       const clone = host.spawnMinion('royalMageClone', at, Math.max(1, Math.round(e.maxHp * v('hpRatio'))));
       clone.sprite.setAlpha(0.55);
-      this.minions.push({ e: clone, left: v('lifeSec'), shot: v('shotSec') * (0.5 + i * 0.25) });
+      this.minions.push({ e: clone, pattern: 'clones', left: v('lifeSec'), shot: v('shotSec') * (0.5 + i * 0.25) });
     }
+  }
+
+  /** 적 무리 소환 (전투원 호출·폐허의 군세): 보스 둘레에, 보상 없이 */
+  private summonGroup(host: BossHost, pattern: string, ids: readonly string[]): void {
+    const e = this.enemy;
+    const a = host.arena();
+    const base = host.rng.range(0, Math.PI * 2);
+    ids.forEach((id, i) => {
+      const ang = base + (i * Math.PI * 2) / ids.length;
+      const r = e.radius + 30;
+      const at = {
+        x: Math.min(a.x + a.w - 12, Math.max(a.x + 12, e.sprite.x + Math.cos(ang) * r)),
+        y: Math.min(a.y + a.h - 12, Math.max(a.y + 12, e.sprite.y + Math.sin(ang) * r)),
+      };
+      this.minions.push({ e: host.spawnMinion(id, at), pattern, left: null, shot: null });
+    });
+  }
+
+  /** 핵 노출 (파성 돌진이 벽에 부딪힘): 잠깐 멈추고 받는 피해 증가 */
+  private expose(host: BossHost, sec: number, mul: number): void {
+    const e = this.enemy;
+    e.setExposed(sec, mul);
+    this.coreFx?.destroy();
+    this.coreFx = host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius * 0.45, 0xff5a3a, 0.9).setDepth(4);
+    host.scene.tweens.add({ targets: this.coreFx, alpha: 0.3, duration: 200, yoyo: true, repeat: -1 });
+    host.scene.time.delayedCall(sec * 1000, () => {
+      this.coreFx?.destroy();
+      this.coreFx = null;
+    });
   }
 
   private updateMinions(dt: number, host: BossHost): void {
@@ -167,11 +204,12 @@ export class BossController {
     const p = host.playerPos();
     this.minions = this.minions.filter((m) => {
       if (m.e.dead) return false;
-      m.left -= dt;
-      if (m.left <= 0 || this.enemy.dead) {
+      if (m.left !== null) m.left -= dt;
+      if ((m.left !== null && m.left <= 0) || this.enemy.dead) {
         host.removeMinion(m.e);
         return false;
       }
+      if (m.shot === null) return true;
       m.shot -= dt;
       if (m.shot <= 0) {
         m.shot = v('shotSec');
@@ -219,6 +257,8 @@ export class BossController {
     this.aura = null;
     this.buffFx?.destroy();
     this.buffFx = null;
+    this.coreFx?.destroy();
+    this.coreFx = null;
     for (const m of this.minions) this.host?.removeMinion(m.e);
     this.minions = [];
     for (const r of this.rubble) r.destroy();
