@@ -20,14 +20,17 @@ export interface GameContext {
   session: RunSession | null;
   /** 영구 저장 (결정·강화·기억) */
   save: SaveStore;
+  /** 실제로 불러온 그림의 spriteKey (Boot가 채운다. 화면 아이콘이 그림을 쓸지 정할 때) */
+  artLoaded: Set<string>;
   t(key: string, vars?: Record<string, string | number>): string;
 }
 
 let ctx: GameContext | null = null;
 
-export function setContext(c: Omit<GameContext, 't' | 'session' | 'debugFlags'>): GameContext {
+export function setContext(c: Omit<GameContext, 't' | 'session' | 'debugFlags' | 'artLoaded'>): GameContext {
   ctx = {
     ...c,
+    artLoaded: new Set(),
     session: null,
     debugFlags: { revealMap: false, invincible: false },
     t: (key, vars) => formatText(c.data.text, key, vars),

@@ -4,7 +4,7 @@
  */
 import type Phaser from 'phaser';
 import type { GameData } from '../data/index';
-import { anchorOf, collectAssets, fitHitbox, type AssetGroup } from '../systems/art';
+import { anchorOf, animKey, collectAssets, facingFlip, fitHitbox, pickAnim, type AssetGroup } from '../systems/art';
 
 let groups: Map<string, AssetGroup> | null = null;
 
@@ -26,4 +26,21 @@ export function fitArt(data: GameData, img: Phaser.GameObjects.Image, hitW: numb
     body.setSize(hitW, hitH, false);
     body.setOffset(fit.offsetX, fit.offsetY);
   }
+}
+
+/** 이만큼 빠르면 움직이는 중 (move 애니메이션) */
+const MOVING_SPEED = 5;
+
+/**
+ * 매 프레임: 움직이면 move, 멈추면 idle 애니메이션(그림에 있으면), 움직이는 방향으로 좌우 반전.
+ * 색 사각형은 애니메이션이 없고 뒤집어도 같아 보인다.
+ */
+export function animateArt(data: GameData, sprite: Phaser.GameObjects.Sprite): void {
+  const body = sprite.body as Phaser.Physics.Arcade.Body | null;
+  if (!body) return;
+  const key = sprite.texture.key;
+  const def = data.art.sprites[key];
+  sprite.setFlipX(facingFlip(body.velocity.x, sprite.flipX, def?.facing));
+  const anim = pickAnim(def?.anims, body.speed > MOVING_SPEED);
+  if (anim && sprite.scene.anims.exists(animKey(key, anim))) sprite.play(animKey(key, anim), true);
 }

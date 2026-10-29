@@ -13,7 +13,8 @@ import { Enemy, type EnemyHost } from '../entities/enemy';
 import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
 import { Spire } from '../entities/spire';
 import { Darkness } from '../entities/darkness';
-import { fitArt } from '../entities/art';
+import { animateArt, fitArt } from '../entities/art';
+import { artKeys, type TilePart } from '../systems/art';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
 import { FloorWeapon, Pickup } from '../entities/pickup';
@@ -126,7 +127,7 @@ export class RunScene extends Phaser.Scene {
   /** 피해를 준 스킬 id별 SkillHost (학파 궁극기 게이지가 출처를 본다) */
   private hosts = new Map<string, SkillHost>();
 
-  private player!: Phaser.Physics.Arcade.Image;
+  private player!: Phaser.Physics.Arcade.Sprite;
   private weaponSprite!: Phaser.GameObjects.Image;
   private walls!: Phaser.Physics.Arcade.StaticGroup;
   private doorGroup!: Phaser.Physics.Arcade.StaticGroup;
@@ -320,7 +321,7 @@ export class RunScene extends Phaser.Scene {
     this.buildWorld();
 
     const start = roomCenter(map.rooms[map.startId]!, this.m);
-    this.player = this.physics.add.image(start.x, start.y, d.player.spriteKey).setDepth(4);
+    this.player = this.physics.add.sprite(start.x, start.y, d.player.spriteKey).setDepth(4);
     fitArt(d, this.player, d.player.size, d.player.height ?? d.player.size);
     this.weaponSprite = this.add.image(start.x, start.y, this.weaponDef().spriteKey).setDepth(4);
     if (stage.chapter === 1 && stage.stage === 1 && this.ctx.config.testWeapons) this.placeTestWeapons();
@@ -473,18 +474,21 @@ export class RunScene extends Phaser.Scene {
     const corridorColor = hexColor(theme.corridorColor);
     const doorColor = hexColor(d.mapgen.door.color);
 
+    // 타일 그림이 있으면 반복해서 깔고, 없으면 색
+    const chapter = this.session.stage.chapter;
+    const tile = (part: TilePart) => artKeys.tile(part, chapter);
     for (const c of corridors(map, this.m)) {
-      this.addRect(c.floor, corridorColor, 0);
-      for (const w of c.walls) this.walls.add(this.addRect(w, wall, 1));
+      this.addRect(c.floor, corridorColor, 0, tile('corridor'));
+      for (const w of c.walls) this.walls.add(this.addRect(w, wall, 1, tile('wall')));
     }
 
     for (const node of map.rooms) {
-      this.addRect(roomRect(node, this.m), floor, 0);
-      for (const w of wallRects(node, this.m)) this.walls.add(this.addRect(w, wall, 1));
+      this.addRect(roomRect(node, this.m), floor, 0, tile('floor'));
+      for (const w of wallRects(node, this.m)) this.walls.add(this.addRect(w, wall, 1, tile('wall')));
 
       const doors: Door[] = [];
       for (const dir of Object.keys(node.doors) as ('n' | 's' | 'e' | 'w')[]) {
-        doors.push(new Door(this, doorRect(node, dir, this.m), doorColor, this.doorGroup));
+        doors.push(new Door(this, doorRect(node, dir, this.m), doorColor, this.doorGroup, artKeys.door));
       }
       this.doorsByRoom.set(node.id, doors);
 
@@ -511,7 +515,9 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
-  private addRect(r: Rect, color: number, depth: number): Phaser.GameObjects.Rectangle {
+  /** 방 바닥·벽: 타일 그림(key)이 있으면 반복해서 깔고, 없으면 색 사각형 */
+  private addRect(r: Rect, color: number, depth: number, key?: string): Phaser.GameObjects.Rectangle | Phaser.GameObjects.TileSprite {
+    if (key && this.textures.exists(key)) return this.add.tileSprite(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, key).setDepth(depth);
     return this.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, color).setDepth(depth);
   }
 
@@ -636,6 +642,7 @@ export class RunScene extends Phaser.Scene {
       .setPosition(this.player.x + this.aimDir.x * off, this.player.y + this.aimDir.y * off)
       .setRotation(aimAngle);
 
+    animateArt(d, this.player);
     this.updateCamera();
     const cam = this.cameras.main;
     this.darkness?.update(dt, this.player.x - cam.scrollX, this.player.y - cam.scrollY);
@@ -1667,6 +1674,7 @@ export class RunScene extends Phaser.Scene {
       gauge: 0,
       usable: false,
       color: d.ui.hud.skillbar.emptyColor,
+      iconKey: null,
     };
     const slot = (id: string | null, active: boolean): SkillSlotView => {
       const owned = id ? p.loadout.owned[id] : undefined;
@@ -1683,6 +1691,7 @@ export class RunScene extends Phaser.Scene {
         gauge: 0,
         usable: !active || this.skillUsable(def, owned.awakened, sv.values),
         color: def.color,
+        iconKey: artKeys.skillIcon(id),
       };
     };
     const ult = this.ultimateDef();
@@ -1698,6 +1707,7 @@ export class RunScene extends Phaser.Scene {
         gauge: p.ultimate.gauge / ult.gaugeMax,
         usable: p.ultimate.gauge >= ult.gaugeMax,
         color: ult.color,
+        iconKey: artKeys.ultimateIcon(ult.id),
       },
       slot(p.loadout.passive, false),
     ];

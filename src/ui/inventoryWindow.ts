@@ -4,6 +4,7 @@
  *   교체: 끌어다 놓기(PC) 또는 스킬 탭 → 칸 탭(모바일·PC 공통).
  * 아이템 탭: 무기 2칸(버리기), 얻은 아이템, 현재 버프, 코인, 현재 스탯 6종.
  */
+import { applyArtIcon } from './artIcon';
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { conversionLines } from './cutscenePages';
@@ -181,7 +182,7 @@ export class InventoryWindow {
       name.className = 'iw-name';
       const icon = document.createElement('span');
       icon.className = 'cw-icon';
-      icon.style.background = def.color;
+      applyArtIcon(icon, this.ctx, def.spriteKey, def.color);
       name.append(icon, t(def.nameKey));
       name.style.color = grade?.color ?? '#ffffff';
       el.append(name, line('iw-grade', grade ? t(grade.nameKey) : ''), line('iw-desc', t(def.descKey, itemDescParams(def, d.groupMultipliers))));

@@ -72,6 +72,8 @@ export interface SkillSlotView {
   /** 지금 누르면 발동하는지 (근접: 사거리 안 적, 궁극기: 게이지) */
   usable: boolean;
   color: string;
+  /** 아이콘 그림 키 (그림이 있으면 짧은 이름 대신) */
+  iconKey: string | null;
 }
 
 /** HUD '현재 버프' 한 칸 */

@@ -3,6 +3,7 @@
  * PC: 카드 3장 가로, 클릭하면 바로 고른다(1/2/3 키는 RunScene이 명령으로 받는다).
  * 모바일: 큰 카드 3장 세로, 탭으로 고른 뒤 '확정'(오터치 방지).
  */
+import { applyArtIcon } from './artIcon';
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import type { AnyCard } from '../systems/cards';
@@ -64,8 +65,8 @@ export class CardWindow {
       if (v.icon) {
         const icon = document.createElement('span');
         icon.className = 'cw-icon';
-        icon.style.background = v.icon.color;
-        name.prepend(icon);
+        // 스킬 카드는 그림이 있을 때만 아이콘을 붙인다
+        if (applyArtIcon(icon, this.ctx, v.icon.key, v.icon.color) || !v.icon.artOnly) name.prepend(icon);
       }
       const sub = document.createElement('div');
       sub.className = 'cw-sub';

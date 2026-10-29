@@ -2,6 +2,7 @@
  * 컷인 → 설명창 (DOM). 게임이 멈춘 동안 뜬다. PC는 아무 키, 모바일은 화면 탭으로 넘긴다.
  * 컷인 도중에 넘기면 바로 설명창으로 간다. 마지막 장을 넘기면 cutsceneDone.
  */
+import { applyArtIcon } from './artIcon';
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import type { CutIcon, CutIn, CutPage } from './cutscenePages';
@@ -78,7 +79,8 @@ export class CutsceneWindow {
     el.className = `cs-icon ${cls}`;
     el.style.borderColor = i.color;
     el.style.color = i.color;
-    el.textContent = i.label;
+    // 아이콘 그림이 있으면 글자 대신 그림
+    el.textContent = applyArtIcon(el, this.ctx, i.key) ? '' : i.label;
     return el;
   }
 

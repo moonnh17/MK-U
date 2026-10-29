@@ -35,6 +35,8 @@ interface SlotUi {
   dots: Phaser.GameObjects.Rectangle[];
   star: Phaser.GameObjects.Text;
   container: Phaser.GameObjects.Container;
+  /** 스킬 아이콘 그림 (없으면 숨기고 짧은 이름) */
+  icon: Phaser.GameObjects.Image;
 }
 
 /**
@@ -110,14 +112,15 @@ export class Hud {
       if (i === 4) x += sb.groupGap - sb.gap;
       const bg = scene.add.rectangle(0, 0, size, size, 0x000000, 0.5).setOrigin(0).setStrokeStyle(1, hexColor(sb.emptyColor));
       const label = text(size / 2, size / 2 - 1, '', h.fontSize - 2).setOrigin(0.5);
+      const icon = scene.add.image(size / 2, size / 2, '__DEFAULT').setVisible(false);
       const cd = scene.add.graphics();
       const cdText = text(size / 2, size / 2 - 1, '', h.fontSize).setOrigin(0.5).setStroke('#000000', 2);
       const key = text(1, 0, slot.keyLabel, small).setAlpha(0.7);
       const star = text(size - 1, 0, '★', small).setOrigin(1, 0).setColor(sb.awakenedColor);
       const dots = [0, 1, 2].map((k) => scene.add.rectangle(size / 2 - 5 + k * 4, size - 3, 3, 2, 0x333333).setOrigin(0));
-      const container = scene.add.container(x, y, [bg, label, cd, cdText, key, star, ...dots]);
+      const container = scene.add.container(x, y, [bg, icon, label, cd, cdText, key, star, ...dots]);
       if (DISABLED_ACTIONS.has(slot.action as ButtonAction)) container.setAlpha(sb.disabledAlpha);
-      this.slots.push({ x, y, bg, label, cd, cdText, dots, star, container });
+      this.slots.push({ x, y, bg, label, cd, cdText, dots, star, container, icon });
       this.pcOnly.add(container);
       x += size + sb.gap;
     });
@@ -211,7 +214,11 @@ export class Hud {
             ? sb.awakenedColor
             : (sb.levelColors[v.level - 1] ?? sb.emptyColor);
       ui.bg.setStrokeStyle(v.awakened || (i === ultIndex && v.usable) ? 2 : 1, hexColor(borderColor));
-      ui.label.setText(v.label).setColor(filled ? '#ffffff' : '#666666');
+      // 아이콘 그림이 있으면 그림, 없으면 짧은 이름
+      const art = filled && v.iconKey !== null && this.ctx.artLoaded.has(v.iconKey);
+      if (art && ui.icon.texture.key !== v.iconKey) ui.icon.setTexture(v.iconKey!, 0).setDisplaySize(size - 4, size - 4);
+      ui.icon.setVisible(art);
+      ui.label.setText(art ? '' : v.label).setColor(filled ? '#ffffff' : '#666666');
       ui.star.setVisible(v.awakened);
       ui.dots.forEach((dot, k) => {
         dot.setVisible(filled && i !== ultIndex);

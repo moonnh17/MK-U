@@ -9,7 +9,7 @@ import { aimLocked, chainWindup, forceWindup, initialAi, keepDistanceStep, stepA
 import type { BleedState } from '../systems/tags';
 import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank } from '../types/data';
 import { Beams, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
-import { fitArt } from './art';
+import { animateArt, fitArt } from './art';
 import { getContext } from '../core/context';
 
 /** 적이 전투 씬에 바라는 것 (원거리 탄·장판·전술 연계·밧줄) */
@@ -34,7 +34,7 @@ const TELEGRAPH_COLOR = 0xff4040;
  * 행동은 systems/enemyAi.ts 상태 기계가 정하고, 여기서는 돌진·강타와 예고 표시를 처리한다.
  */
 export class Enemy {
-  readonly sprite: Phaser.Physics.Arcade.Image;
+  readonly sprite: Phaser.Physics.Arcade.Sprite;
   hp: number;
   maxHp: number;
   /** 접촉 피해 배율 (히든보스 챕터 배율·자기 강화) */
@@ -111,7 +111,7 @@ export class Enemy {
     this.attacks = [...this.elites.flatMap((x) => x.extraAttacks ?? []), ...(def.attacks ?? [])];
     // 첫 공격은 등장 직후 바로 나오지 않게
     this.ai = initialAi(this.attacks, warnSec);
-    this.sprite = scene.physics.add.image(x, y, def.spriteKey);
+    this.sprite = scene.physics.add.sprite(x, y, def.spriteKey);
     this.sprite.setData('enemy', this);
     // 그림이 커도 판정은 데이터 크기 (엘리트·거대화 배율은 Phaser가 몸에 곱한다)
     fitArt(getContext().data, this.sprite, def.size, def.height ?? def.size);
@@ -173,6 +173,8 @@ export class Enemy {
 
   update(dt: number, host: EnemyHost): void {
     if (this.dead) return;
+    // 지난 프레임 움직임으로 idle·move 애니메이션·좌우 반전
+    animateArt(getContext().data, this.sprite);
     this.updateLook(dt);
     if (this.kbLeft > 0) {
       this.kbLeft -= dt;

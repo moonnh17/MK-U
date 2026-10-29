@@ -1245,3 +1245,20 @@ body {
   font-size: 12px;
   text-shadow: 1px 1px 0 #000;
 }
+
+/* ---------- 도트 아트 아이콘 ---------- */
+.tskill-icon {
+  position: absolute;
+  inset: 16%;
+  pointer-events: none;
+}
+.cw-icon.has-art,
+.cs-icon.has-art,
+.gm-icon.has-art,
+.sw-portrait.has-art {
+  image-rendering: pixelated;
+}
+.sw-portrait.has-art {
+  box-shadow: none;
+  opacity: 1;
+}

@@ -2,6 +2,7 @@
  * 각성·궁극기 각성·전직 연출의 내용(컷인 종류 + 설명창 페이지)을 만든다.
  * 그리는 것은 cutsceneWindow.ts. 학파 엠블럼·실루엣은 지금 색 도형으로 대신한다.
  */
+import { artKeys } from '../systems/art';
 import type { GameContext } from '../core/context';
 import type { ConversionLog } from '../systems/advancement';
 import { findSkill, skillValues } from '../systems/skills';
@@ -10,6 +11,8 @@ import type { AdvancementDef, SchoolId, UltimateDef } from '../types/data';
 export interface CutIcon {
   label: string;
   color: string;
+  /** 아이콘 그림 키 (그림이 있으면 글자 대신) */
+  key?: string;
 }
 
 export type CutIn =
@@ -52,7 +55,7 @@ export function skillAwakeningCut(ctx: GameContext, skillId: string, stats: Reco
   const a = def.awakening;
   return {
     id: `skill.${skillId}`,
-    cut: { kind: 'skillAwakening', icon: { label: t(def.shortKey), color: def.color }, flash: color },
+    cut: { kind: 'skillAwakening', icon: { label: t(def.shortKey), color: def.color, key: artKeys.skillIcon(def.id) }, flash: color },
     pages: [
       {
         title: `${t('cut.skillAwakening')} — ${t(def.nameKey)} → ${t(a.nameKey)}`,
@@ -72,12 +75,12 @@ export function ultimateAwakeningCut(ctx: GameContext, ult: UltimateDef, awakene
   const a = ult.awakening!;
   const icons = awakenedSkills.slice(0, need).map((id) => {
     const def = findSkill(ctx.data.skills, id);
-    return { label: t(def.shortKey), color: def.color };
+    return { label: t(def.shortKey), color: def.color, key: artKeys.skillIcon(def.id) };
   });
   const values = fmt({ ...ult.values, ...a.values });
   return {
     id: `ultimate.${ult.id}`,
-    cut: { kind: 'ultimateAwakening', from: icons, to: { label: t(a.shortKey), color: ult.color }, flash: ult.color },
+    cut: { kind: 'ultimateAwakening', from: icons, to: { label: t(a.shortKey), color: ult.color, key: artKeys.ultimateIcon(ult.id) }, flash: ult.color },
     pages: [
       {
         title: `${t('cut.ultimateAwakening')} — ${t(ult.nameKey)} → ${t(a.nameKey)}`,
@@ -115,7 +118,7 @@ export function advancementCut(
   const { adv, log } = args;
   const icon = (id: string) => {
     const def = findSkill(ctx.data.skills, id);
-    return { label: t(def.shortKey), color: def.color };
+    return { label: t(def.shortKey), color: def.color, key: artKeys.skillIcon(def.id) };
   };
   const plus = new Map<string, number>();
   for (const g of log.gains) plus.set(g.skillId, (plus.get(g.skillId) ?? 0) + 1);

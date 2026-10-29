@@ -1,3 +1,5 @@
+import { getContext } from '../core/context';
+import { applyArtIcon } from './artIcon';
 import type { SkillSlotView } from '../core/session';
 import type { TouchSource } from '../input/touch';
 import type { UiData } from '../types/data';
@@ -9,6 +11,8 @@ const ULT = 4;
 
 interface Parts {
   root: HTMLDivElement;
+  /** 스킬 아이콘 그림 자리 */
+  icon: HTMLSpanElement;
   cd: HTMLDivElement;
   label: HTMLSpanElement;
   num: HTMLSpanElement;
@@ -34,6 +38,8 @@ export class TouchSkills {
       if (!root) return null;
       root.textContent = '';
       root.classList.add('tskill');
+      const icon = document.createElement('span');
+      icon.className = 'tskill-icon';
       const cd = document.createElement('div');
       cd.className = 'tskill-cd';
       const label = document.createElement('span');
@@ -47,8 +53,8 @@ export class TouchSkills {
       const dotsBox = document.createElement('div');
       dotsBox.className = 'tskill-dots';
       const dots = [0, 1, 2].map(() => dotsBox.appendChild(document.createElement('i')));
-      root.append(cd, label, num, star, dotsBox);
-      return { root, cd, label, num, star, dots, sig: '' };
+      root.append(icon, cd, label, num, star, dotsBox);
+      return { root, icon, cd, label, num, star, dots, sig: '' };
     });
   }
 
@@ -59,7 +65,7 @@ export class TouchSkills {
       if (!p) return;
       const cdSec = Math.ceil(v.cooldownLeft);
       const frac = i === ULT ? v.gauge : v.cooldownTotal > 0 ? v.cooldownLeft / v.cooldownTotal : 0;
-      const sig = `${v.skillId}|${v.level}|${v.awakened}|${v.usable}|${cdSec}|${frac.toFixed(2)}`;
+      const sig = `${v.skillId}|${v.iconKey}|${v.level}|${v.awakened}|${v.usable}|${cdSec}|${frac.toFixed(2)}`;
       if (sig === p.sig) return;
       p.sig = sig;
 
@@ -68,7 +74,9 @@ export class TouchSkills {
       p.root.classList.toggle('dim', filled && !v.usable && i !== ULT);
       p.root.classList.toggle('awakened', v.awakened);
       p.root.classList.toggle('ready', i === ULT && v.usable);
-      p.label.textContent = filled ? v.label : (emptyLabels[i] ?? '');
+      // 아이콘 그림이 있으면 그림, 없으면 짧은 이름
+      const art = filled && applyArtIcon(p.icon, getContext(), v.iconKey);
+      p.label.textContent = art ? '' : filled ? v.label : (emptyLabels[i] ?? '');
       p.star.style.display = v.awakened ? 'block' : 'none';
       const levelColor = sb.levelColors[v.level - 1] ?? sb.emptyColor;
       p.root.style.borderColor = !filled

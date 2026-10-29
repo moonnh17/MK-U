@@ -2,6 +2,7 @@
  * 아이템 획득 카드 (DOM). 얻는 순간 화면 위쪽에 잠깐 뜬다(게임은 멈추지 않음).
  * 아이템 탭은 M5에서 만든다.
  */
+import { applyArtIcon } from './artIcon';
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { scaleEffect } from '../systems/items';
@@ -80,6 +81,10 @@ export class ItemCard {
     name.className = 'ic-name';
     name.style.color = grade?.color ?? '#ffffff';
     name.textContent = t(def.nameKey);
+    // 아이템 그림이 있으면 이름 앞에 아이콘
+    const icon = document.createElement('span');
+    icon.className = 'cw-icon';
+    if (applyArtIcon(icon, this.ctx, def.spriteKey)) name.prepend(icon);
     const desc = document.createElement('div');
     desc.className = 'ic-desc';
     desc.textContent = t(def.descKey, itemDescParams(def, d.groupMultipliers));

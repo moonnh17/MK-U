@@ -5,7 +5,7 @@ import { getContext, type GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { registerGemini } from '../core/save';
 import { hexColor } from '../core/scale';
-import { fitArt } from '../entities/art';
+import { animateArt, fitArt } from '../entities/art';
 import { hasLines, storyFor } from '../systems/gemini';
 import { jobChoices, nearestInteractable, portalActive } from '../systems/lab';
 import type { LabObjectDef } from '../types/data';
@@ -22,7 +22,7 @@ const JOB_KEYS = ['skill1', 'skill2', 'skill3'] as const;
  */
 export class LabScene extends Phaser.Scene {
   private ctx!: GameContext;
-  private player!: Phaser.Physics.Arcade.Image;
+  private player!: Phaser.Physics.Arcade.Sprite;
   private walls!: Phaser.Physics.Arcade.StaticGroup;
   private prompt!: Phaser.GameObjects.Text;
   private crystalText!: Phaser.GameObjects.Text;
@@ -78,7 +78,7 @@ export class LabScene extends Phaser.Scene {
     }
     this.refreshPortal();
 
-    this.player = this.physics.add.image(L.start.x, L.start.y, d.player.spriteKey).setDepth(4);
+    this.player = this.physics.add.sprite(L.start.x, L.start.y, d.player.spriteKey).setDepth(4);
     fitArt(d, this.player, d.player.size, d.player.height ?? d.player.size);
     this.physics.add.collider(this.player, this.walls);
 
@@ -214,6 +214,7 @@ export class LabScene extends Phaser.Scene {
 
   override update(): void {
     const frame = this.ctx.input.poll();
+    animateArt(this.ctx.data, this.player);
     if (this.jobOpen) {
       // 직업 선택 창: PC 1/2/3으로 고르고 Esc로 닫는다
       const jobs = jobChoices(this.ctx.data.jobs.jobs);

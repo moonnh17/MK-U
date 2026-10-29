@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
 import { getContext } from '../core/context';
 import { hexColor } from '../core/scale';
-import type { SpriteRef } from '../types/data';
+import { animKey } from '../systems/art';
+import type { ArtAnimId, SpriteRef } from '../types/data';
 
 /**
  * 그림 준비: art.json에 적힌 spriteKey는 public/ 아래 PNG(가로 프레임 스트립)를 불러오고,
@@ -20,7 +21,16 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    const { data } = getContext();
+    const ctx = getContext();
+    const { data } = ctx;
+    // 불러온 그림: 화면 아이콘이 쓸 수 있게 기록하고, 애니메이션(idle·move)을 만든다
+    for (const [key, s] of Object.entries(data.art.sprites)) {
+      if (!this.textures.exists(key)) continue;
+      ctx.artLoaded.add(key);
+      for (const [id, a] of Object.entries(s.anims ?? {}) as [ArtAnimId, { from: number; to: number; fps: number }][]) {
+        this.anims.create({ key: animKey(key, id), frames: this.anims.generateFrameNumbers(key, { start: a.from, end: a.to }), frameRate: a.fps, repeat: -1 });
+      }
+    }
     const refs: SpriteRef[] = [
       data.player,
       data.weapons.projectile,

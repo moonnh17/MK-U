@@ -4,6 +4,8 @@
  */
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
+import { artKeys } from '../systems/art';
+import { applyArtIcon } from './artIcon';
 
 /** 연속 입력으로 문장이 한꺼번에 넘어가지 않게 */
 const ADVANCE_GUARD_MS = 300;
@@ -11,6 +13,7 @@ const ADVANCE_GUARD_MS = 300;
 export class StoryWindow {
   private readonly root: HTMLDivElement;
   private readonly text: HTMLDivElement;
+  private readonly portrait: HTMLDivElement;
   private lines: string[] = [];
   private index = 0;
   private open = false;
@@ -24,6 +27,7 @@ export class StoryWindow {
     const portrait = document.createElement('div');
     portrait.className = 'sw-portrait';
     portrait.innerHTML = '<i></i><i></i>';
+    this.portrait = portrait;
     const box = document.createElement('div');
     box.className = 'sw-box';
     const name = document.createElement('b');
@@ -52,6 +56,8 @@ export class StoryWindow {
       bus.emit('storyDone', {});
       return;
     }
+    // 초상화 그림이 있으면 그림, 없으면 색 블록 + 눈
+    if (applyArtIcon(this.portrait, this.ctx, artKeys.geminiPortrait)) this.portrait.replaceChildren();
     this.lines = lines;
     this.index = 0;
     this.open = true;

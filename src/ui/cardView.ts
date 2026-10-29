@@ -5,6 +5,7 @@ import type { AnyCard } from '../systems/cards';
 import { findSkill, skillValues } from '../systems/skills';
 import { skillTags, tagBadges, type TagBadge } from '../systems/tags';
 import { itemDescParams } from './itemCard';
+import { artKeys } from '../systems/art';
 
 export interface CardView {
   /** 신규 · 액티브 / Lv1 → Lv2 / 각성 / 스탯 */
@@ -19,8 +20,8 @@ export interface CardView {
   accent: string;
   /** 계열 (스탯 카드는 빈 문자열) */
   school: string;
-  /** 아이템 카드: 그림(지금은 색 사각형) */
-  icon?: { color: string };
+  /** 아이콘: 아이템은 그림이 없으면 색 사각형, 스킬(artOnly)은 그림이 있을 때만 */
+  icon?: { color: string; key: string; artOnly?: boolean };
 }
 
 /** 숫자 수치를 설명 문구에 넣을 때 소수점 정리 */
@@ -63,7 +64,7 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
       badges: tagBadges(def.tags, d.tags),
       accent: grade?.color ?? '#ffffff',
       school: '',
-      icon: { color: def.color },
+      icon: { color: def.color, key: def.spriteKey },
     };
   }
   if (card.kind === 'stat') {
@@ -101,6 +102,7 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
       badges: tagBadges(skillTags(def, true), d.tags),
       accent: sb.awakenedColor,
       school,
+      icon: { color: def.color, key: artKeys.skillIcon(def.id), artOnly: true },
     };
   }
   const from = owned?.level ?? 0;
@@ -115,5 +117,6 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
     badges: tagBadges(skillTags(def, false), d.tags),
     accent: sb.levelColors[to - 1] ?? '#ffffff',
     school,
+    icon: { color: def.color, key: artKeys.skillIcon(def.id), artOnly: true },
   };
 }
