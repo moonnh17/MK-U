@@ -2,6 +2,7 @@
  * 보스 패턴 (챕터1~3 보스·히든보스). 같은 동작은 패턴 id만 달리 해 다시 쓴다(예: 마기카이저 기계 펀치 = 대지 분쇄). 패턴 id → 실행 객체. 수치는 bosses.json의 values(강화 단계는 `키Enraged`).
  * 패턴은 보스를 멈추거나 돌진시키고, 피해는 entities/hazard.ts의 위험 지대·적 탄으로 준다.
  */
+import { shake } from '../entities/juice';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import { BouncingDisc, DelayedBlast, Beams, EdgeBand, FollowBlast, OrbitBlades, RectBlast, Ring, SafeZoneBlast, SectorBlast, Zone } from '../entities/hazard';
@@ -323,7 +324,7 @@ class WarCry extends Timed {
       const p = c.boss.pos();
       const ring = c.host.scene.add.circle(p.x, p.y, c.boss.radius()).setStrokeStyle(3, c.boss.color, 0.9).setDepth(6);
       c.host.scene.tweens.add({ targets: ring, scale: 4, alpha: 0, duration: 400, onComplete: () => ring.destroy() });
-      c.host.scene.cameras.main.shake(250, 0.006);
+      shake(c.host.scene, 'medium');
     });
   }
 }
@@ -383,7 +384,7 @@ class GroundBreak extends Timed {
     c.host.addHazard(new DelayedBlast(c.host.scene, at, c.v('radius'), c.v('delaySec'), c.v('damage'), c.boss.color));
     this.at(c.v('delaySec'), () => {
       c.rubble(at, c.v('rubbleRadius'));
-      c.host.scene.cameras.main.shake(150, 0.005);
+      shake(c.host.scene, 'light');
     });
   }
 }
@@ -681,7 +682,7 @@ class BreakerDash implements PatternRun {
     this.checked = true;
     if (this.c.boss.blocked()) {
       this.c.expose(this.c.v('exposeSec'), this.c.v('exposeMul'));
-      this.c.host.scene.cameras.main.shake(200, 0.008);
+      shake(this.c.host.scene, 'medium');
     }
   }
 
@@ -905,7 +906,7 @@ class DoomCommand extends Timed {
       if (safe.every((s) => Math.hypot(s.x - at.x, s.y - at.y) > r * 3)) safe.push(at);
     }
     c.host.addHazard(new SafeZoneBlast(c.host.scene, a, safe, r, c.v('delaySec'), c.v('damage'), c.boss.color));
-    c.host.scene.cameras.main.shake(c.v('delaySec') * 1000, 0.002);
+    shake(c.host.scene, 'rumble', c.v('delaySec') * 1000);
   }
 }
 

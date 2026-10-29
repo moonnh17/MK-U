@@ -86,6 +86,8 @@ export class Enemy {
   private ropeLen = 0;
   private ropeHit = false;
   private holdLeft = 0;
+  /** 맞았을 때 찌그러졌다 돌아오는 남은 시간 */
+  private squashLeft = 0;
   /** 집정관: 흡수량·단계·후광 */
   private absorbed = 0;
   absorbStage = 0;
@@ -174,7 +176,16 @@ export class Enemy {
   update(dt: number, host: EnemyHost): void {
     if (this.dead) return;
     // 지난 프레임 움직임으로 idle·move 애니메이션·좌우 반전
-    animateArt(getContext().data, this.sprite);
+    const data = getContext().data;
+    animateArt(data, this.sprite);
+    // 맞은 직후: 가로로 넓고 세로로 낮게 찌그러졌다 돌아온다
+    if (this.squashLeft > 0) {
+      const hf = data.juice.hitFlash;
+      this.squashLeft = Math.max(0, this.squashLeft - dt);
+      const k = hf.squash * (this.squashLeft / hf.squashSec);
+      const b = this.mods.scale * this.extraScale;
+      this.sprite.setScale(b * (1 + k), b * (1 - k));
+    }
     this.updateLook(dt);
     if (this.kbLeft > 0) {
       this.kbLeft -= dt;
@@ -492,6 +503,11 @@ export class Enemy {
     if (this.dead || this.knockbackImmune || sec <= 0) return;
     this.kbLeft = sec;
     this.kbVel = { x: (dir.x * distance) / sec, y: (dir.y * distance) / sec };
+  }
+
+  /** 맞은 반응: 찌그러짐 시작 */
+  squash(): void {
+    this.squashLeft = getContext().data.juice.hitFlash.squashSec;
   }
 
   /** 피해를 주고, 이번에 죽었으면 true */

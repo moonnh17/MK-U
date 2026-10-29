@@ -170,6 +170,15 @@ sprites.skill_turret_big = sheet('skill_turret_big', single('hectar/turret-5.png
 sprites.skill_mine = sheet('skill_mine', single('hectar/mine-1.png'), 9);
 sprites.skill_drone = sheet('skill_drone', single('hectar/drone-1.png'), 11);
 
+// ---------- 타격·처치·등장 이펙트 (가장 긴 변) ----------
+sprites.fx_hit_tech = sheet('fx_hit_tech', single('basic/rail-hit.png'), 16);
+sprites.fx_hit_magic = sheet('fx_hit_magic', single('fusion/vfx-burst.png'), 16);
+sprites.fx_hit_physical = sheet('fx_hit_physical', single('basic/laser-hit.png'), 14);
+// 마기카이저 폭발 6프레임 중 3번째 칸은 위에 글자가 섞여 있어 뺀다
+{ const ex = strip('kaiser/explosion.png', 6); sprites.fx_explosion = sheet('fx_explosion', [ex[0], ex[1], ex[3], ex[4], ex[5]], 40); }
+sprites.fx_elite_burst = sheet('fx_elite_burst', single('fusion/vfx-explode.png'), 44);
+sprites.fx_spawn = sheet('fx_spawn', single('fusion/vfx-smoke.png'), 26);
+
 // ---------- 스킬·궁극기 아이콘 ----------
 const SKILL_ICON = {
   magiTurret: 'turret', magiMine: 'mine', antimatterCannon: 'antimatter', magiField: 'field', railgun: 'rail', combatDrone: 'drone',

@@ -14,6 +14,8 @@ import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
 import { Spire } from '../entities/spire';
 import { Darkness } from '../entities/darkness';
 import { animateArt, fitArt } from '../entities/art';
+import { Juice, shake } from '../entities/juice';
+import { damageKind, HitStop } from '../systems/juice';
 import { artKeys, type TilePart } from '../systems/art';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
@@ -159,6 +161,11 @@ export class RunScene extends Phaser.Scene {
   private pendingAdvance: (() => void) | null = null;
   /** 마기수집첨탑 (조우 칸 하나에 하나) */
   private spires: Spire[] = [];
+  /** 타격감 연출·히트스톱 (멈춘 동안은 물리와 적이 멈춘다), 다음 피해가 치명타인지 */
+  private juice!: Juice;
+  private hitStop!: HitStop;
+  private stopping = false;
+  private pendingCrit = false;
   /** 일식 어둠과 그 보스 (식광) */
   private darkness: Darkness | null = null;
   private darknessBoss: Enemy | null = null;
@@ -255,6 +262,11 @@ export class RunScene extends Phaser.Scene {
     this.ctx.session = this.session;
     this.rng = Rng.derive(seed, `combat-${stage.chapter}-${stage.stage}`);
     this.mini = new MiniQueue(d.gemini.mini.showSec, d.gemini.mini.fadeSec);
+    // 연출용 난수는 전투 난수와 따로 (시드 재현에 영향 없게)
+    this.juice = new Juice(this, d, Rng.derive(seed, `juice-${stage.chapter}-${stage.stage}`));
+    this.hitStop = new HitStop(d.juice.hitStop.minGapSec);
+    this.stopping = false;
+    this.pendingCrit = false;
     this.storyThen = null;
     bus.emit('geminiMini', { line: null });
     // 챕터를 끝내고 넘어왔다 (2장 종료 미니 대사)
@@ -577,6 +589,16 @@ export class RunScene extends Phaser.Scene {
     // 미니 대사: 창이 열린 동안은 표시 시간도 멈춘다
     const ml = this.mini.update(dt);
     if (ml) bus.emit('geminiMini', ml);
+    // 히트스톱: 아주 잠깐 물리·적·입력을 멈춘다 (연출 트윈은 계속)
+    const stopped = this.hitStop.update(dt);
+    if (stopped !== this.stopping) {
+      this.stopping = stopped;
+      if (stopped) this.physics.pause();
+      else if (!this.session.outcome) this.physics.resume();
+    }
+    this.juice.update(dt, this.session.player.hp / this.session.player.maxHp);
+    if (stopped) return;
+    this.pendingCrit = false;
     this.session.player.record.playSec += dt;
 
     const p = this.session.player;
@@ -926,18 +948,33 @@ export class RunScene extends Phaser.Scene {
     const boss = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss';
     const hm = this.itemRt.hitMods(this.rng, (c) => skillChance(c, 'success', ['chance'], stats, d.tags));
     dmg *= itemDamageMultiplier(this.itemRt.sums, this.itemRt.extraDamageAll(), boss, source) * hm.mult;
-    if (tags.includes('space') || hm.space) dmg = spaceDamage(enemy.rank, enemy.maxHp, dmg, this.tagRule<SpaceRule>('space'));
-    return this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption), source);
+    const space = tags.includes('space') || hm.space;
+    if (space) dmg = spaceDamage(enemy.rank, enemy.maxHp, dmg, this.tagRule<SpaceRule>('space'));
+    const crit = this.pendingCrit;
+    this.pendingCrit = false;
+    return this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption), source, { tags, crit, space });
   }
 
   /** 계산이 끝난 피해를 넣는다. 환원주의자 등에게 알리고, 죽였으면 true */
-  private applyDamage(enemy: Enemy, dmg: number, source: string | null = null): boolean {
+  /** fx: 타격(태그·치명·공간격). 없으면 출혈·변질 같은 지속 피해(작은 회색 숫자, 불꽃 없음) */
+  private applyDamage(enemy: Enemy, dmg: number, source: string | null = null, fx?: { tags: readonly TagId[]; crit: boolean; space: boolean }): boolean {
     if (enemy.dead) return false;
     // 보스 강화 단계 진입 중 무적
     if (enemy.invuln > 0) return false;
     dmg *= enemy.takenMul;
     const dealt = Math.min(Math.max(0, enemy.hp), dmg);
     const killed = enemy.damage(dmg);
+    // 타격감: 피해 숫자, 불꽃·찌그러짐, 근접·치명 히트스톱
+    const top = { x: enemy.sprite.x, y: enemy.sprite.y - enemy.radius };
+    const bossHit = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss';
+    this.juice.damageNumber(top, dmg, damageKind({ crit: fx?.crit, space: fx?.space, dot: !fx }), bossHit);
+    if (fx) {
+      this.juice.hitSpark({ x: enemy.sprite.x, y: enemy.sprite.y }, fx.tags);
+      enemy.squash();
+      const hs = this.ctx.data.juice.hitStop;
+      if (fx.tags.includes('melee')) this.hitStop.request(hs.melee);
+      if (fx.crit) this.hitStop.request(hs.crit);
+    }
     for (const o of [...this.skillObjects]) o.onDamageDealt?.(this.host, dealt, enemy);
     // 학파 궁극기: 정해진 스킬의 피해로 데이터 축적
     const ult = this.session.player.ultimate;
@@ -1089,13 +1126,9 @@ export class RunScene extends Phaser.Scene {
   /** 무기 치명 판정 */
   private critRoll(base: number, chance: number, at: Vec2): number {
     const r = rollCrit(this.rng, base, chance, this.ctx.data.weapons.critMultiplier);
-    if (r.crit) {
-      const t = this.add
-        .text(at.x, at.y - 8, this.ctx.t('loot.crit'), { fontFamily: 'sans-serif', fontSize: '8px', color: '#ffd23f', stroke: '#000000', strokeThickness: 2 })
-        .setOrigin(0.5)
-        .setDepth(7);
-      this.tweens.add({ targets: t, y: t.y - 6, alpha: 0, duration: 400, onComplete: () => t.destroy() });
-    }
+    // 치명타는 바로 이어지는 피해의 숫자를 크고 노랗게 (at은 예전 '치명' 글자 자리, 지금은 쓰지 않음)
+    void at;
+    if (r.crit) this.pendingCrit = true;
     return r.damage;
   }
 
@@ -1111,7 +1144,7 @@ export class RunScene extends Phaser.Scene {
     const radMul = (w.charge ? 1 + (w.charge.radiusMul - 1) * chargeRatio : 1) * (1 + this.itemRt.sums.area) * (big ? big.radiusMul : 1);
     const tags: readonly TagId[] = sig?.kind === 'space' ? [...w.tags, 'space'] : w.tags;
     if (big) {
-      this.cameras.main.shake(120, 0.006);
+      shake(this, 'medium');
       this.floatLabel(origin, this.ctx.t('weapon.sig.bigSmash'), w.color);
     }
     const p = w.pattern;
@@ -1183,12 +1216,21 @@ export class RunScene extends Phaser.Scene {
     const drop = (kind: 'energy' | 'coin', n: number) => {
       // 보스가 부른 적은 보상이 없다
       if (e.noReward) return;
+      const pop = d.juice.death;
       for (let i = 0; i < n; i++) {
         const a = this.rng.range(0, Math.PI * 2);
         const r = this.rng.range(0, d.pickups.scatterRadius);
-        this.pickups.push(new Pickup(this, kind, x + Math.cos(a) * r, y + Math.sin(a) * r, d.pickups));
+        // 쓰러진 자리에서 사방으로 튀어 나가 내려앉는다
+        const pk = new Pickup(this, kind, x, y, d.pickups);
+        const pr = Math.max(r, pop.orbPopPx[0]) + this.rng.range(0, pop.orbPopPx[1] - pop.orbPopPx[0]);
+        this.tweens.add({ targets: pk.sprite, x: x + Math.cos(a) * pr, y: y + Math.sin(a) * pr, duration: pop.orbPopSec * 1000, ease: 'Back.easeOut' });
+        this.pickups.push(pk);
       }
     };
+    // 처치 연출: 번쩍임·파편, 엘리트·정예·보스는 폭발·흔들림·히트스톱
+    const big = e.elites.length > 0 || e.rank === 'champion' || e.rank === 'boss' || e.rank === 'hiddenBoss';
+    this.juice.death(e.sprite, e.def.color, big);
+    if (big) this.hitStop.request(e.rank === 'boss' || e.rank === 'hiddenBoss' ? d.juice.hitStop.bossKill : d.juice.hitStop.eliteKill);
     this.recordKill(e);
     // 집정관: 같은 방에서 죽은 적의 에너지를 흡수한다 (그 적의 에너지 구슬은 떨어지지 않음)
     const absorbed = this.archonAbsorb(e, roomId);
@@ -1312,7 +1354,8 @@ export class RunScene extends Phaser.Scene {
     p.hp = v.hp;
     p.shield = v.shield;
     this.invuln = this.ctx.data.player.hurtInvulnSec;
-    this.cameras.main.shake(80, 0.004);
+    shake(this, 'light');
+    this.juice.hurt();
     // 피격에 반응하는 스킬 오브젝트 (반물질포 충전 취소 등)
     for (const o of [...this.skillObjects]) if (o.onPlayerHurt && !o.onPlayerHurt(this.host)) this.removeObject(o);
     // 아이템: 피격 효과 → 낮은 체력 회복 → 부활
@@ -1413,7 +1456,7 @@ export class RunScene extends Phaser.Scene {
       this.tweens.add({ targets: t, alpha: 0.3, duration: 250, yoyo: true, repeat: Math.max(0, Math.round((sec * 1000) / 500) - 1) });
       this.time.delayedCall(sec * 1000, () => t.destroy());
     }
-    cam.shake(sec * 1000, 0.002);
+    shake(this, 'rumble', sec * 1000);
   }
 
   private updatePickups(dt: number): void {

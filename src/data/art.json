@@ -501,6 +501,42 @@
       "frameHeight": 11,
       "frames": 1
     },
+    "fx_hit_tech": {
+      "file": "mku/fx_hit_tech.png",
+      "frameWidth": 16,
+      "frameHeight": 11,
+      "frames": 1
+    },
+    "fx_hit_magic": {
+      "file": "mku/fx_hit_magic.png",
+      "frameWidth": 16,
+      "frameHeight": 14,
+      "frames": 1
+    },
+    "fx_hit_physical": {
+      "file": "mku/fx_hit_physical.png",
+      "frameWidth": 11,
+      "frameHeight": 14,
+      "frames": 1
+    },
+    "fx_explosion": {
+      "file": "mku/fx_explosion.png",
+      "frameWidth": 38,
+      "frameHeight": 40,
+      "frames": 5
+    },
+    "fx_elite_burst": {
+      "file": "mku/fx_elite_burst.png",
+      "frameWidth": 44,
+      "frameHeight": 27,
+      "frames": 1
+    },
+    "fx_spawn": {
+      "file": "mku/fx_spawn.png",
+      "frameWidth": 26,
+      "frameHeight": 26,
+      "frames": 1
+    },
     "icon_skill_magiTurret": {
       "file": "mku/icon_skill_magiTurret.png",
       "frameWidth": 32,

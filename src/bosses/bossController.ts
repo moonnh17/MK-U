@@ -9,6 +9,7 @@ import type { Vec2 } from '../core/actions';
 import { getContext } from '../core/context';
 import { hexColor } from '../core/scale';
 import { fitArt } from '../entities/art';
+import { shake } from '../entities/juice';
 import { artKeys, bossArtPhase } from '../systems/art';
 import type { Enemy } from '../entities/enemy';
 import { initialBoss, stepBoss, type BossBrainState } from '../systems/bossBrain';
@@ -289,7 +290,7 @@ export class BossController {
     }
     this.aura?.destroy();
     this.aura = host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius + 4).setStrokeStyle(stage, hexColor(this.def.enraged.auraColor), 0.8).setDepth(2);
-    host.scene.cameras.main.shake(400, 0.008);
+    shake(host.scene, 'heavy');
     this.label(host, host.t(`boss.unlock.${this.def.id}.${stage}`), this.def.enraged.auraColor);
   }
 
@@ -301,7 +302,7 @@ export class BossController {
     e.sprite.setVelocity(0, 0);
     if (en.scale !== 1) e.setExtraScale(en.scale);
     this.aura = host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius + 4).setStrokeStyle(2, hexColor(en.auraColor), 0.8).setDepth(2);
-    host.scene.cameras.main.shake(300, 0.006);
+    shake(host.scene, 'heavy');
     this.label(host, host.t(`boss.enraged.${this.def.id}`), en.auraColor);
   }
 

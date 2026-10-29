@@ -2,6 +2,7 @@
  * 마기수집첨탑의 모습: 소형은 검고 얇은 비석, 중형은 검은 구조물 + 붉은 기계. 충전 원 + 충전율 호·숫자.
  * 진행 규칙은 systems/spire.ts(SpireState), 소환·카드는 RunScene이 한다.
  */
+import { shake } from './juice';
 import type Phaser from 'phaser';
 import { hexColor } from '../core/scale';
 import type { SpireData } from '../types/data';
@@ -45,7 +46,7 @@ export class Spire {
   /** 착지: 충전 원이 보이고 화면이 흔들린다 */
   land(): void {
     this.ring.setVisible(true);
-    this.scene.cameras.main.shake(180, 0.006);
+    shake(this.scene, 'medium');
   }
 
   /** 충전율 표시 (매 프레임) */

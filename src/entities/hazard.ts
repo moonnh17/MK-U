@@ -2,6 +2,7 @@
  * 적 쪽 위험 지대(예고 원·장판 등). 플레이어만 피해를 받는다.
  * 근접·장판 공격이라 벡터굴절역장·칼 탄 베기의 대상이 아니다.
  */
+import { shake } from './juice';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import { bounceStep } from '../systems/motion';
@@ -534,7 +535,7 @@ export class SafeZoneBlast implements Hazard {
     if (!safe) host.hurtPlayer(this.damage);
     const f = host.scene.add.rectangle(a.x + a.w / 2, a.y + a.h / 2, a.w, a.h, this.color, 0.6).setDepth(6);
     flash(host, f, 250);
-    host.scene.cameras.main.shake(300, 0.01);
+    shake(host.scene, 'heavy');
     return false;
   }
 

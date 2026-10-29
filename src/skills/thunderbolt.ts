@@ -4,6 +4,7 @@
  * 각성 '케라우노스': 푸른 벼락 강림 → 절단선 → 사선 참격 연속 → 주변 추가 타격 → 공간 균열 붕괴.
  * 보스에게는 절단선(최대 체력 비례)만 들어가고, 나머지 타격은 보스에게 피해가 없다.
  */
+import { shake } from '../entities/juice';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import { hexColor } from '../core/scale';
@@ -124,7 +125,7 @@ class Keraunos implements SkillObject {
     // 5) 공간 균열 붕괴
     step(afterSlash + v.collapseDelaySec!, () => {
       area(host, u, target, host.area(v.collapseRadius!), 'collapse', 0.5);
-      host.scene.cameras.main.shake(200, 0.006);
+      shake(host.scene, 'medium');
     });
   }
 
