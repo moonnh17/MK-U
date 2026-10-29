@@ -125,3 +125,28 @@ describe('애니메이션·좌우 반전', () => {
     expect(e).not.toContain('anims.idle');
   });
 });
+
+describe('전직·보스 단계 모습', () => {
+  it('전직 학파별 플레이어 키, 단계가 있는 보스의 단계 키가 목록에 있다', async () => {
+    const { artKeys } = await import('../src/systems/art');
+    const keys = new Set(refs.map((r) => r.key));
+    expect(keys.has(artKeys.playerSchool('hectar')) && keys.has(artKeys.playerSchool('acro'))).toBe(true);
+    // 마기카이저: 구속 + 3단계 개방 = 4, 식광: 강화 = 2, 시간·강화가 없는 보스는 없음
+    for (let p = 1; p <= 4; p++) expect(keys.has(artKeys.bossPhase('enemy_magi_kaiser', p))).toBe(true);
+    expect(keys.has(artKeys.bossPhase('enemy_eclipse', 2))).toBe(true);
+    expect(keys.has(artKeys.bossPhase('enemy_eclipse', 3))).toBe(false);
+  });
+  it('단계 수와 그림 단계', async () => {
+    const { bossPhaseCount, bossArtPhase } = await import('../src/systems/art');
+    expect(bossPhaseCount({ enrageAt: 0, unlocks: [25, 50, 75] })).toBe(4);
+    expect(bossPhaseCount({ enrageAt: 0.5 })).toBe(2);
+    expect(bossPhaseCount({ enrageAt: 0 })).toBe(1);
+    expect([0, 1, 3].map((s) => bossArtPhase(s, 1, true))).toEqual([1, 2, 4]);
+    expect([bossArtPhase(0, 1, false), bossArtPhase(0, 2, false)]).toEqual([1, 2]);
+  });
+  it('기존 MKU 그림은 모두 public/assets 아래에 있다', async () => {
+    // @types/node 없이: 모듈 이름을 실행 때 만든다
+    const fs = (await import(['node', 'fs'].join(':'))) as { existsSync(p: string): boolean };
+    for (const s of Object.values(gameData.art.sprites)) expect(fs.existsSync(`public/${gameData.art.basePath}${s.file}`), s.file).toBe(true);
+  });
+});

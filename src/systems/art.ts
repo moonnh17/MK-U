@@ -24,7 +24,21 @@ export const artKeys = {
   /** 챕터별 방 타일: 바닥·복도 바닥·벽 */
   tile: (part: TilePart, chapter: number) => `tile_${part}_c${chapter}`,
   door: 'tile_door',
+  /** 전직 후 플레이어 모습 (학파 id) */
+  playerSchool: (school: string) => `player_${school}`,
+  /** 보스 단계별 모습: 1 = 처음(마기카이저 구속), 2 = 강화·다음 단계 … (없으면 기본 그림 그대로) */
+  bossPhase: (spriteKey: string, phase: number) => `${spriteKey}_phase${phase}`,
 } as const;
+
+/** 보스의 단계 수: 시간 단계 보스는 열리는 단계 + 1, 체력 강화가 있으면 2, 없으면 1 */
+export function bossPhaseCount(b: { enrageAt: number; unlocks?: readonly number[] }): number {
+  return b.unlocks?.length ? b.unlocks.length + 1 : b.enrageAt > 0 ? 2 : 1;
+}
+
+/** 보스 단계 → 그림 단계: 시간 단계 보스는 열린 단계 + 1, 체력 강화 보스는 강화 단계(1·2) */
+export function bossArtPhase(timeStage: number, hpPhase: 1 | 2, hasUnlocks: boolean): number {
+  return hasUnlocks ? timeStage + 1 : hpPhase;
+}
 
 export type TilePart = 'floor' | 'corridor' | 'wall';
 export const TILE_PARTS: readonly TilePart[] = ['floor', 'corridor', 'wall'];
@@ -74,10 +88,20 @@ export function collectAssets(d: GameData): AssetRef[] {
     out.set(ref.spriteKey, { key: ref.spriteKey, group, w: ref.size, h: ref.height ?? ref.size, color: ref.color, labelKeys, uses: 1 });
   };
   add('player', d.player, 'asset.player');
+  for (const j of d.jobs.jobs.filter((x) => x.enabled)) {
+    for (const a of j.advancements) add('player', { ...d.player, spriteKey: artKeys.playerSchool(a.id) }, 'asset.player', a.nameKey);
+  }
   for (const w of d.weapons.weapons) add('weapon', w, w.nameKey);
   add('projectile', d.weapons.projectile, 'asset.playerBullet');
   add('projectile', d.enemies.projectile, 'asset.enemyBullet');
   for (const e of d.enemies.enemies) add(e.rank === 'boss' || e.rank === 'hiddenBoss' ? 'boss' : 'enemy', e, e.nameKey);
+  // 보스 단계별 모습 (단계가 있는 보스만)
+  for (const b of [...d.bosses.bosses, ...d.bosses.hiddenBosses]) {
+    const e = d.enemies.enemies.find((x) => x.id === b.id);
+    const n = bossPhaseCount(b);
+    if (!e || n < 2) continue;
+    for (let p = 1; p <= n; p++) add('boss', { ...e, spriteKey: artKeys.bossPhase(e.spriteKey, p) }, e.nameKey, `#${p}단계`);
+  }
   add('prop', d.loot.chest.weapon, 'asset.chestWeapon');
   add('prop', d.loot.chest.item, 'asset.chestItem');
   add('prop', d.loot.merchantStand, 'asset.merchantStand');
