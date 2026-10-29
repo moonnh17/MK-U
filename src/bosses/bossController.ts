@@ -6,7 +6,10 @@
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
+import { getContext } from '../core/context';
 import { hexColor } from '../core/scale';
+import { fitArt } from '../entities/art';
+import { artKeys, bossArtPhase } from '../systems/art';
 import type { Enemy } from '../entities/enemy';
 import { initialBoss, stepBoss, type BossBrainState } from '../systems/bossBrain';
 import type { BossCore } from '../types/data';
@@ -41,6 +44,8 @@ export class BossController {
   private coreFx: Phaser.GameObjects.Arc | null = null;
   /** 구속구 (시간 단계 보스, 첫 단계 전) */
   private restraint: Phaser.GameObjects.Graphics | null = null;
+  /** 지금 입은 단계 그림 (0 = 기본 그림) */
+  private artPhase = 0;
 
   constructor(
     readonly enemy: Enemy,
@@ -49,6 +54,7 @@ export class BossController {
     private readonly damageMul = 1,
   ) {
     this.brain = initialBoss(def.firstDelaySec);
+    this.applyPhaseArt();
     const sprite = enemy.sprite;
     this.body = {
       pos: () => ({ x: sprite.x, y: sprite.y }),
@@ -241,9 +247,25 @@ export class BossController {
     while (this.rubble.length > v('maxRubble')) this.rubble.shift()!.destroy();
   }
 
-  /** 구속구: 몸을 감싼 틀과 사슬 (첫 단계가 열리면 부서진다) */
+  /**
+   * 단계 그림: `보스키_phaseN`이 불러와져 있으면 그 모습으로 (판정은 그대로). 없으면 지금 그림을 그대로 둔다.
+   */
+  private applyPhaseArt(): void {
+    const ctx = getContext();
+    const e = this.enemy;
+    const phase = bossArtPhase(this.brain.unlocked, this.brain.phase, (this.def.unlocks?.length ?? 0) > 0);
+    const key = artKeys.bossPhase(e.def.spriteKey, phase);
+    if (phase === this.artPhase || !ctx.artLoaded.has(key)) return;
+    this.artPhase = phase;
+    // 재생 중인 이전 그림의 애니메이션이 다음 프레임에 텍스처를 되돌리지 않게 멈춘다
+    e.sprite.anims.stop();
+    e.sprite.setTexture(key, 0);
+    fitArt(ctx.data, e.sprite, e.def.size, e.def.height ?? e.def.size);
+  }
+
+  /** 구속구: 몸을 감싼 틀과 사슬 (첫 단계가 열리면 부서진다). 구속된 모습의 그림이 있으면 그림이 대신한다 */
   private drawRestraint(host: BossHost): void {
-    if (!this.restrained) return;
+    if (!this.restrained || this.artPhase === 1) return;
     const e = this.enemy;
     this.restraint ??= host.scene.add.graphics().setDepth(4);
     const r = e.radius + 3;
@@ -258,6 +280,7 @@ export class BossController {
   /** 시간 단계 개방: 이름 표시·흔들림, 첫 단계면 구속이 풀린다 */
   private unlock(host: BossHost, stage: number): void {
     const e = this.enemy;
+    this.applyPhaseArt();
     if (stage === 1) {
       this.restraint?.destroy();
       this.restraint = null;
@@ -272,6 +295,7 @@ export class BossController {
 
   private enrage(host: BossHost): void {
     const e = this.enemy;
+    this.applyPhaseArt();
     const en = this.def.enraged;
     e.invuln = this.def.enrageSec;
     e.sprite.setVelocity(0, 0);

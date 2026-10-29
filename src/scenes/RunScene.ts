@@ -323,6 +323,7 @@ export class RunScene extends Phaser.Scene {
     const start = roomCenter(map.rooms[map.startId]!, this.m);
     this.player = this.physics.add.sprite(start.x, start.y, d.player.spriteKey).setDepth(4);
     fitArt(d, this.player, d.player.size, d.player.height ?? d.player.size);
+    this.applyPlayerArt();
     this.weaponSprite = this.add.image(start.x, start.y, this.weaponDef().spriteKey).setDepth(4);
     if (stage.chapter === 1 && stage.stage === 1 && this.ctx.config.testWeapons) this.placeTestWeapons();
 
@@ -513,6 +514,17 @@ export class RunScene extends Phaser.Scene {
         this.cores.push({ sprite: core, roomId: node.id, radius: ref.size / 2 });
       }
     }
+  }
+
+  /** 플레이어 모습: 전직했으면 그 학파 그림(있으면), 아니면 기본 */
+  private applyPlayerArt(): void {
+    const d = this.ctx.data;
+    const school = this.session.player.advancement;
+    const key = school && this.ctx.artLoaded.has(artKeys.playerSchool(school)) ? artKeys.playerSchool(school) : d.player.spriteKey;
+    if (this.player.texture.key === key) return;
+    this.player.anims.stop();
+    this.player.setTexture(key, 0);
+    fitArt(d, this.player, d.player.size, d.player.height ?? d.player.size);
   }
 
   /** 방 바닥·벽: 타일 그림(key)이 있으면 반복해서 깔고, 없으면 색 사각형 */
@@ -1996,6 +2008,7 @@ export class RunScene extends Phaser.Scene {
     p.advancement = school;
     p.advancementLog = r.log;
     this.session.player = p;
+    this.applyPlayerArt();
     const cuts = [advancementCut(this.ctx, { jobNameKey: job.nameKey, adv, picks: p.schoolPicks, fromUlt, toUlt: this.ultimateDef(), log: r.log })];
     const u = this.checkUltimateAwakening();
     if (u) cuts.push(u);

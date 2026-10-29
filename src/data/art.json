@@ -1,4 +1,817 @@
 {
   "basePath": "assets/",
-  "sprites": {}
+  "sprites": {
+    "player_human": {
+      "file": "mku/player_human.png",
+      "frameWidth": 22,
+      "frameHeight": 26,
+      "frames": 5,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        }
+      }
+    },
+    "player_hectar": {
+      "file": "mku/player_hectar.png",
+      "frameWidth": 19,
+      "frameHeight": 26,
+      "frames": 5,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        }
+      }
+    },
+    "player_acro": {
+      "file": "mku/player_acro.png",
+      "frameWidth": 26,
+      "frameHeight": 25,
+      "frames": 5,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_tomakki": {
+      "file": "mku/enemy_tomakki.png",
+      "frameWidth": 14,
+      "frameHeight": 12,
+      "frames": 4,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 3,
+          "fps": 8
+        }
+      },
+      "facing": "right"
+    },
+    "enemy_gaedeulgae": {
+      "file": "mku/enemy_gaedeulgae.png",
+      "frameWidth": 19,
+      "frameHeight": 18,
+      "frames": 5,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_akgwi": {
+      "file": "mku/enemy_akgwi.png",
+      "frameWidth": 23,
+      "frameHeight": 24,
+      "frames": 6,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 1,
+          "fps": 4
+        },
+        "move": {
+          "from": 2,
+          "to": 5,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_hectar_trooper": {
+      "file": "mku/enemy_hectar_trooper.png",
+      "frameWidth": 11,
+      "frameHeight": 22,
+      "frames": 5,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_hectar_chief": {
+      "file": "mku/enemy_hectar_chief.png",
+      "frameWidth": 18,
+      "frameHeight": 36,
+      "frames": 5,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_magi_beetle": {
+      "file": "mku/enemy_magi_beetle.png",
+      "frameWidth": 24,
+      "frameHeight": 20,
+      "frames": 10,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 4
+        },
+        "move": {
+          "from": 4,
+          "to": 9,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_a_memory": {
+      "file": "mku/enemy_a_memory.png",
+      "frameWidth": 21,
+      "frameHeight": 24,
+      "frames": 14,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 5,
+          "fps": 4
+        },
+        "move": {
+          "from": 6,
+          "to": 13,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_ancient_one": {
+      "file": "mku/enemy_ancient_one.png",
+      "frameWidth": 26,
+      "frameHeight": 26,
+      "frames": 12,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 4,
+          "fps": 4
+        },
+        "move": {
+          "from": 5,
+          "to": 11,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_hatred_shard": {
+      "file": "mku/enemy_hatred_shard.png",
+      "frameWidth": 22,
+      "frameHeight": 12,
+      "frames": 10,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 4
+        },
+        "move": {
+          "from": 4,
+          "to": 9,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_executor": {
+      "file": "mku/enemy_executor.png",
+      "frameWidth": 38,
+      "frameHeight": 35,
+      "frames": 13,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 4,
+          "fps": 4
+        },
+        "move": {
+          "from": 5,
+          "to": 12,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_archon": {
+      "file": "mku/enemy_archon.png",
+      "frameWidth": 22,
+      "frameHeight": 30,
+      "frames": 13,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 5,
+          "fps": 4
+        },
+        "move": {
+          "from": 6,
+          "to": 12,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_fusion_akgwi": {
+      "file": "mku/enemy_fusion_akgwi.png",
+      "frameWidth": 48,
+      "frameHeight": 46,
+      "frames": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 1,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_fusion_akgwi_phase2": {
+      "file": "mku/enemy_fusion_akgwi_phase2.png",
+      "frameWidth": 52,
+      "frameHeight": 37,
+      "frames": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 1,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_electric_ring": {
+      "file": "mku/enemy_electric_ring.png",
+      "frameWidth": 38,
+      "frameHeight": 50,
+      "frames": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 1,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_magi_golem": {
+      "file": "mku/enemy_magi_golem.png",
+      "frameWidth": 56,
+      "frameHeight": 54,
+      "frames": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 1,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_magi_golem_phase2": {
+      "file": "mku/enemy_magi_golem_phase2.png",
+      "frameWidth": 60,
+      "frameHeight": 51,
+      "frames": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 1,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_eclipse": {
+      "file": "mku/enemy_eclipse.png",
+      "frameWidth": 50,
+      "frameHeight": 50,
+      "frames": 10,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 4
+        },
+        "move": {
+          "from": 4,
+          "to": 9,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_eclipse_phase2": {
+      "file": "mku/enemy_eclipse_phase2.png",
+      "frameWidth": 56,
+      "frameHeight": 56,
+      "frames": 10,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 4
+        },
+        "move": {
+          "from": 4,
+          "to": 9,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_magi_kaiser": {
+      "file": "mku/enemy_magi_kaiser.png",
+      "frameWidth": 66,
+      "frameHeight": 53,
+      "frames": 10,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 4
+        },
+        "move": {
+          "from": 4,
+          "to": 9,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_magi_kaiser_phase1": {
+      "file": "mku/enemy_magi_kaiser_phase1.png",
+      "frameWidth": 66,
+      "frameHeight": 52,
+      "frames": 4,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 4
+        }
+      }
+    },
+    "enemy_magi_kaiser_phase2": {
+      "file": "mku/enemy_magi_kaiser_phase2.png",
+      "frameWidth": 66,
+      "frameHeight": 53,
+      "frames": 10,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 4
+        },
+        "move": {
+          "from": 4,
+          "to": 9,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_magi_kaiser_phase3": {
+      "file": "mku/enemy_magi_kaiser_phase3.png",
+      "frameWidth": 70,
+      "frameHeight": 45,
+      "frames": 10,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 4
+        },
+        "move": {
+          "from": 4,
+          "to": 9,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_ancestor_echo": {
+      "file": "mku/enemy_ancestor_echo.png",
+      "frameWidth": 31,
+      "frameHeight": 44,
+      "frames": 3,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 2,
+          "fps": 8
+        }
+      }
+    },
+    "spire_small": {
+      "file": "mku/spire_small.png",
+      "frameWidth": 14,
+      "frameHeight": 44,
+      "frames": 1
+    },
+    "spire_medium": {
+      "file": "mku/spire_medium.png",
+      "frameWidth": 12,
+      "frameHeight": 52,
+      "frames": 1
+    },
+    "skill_turret": {
+      "file": "mku/skill_turret.png",
+      "frameWidth": 14,
+      "frameHeight": 11,
+      "frames": 1
+    },
+    "skill_turret_big": {
+      "file": "mku/skill_turret_big.png",
+      "frameWidth": 22,
+      "frameHeight": 21,
+      "frames": 1
+    },
+    "skill_mine": {
+      "file": "mku/skill_mine.png",
+      "frameWidth": 9,
+      "frameHeight": 6,
+      "frames": 1
+    },
+    "skill_drone": {
+      "file": "mku/skill_drone.png",
+      "frameWidth": 11,
+      "frameHeight": 11,
+      "frames": 1
+    },
+    "icon_skill_magiTurret": {
+      "file": "mku/icon_skill_magiTurret.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_skill_magiMine": {
+      "file": "mku/icon_skill_magiMine.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_skill_antimatterCannon": {
+      "file": "mku/icon_skill_antimatterCannon.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_skill_magiField": {
+      "file": "mku/icon_skill_magiField.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_skill_railgun": {
+      "file": "mku/icon_skill_railgun.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_skill_combatDrone": {
+      "file": "mku/icon_skill_combatDrone.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_skill_unstableSubject": {
+      "file": "mku/icon_skill_unstableSubject.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_skill_magiCorruption": {
+      "file": "mku/icon_skill_magiCorruption.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_skill_experimentalWeapon": {
+      "file": "mku/icon_skill_experimentalWeapon.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_skill_purifyingWings": {
+      "file": "mku/icon_skill_purifyingWings.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_skill_mkPrototype": {
+      "file": "mku/icon_skill_mkPrototype.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_skill_reductionist": {
+      "file": "mku/icon_skill_reductionist.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_ult_firstLaw": {
+      "file": "mku/icon_ult_firstLaw.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_ult_thunderbolt": {
+      "file": "mku/icon_ult_thunderbolt.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_ult_singularity": {
+      "file": "mku/icon_ult_singularity.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "icon_gemini": {
+      "file": "mku/icon_gemini.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "portrait_gemini": {
+      "file": "mku/portrait_gemini.png",
+      "frameWidth": 96,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "item_slime_stew": {
+      "file": "mku/item_slime_stew.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_magicasol": {
+      "file": "mku/item_magicasol.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_nameless_sword": {
+      "file": "mku/item_nameless_sword.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_nameless_helm": {
+      "file": "mku/item_nameless_helm.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_broken_blade": {
+      "file": "mku/item_broken_blade.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_broken_hilt": {
+      "file": "mku/item_broken_hilt.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_elegant_magi": {
+      "file": "mku/item_elegant_magi.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_antimatter_sample": {
+      "file": "mku/item_antimatter_sample.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_combat_theory": {
+      "file": "mku/item_combat_theory.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_oak_heart": {
+      "file": "mku/item_oak_heart.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_hanwoo_steak": {
+      "file": "mku/item_hanwoo_steak.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_lee_seal": {
+      "file": "mku/item_lee_seal.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_magowiki_codex": {
+      "file": "mku/item_magowiki_codex.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_lsd_r": {
+      "file": "mku/item_lsd_r.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_hanabi": {
+      "file": "mku/item_hanabi.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_afro_belt": {
+      "file": "mku/item_afro_belt.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_regulus_shard": {
+      "file": "mku/item_regulus_shard.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_caesar_crown": {
+      "file": "mku/item_caesar_crown.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_acrux_cross": {
+      "file": "mku/item_acrux_cross.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_orion_belt": {
+      "file": "mku/item_orion_belt.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_divine_sword": {
+      "file": "mku/item_divine_sword.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_al_gul_blade": {
+      "file": "mku/item_al_gul_blade.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_hectar_ram": {
+      "file": "mku/item_hectar_ram.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_wonhon_lump": {
+      "file": "mku/item_wonhon_lump.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_gihwan_arm": {
+      "file": "mku/item_gihwan_arm.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_ancient_core": {
+      "file": "mku/item_ancient_core.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "tile_floor_c1": {
+      "file": "mku/tile_floor_c1.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "tile_corridor_c1": {
+      "file": "mku/tile_corridor_c1.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "tile_wall_c1": {
+      "file": "mku/tile_wall_c1.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "tile_floor_c2": {
+      "file": "mku/tile_floor_c2.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "tile_corridor_c2": {
+      "file": "mku/tile_corridor_c2.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "tile_wall_c2": {
+      "file": "mku/tile_wall_c2.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "tile_floor_c3": {
+      "file": "mku/tile_floor_c3.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "tile_corridor_c3": {
+      "file": "mku/tile_corridor_c3.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "tile_wall_c3": {
+      "file": "mku/tile_wall_c3.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    }
+  }
 }
