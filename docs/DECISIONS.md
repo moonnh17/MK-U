@@ -448,7 +448,7 @@
 
 ## 기존 MKU 스프라이트 적용
 
-- 원본: 사용자가 준 `MKU-sprites-v174/assets`(1,279장·230MB, 고해상도). 게임은 480×270이라 그대로 쓰지 않고, 프레임을 잘라 발밑·가운데에 맞춘 뒤 영역 평균으로 게임 크기까지 줄이고(알파 50% 기준으로 단단하게) `public/assets/mku/`에 84장(약 0.9MB)으로 넣었다. art.json도 함께 만든다. 변환 스크립트는 저장소 밖(의존성 없이 Node zlib).
+- 원본: 사용자가 준 `MKU-sprites-v174/assets`(1,279장·230MB, 고해상도). 게임은 480×270이라 그대로 쓰지 않고, 프레임을 잘라 발밑·가운데에 맞춘 뒤 영역 평균으로 게임 크기까지 줄이고(알파 50% 기준으로 단단하게) `public/assets/mku/`에 84장(약 0.9MB)으로 넣었다. art.json도 함께 만든다. 변환 스크립트는 `scripts/build-art.cjs`(PNG 도구 `scripts/pngkit.cjs`, 의존성 없이 Node zlib). `npm run art:build -- <원본 assets 폴더>`로 다시 만들고, 그다음 `npm run assets`.
 - 대응(원본 → 게임): scholars.png 1·2·3행 → 플레이어 기본·헥타르·아크로 / monsters.png 1~3행 → 토마끼·개들개·악귀 / spires/trooper·researcher → 헥타르 전투원·수석 연구원 / monsters/magi_beetle·some_memory·nameless·hatred_fragment → 마기갑충·어느 기억·고대인·증오의 파편 / late-elites → 집행자·집정관 / fusion·electric·golem·eclipse·kaiser → 보스 / warrior/barbarian → 선조의 잔상(야만용사 시초 각성자의 기록) / spires small·medium-0 → 첨탑 / hectar turret·mine·drone → 스킬 오브젝트 / icons → 스킬·궁극기 아이콘(열역학 제1법칙은 ∞ 모양 repeat) / items·rewards → 아이템 아이콘 / story/mg-portrait → 제미니 초상화·아이콘 / terrain.png → 챕터별 바닥·복도·벽 타일.
 - 그림 크기(가장 긴 변): 플레이어 26, 토마끼 14·개들개 19·악귀 24, 전투원 22·갑충 24·어느 기억 24, 고대인 26·증오의 파편 22, 집행자 38·집정관 30, 수석 연구원 36, 융합악귀 48·전기환띠 50·골렘 56·식광 50·마기카이저 66·선조의 잔상 44. 판정은 데이터 크기 그대로.
 - 애니메이션: idle 4fps·move 8fps. 원본에 한 장뿐인 보스(융합악귀·전기환띠·골렘)는 idle·move 자세 한 장씩. 한 장짜리 원본은 그린 배율이 서로 달라 프레임마다 따로 크기를 맞췄다.
