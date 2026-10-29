@@ -74,3 +74,54 @@ describe('docs/ASSETS.md', () => {
     await expect(assetsMarkdown(refs, gameData.art, gameData.text)).toMatchFileSnapshot('../docs/ASSETS.md');
   });
 });
+
+describe('화면 아이콘·타일 키', () => {
+  it('스킬·궁극기 아이콘, 제미니 아이콘·초상화, 챕터별 바닥·복도·벽 + 문 타일이 목록에 있다', async () => {
+    const { artKeys } = await import('../src/systems/art');
+    const keys = new Set(refs.map((r) => r.key));
+    for (const s of gameData.skills.skills) expect(keys.has(artKeys.skillIcon(s.id))).toBe(true);
+    for (const u of gameData.ultimates.ultimates) expect(keys.has(artKeys.ultimateIcon(u.id))).toBe(true);
+    expect(keys.has(artKeys.geminiIcon) && keys.has(artKeys.geminiPortrait)).toBe(true);
+    for (let c = 1; c <= gameData.mapgen.chapters; c++) for (const p of ['floor', 'corridor', 'wall'] as const) expect(keys.has(artKeys.tile(p, c))).toBe(true);
+    expect(keys.has(artKeys.door)).toBe(true);
+  });
+  it('타일은 한 타일 크기, 지금 챕터 색 (3장 바닥 붉은 검정)', async () => {
+    const { artKeys } = await import('../src/systems/art');
+    const f3 = refs.find((r) => r.key === artKeys.tile('floor', 3))!;
+    expect([f3.w, f3.h, f3.color]).toEqual([gameData.mapgen.tileSize, gameData.mapgen.tileSize, gameData.ui.chapterRooms['3']!.floorColor]);
+    expect(refs.find((r) => r.key === artKeys.tile('wall', 1))!.color).toBe(gameData.ui.room.wallColor);
+  });
+});
+
+describe('애니메이션·좌우 반전', () => {
+  it('움직이면 move, 멈추면 idle, 없으면 다른 하나', async () => {
+    const { pickAnim, animKey } = await import('../src/systems/art');
+    const both = { idle: 1, move: 1 };
+    expect([pickAnim(both, true), pickAnim(both, false)]).toEqual(['move', 'idle']);
+    expect(pickAnim({ idle: 1 }, true)).toBe('idle');
+    expect(pickAnim({ move: 1 }, false)).toBe('move');
+    expect(pickAnim(undefined, true)).toBeNull();
+    expect(animKey('player_human', 'move')).toBe('player_human.move');
+  });
+  it('오른쪽을 보는 그림은 왼쪽으로 움직일 때 뒤집고, 거의 멈추면 그대로', async () => {
+    const { facingFlip } = await import('../src/systems/art');
+    expect(facingFlip(-30, false)).toBe(true);
+    expect(facingFlip(30, true)).toBe(false);
+    expect(facingFlip(0.5, true)).toBe(true);
+    expect(facingFlip(-30, false, 'left')).toBe(false);
+    expect(facingFlip(30, false, 'left')).toBe(true);
+  });
+  it('애니메이션 프레임 범위·fps·방향 검사', () => {
+    const bad: ArtData = {
+      basePath: 'assets/',
+      sprites: {
+        player_human: { file: 'p.png', frameWidth: 16, frameHeight: 24, frames: 4, facing: 'up' as never, anims: { idle: { from: 0, to: 1, fps: 4 }, move: { from: 2, to: 4, fps: 0 } } },
+      },
+    };
+    const e = validateArt(bad, refs).join('\n');
+    expect(e).toContain('facing');
+    expect(e).toContain('anims.move: 0 ≤ from ≤ to < frames(4)');
+    expect(e).toContain('anims.move.fps');
+    expect(e).not.toContain('anims.idle');
+  });
+});

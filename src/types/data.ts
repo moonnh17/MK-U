@@ -1083,6 +1083,19 @@ export interface ArtSpriteDef {
   frames?: number;
   /** 없으면 그림 종류별 기본값 (캐릭터·오브젝트는 feet, 탄·픽업·스킬·무기는 center) */
   anchor?: ArtAnchor;
+  /** 프레임 애니메이션 (플레이어·적): 멈춰 있을 때 idle, 움직일 때 move. 없으면 첫 프레임 그대로 */
+  anims?: Partial<Record<ArtAnimId, ArtAnimDef>>;
+  /** 그림이 바라보는 방향 (없으면 오른쪽). 움직이는 방향에 따라 좌우로 뒤집는다 */
+  facing?: 'right' | 'left';
+}
+
+export type ArtAnimId = 'idle' | 'move';
+
+/** 프레임 번호 from~to(0부터, 둘 다 포함)를 초당 fps장으로 반복 */
+export interface ArtAnimDef {
+  from: number;
+  to: number;
+  fps: number;
 }
 
 export interface ArtData {

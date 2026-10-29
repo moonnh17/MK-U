@@ -4,11 +4,30 @@
  * art.json에 적힌 키만 PNG를 불러오고, 나머지는 색 사각형으로 남는다.
  */
 import type { GameData } from '../data/index';
-import type { ArtAnchor, ArtData, SpriteRef } from '../types/data';
+import type { ArtAnchor, ArtAnimId, ArtData, SpriteRef } from '../types/data';
 
-export type AssetGroup = 'player' | 'weapon' | 'projectile' | 'enemy' | 'boss' | 'prop' | 'pickup' | 'skill' | 'lab' | 'item';
+export type AssetGroup = 'player' | 'weapon' | 'projectile' | 'enemy' | 'boss' | 'prop' | 'pickup' | 'skill' | 'lab' | 'item' | 'icon' | 'tile';
 
-export const ASSET_GROUPS: readonly AssetGroup[] = ['player', 'weapon', 'projectile', 'enemy', 'boss', 'prop', 'pickup', 'skill', 'lab', 'item'];
+export const ASSET_GROUPS: readonly AssetGroup[] = ['player', 'weapon', 'projectile', 'enemy', 'boss', 'prop', 'pickup', 'skill', 'lab', 'item', 'icon', 'tile'];
+
+/** 화면(DOM·HUD) 아이콘의 권장 크기 */
+export const ICON_SIZE = 16;
+/** 제미니 스토리 대화 초상화의 권장 크기 */
+export const PORTRAIT_SIZE = { w: 48, h: 64 };
+
+/** 그림 키 규칙 (데이터에 spriteKey가 없는 화면 그림) */
+export const artKeys = {
+  skillIcon: (skillId: string) => `icon_skill_${skillId}`,
+  ultimateIcon: (ultimateId: string) => `icon_ult_${ultimateId}`,
+  geminiIcon: 'icon_gemini',
+  geminiPortrait: 'portrait_gemini',
+  /** 챕터별 방 타일: 바닥·복도 바닥·벽 */
+  tile: (part: TilePart, chapter: number) => `tile_${part}_c${chapter}`,
+  door: 'tile_door',
+} as const;
+
+export type TilePart = 'floor' | 'corridor' | 'wall';
+export const TILE_PARTS: readonly TilePart[] = ['floor', 'corridor', 'wall'];
 
 /** 그림 종류별 기본 기준점: 서 있는 것은 발밑, 날아가거나 회전하는 것은 가운데 */
 const DEFAULT_ANCHOR: Record<AssetGroup, ArtAnchor> = {
@@ -22,6 +41,8 @@ const DEFAULT_ANCHOR: Record<AssetGroup, ArtAnchor> = {
   skill: 'center',
   lab: 'feet',
   item: 'center',
+  icon: 'center',
+  tile: 'center',
 };
 
 export interface AssetRef {
@@ -70,7 +91,42 @@ export function collectAssets(d: GameData): AssetRef[] {
   for (const u of d.ultimates.ultimates) for (const [part, ref] of Object.entries(u.sprites)) add('skill', ref, u.nameKey, `#${part}`);
   for (const o of d.lab.objects) add('lab', { spriteKey: o.spriteKey, color: o.color, size: o.w, height: o.h }, `lab.object.${o.kind}`);
   for (const it of d.items.items) add('item', it, it.nameKey);
+  // 화면 아이콘: 스킬·궁극기·제미니 (HUD 칸·카드·인벤토리·컷씬)
+  for (const s of d.skills.skills) add('icon', { spriteKey: artKeys.skillIcon(s.id), color: s.color, size: ICON_SIZE }, s.nameKey);
+  for (const u of d.ultimates.ultimates) add('icon', { spriteKey: artKeys.ultimateIcon(u.id), color: u.color, size: ICON_SIZE }, u.nameKey);
+  add('icon', { spriteKey: artKeys.geminiIcon, color: d.gemini.color, size: ICON_SIZE }, 'gemini.name', '#icon');
+  add('icon', { spriteKey: artKeys.geminiPortrait, color: d.gemini.color, size: PORTRAIT_SIZE.w, height: PORTRAIT_SIZE.h }, 'gemini.name', '#portrait');
+  // 방 타일 (한 타일 크기, 반복해서 깐다)
+  const ts = d.mapgen.tileSize;
+  for (let c = 1; c <= d.mapgen.chapters; c++) {
+    const theme = d.ui.chapterRooms[String(c)] ?? d.ui.room;
+    const colors: Record<TilePart, string> = { floor: theme.floorColor, corridor: theme.corridorColor, wall: theme.wallColor };
+    for (const part of TILE_PARTS) add('tile', { spriteKey: artKeys.tile(part, c), color: colors[part], size: ts }, `asset.tile.${part}`, `#${c}장`);
+  }
+  add('tile', { spriteKey: artKeys.door, color: d.mapgen.door.color, size: ts }, 'asset.tile.door');
   return [...out.values()];
+}
+
+/** 애니메이션 키 (Phaser 애니메이션 이름) */
+export function animKey(spriteKey: string, anim: ArtAnimId): string {
+  return `${spriteKey}.${anim}`;
+}
+
+/** 지금 재생할 애니메이션: 움직이면 move, 아니면 idle. 그 애니메이션이 없으면 다른 하나, 둘 다 없으면 null */
+export function pickAnim(anims: Partial<Record<ArtAnimId, unknown>> | undefined, moving: boolean): ArtAnimId | null {
+  if (!anims) return null;
+  const want: ArtAnimId = moving ? 'move' : 'idle';
+  if (anims[want]) return want;
+  const other: ArtAnimId = moving ? 'idle' : 'move';
+  return anims[other] ? other : null;
+}
+
+/**
+ * 좌우 반전: 그림이 바라보는 방향과 반대로 움직이면 뒤집는다. 거의 안 움직이면(|vx| ≤ dead) 그대로.
+ */
+export function facingFlip(vx: number, prevFlip: boolean, facing: 'right' | 'left' = 'right', dead = 1): boolean {
+  if (Math.abs(vx) <= dead) return prevFlip;
+  return facing === 'right' ? vx < 0 : vx > 0;
 }
 
 /** 이 키의 기준점: art.json에 적은 값, 없으면 그림 종류별 기본값 */
@@ -107,6 +163,14 @@ export function validateArt(art: ArtData, refs: readonly AssetRef[]): string[] {
     for (const k of ['frameWidth', 'frameHeight'] as const) if (!(Number.isInteger(s[k]) && s[k] > 0)) errors.push(`${w}.${k}: 양의 정수`);
     if (s.frames !== undefined && !(Number.isInteger(s.frames) && s.frames >= 1)) errors.push(`${w}.frames: 1 이상 정수`);
     if (s.anchor !== undefined && s.anchor !== 'center' && s.anchor !== 'feet') errors.push(`${w}.anchor: center · feet`);
+    if (s.facing !== undefined && s.facing !== 'right' && s.facing !== 'left') errors.push(`${w}.facing: right · left`);
+    const frames = s.frames ?? 1;
+    for (const [id, a] of Object.entries(s.anims ?? {})) {
+      if (id !== 'idle' && id !== 'move') errors.push(`${w}.anims.${id}: idle · move`);
+      if (!a) continue;
+      if (!(Number.isInteger(a.from) && Number.isInteger(a.to) && a.from >= 0 && a.from <= a.to && a.to < frames)) errors.push(`${w}.anims.${id}: 0 ≤ from ≤ to < frames(${frames})`);
+      if (!(a.fps > 0)) errors.push(`${w}.anims.${id}.fps: 양수`);
+    }
   }
   return errors;
 }
@@ -122,7 +186,8 @@ export function assetsMarkdown(refs: readonly AssetRef[], art: ArtData, text: Re
     `- 그림 파일: \`public/${art.basePath}\` 아래 PNG. 키마다 한 장, 프레임은 가로로 이어 붙인다.`,
     '- 등록: `src/data/art.json`의 `sprites`에 `"키": { "file", "frameWidth", "frameHeight", "frames", "anchor" }`. 적지 않은 키는 색 사각형 그대로.',
     '- 크기: 권장 캔버스 = 판정 크기. 더 크게 그려도 판정은 그대로다. 기준점 feet는 판정이 그림 아래쪽에, center는 가운데에 놓인다.',
-    '- item은 게임 화면이 아니라 카드·인벤토리 아이콘이다.',
+    '- 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.',
+    '- item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).',
     '',
     `전체 ${refs.length}개 · 그림 있음 ${refs.filter((r) => art.sprites[r.key]).length}개`,
   ];
