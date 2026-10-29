@@ -5,9 +5,10 @@
 - 그림 파일: `public/assets/` 아래 PNG. 키마다 한 장, 프레임은 가로로 이어 붙인다.
 - 등록: `src/data/art.json`의 `sprites`에 `"키": { "file", "frameWidth", "frameHeight", "frames", "anchor" }`. 적지 않은 키는 색 사각형 그대로.
 - 크기: 권장 캔버스 = 판정 크기. 더 크게 그려도 판정은 그대로다. 기준점 feet는 판정이 그림 아래쪽에, center는 가운데에 놓인다.
-- item은 게임 화면이 아니라 카드·인벤토리 아이콘이다.
+- 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
+- item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 98개 · 그림 있음 0개
+전체 125개 · 그림 있음 0개
 
 ## player (1)
 
@@ -156,3 +157,40 @@
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | — |
 | `item_ancient_core` | 고대병기의 코어 | 8×8 | center | #9a4aff | — |
 | `item_eclipse_core` | 식광의 핵 | 8×8 | center | #c8a8ff | — |
+
+## icon (17)
+
+| 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
+| --- | --- | --- | --- | --- | --- |
+| `icon_skill_magiTurret` | 마기 자동포탑 | 16×16 | center | #4fb3d9 | — |
+| `icon_skill_magiMine` | 마기 지뢰 | 16×16 | center | #d9a03b | — |
+| `icon_skill_antimatterCannon` | 반물질포 | 16×16 | center | #a05ad9 | — |
+| `icon_skill_magiField` | 마기역장 | 16×16 | center | #8aa4c8 | — |
+| `icon_skill_railgun` | 레일건 | 16×16 | center | #3ba7d9 | — |
+| `icon_skill_combatDrone` | 전투 드론 | 16×16 | center | #5ad9c0 | — |
+| `icon_skill_unstableSubject` | 불안정 실험체 | 16×16 | center | #9ad94a | — |
+| `icon_skill_magiCorruption` | 마기 변질 | 16×16 | center | #c83a5a | — |
+| `icon_skill_experimentalWeapon` | 실험 병기 | 16×16 | center | #d9d03b | — |
+| `icon_skill_purifyingWings` | 정화의 날개 | 16×16 | center | #d93a3a | — |
+| `icon_skill_mkPrototype` | MK : 프로토타입 | 16×16 | center | #d9783b | — |
+| `icon_skill_reductionist` | 환원주의자 | 16×16 | center | #5ad95a | — |
+| `icon_ult_firstLaw` | 열역학 제1법칙 | 16×16 | center | #ff9a3c | — |
+| `icon_ult_thunderbolt` | 벼락 | 16×16 | center | #4ab0ff | — |
+| `icon_ult_singularity` | 특이점 실험 | 16×16 | center | #ff3a4a | — |
+| `icon_gemini` | 미모사 제미니 (icon) | 16×16 | center | #4ab0ff | — |
+| `portrait_gemini` | 미모사 제미니 (portrait) | 48×64 | center | #4ab0ff | — |
+
+## tile (10)
+
+| 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
+| --- | --- | --- | --- | --- | --- |
+| `tile_floor_c1` | 방 바닥 (1장) | 16×16 | center | #1c2430 | — |
+| `tile_corridor_c1` | 복도 바닥 (1장) | 16×16 | center | #18202a | — |
+| `tile_wall_c1` | 벽 (1장) | 16×16 | center | #3a4656 | — |
+| `tile_floor_c2` | 방 바닥 (2장) | 16×16 | center | #1e2630 | — |
+| `tile_corridor_c2` | 복도 바닥 (2장) | 16×16 | center | #182028 | — |
+| `tile_wall_c2` | 벽 (2장) | 16×16 | center | #5a6a7a | — |
+| `tile_floor_c3` | 방 바닥 (3장) | 16×16 | center | #1a0c0e | — |
+| `tile_corridor_c3` | 복도 바닥 (3장) | 16×16 | center | #120708 | — |
+| `tile_wall_c3` | 벽 (3장) | 16×16 | center | #5a1a1e | — |
+| `tile_door` | 잠긴 문 | 16×16 | center | #c8643a | — |
