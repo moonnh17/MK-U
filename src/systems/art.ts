@@ -1,0 +1,141 @@
+/**
+ * 도트 아트 목록·기준점 (순수 함수).
+ * 데이터의 spriteKey를 모두 모아 그려야 할 그림 목록을 만든다(권장 크기 = 지금 판정 크기).
+ * art.json에 적힌 키만 PNG를 불러오고, 나머지는 색 사각형으로 남는다.
+ */
+import type { GameData } from '../data/index';
+import type { ArtAnchor, ArtData, SpriteRef } from '../types/data';
+
+export type AssetGroup = 'player' | 'weapon' | 'projectile' | 'enemy' | 'boss' | 'prop' | 'pickup' | 'skill' | 'lab' | 'item';
+
+export const ASSET_GROUPS: readonly AssetGroup[] = ['player', 'weapon', 'projectile', 'enemy', 'boss', 'prop', 'pickup', 'skill', 'lab', 'item'];
+
+/** 그림 종류별 기본 기준점: 서 있는 것은 발밑, 날아가거나 회전하는 것은 가운데 */
+const DEFAULT_ANCHOR: Record<AssetGroup, ArtAnchor> = {
+  player: 'feet',
+  weapon: 'center',
+  projectile: 'center',
+  enemy: 'feet',
+  boss: 'feet',
+  prop: 'feet',
+  pickup: 'center',
+  skill: 'center',
+  lab: 'feet',
+  item: 'center',
+};
+
+export interface AssetRef {
+  key: string;
+  group: AssetGroup;
+  /** 판정(= 권장 캔버스) 크기 */
+  w: number;
+  h: number;
+  /** 지금 쓰는 색 */
+  color: string;
+  /** 이름 텍스트 키들 (문서용, 이어 붙인다. '#'로 시작하면 부위 이름 그대로) */
+  labelKeys: string[];
+  /** 같은 그림을 쓰는 곳 수 */
+  uses: number;
+}
+
+/**
+ * 데이터에 있는 그림 전부 (같은 키는 한 줄, 처음 나온 것 기준).
+ * item: 아이템 아이콘 (게임 화면에는 안 그리고 카드·인벤토리에 쓴다)
+ */
+export function collectAssets(d: GameData): AssetRef[] {
+  const out = new Map<string, AssetRef>();
+  const add = (group: AssetGroup, ref: SpriteRef, ...labelKeys: string[]) => {
+    const prev = out.get(ref.spriteKey);
+    if (prev) {
+      prev.uses++;
+      return;
+    }
+    out.set(ref.spriteKey, { key: ref.spriteKey, group, w: ref.size, h: ref.height ?? ref.size, color: ref.color, labelKeys, uses: 1 });
+  };
+  add('player', d.player, 'asset.player');
+  for (const w of d.weapons.weapons) add('weapon', w, w.nameKey);
+  add('projectile', d.weapons.projectile, 'asset.playerBullet');
+  add('projectile', d.enemies.projectile, 'asset.enemyBullet');
+  for (const e of d.enemies.enemies) add(e.rank === 'boss' || e.rank === 'hiddenBoss' ? 'boss' : 'enemy', e, e.nameKey);
+  add('prop', d.loot.chest.weapon, 'asset.chestWeapon');
+  add('prop', d.loot.chest.item, 'asset.chestItem');
+  add('prop', d.loot.merchantStand, 'asset.merchantStand');
+  add('prop', d.loot.spire.small.sprite, 'asset.spireSmall');
+  add('prop', d.loot.spire.medium.sprite, 'asset.spireMedium');
+  add('prop', d.mapgen.props.exitPortal, 'asset.exitPortal');
+  add('prop', d.mapgen.props.encounterCore, 'asset.encounterCore');
+  add('pickup', d.pickups.energyOrb, 'asset.energyOrb');
+  add('pickup', d.pickups.coin, 'asset.coin');
+  for (const s of d.skills.skills) for (const [part, ref] of Object.entries(s.sprites)) add('skill', ref, s.nameKey, `#${part}`);
+  for (const u of d.ultimates.ultimates) for (const [part, ref] of Object.entries(u.sprites)) add('skill', ref, u.nameKey, `#${part}`);
+  for (const o of d.lab.objects) add('lab', { spriteKey: o.spriteKey, color: o.color, size: o.w, height: o.h }, `lab.object.${o.kind}`);
+  for (const it of d.items.items) add('item', it, it.nameKey);
+  return [...out.values()];
+}
+
+/** 이 키의 기준점: art.json에 적은 값, 없으면 그림 종류별 기본값 */
+export function anchorOf(key: string, group: AssetGroup | undefined, art: ArtData): ArtAnchor {
+  return art.sprites[key]?.anchor ?? (group ? DEFAULT_ANCHOR[group] : 'center');
+}
+
+/**
+ * 그림 프레임(fw×fh) 안에서 판정(hw×hh)이 놓일 자리.
+ * origin: 게임 오브젝트 좌표(= 판정 가운데)가 프레임의 어디인지(0~1)
+ * offset: 물리 판정의 프레임 왼쪽 위 기준 위치(배율 적용 전 px)
+ * feet는 판정을 그림 아래쪽에 붙인다. 그림이 판정보다 작거나 같으면 가운데.
+ */
+export function fitHitbox(
+  fw: number,
+  fh: number,
+  hw: number,
+  hh: number,
+  anchor: ArtAnchor,
+): { originX: number; originY: number; offsetX: number; offsetY: number } {
+  const cy = anchor === 'feet' && fh > hh ? fh - hh / 2 : fh / 2;
+  return { originX: 0.5, originY: cy / fh, offsetX: fw / 2 - hw / 2, offsetY: cy - hh / 2 };
+}
+
+/** art.json 검사: 데이터에 없는 키, 파일 경로, 프레임 값 */
+export function validateArt(art: ArtData, refs: readonly AssetRef[]): string[] {
+  const errors: string[] = [];
+  const keys = new Set(refs.map((r) => r.key));
+  if (art.basePath !== '' && !art.basePath.endsWith('/')) errors.push('art.basePath: /로 끝나야 함');
+  for (const [key, s] of Object.entries(art.sprites)) {
+    const w = `art.sprites.${key}`;
+    if (!keys.has(key)) errors.push(`${w}: 데이터에 없는 spriteKey`);
+    if (!/^[\w\-./]+\.png$/i.test(s.file) || s.file.includes('..') || s.file.startsWith('/')) errors.push(`${w}.file: basePath 아래 .png 상대 경로`);
+    for (const k of ['frameWidth', 'frameHeight'] as const) if (!(Number.isInteger(s[k]) && s[k] > 0)) errors.push(`${w}.${k}: 양의 정수`);
+    if (s.frames !== undefined && !(Number.isInteger(s.frames) && s.frames >= 1)) errors.push(`${w}.frames: 1 이상 정수`);
+    if (s.anchor !== undefined && s.anchor !== 'center' && s.anchor !== 'feet') errors.push(`${w}.anchor: center · feet`);
+  }
+  return errors;
+}
+
+/** docs/ASSETS.md 내용 (그림 목록 표). text: 이름 키 → 문구 */
+export function assetsMarkdown(refs: readonly AssetRef[], art: ArtData, text: Readonly<Record<string, string>>): string {
+  const label = (r: AssetRef) => r.labelKeys.map((k) => (k.startsWith('#') ? `(${k.slice(1)})` : (text[k] ?? k))).join(' ');
+  const lines: string[] = [
+    '# 도트 아트 목록',
+    '',
+    '`npm run assets`로 데이터에서 다시 만든다. 직접 고치지 말 것.',
+    '',
+    `- 그림 파일: \`public/${art.basePath}\` 아래 PNG. 키마다 한 장, 프레임은 가로로 이어 붙인다.`,
+    '- 등록: `src/data/art.json`의 `sprites`에 `"키": { "file", "frameWidth", "frameHeight", "frames", "anchor" }`. 적지 않은 키는 색 사각형 그대로.',
+    '- 크기: 권장 캔버스 = 판정 크기. 더 크게 그려도 판정은 그대로다. 기준점 feet는 판정이 그림 아래쪽에, center는 가운데에 놓인다.',
+    '- item은 게임 화면이 아니라 카드·인벤토리 아이콘이다.',
+    '',
+    `전체 ${refs.length}개 · 그림 있음 ${refs.filter((r) => art.sprites[r.key]).length}개`,
+  ];
+  for (const g of ASSET_GROUPS) {
+    const list = refs.filter((r) => r.group === g);
+    if (list.length === 0) continue;
+    lines.push('', `## ${g} (${list.length})`, '', '| 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |', '| --- | --- | --- | --- | --- | --- |');
+    for (const r of list) {
+      const a = art.sprites[r.key];
+      const uses = r.uses > 1 ? ` 외 ${r.uses - 1}곳` : '';
+      const file = a ? `${a.file} (${a.frames ?? 1}프레임)` : '—';
+      lines.push(`| \`${r.key}\` | ${label(r)}${uses} | ${r.w}×${r.h} | ${anchorOf(r.key, r.group, art)} | ${r.color} | ${file} |`);
+    }
+  }
+  return lines.join('\n') + '\n';
+}

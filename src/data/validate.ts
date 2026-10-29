@@ -2,6 +2,7 @@
  * 데이터 JSON 검증. 문제마다 사람이 읽을 수 있는 문장을 돌려준다(빈 배열 = 통과).
  * Phaser에 의존하지 않으며 테스트와 개발 모드 부팅에서 함께 쓴다.
  */
+import { collectAssets, validateArt } from '../systems/art';
 import { BUTTON_ACTIONS } from '../core/actions';
 import { GRADE_IDS, SCHOOL_IDS, STAT_EFFECT_IDS, STAT_IDS, TAG_IDS } from '../types/data';
 import type { EnemyAttackDef, IntRange, SpriteRef } from '../types/data';
@@ -743,6 +744,9 @@ export function validateGameData(d: GameData): Errors {
   for (const [k, v] of Object.entries(d.text)) {
     if (typeof v !== 'string' || (v === '' && !k.startsWith('gemini.story.') && !k.startsWith('gemini.mini.'))) errors.push(`text: '${k}' 값이 비어 있음`);
   }
+
+  // --- 도트 아트 ---
+  errors.push(...validateArt(d.art, collectAssets(d)));
 
   // --- 미모사 제미니 대사 ---
   const gm = d.gemini;

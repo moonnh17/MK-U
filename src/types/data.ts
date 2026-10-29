@@ -1064,3 +1064,30 @@ export interface GeminiData {
   stories: GeminiStoryDef[];
   minis: GeminiMiniDef[];
 }
+
+// ---------- 도트 아트 ----------
+
+/**
+ * 그림 기준점. center: 그림 가운데가 판정 가운데 / feet: 판정이 그림 아래쪽에 붙는다(키 큰 캐릭터를 발밑 기준으로).
+ * 그림이 판정과 같은 크기면 둘은 같다.
+ */
+export type ArtAnchor = 'center' | 'feet';
+
+/** spriteKey 하나의 그림: PNG 한 장, 프레임은 가로로 이어 붙인다 */
+export interface ArtSpriteDef {
+  /** basePath 아래 파일 경로 */
+  file: string;
+  frameWidth: number;
+  frameHeight: number;
+  /** 프레임 수 (없으면 1) */
+  frames?: number;
+  /** 없으면 그림 종류별 기본값 (캐릭터·오브젝트는 feet, 탄·픽업·스킬·무기는 center) */
+  anchor?: ArtAnchor;
+}
+
+export interface ArtData {
+  /** public/ 아래 그림 폴더 */
+  basePath: string;
+  /** spriteKey → 그림. 적혀 있지 않은 키는 색 사각형 */
+  sprites: Record<string, ArtSpriteDef>;
+}
