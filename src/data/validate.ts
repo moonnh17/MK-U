@@ -745,6 +745,20 @@ export function validateGameData(d: GameData): Errors {
     if (typeof v !== 'string' || (v === '' && !k.startsWith('gemini.story.') && !k.startsWith('gemini.mini.'))) errors.push(`text: '${k}' 값이 비어 있음`);
   }
 
+  // --- 타격감 ---
+  const ju = d.juice;
+  for (const [k, c] of [...Object.entries(ju.damageNumbers.colors), ...Object.entries(ju.sparks.colors)]) if (!HEX_COLOR.test(c)) errors.push(`juice 색 ${k}: #RRGGBB`);
+  if (!HEX_COLOR.test(ju.playerHurt.color)) errors.push('juice.playerHurt.color: #RRGGBB');
+  for (const [k, v] of Object.entries(ju.hitStop)) if (!(v >= 0 && v <= 0.3)) errors.push(`juice.hitStop.${k}: 0~0.3초`);
+  for (const [k, v] of Object.entries(ju.shake)) {
+    checkPositive(errors, `juice.shake.${k}.ms`, v.ms);
+    if (!(v.intensity > 0 && v.intensity < 0.05)) errors.push(`juice.shake.${k}.intensity: 0~0.05`);
+  }
+  checkRange(errors, 'juice.sparks.count', ju.sparks.count);
+  checkRange(errors, 'juice.death.shards', ju.death.shards);
+  checkRange(errors, 'juice.death.eliteShards', ju.death.eliteShards);
+  for (const [k, ref] of Object.entries(ju.fx)) checkSprite(errors, `juice.fx.${k}`, ref);
+
   // --- 도트 아트 ---
   errors.push(...validateArt(d.art, collectAssets(d)));
 

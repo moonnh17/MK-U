@@ -12,6 +12,7 @@ import type {
   LabData,
   GeminiData,
   ArtData,
+  JuiceData,
   LootData,
   MapgenData,
   MetaData,
@@ -52,6 +53,7 @@ import metaJson from './meta.json';
 import labJson from './lab.json';
 import geminiJson from './gemini.json';
 import artJson from './art.json';
+import juiceJson from './juice.json';
 import koJson from './text/ko.json';
 
 export interface GameData {
@@ -78,6 +80,7 @@ export interface GameData {
   lab: LabData;
   gemini: GeminiData;
   art: ArtData;
+  juice: JuiceData;
   text: TextTable;
 }
 
@@ -106,5 +109,6 @@ export const gameData: GameData = {
   lab: labJson as unknown as LabData,
   gemini: geminiJson as unknown as GeminiData,
   art: artJson as unknown as ArtData,
+  juice: juiceJson as unknown as JuiceData,
   text: koJson as TextTable,
 };

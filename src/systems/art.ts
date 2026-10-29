@@ -6,9 +6,9 @@
 import type { GameData } from '../data/index';
 import type { ArtAnchor, ArtAnimId, ArtData, SpriteRef } from '../types/data';
 
-export type AssetGroup = 'player' | 'weapon' | 'projectile' | 'enemy' | 'boss' | 'prop' | 'pickup' | 'skill' | 'lab' | 'item' | 'icon' | 'tile';
+export type AssetGroup = 'player' | 'weapon' | 'projectile' | 'enemy' | 'boss' | 'prop' | 'pickup' | 'skill' | 'lab' | 'item' | 'icon' | 'tile' | 'fx';
 
-export const ASSET_GROUPS: readonly AssetGroup[] = ['player', 'weapon', 'projectile', 'enemy', 'boss', 'prop', 'pickup', 'skill', 'lab', 'item', 'icon', 'tile'];
+export const ASSET_GROUPS: readonly AssetGroup[] = ['player', 'weapon', 'projectile', 'enemy', 'boss', 'prop', 'pickup', 'skill', 'lab', 'item', 'icon', 'tile', 'fx'];
 
 /** 화면(DOM·HUD) 아이콘의 권장 크기 */
 export const ICON_SIZE = 16;
@@ -57,6 +57,7 @@ const DEFAULT_ANCHOR: Record<AssetGroup, ArtAnchor> = {
   item: 'center',
   icon: 'center',
   tile: 'center',
+  fx: 'center',
 };
 
 export interface AssetRef {
@@ -128,6 +129,8 @@ export function collectAssets(d: GameData): AssetRef[] {
     for (const part of TILE_PARTS) add('tile', { spriteKey: artKeys.tile(part, c), color: colors[part], size: ts }, `asset.tile.${part}`, `#${c}장`);
   }
   add('tile', { spriteKey: artKeys.door, color: d.mapgen.door.color, size: ts }, 'asset.tile.door');
+  // 타격·처치·등장 이펙트
+  for (const [id, ref] of Object.entries(d.juice.fx)) add('fx', ref, `asset.fx.${id}`);
   return [...out.values()];
 }
 

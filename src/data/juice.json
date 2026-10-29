@@ -1,0 +1,48 @@
+{
+  "damageNumbers": {
+    "enabled": true,
+    "max": 24,
+    "riseSec": 0.6,
+    "risePx": 14,
+    "spreadPx": 6,
+    "fontSize": 8,
+    "critFontSize": 11,
+    "bossFontScale": 1.2,
+    "colors": { "normal": "#ffffff", "crit": "#ffd23f", "space": "#c08aff", "dot": "#c8c8c8" }
+  },
+  "hitFlash": { "squash": 0.18, "squashSec": 0.1 },
+  "sparks": {
+    "count": [3, 5],
+    "speed": [50, 110],
+    "lifeSec": 0.22,
+    "size": 2,
+    "fxSec": 0.18,
+    "colors": { "physical": "#ffffff", "magic": "#c08aff", "tech": "#5ad0ff", "default": "#ffe08a" }
+  },
+  "hitStop": { "melee": 0.04, "crit": 0.04, "eliteKill": 0.06, "bossKill": 0.08, "minGapSec": 0.12 },
+  "death": {
+    "shards": [6, 9],
+    "eliteShards": [14, 18],
+    "shardSpeed": [40, 120],
+    "shardLifeSec": 0.4,
+    "shardSize": 2,
+    "flashSec": 0.06,
+    "orbPopPx": [10, 26],
+    "orbPopSec": 0.25
+  },
+  "playerHurt": { "flashSec": 0.3, "flashAlpha": 0.5, "lowHpRatio": 0.3, "pulseSec": 1.1, "pulseAlpha": 0.35, "color": "#ff2a2a", "edgePx": 18 },
+  "shake": {
+    "light": { "ms": 80, "intensity": 0.004 },
+    "medium": { "ms": 180, "intensity": 0.006 },
+    "heavy": { "ms": 320, "intensity": 0.009 },
+    "rumble": { "ms": 1000, "intensity": 0.002 }
+  },
+  "fx": {
+    "hitTech": { "spriteKey": "fx_hit_tech", "color": "#5ad0ff", "size": 10 },
+    "hitMagic": { "spriteKey": "fx_hit_magic", "color": "#c08aff", "size": 10 },
+    "hitPhysical": { "spriteKey": "fx_hit_physical", "color": "#ffffff", "size": 10 },
+    "explosion": { "spriteKey": "fx_explosion", "color": "#ff5a3a", "size": 30 },
+    "eliteBurst": { "spriteKey": "fx_elite_burst", "color": "#c08aff", "size": 34 },
+    "spawn": { "spriteKey": "fx_spawn", "color": "#8a5ad9", "size": 20 }
+  }
+}

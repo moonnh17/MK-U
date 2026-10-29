@@ -1104,3 +1104,35 @@ export interface ArtData {
   /** spriteKey → 그림. 적혀 있지 않은 키는 색 사각형 */
   sprites: Record<string, ArtSpriteDef>;
 }
+
+// ---------- 타격감·연출 ----------
+
+export type ShakeLevel = 'light' | 'medium' | 'heavy' | 'rumble';
+
+export interface JuiceData {
+  /** 피해 숫자 (동시 max개, riseSec 동안 risePx 위로) */
+  damageNumbers: {
+    enabled: boolean;
+    max: number;
+    riseSec: number;
+    risePx: number;
+    spreadPx: number;
+    fontSize: number;
+    critFontSize: number;
+    bossFontScale: number;
+    colors: Record<'normal' | 'crit' | 'space' | 'dot', string>;
+  };
+  /** 맞으면 squash만큼 찌그러졌다 squashSec에 돌아온다 */
+  hitFlash: { squash: number; squashSec: number };
+  /** 맞은 자리 불꽃 (태그 색), fx 그림은 fxSec 동안 */
+  sparks: { count: IntRange; speed: [number, number]; lifeSec: number; size: number; fxSec: number; colors: Record<'physical' | 'magic' | 'tech' | 'default', string> };
+  /** 잠깐 멈춤(초). 끝난 뒤 minGapSec 동안은 다시 멈추지 않는다 */
+  hitStop: { melee: number; crit: number; eliteKill: number; bossKill: number; minGapSec: number };
+  /** 처치: 파편, 번쩍임, 보상 구슬이 튀어 나가는 거리·시간 */
+  death: { shards: IntRange; eliteShards: IntRange; shardSpeed: [number, number]; shardLifeSec: number; shardSize: number; flashSec: number; orbPopPx: [number, number]; orbPopSec: number };
+  /** 플레이어 피격: 화면 가장자리 붉은 번쩍임, 낮은 체력 맥박 */
+  playerHurt: { flashSec: number; flashAlpha: number; lowHpRatio: number; pulseSec: number; pulseAlpha: number; color: string; edgePx: number };
+  shake: Record<ShakeLevel, { ms: number; intensity: number }>;
+  /** 이펙트 그림 (없으면 도형) */
+  fx: Record<'hitTech' | 'hitMagic' | 'hitPhysical' | 'explosion' | 'eliteBurst' | 'spawn', SpriteRef>;
+}
