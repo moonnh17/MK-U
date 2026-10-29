@@ -5,6 +5,7 @@ import { getContext, type GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { registerGemini } from '../core/save';
 import { hexColor } from '../core/scale';
+import { fitArt } from '../entities/art';
 import { hasLines, storyFor } from '../systems/gemini';
 import { jobChoices, nearestInteractable, portalActive } from '../systems/lab';
 import type { LabObjectDef } from '../types/data';
@@ -69,6 +70,7 @@ export class LabScene extends Phaser.Scene {
 
     for (const o of L.objects) {
       const img = this.add.image(o.x, o.y, o.spriteKey).setDepth(2);
+      fitArt(this.ctx.data, img, o.w, o.h);
       if (o.solid) this.walls.add(img);
       if (o.kind === 'portal') this.portal = img;
       if (o.kind === 'window') this.drawWindow(o);
@@ -77,6 +79,7 @@ export class LabScene extends Phaser.Scene {
     this.refreshPortal();
 
     this.player = this.physics.add.image(L.start.x, L.start.y, d.player.spriteKey).setDepth(4);
+    fitArt(d, this.player, d.player.size, d.player.height ?? d.player.size);
     this.physics.add.collider(this.player, this.walls);
 
     const fs = d.ui.hud.fontSize;

@@ -13,6 +13,7 @@ import { Enemy, type EnemyHost } from '../entities/enemy';
 import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
 import { Spire } from '../entities/spire';
 import { Darkness } from '../entities/darkness';
+import { fitArt } from '../entities/art';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
 import { FloorWeapon, Pickup } from '../entities/pickup';
@@ -320,6 +321,7 @@ export class RunScene extends Phaser.Scene {
 
     const start = roomCenter(map.rooms[map.startId]!, this.m);
     this.player = this.physics.add.image(start.x, start.y, d.player.spriteKey).setDepth(4);
+    fitArt(d, this.player, d.player.size, d.player.height ?? d.player.size);
     this.weaponSprite = this.add.image(start.x, start.y, this.weaponDef().spriteKey).setDepth(4);
     if (stage.chapter === 1 && stage.stage === 1 && this.ctx.config.testWeapons) this.placeTestWeapons();
 
@@ -502,7 +504,9 @@ export class RunScene extends Phaser.Scene {
       if (node.kind === 'exitRoom') this.addPortal(node);
       if (node.kind === 'encounterRoom') {
         const ref = d.mapgen.props.encounterCore;
-        this.cores.push({ sprite: this.add.image(c.x, c.y, ref.spriteKey).setDepth(2), roomId: node.id, radius: ref.size / 2 });
+        const core = this.add.image(c.x, c.y, ref.spriteKey).setDepth(2);
+        fitArt(d, core, ref.size, ref.height ?? ref.size);
+        this.cores.push({ sprite: core, roomId: node.id, radius: ref.size / 2 });
       }
     }
   }
@@ -1057,6 +1061,7 @@ export class RunScene extends Phaser.Scene {
   ): void {
     const proj = this.ctx.data.weapons.projectile;
     const b = this.bullets.create(from.x, from.y, proj.spriteKey) as Phaser.Physics.Arcade.Image;
+    fitArt(this.ctx.data, b, proj.size, proj.height ?? proj.size);
     b.setDepth(5);
     b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>() });
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
@@ -1366,7 +1371,9 @@ export class RunScene extends Phaser.Scene {
 
   /** 적 탄. refractable=false면 굴절·탄 베기 불가(보스 대형 레이저 등). homing: 플레이어 쪽으로 휘는 속도(rad/s, 유도 미사일) */
   private fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, homing = 0): void {
-    const b = this.enemyBullets.create(from.x, from.y, this.ctx.data.enemies.projectile.spriteKey) as Phaser.Physics.Arcade.Image;
+    const ep = this.ctx.data.enemies.projectile;
+    const b = this.enemyBullets.create(from.x, from.y, ep.spriteKey) as Phaser.Physics.Arcade.Image;
+    fitArt(this.ctx.data, b, ep.size, ep.height ?? ep.size);
     b.setDepth(5);
     b.setData({ damage, refractable, cuttable: refractable, range, ox: from.x, oy: from.y, homing });
     // 굴절 불가 탄은 붉게, 유도 미사일은 크게
@@ -2518,6 +2525,7 @@ export class RunScene extends Phaser.Scene {
       const x = this.player.x + Math.cos(a) * cfg.distance;
       const y = this.player.y + Math.sin(a) * cfg.distance;
       const b = this.enemyBullets.create(x, y, d.projectile.spriteKey) as Phaser.Physics.Arcade.Image;
+      fitArt(this.ctx.data, b, d.projectile.size, d.projectile.height ?? d.projectile.size);
       b.setDepth(5);
       b.setData({ damage: cfg.damage, refractable: true, cuttable: true });
       b.setVelocity(-Math.cos(a) * cfg.speed, -Math.sin(a) * cfg.speed);

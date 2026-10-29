@@ -9,6 +9,8 @@ import { aimLocked, chainWindup, forceWindup, initialAi, keepDistanceStep, stepA
 import type { BleedState } from '../systems/tags';
 import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank } from '../types/data';
 import { Beams, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
+import { fitArt } from './art';
+import { getContext } from '../core/context';
 
 /** 적이 전투 씬에 바라는 것 (원거리 탄·장판·전술 연계·밧줄) */
 export interface EnemyHost extends HazardHost {
@@ -111,6 +113,8 @@ export class Enemy {
     this.ai = initialAi(this.attacks, warnSec);
     this.sprite = scene.physics.add.image(x, y, def.spriteKey);
     this.sprite.setData('enemy', this);
+    // 그림이 커도 판정은 데이터 크기 (엘리트·거대화 배율은 Phaser가 몸에 곱한다)
+    fitArt(getContext().data, this.sprite, def.size, def.height ?? def.size);
     this.sprite.setDepth(3);
     if (this.mods.scale !== 1) this.sprite.setScale(this.mods.scale);
     if (def.ai === 'idle') this.sprite.setImmovable(true);
@@ -461,7 +465,7 @@ export class Enemy {
       const body = this.sprite.body as Phaser.Physics.Arcade.Body | null;
       if (this.ghostTimer <= 0 && body && body.speed > 10) {
         this.ghostTimer = 0.08;
-        const g = this.scene.add.image(x, y, this.def.spriteKey).setScale(this.mods.scale).setAlpha(0.35).setDepth(2);
+        const g = this.scene.add.image(x, y, this.def.spriteKey).setOrigin(this.sprite.originX, this.sprite.originY).setScale(this.mods.scale).setAlpha(0.35).setDepth(2);
         g.setTint(hexColor(ghost.color));
         this.scene.tweens.add({ targets: g, alpha: 0, duration: 250, onComplete: () => g.destroy() });
       }

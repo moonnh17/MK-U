@@ -3,10 +3,20 @@ import { getContext } from '../core/context';
 import { hexColor } from '../core/scale';
 import type { SpriteRef } from '../types/data';
 
-/** 데이터의 spriteKey마다 색 사각형 텍스처를 만든다. 나중에 도트 아트 로드로 바꾼다. */
+/**
+ * 그림 준비: art.json에 적힌 spriteKey는 public/ 아래 PNG(가로 프레임 스트립)를 불러오고,
+ * 적혀 있지 않거나 불러오지 못한 키는 색 사각형 텍스처를 만든다.
+ */
 export class BootScene extends Phaser.Scene {
   constructor() {
     super('Boot');
+  }
+
+  preload(): void {
+    const { art } = getContext().data;
+    for (const [key, s] of Object.entries(art.sprites)) {
+      this.load.spritesheet(key, `${art.basePath}${s.file}`, { frameWidth: s.frameWidth, frameHeight: s.frameHeight, endFrame: (s.frames ?? 1) - 1 });
+    }
   }
 
   create(): void {
@@ -29,6 +39,10 @@ export class BootScene extends Phaser.Scene {
       ...data.skills.skills.flatMap((s) => Object.values(s.sprites)),
       ...data.ultimates.ultimates.flatMap((u) => Object.values(u.sprites)),
     ];
+    // 파일이 없거나 깨져서 못 불러온 그림은 그 키만 색 사각형으로 남긴다
+    for (const [key, s] of Object.entries(data.art.sprites)) {
+      if (!this.textures.exists(key)) console.warn(`[그림] '${key}' 불러오기 실패 (${data.art.basePath}${s.file}) — 색 사각형으로 대신함`);
+    }
     for (const ref of refs) this.makeRectTexture(ref);
     for (const o of data.lab.objects) this.makeRectTexture({ spriteKey: o.spriteKey, color: o.color, size: o.w, height: o.h });
 

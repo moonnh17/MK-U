@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
+import { getContext } from '../core/context';
 import { hexColor } from '../core/scale';
+import { fitArt } from './art';
 import type { WeaponItem } from '../systems/weapons';
 import type { PickupsData } from '../types/data';
 
@@ -19,6 +21,7 @@ export class Pickup {
   ) {
     const ref = kind === 'energy' ? data.energyOrb : data.coin;
     this.sprite = scene.add.image(x, y, ref.spriteKey).setDepth(2);
+    fitArt(getContext().data, this.sprite, ref.size, ref.height ?? ref.size);
   }
 
   /** 획득했으면 true */

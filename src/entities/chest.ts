@@ -3,7 +3,9 @@
  * 무엇이 나오는지는 RunScene이 systems/loot.ts로 정한다.
  */
 import type Phaser from 'phaser';
+import { getContext } from '../core/context';
 import type { StockItem } from '../systems/loot';
+import { fitArt } from './art';
 import type { GradeId, SpriteRef } from '../types/data';
 
 export type ChestKind = 'weapon' | 'item';
@@ -24,6 +26,7 @@ export class Chest {
     readonly fixedItem?: string,
   ) {
     this.sprite = scene.add.image(x, y, ref.spriteKey).setDepth(2);
+    fitArt(getContext().data, this.sprite, ref.size, ref.height ?? ref.size);
     scene.tweens.add({ targets: this.sprite, scaleX: 1.08, scaleY: 1.08, duration: 500, yoyo: true, repeat: -1 });
   }
 
