@@ -741,6 +741,15 @@
         }
       ]
     },
+    "panic": {
+      "gapSec": 0.5,
+      "maxVoices": 1,
+      "layers": [
+        { "wave": "sawtooth", "freq": [420, 70], "durSec": 0.7, "volume": 0.22 },
+        { "wave": "square", "freq": [437, 66], "durSec": 0.7, "volume": 0.1 },
+        { "wave": "noise", "durSec": 0.5, "volume": 0.14, "filter": { "type": "lowpass", "freq": [1800, 200] } }
+      ]
+    },
     "blink": {
       "gapSec": 0.08,
       "maxVoices": 2,

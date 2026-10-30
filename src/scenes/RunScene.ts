@@ -17,6 +17,8 @@ import { Enemy, type EnemyHost } from '../entities/enemy';
 import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
 import { Spire } from '../entities/spire';
 import { Darkness } from '../entities/darkness';
+import { PanicFx } from '../entities/panicFx';
+import { applyMental, sanityMaxFor, stepSanity } from '../systems/sanity';
 import { animateArt, fitArt } from '../entities/art';
 import { Juice, shake } from '../entities/juice';
 import { cameraFocus, viewSize } from '../systems/camera';
@@ -242,6 +244,8 @@ export class RunScene extends Phaser.Scene {
   private invuln = 0;
   private dodge: DodgeState = IDLE_DODGE;
   private dodgeGhostIn = 0;
+  private panicFx: PanicFx | null = null;
+  private panicTinted = false;
   private dodgeFxRng: Rng | null = null;
   private dodgeBar: Phaser.GameObjects.Graphics | null = null;
   private pathFields = new Map<number, PathField>();
@@ -345,8 +349,8 @@ export class RunScene extends Phaser.Scene {
       scene: this,
       playerPos: () => ({ x: this.player.x, y: this.player.y }),
       playerRadius: d.player.size / 2,
-      hurtPlayer: (amount, attacker) => this.hurtPlayer(amount, attacker ?? null),
-      fireEnemyBullet: (from, angle, speed, range, damage, refractable) => this.fireEnemyBullet(from, angle, speed, range, damage, refractable),
+      hurtPlayer: (amount, attacker, mental) => this.hurtPlayer(amount, attacker ?? null, mental),
+      fireEnemyBullet: (from, angle, speed, range, damage, refractable, mental) => this.fireEnemyBullet(from, angle, speed, range, damage, refractable, 0, mental),
       addHazard: (h) => this.hazards.push(h),
       linkWindup: (e, attackId) => this.linkWindup(e, attackId),
       rng: this.rng,
@@ -532,6 +536,8 @@ export class RunScene extends Phaser.Scene {
     this.fireCooldown = 0;
     this.invuln = 0;
     this.dodge = IDLE_DODGE;
+    this.panicFx = null;
+    this.panicTinted = false;
     this.dodgeBar = null;
     this.pathFields = new Map();
     this.bossHpSeen = new Map();
@@ -897,7 +903,7 @@ export class RunScene extends Phaser.Scene {
 
   override update(_time: number, deltaMs: number): void {
     let dt = Math.min(deltaMs / 1000, 0.05);
-    const frame = this.ctx.input.poll();
+    let frame = this.ctx.input.poll();
     // 보스 처치 슬로모션: 물리·트윈·게임 시간을 함께 늦춘다
     if (this.slowT !== null) {
       this.slowT += dt;
@@ -952,9 +958,10 @@ export class RunScene extends Phaser.Scene {
     const p = this.session.player;
     const d = this.ctx.data;
     const mods = this.playerMods();
-    p.shieldMax = d.player.shieldMax + p.meta.shield + mods.shieldMax;
-    p.shield = Math.min(p.shield, p.shieldMax);
     this.syncMaxHp();
+    this.updateSanity(dt);
+    // 패닉: 방향이 뒤집힌다
+    if (p.panic) frame = { ...frame, move: { x: -frame.move.x, y: -frame.move.y } };
     this.itemRt.update(dt);
     this.updateDodge(dt, frame);
     const speed = d.player.moveSpeed * (1 + statEffect('moveSpeed', this.effStats(), d.stats)) * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus());
@@ -1313,9 +1320,13 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 실제로 쓰는 스탯: 기본 스탯 + 들고 있는 무기의 보너스(신궁 환디 힘 +30) */
-  private effStats(): Stats {
+  /** awaken=false: 패닉 각성 보너스를 뺀 값 (최대 체력·정신력은 각성으로 늘지 않는다) */
+  private effStats(awaken = true): Stats {
     const out = { ...this.session.player.stats };
     for (const [k, v] of Object.entries(this.weaponDef().equipBonus?.stats ?? {})) out[k as StatId] += v ?? 0;
+    // 패닉 각성
+    const bonus = awaken && this.session.player.panic ? this.itemRt?.panicAwaken() : null;
+    if (bonus) for (const k of Object.keys(out) as StatId[]) out[k] += bonus.allStats;
     // 아이템 스탯 (LSD-R 재편 포함)
     const items = this.itemRt?.sums.stats;
     if (items) for (const k of Object.keys(out) as StatId[]) out[k] += items[k];
@@ -1626,6 +1637,52 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
+  /** 정신력 값 반영. 패닉에 들어가고 나올 때 알린다 */
+  private setSanity(next: { sanity: number; panic: boolean }): void {
+    const p = this.session.player;
+    const was = p.panic;
+    p.sanity = next.sanity;
+    p.panic = next.panic;
+    if (!was && p.panic) {
+      sfx('panic');
+      this.toastThrottled(this.ctx.t(this.itemRt.panicAwaken() ? 'panic.awaken' : 'panic.enter'));
+    } else if (was && !p.panic) this.toastThrottled(this.ctx.t('panic.exit'));
+  }
+
+  /** 최대치 동기화, 회복·보스 감소, 패닉 연출·각성 */
+  private updateSanity(dt: number): void {
+    const d = this.ctx.data;
+    const p = this.session.player;
+    const cfg = d.player.sanity;
+    const max = sanityMaxFor(this.effStats(false).willpower, cfg) + p.meta.sanity;
+    if (max !== p.sanityMax) {
+      if (max > p.sanityMax) p.sanity += max - p.sanityMax;
+      p.sanityMax = max;
+      p.sanity = Math.min(p.sanity, max);
+    }
+    const facingBoss = this.enemies.some((e) => e.rank === 'boss' || e.rank === 'hiddenBoss');
+    this.setSanity(stepSanity(p, dt, facingBoss, cfg));
+
+    if (p.panic) {
+      this.panicFx ??= new PanicFx(this, cfg.panic, Rng.derive(this.ctx.config.seed, 'panic-fx'), this.ctx.renderScale);
+      const cam = this.cameras.main;
+      this.panicFx.update(dt, cam.width / 2 + (this.player.x - cam.midPoint.x), cam.height / 2 + (this.player.y - cam.midPoint.y));
+    } else if (this.panicFx) {
+      this.panicFx.destroy();
+      this.panicFx = null;
+    }
+    // 각성: 체력이 닳는다 (죽지는 않는다)
+    const awaken = p.panic ? this.itemRt.panicAwaken() : null;
+    if (awaken) {
+      p.hp = Math.max(Math.min(p.hp, 1), p.hp - awaken.hpPerSec * dt);
+      this.player.setTint(hexColor(cfg.panic.awakenTint));
+      this.panicTinted = true;
+    } else if (this.panicTinted) {
+      this.player.clearTint();
+      this.panicTinted = false;
+    }
+  }
+
   /** 적 길 찾기: 곧장 갈 수 있으면 null, 막혔으면 이 방 격자로 돌아가는 방향 */
   private enemyPathDir(from: Vec2, radius: number): Vec2 | null {
     const rid = this.session.currentRoomId;
@@ -1874,7 +1931,7 @@ export class RunScene extends Phaser.Scene {
 
   /** 피해를 받았으면 true */
   /** 피해를 받았으면 true. attacker: 때린 적(반사용, 모르면 null) */
-  private hurtPlayer(amount: number, attacker: Enemy | null = null): boolean {
+  private hurtPlayer(amount: number, attacker: Enemy | null = null, mentalRaw?: number): boolean {
     if (this.invuln > 0 || this.dodge.invuln > 0 || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
     // 특무 인장: 피해를 받기 직전 순간이동으로 피한다 (피격 무적과 같은 시간)
     if (this.itemRt.tryDodge()) {
@@ -1891,9 +1948,12 @@ export class RunScene extends Phaser.Scene {
     }
     const p = this.session.player;
     const taken = damageTaken(amount, this.effStats(), this.ctx.data.stats) * (1 - this.playerMods().damageReduction) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard());
-    const v = takeDamage(p, taken);
+    // 정신 피해: 패닉 중이면 체력 피해로 바뀐다
+    const mental = (mentalRaw ?? amount * (attacker?.def.mentalRatio ?? 0)) * (1 - statEffect('mentalResist', this.effStats(), this.ctx.data.stats));
+    const m = applyMental(p, mental);
+    this.setSanity(m);
+    const v = takeDamage(p, taken + m.hpDamage);
     p.hp = v.hp;
-    p.shield = v.shield;
     this.invuln = this.ctx.data.player.hurtInvulnSec;
     shake(this, 'light');
     this.juice.hurt();
@@ -1974,12 +2034,12 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 적 탄. refractable=false면 굴절·탄 베기 불가(보스 대형 레이저 등). homing: 플레이어 쪽으로 휘는 속도(rad/s, 유도 미사일) */
-  private fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, homing = 0): void {
+  private fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, homing = 0, mental = 0): void {
     const ep = this.ctx.data.enemies.projectile;
     const b = this.enemyBullets.create(from.x, from.y, ep.spriteKey) as Phaser.Physics.Arcade.Image;
     fitArt(this.ctx.data, b, ep.size, ep.height ?? ep.size);
     b.setDepth(5);
-    b.setData({ damage, refractable, cuttable: refractable, range, ox: from.x, oy: from.y, homing });
+    b.setData({ damage, mental, refractable, cuttable: refractable, range, ox: from.x, oy: from.y, homing });
     // 굴절 불가 탄은 붉게, 유도 미사일은 크게
     if (!refractable) b.setTint(0xff2a2a);
     if (homing > 0) b.setScale(1.5);
@@ -2080,9 +2140,9 @@ export class RunScene extends Phaser.Scene {
       },
       heal: (amount, overflow) => {
         const p = this.session.player;
-        const v = heal(p, amount, overflow);
+        const v = heal(p, amount);
         p.hp = v.hp;
-        p.shield = v.shield;
+        if (overflow) this.setSanity({ sanity: Math.min(p.sanityMax, p.sanity + v.overflow), panic: p.panic });
       },
       payHp: (ratio) => {
         const p = this.session.player;
@@ -2172,8 +2232,9 @@ export class RunScene extends Phaser.Scene {
     // 구르는 동안에는 탄이 몸을 지나간다
     if (!b.active || this.dodge.invuln > 0) return;
     const damage = b.getData('damage') as number;
+    const mental = b.getData('mental') as number | undefined;
     b.destroy();
-    this.hurtPlayer(damage);
+    this.hurtPlayer(damage, null, mental);
   }
 
   /** HUD '현재 버프': 보호막 + 스킬 오브젝트가 알리는 상태(충전 등) */
@@ -2211,7 +2272,7 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     const p = this.session.player;
     // 기본 체력(+영구 강화) + 견고 + 아이템
-    const target = maxHpFor(d.player.maxHp + p.meta.maxHp, this.effStats(), d.stats) + this.itemRt.sums.maxHp;
+    const target = maxHpFor(d.player.maxHp + p.meta.maxHp, this.effStats(false), d.stats) + this.itemRt.sums.maxHp;
     if (target === p.maxHp) return;
     if (target > p.maxHp) p.hp += target - p.maxHp;
     p.maxHp = target;

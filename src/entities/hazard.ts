@@ -14,7 +14,8 @@ export interface HazardHost {
   playerPos(): Vec2;
   readonly playerRadius: number;
   /** 피해를 받았으면 true. attacker: 때린 적 (아이템 반사용) */
-  hurtPlayer(amount: number, attacker?: Enemy): boolean;
+  /** mental: 정신 피해. 없으면 attacker의 mentalRatio로 정한다 */
+  hurtPlayer(amount: number, attacker?: Enemy, mental?: number): boolean;
 }
 
 /** 일정 간격으로 피해를 주는 지대의 공통 처리 */
@@ -22,10 +23,10 @@ class Ticker {
   private timer = 0;
   constructor(private readonly tickSec: number) {}
   /** 플레이어가 안에 있으면 간격마다 피해. 맞힐 수 있는 순간이면 true */
-  tick(dt: number, inside: boolean, host: HazardHost, damage: number): void {
+  tick(dt: number, inside: boolean, host: HazardHost, damage: number, mental?: number): void {
     this.timer -= dt;
     if (!inside || this.timer > 0) return;
-    if (host.hurtPlayer(damage)) this.timer = this.tickSec;
+    if (host.hurtPlayer(damage, undefined, mental)) this.timer = this.tickSec;
   }
 }
 
@@ -90,6 +91,7 @@ export class Zone implements Hazard {
     private readonly damage: number,
     tickSec: number,
     color: number,
+    private readonly mental = 0,
   ) {
     this.left = liveSec;
     this.ticker = new Ticker(tickSec);
@@ -101,7 +103,7 @@ export class Zone implements Hazard {
     if (this.left <= 0) return false;
     this.c.setAlpha(Math.min(1, this.left));
     const p = host.playerPos();
-    this.ticker.tick(dt, Math.hypot(p.x - this.at.x, p.y - this.at.y) <= this.radius + host.playerRadius, host, this.damage);
+    this.ticker.tick(dt, Math.hypot(p.x - this.at.x, p.y - this.at.y) <= this.radius + host.playerRadius, host, this.damage, this.mental);
     return true;
   }
 
@@ -189,6 +191,8 @@ export interface BeamsSpec {
   telegraphSec: number;
   liveSec: number;
   damage: number;
+  /** 정신 피해 */
+  mental?: number;
   tickSec: number;
   color: number;
 }
@@ -223,7 +227,7 @@ export class Beams implements Hazard {
       this.g.lineBetween(c.x, c.y, end.x, end.y);
       if (segDist(p, c, end) <= s.width / 2 + host.playerRadius) inside = true;
     }
-    if (live) this.ticker.tick(dt, inside, host, s.damage);
+    if (live) this.ticker.tick(dt, inside, host, s.damage, s.mental);
     return true;
   }
 

@@ -37,6 +37,7 @@ export const SFX_IDS = [
   'warpArrive',
   'dash',
   'blink',
+  'panic',
   'vend',
   'heal',
   'itemFanfare',

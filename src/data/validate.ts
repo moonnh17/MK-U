@@ -527,7 +527,7 @@ export function validateGameData(d: GameData): Errors {
   checkPositive(errors, 'player.hurtInvulnSec', pl.hurtInvulnSec, true);
   checkPositive(errors, 'player.blinkIntervalSec', pl.blinkIntervalSec);
   checkPositive(errors, 'player.weaponOffset', pl.weaponOffset, true);
-  checkPositive(errors, 'player.shieldMax', pl.shieldMax, true);
+  checkPositive(errors, 'player.sanity.base', pl.sanity.base);
   checkPositive(errors, 'player.energy.max', pl.energy.max);
   checkPositive(errors, 'player.energy.orbValue', pl.energy.orbValue);
   if (!isNum(pl.energy.start) || pl.energy.start < 0 || pl.energy.start > pl.energy.max) {

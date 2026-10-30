@@ -1,3 +1,4 @@
+import { sanityMaxFor } from '../systems/sanity';
 import type { GameData } from '../data/index';
 import { startingStats, type Stats } from '../systems/damage';
 import type { StageMap } from '../systems/mapgen';
@@ -15,8 +16,10 @@ export interface PlayerState {
   hp: number;
   maxHp: number;
   /** 보호막: 체력보다 먼저 깎인다(지금은 환원주의자 각성이 채움) */
-  shield: number;
-  shieldMax: number;
+  /** 정신력. 0이 되면 패닉 */
+  sanity: number;
+  sanityMax: number;
+  panic: boolean;
   energy: number;
   energyMax: number;
   coins: number;
@@ -52,7 +55,7 @@ export interface PlayerState {
   /** 결산용 런 기록 (스테이지를 넘어가도 유지) */
   record: RunRecord;
   /** 영구 강화로 더한 기본 체력·보호막 최대치 (스탯은 시작 스탯에 이미 들어 있다) */
-  meta: { maxHp: number; shield: number };
+  meta: { maxHp: number; sanity: number };
 }
 
 export type RunOutcome = { type: 'dead' } | { type: 'chapterClear'; chapter: number };
@@ -144,9 +147,10 @@ export function newPlayerState(data: GameData, jobId: string = data.jobs.startJo
   return {
     hp: data.player.maxHp + bonus.maxHp,
     maxHp: data.player.maxHp + bonus.maxHp,
-    shield: 0,
-    shieldMax: data.player.shieldMax + bonus.shield,
-    meta: { maxHp: bonus.maxHp, shield: bonus.shield },
+    sanity: sanityMaxFor(stats.willpower, data.player.sanity) + bonus.sanity,
+    sanityMax: sanityMaxFor(stats.willpower, data.player.sanity) + bonus.sanity,
+    panic: false,
+    meta: { maxHp: bonus.maxHp, sanity: bonus.sanity },
     energy: data.player.energy.start,
     energyMax: data.player.energy.max,
     coins: 0,

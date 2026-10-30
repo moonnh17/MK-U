@@ -283,6 +283,8 @@ export interface EnemyDef extends SpriteRef {
   /** 원거리 적: 플레이어와 이 거리를 유지한다 */
   keepDistance?: number;
   trail?: EnemyTrailDef;
+  /** 체력 피해의 이 배율만큼 정신 피해를 함께 준다 */
+  mentalRatio?: number;
   /** 집정관: 같은 방에서 죽은 적의 최대 체력을 흡수해 단계가 오른다 */
   absorb?: ArchonAbsorbDef;
 }
@@ -314,6 +316,8 @@ export interface EnemyAttackDef {
   radius?: number;
   /** slam: 몸에서 강타 중심까지 최대 거리 */
   reach?: number;
+  /** puddle: 장판 틱마다 주는 정신 피해 */
+  mentalDamage?: number;
   /** slam: 내리칠 때 사방으로 퍼지는 충격 탄 */
   ring?: { shots: number; speed: number; range: number; damage: number };
   /** 등장 후 첫 공격을 이 시간 안에서 무작위로 늦춘다 (떼가 한꺼번에 쏘지 않게) */
@@ -352,6 +356,8 @@ export interface EnemyTrailDef {
   liveSec: number;
   damage: number;
   tickSec: number;
+  /** 틱마다 주는 정신 피해 */
+  mentalDamage?: number;
 }
 
 export interface EliteDef {
@@ -575,6 +581,32 @@ export type DodgeSchoolDef = { nameKey: string; descKey: string } & (
   | { kind: 'shot'; shots: number; spreadDeg: number; damage: number; projectileSpeed: number; range: number; tags: TagId[]; tint: string }
 );
 
+export interface SanityConfig {
+  base: number;
+  perWillpower: number;
+  regenPerSec: number;
+  /** 보스와 마주한 동안 초당 감소 (이때는 회복하지 않는다) */
+  bossDrainPerSec: number;
+  panic: {
+    regenPerSec: number;
+    /** 최대치의 이 비율까지 회복하면 패닉이 끝난다 */
+    exitRatio: number;
+    lightRadius: number;
+    darkAlpha: number;
+    darkColor: string;
+    fadeSec: number;
+    shakeMs: number;
+    shakeIntensity: number;
+    lines: number;
+    lineEverySec: number;
+    lineWidthPx: [number, number];
+    lineSegments: number;
+    lineAmpPx: number;
+    lineAlpha: number;
+    awakenTint: string;
+  };
+}
+
 export interface PlayerData extends SpriteRef {
   maxHp: number;
   /** px/s */
@@ -601,8 +633,8 @@ export interface PlayerData extends SpriteRef {
     /** 전직하면 회피가 바뀐다 */
     schools: Partial<Record<string, DodgeSchoolDef>>;
   };
-  /** 보호막 최대치. 규칙은 나중에 정한다(M1은 바 자리만) */
-  shieldMax: number;
+  /** 정신력 게이지: 최대치 = base + perWillpower × 정신력 스탯 */
+  sanity: SanityConfig;
   energy: { max: number; start: number; orbValue: number };
 }
 
@@ -636,7 +668,7 @@ export interface HudLayoutData {
     height: number;
     gap: number;
     hpColor: string;
-    shieldColor: string;
+    sanityColor: string;
     energyColor: string;
     backColor: string;
   };
@@ -847,6 +879,8 @@ export type ItemEffect =
   | { kind: 'shieldThrow'; everySec: number; damage: number; bounces: number; speed: number; size: number; maxSec: number; guard: number; tags: TagId[] }
   /** 방패 튕김 횟수 증가 (직업 변형) */
   | { kind: 'shieldBounces'; value: number }
+  /** 패닉 중 각성: 체력이 초당 hpPerSec 닳고(1 아래로는 안 내려감) 모든 스탯 +allStats */
+  | { kind: 'panicAwaken'; hpPerSec: number; allStats: number }
   /** 궁극기를 쓸 때 관통 탄환 shots발 전방위 (고대병기의 코어) */
   | { kind: 'ultimateBurst'; shots: number; damage: number; speed: number; range: number; tags: TagId[] }
   /** 기본 스탯을 base로, 정신력을 willpower로 재편하고 줄어든 양을 가장 많이 투자한 스탯에 옮김 */
@@ -1040,10 +1074,10 @@ export interface MetaData {
   upgrades: UpgradeDef[];
 }
 
-/** stat: 시작 스탯 +perLevel / maxHp: 기본 체력 +perLevel / shield: 보호막 최대치 +perLevel */
+/** stat: 시작 스탯 +perLevel / maxHp: 기본 체력 +perLevel / sanity: 최대 정신력 +perLevel */
 export type UpgradeDef =
   | { id: string; kind: 'stat'; stat: StatId; perLevel: number; costs: number[] }
-  | { id: string; kind: 'maxHp' | 'shield'; perLevel: number; costs: number[] };
+  | { id: string; kind: 'maxHp' | 'sanity'; perLevel: number; costs: number[] };
 
 // ---------- 실험장 (시작 방) ----------
 

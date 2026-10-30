@@ -512,6 +512,7 @@ actor('enemy_orion_crusader', gaps('warrior/paladin-idle.png'), gaps('warrior/pa
 }
 
 // 아이템 아이콘 (원본에 맞는 것이 없는 둘은 직접 찍는다)
+sprites.item_panic_brand = icon('item_panic_brand', 'warrior/icon-b-rage.png', 32);
 sprites.item_death_whistle = icon('item_death_whistle', 'warrior/icon-b-shout.png', 32);
 sprites.item_orion_shield = icon('item_orion_shield', 'warrior/icon-p-shield.png', 32);
 sprites.item_eclipse_core = icon('item_eclipse_core', 'eclipse/totality-sun.png', 32);

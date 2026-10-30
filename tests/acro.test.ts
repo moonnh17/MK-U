@@ -81,21 +81,15 @@ describe('마기 변질', () => {
   });
 });
 
-describe('체력·보호막', () => {
-  const v = { hp: 50, maxHp: 100, shield: 10, shieldMax: 30 };
-  it('피해는 보호막부터', () => {
-    expect(takeDamage(v, 4)).toMatchObject({ shield: 6, hp: 50 });
-    expect(takeDamage(v, 15)).toMatchObject({ shield: 0, hp: 45 });
+describe('체력', () => {
+  const v = { hp: 50, maxHp: 100 };
+  it('피해', () => {
+    expect(takeDamage(v, 15).hp).toBe(35);
     expect(takeDamage(v, 999).hp).toBe(0);
   });
-  it('회복: 넘치는 양은 보호막으로 (최대치까지)', () => {
-    expect(heal(v, 20, true)).toMatchObject({ hp: 70, shield: 10 });
-    expect(heal({ ...v, hp: 95 }, 20, true)).toMatchObject({ hp: 100, shield: 25 });
-    expect(heal({ ...v, hp: 100 }, 50, true)).toMatchObject({ hp: 100, shield: 30 });
-    expect(heal({ ...v, hp: 100 }, 50, false)).toMatchObject({ hp: 100, shield: 10 });
-  });
-  it('보호막 최대치가 줄어도 이미 있는 보호막은 회복으로 깎이지 않는다', () => {
-    expect(heal({ ...v, hp: 100, shield: 20, shieldMax: 0 }, 5, true).shield).toBe(20);
+  it('회복: 넘치는 양을 돌려준다', () => {
+    expect(heal(v, 20)).toEqual({ hp: 70, overflow: 0 });
+    expect(heal({ ...v, hp: 95 }, 20)).toEqual({ hp: 100, overflow: 15 });
   });
   it('체력 소모는 죽지 않는다', () => {
     expect(payHp(100, 0.2)).toEqual({ hp: 80, paid: 20 });
@@ -105,13 +99,12 @@ describe('체력·보호막', () => {
 });
 
 describe('플레이어 보정 합치기', () => {
-  it('이속·보호막은 더하고 피해 감소는 곱한다', () => {
-    const m = combineMods([{ moveSpeed: 0.2, damageReduction: 0.5 }, { damageReduction: 0.5, shieldMax: 30 }]);
+  it('이속은 더하고 피해 감소는 곱한다', () => {
+    const m = combineMods([{ moveSpeed: 0.2, damageReduction: 0.5 }, { damageReduction: 0.5 }]);
     expect(m.moveSpeed).toBeCloseTo(0.2);
     expect(m.damageReduction).toBeCloseTo(0.75);
-    expect(m.shieldMax).toBe(30);
   });
   it('비어 있으면 0', () => {
-    expect(combineMods([])).toEqual({ moveSpeed: 0, damageReduction: 0, shieldMax: 0 });
+    expect(combineMods([])).toEqual({ moveSpeed: 0, damageReduction: 0 });
   });
 });

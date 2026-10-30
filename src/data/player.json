@@ -28,7 +28,29 @@
     "ghostEverySec": 0.04,
     "barColor": "#7ad8ff"
   },
-  "shieldMax": 0,
+  "sanity": {
+    "base": 50,
+    "perWillpower": 5,
+    "regenPerSec": 2,
+    "bossDrainPerSec": 1,
+    "panic": {
+      "regenPerSec": 4,
+      "exitRatio": 0.3,
+      "lightRadius": 70,
+      "darkAlpha": 0.72,
+      "darkColor": "#000000",
+      "fadeSec": 0.4,
+      "shakeMs": 240,
+      "shakeIntensity": 0.004,
+      "lines": 9,
+      "lineEverySec": 0.09,
+      "lineWidthPx": [1, 3],
+      "lineSegments": 6,
+      "lineAmpPx": 14,
+      "lineAlpha": 0.9,
+      "awakenTint": "#ff7a7a"
+    }
+  },
   "energy": {
     "max": 200,
     "start": 200,

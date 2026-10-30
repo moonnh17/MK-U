@@ -4,7 +4,6 @@
  * 각성 '제1원리': 준 피해의 일부를 흡혈하고, 처치하면 기초 단위만큼 회복한다.
  * 기초 단위로 최대 체력을 넘는 양은 보호막이 된다(보호막 최대치는 장착 중에만 늘어남).
  */
-import type { PlayerMods } from '../systems/vitals';
 import type { PassiveImpl, SkillCast, SkillHost, SkillObject } from './host';
 
 const ID = 'reductionist';
@@ -24,10 +23,6 @@ class Reductionist implements SkillObject {
   update(dt: number): boolean {
     this.hitTimer -= dt;
     return true;
-  }
-
-  playerMods(): Partial<PlayerMods> {
-    return this.s.owned.awakened ? { shieldMax: this.s.values.shieldCap! } : {};
   }
 
   onDamageDealt(host: SkillHost, amount: number): void {

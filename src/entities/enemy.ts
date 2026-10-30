@@ -17,7 +17,7 @@ import { getContext } from '../core/context';
 /** 적이 전투 씬에 바라는 것 (원거리 탄·장판·전술 연계·밧줄) */
 export interface EnemyHost extends HazardHost {
   readonly rng: Rng;
-  fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean): void;
+  fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, mental?: number): void;
   addHazard(h: Hazard): void;
   /** 전술 연계: 이 적이 조준을 시작했다 (같은 방의 동료도 함께 조준) */
   linkWindup(e: Enemy, attackId: string): void;
@@ -402,7 +402,7 @@ export class Enemy {
   private fireShot(a: EnemyAttackDef, host: EnemyHost): void {
     const p = host.playerPos();
     const from = { x: this.sprite.x, y: this.sprite.y };
-    host.fireEnemyBullet(from, Math.atan2(p.y - from.y, p.x - from.x), a.speed!, a.range!, a.damage * this.damageMul, true);
+    host.fireEnemyBullet(from, Math.atan2(p.y - from.y, p.x - from.x), a.speed!, a.range!, a.damage * this.damageMul, true, a.damage * this.damageMul * (this.def.mentalRatio ?? 0));
     this.shotsFired++;
     this.shotTimer = a.shotGapSec ?? 0;
   }
@@ -419,7 +419,7 @@ export class Enemy {
     this.trailDist += speed * dt;
     if (this.trailDist < t.everyPx) return;
     this.trailDist = 0;
-    host.addHazard(new Zone(this.scene, { x: this.sprite.x, y: this.sprite.y }, t.radius, t.liveSec, t.damage, t.tickSec, hexColor(this.def.color)));
+    host.addHazard(new Zone(this.scene, { x: this.sprite.x, y: this.sprite.y }, t.radius, t.liveSec, t.damage, t.tickSec, hexColor(this.def.color), t.mentalDamage ?? 0));
   }
 
   /**
@@ -475,7 +475,7 @@ export class Enemy {
         this.shotTimer = 0;
         this.fireShot(a, host);
       } else if (a.kind === 'puddle') {
-        host.addHazard(new Zone(this.scene, this.slamAt, a.radius!, a.liveSec!, a.damage, a.tickSec!, hexColor(this.def.color)));
+        host.addHazard(new Zone(this.scene, this.slamAt, a.radius!, a.liveSec!, a.damage, a.tickSec!, hexColor(this.def.color), a.mentalDamage ?? 0));
       } else if (a.kind === 'fan') {
         // 부채꼴 탄막: 예고 때 정한 방향으로 (일반 탄: 굴절·탄 베기 가능)
         const base = Math.atan2(this.aim.y, this.aim.x);
@@ -484,7 +484,7 @@ export class Enemy {
         const from = { x: this.sprite.x, y: this.sprite.y };
         for (let k = 0; k < n; k++) {
           const ang = n === 1 ? base : base - spread / 2 + (spread * k) / (n - 1);
-          host.fireEnemyBullet(from, ang, a.speed!, a.range!, a.damage * this.damageMul, true);
+          host.fireEnemyBullet(from, ang, a.speed!, a.range!, a.damage * this.damageMul, true, a.damage * this.damageMul * (this.def.mentalRatio ?? 0));
         }
       } else if (a.kind === 'rope') {
         this.ropeLen = 0;
@@ -503,6 +503,7 @@ export class Enemy {
             telegraphSec: 0,
             liveSec: a.actSec,
             damage: a.damage * this.damageMul,
+            mental: a.damage * this.damageMul * (this.def.mentalRatio ?? 0),
             tickSec: a.actSec + 1,
             color: hexColor(this.def.color),
           }),

@@ -47,7 +47,7 @@ interface SlotUi {
 export class Hud {
   private readonly bars: Phaser.GameObjects.Container;
   private readonly hp: Bar;
-  private readonly shield: Bar;
+  private readonly sanity: Bar;
   private readonly energy: Bar;
   private readonly stageText: Phaser.GameObjects.Text;
   private readonly coinText: Phaser.GameObjects.Text;
@@ -79,7 +79,7 @@ export class Hud {
     const text = (x: number, y: number, s: string, size = h.fontSize) =>
       scene.add.text(x, y, s, { fontFamily: 'sans-serif', fontSize: `${size}px`, color: '#ffffff' });
 
-    // --- 체력·보호막·에너지 바 ---
+    // --- 체력·정신력·에너지 바 ---
     this.bars = scene.add.container(h.margin, h.margin);
     const makeBar = (i: number, color: string): Bar => {
       const y = i * (h.bars.height + h.bars.gap);
@@ -90,7 +90,7 @@ export class Hud {
       return { fill, text: label, color: hexColor(color) };
     };
     this.hp = makeBar(0, h.bars.hpColor);
-    this.shield = makeBar(1, h.bars.shieldColor);
+    this.sanity = makeBar(1, h.bars.sanityColor);
     this.energy = makeBar(2, h.bars.energyColor);
     const barsBottom = 3 * (h.bars.height + h.bars.gap);
     this.stageText = text(0, barsBottom, '');
@@ -175,7 +175,9 @@ export class Hud {
       bar.text.setText(max > 0 ? `${Math.ceil(value)}/${max}` : '');
     };
     setBar(this.hp, p.hp, p.maxHp);
-    setBar(this.shield, p.shield, p.shieldMax);
+    setBar(this.sanity, p.sanity, p.sanityMax);
+    // 패닉 중에는 바가 깜빡인다
+    this.sanity.fill.setAlpha(p.panic ? 0.5 + 0.5 * Math.abs(Math.sin(now / 120)) : 1);
     const empty = now - s.energyEmptyAt < this.ctx.data.ui.energyEmptyFlashSec * 1000;
     setBar(this.energy, p.energy, p.energyMax, empty ? hexColor(this.ctx.data.ui.hud.bars.hpColor) : this.energy.color);
 

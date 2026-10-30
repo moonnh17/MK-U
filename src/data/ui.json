@@ -13,7 +13,7 @@
       "height": 6,
       "gap": 3,
       "hpColor": "#d94a4a",
-      "shieldColor": "#8aa4c8",
+      "sanityColor": "#b48aff",
       "energyColor": "#3fc8e0",
       "backColor": "#1d232b"
     },

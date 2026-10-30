@@ -17,7 +17,7 @@ describe('강화 표 (기획서)', () => {
     expect(up('maxHp')).toMatchObject({ perLevel: 5, costs: [40, 80, 150, 250, 400] });
   });
   it('보호막: 최대치 +1, 최대 3, 100·250·500', () => {
-    expect(up('shield')).toMatchObject({ perLevel: 1, costs: [100, 250, 500] });
+    expect(up('sanity')).toMatchObject({ perLevel: 10, costs: [100, 250, 500] });
   });
 });
 
@@ -38,9 +38,9 @@ describe('강화·초기화', () => {
   });
   it('최대 레벨이면 더 오르지 않는다', () => {
     const s = { ...defaultSave(), crystals: 100000 };
-    for (let i = 0; i < 5; i++) buyUpgrade(s, JOB, up('shield'));
-    expect(s.upgrades[JOB]!.shield).toBe(3);
-    expect(nextCost(up('shield'), 3)).toBeNull();
+    for (let i = 0; i < 5; i++) buyUpgrade(s, JOB, up('sanity'));
+    expect(s.upgrades[JOB]!.sanity).toBe(3);
+    expect(nextCost(up('sanity'), 3)).toBeNull();
     expect(s.crystals).toBe(100000 - 850);
   });
   it('초기화: 그 직업에 쓴 결정 전액 반환', () => {
@@ -64,8 +64,8 @@ describe('강화·초기화', () => {
 
 describe('런 시작 적용', () => {
   it('스탯·기본 체력·보호막', () => {
-    const b = upgradeBonus({ strength: 5, willpower: 2, maxHp: 3, shield: 1 }, U);
-    expect(b).toEqual({ stats: { strength: 5, willpower: 2 }, maxHp: 15, shield: 1 });
+    const b = upgradeBonus({ strength: 5, willpower: 2, maxHp: 3, sanity: 1 }, U);
+    expect(b).toEqual({ stats: { strength: 5, willpower: 2 }, maxHp: 15, sanity: 10 });
   });
   it('스탯을 모두 끝내면 시작 스탯 15', () => {
     const levels = Object.fromEntries(STAT_IDS.map((s) => [s, 5]));
@@ -74,15 +74,15 @@ describe('런 시작 적용', () => {
   });
   it('강화 없으면 그대로', () => {
     const p = newPlayerState(gameData, JOB);
-    expect(p.meta).toEqual({ maxHp: 0, shield: 0 });
+    expect(p.meta).toEqual({ maxHp: 0, sanity: 0 });
     expect(p.stats.strength).toBe(gameData.stats.startValue);
   });
   it('기본 체력·보호막 강화가 시작 값에 들어간다', () => {
-    const p = newPlayerState(gameData, JOB, { maxHp: 2, shield: 1 });
-    expect(p.meta).toEqual({ maxHp: 10, shield: 1 });
+    const p = newPlayerState(gameData, JOB, { maxHp: 2, sanity: 1 });
+    expect(p.meta).toEqual({ maxHp: 10, sanity: 10 });
     expect(p.maxHp).toBe(gameData.player.maxHp + 10);
     expect(p.hp).toBe(p.maxHp);
-    expect(p.shieldMax).toBe(gameData.player.shieldMax + 1);
+    expect(p.sanityMax).toBe(gameData.player.sanity.base + gameData.player.sanity.perWillpower * p.stats.willpower + 10);
   });
 });
 

@@ -1473,6 +1473,12 @@
         }
       }
     },
+    "item_panic_brand": {
+      "file": "mku/item_panic_brand.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
     "item_death_whistle": {
       "file": "mku/item_death_whistle.png",
       "frameWidth": 32,

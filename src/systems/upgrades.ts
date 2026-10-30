@@ -50,13 +50,13 @@ export interface UpgradeBonus {
   stats: Partial<Record<StatId, number>>;
   /** 기본 체력 증가 */
   maxHp: number;
-  /** 보호막 최대치 증가 */
-  shield: number;
+  /** 최대 정신력 증가 */
+  sanity: number;
 }
 
 /** 런 시작에 더할 값 */
 export function upgradeBonus(levels: UpgradeLevels | undefined, defs: readonly UpgradeDef[]): UpgradeBonus {
-  const out: UpgradeBonus = { stats: {}, maxHp: 0, shield: 0 };
+  const out: UpgradeBonus = { stats: {}, maxHp: 0, sanity: 0 };
   for (const d of defs) {
     const v = Math.min(upgradeLevel(levels, d.id), d.costs.length) * d.perLevel;
     if (v === 0) continue;

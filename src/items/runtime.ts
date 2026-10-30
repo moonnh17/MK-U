@@ -230,6 +230,11 @@ export class ItemRuntime {
     return this.totals;
   }
 
+  /** 패닉 각성 효과 (없으면 null) */
+  panicAwaken(): Extract<ItemEffect, { kind: 'panicAwaken' }> | null {
+    return this.each('panicAwaken')[0]?.e ?? null;
+  }
+
   private each<K extends ItemEffect['kind']>(kind: K): { id: string; e: Extract<ItemEffect, { kind: K }> }[] {
     this.refresh();
     return this.effects.filter((x) => x.e.kind === kind) as { id: string; e: Extract<ItemEffect, { kind: K }> }[];

@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 210개 · 그림 있음 195개
+전체 211개 · 그림 있음 196개
 
 ## player (3)
 
@@ -188,7 +188,7 @@
 | `lab_gemini` | 미모사 제미니 | 14×22 | feet | #7ae0e0 | mku/lab_gemini.png (1프레임) |
 | `lab_window` | 관측창 | 100×12 | feet | #06090c | mku/lab_window.png (1프레임) |
 
-## item (31)
+## item (32)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -206,6 +206,7 @@
 | `item_lee_seal` | 이씨 가문의 증표 | 8×8 | center | #ffd23f | mku/item_lee_seal.png (1프레임) |
 | `item_magowiki_codex` | 마고위키 필사본 | 8×8 | center | #e0c060 | mku/item_magowiki_codex.png (1프레임) |
 | `item_lsd_r` | LSD-R | 8×8 | center | #e070c0 | mku/item_lsd_r.png (1프레임) |
+| `item_panic_brand` | 광기의 각인 | 8×8 | center | #ff4a4a | mku/item_panic_brand.png (1프레임) |
 | `item_hanabi` | 한아비 | 8×8 | center | #ffb04a | mku/item_hanabi.png (1프레임) |
 | `item_gisup_stone` | 기숲 비석의 조각 | 8×8 | center | #7a8a9a | mku/item_gisup_stone.png (1프레임) |
 | `item_afro_belt` | 아프로 씨의 벨트 | 8×8 | center | #a45cff | mku/item_afro_belt.png (1프레임) |

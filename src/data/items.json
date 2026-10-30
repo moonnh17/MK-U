@@ -66,6 +66,9 @@
     { "id": "lsdR", "nameKey": "item.lsdR", "descKey": "item.lsdR.desc", "grade": "legendary", "pool": "normal", "tags": [],
       "effects": [{ "kind": "statReshuffle", "base": 5, "willpower": 1 }],
       "spriteKey": "item_lsd_r", "color": "#e070c0", "size": 8 },
+    { "id": "panicBrand", "nameKey": "item.panicBrand", "descKey": "item.panicBrand.desc", "grade": "legendary", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "panicAwaken", "hpPerSec": 2, "allStats": 15 }],
+      "spriteKey": "item_panic_brand", "color": "#ff4a4a", "size": 8 },
     { "id": "hanabi", "nameKey": "item.hanabi", "descKey": "item.hanabi.desc", "grade": "legendary", "pool": "normal", "tags": [],
       "effects": [
         { "kind": "damage", "scope": "all", "value": 0.1, "group": "damagePct" },

@@ -38,6 +38,8 @@ export function itemDescParams(def: ItemDef, groups: GroupMultipliersData): Reco
       out[`pd${i}`] = num((e.damage as number) * 100);
       out[`pm${i}`] = num((e.moveSpeed as number) * 100);
     }
+    if (typeof e.hpPerSec === 'number') out[`hp${i}`] = num(e.hpPerSec);
+    if (typeof e.allStats === 'number') out[`st${i}`] = num(e.allStats);
     if (typeof e.bonus === 'number') out[`b${i}`] = num(e.bonus * 100);
     if (typeof e.bounces === 'number') out[`c${i}`] = num(e.bounces);
     if (typeof e.guard === 'number') out[`g${i}`] = num(e.guard * 100);
