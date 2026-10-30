@@ -764,6 +764,23 @@ export function validateGameData(d: GameData): Errors {
   for (const [k, v] of Object.entries(ju.bossIntro)) if (typeof v === 'number') checkPositive(errors, `juice.bossIntro.${k}`, v);
   if (!(ju.bossKill.slowScale > 0 && ju.bossKill.slowScale <= 1)) errors.push('juice.bossKill.slowScale: 0~1');
 
+  // --- 효과음 ---
+  const so = d.sounds;
+  if (!(so.masterVolume >= 0 && so.masterVolume <= 1)) errors.push('sounds.masterVolume: 0~1');
+  for (const [id, def] of Object.entries(so.sounds)) {
+    const w = `sounds.${id}`;
+    if (def.layers.length === 0) errors.push(`${w}: 층이 없음`);
+    def.layers.forEach((l, i) => {
+      const lw = `${w}.layers[${i}]`;
+      if (!['sine', 'square', 'triangle', 'sawtooth', 'noise'].includes(l.wave)) errors.push(`${lw}.wave: sine·square·triangle·sawtooth·noise`);
+      if (l.wave !== 'noise' && !(l.freq && l.freq[0] > 0 && l.freq[1] > 0)) errors.push(`${lw}.freq: 0보다 큰 [시작, 끝]`);
+      checkPositive(errors, `${lw}.durSec`, l.durSec);
+      if (!(l.volume > 0 && l.volume <= 1)) errors.push(`${lw}.volume: 0~1`);
+      if (l.filter && !(['lowpass', 'highpass', 'bandpass'].includes(l.filter.type) && l.filter.freq[0] > 0 && l.filter.freq[1] > 0)) errors.push(`${lw}.filter`);
+    });
+  }
+  for (const wpn of d.weapons.weapons) if (wpn.sfx !== undefined && !so.sounds[wpn.sfx]) errors.push(`weapons.${wpn.id}.sfx: 없는 소리 '${wpn.sfx}'`);
+
   // --- 도트 아트 ---
   errors.push(...validateArt(d.art, collectAssets(d)));
 

@@ -219,6 +219,8 @@ export interface WeaponDef extends SpriteRef {
   /** 1회 공격당 에너지 소모 */
   energyCost: number;
   pattern: WeaponPattern;
+  /** 공격 소리 (없으면 분류·탄 모양으로) */
+  sfx?: string;
   /** 총: 탄속(px/s). 칼은 0 */
   projectileSpeed: number;
   /** 총: 탄 사거리(px). 칼: 베기 반지름과 같게 둔다 */
@@ -1147,4 +1149,35 @@ export interface JuiceData {
   bossKill: { slowSec: number; slowScale: number; explosions: number; spreadPx: number; stepSec: number; flashMs: number };
   /** 방 클리어 글자, 문이 사라지는 시간 */
   roomClear: { sec: number; color: string; size: number; doorFadeSec: number };
+}
+
+// ---------- 효과음 ----------
+
+/** 소리 한 층: 파형(또는 잡음), 높낮이 시작→끝(Hz), 길이, 크기, 걸러내기, 시작 지연 */
+export interface SoundLayer {
+  wave: 'sine' | 'square' | 'triangle' | 'sawtooth' | 'noise';
+  /** 잡음은 없어도 된다 */
+  freq?: [number, number];
+  durSec: number;
+  volume: number;
+  filter?: { type: 'lowpass' | 'highpass' | 'bandpass'; freq: [number, number] };
+  delaySec?: number;
+}
+
+export interface SoundDef {
+  layers: SoundLayer[];
+  /** 같은 소리를 다시 내기까지 최소 간격(초), 동시에 나는 최대 수 */
+  gapSec?: number;
+  maxVoices?: number;
+}
+
+export interface SoundsData {
+  masterVolume: number;
+  /** 소리 켜기·끄기 키 (KeyboardEvent.code) */
+  muteKey: string;
+  defaultGapSec: number;
+  defaultMaxVoices: number;
+  /** 음 높이 흔들림 비율 */
+  pitchJitter: number;
+  sounds: Record<string, SoundDef>;
 }

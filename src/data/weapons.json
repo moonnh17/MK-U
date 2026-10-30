@@ -29,7 +29,7 @@
       "size": 6
     },
     {
-      "id": "shotgun",
+      "id": "shotgun", "sfx": "shotShotgun",
       "nameKey": "weapon.shotgun",
       "category": "gun",
       "grade": "common",
@@ -77,7 +77,7 @@
       "spriteKey": "weapon_rifle", "color": "#7a9a6a", "size": 9
     },
     {
-      "id": "sniper", "nameKey": "weapon.sniper", "category": "gun", "grade": "common", "tags": ["tech", "ranged"],
+      "id": "sniper", "sfx": "shotSniper", "nameKey": "weapon.sniper", "category": "gun", "grade": "common", "tags": ["tech", "ranged"],
       "baseDamage": 18, "fireIntervalSec": 0.9, "energyCost": 4, "pattern": { "kind": "single" }, "pierce": 3,
       "projectileSpeed": 520, "range": 420, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_sniper", "color": "#5a6a8a", "size": 10
