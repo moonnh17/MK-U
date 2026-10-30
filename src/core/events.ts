@@ -16,7 +16,7 @@ export interface GameEvents {
   /** 화면 가운데 짧은 알림 */
   toast: { text: string };
   /** 근처에 상호작용 대상이 생기거나 사라짐 (모바일 공격 버튼 → 줍기/조사) */
-  interactHint: { kind: 'weapon' | 'chest' | 'merchant' | 'lab' | 'vending' | 'portal' | null };
+  interactHint: { kind: 'weapon' | 'chest' | 'merchant' | 'lab' | 'vending' | 'portal' | 'statue' | null };
   /** 전투 시작·방 클리어 띠 */
   combatBanner: { kind: 'start' | 'clear' };
   /** 아이템 획득 창을 닫았다 */

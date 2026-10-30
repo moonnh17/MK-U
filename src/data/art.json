@@ -1377,6 +1377,36 @@
       "frameHeight": 19,
       "frames": 1
     },
+    "prop_crate": {
+      "file": "mku/prop_crate.png",
+      "frameWidth": 14,
+      "frameHeight": 13,
+      "frames": 1
+    },
+    "prop_barrel": {
+      "file": "mku/prop_barrel.png",
+      "frameWidth": 12,
+      "frameHeight": 14,
+      "frames": 1
+    },
+    "prop_statue_heal": {
+      "file": "mku/prop_statue_heal.png",
+      "frameWidth": 16,
+      "frameHeight": 17,
+      "frames": 1
+    },
+    "prop_statue_energy": {
+      "file": "mku/prop_statue_energy.png",
+      "frameWidth": 16,
+      "frameHeight": 17,
+      "frames": 1
+    },
+    "prop_statue_sanity": {
+      "file": "mku/prop_statue_sanity.png",
+      "frameWidth": 16,
+      "frameHeight": 17,
+      "frames": 1
+    },
     "prop_exit_portal": {
       "file": "mku/prop_exit_portal.png",
       "frameWidth": 36,

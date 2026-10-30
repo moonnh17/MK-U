@@ -13,14 +13,14 @@ describe('방 크기 틀', () => {
   it('데이터 검증 통과', () => {
     expect(validateGameData(gameData)).toEqual([]);
   });
-  it('모든 방에 크기가 있고, 보스방은 큰 방, 장애물은 전투 칸에만', () => {
+  it('모든 방에 크기가 있고, 보스방은 큰 방, 보스·시작 방에는 장애물이 없다', () => {
     for (let seed = 1; seed < 30; seed++) {
       for (const [c, s] of [[1, 1], [1, 2], [3, 5]] as const) {
         const map = generateStage(seed, c, s, D);
         for (const n of map.rooms) {
           expect(n.size, `${seed} ${n.kind}`).toBeDefined();
           if (n.kind === 'bossRoom') expect(n.size).toEqual({ w: 36, h: 21 });
-          if (n.kind !== 'combatRoom') expect(n.layout ?? null).toBeNull();
+          if (n.kind === 'bossRoom' || n.kind === 'startRoom') expect(n.layout ?? null).toBeNull();
         }
       }
     }

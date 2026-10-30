@@ -486,6 +486,24 @@ dots('enemy_training_dummy', [
   '.....KKBBKK.....', '....KbbbbbbK....', '....KKKKKKKK....',
 ]);
 
+// 부서지는 소품: 나무 상자, 불꽃 표시 통, 보석 색이 다른 석상
+dots('prop_crate', [
+  'KKKKKKKKKKKKKK', 'KBBBBBBBBBBBBK', 'KBbGbbbbbbGbBK', 'KBbbGbbbbGbbBK', 'KBbbbGbbGbbbBK', 'KBbbbbGGbbbbBK', 'KBbbbbGGbbbbBK',
+  'KBbbbGbbGbbbBK', 'KBbbGbbbbGbbBK', 'KBbGbbbbbbGbBK', 'KBBBBBBBBBBBBK', 'KbbbbbbbbbbbbK', 'KKKKKKKKKKKKKK',
+]);
+dots('prop_barrel', [
+  '..KKKKKKKK..', '.KmlllllllK.', 'KKKKKKKKKKKK', 'KrrrrrrrrrRK', 'KrrrYYrrrrRK', 'KrrYYYYrrrRK', 'KrrYeeYYrrRK',
+  'KKKKKKKKKKKK', 'KrrYeeeYrrRK', 'KrrrYeYrrrRK', 'KrrrrrrrrrRK', 'KKKKKKKKKKKK', '.KdddddddK..', '..KKKKKKKK..',
+], { pal: { R: [140, 30, 44] } });
+const STATUE = [
+  '.....KKKKKK.....', '....KlllllmK....', '....KllGGlmK....', '....KlGGGGmK....', '....KllGGlmK....', '.....KlllmK.....', '...KKKlllmKKK...',
+  '..KlllllllmmmK..', '..KlKKlllKKmmK..', '..KlK.KlK.KmmK..', '....KKlllmKK....', '....KlllllmK....', '....KlllllmK....', '...KKKKKKKKKK...',
+  '..KmmmmmmmmmmK..', '.KddddddddddddK.', 'KKKKKKKKKKKKKKKK',
+];
+dots('prop_statue_heal', STATUE, { pal: { G: PAL.r } });
+dots('prop_statue_energy', STATUE, { pal: { G: PAL.c } });
+dots('prop_statue_sanity', STATUE, { pal: { G: PAL.P } });
+
 // 포털·코어
 sprites.prop_exit_portal = sheet('prop_exit_portal', single('rift/frame-1.png'), 36);
 sprites.prop_encounter_core = sheet('prop_encounter_core', single('mimosa/frames/crystal.png'), 24);

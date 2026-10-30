@@ -141,6 +141,9 @@ export function collectAssets(d: GameData): AssetRef[] {
     for (let i = 0; i < dr.decalKinds; i++) add('prop', { spriteKey: artKeys.decal(c, i), color: dr.decalColor, size: ts }, 'asset.decal', `#${c}장`);
   }
   add('prop', d.mapgen.vending, 'asset.vending');
+  add('prop', d.mapgen.roomProps.crate, 'asset.crate');
+  add('prop', d.mapgen.roomProps.barrel, 'asset.barrel');
+  for (const s of d.mapgen.roomProps.statues) add('prop', s, 'asset.statue', `#${s.kind}`);
   add('pickup', d.mapgen.vending.potion, 'asset.potion');
   // 타격·처치·등장 이펙트
   for (const [id, ref] of Object.entries(d.juice.fx)) add('fx', ref, `asset.fx.${id}`);

@@ -1,5 +1,5 @@
 /**
- * 방 모양 (순수 함수, 시드 재현): 방마다 크기 틀을 뽑고, 전투 칸에는 장애물 배치 틀을 뽑는다.
+ * 방 모양 (순수 함수, 시드 재현): 방마다 크기 틀을 뽑고, 전투·조우·출구 칸에는 장애물 배치 틀을 뽑는다.
  * 장애물 블록은 방 안쪽 바닥 비율 자리(가운데 기준) + 타일 크기로 적혀 있고, 방 크기에 맞춰 타일 좌표로 바꾼다.
  * 문 앞 통로(문 폭 + 양옆 1타일, 안쪽으로 doorLaneTiles)에 걸리는 블록은 빼서 갇히지 않게 한다.
  */
@@ -22,6 +22,8 @@ export function pickRoomShape(rng: Rng, kind: RoomKind, data: MapgenData): { w: 
   let layout: string | null = null;
   if (kind === 'combatRoom' && rng.chance(data.obstacles.chance)) {
     layout = rng.weighted(data.obstacles.layouts.map((l) => ({ item: l.id, weight: l.weight })));
+  } else if (kind !== 'combatRoom' && rng.chance(data.obstacles.otherRooms[kind] ?? 0)) {
+    layout = rng.weighted(data.obstacles.layouts.filter((l) => l.open).map((l) => ({ item: l.id, weight: l.weight })));
   }
   return { w: size.w, h: size.h, layout };
 }

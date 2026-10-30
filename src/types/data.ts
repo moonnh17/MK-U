@@ -475,6 +475,31 @@ export interface StageRoomRule {
   lastRoom: RoomKind;
 }
 
+export type StatueKind = 'heal' | 'energy' | 'sanity';
+
+/** 방 하나의 소품 수·석상 확률 */
+export interface RoomPropRule {
+  crates: [number, number];
+  barrels: [number, number];
+  statueChance: number;
+}
+
+export interface RoomPropsData {
+  spacingPx: number;
+  /** 문 앞·방 가운데·벽에서 이만큼 떨어져 놓는다 */
+  doorClearPx: number;
+  centerClearPx: number;
+  edgeInsetPx: number;
+  rules: Partial<Record<RoomKind, RoomPropRule>>;
+  crate: SpriteRef & { hp: number; coins: { chance: number; count: [number, number] }; energy: { chance: number; count: [number, number] } };
+  /** 부서지면 fuseSec 뒤 폭발: 적에게 damage, 플레이어에게 playerDamage, 주변 소품도 부순다 */
+  barrel: SpriteRef & { hp: number; fuseSec: number; radius: number; damage: number; playerDamage: number; tags: TagId[] };
+  /** value: 최대치에 대한 회복 비율 */
+  statues: (SpriteRef & { kind: StatueKind; value: number })[];
+  /** 문 안쪽에 다음 방 종류 표시 */
+  doorIcon: { insetPx: number; fontPx: number; keys: Record<RoomKind, string>; colors: Record<RoomKind, string> };
+}
+
 export interface MapgenData {
   chapters: number;
   stagesPerChapter: number;
@@ -519,7 +544,9 @@ export interface MapgenData {
   /** 방 종류별로 뽑을 크기 틀과 가중치 */
   roomSizeRules: Record<RoomKind, { size: string; weight: number }[]>;
   /** 전투 칸 장애물: chance로 배치 틀 하나. 블록 x·y는 안쪽 바닥 비율(블록 가운데), w·h는 타일 */
-  obstacles: { chance: number; doorLaneTiles: number; layouts: { id: string; weight: number; blocks: { x: number; y: number; w: number; h: number }[] }[] };
+  /** otherRooms: 전투 칸 밖의 방에 장애물이 나올 확률 (open 틀만: 가운데가 비어 포털·코어·진열대를 가리지 않는다) */
+  obstacles: { chance: number; doorLaneTiles: number; otherRooms: Partial<Record<RoomKind, number>>; layouts: { id: string; weight: number; open?: boolean; blocks: { x: number; y: number; w: number; h: number }[] }[] };
+  roomProps: RoomPropsData;
 }
 
 export interface PickupsData {

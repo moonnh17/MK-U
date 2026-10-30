@@ -59,6 +59,8 @@ export interface SkillHost {
   corrupt(enemy: Enemy, state: CorruptionState): void;
   /** 적을 쓰러뜨린 것으로 처리하고 필드에서 치운다(드롭·게이지·방 클리어 집계 포함, 변질 폭발 없음). 반역 개체화에 쓴다 */
   defeat(enemy: Enemy): void;
+  /** 폭발이 주변 소품(상자·통)도 부순다 */
+  blastProps(at: { x: number; y: number }, radius: number, damage: number): void;
   /** 체력 회복. overflowToSanity면 넘치는 양으로 정신력을 회복한다 */
   heal(amount: number, overflowToSanity: boolean): void;
   /** 현재 체력의 ratio만큼 소모한다(죽지 않음) */

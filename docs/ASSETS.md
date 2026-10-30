@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 211개 · 그림 있음 196개
+전체 216개 · 그림 있음 201개
 
 ## player (3)
 
@@ -97,7 +97,7 @@
 | `enemy_orion_crusader_phase1` | 오리온의 성전사 (1단계) | 42×42 | feet | #d9c25a | — |
 | `enemy_orion_crusader_phase2` | 오리온의 성전사 (2단계) | 42×42 | feet | #d9c25a | — |
 
-## prop (47)
+## prop (52)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -148,6 +148,11 @@
 | `decal_c3_5` | 바닥 장식 (3장) | 16×16 | feet | #2a2d36 | mku/decal_c3_5.png (1프레임) |
 | `decal_c3_6` | 바닥 장식 (3장) | 16×16 | feet | #2a2d36 | mku/decal_c3_6.png (1프레임) |
 | `prop_vending` | 물약 자판기 | 22×32 | feet | #3a7bff | mku/prop_vending.png (1프레임) |
+| `prop_crate` | 부서지는 상자 | 14×14 | feet | #a07a3a | mku/prop_crate.png (1프레임) |
+| `prop_barrel` | 폭발 통 | 14×14 | feet | #c8402a | mku/prop_barrel.png (1프레임) |
+| `prop_statue_heal` | 석상 (heal) | 16×16 | feet | #e23a4c | mku/prop_statue_heal.png (1프레임) |
+| `prop_statue_energy` | 석상 (energy) | 16×16 | feet | #3fc8e0 | mku/prop_statue_energy.png (1프레임) |
+| `prop_statue_sanity` | 석상 (sanity) | 16×16 | feet | #b48aff | mku/prop_statue_sanity.png (1프레임) |
 
 ## pickup (3)
 

@@ -142,6 +142,7 @@ bus.on('interactHint', ({ kind }) => {
   else if (kind === 'chest') touch.setAttackOverride('interact', t('mobile.open'));
   else if (kind === 'merchant' || kind === 'vending') touch.setAttackOverride('interact', t('mobile.buy'));
   else if (kind === 'portal') touch.setAttackOverride('interact', t('mobile.enter'));
+  else if (kind === 'statue') touch.setAttackOverride('interact', t('mobile.use'));
   else if (kind === 'lab') touch.setAttackOverride('interact', t('mobile.check'));
   else touch.setAttackOverride(null, t('mobile.attack'));
 });
