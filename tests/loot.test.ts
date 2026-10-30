@@ -24,7 +24,7 @@ describe('무기 종류 (기획서 무기 표)', () => {
   });
   it('칼은 에너지를 쓰지 않고, 권총·단검·장검·대검·창·해머는 0', () => {
     for (const w of W.weapons.filter((x) => x.category === 'blade')) expect(w.energyCost).toBe(0);
-    expect(def('pistol').energyCost).toBe(0);
+    expect(def('pistol').energyCost).toBe(1);
   });
 });
 
@@ -67,8 +67,8 @@ describe('등급·신화', () => {
     // 칼에는 탄속·에너지 옵션이 붙지 않는다
     for (let s = 0; s < 40; s++) {
       for (const o of rollOptions(new Rng(s), def('longsword'), 2, W.options)) expect(['crit', 'attackSpeed']).toContain(o.id);
-      // 에너지 0인 총에는 에너지 감소가 붙지 않는다
-      for (const o of rollOptions(new Rng(s), def('pistol'), 3, W.options)) expect(o.id).not.toBe('energyCost');
+      // 에너지를 쓰지 않는 무기에는 에너지 감소가 붙지 않는다
+      for (const o of rollOptions(new Rng(s), { ...def('pistol'), energyCost: 0 }, 3, W.options)) expect(o.id).not.toBe('energyCost');
     }
   });
 });
@@ -83,7 +83,7 @@ describe('무기 수치', () => {
     const e = weaponStats(def('sniper'), { defId: 'sniper', grade: 'rare', options: [{ id: 'energyCost', value: 1 }] }, 1.2);
     expect(e.energyCost).toBe(3);
     const p = weaponStats(def('pistol'), plainWeapon(def('pistol')), 1);
-    expect(p).toMatchObject({ damage: 4, energyCost: 0, critChance: 0 });
+    expect(p).toMatchObject({ damage: 4, energyCost: 1, critChance: 0 });
   });
   it('치명은 확률로 ×1.5', () => {
     expect(rollCrit(new Rng(1), 10, 1, W.critMultiplier)).toEqual({ damage: 15, crit: true });

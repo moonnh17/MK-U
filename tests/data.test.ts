@@ -29,10 +29,10 @@ describe('데이터 검증', () => {
     }
   });
 
-  it('시작 무기는 에너지 0인 권총이다', () => {
+  it('시작 무기는 탄당 에너지 1인 권총이다', () => {
     const w = gameData.weapons.weapons.find((x) => x.id === gameData.weapons.startWeapon)!;
     expect(w.id).toBe('pistol');
-    expect(w.energyCost).toBe(0);
+    expect(w.energyCost).toBe(1);
   });
 
   it('챕터1 일반 적 3종이 있다', () => {
