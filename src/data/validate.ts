@@ -745,6 +745,11 @@ export function validateGameData(d: GameData): Errors {
     if (typeof v !== 'string' || (v === '' && !k.startsWith('gemini.story.') && !k.startsWith('gemini.mini.'))) errors.push(`text: '${k}' 값이 비어 있음`);
   }
 
+  // --- 카메라 ---
+  if (!(d.ui.camera.zoom >= 1 && d.ui.camera.zoom <= 4)) errors.push('ui.camera.zoom: 1~4');
+  if (!(d.ui.camera.lean >= 0 && d.ui.camera.lean <= 1)) errors.push('ui.camera.lean: 0~1');
+  checkPositive(errors, 'ui.camera.playerMarginPx', d.ui.camera.playerMarginPx, true);
+
   // --- 타격감 ---
   const ju = d.juice;
   for (const [k, c] of [...Object.entries(ju.damageNumbers.colors), ...Object.entries(ju.sparks.colors)]) if (!HEX_COLOR.test(c)) errors.push(`juice 색 ${k}: #RRGGBB`);

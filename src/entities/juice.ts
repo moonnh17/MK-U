@@ -9,6 +9,7 @@ import type { Rng } from '../core/rng';
 import { hexColor } from '../core/scale';
 import type { GameData } from '../data/index';
 import { burst, damageNumberStyle, lowHpPulse, sparkKind, type DamageKind } from '../systems/juice';
+import { screenToFixed } from '../systems/camera';
 import type { JuiceData, ShakeLevel, TagId } from '../types/data';
 
 /** 화면 흔들림 (세기는 데이터의 단계). rumble처럼 길이가 정해지지 않은 것은 ms로 */
@@ -127,10 +128,15 @@ export class Juice {
     if (alpha <= 0.01) return;
     const cam = this.scene.cameras.main;
     const c = hexColor(p.color);
+    // 화면 고정 오브젝트도 카메라 확대를 받으므로 보이는 화면 테두리를 지역 좌표로 바꿔 그린다
+    const z = cam.zoom;
+    const tl = screenToFixed(0, 0, cam.width, cam.height, z);
+    const w = cam.width / z;
+    const h = cam.height / z;
     // 바깥쪽이 진하고 안쪽으로 옅어지는 테두리
     for (let i = 0; i < p.edgePx; i += 2) {
-      this.edge.lineStyle(2, c, alpha * (1 - i / p.edgePx));
-      this.edge.strokeRect(i, i, cam.width - i * 2, cam.height - i * 2);
+      this.edge.lineStyle(2 / z, c, alpha * (1 - i / p.edgePx));
+      this.edge.strokeRect(tl.x + i / z, tl.y + i / z, w - (i * 2) / z, h - (i * 2) / z);
     }
   }
 

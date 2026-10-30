@@ -632,6 +632,8 @@ export interface UiData {
   slashFxSec: number;
   /** 카메라 따라가기 보간(0~1) */
   cameraLerp: number;
+  /** 런 카메라: 기본 확대, 조준 적 쪽으로 기우는 비율, 플레이어가 화면 가장자리에서 떨어질 거리 */
+  camera: { zoom: number; lean: number; playerMarginPx: number };
   toastSec: number;
   /** "인벤토리에 보관됨" 알림(교체 버튼) 표시 시간(초) */
   storedNoticeSec: number;
@@ -1140,6 +1142,7 @@ export interface JuiceData {
   /** 적 소환: 바닥 원(몸 반지름 × ringRadiusMul), 작게(startScale) 아래(risePx)에서 솟아오른다 */
   spawn: { ringColor: string; ringRadiusMul: number; startScale: number; risePx: number };
   /** 보스 등장 컷: 카메라 이동(panSec) → 내려찍기(dropSec, dropHeight) → 이름 띠(nameSec) → 복귀(returnSec) */
+  /** zoom: 기본 확대에 곱하는 배율 */
   bossIntro: { panSec: number; dropSec: number; dropHeight: number; nameSec: number; returnSec: number; zoom: number; bandColor: string; bandAlpha: number; nameColor: string; subColor: string };
   /** 보스 체력바: 깎인 만큼 흰 잔상이 trailDelaySec 뒤 초당 trailPerSec(비율)씩 줄어든다 */
   bossBar: { width: number; height: number; y: number; trailDelaySec: number; trailPerSec: number; color: string; trailColor: string; backColor: string; markerColor: string; fontSize: number };

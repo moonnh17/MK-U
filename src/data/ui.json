@@ -31,19 +31,41 @@
       "gap": 3,
       "groupGap": 8,
       "disabledAlpha": 0.35,
-      "levelColors": ["#9aa4b0", "#5ab0ff", "#c77dff"],
+      "levelColors": [
+        "#9aa4b0",
+        "#5ab0ff",
+        "#c77dff"
+      ],
       "awakenedColor": "#ffd23f",
       "emptyColor": "#4a5562",
       "cooldownColor": "#000000",
       "cooldownAlpha": 0.65,
       "ultimateReadyColor": "#ff9a3c"
     },
-    "weapons": { "mainWidth": 52, "mainHeight": 22, "subWidth": 34, "subHeight": 14, "gap": 3 }
+    "weapons": {
+      "mainWidth": 52,
+      "mainHeight": 22,
+      "subWidth": 34,
+      "subHeight": 14,
+      "gap": 3
+    }
   },
-  "room": { "floorColor": "#1c2430", "wallColor": "#3a4656", "corridorColor": "#18202a" },
+  "room": {
+    "floorColor": "#1c2430",
+    "wallColor": "#3a4656",
+    "corridorColor": "#18202a"
+  },
   "chapterRooms": {
-    "2": { "floorColor": "#1e2630", "wallColor": "#5a6a7a", "corridorColor": "#182028" },
-    "3": { "floorColor": "#1a0c0e", "wallColor": "#5a1a1e", "corridorColor": "#120708" }
+    "2": {
+      "floorColor": "#1e2630",
+      "wallColor": "#5a6a7a",
+      "corridorColor": "#182028"
+    },
+    "3": {
+      "floorColor": "#1a0c0e",
+      "wallColor": "#5a1a1e",
+      "corridorColor": "#120708"
+    }
   },
   "slashFxSec": 0.1,
   "cameraLerp": 0.18,
@@ -60,9 +82,26 @@
     "bagDp": 48,
     "pauseDp": 48,
     "gapDp": 8,
-    "skillFanDeg": [180, 210, 240, 270],
+    "skillFanDeg": [
+      180,
+      210,
+      240,
+      270
+    ],
     "ultimateDeg": 225,
-    "minimapTab": { "widthDp": 72, "heightDp": 40 },
-    "joystick": { "radiusDp": 56, "knobDp": 44, "deadZone": 0.15 }
+    "minimapTab": {
+      "widthDp": 72,
+      "heightDp": 40
+    },
+    "joystick": {
+      "radiusDp": 56,
+      "knobDp": 44,
+      "deadZone": 0.15
+    }
+  },
+  "camera": {
+    "zoom": 1.5,
+    "lean": 0.35,
+    "playerMarginPx": 40
   }
 }

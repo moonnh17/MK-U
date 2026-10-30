@@ -15,6 +15,7 @@ import { Spire } from '../entities/spire';
 import { Darkness } from '../entities/darkness';
 import { animateArt, fitArt } from '../entities/art';
 import { Juice, shake } from '../entities/juice';
+import { cameraFocus, viewSize } from '../systems/camera';
 import { bossIntroStage, bossIntroTotal, damageKind, HitStop, slowMoScale, type IntroStage } from '../systems/juice';
 import { weaponSfx, type SfxId } from '../systems/sound';
 
@@ -172,6 +173,8 @@ export class RunScene extends Phaser.Scene {
   private pendingCrit = false;
   /** 보스 등장 컷 (그동안 게임은 멈춘다) */
   private intro: { e: Enemy; t: number; stage: IntroStage } | null = null;
+  /** 지금 조준 중인 적 (카메라가 그쪽으로 기운다) */
+  private aimTarget: Vec2 | null = null;
   /** 보스 처치 슬로모션 경과(초), 없으면 null */
   private slowT: number | null = null;
   /** 일식 어둠과 그 보스 (식광) */
@@ -281,6 +284,7 @@ export class RunScene extends Phaser.Scene {
     // 슬로모션 중에 스테이지를 넘어가도 배속이 남지 않게
     this.physics.world.timeScale = 1;
     this.tweens.timeScale = 1;
+    this.aimTarget = null;
     this.storyThen = null;
     bus.emit('geminiMini', { line: null });
     // 챕터를 끝내고 넘어왔다 (2장 종료 미니 대사)
@@ -352,6 +356,13 @@ export class RunScene extends Phaser.Scene {
     fitArt(d, this.player, d.player.size, d.player.height ?? d.player.size);
     this.applyPlayerArt();
     this.weaponSprite = this.add.image(start.x, start.y, this.weaponDef().spriteKey).setDepth(4);
+    // 카메라: 확대하고 첫 프레임부터 제자리 (다음부터는 부드럽게 따라간다)
+    {
+      const cam = this.cameras.main;
+      cam.setZoom(d.ui.camera.zoom);
+      const t0 = this.cameraTarget();
+      cam.setScroll(t0.x - cam.width / 2, t0.y - cam.height / 2);
+    }
     if (stage.chapter === 1 && stage.stage === 1 && this.ctx.config.testWeapons) this.placeTestWeapons();
 
     this.physics.add.collider(this.player, this.walls);
@@ -575,10 +586,13 @@ export class RunScene extends Phaser.Scene {
     return null;
   }
 
-  /** 카메라가 평소 따라가는 곳 (플레이어가 있는 방 가운데) */
+  /** 카메라가 평소 볼 곳: 플레이어(조준 적 쪽으로 기울어), 방 안이면 방 경계 안 */
   private cameraTarget(): Vec2 {
+    const rules = this.ctx.data.ui.camera;
+    const cam = this.cameras.main;
     const rid = roomAt(this.session.map, this.m, this.player.x, this.player.y);
-    return rid !== null ? roomCenter(this.session.map.rooms[rid]!, this.m) : { x: this.player.x, y: this.player.y };
+    const room = rid !== null ? roomRect(this.session.map.rooms[rid]!, this.m) : null;
+    return cameraFocus({ x: this.player.x, y: this.player.y }, this.aimTarget, viewSize(cam.width, cam.height, rules.zoom), rules, room);
   }
 
   /** 보스 등장 컷 시작: 게임을 멈추고 카메라가 보스 쪽으로 다가간다 */
@@ -590,7 +604,7 @@ export class RunScene extends Phaser.Scene {
     this.setModal('intro');
     const cam = this.cameras.main;
     cam.pan(e.sprite.x, e.sprite.y, bi.panSec * 1000, 'Sine.easeInOut');
-    cam.zoomTo(bi.zoom, bi.panSec * 1000);
+    cam.zoomTo(this.ctx.data.ui.camera.zoom * bi.zoom, bi.panSec * 1000);
   }
 
   /** 등장 컷 한 프레임: 단계가 바뀔 때마다 연출. 아무 키·탭이면 건너뛴다 */
@@ -631,7 +645,7 @@ export class RunScene extends Phaser.Scene {
       bus.emit('bossIntroBand', { name: '', sub: '' });
       const tgt = this.cameraTarget();
       cam.pan(tgt.x, tgt.y, bi.returnSec * 1000, 'Sine.easeInOut');
-      cam.zoomTo(1, bi.returnSec * 1000);
+      cam.zoomTo(this.ctx.data.ui.camera.zoom, bi.returnSec * 1000);
     } else if (st === 'done') {
       this.finishIntro();
     }
@@ -645,7 +659,7 @@ export class RunScene extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.panEffect.reset();
     cam.zoomEffect.reset();
-    cam.setZoom(1);
+    cam.setZoom(this.ctx.data.ui.camera.zoom);
     const tgt = this.cameraTarget();
     cam.setScroll(tgt.x - cam.width / 2, tgt.y - cam.height / 2);
     this.tweens.killTweensOf(it.e.sprite);
@@ -662,7 +676,8 @@ export class RunScene extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.flash(bp.flashMs, c.red, c.green, c.blue);
     sfx('bossPhase');
-    this.tweens.add({ targets: cam, zoom: bp.zoom, duration: (bp.zoomSec * 1000) / 2, yoyo: true, onComplete: () => cam.setZoom(1) });
+    const base = this.ctx.data.ui.camera.zoom;
+    this.tweens.add({ targets: cam, zoom: base * bp.zoom, duration: (bp.zoomSec * 1000) / 2, yoyo: true, onComplete: () => cam.setZoom(base) });
     bus.emit('banner', { text, color, size: bp.bannerSize, sec: bp.bannerSec });
   }
 
@@ -791,6 +806,7 @@ export class RunScene extends Phaser.Scene {
       this.aimDir,
     );
     this.aimDir = aim.target ? aim.dir : moving ? normalize(frame.move) : this.aimDir;
+    this.aimTarget = aim.target ? { x: aim.target.x, y: aim.target.y } : null;
     const aimAngle = Math.atan2(this.aimDir.y, this.aimDir.x);
 
     if (frame.pressed.has('swapWeapon')) {
@@ -829,7 +845,8 @@ export class RunScene extends Phaser.Scene {
     animateArt(d, this.player);
     this.updateCamera();
     const cam = this.cameras.main;
-    this.darkness?.update(dt, this.player.x - cam.scrollX, this.player.y - cam.scrollY);
+    // 화면 고정 어둠도 확대를 받는다: 지역 좌표 = 화면 가운데 + (플레이어 − 보이는 곳 가운데)
+    this.darkness?.update(dt, cam.width / 2 + (this.player.x - cam.midPoint.x), cam.height / 2 + (this.player.y - cam.midPoint.y));
     this.refreshSkillView();
     if (frame.pressed.has('inventory')) this.openInventory();
   }
@@ -2773,10 +2790,10 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
+  /** 카메라: 조준 중인 적 쪽으로 기울어 따라가고(없으면 플레이어), 방 바깥은 보이지 않게 */
   private updateCamera(): void {
     const cam = this.cameras.main;
-    const rid = roomAt(this.session.map, this.m, this.player.x, this.player.y);
-    const target = rid !== null ? roomCenter(this.session.map.rooms[rid]!, this.m) : { x: this.player.x, y: this.player.y };
+    const target = this.cameraTarget();
     const lerp = this.ctx.data.ui.cameraLerp;
     cam.scrollX += (target.x - cam.width / 2 - cam.scrollX) * lerp;
     cam.scrollY += (target.y - cam.height / 2 - cam.scrollY) * lerp;

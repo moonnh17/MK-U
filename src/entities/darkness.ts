@@ -32,7 +32,7 @@ export class Darkness {
     }
   }
 
-  /** 매 프레임: 플레이어 화면 좌표 */
+  /** 매 프레임: 플레이어 위치를 화면 고정 텍스처의 지역 좌표로 (카메라 확대를 받는다) */
   update(dt: number, screenX: number, screenY: number): void {
     this.fade = Math.min(1, this.fade + dt / this.fadeSec);
     this.rt.clear();
