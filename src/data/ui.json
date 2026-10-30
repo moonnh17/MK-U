@@ -1,9 +1,6 @@
 {
   "baseWidth": 480,
   "baseHeight": 270,
-  "renderScaleMin": 2,
-  "renderScaleMax": 4,
-  "renderScaleMaxMobile": 3,
   "backgroundColor": "#0b0f14",
   "hud": {
     "margin": 6,

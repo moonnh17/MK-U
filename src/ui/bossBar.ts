@@ -29,7 +29,7 @@ export class BossBar {
     private readonly ctx: GameContext,
   ) {
     const b = ctx.data.juice.bossBar;
-    const W = ctx.data.ui.baseWidth;
+    const W = scene.scale.gameSize.width;
     const x = (W - b.width) / 2;
     const y = b.y + b.fontSize + 2;
     this.back = scene.add.rectangle(x - 1, y - 1, b.width + 2, b.height + 2, hexColor(b.backColor)).setOrigin(0).setStrokeStyle(1, 0x000000);
@@ -76,7 +76,7 @@ export class BossBar {
   private banner(text: string, color: string, size: number, sec: number): void {
     const s = this.scene;
     const t = s.add
-      .text(this.ctx.data.ui.baseWidth / 2, this.ctx.data.ui.baseHeight * 0.38, text, { fontFamily: 'sans-serif', fontSize: `${size}px`, color, stroke: '#000000', strokeThickness: 4, resolution: 4 })
+      .text(s.scale.gameSize.width / 2, s.scale.gameSize.height * 0.38, text, { fontFamily: 'sans-serif', fontSize: `${size}px`, color, stroke: '#000000', strokeThickness: 4, resolution: 4 })
       .setOrigin(0.5)
       .setDepth(31)
       .setScale(1.6)
@@ -96,8 +96,8 @@ export class BossBar {
       return;
     }
     this.band?.destroy();
-    const W = this.ctx.data.ui.baseWidth;
-    const H = this.ctx.data.ui.baseHeight;
+    const W = s.scale.gameSize.width;
+    const H = s.scale.gameSize.height;
     // 아래쪽 스킬바와 겹치지 않게 화면 높이 60% 즈음
     const h = 44;
     const top = Math.round(H * 0.58);

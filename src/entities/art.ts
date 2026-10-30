@@ -8,28 +8,6 @@ import { anchorOf, animKey, collectAssets, facingFlip, fitHitbox, pickAnim, type
 
 let groups: Map<string, AssetGroup> | null = null;
 
-/** UI·실험장처럼 기준 해상도 좌표를 쓰는 씬: 기준 화면이 캔버스에 꽉 차게 */
-export function fitBaseCamera(scene: Phaser.Scene, baseW: number, baseH: number, renderScale: number): void {
-  scene.cameras.main.setZoom(renderScale).centerOn(baseW / 2, baseH / 2);
-}
-
-/**
- * 고밀도 그림: 텍스처의 각 프레임이 게임 크기(픽셀 ÷ density)로 그려지게 한다.
- * 크기만 줄이고 텍스처 좌표는 그대로 두므로 판정·기준점·배율 코드는 게임 크기만 본다. (WebGL 렌더러)
- */
-export function applyArtDensity(texture: Phaser.Textures.Texture, density: number): void {
-  if (density <= 1) return;
-  for (const name of texture.getFrameNames()) {
-    const f = texture.get(name);
-    const { u0, v0, u1, v1, realWidth, realHeight } = f;
-    f.setSize(realWidth / density, realHeight / density);
-    f.u0 = u0;
-    f.v0 = v0;
-    f.u1 = u1;
-    f.v1 = v1;
-  }
-}
-
 function groupOf(data: GameData, key: string): AssetGroup | undefined {
   groups ??= new Map(collectAssets(data).map((r) => [r.key, r.group]));
   return groups.get(key);

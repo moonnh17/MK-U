@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseLaunchConfig } from '../src/core/config';
-import { computeZoom, renderScale } from '../src/core/scale';
+import { computeZoom } from '../src/core/scale';
 import { formatText } from '../src/core/text';
 
 describe('parseLaunchConfig', () => {
@@ -31,23 +31,14 @@ describe('parseLaunchConfig', () => {
 });
 
 describe('computeZoom', () => {
-  it('창에 꽉 차는 배율 (짧은 쪽 기준)', () => {
-    expect(computeZoom(1920, 1080, 480, 270)).toBe(4);
-    expect(computeZoom(1366, 768, 480, 270)).toBeCloseTo(768 / 270);
-    expect(computeZoom(800, 360, 480, 270)).toBeCloseTo(360 / 270);
-  });
-});
-
-describe('renderScale', () => {
-  it('화면 실제 픽셀에 맞추되 범위 안', () => {
-    expect(renderScale(1920, 1080, 1, 480, 270, 2, 4)).toBe(4);
-    expect(renderScale(1366, 768, 1, 480, 270, 2, 4)).toBe(3);
-    expect(renderScale(800, 600, 1, 480, 270, 2, 4)).toBe(2);
-    expect(renderScale(3840, 2160, 2, 480, 270, 2, 4)).toBe(4);
+  it('PC는 정수 배, 최소 1', () => {
+    expect(computeZoom(1920, 1080, 480, 270, 'pc')).toBe(4);
+    expect(computeZoom(1366, 768, 480, 270, 'pc')).toBe(2);
+    expect(computeZoom(400, 200, 480, 270, 'pc')).toBe(1);
   });
 
-  it('세로로 쥔 폰도 가로 화면 기준', () => {
-    expect(renderScale(390, 844, 3, 480, 270, 2, 3)).toBe(3);
+  it('모바일은 화면에 맞는 비정수 배', () => {
+    expect(computeZoom(800, 360, 480, 270, 'mobile')).toBeCloseTo(360 / 270);
   });
 });
 

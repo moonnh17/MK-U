@@ -6,7 +6,7 @@ import { browserStore, SaveStore } from './core/save';
 import { debugClearRoom, toggleDebug, toggleDebugFlag } from './core/debug';
 import { bus } from './core/events';
 import { DISABLED_ACTIONS } from './core/features';
-import { computeZoom, hexColor, renderScale } from './core/scale';
+import { computeZoom, hexColor } from './core/scale';
 import { formatText } from './core/text';
 import { gameData } from './data/index';
 import { validateGameData } from './data/validate';
@@ -76,30 +76,23 @@ const ctx = setContext({
   input,
   touch,
   uiMode: initialUiMode(config.ui, coarse),
-  renderScale: renderScale(window.screen.width, window.screen.height, window.devicePixelRatio || 1, data.ui.baseWidth, data.ui.baseHeight, data.ui.renderScaleMin, coarse ? data.ui.renderScaleMaxMobile : data.ui.renderScaleMax),
   debug: config.debug,
   save: new SaveStore(browserStore()),
 });
 
 // --- Phaser ---
-// 캔버스는 기준 해상도의 renderScale배로 그리고, 창에 맞춘 배율의 나머지만 CSS로 줄이거나 늘린다
-const cssZoom = () => computeZoom(window.innerWidth, window.innerHeight, data.ui.baseWidth, data.ui.baseHeight) / ctx.renderScale;
-
-// 글자도 캔버스 해상도에 맞춰 그린다 (카메라 확대까지 고려해 넉넉히)
-const addText = Phaser.GameObjects.GameObjectFactory.prototype.text;
-Phaser.GameObjects.GameObjectFactory.prototype.text = function (this: Phaser.GameObjects.GameObjectFactory, x, y, text, style) {
-  return addText.call(this, x, y, text, { resolution: Math.ceil(ctx.renderScale * 1.5), ...style });
-};
+const zoomFor = (mode: UiMode) =>
+  computeZoom(window.innerWidth, window.innerHeight, data.ui.baseWidth, data.ui.baseHeight, mode);
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
-  width: data.ui.baseWidth * ctx.renderScale,
-  height: data.ui.baseHeight * ctx.renderScale,
+  width: data.ui.baseWidth,
+  height: data.ui.baseHeight,
   backgroundColor: hexColor(data.ui.backgroundColor),
   pixelArt: true,
   roundPixels: true,
-  scale: { mode: Phaser.Scale.NONE, zoom: cssZoom() },
+  scale: { mode: Phaser.Scale.NONE, zoom: zoomFor(ctx.uiMode) },
   physics: { default: 'arcade', arcade: { debug: false } },
   input: { keyboard: false, gamepad: false },
   scene: [BootScene, LabScene, RunScene, UIScene],
@@ -110,7 +103,7 @@ if (config.debug) Object.assign(window, { __game: game, __ctx: ctx });
 function applyUiMode(mode: UiMode): void {
   ctx.uiMode = mode;
   refreshTouch();
-  game.scale.setZoom(cssZoom());
+  game.scale.setZoom(zoomFor(mode));
   bus.emit('uiModeChanged', { mode });
 }
 
@@ -164,7 +157,7 @@ new StoryWindow(ctx);
 new GeminiMini(ctx);
 new PauseWindow(ctx);
 new Sfx(ctx);
-window.addEventListener('resize', () => game.scale.setZoom(cssZoom()));
+window.addEventListener('resize', () => game.scale.setZoom(zoomFor(ctx.uiMode)));
 
 applyUiMode(ctx.uiMode);
 // 디버그 모드에서만 콘솔 점검용 핸들을 노출한다
