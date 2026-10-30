@@ -10,10 +10,21 @@
     "y": -6.5
   },
   "dodge": {
-    "speed": 300,
-    "durationSec": 0.2,
-    "invulnSec": 0.28,
-    "cooldownSec": 1.2,
+    "nameKey": "dodge.name",
+    "speed": 220,
+    "durationSec": 0.18,
+    "invulnSec": 0.24,
+    "cooldownSec": 2,
+    "schools": {
+      "hectar": {
+        "kind": "blink", "nameKey": "dodge.hectar", "descKey": "dodge.hectar.desc",
+        "distancePx": 48, "invulnSec": 0.2, "stepPx": 4, "boltColor": "#9fd8ff", "boltSec": 0.22, "boltSegments": 7, "boltAmpPx": 7
+      },
+      "acro": {
+        "kind": "shot", "nameKey": "dodge.acro", "descKey": "dodge.acro.desc",
+        "shots": 3, "spreadDeg": 30, "damage": 6, "projectileSpeed": 260, "range": 170, "tags": ["magic", "ranged"], "tint": "#ff5a64"
+      }
+    },
     "ghostEverySec": 0.04,
     "barColor": "#7ad8ff"
   },

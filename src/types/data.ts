@@ -569,6 +569,12 @@ export interface WavesData {
 
 // ---------- 플레이어 ----------
 
+/** 전직 회피. blink: 번개 순간이동(거리·무적·번개 모양) / shot: 구르면서 탄 발사 */
+export type DodgeSchoolDef = { nameKey: string; descKey: string } & (
+  | { kind: 'blink'; distancePx: number; invulnSec: number; stepPx: number; boltColor: string; boltSec: number; boltSegments: number; boltAmpPx: number }
+  | { kind: 'shot'; shots: number; spreadDeg: number; damage: number; projectileSpeed: number; range: number; tags: TagId[]; tint: string }
+);
+
 export interface PlayerData extends SpriteRef {
   maxHp: number;
   /** px/s */
@@ -584,7 +590,17 @@ export interface PlayerData extends SpriteRef {
   /** 무기를 쥔 오른손 자리 (플레이어 기준 px, 그림이 뒤집히면 x도 뒤집는다) */
   weaponHand: { x: number; y: number };
   /** 회피 구르기: 속도, 시간, 무적, 재사용 대기, 잔상 간격, 대기 막대 색 */
-  dodge: { speed: number; durationSec: number; invulnSec: number; cooldownSec: number; ghostEverySec: number; barColor: string };
+  dodge: {
+    nameKey: string;
+    speed: number;
+    durationSec: number;
+    invulnSec: number;
+    cooldownSec: number;
+    ghostEverySec: number;
+    barColor: string;
+    /** 전직하면 회피가 바뀐다 */
+    schools: Partial<Record<string, DodgeSchoolDef>>;
+  };
   /** 보호막 최대치. 규칙은 나중에 정한다(M1은 바 자리만) */
   shieldMax: number;
   energy: { max: number; start: number; orbValue: number };

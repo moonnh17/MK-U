@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 209개 · 그림 있음 194개
+전체 210개 · 그림 있음 195개
 
 ## player (3)
 
@@ -46,13 +46,14 @@
 | `projectile_player` | 플레이어 탄 | 3×3 | center | #fff3a0 | mku/projectile_player.png (1프레임) |
 | `enemy_bullet` | 적 탄 | 4×4 | center | #ff5a5a | mku/enemy_bullet.png (1프레임) |
 
-## enemy (10)
+## enemy (11)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `enemy_tomakki` | 토마끼 | 8×8 | feet | #8fd16a | mku/enemy_tomakki.png (4프레임) |
 | `enemy_gaedeulgae` | 개들개 | 11×11 | feet | #c9a24a | mku/enemy_gaedeulgae.png (5프레임) |
 | `enemy_akgwi` | 악귀 | 15×15 | feet | #b0383a | mku/enemy_akgwi.png (6프레임) |
+| `enemy_ghost_shooter` | 유령 사수 | 11×11 | feet | #c0303a | mku/enemy_ghost_shooter.png (4프레임) |
 | `enemy_hectar_trooper` | 헥타르 전투원 | 12×12 | feet | #3a7bff | mku/enemy_hectar_trooper.png (5프레임) |
 | `enemy_magi_beetle` | 마기갑충 | 15×15 | feet | #5a8a3a | mku/enemy_magi_beetle.png (10프레임) |
 | `enemy_a_memory` | 어느 기억 | 13×13 | feet | #8a7ab0 | mku/enemy_a_memory.png (14프레임) |

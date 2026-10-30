@@ -103,7 +103,12 @@ export class UIScene extends Phaser.Scene {
     this.warp.update(Math.min(deltaMs / 1000, 0.05));
     if (s) {
       this.hud.update(s, this.time.now);
-      if (this.ctx.uiMode === 'mobile') this.touchSkills.update(s.skillView, this.touchSkillLabels);
+      if (this.ctx.uiMode === 'mobile') {
+        this.touchSkills.update(s.skillView, this.touchSkillLabels);
+        // 회피 버튼: 이름(전직하면 바뀜), 대기 중이면 남은 초
+        const dv = s.dodgeView;
+        this.ctx.touch.setLabel('dodge', dv.left > 0 ? dv.left.toFixed(1) : this.ctx.t(dv.nameKey));
+      }
     }
 
     if (this.ctx.debug) {

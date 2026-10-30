@@ -110,6 +110,24 @@
         }
       }
     },
+    "enemy_ghost_shooter": {
+      "file": "mku/enemy_ghost_shooter.png",
+      "frameWidth": 26,
+      "frameHeight": 23,
+      "frames": 4,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 3,
+          "fps": 8
+        }
+      }
+    },
     "enemy_hectar_trooper": {
       "file": "mku/enemy_hectar_trooper.png",
       "frameWidth": 11,

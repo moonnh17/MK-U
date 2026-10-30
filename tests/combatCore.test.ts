@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { gameData } from '../src/data/index';
 import { bossOrbDrops } from '../src/systems/bossEnergy';
-import { dodgeReady, startDodge, stepDodge, type DodgeConfig } from '../src/systems/dodge';
+import { blinkTarget, dodgeConfig, dodgeReady, startDodge, stepDodge, zigzag, type DodgeConfig } from '../src/systems/dodge';
+import { Rng } from '../src/core/rng';
 import { buildPathField, pathDir, segmentClear } from '../src/systems/pathField';
 import { muzzleAngle, muzzlePoint } from '../src/systems/targeting';
 
@@ -35,6 +36,30 @@ describe('회피', () => {
     const d = gameData.player.dodge;
     expect(d.invulnSec).toBeGreaterThanOrEqual(d.durationSec);
     expect(d.cooldownSec).toBeGreaterThan(d.invulnSec);
+  });
+});
+
+describe('전직 회피', () => {
+  const base = gameData.player.dodge;
+  it('전직 전은 회피, 헥타르는 점멸, 아크로는 진격', () => {
+    expect(dodgeConfig(base, null).nameKey).toBe('dodge.name');
+    expect(dodgeConfig(base, 'hectar').nameKey).toBe('dodge.hectar');
+    expect(dodgeConfig(base, 'acro').nameKey).toBe('dodge.acro');
+    expect(gameData.text['dodge.hectar']).toBe('점멸');
+    expect(gameData.text['dodge.acro']).toBe('진격');
+  });
+  it('점멸은 막히기 직전까지만 간다', () => {
+    const blocked = (x: number) => x >= 30;
+    const to = blinkTarget({ x: 0, y: 0 }, { x: 1, y: 0 }, 48, 4, (x) => blocked(x));
+    expect(to.x).toBe(28);
+    expect(blinkTarget({ x: 0, y: 0 }, { x: 0, y: 1 }, 48, 4, (x) => blocked(x)).y).toBe(48);
+  });
+  it('번개는 양 끝이 정확하고 가운데는 흔들린다', () => {
+    const pts = zigzag({ x: 0, y: 0 }, { x: 50, y: 0 }, 6, 7, new Rng(1));
+    expect(pts[0]).toEqual({ x: 0, y: 0 });
+    expect(pts[pts.length - 1]).toEqual({ x: 50, y: 0 });
+    expect(pts.slice(1, -1).some((p) => p.y !== 0)).toBe(true);
+    expect(pts).toHaveLength(7);
   });
 });
 
@@ -113,10 +138,14 @@ describe('총구', () => {
 
 describe('1장 일반 적의 탄', () => {
   const def = (id: string) => gameData.enemies.enemies.find((e) => e.id === id)!;
-  it('토마끼는 느린 탄을 쏜다 (이동속도 이하라 뛰어서 피할 수 있다)', () => {
-    const a = def('tomakki').attacks!.find((x) => x.kind === 'burst')!;
-    expect(a.speed!).toBeLessThanOrEqual(gameData.player.moveSpeed);
-    expect(a.shots).toBe(1);
+  it('토마끼는 탄을 쏘지 않는다', () => {
+    expect(def('tomakki').attacks ?? []).toHaveLength(0);
+  });
+  it('유령 사수는 거리를 두고 활을 쏘고, 1장 웨이브에 나온다', () => {
+    const g = def('ghostShooter');
+    expect(g.keepDistance).toBeGreaterThan(0);
+    expect(g.attacks!.some((x) => x.kind === 'burst')).toBe(true);
+    expect(gameData.waves.waves.some((w) => w.chapter === 1 && w.spawns.some((s) => s.enemy === 'ghostShooter'))).toBe(true);
   });
   it('악귀는 강타 때 충격 탄이 퍼진다', () => {
     const a = def('akgwi').attacks!.find((x) => x.kind === 'slam')!;

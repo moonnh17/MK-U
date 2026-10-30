@@ -35,9 +35,9 @@ describe('데이터 검증', () => {
     expect(w.energyCost).toBe(1);
   });
 
-  it('챕터1 일반 적 3종이 있다', () => {
+  it('챕터1 일반 적 4종이 있다', () => {
     const ids = gameData.enemies.enemies.filter((e) => e.chapter === 1 && e.rank === 'normal' && !e.summon).map((e) => e.id);
-    expect(ids.sort()).toEqual(['akgwi', 'gaedeulgae', 'tomakki']);
+    expect(ids.sort()).toEqual(['akgwi', 'gaedeulgae', 'ghostShooter', 'tomakki']);
   });
 
   it('방 개수 규칙이 기획서와 같다', () => {

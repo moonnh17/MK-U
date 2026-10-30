@@ -14,10 +14,6 @@
       "contactIntervalSec": 0.8,
       "energyOrbs": [0, 1],
       "coins": [0, 1],
-      "attacks": [
-        { "id": "spit", "kind": "burst", "triggerRange": 130, "windupSec": 0.5, "actSec": 0.05, "recoverSec": 0.3, "cooldownSec": 4.5, "firstDelayJitterSec": 3,
-          "damage": 4, "shots": 1, "shotGapSec": 0, "speed": 85, "range": 170 }
-      ],
       "spriteKey": "enemy_tomakki",
       "color": "#8fd16a",
       "size": 8
@@ -60,6 +56,16 @@
       "spriteKey": "enemy_akgwi",
       "color": "#b0383a",
       "size": 15
+    },
+    {
+      "id": "ghostShooter", "nameKey": "enemy.ghostShooter", "chapter": 1, "rank": "normal", "ai": "chase",
+      "maxHp": 16, "moveSpeed": 38, "contactDamage": 4, "contactIntervalSec": 1.0,
+      "energyOrbs": [1, 2], "coins": [1, 2], "keepDistance": 100,
+      "attacks": [
+        { "id": "arrow", "kind": "burst", "triggerRange": 180, "windupSec": 0.7, "actSec": 0.05, "recoverSec": 0.4, "cooldownSec": 2.4, "firstDelayJitterSec": 1.5,
+          "damage": 6, "shots": 1, "shotGapSec": 0, "speed": 140, "range": 240 }
+      ],
+      "spriteKey": "enemy_ghost_shooter", "color": "#c0303a", "size": 11
     },
     {
       "id": "fusionAkgwi",

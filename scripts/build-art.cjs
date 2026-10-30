@@ -132,6 +132,9 @@ const M = (row) => cells('monsters.png', 256, 256, [row * 4, row * 4 + 1, row * 
 { const r = M(1); actor('enemy_gaedeulgae', [r[0]], r, 19); }
 { const r = M(2); actor('enemy_akgwi', [r[0], r[1]], r, 24); }
 
+// 유령 사수: 6번째 줄. 마지막 칸이 활을 당긴 자세
+{ const r = M(5); actor('enemy_ghost_shooter', [r[0]], [r[0], r[1], r[2]], 26); }
+
 // ---------- 2장 ----------
 actor('enemy_hectar_trooper', [strip('spires/trooper.png', 4)[0]], strip('spires/trooper.png', 4), 22);
 actor('enemy_hectar_chief', [strip('spires/researcher.png', 4)[0]], strip('spires/researcher.png', 4), 54);

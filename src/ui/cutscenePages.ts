@@ -123,6 +123,8 @@ export function advancementCut(
   const plus = new Map<string, number>();
   for (const g of log.gains) plus.set(g.skillId, (plus.get(g.skillId) ?? 0) + 1);
   const advName = t(adv.nameKey);
+  const dodgeSchool = ctx.data.player.dodge.schools[adv.id];
+  const dodgeLines = dodgeSchool ? [t('cut.advancement.dodge', { from: t(ctx.data.player.dodge.nameKey), to: t(dodgeSchool.nameKey), desc: t(dodgeSchool.descKey) })] : [];
   return {
     id: `advancement.${args.adv.id}`,
     cut: {
@@ -140,6 +142,7 @@ export function advancementCut(
         lines: [
           t('cut.advancement.judge', { hectar: args.picks.hectar, acro: args.picks.acro }),
           t('cut.advancement.ultimate', { from: t(args.fromUlt.nameKey), to: t(args.toUlt.nameKey) }),
+          ...dodgeLines,
         ],
         accent: adv.color,
       },

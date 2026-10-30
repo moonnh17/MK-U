@@ -1,6 +1,6 @@
 import { buildPathField, pathDir, segmentClear, type PathField } from '../systems/pathField';
 import { bossOrbDrops } from '../systems/bossEnergy';
-import { IDLE_DODGE, startDodge, stepDodge, type DodgeState } from '../systems/dodge';
+import { IDLE_DODGE, blinkTarget, dodgeConfig, startDodge, stepDodge, zigzag, type DodgeState } from '../systems/dodge';
 import { stampGrid } from '../systems/roomShapes';
 import Phaser from 'phaser';
 import type { ActionFrame, ButtonAction, Vec2 } from '../core/actions';
@@ -100,7 +100,7 @@ import {
   type Rect,
   type WorldMetrics,
 } from '../systems/worldLayout';
-import type { BleedRule, CardOfferKind, EncounterKindId, GeminiEventId, GradeId, HiddenBossDef, WeaponSignature, SchoolId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
+import type { BleedRule, CardOfferKind, DodgeSchoolDef, EncounterKindId, GeminiEventId, GradeId, HiddenBossDef, WeaponSignature, SchoolId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
 
 export interface RunSceneData {
   stage?: StageRef;
@@ -242,6 +242,7 @@ export class RunScene extends Phaser.Scene {
   private invuln = 0;
   private dodge: DodgeState = IDLE_DODGE;
   private dodgeGhostIn = 0;
+  private dodgeFxRng: Rng | null = null;
   private dodgeBar: Phaser.GameObjects.Graphics | null = null;
   private pathFields = new Map<number, PathField>();
   private bossHpSeen = new Map<Enemy, number>();
@@ -294,6 +295,7 @@ export class RunScene extends Phaser.Scene {
       outcome: null,
       energyEmptyAt: -Infinity,
       skillView: [],
+      dodgeView: { nameKey: d.player.dodge.nameKey, left: 0, total: d.player.dodge.cooldownSec },
       buffs: [],
       encounters: new Map(),
       effStats: { ...(this.initData.player?.stats ?? newPlayerState(d).stats) },
@@ -1516,13 +1518,14 @@ export class RunScene extends Phaser.Scene {
     base: number,
     tags: readonly TagId[],
     source: string | null = null,
-    opts: { pierce: number; crit: number; homing?: number } = { pierce: 0, crit: 0 },
+    opts: { pierce: number; crit: number; homing?: number; tint?: string } = { pierce: 0, crit: 0 },
   ): void {
     const proj = this.ctx.data.weapons.projectile;
     const b = this.bullets.create(from.x, from.y, proj.spriteKey) as Phaser.Physics.Arcade.Image;
     fitArt(this.ctx.data, b, proj.size, proj.height ?? proj.size);
     b.setDepth(5);
     b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>() });
+    if (opts.tint) b.setTint(hexColor(opts.tint));
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
   }
 
@@ -1553,9 +1556,15 @@ export class RunScene extends Phaser.Scene {
       if (started) {
         this.dodge = started;
         this.dodgeGhostIn = 0;
-        sfx('dash');
+        const school = dodgeConfig(c, this.session.player.advancement).school;
+        if (school?.kind === 'blink') this.blink(school, started.vel);
+        else {
+          sfx('dash');
+          if (school?.kind === 'shot') this.dodgeShot(school);
+        }
       }
     }
+    this.session.dodgeView = { nameKey: dodgeConfig(c, this.session.player.advancement).nameKey, left: this.dodge.cooldown, total: c.cooldownSec };
     if (this.dodge.left > 0) {
       this.dodgeGhostIn -= dt;
       if (this.dodgeGhostIn <= 0) {
@@ -1573,6 +1582,47 @@ export class RunScene extends Phaser.Scene {
       const x = this.player.x - w / 2;
       const y = this.player.y + 7;
       this.dodgeBar.fillStyle(0x000000, 0.6).fillRect(x, y, w, 2).fillStyle(hexColor(c.barColor), 1).fillRect(x, y, w * k, 2);
+    }
+  }
+
+  /** 점멸: 벽을 뚫지 않는 데까지 순간이동하고, 지나간 자리에 번개가 지직거린다 */
+  private blink(s: Extract<DodgeSchoolDef, { kind: 'blink' }>, dir: Vec2): void {
+    const from = { x: this.player.x, y: this.player.y };
+    const r = this.ctx.data.player.size / 2;
+    const blocked = (x: number, y: number) =>
+      this.physics.overlapRect(x - r, y - r, r * 2, r * 2, false, true).some((b) => {
+        const go = b.gameObject;
+        return this.walls.contains(go) || this.doorGroup.contains(go);
+      });
+    const to = blinkTarget(from, dir, s.distancePx, s.stepPx, blocked);
+    this.player.setPosition(to.x, to.y);
+    (this.player.body as Phaser.Physics.Arcade.Body).reset(to.x, to.y);
+    this.dodge = { ...this.dodge, left: 0, invuln: s.invulnSec };
+    sfx('blink');
+    const color = hexColor(s.boltColor);
+    const g = this.add.graphics().setDepth(6);
+    const rng = (this.dodgeFxRng ??= Rng.derive(this.ctx.config.seed, 'dodge-fx'));
+    const draw = () => {
+      g.clear();
+      const pts = zigzag(from, to, s.boltSegments, s.boltAmpPx, rng);
+      g.lineStyle(3, color, 0.35).strokePoints(pts);
+      g.lineStyle(1, 0xffffff, 1).strokePoints(pts);
+    };
+    draw();
+    // 번개 모양을 몇 번 바꿔 지직거린다
+    this.time.addEvent({ delay: (s.boltSec * 1000) / 4, repeat: 2, callback: draw });
+    this.tweens.add({ targets: g, alpha: 0, delay: s.boltSec * 500, duration: s.boltSec * 500, onComplete: () => g.destroy() });
+    this.cameras.main.flash(50, 150, 210, 255);
+  }
+
+  /** 진격: 구르는 순간 조준 방향으로 부채꼴 탄 */
+  private dodgeShot(s: Extract<DodgeSchoolDef, { kind: 'shot' }>): void {
+    const from = { x: this.player.x, y: this.player.y };
+    const base = muzzleAngle(from, this.aimTarget, Math.atan2(this.aimDir.y, this.aimDir.x), 0);
+    const spread = (s.spreadDeg * Math.PI) / 180;
+    for (let i = 0; i < s.shots; i++) {
+      const a = s.shots === 1 ? base : base - spread / 2 + (spread * i) / (s.shots - 1);
+      this.fireBullet(from, a, s.projectileSpeed, s.range, s.damage, s.tags, 'dodge', { pierce: 0, crit: 0, tint: s.tint });
     }
   }
 

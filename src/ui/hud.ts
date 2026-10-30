@@ -54,6 +54,9 @@ export class Hud {
   readonly minimap: Minimap;
   private readonly pcOnly: Phaser.GameObjects.Container;
   private readonly slots: SlotUi[] = [];
+  private readonly dodgeLabel: Phaser.GameObjects.Text;
+  private readonly dodgeCd: Phaser.GameObjects.Graphics;
+  private readonly dodgeCdText: Phaser.GameObjects.Text;
   private readonly storedBadge: Phaser.GameObjects.Text;
   private readonly mainWeaponText: Phaser.GameObjects.Text;
   private readonly mainCostText: Phaser.GameObjects.Text;
@@ -124,6 +127,14 @@ export class Hud {
       this.pcOnly.add(container);
       x += size + sb.gap;
     });
+    // 회피 칸: 스킬바 왼쪽. 이름 + 재사용 대기
+    const dodgeX = (W - totalW) / 2 - size - sb.groupGap;
+    const dodgeBg = scene.add.rectangle(0, 0, size, size, 0x000000, 0.5).setOrigin(0).setStrokeStyle(1, hexColor(sb.emptyColor));
+    this.dodgeLabel = text(size / 2, size / 2, '', h.fontSize - 3).setOrigin(0.5);
+    this.dodgeCd = scene.add.graphics();
+    this.dodgeCdText = text(size / 2, size / 2 - 1, '', h.fontSize).setOrigin(0.5).setStroke('#000000', 2);
+    const dodgeKey = text(1, 0, 'Shift', small - 1).setAlpha(0.7);
+    this.pcOnly.add(scene.add.container(dodgeX, y, [dodgeBg, this.dodgeLabel, this.dodgeCd, this.dodgeCdText, dodgeKey]));
     this.storedBadge = text(x + 2, y + size / 2, '', h.fontSize - 2).setOrigin(0, 0.5).setColor(sb.awakenedColor);
     this.pcOnly.add(this.storedBadge);
 
@@ -145,6 +156,17 @@ export class Hud {
   }
 
   update(s: RunSession, now: number): void {
+    const dv = s.dodgeView;
+    const dsb = this.ctx.data.ui.hud.skillbar;
+    this.dodgeLabel.setText(this.ctx.t(dv.nameKey));
+    this.dodgeCd.clear();
+    this.dodgeCdText.setText('');
+    if (dv.left > 0) {
+      const half = dsb.slotSize / 2;
+      const st = -Math.PI / 2;
+      this.dodgeCd.fillStyle(hexColor(dsb.cooldownColor), dsb.cooldownAlpha).slice(half, half, half - 1, st, st + Math.min(1, dv.left / dv.total) * Math.PI * 2, false).fillPath();
+      this.dodgeCdText.setText(dv.left >= 1 ? String(Math.ceil(dv.left)) : dv.left.toFixed(1));
+    }
     const p = s.player;
     const barW = this.ctx.data.ui.hud.bars.width;
     const setBar = (bar: Bar, value: number, max: number, color = bar.color) => {

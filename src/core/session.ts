@@ -98,6 +98,8 @@ export interface RunSession {
   energyEmptyAt: number;
   /** 액티브 4칸 + 궁극기 + 패시브 (RunScene이 매 프레임 채운다) */
   skillView: SkillSlotView[];
+  /** 회피 칸: 이름(전직하면 바뀜)과 재사용 대기 */
+  dodgeView: { nameKey: string; left: number; total: number };
   /** 유형이 정해진 조우 칸 (방 id → 유형, 미니맵 아이콘) */
   encounters: Map<number, EncounterKindId>;
   /** HUD '현재 버프' (RunScene이 매 프레임 채운다) */
