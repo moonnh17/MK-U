@@ -9,9 +9,10 @@ import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { conversionLines } from './cutscenePages';
 import { gradeMultiplier } from '../systems/damage';
-import { findSkill, storedSkills } from '../systems/skills';
+import { findSkill, skillValues, storedSkills } from '../systems/skills';
+import { skillTags, tagBadges } from '../systems/tags';
 import { emptyHanded, weaponStats, type WeaponItem } from '../systems/weapons';
-import { STAT_IDS } from '../types/data';
+import { STAT_IDS, type TagId } from '../types/data';
 import { itemDescParams } from './itemCard';
 
 type Target = number | 'passive';
@@ -24,6 +25,9 @@ export class InventoryWindow {
   private readonly notice: HTMLDivElement;
   private open = false;
   private selected: string | null = null;
+  /** 설명 칸에 보이는 스킬 ('ultimate'이면 궁극기). 누르거나(모바일) 마우스를 올리면(PC) 바뀐다 */
+  private detailId: string | null = null;
+  private detailEl: HTMLDivElement | null = null;
   private drag: { id: string; x: number; y: number; ghost: HTMLDivElement | null } | null = null;
   private noticeTimer = 0;
   private tab: Tab = 'skill';
@@ -104,6 +108,8 @@ export class InventoryWindow {
     ultEl.innerHTML = '<small></small><div class="iw-name"></div>';
     ultEl.querySelector('small')!.textContent = t('inventory.ultimate');
     ultEl.querySelector('.iw-name')!.textContent = ult ? t(p.ultimate.awakened && ult.awakening ? ult.awakening.nameKey : ult.nameKey) : '';
+    ultEl.addEventListener('click', () => this.showDetail('ultimate'));
+    ultEl.addEventListener('mouseenter', () => this.showDetail('ultimate'));
     equipRow.appendChild(ultEl);
 
     const storedTitle = document.createElement('div');
@@ -120,7 +126,10 @@ export class InventoryWindow {
     }
     for (const id of stored) storedRow.appendChild(this.skillCard(id));
 
-    this.root.append(head, hint, equipRow, storedTitle, storedRow);
+    this.detailEl = document.createElement('div');
+    this.detailEl.className = 'iw-detail';
+    this.root.append(head, hint, equipRow, storedTitle, storedRow, this.detailEl);
+    this.showDetail(this.detailId ?? this.selected ?? p.loadout.active.find((x) => x !== null) ?? null);
     // 전직 후 스킬 변환 기록
     if (p.advancementLog) {
       const logTitle = document.createElement('div');
@@ -309,9 +318,83 @@ export class InventoryWindow {
     });
     el.addEventListener('click', (e) => {
       e.stopPropagation();
+      this.detailId = id;
       this.onSkillTap(id);
     });
+    el.addEventListener('mouseenter', () => this.showDetail(id));
     return el;
+  }
+
+  /** 설명 칸: 이름·계열·레벨·태그·쿨타임, 지금 효과(수치), 다음 레벨, 각성 조건과 각성 효과 / 궁극기 */
+  private showDetail(id: string | null): void {
+    const box = this.detailEl;
+    if (!box) return;
+    this.detailId = id;
+    box.replaceChildren();
+    const t = this.ctx.t;
+    const d = this.ctx.data;
+    const p = this.ctx.session?.player;
+    if (!p || !id) {
+      box.appendChild(this.line('iw-hint', t('inventory.detailHint')));
+      return;
+    }
+    if (id === 'ultimate') {
+      const u = d.ultimates.ultimates.find((x) => x.id === p.ultimate.id);
+      if (!u) return;
+      const aw = p.ultimate.awakened && u.awakening;
+      box.append(
+        this.line('iw-dname', t(aw ? u.awakening!.nameKey : u.nameKey), u.color),
+        this.line('iw-dmeta', t('inventory.ultimate')),
+        this.badges(u.tags),
+        this.line('iw-desc', t(aw ? u.awakening!.descKey : u.descKey, fmt(aw ? { ...u.values, ...u.awakening!.values } : u.values))),
+      );
+      if (u.awakening && !p.ultimate.awakened) box.append(this.line('iw-dsub', t('inventory.detailAwakened')), this.line('iw-desc dim', t(u.awakening.descKey, fmt({ ...u.values, ...u.awakening.values }))));
+      return;
+    }
+    const owned = p.loadout.owned[id];
+    if (!owned) return;
+    const def = findSkill(d.skills, id);
+    const sv = skillValues(def, owned);
+    const meta = [t(`school.${def.school}`), t(def.kind === 'passive' ? 'card.passive' : 'card.active'), `Lv${owned.level}`];
+    if (def.kind !== 'passive') meta.push(t('inventory.detailCooldown', { sec: Math.round(sv.cooldownSec * 10) / 10 }));
+    box.append(
+      this.line('iw-dname', owned.awakened ? `★ ${t(def.awakening.nameKey)}` : t(def.nameKey)),
+      this.line('iw-dmeta', meta.join(' · ')),
+      this.badges(skillTags(def, owned.awakened)),
+      this.line('iw-desc', t(owned.awakened ? def.awakening.descKey : def.descKey, fmt(sv.values))),
+    );
+    if (!owned.awakened && owned.level < d.skills.maxLevel) {
+      const next = skillValues(def, { level: owned.level + 1, awakened: false });
+      box.append(this.line('iw-dsub', t('inventory.detailNext', { level: owned.level + 1 })), this.line('iw-desc dim', t(def.descKey, fmt(next.values))));
+    }
+    if (!owned.awakened) {
+      const a = def.awakening;
+      const met = p.stats[a.requiredStat] >= a.requiredValue && owned.level >= d.skills.maxLevel;
+      const req = this.line('iw-dsub', t('inventory.detailAwaken', { stat: t(`stat.${a.requiredStat}`), value: p.stats[a.requiredStat], need: a.requiredValue, level: d.skills.maxLevel }));
+      req.classList.toggle('met', met);
+      const after = skillValues(def, { level: d.skills.maxLevel, awakened: true });
+      box.append(req, this.line('iw-desc dim', `${t(a.nameKey)} — ${t(a.descKey, fmt(after.values))}`));
+    }
+  }
+
+  private line(cls: string, text: string, color?: string): HTMLDivElement {
+    const el = document.createElement('div');
+    el.className = cls;
+    el.textContent = text;
+    if (color) el.style.color = color;
+    return el;
+  }
+
+  private badges(tags: readonly TagId[]): HTMLDivElement {
+    const row = document.createElement('div');
+    row.className = 'cw-badges';
+    for (const b of tagBadges(tags, this.ctx.data.tags)) {
+      const s = document.createElement('span');
+      s.textContent = this.ctx.t(b.nameKey);
+      s.style.background = b.color;
+      row.appendChild(s);
+    }
+    return row;
   }
 
   private onSkillTap(id: string): void {
@@ -393,4 +476,11 @@ export class InventoryWindow {
     window.clearTimeout(this.noticeTimer);
     this.noticeTimer = window.setTimeout(() => (this.notice.style.display = 'none'), this.ctx.data.ui.storedNoticeSec * 1000);
   }
+}
+
+/** 설명 문구에 넣을 수치 (소수점 정리) */
+function fmt(values: Record<string, number>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(values)) out[k] = String(Math.round(v * 100) / 100);
+  return out;
 }
