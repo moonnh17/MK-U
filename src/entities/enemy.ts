@@ -3,6 +3,7 @@ import type { Vec2 } from '../core/actions';
 import type { Rng } from '../core/rng';
 import { hexColor } from '../core/scale';
 import { archonMods, archonStage, rescaleHp } from '../systems/champions';
+import { spawnRise } from '../systems/juice';
 import type { CorruptionState } from '../systems/acro';
 import { effectiveRank, eliteMods, type EliteMods } from '../systems/elites';
 import { aimLocked, chainWindup, forceWindup, initialAi, keepDistanceStep, stepAi, type AiEvent, type AiState } from '../systems/enemyAi';
@@ -88,6 +89,10 @@ export class Enemy {
   private holdLeft = 0;
   /** 맞았을 때 찌그러졌다 돌아오는 남은 시간 */
   private squashLeft = 0;
+  /** 소환 연출: 대기 전체 시간, 바닥 원·연기 */
+  private readonly warnTotal: number;
+  private spawnRing: Phaser.GameObjects.Graphics | null = null;
+  private spawnSmoke: Phaser.GameObjects.Image | null = null;
   /** 집정관: 흡수량·단계·후광 */
   private absorbed = 0;
   absorbStage = 0;
@@ -120,7 +125,16 @@ export class Enemy {
     this.sprite.setDepth(3);
     if (this.mods.scale !== 1) this.sprite.setScale(this.mods.scale);
     if (def.ai === 'idle') this.sprite.setImmovable(true);
-    if (warnSec > 0) this.sprite.setAlpha(0.4);
+    this.warnTotal = warnSec;
+    // 소환 연출: 바닥에 원이 그려지고 작고 투명하게 시작해 솟아오른다 (보스는 등장 컷이 따로)
+    if (warnSec > 0 && def.ai !== 'boss') {
+      const sj = getContext().data.juice;
+      this.sprite.setAlpha(0).setScale(this.mods.scale * sj.spawn.startScale);
+      this.spawnRing = scene.add.graphics().setDepth(1);
+      if (scene.textures.exists(sj.fx.spawn.spriteKey)) this.spawnSmoke = scene.add.image(x, y, sj.fx.spawn.spriteKey).setDepth(2).setAlpha(0);
+    } else if (warnSec > 0) {
+      this.sprite.setAlpha(0.4);
+    }
     if (elite) {
       this.icon = scene.add
         .text(x, y, iconText, { fontFamily: 'sans-serif', fontSize: '8px', color: elite.color })
@@ -198,6 +212,7 @@ export class Enemy {
     }
     if (this.warn > 0) {
       this.warn -= dt;
+      this.drawSpawn(data);
       if (this.warn <= 0) this.sprite.setAlpha(1);
       this.sprite.setVelocity(0, 0);
       return;
@@ -505,6 +520,41 @@ export class Enemy {
     this.kbVel = { x: (dir.x * distance) / sec, y: (dir.y * distance) / sec };
   }
 
+  /** 소환 연출 한 프레임 (끝나면 원래 크기·투명도로 돌리고 원을 치운다) */
+  private drawSpawn(data: ReturnType<typeof getContext>['data']): void {
+    if (!this.spawnRing) return;
+    const sj = data.juice.spawn;
+    const p = this.warnTotal > 0 ? 1 - Math.max(0, this.warn) / this.warnTotal : 1;
+    if (p >= 1) {
+      this.clearSpawn();
+      this.sprite.setScale(this.baseScale).setAlpha(1);
+      return;
+    }
+    const r = spawnRise(p, sj);
+    this.sprite.setScale(this.baseScale * r.scale).setAlpha(r.alpha);
+    const rad = this.radius * sj.ringRadiusMul;
+    const c = hexColor(sj.ringColor);
+    this.spawnRing
+      .clear()
+      .lineStyle(1, c, 0.9)
+      .strokeCircle(this.sprite.x, this.sprite.y, rad * Math.min(1, p * 2))
+      .fillStyle(c, 0.25 * (1 - p))
+      .fillCircle(this.sprite.x, this.sprite.y, rad * Math.min(1, p * 2));
+    this.spawnSmoke?.setPosition(this.sprite.x, this.sprite.y).setAlpha(0.8 * (1 - p)).setScale(0.6 + 0.6 * p);
+  }
+
+  private clearSpawn(): void {
+    this.spawnRing?.destroy();
+    this.spawnRing = null;
+    this.spawnSmoke?.destroy();
+    this.spawnSmoke = null;
+  }
+
+  /** 엘리트·거대화를 더한 기본 크기 */
+  get baseScale(): number {
+    return this.mods.scale * this.extraScale;
+  }
+
   /** 맞은 반응: 찌그러짐 시작 */
   squash(): void {
     this.squashLeft = getContext().data.juice.hitFlash.squashSec;
@@ -526,6 +576,7 @@ export class Enemy {
   destroy(): void {
     this.dead = true;
     this.clearTelegraph();
+    this.clearSpawn();
     this.halo?.destroy();
     this.icon?.destroy();
     this.outline?.destroy();

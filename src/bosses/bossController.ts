@@ -291,7 +291,7 @@ export class BossController {
     this.aura?.destroy();
     this.aura = host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius + 4).setStrokeStyle(stage, hexColor(this.def.enraged.auraColor), 0.8).setDepth(2);
     shake(host.scene, 'heavy');
-    this.label(host, host.t(`boss.unlock.${this.def.id}.${stage}`), this.def.enraged.auraColor);
+    host.bossPhaseFx(host.t(`boss.unlock.${this.def.id}.${stage}`), this.def.enraged.auraColor);
   }
 
   private enrage(host: BossHost): void {
@@ -303,7 +303,7 @@ export class BossController {
     if (en.scale !== 1) e.setExtraScale(en.scale);
     this.aura = host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius + 4).setStrokeStyle(2, hexColor(en.auraColor), 0.8).setDepth(2);
     shake(host.scene, 'heavy');
-    this.label(host, host.t(`boss.enraged.${this.def.id}`), en.auraColor);
+    host.bossPhaseFx(host.t(`boss.enraged.${this.def.id}`), en.auraColor);
   }
 
   private label(host: BossHost, text: string, color = '#ffffff'): void {

@@ -97,6 +97,21 @@ export class Juice {
     }
   }
 
+  /** 보스 처치 연쇄 폭발 하나: center 둘레 spread 안 아무 데나 */
+  explosionNear(center: Vec2, spread: number): void {
+    const at = { x: center.x + this.rng.range(-spread, spread), y: center.y + this.rng.range(-spread, spread) };
+    this.fxAnim(this.j.fx.explosion.spriteKey, at);
+    this.particles(at, this.j.death.shards, this.j.death.shardSpeed, this.j.death.shardLifeSec, this.j.death.shardSize, hexColor(this.j.fx.explosion.color));
+    shake(this.scene, 'medium');
+  }
+
+  /** 보스 착지: 바닥 먼지 고리 + 파편 */
+  landing(at: Vec2, radius: number): void {
+    const ring = this.scene.add.circle(at.x, at.y, radius).setStrokeStyle(2, 0xffffff, 0.8).setDepth(2);
+    this.scene.tweens.add({ targets: ring, scale: 2.4, alpha: 0, duration: 380, onComplete: () => ring.destroy() });
+    this.particles(at, this.j.death.eliteShards, this.j.death.shardSpeed, this.j.death.shardLifeSec, this.j.death.shardSize, 0xb0a090);
+  }
+
   /** 플레이어 피격: 가장자리 붉은 번쩍임 */
   hurt(): void {
     this.flashLeft = this.j.playerHurt.flashSec;

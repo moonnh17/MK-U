@@ -11,6 +11,8 @@ export class GeminiMini {
   private readonly root: HTMLDivElement;
   private readonly bubble: HTMLDivElement;
   private readonly icon: HTMLDivElement;
+  /** 보스 체력바가 위에 떠 있다 */
+  private low = false;
 
   constructor(private readonly ctx: GameContext) {
     this.root = document.createElement('div');
@@ -29,7 +31,7 @@ export class GeminiMini {
       if (line) {
         // 게임 화면(캔버스) 위쪽 가운데에 붙인다 (창 비율이 달라 위아래가 비어도)
         const r = document.querySelector('canvas')?.getBoundingClientRect();
-        if (r) this.root.style.top = `${Math.max(0, r.top) + 6}px`;
+        if (r) this.root.style.top = `${Math.max(0, r.top) + 6 + (this.low ? (r.height / 270) * 22 : 0)}px`;
         // 아이콘 그림이 있으면 그림(표정 대신), 없으면 색 블록 + 눈
         if (applyArtIcon(this.icon, this.ctx, artKeys.geminiIcon)) this.icon.replaceChildren();
         this.bubble.textContent = line.text;
@@ -37,6 +39,9 @@ export class GeminiMini {
       } else {
         this.root.classList.remove('show');
       }
+    });
+    bus.on('bossBarShown', ({ shown }) => {
+      this.low = shown;
     });
     // 런이 끝나 실험장으로 돌아가면 숨긴다
     bus.on('overlay', ({ open }) => {

@@ -15,7 +15,7 @@ import { Spire } from '../entities/spire';
 import { Darkness } from '../entities/darkness';
 import { animateArt, fitArt } from '../entities/art';
 import { Juice, shake } from '../entities/juice';
-import { damageKind, HitStop } from '../systems/juice';
+import { bossIntroStage, bossIntroTotal, damageKind, HitStop, slowMoScale, type IntroStage } from '../systems/juice';
 import { artKeys, type TilePart } from '../systems/art';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
@@ -115,7 +115,7 @@ interface Offer {
   schools?: SchoolId[];
 }
 
-type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | null;
+type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | 'intro' | null;
 
 const SKILL_ACTIONS: ButtonAction[] = ['skill1', 'skill2', 'skill3', 'skill4'];
 
@@ -166,6 +166,10 @@ export class RunScene extends Phaser.Scene {
   private hitStop!: HitStop;
   private stopping = false;
   private pendingCrit = false;
+  /** 보스 등장 컷 (그동안 게임은 멈춘다) */
+  private intro: { e: Enemy; t: number; stage: IntroStage } | null = null;
+  /** 보스 처치 슬로모션 경과(초), 없으면 null */
+  private slowT: number | null = null;
   /** 일식 어둠과 그 보스 (식광) */
   private darkness: Darkness | null = null;
   private darknessBoss: Enemy | null = null;
@@ -258,6 +262,7 @@ export class RunScene extends Phaser.Scene {
       encounters: new Map(),
       effStats: { ...(this.initData.player?.stats ?? newPlayerState(d).stats) },
       settlement: null,
+      boss: null,
     };
     this.ctx.session = this.session;
     this.rng = Rng.derive(seed, `combat-${stage.chapter}-${stage.stage}`);
@@ -267,6 +272,11 @@ export class RunScene extends Phaser.Scene {
     this.hitStop = new HitStop(d.juice.hitStop.minGapSec);
     this.stopping = false;
     this.pendingCrit = false;
+    this.intro = null;
+    this.slowT = null;
+    // 슬로모션 중에 스테이지를 넘어가도 배속이 남지 않게
+    this.physics.world.timeScale = 1;
+    this.tweens.timeScale = 1;
     this.storyThen = null;
     bus.emit('geminiMini', { line: null });
     // 챕터를 끝내고 넘어왔다 (2장 종료 미니 대사)
@@ -322,6 +332,7 @@ export class RunScene extends Phaser.Scene {
       addObstacle: (at, radius, doorClear) => this.addObstacle(at, radius, doorClear),
       chapterRoster: () => this.chapterRoster(),
       arena: () => this.currentArena(),
+      bossPhaseFx: (text, color) => this.bossPhaseFx(text, color),
     };
 
     this.walls = this.physics.add.staticGroup();
@@ -545,6 +556,115 @@ export class RunScene extends Phaser.Scene {
     return this.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, color).setDepth(depth);
   }
 
+  // ---------- 보스 연출 ----------
+
+  /** 보스 체력바에 띄울 보스 (보스가 부른 적·분신 제외, 등장 컷 동안은 없음) */
+  private bossView(): RunSession['boss'] {
+    if (this.intro) return null;
+    for (const [e, c] of this.bossControllers) {
+      if (e.dead) continue;
+      return { name: this.ctx.t(e.def.nameKey), hp: e.hp, maxHp: e.maxHp, markers: c.def.enrageAt > 0 ? [c.def.enrageAt] : [], color: e.def.color };
+    }
+    return null;
+  }
+
+  /** 카메라가 평소 따라가는 곳 (플레이어가 있는 방 가운데) */
+  private cameraTarget(): Vec2 {
+    const rid = roomAt(this.session.map, this.m, this.player.x, this.player.y);
+    return rid !== null ? roomCenter(this.session.map.rooms[rid]!, this.m) : { x: this.player.x, y: this.player.y };
+  }
+
+  /** 보스 등장 컷 시작: 게임을 멈추고 카메라가 보스 쪽으로 다가간다 */
+  private startBossIntro(e: Enemy): void {
+    const bi = this.ctx.data.juice.bossIntro;
+    e.warn = bossIntroTotal(bi) + 0.1;
+    e.sprite.setAlpha(0);
+    this.intro = { e, t: 0, stage: 'pan' };
+    this.setModal('intro');
+    const cam = this.cameras.main;
+    cam.pan(e.sprite.x, e.sprite.y, bi.panSec * 1000, 'Sine.easeInOut');
+    cam.zoomTo(bi.zoom, bi.panSec * 1000);
+  }
+
+  /** 등장 컷 한 프레임: 단계가 바뀔 때마다 연출. 아무 키·탭이면 건너뛴다 */
+  private updateIntro(dt: number, frame: ActionFrame): void {
+    const it = this.intro!;
+    const d = this.ctx.data;
+    const bi = d.juice.bossIntro;
+    it.t += dt;
+    if (frame.pressed.size > 0 && it.t > 0.2) {
+      this.finishIntro();
+      return;
+    }
+    const st = bossIntroStage(it.t, bi).stage;
+    if (st === it.stage) return;
+    it.stage = st;
+    const e = it.e;
+    const cam = this.cameras.main;
+    if (st === 'drop') {
+      // 커다랗게 떠 있다가 내려찍는다
+      e.sprite.setAlpha(1).setScale(e.baseScale * 1.8);
+      this.tweens.add({
+        targets: e.sprite,
+        scale: e.baseScale,
+        duration: bi.dropSec * 1000,
+        ease: 'Quad.easeIn',
+        onComplete: () => {
+          shake(this, 'heavy');
+          this.juice.landing({ x: e.sprite.x, y: e.sprite.y }, e.radius);
+        },
+      });
+    } else if (st === 'name') {
+      const { stage } = this.session;
+      const hidden = e.rank === 'hiddenBoss';
+      const sub = hidden ? this.ctx.t('boss.intro.hidden') : this.ctx.t('boss.intro.stage', { chapter: stage.chapter, stage: stage.stage });
+      bus.emit('bossIntroBand', { name: this.ctx.t(e.def.nameKey), sub });
+    } else if (st === 'return') {
+      bus.emit('bossIntroBand', { name: '', sub: '' });
+      const tgt = this.cameraTarget();
+      cam.pan(tgt.x, tgt.y, bi.returnSec * 1000, 'Sine.easeInOut');
+      cam.zoomTo(1, bi.returnSec * 1000);
+    } else if (st === 'done') {
+      this.finishIntro();
+    }
+  }
+
+  /** 등장 컷 끝 (또는 건너뜀): 카메라를 제자리로, 보스를 깨운다 */
+  private finishIntro(): void {
+    const it = this.intro;
+    if (!it) return;
+    this.intro = null;
+    const cam = this.cameras.main;
+    cam.panEffect.reset();
+    cam.zoomEffect.reset();
+    cam.setZoom(1);
+    const tgt = this.cameraTarget();
+    cam.setScroll(tgt.x - cam.width / 2, tgt.y - cam.height / 2);
+    this.tweens.killTweensOf(it.e.sprite);
+    it.e.sprite.setAlpha(1).setScale(it.e.baseScale);
+    it.e.warn = 0;
+    bus.emit('bossIntroBand', { name: '', sub: '' });
+    if (this.modal === 'intro') this.setModal(null);
+  }
+
+  /** 보스 강화·단계 개방: 번쩍임, 짧은 확대, 화면 가운데 큰 이름 */
+  private bossPhaseFx(text: string, color: string): void {
+    const bp = this.ctx.data.juice.bossPhase;
+    const c = Phaser.Display.Color.HexStringToColor(color);
+    const cam = this.cameras.main;
+    cam.flash(bp.flashMs, c.red, c.green, c.blue);
+    this.tweens.add({ targets: cam, zoom: bp.zoom, duration: (bp.zoomSec * 1000) / 2, yoyo: true, onComplete: () => cam.setZoom(1) });
+    bus.emit('banner', { text, color, size: bp.bannerSize, sec: bp.bannerSec });
+  }
+
+  /** 보스 처치: 슬로모션 + 흰 번쩍임 + 연쇄 폭발 */
+  private startBossKill(at: Vec2): void {
+    const k = this.ctx.data.juice.bossKill;
+    this.slowT = 0;
+    this.cameras.main.flash(k.flashMs, 255, 255, 255);
+    for (let i = 0; i < k.explosions; i++) this.time.delayedCall(i * k.stepSec * 1000, () => this.juice.explosionNear(at, k.spreadPx));
+  }
+
   private addPortal(node: RoomNode): void {
     const ref = this.ctx.data.mapgen.props.exitPortal;
     const c = roomCenter(node, this.m);
@@ -568,8 +688,19 @@ export class RunScene extends Phaser.Scene {
   // ---------- 루프 ----------
 
   override update(_time: number, deltaMs: number): void {
-    const dt = Math.min(deltaMs / 1000, 0.05);
+    let dt = Math.min(deltaMs / 1000, 0.05);
     const frame = this.ctx.input.poll();
+    // 보스 처치 슬로모션: 물리·트윈·게임 시간을 함께 늦춘다
+    if (this.slowT !== null) {
+      this.slowT += dt;
+      const sc = slowMoScale(this.slowT, this.ctx.data.juice.bossKill);
+      this.physics.world.timeScale = 1 / sc;
+      this.tweens.timeScale = sc;
+      if (sc >= 1) this.slowT = null;
+      dt *= sc;
+    }
+    if (this.intro) this.updateIntro(dt, frame);
+    this.session.boss = this.bossView();
 
     for (const action of frame.pressed) {
       const enabled = !DISABLED_ACTIONS.has(action);
@@ -718,6 +849,8 @@ export class RunScene extends Phaser.Scene {
       else {
         this.setRoomLocked(roomId, false);
         const node = this.session.map.rooms[roomId]!;
+        const rc = this.ctx.data.juice.roomClear;
+        bus.emit('banner', { text: this.ctx.t('room.clear'), color: rc.color, size: rc.size, sec: rc.sec });
         if (node.kind === 'combatRoom') this.combatRoomDrop(roomId);
         if (this.raidRooms.has(roomId)) this.raidReward(roomId);
         if (this.hiddenBossRooms.has(roomId)) this.hiddenBossReward(roomId);
@@ -796,7 +929,10 @@ export class RunScene extends Phaser.Scene {
         enemy.setMaxHp(enemy.maxHp * mul);
         enemy.damageMul = mul;
       }
-      if (core) this.bossControllers.set(enemy, new BossController(enemy, core, mul));
+      if (core) {
+        this.bossControllers.set(enemy, new BossController(enemy, core, mul));
+        if (!this.intro) this.startBossIntro(enemy);
+      }
       // 식광: 일식 어둠
       const dk = core?.darkness;
       if (dk) {
@@ -1231,6 +1367,7 @@ export class RunScene extends Phaser.Scene {
     const big = e.elites.length > 0 || e.rank === 'champion' || e.rank === 'boss' || e.rank === 'hiddenBoss';
     this.juice.death(e.sprite, e.def.color, big);
     if (big) this.hitStop.request(e.rank === 'boss' || e.rank === 'hiddenBoss' ? d.juice.hitStop.bossKill : d.juice.hitStop.eliteKill);
+    if (this.bossControllers.has(e)) this.startBossKill({ x, y });
     this.recordKill(e);
     // 집정관: 같은 방에서 죽은 적의 에너지를 흡수한다 (그 적의 에너지 구슬은 떨어지지 않음)
     const absorbed = this.archonAbsorb(e, roomId);

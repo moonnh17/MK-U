@@ -22,7 +22,13 @@ export interface GameEvents {
   restartRequested: Record<string, never>;
 
   /** 게임을 멈추는 창(카드 선택·인벤토리)이 열리거나 닫힘 */
-  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | 'archive' | 'story' | null };
+  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | 'archive' | 'story' | 'intro' | null };
+  /** 화면 가운데 큰 글자 (보스 단계 이름·방 클리어) */
+  banner: { text: string; color: string; size: number; sec: number };
+  /** 보스 등장 컷 이름 띠 (name이 빈 문자열이면 걷는다) */
+  bossIntroBand: { name: string; sub: string };
+  /** 보스 체력바가 보이거나 사라짐 (미니 대사 말풍선 자리) */
+  bossBarShown: { shown: boolean };
   /** 컷인 → 설명창 (각성·궁극기 각성·전직) */
   cutsceneShow: { cut: CutIn; pages: CutPage[] };
   /** 컷인·설명창을 다 넘겼다 */

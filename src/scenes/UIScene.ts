@@ -1,3 +1,4 @@
+import { BossBar } from '../ui/bossBar';
 import Phaser from 'phaser';
 import { getContext, type GameContext } from '../core/context';
 import { debugClearRoom, toggleDebugFlag } from '../core/debug';
@@ -12,6 +13,7 @@ export class UIScene extends Phaser.Scene {
   private ctx!: GameContext;
   private hud!: Hud;
   private toastText!: Phaser.GameObjects.Text;
+  private bossBar!: BossBar;
   private debugPanel!: DebugPanel;
   private touchSkills!: TouchSkills;
   private touchSkillLabels: string[] = [];
@@ -27,6 +29,7 @@ export class UIScene extends Phaser.Scene {
     const W = ui.baseWidth;
     const H = ui.baseHeight;
     this.hud = new Hud(this, this.ctx);
+    this.bossBar = new BossBar(this, this.ctx);
 
     this.toastText = this.add
       .text(W / 2, H * 0.3, '', {
@@ -86,9 +89,10 @@ export class UIScene extends Phaser.Scene {
     });
   }
 
-  override update(): void {
+  override update(_time: number, deltaMs: number): void {
     const s = this.ctx.session;
     this.hud.setShown(s !== null);
+    this.bossBar.update(s && !s.outcome ? s.boss : null, Math.min(deltaMs / 1000, 0.05));
     if (s) {
       this.hud.update(s, this.time.now);
       if (this.ctx.uiMode === 'mobile') this.touchSkills.update(s.skillView, this.touchSkillLabels);
