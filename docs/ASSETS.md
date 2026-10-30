@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 216개 · 그림 있음 201개
+전체 219개 · 그림 있음 204개
 
 ## player (3)
 
@@ -18,7 +18,7 @@
 | `player_hectar` | 플레이어 헥타르 | 10×10 | feet | #e8e2d0 | mku/player_hectar.png (5프레임) |
 | `player_acro` | 플레이어 아크로 | 10×10 | feet | #e8e2d0 | mku/player_acro.png (5프레임) |
 
-## weapon (16)
+## weapon (22)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -37,12 +37,20 @@
 | `weapon_rasalgethi_club` | 라스알게티의 곤봉 | 11×11 | center | #b0583a | mku/weapon_rasalgethi_club.png (1프레임) |
 | `weapon_avior_staff` | 아비오르의 지팡이 | 11×11 | center | #8a6aff | mku/weapon_avior_staff.png (1프레임) |
 | `weapon_rasalhague_sword` | 라스알히게의 검 | 11×11 | center | #e8d24a | mku/weapon_rasalhague_sword.png (1프레임) |
+| `weapon_broken_blade` | 부러진 칼날 | 6×6 | center | #b8bcc8 | mku/weapon_broken_blade.png (1프레임) |
+| `weapon_hanabi` | 한아비 | 11×11 | center | #ffb04a | mku/weapon_hanabi.png (1프레임) |
+| `weapon_al_gul_blade` | 알 굴 참마검 | 11×11 | center | #c8ccd8 | mku/weapon_al_gul_blade.png (1프레임) |
+| `weapon_gihwan_arm` | 기환의 팔 | 11×11 | center | #3a7bff | mku/weapon_gihwan_arm.png (1프레임) |
+| `weapon_ancient_core` | 고대병기의 코어 | 8×8 | center | #a05aff | mku/weapon_ancient_core.png (1프레임) |
+| `weapon_eclipse_core` | 식광의 핵 | 8×8 | center | #ff3a4a | mku/weapon_eclipse_core.png (1프레임) |
 | `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | mku/weapon_fist.png (1프레임) |
 
-## projectile (2)
+## projectile (4)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
+| `fx_golem_laser` | 고대병기의 코어 (fx) | 12×12 | center | #a05aff | mku/fx_golem_laser.png (1프레임) |
+| `fx_eclipse_meteor` | 식광의 핵 (fx) | 10×10 | center | #ff3a4a | mku/fx_eclipse_meteor.png (1프레임) |
 | `projectile_player` | 플레이어 탄 | 3×3 | center | #fff3a0 | mku/projectile_player.png (1프레임) |
 | `enemy_bullet` | 적 탄 | 4×4 | center | #ff5a5a | mku/enemy_bullet.png (1프레임) |
 
@@ -159,7 +167,7 @@
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `pickup_energy` | 에너지 구슬 | 4×4 | center | #3fc8e0 | mku/pickup_energy.png (1프레임) |
-| `pickup_coin` | 코인 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
+| `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
 ## skill (14)
@@ -193,7 +201,7 @@
 | `lab_gemini` | 미모사 제미니 | 14×22 | feet | #7ae0e0 | mku/lab_gemini.png (1프레임) |
 | `lab_window` | 관측창 | 100×12 | feet | #06090c | mku/lab_window.png (1프레임) |
 
-## item (32)
+## item (27)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -201,7 +209,6 @@
 | `item_magicasol` | 마기카솔 | 8×8 | center | #5ac8e0 | mku/item_magicasol.png (1프레임) |
 | `item_nameless_sword` | 이름 없는 검 | 8×8 | center | #d0d8e8 | mku/item_nameless_sword.png (1프레임) |
 | `item_nameless_helm` | 이름 없는 투구 | 8×8 | center | #9aa4b0 | mku/item_nameless_helm.png (1프레임) |
-| `item_broken_blade` | 부러진 칼날 | 8×8 | center | #b0b0b0 | mku/item_broken_blade.png (1프레임) |
 | `item_broken_hilt` | 망가진 손잡이 | 8×8 | center | #8a7a5a | mku/item_broken_hilt.png (1프레임) |
 | `item_elegant_magi` | 엘러건트 마기 | 8×8 | center | #4a8cff | mku/item_elegant_magi.png (1프레임) |
 | `item_antimatter_sample` | 실험용 반물질 | 8×8 | center | #a05ad9 | mku/item_antimatter_sample.png (1프레임) |
@@ -211,8 +218,6 @@
 | `item_lee_seal` | 이씨 가문의 증표 | 8×8 | center | #ffd23f | mku/item_lee_seal.png (1프레임) |
 | `item_magowiki_codex` | 마고위키 필사본 | 8×8 | center | #e0c060 | mku/item_magowiki_codex.png (1프레임) |
 | `item_lsd_r` | LSD-R | 8×8 | center | #e070c0 | mku/item_lsd_r.png (1프레임) |
-| `item_panic_brand` | 광기의 각인 | 8×8 | center | #ff4a4a | mku/item_panic_brand.png (1프레임) |
-| `item_hanabi` | 한아비 | 8×8 | center | #ffb04a | mku/item_hanabi.png (1프레임) |
 | `item_gisup_stone` | 기숲 비석의 조각 | 8×8 | center | #7a8a9a | mku/item_gisup_stone.png (1프레임) |
 | `item_afro_belt` | 아프로 씨의 벨트 | 8×8 | center | #a45cff | mku/item_afro_belt.png (1프레임) |
 | `item_regulus_shard` | 레굴루스의 의식조각 | 8×8 | center | #8a6aff | mku/item_regulus_shard.png (1프레임) |
@@ -220,15 +225,13 @@
 | `item_acrux_cross` | 아크룩스의 십자가 | 8×8 | center | #e0e0ff | mku/item_acrux_cross.png (1프레임) |
 | `item_orion_belt` | 오리온의 허리띠 | 8×8 | center | #5ad9ff | mku/item_orion_belt.png (1프레임) |
 | `item_divine_sword` | 신검 영디·마기 | 8×8 | center | #ff3b3b | mku/item_divine_sword.png (1프레임) |
-| `item_al_gul_blade` | 알 굴 참마검 | 8×8 | center | #ffe08a | mku/item_al_gul_blade.png (1프레임) |
+| `item_atros_codex` | 아트로스 비석 필사본 | 8×8 | center | #d8c090 | mku/item_atros_codex.png (1프레임) |
+| `item_warrior_memory` | 어느 전사의 기억 | 8×8 | center | #c8ccd8 | mku/item_warrior_memory.png (1프레임) |
 | `item_wonhon_lump` | 원혼 덩어리 | 8×8 | center | #7a1f3a | mku/item_wonhon_lump.png (1프레임) |
-| `item_gihwan_arm` | 기환의 팔 | 8×8 | center | #3a9ad9 | mku/item_gihwan_arm.png (1프레임) |
 | `item_death_whistle` | 바바리안 데스 휘슬 | 8×8 | center | #c86a3a | mku/item_death_whistle.png (1프레임) |
 | `item_royal_seal` | 특무 인장 | 8×8 | center | #6a4ad9 | mku/item_royal_seal.png (1프레임) |
 | `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | mku/item_orion_shield.png (1프레임) |
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | mku/item_hectar_ram.png (1프레임) |
-| `item_ancient_core` | 고대병기의 코어 | 8×8 | center | #9a4aff | mku/item_ancient_core.png (1프레임) |
-| `item_eclipse_core` | 식광의 핵 | 8×8 | center | #c8a8ff | mku/item_eclipse_core.png (1프레임) |
 
 ## icon (17)
 

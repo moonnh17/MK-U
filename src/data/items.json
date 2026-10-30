@@ -3,7 +3,7 @@
   "raidWeights": { "rare": 30, "legendary": 9, "unique": 1 },
   "transferPerPickup": 2,
   "chapterCommonShift": 15,
-  "sets": [{ "materials": ["brokenBlade", "brokenHilt"], "result": "alGulBlade" }],
+  "sets": [{ "materials": ["namelessSword", "namelessHelm"], "result": "warriorMemory" }],
   "items": [
     { "id": "slimeStew", "nameKey": "item.slimeStew", "descKey": "item.slimeStew.desc", "grade": "common", "pool": "normal", "tags": [],
       "effects": [{ "kind": "lowHpHeal", "threshold": 0.5, "healTo": 0.8, "cooldownSec": 0, "priority": 2, "afterDamage": 0.05 }],
@@ -15,11 +15,8 @@
       "effects": [{ "kind": "damage", "scope": "melee", "value": 0.1, "group": "damagePct" }],
       "spriteKey": "item_nameless_sword", "color": "#d0d8e8", "size": 8 },
     { "id": "namelessHelm", "nameKey": "item.namelessHelm", "descKey": "item.namelessHelm.desc", "grade": "common", "pool": "normal", "tags": [],
-      "effects": [{ "kind": "maxHp", "value": 40, "group": "hpFlat" }],
+      "effects": [{ "kind": "maxHp", "value": 10, "group": "hpFlat" }],
       "spriteKey": "item_nameless_helm", "color": "#9aa4b0", "size": 8 },
-    { "id": "brokenBlade", "nameKey": "item.brokenBlade", "descKey": "item.brokenBlade.desc", "grade": "common", "pool": "normal", "tags": [],
-      "effects": [{ "kind": "damage", "scope": "all", "value": 0.02, "group": "damagePct" }],
-      "spriteKey": "item_broken_blade", "color": "#b0b0b0", "size": 8 },
     { "id": "brokenHilt", "nameKey": "item.brokenHilt", "descKey": "item.brokenHilt.desc", "grade": "common", "pool": "normal", "tags": [],
       "effects": [{ "kind": "stat", "stat": "toughness", "value": 2, "group": "statFlat" }],
       "spriteKey": "item_broken_hilt", "color": "#8a7a5a", "size": 8 },
@@ -27,16 +24,17 @@
     { "id": "elegantMagi", "nameKey": "item.elegantMagi", "descKey": "item.elegantMagi.desc", "grade": "rare", "pool": "normal", "tags": [],
       "effects": [{ "kind": "stat", "stat": "intelligence", "value": 6, "group": "statFlat" }],
       "spriteKey": "item_elegant_magi", "color": "#4a8cff", "size": 8 },
-    { "id": "antimatterSample", "nameKey": "item.antimatterSample", "descKey": "item.antimatterSample.desc", "grade": "rare", "pool": "normal", "tags": ["tech", "ranged", "charging"],
+    { "id": "antimatterSample", "nameKey": "item.antimatterSample", "descKey": "item.antimatterSample.desc", "grade": "legendary", "pool": "normal", "tags": ["tech", "ranged", "charging"],
       "effects": [
         { "kind": "autoCast", "skillId": "antimatterCannon", "level": 3, "everySec": 10, "notSchool": "hectar" },
-        { "kind": "skillDamage", "skillId": "antimatterCannon", "value": 0.2, "group": "damagePct", "school": "hectar" }
+        { "kind": "skillDamage", "skillId": "antimatterCannon", "value": 0.5, "group": "damagePct", "school": "hectar" }
       ],
       "spriteKey": "item_antimatter_sample", "color": "#a05ad9", "size": 8 },
     { "id": "combatTheory", "nameKey": "item.combatTheory", "descKey": "item.combatTheory.desc", "grade": "rare", "pool": "normal", "tags": [],
       "effects": [
         { "kind": "damage", "scope": "all", "value": 0.07, "group": "damagePct" },
-        { "kind": "area", "value": 0.1, "group": "damagePct" }
+        { "kind": "area", "value": 0.1, "group": "damagePct" },
+        { "kind": "cutReflect", "range": 240 }
       ],
       "spriteKey": "item_combat_theory", "color": "#5a8ad9", "size": 8 },
     { "id": "oakHeart", "nameKey": "item.oakHeart", "descKey": "item.oakHeart.desc", "grade": "rare", "pool": "normal", "tags": ["buff"],
@@ -66,22 +64,12 @@
     { "id": "lsdR", "nameKey": "item.lsdR", "descKey": "item.lsdR.desc", "grade": "legendary", "pool": "normal", "tags": [],
       "effects": [{ "kind": "statReshuffle", "base": 5, "willpower": 1 }],
       "spriteKey": "item_lsd_r", "color": "#e070c0", "size": 8 },
-    { "id": "panicBrand", "nameKey": "item.panicBrand", "descKey": "item.panicBrand.desc", "grade": "legendary", "pool": "normal", "tags": [],
-      "effects": [{ "kind": "panicAwaken", "hpPerSec": 2, "allStats": 15 }],
-      "spriteKey": "item_panic_brand", "color": "#ff4a4a", "size": 8 },
-    { "id": "hanabi", "nameKey": "item.hanabi", "descKey": "item.hanabi.desc", "grade": "legendary", "pool": "normal", "tags": [],
-      "effects": [
-        { "kind": "damage", "scope": "all", "value": 0.1, "group": "damagePct" },
-        { "kind": "maxHp", "value": 20, "group": "hpFlat" },
-        { "kind": "stat", "stat": "all", "value": 5, "group": "statFlat" }
-      ],
-      "variants": [{ "job": "barbarian", "effects": [{ "kind": "damage", "scope": "all", "value": 0.3, "group": "damagePct" }] }],
-      "spriteKey": "item_hanabi", "color": "#ffb04a", "size": 8 },
     { "id": "gisupStone", "nameKey": "item.gisupStone", "descKey": "item.gisupStone.desc", "grade": "legendary", "pool": "normal", "tags": [],
       "effects": [
         { "kind": "stat", "stat": "magiPower", "value": 10, "group": "statFlat" },
         { "kind": "stat", "stat": "willpower", "value": -5, "group": "statFlat" },
-        { "kind": "damage", "scope": "all", "value": 0.15, "group": "damagePct" }
+        { "kind": "damage", "scope": "all", "value": 0.15, "group": "damagePct" },
+        { "kind": "panicAwaken", "hpPerSec": 2, "allStats": 15 }
       ],
       "variants": [{ "job": "paladin", "effects": [{ "kind": "stat", "stat": "toughness", "value": 10, "group": "statFlat" }] }],
       "spriteKey": "item_gisup_stone", "color": "#7a8a9a", "size": 8 },
@@ -131,21 +119,17 @@
       ],
       "spriteKey": "item_divine_sword", "color": "#ff3b3b", "size": 8 },
 
-    { "id": "alGulBlade", "nameKey": "item.alGulBlade", "descKey": "item.alGulBlade.desc", "grade": "legendary", "pool": "set", "tags": ["chance"],
-      "effects": [
-        { "kind": "damage", "scope": "all", "value": 0.2, "group": "damagePct" },
-        { "kind": "damage", "scope": "boss", "value": 0.2, "group": "damagePct" },
-        { "kind": "luckyHit", "chance": 0.1, "mult": 1.5 }
-      ],
-      "spriteKey": "item_al_gul_blade", "color": "#ffe08a", "size": 8 },
 
+    { "id": "atrosCodex", "nameKey": "item.atrosCodex", "descKey": "item.atrosCodex.desc", "grade": "unique", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "lowSanityDamage", "maxDamage": 0.4 }, { "kind": "panicCalm", "visionMul": 0.7 }],
+      "spriteKey": "item_atros_codex", "color": "#d8c090", "size": 8 },
+    { "id": "warriorMemory", "nameKey": "item.warriorMemory", "descKey": "item.warriorMemory.desc", "grade": "legendary", "pool": "set", "tags": [],
+      "effects": [{ "kind": "hpStance", "ratio": 0.5, "damageUp": 0.15, "takenDown": 0.15 }],
+      "spriteKey": "item_warrior_memory", "color": "#c8ccd8", "size": 8 },
     { "id": "wonhonLump", "nameKey": "item.wonhonLump", "descKey": "item.wonhonLump.desc", "grade": "legendary", "pool": "boss", "bossId": "fusionAkgwi", "tags": [],
       "effects": [{ "kind": "hurtInvuln", "sec": 1, "cooldownSec": 15 }],
       "spriteKey": "item_wonhon_lump", "color": "#7a1f3a", "size": 8 },
-    { "id": "gihwanArm", "nameKey": "item.gihwanArm", "descKey": "item.gihwanArm.desc", "grade": "legendary", "pool": "boss", "bossId": "electricRing", "tags": ["physical", "magic"],
-      "effects": [{ "kind": "hurtBurst", "damage": 180, "radius": 232.5, "tags": ["physical", "magic"] }],
-      "spriteKey": "item_gihwan_arm", "color": "#3a9ad9", "size": 8 },
-    { "id": "deathWhistle", "nameKey": "item.deathWhistle", "descKey": "item.deathWhistle.desc", "grade": "unique", "pool": "hiddenBoss", "bossId": "ancestorEcho", "tags": ["buff"],
+    { "id": "deathWhistle", "nameKey": "item.deathWhistle", "descKey": "item.deathWhistle.desc", "grade": "legendary", "pool": "hiddenBoss", "bossId": "ancestorEcho", "tags": ["buff"],
       "effects": [{ "kind": "roomRoar", "durationSec": 5, "damage": 0.15, "moveSpeed": 0.1 }],
       "variants": [{ "job": "barbarian", "effects": [{ "kind": "roarBoost", "value": 0.2 }] }],
       "spriteKey": "item_death_whistle", "color": "#c86a3a", "size": 8 },
@@ -160,14 +144,8 @@
     { "id": "hectarRam", "nameKey": "item.hectarRam", "descKey": "item.hectarRam.desc", "grade": "rare", "pool": "boss", "bossId": "hectarChief", "dropChance": 0.2, "tags": [],
       "effects": [
         { "kind": "stat", "stat": "magiPower", "value": 4, "group": "statFlat" },
-        { "kind": "coinGain", "value": 0.1, "group": "damagePct" }
+        { "kind": "coinGain", "value": 0.1, "group": "damagePct" }, { "kind": "grazeEnergy", "value": 3 }
       ],
-      "spriteKey": "item_hectar_ram", "color": "#3a9aff", "size": 8 },
-    { "id": "ancientCore", "nameKey": "item.ancientCore", "descKey": "item.ancientCore.desc", "grade": "legendary", "pool": "boss", "bossId": "magiGolem", "tags": ["magic", "ranged"],
-      "effects": [{ "kind": "ultimateBurst", "shots": 24, "damage": 200, "speed": 240, "range": 300, "tags": ["magic", "ranged"] }],
-      "spriteKey": "item_ancient_core", "color": "#9a4aff", "size": 8 },
-    { "id": "eclipseCore", "nameKey": "item.eclipseCore", "descKey": "item.eclipseCore.desc", "grade": "legendary", "pool": "boss", "bossId": "eclipse", "tags": ["magic"],
-      "effects": [{ "kind": "absorbCore", "everySec": 12, "absorbSec": 2.5, "damage": 220, "radius": 510, "tags": ["magic"] }],
-      "spriteKey": "item_eclipse_core", "color": "#c8a8ff", "size": 8 }
+      "spriteKey": "item_hectar_ram", "color": "#3a9aff", "size": 8 }
   ]
 }

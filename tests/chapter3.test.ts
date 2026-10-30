@@ -197,10 +197,10 @@ describe('시간 단계 (마기카이저)', () => {
 });
 
 describe('식광의 핵', () => {
-  const it2 = gameData.items.items.find((x) => x.id === 'eclipseCore')!;
-  it('식광 전용, 12초마다 2.5초 흡수 후 폭발(220, 범위 510)', () => {
-    expect(it2).toMatchObject({ pool: 'boss', bossId: 'eclipse' });
-    expect(it2.effects[0]).toMatchObject({ kind: 'absorbCore', everySec: 12, absorbSec: 2.5, damage: 220, radius: 510 });
+  it('식광 전용 유니크 무기: 적 자리에 운석', () => {
+    const w = gameData.weapons.weapons.find((x) => x.id === 'eclipseCore')!;
+    expect(w).toMatchObject({ grade: 'unique', bossId: 'eclipse', droppable: false });
+    expect(w.pattern.kind).toBe('meteor');
   });
 });
 

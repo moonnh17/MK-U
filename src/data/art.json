@@ -707,12 +707,6 @@
       "frameHeight": 32,
       "frames": 1
     },
-    "item_broken_blade": {
-      "file": "mku/item_broken_blade.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
-      "frames": 1
-    },
     "item_broken_hilt": {
       "file": "mku/item_broken_hilt.png",
       "frameWidth": 32,
@@ -767,12 +761,6 @@
       "frameHeight": 32,
       "frames": 1
     },
-    "item_hanabi": {
-      "file": "mku/item_hanabi.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
-      "frames": 1
-    },
     "item_afro_belt": {
       "file": "mku/item_afro_belt.png",
       "frameWidth": 32,
@@ -803,14 +791,20 @@
       "frameHeight": 32,
       "frames": 1
     },
-    "item_divine_sword": {
-      "file": "mku/item_divine_sword.png",
+    "item_warrior_memory": {
+      "file": "mku/item_warrior_memory.png",
       "frameWidth": 32,
       "frameHeight": 32,
       "frames": 1
     },
-    "item_al_gul_blade": {
-      "file": "mku/item_al_gul_blade.png",
+    "item_atros_codex": {
+      "file": "mku/item_atros_codex.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_divine_sword": {
+      "file": "mku/item_divine_sword.png",
       "frameWidth": 32,
       "frameHeight": 32,
       "frames": 1
@@ -823,18 +817,6 @@
     },
     "item_wonhon_lump": {
       "file": "mku/item_wonhon_lump.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
-      "frames": 1
-    },
-    "item_gihwan_arm": {
-      "file": "mku/item_gihwan_arm.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
-      "frames": 1
-    },
-    "item_ancient_core": {
-      "file": "mku/item_ancient_core.png",
       "frameWidth": 32,
       "frameHeight": 32,
       "frames": 1
@@ -1329,6 +1311,60 @@
       "frames": 1,
       "gripX": 0.15
     },
+    "weapon_broken_blade": {
+      "file": "mku/weapon_broken_blade.png",
+      "frameWidth": 14,
+      "frameHeight": 10,
+      "frames": 1,
+      "gripX": 0.3
+    },
+    "weapon_al_gul_blade": {
+      "file": "mku/weapon_al_gul_blade.png",
+      "frameWidth": 28,
+      "frameHeight": 19,
+      "frames": 1,
+      "gripX": 0.2
+    },
+    "weapon_hanabi": {
+      "file": "mku/weapon_hanabi.png",
+      "frameWidth": 28,
+      "frameHeight": 6,
+      "frames": 1,
+      "gripX": 0.2
+    },
+    "weapon_gihwan_arm": {
+      "file": "mku/weapon_gihwan_arm.png",
+      "frameWidth": 26,
+      "frameHeight": 14,
+      "frames": 1,
+      "gripX": 0.2
+    },
+    "weapon_ancient_core": {
+      "file": "mku/weapon_ancient_core.png",
+      "frameWidth": 15,
+      "frameHeight": 16,
+      "frames": 1,
+      "gripX": 0.5
+    },
+    "weapon_eclipse_core": {
+      "file": "mku/weapon_eclipse_core.png",
+      "frameWidth": 16,
+      "frameHeight": 16,
+      "frames": 1,
+      "gripX": 0.5
+    },
+    "fx_golem_laser": {
+      "file": "mku/fx_golem_laser.png",
+      "frameWidth": 96,
+      "frameHeight": 43,
+      "frames": 1
+    },
+    "fx_eclipse_meteor": {
+      "file": "mku/fx_eclipse_meteor.png",
+      "frameWidth": 10,
+      "frameHeight": 20,
+      "frames": 1
+    },
     "projectile_player": {
       "file": "mku/projectile_player.png",
       "frameWidth": 5,
@@ -1503,12 +1539,6 @@
         }
       }
     },
-    "item_panic_brand": {
-      "file": "mku/item_panic_brand.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
-      "frames": 1
-    },
     "item_death_whistle": {
       "file": "mku/item_death_whistle.png",
       "frameWidth": 32,
@@ -1517,12 +1547,6 @@
     },
     "item_orion_shield": {
       "file": "mku/item_orion_shield.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
-      "frames": 1
-    },
-    "item_eclipse_core": {
-      "file": "mku/item_eclipse_core.png",
       "frameWidth": 32,
       "frameHeight": 32,
       "frames": 1

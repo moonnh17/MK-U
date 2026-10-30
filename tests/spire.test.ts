@@ -104,7 +104,7 @@ describe('아이템 선택 카드', () => {
   it('보스 전용·세트 결과는 나오지 않는다', () => {
     const seen = new Set<string>();
     for (let seed = 0; seed < 300; seed++) for (const id of spireItemChoices(new Rng(seed), S.small.weights, 0.001, I, new Set(), 3)) seen.add(id);
-    for (const id of ['wonhonLump', 'gihwanArm', 'alGulBlade']) expect(seen.has(id)).toBe(false);
+    for (const id of ['wonhonLump', 'warriorMemory']) expect(seen.has(id)).toBe(false);
   });
   it('신화 판정은 가중치 밖에서 따로', () => {
     expect(spireItemChoices(new Rng(1), S.small.weights, 1, I, new Set(), 3)[0]).toBe('divineSword');

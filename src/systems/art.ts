@@ -96,7 +96,11 @@ export function collectAssets(d: GameData): AssetRef[] {
   for (const j of d.jobs.jobs.filter((x) => x.enabled)) {
     for (const a of j.advancements) add('player', { ...d.player, spriteKey: artKeys.playerSchool(a.id) }, 'asset.player', a.nameKey);
   }
-  for (const w of d.weapons.weapons) add('weapon', w, w.nameKey);
+  for (const w of d.weapons.weapons) {
+    add('weapon', w, w.nameKey);
+    if (w.pattern.kind === 'meteor') add('projectile', w.pattern.sprite, w.nameKey, '#fx');
+    if (w.signature?.kind === 'laser' && w.signature.beam) add('projectile', w.signature.beam, w.nameKey, '#fx');
+  }
   add('projectile', d.weapons.projectile, 'asset.playerBullet');
   add('projectile', d.enemies.projectile, 'asset.enemyBullet');
   for (const e of d.enemies.enemies) add(e.rank === 'boss' || e.rank === 'hiddenBoss' ? 'boss' : 'enemy', e, e.nameKey);

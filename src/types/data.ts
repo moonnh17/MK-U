@@ -177,7 +177,10 @@ export type WeaponCategory = 'gun' | 'blade' | 'staff';
  */
 export type WeaponSignature =
   | { every: number; kind: 'bigSmash'; damageMul: number; radiusMul: number }
-  | { every: number; kind: 'laser'; damageMul: number; length: number; width: number }
+  /** beam: 레이저 그림 (없으면 선) */
+  | { every: number; kind: 'laser'; damageMul: number; length: number; width: number; beam?: SpriteRef }
+  /** 튕기는 번개: 가까운 적에서 적으로 jumps번 */
+  | { every: number; kind: 'chainBolt'; damageMul: number; jumps: number; range: number; color: string }
   | { every: number; kind: 'space' };
 
 /**
@@ -192,7 +195,9 @@ export type WeaponPattern =
   | { kind: 'line'; length: number; width: number }
   | { kind: 'smash'; reach: number; radius: number }
   /** 지팡이: 가까운 적을 따라 휘는 탄 (turnRate rad/s) */
-  | { kind: 'homing'; turnRate: number };
+  | { kind: 'homing'; turnRate: number }
+  /** 가까운 적 자리에 delaySec 뒤 운석이 떨어져 터진다 */
+  | { kind: 'meteor'; radius: number; delaySec: number; fallPx: number; color: string; sprite: SpriteRef };
 
 /** 무기 무작위 옵션 (레어 1개·전설 2개) */
 export interface WeaponOptionDef {
@@ -236,7 +241,12 @@ export interface WeaponDef extends SpriteRef {
   /** 맞은 적을 밀어낸다(해머). 거대 엘리트·보스는 면역 */
   knockback?: { distance: number; sec: number };
   /** 들고 있는 동안 효과 (신궁 환디) */
-  equipBonus?: { stats?: Partial<Record<StatId, number>>; rangedDamage?: number; meleeDamage?: number };
+  /** bossDamage: 이 무기로 보스에게 주는 피해 증가 / jobDamage: 전직별 피해 증가 */
+  equipBonus?: { stats?: Partial<Record<StatId, number>>; rangedDamage?: number; meleeDamage?: number; bossDamage?: number; jobDamage?: Partial<Record<string, number>> };
+  /** 기본 치명타 확률 */
+  critChance?: number;
+  /** 이 보스를 잡으면 나오는 무기 */
+  bossId?: string;
   /** 유니크 고유 효과 */
   signature?: WeaponSignature;
 }
@@ -906,6 +916,16 @@ export type ItemEffect =
   | { kind: 'shieldThrow'; everySec: number; damage: number; bounces: number; speed: number; size: number; maxSec: number; guard: number; tags: TagId[] }
   /** 방패 튕김 횟수 증가 (직업 변형) */
   | { kind: 'shieldBounces'; value: number }
+  /** 구르다 적 탄을 통과하면 탄 1발당 에너지 +value */
+  | { kind: 'grazeEnergy'; value: number }
+  /** 칼로 벤 적 탄이 되돌아간다 */
+  | { kind: 'cutReflect'; range: number }
+  /** 체력 비율 ratio 이상이면 피해 증가, 미만이면 받는 피해 감소 */
+  | { kind: 'hpStance'; ratio: number; damageUp: number; takenDown: number }
+  /** 정신력이 낮을수록 피해 증가 (0일 때 maxDamage) */
+  | { kind: 'lowSanityDamage'; maxDamage: number }
+  /** 패닉에도 방향이 뒤집히지 않고, 시야 방해가 visionMul배로 준다 */
+  | { kind: 'panicCalm'; visionMul: number }
   /** 패닉 중 각성: 체력이 초당 hpPerSec 닳고(1 아래로는 안 내려감) 모든 스탯 +allStats */
   | { kind: 'panicAwaken'; hpPerSec: number; allStats: number }
   /** 궁극기를 쓸 때 관통 탄환 shots발 전방위 (고대병기의 코어) */

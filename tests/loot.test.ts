@@ -15,7 +15,7 @@ describe('무기 종류 (기획서 무기 표)', () => {
   it('총 6종·칼 5종 + 신궁 환디', () => {
     const by = (c: string) => W.weapons.filter((w) => w.category === c && w.droppable).map((w) => w.id).sort();
     expect(by('gun')).toEqual(['grenadeLauncher', 'pistol', 'rifle', 'shotgun', 'smg', 'sniper']);
-    expect(by('blade')).toEqual(['dagger', 'greatsword', 'hammer', 'longsword', 'spear']);
+    expect(by('blade')).toEqual(['alGulBlade', 'brokenBlade', 'dagger', 'greatsword', 'hammer', 'hanabi', 'longsword', 'spear']);
     const handi = def('handi');
     expect(handi.grade).toBe('mythic');
     expect(handi.droppable).toBe(false);
@@ -46,10 +46,11 @@ describe('등급·신화', () => {
     expect(rollWeapon(new Rng(1), 'mythic', W.weapons, W.options, G, 'legendary').defId).toBe('handi');
   });
 
-  it('유니크는 목록이 생길 때까지 전설로 대체', () => {
+  it('유니크는 드롭 유니크 무기 중 하나', () => {
     for (let s = 0; s < 20; s++) {
       const w = rollWeapon(new Rng(s), 'unique', W.weapons, W.options, G, L.uniqueWeaponFallback);
-      expect(w.grade).toBe('legendary');
+      expect(w.grade).toBe('unique');
+      expect(def(w.defId).grade).toBe('unique');
       expect(def(w.defId).droppable).toBe(true);
     }
   });

@@ -224,12 +224,13 @@ sprites.icon_gemini = icon('icon_gemini', 'story/mg-portrait.png', 32, { x: 380,
 // ---------- 아이템 아이콘 ----------
 const ITEM = {
   item_slime_stew: 'items/stew.png', item_magicasol: 'items/magi-casol.png', item_nameless_sword: 'items/nameless-sword.png', item_nameless_helm: 'items/nameless-helm.png',
-  item_broken_blade: 'items/broken-blade.png', item_broken_hilt: 'items/broken-sheath.png', item_elegant_magi: 'items/elegant-magi.png', item_antimatter_sample: 'items/experimental-antimatter.png',
+  item_broken_hilt: 'items/broken-sheath.png', item_elegant_magi: 'items/elegant-magi.png', item_antimatter_sample: 'items/experimental-antimatter.png',
   item_combat_theory: 'items/combat-application.png', item_oak_heart: 'items/oak-heart.png', item_hanwoo_steak: 'items/raw-beef.png', item_lee_seal: 'items/lee-seal.png',
-  item_magowiki_codex: 'items/magowiki.png', item_lsd_r: 'items/lsd-r.png', item_hanabi: 'items/hanabi.png', item_afro_belt: 'items/afro-belt.png',
+  item_magowiki_codex: 'items/magowiki.png', item_lsd_r: 'items/lsd-r.png', item_afro_belt: 'items/afro-belt.png',
   item_regulus_shard: 'items/regulus.png', item_caesar_crown: 'items/caesar.png', item_acrux_cross: 'items/acrux.png', item_orion_belt: 'items/betelgeuse.png',
-  item_divine_sword: 'items/sword-youngdi.png', item_al_gul_blade: 'items/al-ghul.png', item_hectar_ram: 'items/hectar-ram.png',
-  item_wonhon_lump: 'rewards/ghost-icon.png', item_gihwan_arm: 'rewards/arm-icon.png', item_ancient_core: 'rewards/core-icon.png',
+  item_warrior_memory: 'warrior/icon-mastery-weapon.png', item_atros_codex: 'codex/simple-paper.png',
+  item_divine_sword: 'items/sword-youngdi.png', item_hectar_ram: 'items/hectar-ram.png',
+  item_wonhon_lump: 'rewards/ghost-icon.png',
 };
 for (const [key, f] of Object.entries(ITEM)) sprites[key] = icon(key, f, 32);
 
@@ -448,11 +449,21 @@ function bigWeapon(key, f, deg, fit, gripX, dim) {
 bigWeapon('weapon_handi', 'items/bow-hwandi.png', 45, 26, 0.5, 1.9);
 bigWeapon('weapon_rasalgethi_club', 'items/rasalgethi.png', 45, 22, 0.2);
 bigWeapon('weapon_rasalhague_sword', 'warrior/p-sword-single.png', 90, 26, 0.15);
+bigWeapon('weapon_broken_blade', 'items/broken-blade.png', 45, 14, 0.3);
+bigWeapon('weapon_al_gul_blade', 'items/al-ghul.png', -90, 28, 0.2);
+bigWeapon('weapon_hanabi', 'items/hanabi.png', 135, 28, 0.2);
+bigWeapon('weapon_gihwan_arm', 'rewards/arm.png', -90, 26, 0.2);
+bigWeapon('weapon_ancient_core', 'golem/vfx-core.png', 0, 16, 0.5);
+bigWeapon('weapon_eclipse_core', 'eclipse/totality-sun.png', 0, 16, 0.5);
+// 고대병기의 코어 레이저(마기골렘 원본), 식광 운석
+sprites.fx_golem_laser = sheet('fx_golem_laser', single('golem/vfx-laser-side.png'), 96, { alphaCut: 0.2 });
+sprites.fx_eclipse_meteor = sheet('fx_eclipse_meteor', [strip('eclipse/drop.png', 3)[0]], 20);
 
 // 탄·줍는 것
 dots('projectile_player', ['.ggg.', 'gYyYg', 'gyyyg', 'gYyYg', '.ggg.']);
 dots('enemy_bullet', ['..KKK..', '.KrrrK.', 'KrrwrrK', 'KrwwwrK', 'KrrwrrK', '.KrrrK.', '..KKK..']);
-dots('pickup_coin', ['..KKK..', '.KYYYK.', 'KYYgYGK', 'KYYgYGK', 'KYYgYGK', '.KGGGK.', '..KKK..']);
+// 마기 입자: 보랏빛 알갱이와 작은 빛
+dots('pickup_coin', ['...P...', '..KpK..', '.KpPpK.', 'PpPwPpP', '.KpPpK.', '..KpK..', '...P...']);
 dots('pickup_energy', ['...K...', '..KwK..', '.KwcCK.', 'KwccCCK', 'KcccCCK', '.KcCCK.', '..KCK..', '...K...']);
 
 // 상자: 나무(무기) / 푸른 금속(아이템)
@@ -530,10 +541,8 @@ actor('enemy_orion_crusader', gaps('warrior/paladin-idle.png'), gaps('warrior/pa
 }
 
 // 아이템 아이콘 (원본에 맞는 것이 없는 둘은 직접 찍는다)
-sprites.item_panic_brand = icon('item_panic_brand', 'warrior/icon-b-rage.png', 32);
 sprites.item_death_whistle = icon('item_death_whistle', 'warrior/icon-b-shout.png', 32);
 sprites.item_orion_shield = icon('item_orion_shield', 'warrior/icon-p-shield.png', 32);
-sprites.item_eclipse_core = icon('item_eclipse_core', 'eclipse/totality-sun.png', 32);
 dots('item_royal_seal', [
   '.....KKKKKK.....', '...KKppppppKK...', '..KppPPPPPPppK..', '.KpPPpPPPPpPPpK.', '.KpPpPPggPPpPpK.', 'KpPPPPggggPPPPpK', 'KpPPPggwwggPPPpK', 'KpPPggwwwwggPPpK',
   'KpPPggwwwwggPPpK', 'KpPPPggwwggPPPpK', 'KpPPPPggggPPPPpK', '.KpPpPPggPPpPpK.', '.KpPPpPPPPpPPpK.', '..KppPPPPPPppK..', '...KKppppppKK...', '.....KKKKKK.....',

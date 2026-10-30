@@ -144,6 +144,50 @@
       "spriteKey": "weapon_rasalhague_sword", "color": "#e8d24a", "size": 11
     },
     {
+      "id": "brokenBlade", "nameKey": "weapon.brokenBlade", "category": "blade", "grade": "common", "tags": ["physical", "melee"],
+      "baseDamage": 5, "fireIntervalSec": 0.22, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 90, "radius": 16 },
+      "projectileSpeed": 0, "range": 16, "cutsProjectiles": true, "droppable": true,
+      "spriteKey": "weapon_broken_blade", "color": "#b8bcc8", "size": 6
+    },
+    {
+      "id": "hanabi", "nameKey": "weapon.hanabi", "category": "blade", "grade": "legendary", "tags": ["physical", "melee"],
+      "baseDamage": 14, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 140, "radius": 30 },
+      "equipBonus": { "jobDamage": { "barbarian": 0.3 } },
+      "signature": { "every": 3, "kind": "bigSmash", "damageMul": 2, "radiusMul": 1.3 },
+      "projectileSpeed": 0, "range": 30, "cutsProjectiles": true, "droppable": true,
+      "spriteKey": "weapon_hanabi", "color": "#ffb04a", "size": 11
+    },
+    {
+      "id": "alGulBlade", "nameKey": "weapon.alGulBlade", "category": "blade", "grade": "unique", "tags": ["physical", "melee"],
+      "baseDamage": 18, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 120, "radius": 30 },
+      "critChance": 0.1,
+      "equipBonus": { "bossDamage": 0.2 },
+      "signature": { "every": 3, "kind": "bigSmash", "damageMul": 1.5, "radiusMul": 1.9 },
+      "projectileSpeed": 0, "range": 30, "cutsProjectiles": true, "droppable": true,
+      "spriteKey": "weapon_al_gul_blade", "color": "#c8ccd8", "size": 11
+    },
+    {
+      "id": "gihwanArm", "nameKey": "weapon.gihwanArm", "category": "blade", "grade": "unique", "tags": ["physical", "melee"], "bossId": "electricRing",
+      "baseDamage": 11, "fireIntervalSec": 0.45, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 120, "radius": 28 },
+      "signature": { "every": 3, "kind": "chainBolt", "damageMul": 1.5, "jumps": 5, "range": 100, "color": "#7ac8ff" },
+      "projectileSpeed": 0, "range": 28, "cutsProjectiles": true, "droppable": false,
+      "spriteKey": "weapon_gihwan_arm", "color": "#3a7bff", "size": 11
+    },
+    {
+      "id": "ancientCore", "nameKey": "weapon.ancientCore", "category": "staff", "grade": "unique", "tags": ["magic", "ranged"], "bossId": "magiGolem",
+      "baseDamage": 14, "fireIntervalSec": 0.8, "energyCost": 3, "pattern": { "kind": "homing", "turnRate": 1 },
+      "signature": { "every": 1, "kind": "laser", "damageMul": 1, "length": 260, "width": 12, "beam": { "spriteKey": "fx_golem_laser", "color": "#a05aff", "size": 12 } },
+      "projectileSpeed": 200, "range": 260, "cutsProjectiles": false, "droppable": false,
+      "spriteKey": "weapon_ancient_core", "color": "#a05aff", "size": 8
+    },
+    {
+      "id": "eclipseCore", "nameKey": "weapon.eclipseCore", "category": "staff", "grade": "unique", "tags": ["magic", "ranged"], "bossId": "eclipse",
+      "baseDamage": 20, "fireIntervalSec": 1, "energyCost": 3,
+      "pattern": { "kind": "meteor", "radius": 30, "delaySec": 0.45, "fallPx": 130, "color": "#ff3a4a", "sprite": { "spriteKey": "fx_eclipse_meteor", "color": "#ff3a4a", "size": 10 } },
+      "projectileSpeed": 200, "range": 280, "cutsProjectiles": false, "droppable": false,
+      "spriteKey": "weapon_eclipse_core", "color": "#ff3a4a", "size": 8
+    },
+    {
       "id": "fist", "nameKey": "weapon.fist", "category": "blade", "grade": "common", "tags": ["physical", "melee"],
       "baseDamage": 3, "fireIntervalSec": 0.35, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 90, "radius": 18 },
       "projectileSpeed": 0, "range": 18, "cutsProjectiles": false, "droppable": false,

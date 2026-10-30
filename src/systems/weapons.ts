@@ -40,7 +40,7 @@ export function weaponStats(def: WeaponDef, item: WeaponItem, gradeMul: number):
     fireIntervalSec: def.fireIntervalSec / (1 + opt('attackSpeed')),
     energyCost: Math.max(0, def.energyCost - opt('energyCost')),
     projectileSpeed: def.projectileSpeed * (1 + opt('projectileSpeed')),
-    critChance: Math.min(1, opt('crit')),
+    critChance: Math.min(1, (def.critChance ?? 0) + opt('crit')),
   };
 }
 

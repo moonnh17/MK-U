@@ -18,6 +18,11 @@ export function heal(v: Vitals, amount: number): { hp: number; overflow: number 
   return { hp: v.hp + toHp, overflow: amount - toHp };
 }
 
+/** 어느 전사의 기억: 체력 ratio 이상이면 피해 증가, 미만이면 받는 피해 감소 */
+export function hpStance(hp: number, maxHp: number, e: { ratio: number; damageUp: number; takenDown: number }): { damage: number; taken: number } {
+  return hp >= maxHp * e.ratio ? { damage: e.damageUp, taken: 0 } : { damage: 0, taken: e.takenDown };
+}
+
 /** 체력 소모(죽지 않음: 최소 1 남김). 소모한 양도 돌려준다 */
 export function payHp(hp: number, ratio: number): { hp: number; paid: number } {
   const paid = Math.min(Math.max(0, hp - 1), hp * ratio);

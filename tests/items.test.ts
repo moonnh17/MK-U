@@ -25,16 +25,13 @@ const totals = (ids: string[], school: 'hectar' | 'acro' | null = null) =>
   itemTotals(ids, I, { school, job: 'magiScholar' }, G, { startValue: 10, invest: noInvest });
 
 describe('아이템 목록 (기획서 표)', () => {
-  it('일반 6·레어 5·전설 6·유니크 5·신화 1 + 세트 1 + 보스 전용', () => {
+  it('일반 5·레어 4·전설 5·유니크 6·신화 1 + 세트 1 + 보스 전용', () => {
     const by = (g: string) => I.items.filter((x) => x.pool === 'normal' && x.grade === g).length;
-    expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([6, 5, 6, 5, 1]);
-    expect(I.items.filter((x) => x.pool === 'set').map((x) => x.id)).toEqual(['alGulBlade']);
+    expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([5, 4, 5, 6, 1]);
+    expect(I.items.filter((x) => x.pool === 'set').map((x) => x.id)).toEqual(['warriorMemory']);
     expect(I.items.filter((x) => x.pool === 'boss').map((x) => [x.id, x.bossId])).toEqual([
       ['wonhonLump', 'fusionAkgwi'],
-      ['gihwanArm', 'electricRing'],
       ['hectarRam', 'hectarChief'],
-      ['ancientCore', 'magiGolem'],
-      ['eclipseCore', 'eclipse'],
     ]);
   });
   it('데이터 검증 통과', () => {
@@ -44,10 +41,8 @@ describe('아이템 목록 (기획서 표)', () => {
 
 describe('그룹 배율', () => {
   it('실제 값 = 기준값 × 그룹 배율', () => {
-    const burst = scaleEffect(item('gihwanArm').effects[0]!, G);
-    expect(burst).toMatchObject({ damage: 180 * G.itemGroups.procDamage, radius: 232.5 * G.itemGroups.area });
     const helm = scaleEffect(item('namelessHelm').effects[0]!, G);
-    expect(helm).toMatchObject({ value: 40 * G.itemGroups.hpFlat });
+    expect(helm).toMatchObject({ value: 10 * G.itemGroups.hpFlat });
   });
   it('그룹 배율 하나를 바꾸면 그 그룹 아이템이 같이 바뀐다', () => {
     const g2 = structuredClone(G);
@@ -60,31 +55,30 @@ describe('그룹 배율', () => {
 
 describe('효과 합산', () => {
   it('같은 종류의 +%는 더한 뒤 한 번 곱한다', () => {
-    const t = totals(['brokenBlade', 'combatTheory', 'leeSeal']);
-    expect(t.damage.all).toBeCloseTo(0.02 + 0.07 + 0.15);
-    expect(itemDamageMultiplier(t, 0, false, null)).toBeCloseTo(1.24);
+    const t = totals(['namelessSword', 'combatTheory', 'leeSeal']);
+    expect(t.damage.all).toBeCloseTo(0.07 + 0.15);
+    expect(itemDamageMultiplier(t, 0, false, null)).toBeCloseTo(1.22);
   });
   it('신검 영디·마기만 있으면 4배', () => {
     expect(itemDamageMultiplier(totals(['divineSword']), 0, false, null)).toBeCloseTo(4);
   });
   it('모든 적이 받는 피해·보스 피해는 따로 곱한다', () => {
-    const t = totals(['magowikiCodex', 'alGulBlade']);
-    expect(itemDamageMultiplier(t, 0, true, null)).toBeCloseTo(1.2 * 1.2 * 1.05);
-    expect(itemDamageMultiplier(t, 0, false, null)).toBeCloseTo(1.2 * 1.05);
+    const t = totals(['magowikiCodex']);
+    expect(itemDamageMultiplier(t, 0, false, null)).toBeCloseTo(1.05);
   });
   it('모든 스탯 +5', () => {
     const t = totals(['magowikiCodex']);
     for (const s of STAT_IDS) expect(t.stats[s]).toBe(5);
   });
-  it('실험용 반물질: 헥타르 외에는 자동 발사, 헥타르는 반물질포 피해 +20%', () => {
+  it('실험용 반물질: 헥타르 외에는 자동 발사, 헥타르는 반물질포 피해 +50%', () => {
     const kinds = (school: 'hectar' | 'acro' | null) => activeEffects(item('antimatterSample'), { school, job: 'magiScholar' }, G).map((e) => e.kind);
     expect(kinds(null)).toEqual(['autoCast']);
     expect(kinds('acro')).toEqual(['autoCast']);
     expect(kinds('hectar')).toEqual(['skillDamage']);
-    expect(itemDamageMultiplier(totals(['antimatterSample'], 'hectar'), 0, false, 'antimatterCannon')).toBeCloseTo(1.2);
+    expect(itemDamageMultiplier(totals(['antimatterSample'], 'hectar'), 0, false, 'antimatterCannon')).toBeCloseTo(1.5);
   });
   it('직업 변형은 그 직업일 때만 (마기학자에게는 없음)', () => {
-    expect(totals(['hanabi']).damage.all).toBeCloseTo(0.1);
+    expect(activeEffects(item('deathWhistle'), { school: null, job: 'magiScholar' }, G).map((e) => e.kind)).toEqual(['roomRoar']);
   });
   it('레굴루스 부활은 헥타르만, 아크룩스 대성공은 아크로만', () => {
     const kinds = (id: string, school: 'hectar' | 'acro' | null) => activeEffects(item(id), { school, job: 'magiScholar' }, G).map((e) => e.kind);
@@ -139,7 +133,7 @@ describe('아이템 뽑기', () => {
   it('보스 전용·세트 결과는 상자에서 나오지 않는다', () => {
     const seen = new Set<string>();
     for (let s = 0; s < 400; s++) seen.add(rollItem(new Rng(s), I.treasureWeights, 0.001, I, new Set())!);
-    for (const id of ['wonhonLump', 'gihwanArm', 'alGulBlade']) expect(seen.has(id)).toBe(false);
+    for (const id of ['wonhonLump', 'warriorMemory']) expect(seen.has(id)).toBe(false);
   });
   it('신화 판정이 나면 신검 영디·마기', () => {
     expect(rollItem(new Rng(1), I.treasureWeights, 1, I, new Set())).toBe('divineSword');
@@ -159,10 +153,11 @@ describe('회복·세트', () => {
     const pr = (id: string) => (item(id).effects[0] as { priority: number }).priority;
     expect(pr('hanwooSteak') < pr('slimeStew') && pr('slimeStew') < pr('magicasol')).toBe(true);
   });
-  it('부러진 칼날 + 망가진 손잡이 → 알 굴 참마검', () => {
-    expect(readySet(new Set(['brokenBlade', 'brokenHilt']), new Set(['brokenBlade', 'brokenHilt']), I.sets)?.result).toBe('alGulBlade');
-    expect(readySet(new Set(['brokenBlade']), new Set(['brokenBlade']), I.sets)).toBeNull();
-    expect(readySet(new Set(['brokenBlade', 'brokenHilt']), new Set(['alGulBlade']), I.sets)).toBeNull();
+  it('이름 없는 검 + 이름 없는 투구 → 어느 전사의 기억', () => {
+    const m = ['namelessSword', 'namelessHelm'];
+    expect(readySet(new Set(m), new Set(m), I.sets)?.result).toBe('warriorMemory');
+    expect(readySet(new Set(['namelessSword']), new Set(['namelessSword']), I.sets)).toBeNull();
+    expect(readySet(new Set(m), new Set(['warriorMemory']), I.sets)).toBeNull();
   });
 });
 

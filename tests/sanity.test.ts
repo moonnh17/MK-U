@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { gameData } from '../src/data/index';
-import { applyMental, sanityMaxFor, stepSanity } from '../src/systems/sanity';
+import { applyMental, lowSanityBonus, sanityMaxFor, stepSanity } from '../src/systems/sanity';
 
 const c = gameData.player.sanity;
 const max = sanityMaxFor(gameData.stats.startValue, c);
@@ -48,10 +48,16 @@ describe('정신 피해를 주는 적', () => {
   });
 });
 
-describe('광기의 각인', () => {
-  it('전설 등급이고 각성 효과가 있다', () => {
-    const it2 = gameData.items.items.find((i) => i.id === 'panicBrand')!;
-    expect(it2.grade).toBe('legendary');
-    expect(it2.effects[0]!.kind).toBe('panicAwaken');
+describe('패닉 아이템', () => {
+  const kinds = (id: string) => gameData.items.items.find((i) => i.id === id)!.effects.map((e) => e.kind);
+  it('기숲 비석의 조각에 각성이 옮겨졌다', () => {
+    expect(kinds('gisupStone')).toContain('panicAwaken');
+    expect(gameData.items.items.some((i) => i.id === 'panicBrand')).toBe(false);
+  });
+  it('아트로스 비석 필사본: 방향 유지·시야 방해 감소, 정신력이 낮을수록 피해', () => {
+    expect(kinds('atrosCodex')).toEqual(['lowSanityDamage', 'panicCalm']);
+    expect(lowSanityBonus(0, 100, 0.4)).toBeCloseTo(0.4);
+    expect(lowSanityBonus(50, 100, 0.4)).toBeCloseTo(0.2);
+    expect(lowSanityBonus(100, 100, 0.4)).toBe(0);
   });
 });

@@ -14,6 +14,11 @@ export function sanityMaxFor(willpower: number, c: Pick<SanityConfig, 'base' | '
   return Math.max(1, c.base + c.perWillpower * willpower);
 }
 
+/** 아트로스 비석 필사본: 정신력이 낮을수록 피해 증가 */
+export function lowSanityBonus(sanity: number, sanityMax: number, maxDamage: number): number {
+  return maxDamage * (1 - Math.min(1, sanity / Math.max(1, sanityMax)));
+}
+
 /** 정신 피해. hpDamage: 패닉 중이라 체력 피해로 바뀐 양 */
 export function applyMental(s: SanityState, amount: number): { sanity: number; panic: boolean; hpDamage: number } {
   if (amount <= 0) return { sanity: s.sanity, panic: s.panic, hpDamage: 0 };

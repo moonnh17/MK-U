@@ -176,7 +176,7 @@ export function validateGameData(d: GameData): Errors {
     const sig = wpn.signature;
     if (sig) {
       checkPositive(errors, `${w}.signature.every`, sig.every);
-      if (sig.kind === 'bigSmash' && wpn.pattern.kind !== 'smash') errors.push(`${w}: bigSmash는 내려찍기 무기만`);
+      if (sig.kind === 'bigSmash' && wpn.pattern.kind !== 'smash' && wpn.pattern.kind !== 'arc') errors.push(`${w}: bigSmash는 근접 무기만`);
       if (sig.kind === 'laser' && wpn.category === 'blade') errors.push(`${w}: laser는 탄을 쏘는 무기만`);
     }
     if (wpn.category === 'blade' && wpn.energyCost !== 0) errors.push(`${w}: 칼은 에너지를 소모하지 않음`);
@@ -197,6 +197,9 @@ export function validateGameData(d: GameData): Errors {
       checkPositive(errors, `${w}.pattern.radius`, p.radius);
     } else if (p.kind === 'homing') {
       checkPositive(errors, `${w}.pattern.turnRate`, p.turnRate);
+    } else if (p.kind === 'meteor') {
+      checkPositive(errors, `${w}.pattern.radius`, p.radius);
+      if (wpn.category !== 'staff') errors.push(`${w}: meteor는 지팡이 패턴`);
     } else if (p.kind !== 'single') {
       errors.push(`${w}: 알 수 없는 pattern.kind`);
     }

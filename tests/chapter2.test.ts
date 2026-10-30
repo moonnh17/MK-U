@@ -39,9 +39,10 @@ describe('챕터2 보스 전용 아이템', () => {
   it('헥타르 RAM: 레어, 마기력 +4, 코인 +10%, 2-2 처치 시 20%', () => {
     expect(item('hectarRam')).toMatchObject({ grade: 'rare', pool: 'boss', bossId: 'hectarChief', dropChance: 0.2 });
   });
-  it('고대병기의 코어: 마기골렘, 궁극기 사용 시 관통 탄환 24발', () => {
-    expect(item('ancientCore')).toMatchObject({ pool: 'boss', bossId: 'magiGolem' });
-    expect(item('ancientCore').effects[0]).toMatchObject({ kind: 'ultimateBurst', shots: 24, tags: ['magic', 'ranged'] });
+  it('고대병기의 코어: 마기골렘 전용 유니크 레이저 무기', () => {
+    const w = gameData.weapons.weapons.find((x) => x.id === 'ancientCore')!;
+    expect(w).toMatchObject({ grade: 'unique', bossId: 'magiGolem', droppable: false });
+    expect(w.signature).toMatchObject({ kind: 'laser', every: 1 });
   });
 });
 

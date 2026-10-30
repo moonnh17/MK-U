@@ -232,7 +232,12 @@ export class ItemRuntime {
 
   /** 패닉 각성 효과 (없으면 null) */
   panicAwaken(): Extract<ItemEffect, { kind: 'panicAwaken' }> | null {
-    return this.each('panicAwaken')[0]?.e ?? null;
+    return this.first('panicAwaken');
+  }
+
+  /** 그 종류의 첫 효과 (없으면 null) */
+  first<K extends ItemEffect['kind']>(kind: K): Extract<ItemEffect, { kind: K }> | null {
+    return this.each(kind)[0]?.e ?? null;
   }
 
   private each<K extends ItemEffect['kind']>(kind: K): { id: string; e: Extract<ItemEffect, { kind: K }> }[] {
