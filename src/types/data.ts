@@ -486,6 +486,12 @@ export interface MapgenData {
   props: { exitPortal: SpriteRef; encounterCore: SpriteRef };
   /** 플레이어가 방 안쪽으로 이만큼(px) 들어와야 문이 잠긴다 */
   lockInsetPx: number;
+  /** 방 크기 틀(타일, 벽 포함). 격자 한 칸은 가장 큰 틀 크기이고 방은 칸 가운데에 놓인다 */
+  roomSizes: { id: string; w: number; h: number }[];
+  /** 방 종류별로 뽑을 크기 틀과 가중치 */
+  roomSizeRules: Record<RoomKind, { size: string; weight: number }[]>;
+  /** 전투 칸 장애물: chance로 배치 틀 하나. 블록 x·y는 안쪽 바닥 비율(블록 가운데), w·h는 타일 */
+  obstacles: { chance: number; doorLaneTiles: number; layouts: { id: string; weight: number; blocks: { x: number; y: number; w: number; h: number }[] }[] };
 }
 
 export interface PickupsData {

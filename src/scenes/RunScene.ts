@@ -90,6 +90,7 @@ import {
   roomAt,
   roomCenter,
   roomRect,
+  obstacleRects,
   wallRects,
   type Rect,
   type WorldMetrics,
@@ -173,6 +174,8 @@ export class RunScene extends Phaser.Scene {
   private pendingCrit = false;
   /** 보스 등장 컷 (그동안 게임은 멈춘다) */
   private intro: { e: Enemy; t: number; stage: IntroStage } | null = null;
+  /** 방 장애물 (적 소환 자리를 피한다) */
+  private obstacles = new Map<number, Rect[]>();
   /** 지금 조준 중인 적 (카메라가 그쪽으로 기운다) */
   private aimTarget: Vec2 | null = null;
   /** 보스 처치 슬로모션 경과(초), 없으면 null */
@@ -285,6 +288,7 @@ export class RunScene extends Phaser.Scene {
     this.physics.world.timeScale = 1;
     this.tweens.timeScale = 1;
     this.aimTarget = null;
+    this.obstacles = new Map();
     this.storyThen = null;
     bus.emit('geminiMini', { line: null });
     // 챕터를 끝내고 넘어왔다 (2장 종료 미니 대사)
@@ -527,6 +531,16 @@ export class RunScene extends Phaser.Scene {
     for (const node of map.rooms) {
       this.addRect(roomRect(node, this.m), floor, 0, tile('floor'));
       for (const w of wallRects(node, this.m)) this.walls.add(this.addRect(w, wall, 1, tile('wall')));
+      // 장애물: 벽처럼 이동과 탄(플레이어·적)을 막는다
+      const obs = obstacleRects(node, this.m, d.mapgen);
+      this.obstacles.set(node.id, obs);
+      for (const o of obs) {
+        // 바닥과 구분되게: 아래로 드리운 그림자 + 밝은 윗면 + 어두운 테두리
+        this.add.rectangle(o.x + o.w / 2 + 2, o.y + o.h / 2 + 4, o.w, o.h, 0x000000, 0.45).setDepth(0.5);
+        this.walls.add(this.addRect(o, wall, 1, tile('wall')).setDepth(1));
+        this.add.rectangle(o.x + o.w / 2, o.y + o.h / 2, o.w, o.h).setStrokeStyle(1, 0x05070a, 0.9).setDepth(1.1);
+        this.add.rectangle(o.x + o.w / 2, o.y + 1, o.w - 2, 2, 0xffffff, 0.18).setDepth(1.1);
+      }
 
       const doors: Door[] = [];
       for (const dir of Object.keys(node.doors) as ('n' | 's' | 'e' | 'w')[]) {
@@ -1057,8 +1071,12 @@ export class RunScene extends Phaser.Scene {
     const minDist = this.ctx.data.waves.spawnMinPlayerDistance;
     let best: Vec2 = { x: inner.x, y: inner.y };
     let bestDist = -1;
+    const obs = this.obstacles.get(node.id) ?? [];
+    const blocked = (p: Vec2) => obs.some((o) => p.x > o.x - radius && p.x < o.x + o.w + radius && p.y > o.y - radius && p.y < o.y + o.h + radius);
     for (let i = 0; i < 30; i++) {
       const p = { x: rng.range(inner.x, inner.x + inner.w), y: rng.range(inner.y, inner.y + inner.h) };
+      // 장애물 안에는 소환하지 않는다
+      if (blocked(p)) continue;
       const dist = Math.hypot(p.x - this.player.x, p.y - this.player.y);
       if (dist >= minDist) return p;
       if (dist > bestDist) {
@@ -2632,8 +2650,8 @@ export class RunScene extends Phaser.Scene {
     const { stage } = this.session;
     const rng = Rng.derive(this.ctx.config.seed, `drop-${stage.chapter}-${stage.stage}-${roomId}`);
     if (!rng.chance(d.loot.combatDrop.chance)) return;
-    const c = roomCenter(this.session.map.rooms[roomId]!, this.m);
-    this.dropWeapon(this.rollWeaponItem(d.loot.combatDrop.weights, 'drop'), c.x, c.y);
+    // 방 가운데는 장애물일 수 있어 플레이어 발밑에 떨어뜨린다
+    this.dropWeapon(this.rollWeaponItem(d.loot.combatDrop.weights, 'drop'), this.player.x, this.player.y);
   }
 
   /** 대규모 습격 보상: 아이템 상자(레어 이상, M4-B) + 코인 다량 */

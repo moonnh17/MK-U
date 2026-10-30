@@ -745,6 +745,24 @@ export function validateGameData(d: GameData): Errors {
     if (typeof v !== 'string' || (v === '' && !k.startsWith('gemini.story.') && !k.startsWith('gemini.mini.'))) errors.push(`text: '${k}' 값이 비어 있음`);
   }
 
+  // --- 방 크기·장애물 ---
+  const mg = d.mapgen;
+  checkUnique(errors, 'mapgen.roomSizes', mg.roomSizes.map((s) => s.id));
+  for (const s of mg.roomSizes) {
+    // 문·복도가 가운데에 오도록 크기는 홀수 너비의 복도와 맞아야 하고, 최소 크기
+    if (!(Number.isInteger(s.w) && Number.isInteger(s.h) && s.w >= 12 && s.h >= 9)) errors.push(`mapgen.roomSizes.${s.id}: 12×9 이상 정수`);
+  }
+  for (const kind of ['startRoom', 'combatRoom', 'encounterRoom', 'bossRoom', 'exitRoom'] as const) {
+    const rules = mg.roomSizeRules[kind];
+    if (!rules || rules.length === 0) errors.push(`mapgen.roomSizeRules.${kind}: 없음`);
+    for (const r of rules ?? []) if (!mg.roomSizes.some((s) => s.id === r.size)) errors.push(`mapgen.roomSizeRules.${kind}: 없는 크기 '${r.size}'`);
+  }
+  if (!(mg.obstacles.chance >= 0 && mg.obstacles.chance <= 1)) errors.push('mapgen.obstacles.chance: 0~1');
+  checkUnique(errors, 'mapgen.obstacles.layouts', mg.obstacles.layouts.map((l) => l.id));
+  for (const l of mg.obstacles.layouts) {
+    for (const b of l.blocks) if (!(b.x > 0 && b.x < 1 && b.y > 0 && b.y < 1 && b.w >= 1 && b.h >= 1)) errors.push(`mapgen.obstacles.layouts.${l.id}: 블록 자리 0~1, 크기 1 이상`);
+  }
+
   // --- 카메라 ---
   if (!(d.ui.camera.zoom >= 1 && d.ui.camera.zoom <= 4)) errors.push('ui.camera.zoom: 1~4');
   if (!(d.ui.camera.lean >= 0 && d.ui.camera.lean <= 1)) errors.push('ui.camera.lean: 0~1');

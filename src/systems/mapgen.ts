@@ -5,6 +5,7 @@
  */
 import { Rng } from '../core/rng';
 import type { MapgenData, RoomKind, StageKind } from '../types/data';
+import { pickRoomShape } from './roomShapes';
 
 export type Dir = 'n' | 's' | 'e' | 'w';
 
@@ -22,6 +23,10 @@ export interface RoomNode {
   gy: number;
   /** 문이 있는 방향 → 이웃 방 id */
   doors: Partial<Record<Dir, number>>;
+  /** 방 크기(타일, 벽 포함). 없으면 기본 roomTiles */
+  size?: { w: number; h: number };
+  /** 장애물 배치 틀 id (없으면 null) */
+  layout?: string | null;
 }
 
 export interface StageMap {
@@ -52,7 +57,16 @@ export function generateStage(seed: number, chapter: number, stage: number, data
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const map = tryGenerate(rng, chapter, stage, kind, combatCount, data);
-    if (map) return map;
+    if (map) {
+      // 방 크기·장애물은 따로 뽑는다 (배치 난수와 섞이지 않게)
+      const shapeRng = Rng.derive(seed, `${stageSeedLabel(chapter, stage)}-shape`);
+      for (const n of map.rooms) {
+        const s = pickRoomShape(shapeRng, n.kind, data);
+        n.size = { w: s.w, h: s.h };
+        n.layout = s.layout;
+      }
+      return map;
+    }
   }
   throw new Error(`맵 생성 실패: seed=${seed} ${chapter}-${stage}`);
 }

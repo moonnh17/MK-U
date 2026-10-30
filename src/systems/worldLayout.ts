@@ -1,9 +1,10 @@
 /**
  * 격자 좌표 → 월드 좌표 (순수 함수).
- * 방 하나 = roomTiles × tileSize, 벽 두께 = 1타일, 방 사이는 복도(corridor)로 잇는다.
+ * 격자 한 칸 = 가장 큰 방 크기, 방은 칸 가운데에 놓인다(방마다 크기가 다름). 벽 두께 = 1타일, 방 사이는 복도로 잇는다(길이는 두 방 사이 빈 곳).
  */
 import type { MapgenData } from '../types/data';
 import { DIRS, type Dir, type RoomNode, type StageMap } from './mapgen';
+import { maxRoomTiles, obstacleTiles } from './roomShapes';
 
 export interface Rect {
   x: number;
@@ -14,8 +15,12 @@ export interface Rect {
 
 export interface WorldMetrics {
   tile: number;
+  /** 기본 방 크기 (크기가 없는 방) */
   roomW: number;
   roomH: number;
+  /** 격자 한 칸 (가장 큰 방) */
+  cellW: number;
+  cellH: number;
   corridorLen: number;
   corridorW: number;
   strideX: number;
@@ -28,27 +33,33 @@ export function metrics(d: MapgenData): WorldMetrics {
   const roomH = d.roomTiles.height * tile;
   const corridorLen = d.corridor.lengthTiles * tile;
   const corridorW = d.corridor.widthTiles * tile;
-  return { tile, roomW, roomH, corridorLen, corridorW, strideX: roomW + corridorLen, strideY: roomH + corridorLen };
+  const max = maxRoomTiles(d);
+  const cellW = Math.max(roomW, max.w * tile);
+  const cellH = Math.max(roomH, max.h * tile);
+  return { tile, roomW, roomH, cellW, cellH, corridorLen, corridorW, strideX: cellW + corridorLen, strideY: cellH + corridorLen };
 }
 
-export function roomRect(n: Pick<RoomNode, 'gx' | 'gy'>, m: WorldMetrics): Rect {
-  return { x: n.gx * m.strideX, y: n.gy * m.strideY, w: m.roomW, h: m.roomH };
+/** 방 자리: 격자 칸 가운데 (같은 줄·칸의 방은 가운데가 같아서 복도가 곧게 이어진다) */
+export function roomRect(n: Pick<RoomNode, 'gx' | 'gy' | 'size'>, m: WorldMetrics): Rect {
+  const w = n.size ? n.size.w * m.tile : m.roomW;
+  const h = n.size ? n.size.h * m.tile : m.roomH;
+  return { x: n.gx * m.strideX + (m.cellW - w) / 2, y: n.gy * m.strideY + (m.cellH - h) / 2, w, h };
 }
 
-export function roomCenter(n: Pick<RoomNode, 'gx' | 'gy'>, m: WorldMetrics): { x: number; y: number } {
+export function roomCenter(n: Pick<RoomNode, 'gx' | 'gy' | 'size'>, m: WorldMetrics): { x: number; y: number } {
   const r = roomRect(n, m);
   return { x: r.x + r.w / 2, y: r.y + r.h / 2 };
 }
 
 /** 벽 안쪽 바닥 */
-export function interiorRect(n: Pick<RoomNode, 'gx' | 'gy'>, m: WorldMetrics, inset = 0): Rect {
+export function interiorRect(n: Pick<RoomNode, 'gx' | 'gy' | 'size'>, m: WorldMetrics, inset = 0): Rect {
   const r = roomRect(n, m);
   const t = m.tile + inset;
   return { x: r.x + t, y: r.y + t, w: r.w - t * 2, h: r.h - t * 2 };
 }
 
 /** 벽에 뚫린 문 자리 */
-export function doorRect(n: Pick<RoomNode, 'gx' | 'gy'>, dir: Dir, m: WorldMetrics): Rect {
+export function doorRect(n: Pick<RoomNode, 'gx' | 'gy' | 'size'>, dir: Dir, m: WorldMetrics): Rect {
   const r = roomRect(n, m);
   const t = m.tile;
   const cw = m.corridorW;
@@ -108,29 +119,43 @@ export function corridors(map: StageMap, m: WorldMetrics): CorridorGeom[] {
   for (const n of map.rooms) {
     const r = roomRect(n, m);
     if (n.doors.e !== undefined) {
+      // 두 방 사이 빈 곳 전체가 복도
+      const nb = roomRect(map.rooms[n.doors.e]!, m);
       const y = r.y + r.h / 2 - m.corridorW / 2;
       const x = r.x + r.w;
+      const len = nb.x - x;
       out.push({
-        floor: { x, y, w: m.corridorLen, h: m.corridorW },
+        floor: { x, y, w: len, h: m.corridorW },
         walls: [
-          { x, y: y - t, w: m.corridorLen, h: t },
-          { x, y: y + m.corridorW, w: m.corridorLen, h: t },
+          { x, y: y - t, w: len, h: t },
+          { x, y: y + m.corridorW, w: len, h: t },
         ],
       });
     }
     if (n.doors.s !== undefined) {
+      const nb = roomRect(map.rooms[n.doors.s]!, m);
       const x = r.x + r.w / 2 - m.corridorW / 2;
       const y = r.y + r.h;
+      const len = nb.y - y;
       out.push({
-        floor: { x, y, w: m.corridorW, h: m.corridorLen },
+        floor: { x, y, w: m.corridorW, h: len },
         walls: [
-          { x: x - t, y, w: t, h: m.corridorLen },
-          { x: x + m.corridorW, y, w: t, h: m.corridorLen },
+          { x: x - t, y, w: t, h: len },
+          { x: x + m.corridorW, y, w: t, h: len },
         ],
       });
     }
   }
   return out;
+}
+
+/** 방 장애물 (월드 좌표). 장애물 틀이 없으면 빈 목록 */
+export function obstacleRects(n: RoomNode, m: WorldMetrics, d: MapgenData): Rect[] {
+  if (!n.layout) return [];
+  const inner = interiorRect(n, m);
+  const tw = Math.round(inner.w / m.tile);
+  const th = Math.round(inner.h / m.tile);
+  return obstacleTiles(n.layout, tw, th, Object.keys(n.doors) as Dir[], d).map((b) => ({ x: inner.x + b.x * m.tile, y: inner.y + b.y * m.tile, w: b.w * m.tile, h: b.h * m.tile }));
 }
 
 export function contains(r: Rect, x: number, y: number): boolean {

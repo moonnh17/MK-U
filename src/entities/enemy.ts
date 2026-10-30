@@ -24,6 +24,9 @@ export interface EnemyHost extends HazardHost {
   pullPlayer(to: Vec2, speed: number): number;
 }
 
+/** 장애물에 막혔을 때 옆으로 비켜 가는 시간(초) */
+const SIDESTEP_SEC = 0.45;
+
 /** 거리 유지 적이 멈추는 폭 */
 const KEEP_BAND = 30;
 
@@ -87,6 +90,9 @@ export class Enemy {
   private ropeLen = 0;
   private ropeHit = false;
   private holdLeft = 0;
+  /** 장애물에 막혔을 때 옆으로 비켜 가는 남은 시간과 방향(±1) */
+  private sideLeft = 0;
+  private sideSign = 1;
   /** 맞았을 때 찌그러졌다 돌아오는 남은 시간 */
   private squashLeft = 0;
   /** 소환 연출: 대기 전체 시간, 바닥 원·연기 */
@@ -263,7 +269,25 @@ export class Enemy {
       const len = dist || 1;
       // 원거리 적은 거리를 유지한다
       const k = this.def.keepDistance ? keepDistanceStep(dist, this.def.keepDistance, KEEP_BAND) : 1;
-      this.sprite.setVelocity((dx / len) * speed * k, (dy / len) * speed * k);
+      let vx = (dx / len) * k;
+      let vy = (dy / len) * k;
+      // 장애물(벽)에 막히면 잠깐 옆으로 비켜 간다 (막힐 때마다 반대쪽으로)
+      const body = this.sprite.body as Phaser.Physics.Arcade.Body | null;
+      if (k !== 0 && body && !body.blocked.none && this.sideLeft <= 0) {
+        this.sideLeft = SIDESTEP_SEC;
+        this.sideSign = -this.sideSign;
+      }
+      if (this.sideLeft > 0) {
+        this.sideLeft -= dt;
+        const sx = -vy * this.sideSign;
+        const sy = vx * this.sideSign;
+        vx = vx * 0.3 + sx;
+        vy = vy * 0.3 + sy;
+        const l = Math.hypot(vx, vy) || 1;
+        vx /= l;
+        vy /= l;
+      }
+      this.sprite.setVelocity(vx * speed, vy * speed);
       this.dropTrail(dt, speed * Math.abs(k), host);
     } else if (this.ai.phase === 'act' && attack?.kind === 'lunge') {
       this.sprite.setVelocity(this.aim.x * attack.speed!, this.aim.y * attack.speed!);
