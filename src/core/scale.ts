@@ -1,14 +1,11 @@
 import type { UiMode } from '../input/uiMode';
 
 /**
- * 화면 배율 (순수 함수).
- * - PC: 정수 배 (최소 1)
- * - 모바일: 화면에 꽉 차는 비정수 배 (정수 배면 폰에서 여백이 너무 커서. DECISIONS 참고)
+ * 화면 배율 (순수 함수): 기준 해상도 1px이 창에서 몇 CSS px인지. PC·모바일 모두 창에 꽉 차게.
+ * (캔버스 픽셀이 곧 도트 하나라 표시는 가장 가까운 픽셀로 늘린다. DECISIONS 참고)
  */
-export function computeZoom(viewW: number, viewH: number, baseW: number, baseH: number, mode: UiMode): number {
-  const fit = Math.min(viewW / baseW, viewH / baseH);
-  if (mode === 'mobile') return Math.max(fit, 0.25);
-  return Math.max(1, Math.floor(fit));
+export function computeZoom(viewW: number, viewH: number, baseW: number, baseH: number): number {
+  return Math.max(Math.min(viewW / baseW, viewH / baseH), 0.25);
 }
 
 /** "#rrggbb" → 0xrrggbb */

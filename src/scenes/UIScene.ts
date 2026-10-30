@@ -1,3 +1,4 @@
+import { fitBaseCamera } from '../entities/art';
 import { Warp } from '../ui/warp';
 import { BossBar } from '../ui/bossBar';
 import Phaser from 'phaser';
@@ -30,6 +31,7 @@ export class UIScene extends Phaser.Scene {
     const { ui } = this.ctx.data;
     const W = ui.baseWidth;
     const H = ui.baseHeight;
+    fitBaseCamera(this, W, H, this.ctx.renderScale);
     this.hud = new Hud(this, this.ctx);
     this.bossBar = new BossBar(this, this.ctx);
     this.warp = new Warp(this, this.ctx);

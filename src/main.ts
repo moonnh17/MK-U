@@ -76,23 +76,30 @@ const ctx = setContext({
   input,
   touch,
   uiMode: initialUiMode(config.ui, coarse),
+  renderScale: data.ui.renderScale,
   debug: config.debug,
   save: new SaveStore(browserStore()),
 });
 
 // --- Phaser ---
-const zoomFor = (mode: UiMode) =>
-  computeZoom(window.innerWidth, window.innerHeight, data.ui.baseWidth, data.ui.baseHeight, mode);
+// 캔버스는 기준 해상도의 renderScale배로 그리고, 창에 맞춘 나머지 배율만 CSS로 늘린다
+const cssZoom = () => computeZoom(window.innerWidth, window.innerHeight, data.ui.baseWidth, data.ui.baseHeight) / ctx.renderScale;
+
+// 글자도 같은 픽셀 격자로 그린다
+const addText = Phaser.GameObjects.GameObjectFactory.prototype.text;
+Phaser.GameObjects.GameObjectFactory.prototype.text = function (this: Phaser.GameObjects.GameObjectFactory, x, y, text, style) {
+  return addText.call(this, x, y, text, { resolution: ctx.renderScale, ...style });
+};
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
-  width: data.ui.baseWidth,
-  height: data.ui.baseHeight,
+  width: data.ui.baseWidth * ctx.renderScale,
+  height: data.ui.baseHeight * ctx.renderScale,
   backgroundColor: hexColor(data.ui.backgroundColor),
   pixelArt: true,
   roundPixels: true,
-  scale: { mode: Phaser.Scale.NONE, zoom: zoomFor(ctx.uiMode) },
+  scale: { mode: Phaser.Scale.NONE, zoom: cssZoom() },
   physics: { default: 'arcade', arcade: { debug: false } },
   input: { keyboard: false, gamepad: false },
   scene: [BootScene, LabScene, RunScene, UIScene],
@@ -103,7 +110,7 @@ if (config.debug) Object.assign(window, { __game: game, __ctx: ctx });
 function applyUiMode(mode: UiMode): void {
   ctx.uiMode = mode;
   refreshTouch();
-  game.scale.setZoom(zoomFor(mode));
+  game.scale.setZoom(cssZoom());
   bus.emit('uiModeChanged', { mode });
 }
 
@@ -157,7 +164,7 @@ new StoryWindow(ctx);
 new GeminiMini(ctx);
 new PauseWindow(ctx);
 new Sfx(ctx);
-window.addEventListener('resize', () => game.scale.setZoom(zoomFor(ctx.uiMode)));
+window.addEventListener('resize', () => game.scale.setZoom(cssZoom()));
 
 applyUiMode(ctx.uiMode);
 // 디버그 모드에서만 콘솔 점검용 핸들을 노출한다

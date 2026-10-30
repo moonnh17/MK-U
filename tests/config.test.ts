@@ -31,16 +31,13 @@ describe('parseLaunchConfig', () => {
 });
 
 describe('computeZoom', () => {
-  it('PC는 정수 배, 최소 1', () => {
-    expect(computeZoom(1920, 1080, 480, 270, 'pc')).toBe(4);
-    expect(computeZoom(1366, 768, 480, 270, 'pc')).toBe(2);
-    expect(computeZoom(400, 200, 480, 270, 'pc')).toBe(1);
-  });
-
-  it('모바일은 화면에 맞는 비정수 배', () => {
-    expect(computeZoom(800, 360, 480, 270, 'mobile')).toBeCloseTo(360 / 270);
+  it('창에 꽉 차는 배율 (짧은 쪽 기준)', () => {
+    expect(computeZoom(1920, 1080, 480, 270)).toBe(4);
+    expect(computeZoom(1366, 768, 480, 270)).toBeCloseTo(768 / 270);
+    expect(computeZoom(800, 360, 480, 270)).toBeCloseTo(360 / 270);
   });
 });
+
 
 describe('formatText', () => {
   it('자리 표시자를 채우고 없는 키는 키를 돌려준다', () => {

@@ -128,4 +128,45 @@ function paste(dst, src, x, y) {
   }
 }
 
-module.exports = { read, write, blank, crop, resize, bbox, paste };
+/** 색 수 줄이기 (median cut): 불투명 픽셀을 n가지 색으로. 투명은 그대로 */
+function quantize(img, n) {
+  const all = [];
+  for (let o = 0; o < img.px.length; o += 4) if (img.px[o + 3] > 0) all.push([img.px[o], img.px[o + 1], img.px[o + 2]]);
+  if (all.length === 0) return img;
+  let boxes = [all];
+  while (boxes.length < n) {
+    let bi = -1, bestRange = 0, bestCh = 0;
+    boxes.forEach((box, i) => {
+      if (box.length < 2) return;
+      for (let c = 0; c < 3; c++) {
+        let lo = 255, hi = 0;
+        for (const p of box) { if (p[c] < lo) lo = p[c]; if (p[c] > hi) hi = p[c]; }
+        if (hi - lo > bestRange) { bestRange = hi - lo; bi = i; bestCh = c; }
+      }
+    });
+    if (bi < 0) break;
+    const box = boxes[bi].sort((a, b) => a[bestCh] - b[bestCh]);
+    const mid = box.length >> 1;
+    boxes.splice(bi, 1, box.slice(0, mid), box.slice(mid));
+  }
+  const pal = boxes.map((box) => [0, 1, 2].map((c) => Math.round(box.reduce((s, p) => s + p[c], 0) / box.length)));
+  const memo = new Map();
+  const out = { w: img.w, h: img.h, px: Buffer.from(img.px) };
+  for (let o = 0; o < out.px.length; o += 4) {
+    if (out.px[o + 3] === 0) continue;
+    const key = (out.px[o] << 16) | (out.px[o + 1] << 8) | out.px[o + 2];
+    let best = memo.get(key);
+    if (!best) {
+      let bd = Infinity;
+      for (const q of pal) {
+        const d = (q[0] - out.px[o]) ** 2 + (q[1] - out.px[o + 1]) ** 2 + (q[2] - out.px[o + 2]) ** 2;
+        if (d < bd) { bd = d; best = q; }
+      }
+      memo.set(key, best);
+    }
+    out.px[o] = best[0]; out.px[o + 1] = best[1]; out.px[o + 2] = best[2];
+  }
+  return out;
+}
+
+module.exports = { read, write, blank, crop, resize, bbox, paste, quantize };

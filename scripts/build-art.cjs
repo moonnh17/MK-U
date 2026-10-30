@@ -12,6 +12,12 @@ if (!SRC || !fs.existsSync(path.join(SRC, 'monsters.png'))) {
   process.exit(1);
 }
 const OUT_DIR = 'mku';
+/** 게임 1px에 넣는 도트 수 (최대). camera.zoom 1.5 × renderScale 2 = 3이면 도트 하나가 캔버스 1px. 원본이 작으면 낮춘다 */
+const MAX_DENSITY = 3;
+/** 그림 한 장의 색 수: 부드러운 그라데이션을 없애 도트로 보이게 */
+const PALETTE = 32;
+const densityFor = (side, size) => Math.max(1, Math.min(MAX_DENSITY, Math.floor(side / size)));
+const withDensity = (def, d) => (d > 1 ? { ...def, density: d } : def);
 const out = path.join(REPO, 'public/assets', OUT_DIR);
 fs.mkdirSync(out, { recursive: true });
 
@@ -64,7 +70,9 @@ function sheet(key, frames, fit, opts = {}) {
   const s = fit / Math.max(cw, ch);
   // independent: 원본마다 그린 배율이 달라(보스 단일 자세) 프레임마다 따로 fit에 맞춘다
   const fw = Math.max(1, Math.round(cw * s)), fh = Math.max(1, Math.round(ch * s));
-  const outImg = k.blank(fw * frames.length, fh);
+  const d = densityFor(opts.independent ? Math.min(...boxes.map((b) => Math.max(b.w, b.h))) : Math.max(cw, ch), fit);
+  const rw = fw * d, rh = fh * d;
+  const outImg = k.blank(rw * frames.length, rh);
   frames.forEach((f, i) => {
     const b = boxes[i];
     const cell = k.blank(cw, ch);
@@ -72,17 +80,17 @@ function sheet(key, frames, fit, opts = {}) {
     k.paste(cell, k.crop(f, b.x, b.y, b.w, b.h), Math.round((cw - b.w) / 2), ch - b.h);
     let small;
     if (opts.independent) {
-      const si = Math.min(fw / b.w, fh / b.h);
+      const si = Math.min(rw / b.w, rh / b.h);
       const iw = Math.max(1, Math.round(b.w * si)), ih = Math.max(1, Math.round(b.h * si));
-      small = k.blank(fw, fh);
-      k.paste(small, k.resize(k.crop(f, b.x, b.y, b.w, b.h), iw, ih, 0.5), Math.round((fw - iw) / 2), fh - ih);
-    } else small = k.resize(cell, fw, fh, opts.soft ? null : 0.5);
+      small = k.blank(rw, rh);
+      k.paste(small, k.resize(k.crop(f, b.x, b.y, b.w, b.h), iw, ih, 0.5), Math.round((rw - iw) / 2), rh - ih);
+    } else small = k.resize(cell, rw, rh, opts.soft ? null : 0.5);
     if (opts.dim) for (let p = 0; p < small.px.length; p += 4) for (let c = 0; c < 3; c++) small.px[p + c] = Math.round(small.px[p + c] * opts.dim);
-    k.paste(outImg, small, i * fw, 0);
+    k.paste(outImg, small, i * rw, 0);
   });
   const file = `${OUT_DIR}/${key}.png`;
-  k.write(path.join(REPO, 'public/assets', file), outImg);
-  return { file, frameWidth: fw, frameHeight: fh, frames: frames.length };
+  k.write(path.join(REPO, 'public/assets', file), k.quantize(outImg, PALETTE));
+  return withDensity({ file, frameWidth: rw, frameHeight: rh, frames: frames.length }, d);
 }
 /** 불투명 정사각형 그림(아이콘): 정사각형으로 채운 뒤 size로 */
 function icon(key, f, size, crop) {
@@ -92,8 +100,9 @@ function icon(key, f, size, crop) {
   const sq = k.blank(side, side);
   k.paste(sq, im, Math.round((side - im.w) / 2), Math.round((side - im.h) / 2));
   const file = `${OUT_DIR}/${key}.png`;
-  k.write(path.join(REPO, 'public/assets', file), k.resize(sq, size, size, 0.5));
-  return { file, frameWidth: size, frameHeight: size, frames: 1 };
+  const d = densityFor(side, size);
+  k.write(path.join(REPO, 'public/assets', file), k.quantize(k.resize(sq, size * d, size * d, 0.5), PALETTE));
+  return withDensity({ file, frameWidth: size * d, frameHeight: size * d, frames: 1 }, d);
 }
 /** 바닥 타일: terrain.png 4×4 중 (col,row) 칸 */
 function tile(key, col, row, size, dim = 1) {
@@ -101,11 +110,12 @@ function tile(key, col, row, size, dim = 1) {
   const cw = im.w / 4;
   // 칸 경계선이 들어가지 않게 안쪽을 조금 잘라낸다
   const t = k.crop(im, Math.round(col * cw) + 3, Math.round(row * cw) + 3, Math.round(cw) - 6, Math.round(cw) - 6);
-  const small = k.resize(t, size, size, 0.5);
+  const d = densityFor(t.w, size);
+  const small = k.resize(t, size * d, size * d, 0.5);
   if (dim !== 1) for (let p = 0; p < small.px.length; p += 4) for (let c = 0; c < 3; c++) small.px[p + c] = Math.round(small.px[p + c] * dim);
   const file = `${OUT_DIR}/${key}.png`;
-  k.write(path.join(REPO, 'public/assets', file), small);
-  return { file, frameWidth: size, frameHeight: size, frames: 1 };
+  k.write(path.join(REPO, 'public/assets', file), k.quantize(small, PALETTE));
+  return withDensity({ file, frameWidth: size * d, frameHeight: size * d, frames: 1 }, d);
 }
 
 const sprites = {};
@@ -194,8 +204,9 @@ sprites.icon_gemini = icon('icon_gemini', 'story/mg-portrait.png', 32, { x: 380,
   const im = load('story/mg-portrait.png');
   const c = k.crop(im, 157, 0, 940, 1254);
   const file = `${OUT_DIR}/portrait_gemini.png`;
-  k.write(path.join(REPO, 'public/assets', file), k.resize(c, 96, 128, 0.5));
-  sprites.portrait_gemini = { file, frameWidth: 96, frameHeight: 128, frames: 1 };
+  const d = densityFor(c.w, 96);
+  k.write(path.join(REPO, 'public/assets', file), k.quantize(k.resize(c, 96 * d, 128 * d, 0.5), PALETTE));
+  sprites.portrait_gemini = withDensity({ file, frameWidth: 96 * d, frameHeight: 128 * d, frames: 1 }, d);
 }
 
 // ---------- 아이템 아이콘 ----------

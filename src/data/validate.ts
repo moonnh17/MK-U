@@ -670,6 +670,7 @@ export function validateGameData(d: GameData): Errors {
   // --- UI ---
   checkPositive(errors, 'ui.baseWidth', d.ui.baseWidth);
   checkPositive(errors, 'ui.baseHeight', d.ui.baseHeight);
+  if (!Number.isInteger(d.ui.renderScale) || d.ui.renderScale < 1) errors.push('ui.renderScale: 1 이상 정수');
   const mb = d.ui.mobile;
   for (const k of ['edgeMarginDp', 'attackDp', 'skillDp', 'ultimateDp', 'swapDp', 'bagDp', 'pauseDp'] as const) {
     checkPositive(errors, `ui.mobile.${k}`, mb[k]);
