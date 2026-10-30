@@ -758,6 +758,11 @@ export function validateGameData(d: GameData): Errors {
   checkRange(errors, 'juice.death.shards', ju.death.shards);
   checkRange(errors, 'juice.death.eliteShards', ju.death.eliteShards);
   for (const [k, ref] of Object.entries(ju.fx)) checkSprite(errors, `juice.fx.${k}`, ref);
+  for (const c of [ju.spawn.ringColor, ju.bossIntro.bandColor, ju.bossIntro.nameColor, ju.bossIntro.subColor, ju.bossBar.color, ju.bossBar.trailColor, ju.bossBar.backColor, ju.bossBar.markerColor, ju.roomClear.color]) {
+    if (!HEX_COLOR.test(c)) errors.push(`juice 색 ${c}: #RRGGBB`);
+  }
+  for (const [k, v] of Object.entries(ju.bossIntro)) if (typeof v === 'number') checkPositive(errors, `juice.bossIntro.${k}`, v);
+  if (!(ju.bossKill.slowScale > 0 && ju.bossKill.slowScale <= 1)) errors.push('juice.bossKill.slowScale: 0~1');
 
   // --- 도트 아트 ---
   errors.push(...validateArt(d.art, collectAssets(d)));

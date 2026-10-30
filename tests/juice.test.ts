@@ -81,3 +81,55 @@ describe('타격감 데이터', () => {
     for (const ref of Object.values(J.fx)) expect(gameData.art.sprites[ref.spriteKey], ref.spriteKey).toBeDefined();
   });
 });
+
+describe('보스 등장 컷 시간표', () => {
+  it('카메라 이동 → 내려찍기 → 이름 띠 → 복귀 → 끝', async () => {
+    const { bossIntroStage, bossIntroTotal } = await import('../src/systems/juice');
+    const b = J.bossIntro;
+    expect(bossIntroStage(0, b).stage).toBe('pan');
+    expect(bossIntroStage(b.panSec + 0.01, b).stage).toBe('drop');
+    expect(bossIntroStage(b.panSec + b.dropSec + 0.01, b).stage).toBe('name');
+    expect(bossIntroStage(bossIntroTotal(b) - 0.01, b).stage).toBe('return');
+    expect(bossIntroStage(bossIntroTotal(b), b)).toEqual({ stage: 'done', progress: 1 });
+    expect(bossIntroStage(b.panSec / 2, b).progress).toBeCloseTo(0.5);
+  });
+});
+
+describe('보스 체력바 잔상', () => {
+  it('깎이면 잠깐 버티다 내려오고, 회복하면 바로 맞춘다', async () => {
+    const { trailStep } = await import('../src/systems/juice');
+    const b = J.bossBar;
+    let s = trailStep(1, 0.8, 0, 0.016, b, true);
+    expect(s).toEqual({ trail: 1, hold: b.trailDelaySec });
+    s = trailStep(s.trail, 0.8, s.hold, b.trailDelaySec, b, false);
+    expect(s.trail).toBe(1);
+    s = trailStep(s.trail, 0.8, s.hold, 0.1, b, false);
+    expect(s.trail).toBeCloseTo(1 - b.trailPerSec * 0.1);
+    s = trailStep(s.trail, 0.8, 0, 10, b, false);
+    expect(s.trail).toBe(0.8);
+    expect(trailStep(0.5, 0.7, 0.3, 0.1, b, false)).toEqual({ trail: 0.7, hold: 0 });
+  });
+});
+
+describe('보스 처치 슬로모션·적 소환', () => {
+  it('처음엔 느리고 점점 원래 배속, 끝나면 1', async () => {
+    const { slowMoScale } = await import('../src/systems/juice');
+    const k = J.bossKill;
+    expect(slowMoScale(0, k)).toBeCloseTo(k.slowScale);
+    expect(slowMoScale(k.slowSec / 2, k)).toBeGreaterThan(k.slowScale);
+    expect(slowMoScale(k.slowSec / 2, k)).toBeLessThan(1);
+    expect(slowMoScale(k.slowSec, k)).toBe(1);
+  });
+  it('소환: 작고 투명하게 아래에서 시작해 원래 크기·위치로', async () => {
+    const { spawnRise } = await import('../src/systems/juice');
+    const s = J.spawn;
+    const start = spawnRise(0, s);
+    expect(start.scale).toBeCloseTo(s.startScale);
+    expect([start.alpha, start.offsetY]).toEqual([0, s.risePx]);
+    const end = spawnRise(1, s);
+    expect(end.scale).toBeCloseTo(1);
+    expect([end.alpha, end.offsetY]).toEqual([1, 0]);
+    // 끝나기 직전 살짝 커졌다 돌아온다
+    expect(spawnRise(0.85, s).scale).toBeGreaterThan(1);
+  });
+});

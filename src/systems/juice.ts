@@ -79,3 +79,54 @@ export function lowHpPulse(time: number, hpRatio: number, p: JuiceData['playerHu
   const wave = 0.5 + 0.5 * Math.sin((time / p.pulseSec) * Math.PI * 2);
   return p.pulseAlpha * (0.4 + 0.6 * depth) * wave;
 }
+
+export type IntroStage = 'pan' | 'drop' | 'name' | 'return' | 'done';
+
+/** 보스 등장 컷: 지금 어느 단계이고 그 단계의 진행률(0~1)은 얼마인지 */
+export function bossIntroStage(t: number, b: JuiceData['bossIntro']): { stage: IntroStage; progress: number } {
+  const steps: [IntroStage, number][] = [
+    ['pan', b.panSec],
+    ['drop', b.dropSec],
+    ['name', b.nameSec],
+    ['return', b.returnSec],
+  ];
+  let start = 0;
+  for (const [stage, sec] of steps) {
+    if (t < start + sec) return { stage, progress: sec > 0 ? (t - start) / sec : 1 };
+    start += sec;
+  }
+  return { stage: 'done', progress: 1 };
+}
+
+/** 등장 컷 전체 길이 */
+export function bossIntroTotal(b: JuiceData['bossIntro']): number {
+  return b.panSec + b.dropSec + b.nameSec + b.returnSec;
+}
+
+/**
+ * 보스 체력바 잔상: 체력이 깎이면 잔상은 그대로 있다가(hold) delay 뒤 초당 perSec씩 체력까지 내려온다. 회복하면 바로 맞춘다.
+ * 반환: 다음 잔상 비율과 남은 대기
+ */
+export function trailStep(trail: number, hp: number, hold: number, dt: number, b: JuiceData['bossBar'], dropped: boolean): { trail: number; hold: number } {
+  if (hp >= trail) return { trail: hp, hold: 0 };
+  if (dropped) return { trail, hold: b.trailDelaySec };
+  if (hold > 0) return { trail, hold: Math.max(0, hold - dt) };
+  return { trail: Math.max(hp, trail - b.trailPerSec * dt), hold: 0 };
+}
+
+/** 보스 처치 슬로모션: t초 지점의 배속 (slowScale에서 시작해 slowSec 동안 1로) */
+export function slowMoScale(t: number, k: JuiceData['bossKill']): number {
+  if (t >= k.slowSec) return 1;
+  const p = t / k.slowSec;
+  // 처음엔 오래 느리게, 끝에서 빨리 원래대로
+  return k.slowScale + (1 - k.slowScale) * p * p;
+}
+
+/** 적 소환 연출: 대기 진행률(0~1) → 크기 배율·투명도·위로 솟는 정도(px) */
+export function spawnRise(progress: number, s: JuiceData['spawn']): { scale: number; alpha: number; offsetY: number } {
+  const p = Math.min(1, Math.max(0, progress));
+  // 마지막에 살짝 튀어 오르는 느낌 (back ease)
+  const c = 1.7;
+  const e = 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2);
+  return { scale: s.startScale + (1 - s.startScale) * e, alpha: Math.min(1, p * 1.5), offsetY: s.risePx * (1 - p) };
+}

@@ -1135,4 +1135,16 @@ export interface JuiceData {
   shake: Record<ShakeLevel, { ms: number; intensity: number }>;
   /** 이펙트 그림 (없으면 도형) */
   fx: Record<'hitTech' | 'hitMagic' | 'hitPhysical' | 'explosion' | 'eliteBurst' | 'spawn', SpriteRef>;
+  /** 적 소환: 바닥 원(몸 반지름 × ringRadiusMul), 작게(startScale) 아래(risePx)에서 솟아오른다 */
+  spawn: { ringColor: string; ringRadiusMul: number; startScale: number; risePx: number };
+  /** 보스 등장 컷: 카메라 이동(panSec) → 내려찍기(dropSec, dropHeight) → 이름 띠(nameSec) → 복귀(returnSec) */
+  bossIntro: { panSec: number; dropSec: number; dropHeight: number; nameSec: number; returnSec: number; zoom: number; bandColor: string; bandAlpha: number; nameColor: string; subColor: string };
+  /** 보스 체력바: 깎인 만큼 흰 잔상이 trailDelaySec 뒤 초당 trailPerSec(비율)씩 줄어든다 */
+  bossBar: { width: number; height: number; y: number; trailDelaySec: number; trailPerSec: number; color: string; trailColor: string; backColor: string; markerColor: string; fontSize: number };
+  /** 보스 강화·단계 개방: 번쩍임, 짧은 확대, 화면 가운데 큰 이름 */
+  bossPhase: { flashMs: number; zoom: number; zoomSec: number; bannerSec: number; bannerSize: number };
+  /** 보스 처치: slowSec 동안 slowScale 배속에서 점점 원래대로, 연쇄 폭발 */
+  bossKill: { slowSec: number; slowScale: number; explosions: number; spreadPx: number; stepSec: number; flashMs: number };
+  /** 방 클리어 글자, 문이 사라지는 시간 */
+  roomClear: { sec: number; color: string; size: number; doorFadeSec: number };
 }

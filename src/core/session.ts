@@ -106,6 +106,18 @@ export interface RunSession {
   effStats: Stats;
   /** 런이 끝났을 때의 결산 (결정은 이미 저장에 더해져 있다) */
   settlement: Settlement | null;
+  /** 지금 싸우는 보스 (보스 체력바, RunScene이 매 프레임 채운다) */
+  boss: BossView | null;
+}
+
+/** 보스 체력바 한 줄 */
+export interface BossView {
+  name: string;
+  hp: number;
+  maxHp: number;
+  /** 강화 단계가 열리는 체력 비율 (눈금) */
+  markers: number[];
+  color: string;
 }
 
 export interface Settlement {
