@@ -68,6 +68,11 @@
   "lockInsetPx": 20,
   "roomSizes": [
     {
+      "id": "starter",
+      "w": 16,
+      "h": 11
+    },
+    {
       "id": "small",
       "w": 20,
       "h": 13
@@ -96,12 +101,8 @@
   "roomSizeRules": {
     "startRoom": [
       {
-        "size": "small",
+        "size": "starter",
         "weight": 1
-      },
-      {
-        "size": "medium",
-        "weight": 2
       }
     ],
     "exitRoom": [

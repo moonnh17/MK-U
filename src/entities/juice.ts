@@ -15,7 +15,9 @@ import type { JuiceData, ShakeLevel, TagId } from '../types/data';
 /** 화면 흔들림 (세기는 데이터의 단계). rumble처럼 길이가 정해지지 않은 것은 ms로 */
 export function shake(scene: Phaser.Scene, level: ShakeLevel, ms?: number): void {
   const s = getContext().data.juice.shake[level];
-  scene.cameras.main.shake(ms ?? s.ms, s.intensity);
+  // Phaser는 폭 × 세기 × 확대로 흔든다: 캔버스 배율이 두 번 곱해지므로 한 번 나눠 화면 기준 세기를 맞춘다
+  const ctx = getContext();
+  scene.cameras.main.shake(ms ?? s.ms, s.intensity / ctx.renderScale);
 }
 
 /** 불꽃 종류 → 이펙트 그림 */
@@ -102,7 +104,7 @@ export class Juice {
     if (big) {
       this.fxAnim(this.j.fx.explosion.spriteKey, at);
       this.fxImage(this.j.fx.eliteBurst.spriteKey, at, 0.35, 0.6, 1.3);
-      shake(this.scene, 'medium');
+      shake(this.scene, 'light');
     } else {
       this.fxImage(this.j.fx.hitPhysical.spriteKey, at, 0.2, 0.8, 1.4);
     }
@@ -113,7 +115,7 @@ export class Juice {
     const at = { x: center.x + this.rng.range(-spread, spread), y: center.y + this.rng.range(-spread, spread) };
     this.fxAnim(this.j.fx.explosion.spriteKey, at);
     this.particles(at, this.j.death.shards, this.j.death.shardSpeed, this.j.death.shardLifeSec, this.j.death.shardSize, hexColor(this.j.fx.explosion.color));
-    shake(this.scene, 'medium');
+    shake(this.scene, 'light');
   }
 
   /** 보스 착지: 바닥 먼지 고리 + 파편 */

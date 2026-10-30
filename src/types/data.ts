@@ -570,6 +570,8 @@ export interface PlayerData extends SpriteRef {
   blinkIntervalSec: number;
   /** 무기를 몸에서 이만큼 떨어뜨려 그린다(px) */
   weaponOffset: number;
+  /** 무기를 쥔 오른손 자리 (플레이어 기준 px, 그림이 뒤집히면 x도 뒤집는다) */
+  weaponHand: { x: number; y: number };
   /** 보호막 최대치. 규칙은 나중에 정한다(M1은 바 자리만) */
   shieldMax: number;
   energy: { max: number; start: number; orbValue: number };

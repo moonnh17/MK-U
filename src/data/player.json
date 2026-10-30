@@ -3,9 +3,17 @@
   "moveSpeed": 90,
   "hurtInvulnSec": 0.5,
   "blinkIntervalSec": 0.08,
-  "weaponOffset": 8,
+  "weaponOffset": 1,
+  "weaponHand": {
+    "x": -4.5,
+    "y": -6.5
+  },
   "shieldMax": 0,
-  "energy": { "max": 200, "start": 200, "orbValue": 5 },
+  "energy": {
+    "max": 200,
+    "start": 200,
+    "orbValue": 5
+  },
   "spriteKey": "player_human",
   "color": "#e8e2d0",
   "size": 10

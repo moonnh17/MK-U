@@ -540,7 +540,7 @@ export class SafeZoneBlast implements Hazard {
     if (!safe) host.hurtPlayer(this.damage);
     const f = host.scene.add.rectangle(a.x + a.w / 2, a.y + a.h / 2, a.w, a.h, this.color, 0.6).setDepth(6);
     flash(host, f, 250);
-    shake(host.scene, 'heavy');
+    shake(host.scene, 'medium');
     return false;
   }
 

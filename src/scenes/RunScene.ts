@@ -1004,9 +1004,10 @@ export class RunScene extends Phaser.Scene {
     this.updateInteractHint();
 
     const off = d.player.weaponOffset;
+    const hand = d.player.weaponHand;
     this.weaponSprite
       .setTexture(this.shownWeaponKey())
-      .setPosition(this.player.x + this.aimDir.x * off, this.player.y + this.aimDir.y * off)
+      .setPosition(this.player.x + (this.player.flipX ? -hand.x : hand.x) + this.aimDir.x * off, this.player.y + hand.y + this.aimDir.y * off)
       .setRotation(aimAngle);
 
     animateArt(d, this.player);
