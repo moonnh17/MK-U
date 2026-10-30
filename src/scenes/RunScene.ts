@@ -16,6 +16,10 @@ import { Darkness } from '../entities/darkness';
 import { animateArt, fitArt } from '../entities/art';
 import { Juice, shake } from '../entities/juice';
 import { bossIntroStage, bossIntroTotal, damageKind, HitStop, slowMoScale, type IntroStage } from '../systems/juice';
+import { weaponSfx, type SfxId } from '../systems/sound';
+
+/** 효과음 하나 (합성은 audio/sfx.ts) */
+const sfx = (id: SfxId) => bus.emit('sfx', { id });
 import { artKeys, type TilePart } from '../systems/art';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
@@ -115,7 +119,7 @@ interface Offer {
   schools?: SchoolId[];
 }
 
-type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | 'intro' | null;
+type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | 'intro' | 'pause' | null;
 
 const SKILL_ACTIONS: ButtonAction[] = ['skill1', 'skill2', 'skill3', 'skill4'];
 
@@ -392,6 +396,9 @@ export class RunScene extends Phaser.Scene {
       bus.on('debugBarrage', () => this.debugBarrage()),
       bus.on('cutsceneDone', () => this.showNextCut()),
       bus.on('storyDone', () => this.finishStory()),
+      bus.on('pauseResume', () => {
+        if (this.modal === 'pause') this.setModal(null);
+      }),
       bus.on('cardReroll', () => this.rerollCards()),
       bus.on('debugForceEncounter', ({ kind }) => {
         this.forcedEncounter = kind;
@@ -611,6 +618,7 @@ export class RunScene extends Phaser.Scene {
         ease: 'Quad.easeIn',
         onComplete: () => {
           shake(this, 'heavy');
+          sfx('bossSlam');
           this.juice.landing({ x: e.sprite.x, y: e.sprite.y }, e.radius);
         },
       });
@@ -653,6 +661,7 @@ export class RunScene extends Phaser.Scene {
     const c = Phaser.Display.Color.HexStringToColor(color);
     const cam = this.cameras.main;
     cam.flash(bp.flashMs, c.red, c.green, c.blue);
+    sfx('bossPhase');
     this.tweens.add({ targets: cam, zoom: bp.zoom, duration: (bp.zoomSec * 1000) / 2, yoyo: true, onComplete: () => cam.setZoom(1) });
     bus.emit('banner', { text, color, size: bp.bannerSize, sec: bp.bannerSec });
   }
@@ -662,7 +671,12 @@ export class RunScene extends Phaser.Scene {
     const k = this.ctx.data.juice.bossKill;
     this.slowT = 0;
     this.cameras.main.flash(k.flashMs, 255, 255, 255);
-    for (let i = 0; i < k.explosions; i++) this.time.delayedCall(i * k.stepSec * 1000, () => this.juice.explosionNear(at, k.spreadPx));
+    for (let i = 0; i < k.explosions; i++) {
+      this.time.delayedCall(i * k.stepSec * 1000, () => {
+        this.juice.explosionNear(at, k.spreadPx);
+        sfx('explosion');
+      });
+    }
   }
 
   private addPortal(node: RoomNode): void {
@@ -730,6 +744,11 @@ export class RunScene extends Phaser.Scene {
     this.juice.update(dt, this.session.player.hp / this.session.player.maxHp);
     if (stopped) return;
     this.pendingCrit = false;
+    // 일시정지 창
+    if (frame.pressed.has('pause')) {
+      this.setModal('pause');
+      return;
+    }
     this.session.player.record.playSec += dt;
 
     const p = this.session.player;
@@ -851,6 +870,7 @@ export class RunScene extends Phaser.Scene {
         const node = this.session.map.rooms[roomId]!;
         const rc = this.ctx.data.juice.roomClear;
         bus.emit('banner', { text: this.ctx.t('room.clear'), color: rc.color, size: rc.size, sec: rc.sec });
+        sfx('roomClear');
         if (node.kind === 'combatRoom') this.combatRoomDrop(roomId);
         if (this.raidRooms.has(roomId)) this.raidReward(roomId);
         if (this.hiddenBossRooms.has(roomId)) this.hiddenBossReward(roomId);
@@ -871,7 +891,9 @@ export class RunScene extends Phaser.Scene {
   }
 
   private setRoomLocked(roomId: number, locked: boolean): void {
-    for (const door of this.doorsByRoom.get(roomId) ?? []) door.setLocked(locked);
+    const doors = this.doorsByRoom.get(roomId) ?? [];
+    if (doors.length > 0 && doors.some((d) => d.rect.visible !== locked)) sfx(locked ? 'doorLock' : 'doorOpen');
+    for (const door of doors) door.setLocked(locked);
   }
 
   private spawnWave(roomId: number, wave: Wave, index: number): void {
@@ -1105,6 +1127,7 @@ export class RunScene extends Phaser.Scene {
     const bossHit = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss';
     this.juice.damageNumber(top, dmg, damageKind({ crit: fx?.crit, space: fx?.space, dot: !fx }), bossHit);
     if (fx) {
+      sfx(fx.crit ? 'crit' : 'hit');
       this.juice.hitSpark({ x: enemy.sprite.x, y: enemy.sprite.y }, fx.tags);
       enemy.squash();
       const hs = this.ctx.data.juice.hitStop;
@@ -1180,6 +1203,7 @@ export class RunScene extends Phaser.Scene {
     const sig = w.signature && signatureFires(++this.sigCount, w.signature.every) ? w.signature : null;
 
     if (w.category === 'blade') {
+      sfx(weaponSfx(w));
       // 특무 인장: 순간 회피 직후 기본공격 피해 증가
       this.melee(w, st, aimAngle, chargeRatio, sig, this.itemRt.consumeEmpowered());
       return;
@@ -1192,6 +1216,7 @@ export class RunScene extends Phaser.Scene {
       return;
     }
     p.energy = left;
+    sfx(sig?.kind === 'laser' ? 'shotLaser' : weaponSfx(w));
     const emp = this.itemRt.consumeEmpowered();
     if (sig?.kind === 'laser') {
       this.weaponLaser(w, st.damage * sig.damageMul * emp, st.critChance, aimAngle, sig.length, sig.width);
@@ -1366,6 +1391,7 @@ export class RunScene extends Phaser.Scene {
     // 처치 연출: 번쩍임·파편, 엘리트·정예·보스는 폭발·흔들림·히트스톱
     const big = e.elites.length > 0 || e.rank === 'champion' || e.rank === 'boss' || e.rank === 'hiddenBoss';
     this.juice.death(e.sprite, e.def.color, big);
+    sfx(big ? 'explosion' : 'kill');
     if (big) this.hitStop.request(e.rank === 'boss' || e.rank === 'hiddenBoss' ? d.juice.hitStop.bossKill : d.juice.hitStop.eliteKill);
     if (this.bossControllers.has(e)) this.startBossKill({ x, y });
     this.recordKill(e);
@@ -1493,6 +1519,7 @@ export class RunScene extends Phaser.Scene {
     this.invuln = this.ctx.data.player.hurtInvulnSec;
     shake(this, 'light');
     this.juice.hurt();
+    sfx('playerHurt');
     // 피격에 반응하는 스킬 오브젝트 (반물질포 충전 취소 등)
     for (const o of [...this.skillObjects]) if (o.onPlayerHurt && !o.onPlayerHurt(this.host)) this.removeObject(o);
     // 아이템: 피격 효과 → 낮은 체력 회복 → 부활
@@ -1583,6 +1610,7 @@ export class RunScene extends Phaser.Scene {
 
   /** 보스방 경고: 화면 가운데 WARNING + 보스 이름 */
   private showBossWarning(name: string): void {
+    sfx('warning');
     const cam = this.cameras.main;
     const sec = this.ctx.data.bosses.bannerSec;
     const style = { fontFamily: 'sans-serif', color: '#ff4a4a', stroke: '#000000', strokeThickness: 3 };
@@ -1603,6 +1631,7 @@ export class RunScene extends Phaser.Scene {
     const coin = d.pickups.coin.value * (1 + statEffect('coinGain', this.effStats(), d.stats) + this.itemRt.sums.coinGain);
     for (const pk of this.pickups) {
       if (!pk.update(dt, this.player, d.pickups)) continue;
+      sfx(pk.kind === 'energy' ? 'energy' : 'coin');
       if (pk.kind === 'energy') p.energy = gainEnergy(p.energy, orb, p.energyMax);
       else {
         p.coins += coin;
@@ -1833,7 +1862,10 @@ export class RunScene extends Phaser.Scene {
       this.toastThrottled(this.ctx.t('skillMsg.noTarget'));
       return;
     }
-    if (impl.cast(this.hostFor(id), { def, owned, values: sv.values })) p.cooldowns = { ...p.cooldowns, [id]: sv.cooldownSec };
+    if (impl.cast(this.hostFor(id), { def, owned, values: sv.values })) {
+      p.cooldowns = { ...p.cooldowns, [id]: sv.cooldownSec };
+      sfx('skill');
+    }
   }
 
   private castUltimate(): void {
@@ -1848,6 +1880,7 @@ export class RunScene extends Phaser.Scene {
     const values = ult.awakened && def.awakening ? { ...def.values, ...def.awakening.values } : { ...def.values };
     if (!impl.cast(this.hostFor(def.id), { def, awakened: ult.awakened, values })) return;
     ult.gauge = 0;
+    sfx('ultimate');
     this.itemRt.onUltimate();
   }
 
@@ -1928,6 +1961,8 @@ export class RunScene extends Phaser.Scene {
       });
     } else if (this.modal === 'inventory') {
       if (frame.pressed.has('inventory') || frame.pressed.has('pause')) this.closeInventory();
+    } else if (this.modal === 'pause') {
+      if (frame.pressed.has('pause')) this.setModal(null);
     }
   }
 
@@ -2003,6 +2038,7 @@ export class RunScene extends Phaser.Scene {
   private pickCard(index: number): void {
     const card = this.currentCards?.[index];
     if (!card || this.modal !== 'cards') return;
+    sfx('cardPick');
     if (card.kind === 'item') {
       this.giveItem(card.itemId);
       this.openNextCards();
@@ -2073,6 +2109,7 @@ export class RunScene extends Phaser.Scene {
       save.write();
     }
     this.setModal('cutscene');
+    sfx('awaken');
     bus.emit('cutsceneShow', next);
   }
 
@@ -2393,6 +2430,7 @@ export class RunScene extends Phaser.Scene {
 
   /** 아이템 획득: 확률 이전 → 세트 합성 → 획득 카드 */
   private giveItem(id: string): void {
+    sfx('itemGet');
     const d = this.ctx.data;
     const p = this.session.player;
     const def = d.items.items.find((x) => x.id === id);

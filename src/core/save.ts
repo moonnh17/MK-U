@@ -27,10 +27,12 @@ export interface SaveData {
   firstRunDone: boolean;
   /** 현재의 기억에 남은 미모사 제미니 대사: 칸 id → 본 문장(텍스트 키)·처음 본 순서 */
   gemini: Record<string, { lines: string[]; order: number }>;
+  /** 소리 꺼 둠 */
+  muted: boolean;
 }
 
 export function defaultSave(): SaveData {
-  return { version: SAVE_VERSION, crystals: 0, upgrades: {}, cutscenes: {}, pastShards: 0, firstRunDone: false, gemini: {} };
+  return { version: SAVE_VERSION, crystals: 0, upgrades: {}, cutscenes: {}, pastShards: 0, firstRunDone: false, gemini: {}, muted: false };
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -75,6 +77,7 @@ export function parseSave(raw: string | null): SaveData {
     cutscenes,
     pastShards: nonNeg(o.pastShards, 0),
     firstRunDone: o.firstRunDone === true,
+    muted: o.muted === true,
   };
 }
 

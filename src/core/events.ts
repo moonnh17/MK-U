@@ -1,4 +1,5 @@
 import type { CutIn, CutPage } from '../ui/cutscenePages';
+import type { SfxId } from '../systems/sound';
 import type { ButtonAction } from './actions';
 import type { UiMode } from '../input/uiMode';
 import type { AnyCard } from '../systems/cards';
@@ -22,7 +23,14 @@ export interface GameEvents {
   restartRequested: Record<string, never>;
 
   /** 게임을 멈추는 창(카드 선택·인벤토리)이 열리거나 닫힘 */
-  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | 'archive' | 'story' | 'intro' | null };
+  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | 'archive' | 'story' | 'intro' | 'pause' | null };
+  /** 효과음 하나 */
+  sfx: { id: SfxId };
+  /** 소리 켜기·끄기 요청 / 바뀜 */
+  muteToggle: Record<string, never>;
+  muteChanged: { muted: boolean };
+  /** 일시정지 창의 '계속하기' */
+  pauseResume: Record<string, never>;
   /** 화면 가운데 큰 글자 (보스 단계 이름·방 클리어) */
   banner: { text: string; color: string; size: number; sec: number };
   /** 보스 등장 컷 이름 띠 (name이 빈 문자열이면 걷는다) */

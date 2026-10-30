@@ -1262,3 +1262,40 @@ body {
   box-shadow: none;
   opacity: 1;
 }
+
+/* ---------- 일시정지 창 ---------- */
+#pause-window {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 6, 12, 0.7);
+  font-family: sans-serif;
+  color: #fff;
+}
+.pw-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 200px;
+  padding: 16px 20px;
+  background: #121824;
+  border: 2px solid #4a5a74;
+  text-align: center;
+}
+.pw-box b {
+  font-size: 18px;
+}
+.pw-box button {
+  padding: 8px 12px;
+  font-size: 15px;
+  color: #fff;
+  background: #24324a;
+  border: 1px solid #5a7aa8;
+  cursor: pointer;
+}
+.pw-box small {
+  opacity: 0.6;
+}
