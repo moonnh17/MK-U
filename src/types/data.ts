@@ -1156,6 +1156,8 @@ export interface JuiceData {
   bossPhase: { flashMs: number; zoom: number; zoomSec: number; bannerSec: number; bannerSize: number };
   /** 보스 처치: slowSec 동안 slowScale 배속에서 점점 원래대로, 연쇄 폭발 */
   bossKill: { slowSec: number; slowScale: number; explosions: number; spreadPx: number; stepSec: number; flashMs: number };
+  /** 포탈 이동: 빨려 들어감(suckSec, 확대 zoom배) → 이동 화면(덮기·걷기 시간, 빛줄기 수, 색) → 도착(arriveSec) */
+  portal: { suckSec: number; zoom: number; holdSec: number; fadeInSec: number; fadeOutSec: number; arriveSec: number; streaks: number; color: string; bgColor: string };
   /** 방 클리어 글자, 문이 사라지는 시간 */
   roomClear: { sec: number; color: string; size: number; doorFadeSec: number };
 }

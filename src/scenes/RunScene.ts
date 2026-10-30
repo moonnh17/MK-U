@@ -104,6 +104,8 @@ export interface RunSceneData {
   offers?: CardOfferKind[];
   /** 새 런: 실험장에서 고른 직업 */
   job?: string;
+  /** 포탈을 타고 왔다 (도착 연출, 이동 화면을 걷는다) */
+  warpIn?: boolean;
 }
 
 interface Prop {
@@ -121,7 +123,7 @@ interface Offer {
   schools?: SchoolId[];
 }
 
-type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | 'intro' | 'pause' | null;
+type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | 'intro' | 'pause' | 'portal' | null;
 
 const SKILL_ACTIONS: ButtonAction[] = ['skill1', 'skill2', 'skill3', 'skill4'];
 
@@ -360,6 +362,7 @@ export class RunScene extends Phaser.Scene {
     fitArt(d, this.player, d.player.size, d.player.height ?? d.player.size);
     this.applyPlayerArt();
     this.weaponSprite = this.add.image(start.x, start.y, this.weaponDef().spriteKey).setDepth(4);
+    if (this.initData.warpIn) this.warpIn();
     // 카메라: 확대하고 첫 프레임부터 제자리 (다음부터는 부드럽게 따라간다)
     {
       const cam = this.cameras.main;
@@ -681,6 +684,54 @@ export class RunScene extends Phaser.Scene {
     it.e.warn = 0;
     bus.emit('bossIntroBand', { name: '', sub: '' });
     if (this.modal === 'intro') this.setModal(null);
+  }
+
+  /**
+   * 포탈 타기: 게임을 멈추고 캐릭터가 포탈 가운데로 빨려 들어가며(돌며 작아짐) 카메라가 확대된다.
+   * 다 들어가면 이동 화면(빛줄기)을 덮고 잠깐 뒤 then (카드 고르기).
+   */
+  private warpOut(then: () => void): void {
+    const p = this.ctx.data.juice.portal;
+    const portal = this.nearest(this.portals.map((x) => ({ x: x.sprite.x, y: x.sprite.y })), Infinity) ?? { x: this.player.x, y: this.player.y };
+    this.setModal('portal');
+    sfx('warp');
+    const cam = this.cameras.main;
+    cam.zoomTo(this.ctx.data.ui.camera.zoom * p.zoom, p.suckSec * 1000, 'Quad.easeIn');
+    cam.pan(portal.x, portal.y, p.suckSec * 1000, 'Sine.easeInOut');
+    this.weaponSprite.setVisible(false);
+    this.tweens.add({
+      targets: this.player,
+      x: portal.x,
+      y: portal.y,
+      scale: 0,
+      angle: 540,
+      duration: p.suckSec * 1000,
+      ease: 'Quad.easeIn',
+      onComplete: () => {
+        bus.emit('warp', { on: true });
+        // 덮인 뒤 잠깐 있다가 카드 (트윈은 모달 중에도 돈다)
+        this.tweens.add({
+          targets: this.player,
+          alpha: 0,
+          duration: (p.fadeInSec + p.holdSec) * 1000,
+          onComplete: () => {
+            if (this.modal === 'portal') this.setModal(null);
+            then();
+          },
+        });
+      },
+    });
+  }
+
+  /** 포탈을 타고 도착: 이동 화면을 걷고 캐릭터가 빛 속에서 커지며 나타난다 */
+  private warpIn(): void {
+    const p = this.ctx.data.juice.portal;
+    bus.emit('warp', { on: false });
+    sfx('warpArrive');
+    this.player.setScale(0).setAngle(-360);
+    this.tweens.add({ targets: this.player, scale: 1, angle: 0, duration: p.arriveSec * 1000, delay: p.fadeOutSec * 500, ease: 'Back.easeOut' });
+    const ring = this.add.circle(this.player.x, this.player.y, 6).setStrokeStyle(2, hexColor(p.color), 1).setDepth(5);
+    this.tweens.add({ targets: ring, scale: 5, alpha: 0, duration: p.arriveSec * 1000 * 1.4, delay: p.fadeOutSec * 500, onComplete: () => ring.destroy() });
   }
 
   /** 보스 강화·단계 개방: 번쩍임, 짧은 확대, 화면 가운데 큰 이름 */
@@ -2714,8 +2765,13 @@ export class RunScene extends Phaser.Scene {
     const adv = advanceStage(this.session.stage, d.mapgen, playableChapters(d.waves, d.mapgen));
     this.session.player.record.stagesCleared++;
     if (adv.type === 'stage' || adv.type === 'chapter') {
-      const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [afterStage] };
-      this.scene.restart(data);
+      // 포탈에 빨려 들어가 이동 화면에서 스테이지 끝 카드를 고른 뒤 다음 스테이지로
+      this.warpOut(() =>
+        this.queueOffers([{ kind: afterStage, boss: false }], () => {
+          const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [], warpIn: true };
+          this.scene.restart(data);
+        }),
+      );
     } else if (adv.chapter >= d.mapgen.chapters) {
       // 3-5 런 클리어: 더 쓸 곳이 없는 카드는 건너뛰고 바로 결산
       this.endRun({ type: 'chapterClear', chapter: adv.chapter });

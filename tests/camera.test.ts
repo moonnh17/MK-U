@@ -22,11 +22,14 @@ describe('카메라 따라가기', () => {
     const f = cameraFocus({ x: 500, y: 500 }, { x: 2000, y: 500 }, view, R, bigRoom);
     expect(f.x - 500).toBeCloseTo(view.w / 2 - R.playerMarginPx);
   });
-  it('방 바깥은 보이지 않게 경계에서 멈추고, 방이 화면보다 작으면 가운데', () => {
-    const edge = cameraFocus({ x: 10, y: 10 }, null, view, R, bigRoom);
+  it('적이 있으면 방 바깥은 보이지 않게 경계에서 멈추고, 방이 화면보다 작으면 가운데', () => {
+    const edge = cameraFocus({ x: 10, y: 10 }, { x: 12, y: 10 }, view, R, bigRoom);
     expect(edge).toEqual({ x: view.w / 2, y: view.h / 2 });
     const small = { x: 100, y: 100, w: view.w - 20, h: view.h - 20 };
-    expect(cameraFocus({ x: 110, y: 110 }, null, view, R, small)).toEqual({ x: 100 + small.w / 2, y: 100 + small.h / 2 });
+    expect(cameraFocus({ x: 110, y: 110 }, { x: 120, y: 110 }, view, R, small)).toEqual({ x: 100 + small.w / 2, y: 100 + small.h / 2 });
+  });
+  it('적이 없으면 방 안에서도 캐릭터에 고정 (경계에서 멈추지 않는다)', () => {
+    expect(cameraFocus({ x: 10, y: 10 }, null, view, R, bigRoom)).toEqual({ x: 10, y: 10 });
   });
   it('복도(방 밖)에서는 플레이어 그대로', () => {
     expect(cameraFocus({ x: -50, y: 7 }, null, view, R, null)).toEqual({ x: -50, y: 7 });

@@ -1,7 +1,8 @@
 /**
  * 카메라 따라가기 (순수 함수).
- * 조준 중인 적이 있으면 플레이어와 적 사이(적 쪽으로 lean만큼)를, 없으면 플레이어를 본다.
- * 플레이어는 화면 가장자리 margin 안에 남고, 방 안에 있으면 방 바깥이 보이지 않게 방 경계에서 멈춘다(방이 화면보다 작으면 가운데).
+ * 조준 중인 적이 있으면 플레이어와 적 사이(적 쪽으로 lean만큼)를 보고, 플레이어는 화면 가장자리 margin 안에 남으며,
+ * 방 안이면 방 바깥이 보이지 않게 방 경계에서 멈춘다(방이 화면보다 작으면 가운데).
+ * 적이 없으면 복도에서처럼 캐릭터에 고정한다.
  */
 import type { Vec2 } from '../core/actions';
 import type { Rect } from './worldLayout';
@@ -27,12 +28,10 @@ function clampAxis(v: number, lo: number, hi: number): number {
 
 /** 카메라가 볼 가운데 지점 */
 export function cameraFocus(player: Vec2, target: Vec2 | null, view: { w: number; h: number }, rules: CameraRules, room: Rect | null): Vec2 {
-  let x = player.x;
-  let y = player.y;
-  if (target) {
-    x += (target.x - player.x) * rules.lean;
-    y += (target.y - player.y) * rules.lean;
-  }
+  // 적이 없으면 복도에서처럼 캐릭터에 고정 (방 경계에서 멈추지 않는다)
+  if (!target) return { x: player.x, y: player.y };
+  let x = player.x + (target.x - player.x) * rules.lean;
+  let y = player.y + (target.y - player.y) * rules.lean;
   // 플레이어가 화면 안(가장자리 margin 안쪽)에 남게
   const mx = Math.max(0, view.w / 2 - rules.playerMarginPx);
   const my = Math.max(0, view.h / 2 - rules.playerMarginPx);

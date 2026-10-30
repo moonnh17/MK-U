@@ -678,6 +678,68 @@
           "delaySec": 0.2
         }
       ]
+    },
+    "warp": {
+      "maxVoices": 1,
+      "layers": [
+        {
+          "wave": "noise",
+          "durSec": 0.9,
+          "volume": 0.3,
+          "filter": {
+            "type": "bandpass",
+            "freq": [
+              300,
+              3500
+            ]
+          }
+        },
+        {
+          "wave": "sine",
+          "freq": [
+            180,
+            900
+          ],
+          "durSec": 0.8,
+          "volume": 0.22
+        },
+        {
+          "wave": "triangle",
+          "freq": [
+            660,
+            1320
+          ],
+          "durSec": 0.4,
+          "volume": 0.1,
+          "delaySec": 0.5
+        }
+      ]
+    },
+    "warpArrive": {
+      "maxVoices": 1,
+      "layers": [
+        {
+          "wave": "sine",
+          "freq": [
+            900,
+            300
+          ],
+          "durSec": 0.35,
+          "volume": 0.2
+        },
+        {
+          "wave": "noise",
+          "durSec": 0.25,
+          "volume": 0.15,
+          "filter": {
+            "type": "lowpass",
+            "freq": [
+              2500,
+              300
+            ]
+          }
+        }
+      ]
     }
   }
 }

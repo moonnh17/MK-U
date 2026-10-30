@@ -176,5 +176,16 @@
     "color": "#9affb0",
     "size": 18,
     "doorFadeSec": 0.25
+  },
+  "portal": {
+    "suckSec": 0.65,
+    "zoom": 1.8,
+    "holdSec": 0.25,
+    "fadeInSec": 0.35,
+    "fadeOutSec": 0.6,
+    "arriveSec": 0.45,
+    "streaks": 48,
+    "color": "#9a7aff",
+    "bgColor": "#0a0614"
   }
 }

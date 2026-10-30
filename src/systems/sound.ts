@@ -33,6 +33,8 @@ export const SFX_IDS = [
   'cardPick',
   'uiClick',
   'awaken',
+  'warp',
+  'warpArrive',
 ] as const;
 
 export type SfxId = (typeof SFX_IDS)[number];

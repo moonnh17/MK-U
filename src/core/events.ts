@@ -23,7 +23,9 @@ export interface GameEvents {
   restartRequested: Record<string, never>;
 
   /** 게임을 멈추는 창(카드 선택·인벤토리)이 열리거나 닫힘 */
-  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | 'archive' | 'story' | 'intro' | 'pause' | null };
+  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | 'archive' | 'story' | 'intro' | 'pause' | 'portal' | null };
+  /** 포탈 이동 화면을 덮거나(on) 걷는다 */
+  warp: { on: boolean };
   /** 효과음 하나 */
   sfx: { id: SfxId };
   /** 소리 켜기·끄기 요청 / 바뀜 */
