@@ -91,8 +91,9 @@ describe('무기 버리기와 맨손', () => {
 });
 
 describe('에너지', () => {
-  it('권총·장검은 에너지 0이라 언제나 쏠 수 있다', () => {
-    expect(canFire(0, weapon('pistol'))).toBe(true);
+  it('장검은 에너지 0이라 언제나 쓸 수 있고, 권총은 탄당 1을 쓴다', () => {
+    expect(canFire(0, weapon('pistol'))).toBe(false);
+    expect(spendEnergy(1, weapon('pistol'))).toBe(0);
     expect(spendEnergy(0, weapon('longsword'))).toBe(0);
   });
 
