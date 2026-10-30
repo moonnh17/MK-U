@@ -19,9 +19,9 @@
         "shell": ["tech", "ranged"]
       },
       "levels": [
-        { "cooldownSec": 8, "values": { "maxCount": 1, "damage": 3, "fireIntervalSec": 0.6, "range": 140, "projectileSpeed": 260 } },
-        { "cooldownSec": 7, "values": { "maxCount": 2, "damage": 3.5, "fireIntervalSec": 0.55, "range": 140, "projectileSpeed": 260 } },
-        { "cooldownSec": 6, "values": { "maxCount": 3, "damage": 4, "fireIntervalSec": 0.5, "range": 150, "projectileSpeed": 260 } }
+        { "cooldownSec": 8, "values": { "maxCount": 1, "damage": 3, "fireIntervalSec": 0.6, "range": 140, "projectileSpeed": 420 } },
+        { "cooldownSec": 7, "values": { "maxCount": 2, "damage": 3.5, "fireIntervalSec": 0.55, "range": 140, "projectileSpeed": 420 } },
+        { "cooldownSec": 6, "values": { "maxCount": 3, "damage": 4, "fireIntervalSec": 0.5, "range": 150, "projectileSpeed": 420 } }
       ],
       "awakening": {
         "nameKey": "skill.magiTurret.awakened",
@@ -33,7 +33,7 @@
         "values": {
           "maxCount": 1,
           "range": 170,
-          "projectileSpeed": 300,
+          "projectileSpeed": 480,
           "bulletDamage": 3,
           "bulletIntervalSec": 0.25,
           "laserDamage": 10,
@@ -47,7 +47,9 @@
       "color": "#4fb3d9",
       "sprites": {
         "turret": { "spriteKey": "skill_turret", "color": "#4fb3d9", "size": 8 },
+        "turretHead": { "spriteKey": "skill_turret_head", "color": "#8fd3f0", "size": 8 },
         "bigTurret": { "spriteKey": "skill_turret_big", "color": "#8ae0ff", "size": 16 },
+        "bigTurretHead": { "spriteKey": "skill_turret_big_head", "color": "#b8ecff", "size": 16 },
         "shell": { "spriteKey": "skill_turret_shell", "color": "#ffb04a", "size": 5 }
       }
     },

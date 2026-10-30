@@ -1,3 +1,4 @@
+import { bus } from '../core/events';
 import Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import type { Rng } from '../core/rng';
@@ -453,6 +454,7 @@ export class Enemy {
     } else if (e.type === 'strike') {
       this.clearTelegraph();
       this.actHit = false;
+      if (a.kind === 'lunge') bus.emit('sfx', { id: 'dash' });
       if (a.kind === 'burst') {
         this.shotsFired = 0;
         this.shotTimer = 0;

@@ -740,6 +740,255 @@
           }
         }
       ]
+    },
+    "dash": {
+      "gapSec": 0.08,
+      "maxVoices": 2,
+      "layers": [
+        {
+          "wave": "noise",
+          "durSec": 0.22,
+          "volume": 0.28,
+          "filter": {
+            "type": "bandpass",
+            "freq": [
+              500,
+              2600
+            ]
+          }
+        },
+        {
+          "wave": "sawtooth",
+          "freq": [
+            160,
+            420
+          ],
+          "durSec": 0.16,
+          "volume": 0.1
+        }
+      ]
+    },
+    "vend": {
+      "maxVoices": 1,
+      "layers": [
+        {
+          "wave": "square",
+          "freq": [
+            880,
+            880
+          ],
+          "durSec": 0.06,
+          "volume": 0.1
+        },
+        {
+          "wave": "square",
+          "freq": [
+            1175,
+            1175
+          ],
+          "durSec": 0.08,
+          "volume": 0.1,
+          "delaySec": 0.07
+        },
+        {
+          "wave": "noise",
+          "durSec": 0.12,
+          "volume": 0.25,
+          "delaySec": 0.2,
+          "filter": {
+            "type": "lowpass",
+            "freq": [
+              900,
+              200
+            ]
+          }
+        }
+      ]
+    },
+    "heal": {
+      "maxVoices": 1,
+      "layers": [
+        {
+          "wave": "sine",
+          "freq": [
+            520,
+            1040
+          ],
+          "durSec": 0.3,
+          "volume": 0.2
+        },
+        {
+          "wave": "triangle",
+          "freq": [
+            780,
+            1560
+          ],
+          "durSec": 0.3,
+          "volume": 0.1,
+          "delaySec": 0.08
+        }
+      ]
+    },
+    "itemFanfare": {
+      "maxVoices": 1,
+      "layers": [
+        {
+          "wave": "triangle",
+          "freq": [
+            523,
+            523
+          ],
+          "durSec": 0.14,
+          "volume": 0.22
+        },
+        {
+          "wave": "triangle",
+          "freq": [
+            659,
+            659
+          ],
+          "durSec": 0.14,
+          "volume": 0.22,
+          "delaySec": 0.13
+        },
+        {
+          "wave": "triangle",
+          "freq": [
+            784,
+            784
+          ],
+          "durSec": 0.14,
+          "volume": 0.22,
+          "delaySec": 0.26
+        },
+        {
+          "wave": "triangle",
+          "freq": [
+            1047,
+            1047
+          ],
+          "durSec": 0.55,
+          "volume": 0.25,
+          "delaySec": 0.39
+        },
+        {
+          "wave": "sine",
+          "freq": [
+            1568,
+            1568
+          ],
+          "durSec": 0.5,
+          "volume": 0.1,
+          "delaySec": 0.39
+        }
+      ]
+    },
+    "combatStart": {
+      "maxVoices": 1,
+      "layers": [
+        {
+          "wave": "sawtooth",
+          "freq": [
+            110,
+            90
+          ],
+          "durSec": 0.35,
+          "volume": 0.22
+        },
+        {
+          "wave": "square",
+          "freq": [
+            440,
+            440
+          ],
+          "durSec": 0.08,
+          "volume": 0.12
+        },
+        {
+          "wave": "square",
+          "freq": [
+            440,
+            440
+          ],
+          "durSec": 0.08,
+          "volume": 0.12,
+          "delaySec": 0.14
+        },
+        {
+          "wave": "noise",
+          "durSec": 0.2,
+          "volume": 0.2,
+          "filter": {
+            "type": "lowpass",
+            "freq": [
+              1800,
+              200
+            ]
+          }
+        }
+      ]
+    },
+    "advCharge": {
+      "maxVoices": 1,
+      "layers": [
+        {
+          "wave": "sawtooth",
+          "freq": [
+            70,
+            620
+          ],
+          "durSec": 3,
+          "volume": 0.14
+        },
+        {
+          "wave": "noise",
+          "durSec": 3,
+          "volume": 0.18,
+          "filter": {
+            "type": "bandpass",
+            "freq": [
+              200,
+              5000
+            ]
+          }
+        }
+      ]
+    },
+    "advBurst": {
+      "maxVoices": 1,
+      "layers": [
+        {
+          "wave": "noise",
+          "durSec": 0.9,
+          "volume": 0.4,
+          "filter": {
+            "type": "lowpass",
+            "freq": [
+              6000,
+              200
+            ]
+          }
+        },
+        {
+          "wave": "sine",
+          "freq": [
+            180,
+            45
+          ],
+          "durSec": 0.8,
+          "volume": 0.35
+        },
+        {
+          "wave": "triangle",
+          "freq": [
+            880,
+            1760
+          ],
+          "durSec": 0.5,
+          "volume": 0.15,
+          "delaySec": 0.05
+        }
+      ]
     }
   }
 }

@@ -1,3 +1,4 @@
+import { bus } from '../core/events';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import { hexColor } from '../core/scale';
@@ -54,6 +55,7 @@ export class Explosive implements SkillObject {
   }
 
   private explode(host: SkillHost): void {
+    bus.emit('sfx', { id: 'explosion' });
     const r = this.spec.radius;
     for (const e of [...host.enemies()]) {
       if (Math.hypot(e.sprite.x - this.x, e.sprite.y - this.y) <= r + e.radius) host.hit(e, this.spec.base, this.spec.tags);

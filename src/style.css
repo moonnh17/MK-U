@@ -22,9 +22,9 @@ body {
   justify-content: center;
 }
 
+/* 캔버스가 이미 고해상도라, 창에 맞출 때 생기는 소수 배는 부드럽게 */
 #game canvas {
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+  image-rendering: auto !important;
 }
 
 /* 모바일 터치 컨트롤: 캔버스 위에 실제 dp(CSS px) 단위로 그린다 */
@@ -834,36 +834,167 @@ body {
 /* 아이템 획득 카드 */
 #item-card {
   position: fixed;
-  top: 12%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 7;
+  inset: 0;
+  z-index: 40;
   display: none;
   flex-direction: column;
-  gap: 3px;
-  max-width: min(80vw, 360px);
-  padding: 8px 14px;
-  border: 2px solid #fff;
-  border-radius: 8px;
-  background: rgba(10, 16, 24, 0.92);
+  align-items: center;
+  justify-content: center;
+  gap: 2vh;
+  background: rgba(0, 0, 0, 0.72);
   color: #fff;
   font-family: sans-serif;
-  pointer-events: none;
+  animation: ig-fade 0.25s ease-out;
+}
+
+@keyframes ig-fade {
+  from { background: rgba(0, 0, 0, 0); }
+}
+
+.ig-stage {
+  position: relative;
+  width: min(44vh, 240px);
+  height: min(44vh, 240px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ig-rays {
+  position: absolute;
+  inset: -30%;
+  border-radius: 50%;
+  background: repeating-conic-gradient(var(--grade) 0deg 9deg, transparent 9deg 30deg);
+  -webkit-mask-image: radial-gradient(circle, #000 12%, transparent 68%);
+  mask-image: radial-gradient(circle, #000 12%, transparent 68%);
+  opacity: 0;
+  animation: ig-rays-in 0.5s 0.2s ease-out forwards, ig-rays-spin 9s linear infinite;
+}
+
+@keyframes ig-rays-in {
+  from { opacity: 0; transform: scale(0.3); }
+  to { opacity: 0.55; transform: scale(1); }
+}
+
+@keyframes ig-rays-spin {
+  to { rotate: 360deg; }
+}
+
+.ig-icon {
+  position: relative;
+  width: min(22vh, 112px);
+  height: min(22vh, 112px);
+  filter: drop-shadow(0 0 14px var(--grade));
+  animation: ig-rise 0.75s cubic-bezier(0.2, 1.3, 0.4, 1) both, ig-float 1.8s 0.75s ease-in-out infinite;
+}
+
+.ig-icon.ig-noart {
+  border-radius: 8px;
+  background: var(--grade);
+}
+
+@keyframes ig-rise {
+  from { transform: translateY(90%) scale(0.2) rotate(-18deg); opacity: 0; }
+  to { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
+}
+
+@keyframes ig-float {
+  50% { transform: translateY(-6px); }
+}
+
+.ig-spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  background: #fff;
+  box-shadow: 0 0 6px var(--grade);
+  opacity: 0;
+  animation: ig-spark 0.8s ease-out forwards;
+}
+
+@keyframes ig-spark {
+  from { opacity: 1; transform: rotate(var(--a)) translateY(0); }
+  to { opacity: 0; transform: rotate(var(--a)) translateY(calc(min(26vh, 130px) * -1)); }
+}
+
+.ig-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: min(86vw, 560px);
+  padding: 12px 18px 22px;
+  border: 2px solid var(--grade);
+  border-radius: 10px;
+  background: rgba(8, 12, 20, 0.95);
+  box-shadow: 0 0 22px rgba(0, 0, 0, 0.7);
+  animation: ig-box 0.35s 0.45s ease-out both;
+}
+
+@keyframes ig-box {
+  from { opacity: 0; transform: translateY(24px); }
+}
+
+.ig-next {
+  position: absolute;
+  right: 12px;
+  bottom: 5px;
+  font-size: 11px;
+  color: #aab4c0;
+  animation: ig-blink 1s steps(2) infinite;
+}
+
+@keyframes ig-blink {
+  50% { opacity: 0.35; }
 }
 
 .ic-head {
-  font-size: 11px;
+  font-size: 12px;
   color: #aab4c0;
 }
 
 .ic-name {
-  font: bold 16px sans-serif;
+  font: bold 20px sans-serif;
+  color: var(--grade);
 }
 
 .ic-desc {
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: 14px;
+  line-height: 1.5;
   color: #dde3ea;
+}
+
+/* 전직: 입자가 모여드는 캐릭터 */
+.cs-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cs-actor {
+  position: relative;
+  z-index: 1;
+  image-rendering: pixelated;
+}
+
+.cs-wave {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  border: 5px solid var(--flash);
+  border-radius: 50%;
+  box-shadow: 0 0 30px var(--flash);
+  pointer-events: none;
+  animation: cs-wave 0.9s ease-out forwards;
+}
+
+@keyframes cs-wave {
+  to { transform: scale(40); opacity: 0; border-width: 1px; }
 }
 
 /* 결산 화면 */

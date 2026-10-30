@@ -30,14 +30,14 @@ describe('맵 생성', () => {
       expect(count(map, 'encounterRoom')).toBe(1);
       const combat = count(map, 'combatRoom');
       if (boss) {
-        expect(combat).toBeGreaterThanOrEqual(2);
-        expect(combat).toBeLessThanOrEqual(3);
+        expect(combat).toBeGreaterThanOrEqual(1);
+        expect(combat).toBeLessThanOrEqual(2);
         expect(count(map, 'bossRoom')).toBe(1);
         expect(count(map, 'exitRoom')).toBe(0);
         expect(map.rooms[map.lastId]!.kind).toBe('bossRoom');
       } else {
-        expect(combat).toBeGreaterThanOrEqual(4);
-        expect(combat).toBeLessThanOrEqual(5);
+        expect(combat).toBeGreaterThanOrEqual(2);
+        expect(combat).toBeLessThanOrEqual(3);
         expect(count(map, 'bossRoom')).toBe(0);
         expect(count(map, 'exitRoom')).toBe(1);
         expect(map.rooms[map.lastId]!.kind).toBe('exitRoom');

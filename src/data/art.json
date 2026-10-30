@@ -130,8 +130,8 @@
     },
     "enemy_hectar_chief": {
       "file": "mku/enemy_hectar_chief.png",
-      "frameWidth": 18,
-      "frameHeight": 36,
+      "frameWidth": 27,
+      "frameHeight": 54,
       "frames": 5,
       "anims": {
         "idle": {
@@ -256,8 +256,8 @@
     },
     "enemy_fusion_akgwi": {
       "file": "mku/enemy_fusion_akgwi.png",
-      "frameWidth": 48,
-      "frameHeight": 46,
+      "frameWidth": 72,
+      "frameHeight": 69,
       "frames": 2,
       "anims": {
         "idle": {
@@ -274,8 +274,8 @@
     },
     "enemy_fusion_akgwi_phase2": {
       "file": "mku/enemy_fusion_akgwi_phase2.png",
-      "frameWidth": 52,
-      "frameHeight": 37,
+      "frameWidth": 78,
+      "frameHeight": 55,
       "frames": 2,
       "anims": {
         "idle": {
@@ -292,8 +292,8 @@
     },
     "enemy_electric_ring": {
       "file": "mku/enemy_electric_ring.png",
-      "frameWidth": 38,
-      "frameHeight": 50,
+      "frameWidth": 57,
+      "frameHeight": 75,
       "frames": 2,
       "anims": {
         "idle": {
@@ -310,8 +310,8 @@
     },
     "enemy_magi_golem": {
       "file": "mku/enemy_magi_golem.png",
-      "frameWidth": 56,
-      "frameHeight": 54,
+      "frameWidth": 84,
+      "frameHeight": 80,
       "frames": 2,
       "anims": {
         "idle": {
@@ -328,8 +328,8 @@
     },
     "enemy_magi_golem_phase2": {
       "file": "mku/enemy_magi_golem_phase2.png",
-      "frameWidth": 60,
-      "frameHeight": 51,
+      "frameWidth": 90,
+      "frameHeight": 76,
       "frames": 2,
       "anims": {
         "idle": {
@@ -346,8 +346,8 @@
     },
     "enemy_eclipse": {
       "file": "mku/enemy_eclipse.png",
-      "frameWidth": 50,
-      "frameHeight": 50,
+      "frameWidth": 75,
+      "frameHeight": 75,
       "frames": 10,
       "anims": {
         "idle": {
@@ -364,8 +364,8 @@
     },
     "enemy_eclipse_phase2": {
       "file": "mku/enemy_eclipse_phase2.png",
-      "frameWidth": 56,
-      "frameHeight": 56,
+      "frameWidth": 84,
+      "frameHeight": 84,
       "frames": 10,
       "anims": {
         "idle": {
@@ -382,8 +382,8 @@
     },
     "enemy_magi_kaiser": {
       "file": "mku/enemy_magi_kaiser.png",
-      "frameWidth": 66,
-      "frameHeight": 53,
+      "frameWidth": 99,
+      "frameHeight": 79,
       "frames": 10,
       "anims": {
         "idle": {
@@ -400,8 +400,8 @@
     },
     "enemy_magi_kaiser_phase1": {
       "file": "mku/enemy_magi_kaiser_phase1.png",
-      "frameWidth": 66,
-      "frameHeight": 52,
+      "frameWidth": 99,
+      "frameHeight": 78,
       "frames": 4,
       "anims": {
         "idle": {
@@ -413,8 +413,8 @@
     },
     "enemy_magi_kaiser_phase2": {
       "file": "mku/enemy_magi_kaiser_phase2.png",
-      "frameWidth": 66,
-      "frameHeight": 53,
+      "frameWidth": 99,
+      "frameHeight": 79,
       "frames": 10,
       "anims": {
         "idle": {
@@ -431,8 +431,8 @@
     },
     "enemy_magi_kaiser_phase3": {
       "file": "mku/enemy_magi_kaiser_phase3.png",
-      "frameWidth": 70,
-      "frameHeight": 45,
+      "frameWidth": 105,
+      "frameHeight": 67,
       "frames": 10,
       "anims": {
         "idle": {
@@ -449,8 +449,8 @@
     },
     "enemy_ancestor_echo": {
       "file": "mku/enemy_ancestor_echo.png",
-      "frameWidth": 31,
-      "frameHeight": 44,
+      "frameWidth": 47,
+      "frameHeight": 66,
       "frames": 3,
       "anims": {
         "idle": {
@@ -479,15 +479,41 @@
     },
     "skill_turret": {
       "file": "mku/skill_turret.png",
-      "frameWidth": 14,
-      "frameHeight": 11,
+      "frameWidth": 20,
+      "frameHeight": 12,
       "frames": 1
+    },
+    "skill_turret_head": {
+      "file": "mku/skill_turret_head.png",
+      "frameWidth": 18,
+      "frameHeight": 7,
+      "frames": 1,
+      "aim": {
+        "pivotX": 0.16,
+        "pivotY": 0.65,
+        "mountY": -8,
+        "tiltDeg": 9,
+        "muzzlePx": 13
+      }
     },
     "skill_turret_big": {
       "file": "mku/skill_turret_big.png",
-      "frameWidth": 22,
-      "frameHeight": 21,
+      "frameWidth": 26,
+      "frameHeight": 15,
       "frames": 1
+    },
+    "skill_turret_big_head": {
+      "file": "mku/skill_turret_big_head.png",
+      "frameWidth": 32,
+      "frameHeight": 17,
+      "frames": 1,
+      "aim": {
+        "pivotX": 0.36,
+        "pivotY": 0.74,
+        "mountY": -11,
+        "tiltDeg": 14,
+        "muzzlePx": 17
+      }
     },
     "skill_mine": {
       "file": "mku/skill_mine.png",
@@ -847,6 +873,330 @@
       "file": "mku/tile_wall_c3.png",
       "frameWidth": 32,
       "frameHeight": 32,
+      "frames": 1
+    },
+    "tile_floor_c1_v0": {
+      "file": "mku/tile_floor_c1_v0.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "tile_floor_c1_v1": {
+      "file": "mku/tile_floor_c1_v1.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "tile_floor_c1_v2": {
+      "file": "mku/tile_floor_c1_v2.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "tile_floor_c1_v3": {
+      "file": "mku/tile_floor_c1_v3.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "tile_floor_c1_v4": {
+      "file": "mku/tile_floor_c1_v4.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "tile_floor_c1_v5": {
+      "file": "mku/tile_floor_c1_v5.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "tile_floor_c2_v0": {
+      "file": "mku/tile_floor_c2_v0.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "tile_floor_c2_v1": {
+      "file": "mku/tile_floor_c2_v1.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "tile_floor_c2_v2": {
+      "file": "mku/tile_floor_c2_v2.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "tile_floor_c2_v3": {
+      "file": "mku/tile_floor_c2_v3.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "tile_floor_c3_v0": {
+      "file": "mku/tile_floor_c3_v0.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "tile_floor_c3_v1": {
+      "file": "mku/tile_floor_c3_v1.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "tile_floor_c3_v2": {
+      "file": "mku/tile_floor_c3_v2.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "obstacle_c1_0": {
+      "file": "mku/obstacle_c1_0.png",
+      "frameWidth": 28,
+      "frameHeight": 22,
+      "frames": 1
+    },
+    "obstacle_c1_1": {
+      "file": "mku/obstacle_c1_1.png",
+      "frameWidth": 27,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "obstacle_c1_2": {
+      "file": "mku/obstacle_c1_2.png",
+      "frameWidth": 28,
+      "frameHeight": 23,
+      "frames": 1
+    },
+    "obstacle_c1_3": {
+      "file": "mku/obstacle_c1_3.png",
+      "frameWidth": 28,
+      "frameHeight": 23,
+      "frames": 1
+    },
+    "obstacle_c1_4": {
+      "file": "mku/obstacle_c1_4.png",
+      "frameWidth": 28,
+      "frameHeight": 26,
+      "frames": 1
+    },
+    "obstacle_c1_5": {
+      "file": "mku/obstacle_c1_5.png",
+      "frameWidth": 21,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "obstacle_c2_0": {
+      "file": "mku/obstacle_c2_0.png",
+      "frameWidth": 17,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "obstacle_c2_1": {
+      "file": "mku/obstacle_c2_1.png",
+      "frameWidth": 25,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "obstacle_c2_2": {
+      "file": "mku/obstacle_c2_2.png",
+      "frameWidth": 28,
+      "frameHeight": 26,
+      "frames": 1
+    },
+    "obstacle_c2_3": {
+      "file": "mku/obstacle_c2_3.png",
+      "frameWidth": 16,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "obstacle_c2_4": {
+      "file": "mku/obstacle_c2_4.png",
+      "frameWidth": 16,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "obstacle_c2_5": {
+      "file": "mku/obstacle_c2_5.png",
+      "frameWidth": 18,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "obstacle_c3_0": {
+      "file": "mku/obstacle_c3_0.png",
+      "frameWidth": 20,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "obstacle_c3_1": {
+      "file": "mku/obstacle_c3_1.png",
+      "frameWidth": 20,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "obstacle_c3_2": {
+      "file": "mku/obstacle_c3_2.png",
+      "frameWidth": 20,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "obstacle_c3_3": {
+      "file": "mku/obstacle_c3_3.png",
+      "frameWidth": 28,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "obstacle_c3_4": {
+      "file": "mku/obstacle_c3_4.png",
+      "frameWidth": 19,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "obstacle_c3_5": {
+      "file": "mku/obstacle_c3_5.png",
+      "frameWidth": 23,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "decal_c1_0": {
+      "file": "mku/decal_c1_0.png",
+      "frameWidth": 28,
+      "frameHeight": 22,
+      "frames": 1
+    },
+    "decal_c1_1": {
+      "file": "mku/decal_c1_1.png",
+      "frameWidth": 26,
+      "frameHeight": 18,
+      "frames": 1
+    },
+    "decal_c1_2": {
+      "file": "mku/decal_c1_2.png",
+      "frameWidth": 26,
+      "frameHeight": 21,
+      "frames": 1
+    },
+    "decal_c1_3": {
+      "file": "mku/decal_c1_3.png",
+      "frameWidth": 25,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "decal_c1_4": {
+      "file": "mku/decal_c1_4.png",
+      "frameWidth": 26,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "decal_c1_5": {
+      "file": "mku/decal_c1_5.png",
+      "frameWidth": 30,
+      "frameHeight": 18,
+      "frames": 1
+    },
+    "decal_c1_6": {
+      "file": "mku/decal_c1_6.png",
+      "frameWidth": 34,
+      "frameHeight": 22,
+      "frames": 1
+    },
+    "decal_c2_0": {
+      "file": "mku/decal_c2_0.png",
+      "frameWidth": 56,
+      "frameHeight": 55,
+      "frames": 1
+    },
+    "decal_c2_1": {
+      "file": "mku/decal_c2_1.png",
+      "frameWidth": 54,
+      "frameHeight": 56,
+      "frames": 1
+    },
+    "decal_c2_2": {
+      "file": "mku/decal_c2_2.png",
+      "frameWidth": 56,
+      "frameHeight": 53,
+      "frames": 1
+    },
+    "decal_c2_3": {
+      "file": "mku/decal_c2_3.png",
+      "frameWidth": 28,
+      "frameHeight": 22,
+      "frames": 1
+    },
+    "decal_c2_4": {
+      "file": "mku/decal_c2_4.png",
+      "frameWidth": 26,
+      "frameHeight": 18,
+      "frames": 1
+    },
+    "decal_c2_5": {
+      "file": "mku/decal_c2_5.png",
+      "frameWidth": 26,
+      "frameHeight": 21,
+      "frames": 1
+    },
+    "decal_c2_6": {
+      "file": "mku/decal_c2_6.png",
+      "frameWidth": 34,
+      "frameHeight": 22,
+      "frames": 1
+    },
+    "decal_c3_0": {
+      "file": "mku/decal_c3_0.png",
+      "frameWidth": 28,
+      "frameHeight": 24,
+      "frames": 1
+    },
+    "decal_c3_1": {
+      "file": "mku/decal_c3_1.png",
+      "frameWidth": 23,
+      "frameHeight": 26,
+      "frames": 1
+    },
+    "decal_c3_2": {
+      "file": "mku/decal_c3_2.png",
+      "frameWidth": 22,
+      "frameHeight": 19,
+      "frames": 1
+    },
+    "decal_c3_3": {
+      "file": "mku/decal_c3_3.png",
+      "frameWidth": 36,
+      "frameHeight": 34,
+      "frames": 1
+    },
+    "decal_c3_4": {
+      "file": "mku/decal_c3_4.png",
+      "frameWidth": 54,
+      "frameHeight": 56,
+      "frames": 1
+    },
+    "decal_c3_5": {
+      "file": "mku/decal_c3_5.png",
+      "frameWidth": 56,
+      "frameHeight": 55,
+      "frames": 1
+    },
+    "decal_c3_6": {
+      "file": "mku/decal_c3_6.png",
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "frames": 1
+    },
+    "prop_vending": {
+      "file": "mku/prop_vending.png",
+      "frameWidth": 24,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "pickup_potion": {
+      "file": "mku/pickup_potion.png",
+      "frameWidth": 9,
+      "frameHeight": 12,
       "frames": 1
     }
   }

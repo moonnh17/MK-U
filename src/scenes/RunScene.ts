@@ -1,3 +1,4 @@
+import { stampGrid } from '../systems/roomShapes';
 import Phaser from 'phaser';
 import type { ActionFrame, ButtonAction, Vec2 } from '../core/actions';
 import { getContext, type GameContext } from '../core/context';
@@ -30,7 +31,7 @@ import { nearestEnemy, type ShieldOpts, type SkillHost, type SkillObject } from 
 import { isSkillImplemented, passiveImpl, skillImpl, ultimateImpl } from '../skills/registry';
 import { applyCard, drawSkillCards, drawStatCards, runStartOffers, stageEndOffers, type AnyCard } from '../systems/cards';
 import { calcDamage, gradeMultiplier, spaceDamage, type RangeBonus, type Stats } from '../systems/damage';
-import { convertSkills, gaugeFromDamage, gaugeFromGreatSuccess, judgeSchool, skillAllowed, topSchools, ultimateAwakeningReady } from '../systems/advancement';
+import { convertSkills, gaugeFromDamage, gaugeFromEnergy, gaugeFromGreatSuccess, judgeSchool, skillAllowed, topSchools, ultimateAwakeningReady } from '../systems/advancement';
 import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type Cutscene } from '../ui/cutscenePages';
 import { assignElites, eliteCount, pickTwoElites } from '../systems/elites';
 import { championWaves, raidChampions } from '../systems/champions';
@@ -123,7 +124,15 @@ interface Offer {
   schools?: SchoolId[];
 }
 
-type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | 'intro' | 'pause' | 'portal' | null;
+type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | 'intro' | 'pause' | 'portal' | 'itemGet' | null;
+
+/** 조우 칸 물약 자판기 */
+interface Vending {
+  x: number;
+  y: number;
+  stock: number;
+  sprite: Phaser.GameObjects.Image;
+}
 
 const SKILL_ACTIONS: ButtonAction[] = ['skill1', 'skill2', 'skill3', 'skill4'];
 
@@ -153,6 +162,12 @@ export class RunScene extends Phaser.Scene {
   private pickups: Pickup[] = [];
   private floorWeapons: FloorWeapon[] = [];
   private portals: Prop[] = [];
+  private vendings: Vending[] = [];
+  private potions: Phaser.GameObjects.Image[] = [];
+  /** 포탈·자판기 앞에 뜨는 조작 안내 */
+  private interactPrompt: Phaser.GameObjects.Text | null = null;
+  /** 아직 보여주지 않은 아이템 획득 창 */
+  private itemGets: { itemId: string; set: boolean }[] = [];
   private cores: Prop[] = [];
   private chests: Chest[] = [];
   private stands: MerchantStand[] = [];
@@ -221,7 +236,7 @@ export class RunScene extends Phaser.Scene {
   private aimDir: Vec2 = { x: 1, y: 0 };
   private fireCooldown = 0;
   private invuln = 0;
-  private interactKind: 'weapon' | 'chest' | 'merchant' | null = null;
+  private interactKind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | null = null;
   /** 상자·드롭 무기 시드 순번 */
   private lootSeq = 0;
   private toastTimes = new Map<string, number>();
@@ -346,7 +361,7 @@ export class RunScene extends Phaser.Scene {
       addObstacle: (at, radius, doorClear) => this.addObstacle(at, radius, doorClear),
       chapterRoster: () => this.chapterRoster(),
       arena: () => this.currentArena(),
-      bossPhaseFx: (text, color) => this.bossPhaseFx(text, color),
+      bossPhaseFx: (text, color, at) => this.bossPhaseFx(text, color, at),
     };
 
     this.walls = this.physics.add.staticGroup();
@@ -366,7 +381,7 @@ export class RunScene extends Phaser.Scene {
     // 카메라: 확대하고 첫 프레임부터 제자리 (다음부터는 부드럽게 따라간다)
     {
       const cam = this.cameras.main;
-      cam.setZoom(d.ui.camera.zoom);
+      cam.setZoom(d.ui.camera.zoom * this.ctx.renderScale);
       const t0 = this.cameraTarget();
       cam.setScroll(t0.x - cam.width / 2, t0.y - cam.height / 2);
     }
@@ -414,6 +429,9 @@ export class RunScene extends Phaser.Scene {
       bus.on('debugBarrage', () => this.debugBarrage()),
       bus.on('cutsceneDone', () => this.showNextCut()),
       bus.on('storyDone', () => this.finishStory()),
+      bus.on('itemGetDone', () => {
+        if (this.modal === 'itemGet') this.setModal(null);
+      }),
       bus.on('pauseResume', () => {
         if (this.modal === 'pause') this.setModal(null);
       }),
@@ -472,6 +490,10 @@ export class RunScene extends Phaser.Scene {
     this.pickups = [];
     this.floorWeapons = [];
     this.portals = [];
+    this.vendings = [];
+    this.potions = [];
+    this.interactPrompt = null;
+    this.itemGets = [];
     this.cores = [];
     this.chests = [];
     this.stands = [];
@@ -532,18 +554,16 @@ export class RunScene extends Phaser.Scene {
     }
 
     for (const node of map.rooms) {
-      this.addRect(roomRect(node, this.m), floor, 0, tile('floor'));
+      // 바닥: 방마다 변형 하나 (같은 시드면 같은 방)
+      const dress = Rng.derive(this.ctx.config.seed, `dress-${map.chapter}-${map.stage}-${node.id}`);
+      const floorN = d.mapgen.dressing.floorVariants[String(chapter)] ?? 0;
+      this.addRect(roomRect(node, this.m), floor, 0, floorN > 0 ? artKeys.floorVariant(chapter, dress.int(0, floorN - 1)) : tile('floor'));
       for (const w of wallRects(node, this.m)) this.walls.add(this.addRect(w, wall, 1, tile('wall')));
       // 장애물: 벽처럼 이동과 탄(플레이어·적)을 막는다
       const obs = obstacleRects(node, this.m, d.mapgen);
       this.obstacles.set(node.id, obs);
-      for (const o of obs) {
-        // 바닥과 구분되게: 아래로 드리운 그림자 + 밝은 윗면 + 어두운 테두리
-        this.add.rectangle(o.x + o.w / 2 + 2, o.y + o.h / 2 + 4, o.w, o.h, 0x000000, 0.45).setDepth(0.5);
-        this.walls.add(this.addRect(o, wall, 1, tile('wall')).setDepth(1));
-        this.add.rectangle(o.x + o.w / 2, o.y + o.h / 2, o.w, o.h).setStrokeStyle(1, 0x05070a, 0.9).setDepth(1.1);
-        this.add.rectangle(o.x + o.w / 2, o.y + 1, o.w - 2, 2, 0xffffff, 0.18).setDepth(1.1);
-      }
+      this.addDecals(node, chapter, obs, dress);
+      for (const o of obs) this.dressObstacle(o, chapter, dress);
 
       const doors: Door[] = [];
       for (const dir of Object.keys(node.doors) as ('n' | 's' | 'e' | 'w')[]) {
@@ -566,12 +586,88 @@ export class RunScene extends Phaser.Scene {
       const c = roomCenter(node, this.m);
       if (node.kind === 'exitRoom') this.addPortal(node);
       if (node.kind === 'encounterRoom') {
+        this.addVending(node, obs, dress);
         const ref = d.mapgen.props.encounterCore;
         const core = this.add.image(c.x, c.y, ref.spriteKey).setDepth(2);
         fitArt(d, core, ref.size, ref.height ?? ref.size);
         this.cores.push({ sprite: core, roomId: node.id, radius: ref.size / 2 });
       }
     }
+  }
+
+  /** 바닥 장식: 밟고 지나가는 잔해·패널 (지형지물 자리는 피한다) */
+  private addDecals(node: RoomNode, chapter: number, obs: readonly Rect[], rng: Rng): void {
+    const dr = this.ctx.data.mapgen.dressing;
+    const inner = interiorRect(node, this.m, 8);
+    const n = rng.int(dr.decalsPerRoom[0], dr.decalsPerRoom[1]);
+    for (let i = 0; i < n; i++) {
+      const x = rng.range(inner.x, inner.x + inner.w);
+      const y = rng.range(inner.y, inner.y + inner.h);
+      const key = artKeys.decal(chapter, rng.int(0, dr.decalKinds - 1));
+      if (!this.ctx.artLoaded.has(key) || obs.some((o) => contains({ x: o.x - 16, y: o.y - 16, w: o.w + 32, h: o.h + 32 }, x, y))) continue;
+      this.add.image(x, y, key).setDepth(0.2).setFlipX(rng.chance(0.5));
+    }
+  }
+
+  /** 지형지물: 판정은 사각형 그대로, 겉모습은 챕터 소품을 빽빽이 찍어 바닥과 확실히 다르게 */
+  private dressObstacle(o: Rect, chapter: number, rng: Rng): void {
+    const dr = this.ctx.data.mapgen.dressing;
+    this.add.rectangle(o.x + o.w / 2 + 2, o.y + o.h / 2 + 5, o.w, o.h, 0x000000, 0.5).setDepth(0.5);
+    this.walls.add(this.add.rectangle(o.x + o.w / 2, o.y + o.h / 2, o.w, o.h, hexColor(dr.obstacleBaseColor)).setDepth(1));
+    for (const p of stampGrid(o, dr.obstacleStepPx)) {
+      const key = artKeys.obstacle(chapter, rng.int(0, dr.obstacleKinds - 1));
+      if (!this.ctx.artLoaded.has(key)) continue;
+      this.add.image(p.x, p.y + 4, key).setOrigin(0.5, 0.8).setDepth(1.1 + p.y * 1e-5).setFlipX(rng.chance(0.5));
+    }
+  }
+
+  /** 물약 자판기: 방 모서리 중 지형지물이 없는 곳 */
+  private addVending(node: RoomNode, obs: readonly Rect[], rng: Rng): void {
+    const v = this.ctx.data.mapgen.vending;
+    const inner = interiorRect(node, this.m, v.cornerInsetPx);
+    const corners = [
+      { x: inner.x, y: inner.y },
+      { x: inner.x + inner.w, y: inner.y },
+      { x: inner.x, y: inner.y + inner.h },
+      { x: inner.x + inner.w, y: inner.y + inner.h },
+    ].filter((p) => !obs.some((o) => contains({ x: o.x - 24, y: o.y - 24, w: o.w + 48, h: o.h + 48 }, p.x, p.y)));
+    const at = corners.length > 0 ? rng.pick(corners) : roomCenter(node, this.m);
+    const sprite = this.add.image(at.x, at.y, v.spriteKey).setDepth(2);
+    fitArt(this.ctx.data, sprite, v.size, v.height ?? v.size);
+    this.vendings.push({ x: at.x, y: at.y, stock: v.stock, sprite });
+  }
+
+  /** 자판기에서 물약을 뽑는다: 코인을 내면 앞으로 물약이 튀어나온다 */
+  private buyPotion(m: Vending): void {
+    const v = this.ctx.data.mapgen.vending;
+    const p = this.session.player;
+    if (p.coins < v.price) {
+      this.toastThrottled(this.ctx.t('merchant.noCoins'));
+      return;
+    }
+    p.coins -= v.price;
+    m.stock--;
+    sfx('vend');
+    this.tweens.add({ targets: m.sprite, x: m.x + 1.5, duration: 40, yoyo: true, repeat: 3, onComplete: () => m.sprite.setX(m.x) });
+    if (m.stock <= 0) m.sprite.setAlpha(0.45);
+    const potion = this.add.image(m.x, m.y + 4, v.potion.spriteKey).setDepth(3);
+    this.potions.push(potion);
+    this.tweens.add({ targets: potion, y: m.y + 26, x: m.x + this.rng.range(-8, 8), duration: 280, ease: 'Bounce.easeOut' });
+  }
+
+  /** 물약 줍기: 체력이 닳아 있을 때 닿으면 회복 */
+  private updatePotions(): void {
+    const v = this.ctx.data.mapgen.vending;
+    const p = this.session.player;
+    this.potions = this.potions.filter((img) => {
+      if (p.hp >= p.maxHp || Math.hypot(img.x - this.player.x, img.y - this.player.y) > v.pickupRadius) return true;
+      const before = p.hp;
+      p.hp = Math.min(p.maxHp, p.hp + p.maxHp * v.healRatio);
+      sfx('heal');
+      this.floatLabel({ x: this.player.x, y: this.player.y - 8 }, this.ctx.t('vending.heal', { n: Math.round(p.hp - before) }), '#7dff9a');
+      img.destroy();
+      return false;
+    });
   }
 
   /** 플레이어 모습: 전직했으면 그 학파 그림(있으면), 아니면 기본 */
@@ -609,7 +705,7 @@ export class RunScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const rid = roomAt(this.session.map, this.m, this.player.x, this.player.y);
     const room = rid !== null ? roomRect(this.session.map.rooms[rid]!, this.m) : null;
-    return cameraFocus({ x: this.player.x, y: this.player.y }, this.aimTarget, viewSize(cam.width, cam.height, rules.zoom), rules, room);
+    return cameraFocus({ x: this.player.x, y: this.player.y }, this.aimTarget, viewSize(cam.width, cam.height, rules.zoom * this.ctx.renderScale), rules, room);
   }
 
   /** 보스 등장 컷 시작: 게임을 멈추고 카메라가 보스 쪽으로 다가간다 */
@@ -621,7 +717,7 @@ export class RunScene extends Phaser.Scene {
     this.setModal('intro');
     const cam = this.cameras.main;
     cam.pan(e.sprite.x, e.sprite.y, bi.panSec * 1000, 'Sine.easeInOut');
-    cam.zoomTo(this.ctx.data.ui.camera.zoom * bi.zoom, bi.panSec * 1000);
+    cam.zoomTo(this.ctx.data.ui.camera.zoom * this.ctx.renderScale * bi.zoom, bi.panSec * 1000);
   }
 
   /** 등장 컷 한 프레임: 단계가 바뀔 때마다 연출. 아무 키·탭이면 건너뛴다 */
@@ -662,7 +758,7 @@ export class RunScene extends Phaser.Scene {
       bus.emit('bossIntroBand', { name: '', sub: '' });
       const tgt = this.cameraTarget();
       cam.pan(tgt.x, tgt.y, bi.returnSec * 1000, 'Sine.easeInOut');
-      cam.zoomTo(this.ctx.data.ui.camera.zoom, bi.returnSec * 1000);
+      cam.zoomTo(this.ctx.data.ui.camera.zoom * this.ctx.renderScale, bi.returnSec * 1000);
     } else if (st === 'done') {
       this.finishIntro();
     }
@@ -676,7 +772,7 @@ export class RunScene extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.panEffect.reset();
     cam.zoomEffect.reset();
-    cam.setZoom(this.ctx.data.ui.camera.zoom);
+    cam.setZoom(this.ctx.data.ui.camera.zoom * this.ctx.renderScale);
     const tgt = this.cameraTarget();
     cam.setScroll(tgt.x - cam.width / 2, tgt.y - cam.height / 2);
     this.tweens.killTweensOf(it.e.sprite);
@@ -696,7 +792,7 @@ export class RunScene extends Phaser.Scene {
     this.setModal('portal');
     sfx('warp');
     const cam = this.cameras.main;
-    cam.zoomTo(this.ctx.data.ui.camera.zoom * p.zoom, p.suckSec * 1000, 'Quad.easeIn');
+    cam.zoomTo(this.ctx.data.ui.camera.zoom * this.ctx.renderScale * p.zoom, p.suckSec * 1000, 'Quad.easeIn');
     cam.pan(portal.x, portal.y, p.suckSec * 1000, 'Sine.easeInOut');
     this.weaponSprite.setVisible(false);
     this.tweens.add({
@@ -735,13 +831,14 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 보스 강화·단계 개방: 번쩍임, 짧은 확대, 화면 가운데 큰 이름 */
-  private bossPhaseFx(text: string, color: string): void {
+  private bossPhaseFx(text: string, color: string, at: Vec2): void {
     const bp = this.ctx.data.juice.bossPhase;
     const c = Phaser.Display.Color.HexStringToColor(color);
     const cam = this.cameras.main;
     cam.flash(bp.flashMs, c.red, c.green, c.blue);
     sfx('bossPhase');
-    const base = this.ctx.data.ui.camera.zoom;
+    this.juice.colorBurst(at, color, bp);
+    const base = this.ctx.data.ui.camera.zoom * this.ctx.renderScale;
     this.tweens.add({ targets: cam, zoom: base * bp.zoom, duration: (bp.zoomSec * 1000) / 2, yoyo: true, onComplete: () => cam.setZoom(base) });
     bus.emit('banner', { text, color, size: bp.bannerSize, sec: bp.bannerSec });
   }
@@ -805,6 +902,10 @@ export class RunScene extends Phaser.Scene {
     if (this.session.outcome) {
       if (frame.pressed.has('attack') || frame.pressed.has('interact')) this.restartRun();
       return;
+    }
+    if (!this.modal && this.itemGets.length > 0) {
+      this.setModal('itemGet');
+      bus.emit('itemGot', this.itemGets.shift()!);
     }
     if (this.modal) {
       this.updateModal(frame);
@@ -898,8 +999,8 @@ export class RunScene extends Phaser.Scene {
     this.updateBullets(dt);
     this.updatePickups(dt);
     this.updateInvuln(dt);
+    this.updatePotions();
     this.updateInteractHint();
-    this.checkPortals();
 
     const off = d.player.weaponOffset;
     this.weaponSprite
@@ -945,14 +1046,26 @@ export class RunScene extends Phaser.Scene {
 
   private handleRoomEvents(roomId: number, events: RoomEvent[]): void {
     for (const e of events) {
-      if (e.type === 'lock') this.setRoomLocked(roomId, true);
+      if (e.type === 'lock') {
+        this.setRoomLocked(roomId, true);
+        // 보스는 등장 연출이 따로 있다
+        if (this.rooms.get(roomId)?.kind !== 'bossRoom' && !this.hiddenBossRooms.has(roomId)) {
+          bus.emit('combatBanner', { kind: 'start' });
+          sfx('combatStart');
+          shake(this, 'light');
+        }
+      }
       else if (e.type === 'spawn') this.spawnWave(roomId, e.wave, e.index);
       else {
         this.setRoomLocked(roomId, false);
         const node = this.session.map.rooms[roomId]!;
         const rc = this.ctx.data.juice.roomClear;
-        bus.emit('banner', { text: this.ctx.t('room.clear'), color: rc.color, size: rc.size, sec: rc.sec });
+        bus.emit('combatBanner', { kind: 'clear' });
         sfx('roomClear');
+        this.juice.colorBurst({ x: this.player.x, y: this.player.y }, rc.color, rc);
+        const cam = this.cameras.main;
+        const base = this.ctx.data.ui.camera.zoom * this.ctx.renderScale;
+        this.tweens.add({ targets: cam, zoom: base * rc.zoom, duration: (rc.zoomSec * 1000) / 2, yoyo: true, onComplete: () => cam.setZoom(base) });
         if (node.kind === 'combatRoom') this.combatRoomDrop(roomId);
         if (this.raidRooms.has(roomId)) this.raidReward(roomId);
         if (this.hiddenBossRooms.has(roomId)) this.hiddenBossReward(roomId);
@@ -1301,6 +1414,8 @@ export class RunScene extends Phaser.Scene {
       this.toastThrottled(this.ctx.t('room.energyEmpty'));
       return;
     }
+    const udef = this.ultimateDef();
+    p.ultimate.gauge = gainGauge(p.ultimate.gauge, udef.gaugeMax, gaugeFromEnergy(udef, p.energy - left));
     p.energy = left;
     sfx(sig?.kind === 'laser' ? 'shotLaser' : weaponSfx(w));
     const emp = this.itemRt.consumeEmpowered();
@@ -1797,6 +1912,7 @@ export class RunScene extends Phaser.Scene {
         p.hp = payHp(p.hp, ratio).hp;
       },
       dash: (dir, speed, sec) => {
+        sfx('dash');
         this.dashVel = { x: dir.x * speed, y: dir.y * speed };
         this.dashLeft = sec;
       },
@@ -2491,7 +2607,14 @@ export class RunScene extends Phaser.Scene {
       stand.markSold(t('merchant.sold'));
       this.takeWeapon(stand.stock.weapon, stand.x, stand.y + 14);
       bus.emit('toast', { text: t('merchant.bought', { weapon: this.weaponName(stand.stock.weapon) }) });
+      return;
     }
+    const vending = this.nearVending();
+    if (vending) {
+      this.buyPotion(vending);
+      return;
+    }
+    if (this.nearPortal()) this.nextStage();
   }
 
   private openChest(chest: Chest): void {
@@ -2516,7 +2639,6 @@ export class RunScene extends Phaser.Scene {
 
   /** 아이템 획득: 확률 이전 → 세트 합성 → 획득 카드 */
   private giveItem(id: string): void {
-    sfx('itemGet');
     const d = this.ctx.data;
     const p = this.session.player;
     const def = d.items.items.find((x) => x.id === id);
@@ -2524,13 +2646,13 @@ export class RunScene extends Phaser.Scene {
     p.items = [...p.items, id];
     p.itemsObtained = [...p.itemsObtained, id];
     if (def.pool === 'normal') p.lootShift = transferWeight(p.lootShift, def.grade, d.items.transferPerPickup);
-    bus.emit('itemGot', { itemId: id, set: false });
+    this.itemGets.push({ itemId: id, set: false });
     // 세트: 재료가 모이면 자동 합성, 재료 효과는 사라지고 다시 나오지 않는다
     const set = readySet(new Set(p.items), new Set(p.itemsObtained), d.items.sets);
     if (set) {
       p.items = [...p.items.filter((x) => !set.materials.includes(x)), set.result];
       p.itemsObtained = [...p.itemsObtained, set.result];
-      bus.emit('itemGot', { itemId: set.result, set: true });
+      this.itemGets.push({ itemId: set.result, set: true });
     }
     this.itemRt.refresh();
   }
@@ -2719,11 +2841,24 @@ export class RunScene extends Phaser.Scene {
   }
 
   private updateInteractHint(): void {
-    const kind = this.nearestFloorWeapon() ? 'weapon' : this.nearChest() ? 'chest' : this.nearStand() ? 'merchant' : null;
+    const vending = this.nearVending();
+    const portal = this.nearPortal();
+    const kind = this.nearestFloorWeapon() ? 'weapon' : this.nearChest() ? 'chest' : this.nearStand() ? 'merchant' : vending ? 'vending' : portal ? 'portal' : null;
     if (kind !== this.interactKind) this.setInteractHint(kind);
+    // 포탈·자판기: 머리 위에 조작 안내
+    const at = kind === 'vending' ? vending : kind === 'portal' ? { x: portal!.sprite.x, y: portal!.sprite.y } : null;
+    if (!at) {
+      this.interactPrompt?.setVisible(false);
+      return;
+    }
+    const mode = this.ctx.uiMode === 'mobile' ? 'mobile' : 'pc';
+    const text = this.ctx.t(`interact.${kind}.${mode}`, { price: this.ctx.data.mapgen.vending.price });
+    this.interactPrompt ??= this.add.text(0, 0, '', { fontFamily: 'sans-serif', fontSize: '9px', color: '#ffffff', stroke: '#000000', strokeThickness: 3 }).setOrigin(0.5, 1).setDepth(9);
+    if (this.interactPrompt.text !== text) this.interactPrompt.setText(text);
+    this.interactPrompt.setPosition(at.x, at.y - 22).setVisible(true);
   }
 
-  private setInteractHint(kind: 'weapon' | 'chest' | 'merchant' | null): void {
+  private setInteractHint(kind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | null): void {
     this.interactKind = kind;
     bus.emit('interactHint', { kind });
   }
@@ -2747,15 +2882,18 @@ export class RunScene extends Phaser.Scene {
 
   // ---------- 진행 ----------
 
-  private checkPortals(): void {
-    if (this.leaving) return;
-    const pr = this.ctx.data.player.size / 2;
-    for (const portal of this.portals) {
-      if (Math.hypot(portal.sprite.x - this.player.x, portal.sprite.y - this.player.y) <= portal.radius + pr) {
-        this.nextStage();
-        return;
-      }
-    }
+  /** 상호작용(F)이 닿는 포탈 */
+  private nearPortal(): Prop | null {
+    if (this.leaving) return null;
+    const r = this.ctx.data.pickups.interactRadius;
+    return this.portals.find((x) => Math.hypot(x.sprite.x - this.player.x, x.sprite.y - this.player.y) <= x.radius + r) ?? null;
+  }
+
+  private nearVending(): Vending | null {
+    return this.nearest(
+      this.vendings.filter((v) => v.stock > 0),
+      this.ctx.data.pickups.interactRadius + this.ctx.data.mapgen.vending.size / 2,
+    );
   }
 
   private nextStage(): void {

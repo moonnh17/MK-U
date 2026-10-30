@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
 import { generateStage, type Dir } from '../src/systems/mapgen';
-import { doorLanes, floorConnected, obstacleTiles } from '../src/systems/roomShapes';
+import { doorLanes, floorConnected, obstacleTiles, stampGrid } from '../src/systems/roomShapes';
 import { corridors, interiorRect, metrics, obstacleRects, roomAt, roomRect } from '../src/systems/worldLayout';
 
 const D = gameData.mapgen;
@@ -102,5 +102,22 @@ describe('장애물 배치 틀', () => {
         }
       }
     }
+  });
+});
+
+describe('stampGrid', () => {
+  it('사각형을 간격대로 덮는다 (자리는 모두 안쪽)', () => {
+    const r = { x: 100, y: 200, w: 64, h: 16 };
+    const pts = stampGrid(r, 16);
+    expect(pts.length).toBe(4);
+    for (const p of pts) {
+      expect(p.x).toBeGreaterThan(r.x);
+      expect(p.x).toBeLessThan(r.x + r.w);
+      expect(p.y).toBeCloseTo(208);
+    }
+  });
+
+  it('간격보다 작아도 한 자리는 찍는다', () => {
+    expect(stampGrid({ x: 0, y: 0, w: 4, h: 4 }, 16)).toEqual([{ x: 2, y: 2 }]);
   });
 });

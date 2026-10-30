@@ -17,6 +17,7 @@ export class CutsceneWindow {
   private open = false;
   private shownAt = 0;
   private timers: number[] = [];
+  private raf = 0;
 
   constructor(private readonly ctx: GameContext) {
     this.root = document.createElement('div');
@@ -72,6 +73,7 @@ export class CutsceneWindow {
   private clearTimers(): void {
     for (const id of this.timers) clearTimeout(id);
     this.timers = [];
+    cancelAnimationFrame(this.raf);
   }
 
   private icon(i: CutIcon, cls = ''): HTMLDivElement {
@@ -150,8 +152,112 @@ export class CutsceneWindow {
       return;
     }
 
-    // 전직: 암전 → 실루엣이 엠블럼으로 → 반대 학파 아이콘이 깨져 파편이 내 스킬로 → +1 → 학파 색 전환
+    // 전직: 암전 → 입자가 사방에서 캐릭터로 빨려 들어감 → 번쩍이며 새 모습 → 이어서 스킬 변환
     this.root.classList.add('cs-black');
+    const ad = this.ctx.data.juice.advancement;
+    const actor = this.actor(cut.actorFrom);
+    stage.appendChild(actor);
+    bus.emit('sfx', { id: 'advCharge' });
+    this.converge(actor, cut.flash, ad.chargeSec, ad.particles, () => {
+      bus.emit('sfx', { id: 'advBurst' });
+      this.root.classList.add('cs-flash');
+      this.later(350, () => this.root.classList.remove('cs-flash'));
+      const next = this.actor(cut.actorTo);
+      actor.replaceWith(next);
+      next.style.filter = `drop-shadow(0 0 22px ${cut.flash})`;
+      const wave = document.createElement('div');
+      wave.className = 'cs-wave';
+      this.root.appendChild(wave);
+      this.later(900, () => wave.remove());
+      this.later(ad.burstHoldSec * 1000, () => {
+        stage.replaceChildren();
+        this.playConversion(stage, cut);
+      });
+    });
+  }
+
+  /** 플레이어 그림(첫 프레임)을 크게 */
+  private actor(key: string): HTMLDivElement {
+    const el = document.createElement('div');
+    el.className = 'cs-actor';
+    const s = this.ctx.data.art.sprites[key];
+    const h = Math.min(window.innerHeight * 0.42, 220);
+    el.style.height = `${h}px`;
+    el.style.width = `${s ? (h * s.frameWidth) / s.frameHeight : h * 0.6}px`;
+    applyArtIcon(el, this.ctx, key, '#e8e2d0');
+    return el;
+  }
+
+  /** 화면 전체에서 입자가 소용돌이치며 actor로 빨려 들어간다. 끝으로 갈수록 빠르고 많고 캐릭터가 밝게 떨린다 */
+  private converge(actor: HTMLElement, color: string, sec: number, count: number, done: () => void): void {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'cs-canvas';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    this.root.appendChild(canvas);
+    const g = canvas.getContext('2d');
+    const r = actor.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const far = Math.hypot(canvas.width, canvas.height) * 0.65;
+    const parts = Array.from({ length: count }, (_, i) => ({
+      angle: Math.random() * Math.PI * 2,
+      dist: far * (0.5 + Math.random() * 0.5),
+      // 뒤로 갈수록 몰려 들어온다
+      delay: Math.pow(i / count, 0.6) * 0.72,
+      dur: 0.16 + Math.random() * 0.14,
+      spin: (Math.random() < 0.5 ? -1 : 1) * (1.2 + Math.random() * 1.8),
+      size: 1.5 + Math.random() * 3,
+      white: Math.random() < 0.35,
+    }));
+    const pos = (p: (typeof parts)[number], t: number) => {
+      const e = t * t;
+      const d = p.dist * (1 - e);
+      const a = p.angle + p.spin * e;
+      return { x: cx + Math.cos(a) * d, y: cy + Math.sin(a) * d };
+    };
+    const start = performance.now();
+    const frame = (now: number) => {
+      const k = Math.min(1, (now - start) / (sec * 1000));
+      if (g) {
+        g.clearRect(0, 0, canvas.width, canvas.height);
+        g.lineCap = 'round';
+        // 캐릭터 뒤 빛
+        const glow = g.createRadialGradient(cx, cy, 0, cx, cy, 40 + 260 * k * k);
+        glow.addColorStop(0, color);
+        glow.addColorStop(1, 'transparent');
+        g.globalAlpha = 0.15 + 0.6 * k * k;
+        g.fillStyle = glow;
+        g.fillRect(0, 0, canvas.width, canvas.height);
+        for (const p of parts) {
+          const t = (k - p.delay) / p.dur;
+          if (t <= 0 || t >= 1) continue;
+          const a = pos(p, t);
+          const b = pos(p, Math.max(0, t - 0.07));
+          g.globalAlpha = Math.min(1, t * 4);
+          g.strokeStyle = p.white ? '#ffffff' : color;
+          g.lineWidth = p.size;
+          g.beginPath();
+          g.moveTo(a.x, a.y);
+          g.lineTo(b.x, b.y);
+          g.stroke();
+        }
+      }
+      const shakePx = k * k * 7;
+      actor.style.transform = `translate(${(Math.random() - 0.5) * shakePx}px, ${(Math.random() - 0.5) * shakePx}px) scale(${1 + k * 0.12})`;
+      actor.style.filter = `brightness(${1 + 5 * k * k}) drop-shadow(0 0 ${6 + 34 * k}px ${color})`;
+      if (k >= 1) {
+        canvas.remove();
+        done();
+        return;
+      }
+      this.raf = requestAnimationFrame(frame);
+    };
+    this.raf = requestAnimationFrame(frame);
+  }
+
+  /** 전직 뒷부분: 실루엣이 엠블럼으로 → 반대 학파 아이콘이 깨져 파편이 내 스킬로 → +1 → 학파 색 전환 */
+  private playConversion(stage: HTMLElement, cut: Extract<CutIn, { kind: 'advancement' }>): void {
     const top = document.createElement('div');
     top.className = 'cs-row';
     const broken = cut.broken.map((i) => this.icon(i));

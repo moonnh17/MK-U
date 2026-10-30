@@ -24,7 +24,7 @@ export interface BossHost extends HazardHost {
   chapterRoster(): string[];
   removeMinion(e: Enemy): void;
   /** 보스 강화·단계 개방 연출: 번쩍임·짧은 확대·화면 가운데 큰 이름 */
-  bossPhaseFx(text: string, color: string): void;
+  bossPhaseFx(text: string, color: string, at: Vec2): void;
   /** 지나갈 수 없는 장애물(지면 파괴 잔해). 문 근처·플레이어 자리면 만들지 않고 null */
   addObstacle(at: Vec2, radius: number, doorClear: number): { destroy(): void } | null;
 }

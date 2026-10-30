@@ -35,6 +35,13 @@ export const SFX_IDS = [
   'awaken',
   'warp',
   'warpArrive',
+  'dash',
+  'vend',
+  'heal',
+  'itemFanfare',
+  'combatStart',
+  'advCharge',
+  'advBurst',
 ] as const;
 
 export type SfxId = (typeof SFX_IDS)[number];

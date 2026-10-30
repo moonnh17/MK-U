@@ -1,6 +1,6 @@
 /**
- * 아이템 획득 카드 (DOM). 얻는 순간 화면 위쪽에 잠깐 뜬다(게임은 멈추지 않음).
- * 아이템 탭은 M5에서 만든다.
+ * 아이템 획득 창 (DOM). 게임을 멈추고, 빛줄기 속에서 아이템이 떠오른 뒤 아래 글상자에 이름·설명이 뜬다.
+ * 아무 키나 화면을 누르면 닫힌다.
  */
 import { applyArtIcon } from './artIcon';
 import type { GameContext } from '../core/context';
@@ -45,51 +45,79 @@ export function itemDescParams(def: ItemDef, groups: GroupMultipliersData): Reco
   return out;
 }
 
+/** 연속 입력으로 바로 닫히지 않게 */
+const CLOSE_GUARD_MS = 700;
+
 export class ItemCard {
   private readonly root: HTMLDivElement;
-  private timer = 0;
-  private queue: { itemId: string; set: boolean }[] = [];
+  private open = false;
+  private shownAt = 0;
 
   constructor(private readonly ctx: GameContext) {
     this.root = document.createElement('div');
     this.root.id = 'item-card';
     document.body.appendChild(this.root);
-    bus.on('itemGot', (e) => {
-      this.queue.push(e);
-      if (!this.timer) this.next();
-    });
+    bus.on('itemGot', (e) => this.show(e));
+    const close = (e: Event) => {
+      if (!this.open) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (performance.now() - this.shownAt < CLOSE_GUARD_MS) return;
+      this.open = false;
+      this.root.style.display = 'none';
+      this.root.replaceChildren();
+      bus.emit('itemGetDone', {});
+    };
+    window.addEventListener('keydown', close, true);
+    this.root.addEventListener('pointerdown', close);
   }
 
-  private next(): void {
-    const e = this.queue.shift();
-    if (!e) {
-      this.timer = 0;
-      this.root.style.display = 'none';
-      return;
-    }
+  private show(e: { itemId: string; set: boolean }): void {
     const t = this.ctx.t;
     const d = this.ctx.data;
     const def = d.items.items.find((x) => x.id === e.itemId);
-    if (!def) return this.next();
+    if (!def) {
+      bus.emit('itemGetDone', {});
+      return;
+    }
     const grade = d.groupMultipliers.grades.find((g) => g.id === def.grade);
-    this.root.style.borderColor = grade?.color ?? '#ffffff';
+    const color = grade?.color ?? '#ffffff';
+    this.root.style.setProperty('--grade', color);
     this.root.replaceChildren();
+    const stage = document.createElement('div');
+    stage.className = 'ig-stage';
+    const rays = document.createElement('div');
+    rays.className = 'ig-rays';
+    const icon = document.createElement('div');
+    icon.className = 'ig-icon';
+    if (!applyArtIcon(icon, this.ctx, def.spriteKey, color)) icon.classList.add('ig-noart');
+    stage.append(rays, icon);
+    for (let i = 0; i < 14; i++) {
+      const spark = document.createElement('i');
+      spark.className = 'ig-spark';
+      spark.style.setProperty('--a', `${(i / 14) * 360}deg`);
+      spark.style.animationDelay = `${0.35 + (i % 4) * 0.08}s`;
+      stage.appendChild(spark);
+    }
+    const box = document.createElement('div');
+    box.className = 'ig-box';
     const head = document.createElement('div');
     head.className = 'ic-head';
     head.textContent = `${t(e.set ? 'item.set' : 'item.got')} · ${grade ? t(grade.nameKey) : ''}`;
     const name = document.createElement('div');
     name.className = 'ic-name';
-    name.style.color = grade?.color ?? '#ffffff';
     name.textContent = t(def.nameKey);
-    // 아이템 그림이 있으면 이름 앞에 아이콘
-    const icon = document.createElement('span');
-    icon.className = 'cw-icon';
-    if (applyArtIcon(icon, this.ctx, def.spriteKey)) name.prepend(icon);
     const desc = document.createElement('div');
     desc.className = 'ic-desc';
     desc.textContent = t(def.descKey, itemDescParams(def, d.groupMultipliers));
-    this.root.append(head, name, desc);
+    const next = document.createElement('div');
+    next.className = 'ig-next';
+    next.textContent = `▼ ${t(this.ctx.uiMode === 'mobile' ? 'itemGet.next.mobile' : 'itemGet.next.pc')}`;
+    box.append(head, name, desc, next);
+    this.root.append(stage, box);
     this.root.style.display = 'flex';
-    this.timer = window.setTimeout(() => this.next(), d.items.pickupCardSec * 1000);
+    this.open = true;
+    this.shownAt = performance.now();
+    bus.emit('sfx', { id: 'itemFanfare' });
   }
 }

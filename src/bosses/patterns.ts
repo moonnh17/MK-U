@@ -2,6 +2,7 @@
  * 보스 패턴 (챕터1~3 보스·히든보스). 같은 동작은 패턴 id만 달리 해 다시 쓴다(예: 마기카이저 기계 펀치 = 대지 분쇄). 패턴 id → 실행 객체. 수치는 bosses.json의 values(강화 단계는 `키Enraged`).
  * 패턴은 보스를 멈추거나 돌진시키고, 피해는 entities/hazard.ts의 위험 지대·적 탄으로 준다.
  */
+import { bus } from '../core/events';
 import { shake } from '../entities/juice';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
@@ -114,6 +115,7 @@ class Dash extends Timed {
     this.at(c.v('windupSec'), () => {
       this.line.clear();
       this.dashing = true;
+      bus.emit('sfx', { id: 'dash' });
     });
   }
 

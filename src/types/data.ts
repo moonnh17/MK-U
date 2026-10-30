@@ -484,6 +484,19 @@ export interface MapgenData {
   /** 문 */
   door: { color: string; openColor: string };
   props: { exitPortal: SpriteRef; encounterCore: SpriteRef };
+  /** 방 꾸미기: 챕터별 바닥 변형 수, 지형지물·바닥 장식 그림 수와 배치 */
+  dressing: {
+    floorVariants: Record<string, number>;
+    obstacleKinds: number;
+    /** 지형지물 그림을 이 간격(px)으로 찍어 덮는다 */
+    obstacleStepPx: number;
+    decalKinds: number;
+    decalsPerRoom: [number, number];
+    decalColor: string;
+    obstacleBaseColor: string;
+  };
+  /** 조우 칸 물약 자판기 */
+  vending: SpriteRef & { price: number; stock: number; healRatio: number; cornerInsetPx: number; potion: SpriteRef; pickupRadius: number };
   /** 플레이어가 방 안쪽으로 이만큼(px) 들어와야 문이 잠긴다 */
   lockInsetPx: number;
   /** 방 크기 틀(타일, 벽 포함). 격자 한 칸은 가장 큰 틀 크기이고 방은 칸 가운데에 놓인다 */
@@ -628,6 +641,10 @@ export interface HudLayoutData {
 export interface UiData {
   baseWidth: number;
   baseHeight: number;
+  /** 게임 1px을 캔버스 몇 px로 그릴지 (기기 화면에 맞춰 이 범위에서 고른다) */
+  renderScaleMin: number;
+  renderScaleMax: number;
+  renderScaleMaxMobile: number;
   backgroundColor: string;
   /** HUD 배치 (기준 해상도 px) */
   hud: HudLayoutData;
@@ -719,7 +736,7 @@ export interface UltimateDef {
   /** 게이지가 이만큼 차면 발동할 수 있다 */
   gaugeMax: number;
   /** kill: 적 처치로 충전(열역학 제1법칙) / damage: 정해진 스킬의 피해량 × perDamage(+ 대성공 보너스) */
-  gauge: { kind: 'kill' } | { kind: 'damage'; skills: string[]; perDamage: number; perGreatSuccess?: number };
+  gauge: { kind: 'kill' } | { kind: 'energy'; perEnergy: number } | { kind: 'damage'; skills: string[]; perDamage: number; perGreatSuccess?: number };
   /** 학파 궁극기면 그 학파 (궁극기 각성 조건: 이 학파 스킬 각성 수) */
   school?: SchoolId;
   values: Record<string, number>;
@@ -834,7 +851,6 @@ export interface ItemsData {
   /** 세트 합성: 재료 → 결과 */
   sets: { materials: string[]; result: string }[];
   /** 획득 카드 표시 시간(초) */
-  pickupCardSec: number;
   items: ItemDef[];
 }
 
@@ -1091,6 +1107,8 @@ export interface ArtSpriteDef {
   frameHeight: number;
   /** 프레임 수 (없으면 1) */
   frames?: number;
+  /** 돌아가는 머리(포탑): 회전 중심, 받침 위 높이, 그림의 기울기, 총구까지 거리 */
+  aim?: { pivotX: number; pivotY: number; mountY: number; tiltDeg: number; muzzlePx: number };
   /** 없으면 그림 종류별 기본값 (캐릭터·오브젝트는 feet, 탄·픽업·스킬·무기는 center) */
   anchor?: ArtAnchor;
   /** 프레임 애니메이션 (플레이어·적): 멈춰 있을 때 idle, 움직일 때 move. 없으면 첫 프레임 그대로 */
@@ -1153,13 +1171,17 @@ export interface JuiceData {
   /** 보스 체력바: 깎인 만큼 흰 잔상이 trailDelaySec 뒤 초당 trailPerSec(비율)씩 줄어든다 */
   bossBar: { width: number; height: number; y: number; trailDelaySec: number; trailPerSec: number; color: string; trailColor: string; backColor: string; markerColor: string; fontSize: number };
   /** 보스 강화·단계 개방: 번쩍임, 짧은 확대, 화면 가운데 큰 이름 */
-  bossPhase: { flashMs: number; zoom: number; zoomSec: number; bannerSec: number; bannerSize: number };
+  /** 전직 연출: 입자가 모여드는 시간, 입자 수, 터진 뒤 멈춤 */
+  advancement: { chargeSec: number; particles: number; burstHoldSec: number };
+  /** 전투 시작 띠 */
+  combatStart: { sec: number; color: string; size: number; bandPx: number };
+  bossPhase: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; flashMs: number; zoom: number; zoomSec: number; bannerSec: number; bannerSize: number };
   /** 보스 처치: slowSec 동안 slowScale 배속에서 점점 원래대로, 연쇄 폭발 */
   bossKill: { slowSec: number; slowScale: number; explosions: number; spreadPx: number; stepSec: number; flashMs: number };
   /** 포탈 이동: 빨려 들어감(suckSec, 확대 zoom배) → 이동 화면(덮기·걷기 시간, 빛줄기 수, 색) → 도착(arriveSec) */
   portal: { suckSec: number; zoom: number; holdSec: number; fadeInSec: number; fadeOutSec: number; arriveSec: number; streaks: number; color: string; bgColor: string };
   /** 방 클리어 글자, 문이 사라지는 시간 */
-  roomClear: { sec: number; color: string; size: number; doorFadeSec: number };
+  roomClear: { sec: number; color: string; size: number; doorFadeSec: number; bandPx: number; particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; zoom: number; zoomSec: number };
 }
 
 // ---------- 효과음 ----------

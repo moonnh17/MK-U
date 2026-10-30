@@ -87,3 +87,12 @@ export function floorConnected(innerW: number, innerH: number, blocks: readonly 
   }
   return seen.size === free;
 }
+
+/** 사각형을 step 간격으로 덮는 그림 찍을 자리 (칸 가운데, 위에서 아래로) */
+export function stampGrid(r: { x: number; y: number; w: number; h: number }, step: number): { x: number; y: number }[] {
+  const nx = Math.max(1, Math.round(r.w / step));
+  const ny = Math.max(1, Math.round(r.h / step));
+  const out: { x: number; y: number }[] = [];
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) out.push({ x: r.x + ((i + 0.5) * r.w) / nx, y: r.y + ((j + 0.5) * r.h) / ny });
+  return out;
+}

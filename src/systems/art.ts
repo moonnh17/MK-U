@@ -24,6 +24,10 @@ export const artKeys = {
   /** 챕터별 방 타일: 바닥·복도 바닥·벽 */
   tile: (part: TilePart, chapter: number) => `tile_${part}_c${chapter}`,
   door: 'tile_door',
+  /** 방마다 고르는 바닥 변형, 지형지물·바닥 장식 그림 */
+  floorVariant: (chapter: number, i: number) => `tile_floor_c${chapter}_v${i}`,
+  obstacle: (chapter: number, i: number) => `obstacle_c${chapter}_${i}`,
+  decal: (chapter: number, i: number) => `decal_c${chapter}_${i}`,
   /** 전직 후 플레이어 모습 (학파 id) */
   playerSchool: (school: string) => `player_${school}`,
   /** 보스 단계별 모습: 1 = 처음(마기카이저 구속), 2 = 강화·다음 단계 … (없으면 기본 그림 그대로) */
@@ -129,6 +133,15 @@ export function collectAssets(d: GameData): AssetRef[] {
     for (const part of TILE_PARTS) add('tile', { spriteKey: artKeys.tile(part, c), color: colors[part], size: ts }, `asset.tile.${part}`, `#${c}장`);
   }
   add('tile', { spriteKey: artKeys.door, color: d.mapgen.door.color, size: ts }, 'asset.tile.door');
+  const dr = d.mapgen.dressing;
+  for (let c = 1; c <= d.mapgen.chapters; c++) {
+    const theme = d.ui.chapterRooms[String(c)] ?? d.ui.room;
+    for (let i = 0; i < (dr.floorVariants[String(c)] ?? 0); i++) add('tile', { spriteKey: artKeys.floorVariant(c, i), color: theme.floorColor, size: ts }, 'asset.tile.floor', `#${c}장 변형`);
+    for (let i = 0; i < dr.obstacleKinds; i++) add('prop', { spriteKey: artKeys.obstacle(c, i), color: dr.obstacleBaseColor, size: ts }, 'asset.obstacle', `#${c}장`);
+    for (let i = 0; i < dr.decalKinds; i++) add('prop', { spriteKey: artKeys.decal(c, i), color: dr.decalColor, size: ts }, 'asset.decal', `#${c}장`);
+  }
+  add('prop', d.mapgen.vending, 'asset.vending');
+  add('pickup', d.mapgen.vending.potion, 'asset.potion');
   // 타격·처치·등장 이펙트
   for (const [id, ref] of Object.entries(d.juice.fx)) add('fx', ref, `asset.fx.${id}`);
   return [...out.values()];

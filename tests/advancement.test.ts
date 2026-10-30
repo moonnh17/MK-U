@@ -6,6 +6,7 @@ import {
   awakenedCount,
   convertSkills,
   gaugeFromDamage,
+  gaugeFromEnergy,
   gaugeFromGreatSuccess,
   judgeSchool,
   topSchools,
@@ -127,6 +128,12 @@ describe('전직 후 카드 풀', () => {
 
 describe('학파 궁극기', () => {
   const ult = (id: string) => gameData.ultimates.ultimates.find((u) => u.id === id)!;
+
+  it('마기학자 궁극기는 에너지를 쓴 만큼 찬다', () => {
+    expect(gaugeFromEnergy(ult('firstLaw'), 30)).toBe(30);
+    expect(gaugeFromEnergy(ult('firstLaw'), 0)).toBe(0);
+    expect(gaugeFromEnergy(ult('thunderbolt'), 30)).toBe(0);
+  });
 
   it('헥타르 벼락: 포탑·지뢰·드론 피해로 연산 데이터', () => {
     expect(gaugeFromDamage(ult('thunderbolt'), 'magiTurret', 100)).toBeCloseTo(15);

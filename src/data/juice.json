@@ -161,7 +161,18 @@
     "zoom": 1.12,
     "zoomSec": 0.25,
     "bannerSec": 1.4,
-    "bannerSize": 20
+    "bannerSize": 20,
+    "particles": [
+      90,
+      120
+    ],
+    "particleSpeed": [
+      60,
+      260
+    ],
+    "particleLifeSec": 0.8,
+    "particleSize": 2.5,
+    "ringRadiusPx": 70
   },
   "bossKill": {
     "slowSec": 1.1,
@@ -172,10 +183,24 @@
     "flashMs": 400
   },
   "roomClear": {
-    "sec": 1.1,
-    "color": "#9affb0",
-    "size": 18,
-    "doorFadeSec": 0.25
+    "sec": 1.5,
+    "color": "#ffd76a",
+    "size": 24,
+    "doorFadeSec": 0.25,
+    "bandPx": 38,
+    "particles": [
+      36,
+      48
+    ],
+    "particleSpeed": [
+      40,
+      180
+    ],
+    "particleLifeSec": 0.7,
+    "particleSize": 2,
+    "ringRadiusPx": 90,
+    "zoom": 1.05,
+    "zoomSec": 0.3
   },
   "portal": {
     "suckSec": 0.65,
@@ -187,5 +212,16 @@
     "streaks": 48,
     "color": "#9a7aff",
     "bgColor": "#0a0614"
+  },
+  "combatStart": {
+    "sec": 1,
+    "color": "#ff5a4a",
+    "size": 20,
+    "bandPx": 30
+  },
+  "advancement": {
+    "chargeSec": 3,
+    "particles": 280,
+    "burstHoldSec": 0.9
   }
 }

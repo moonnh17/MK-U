@@ -8,6 +8,11 @@ import { anchorOf, animKey, collectAssets, facingFlip, fitHitbox, pickAnim, type
 
 let groups: Map<string, AssetGroup> | null = null;
 
+/** UI·실험장처럼 기준 해상도 좌표를 쓰는 씬: 기준 화면이 캔버스에 꽉 차게 */
+export function fitBaseCamera(scene: Phaser.Scene, baseW: number, baseH: number, renderScale: number): void {
+  scene.cameras.main.setZoom(renderScale).centerOn(baseW / 2, baseH / 2);
+}
+
 function groupOf(data: GameData, key: string): AssetGroup | undefined {
   groups ??= new Map(collectAssets(data).map((r) => [r.key, r.group]));
   return groups.get(key);

@@ -11,7 +11,6 @@
   "stat.magiPower.desc": "스킬 범위 증가, 코인·에너지 획득량 증가",
   "stat.willpower": "정신력",
   "stat.willpower.desc": "버프 지속시간 증가, 정신 계열 피해 감소",
-
   "tag.physical": "물리",
   "tag.physical.desc": "힘으로 공격력 증가",
   "tag.magic": "마기",
@@ -34,25 +33,20 @@
   "tag.space.desc": "공간을 직접 공격",
   "tag.bleed": "출혈",
   "tag.bleed.desc": "지속 물리 피해",
-
   "grade.common": "일반",
   "grade.rare": "레어",
   "grade.legendary": "전설",
   "grade.unique": "유니크",
   "grade.mythic": "신화",
-
   "weapon.pistol": "권총",
   "weapon.shotgun": "산탄총",
   "weapon.longsword": "장검",
-
   "enemy.tomakki": "토마끼",
   "enemy.gaedeulgae": "개들개",
   "enemy.akgwi": "악귀",
   "enemy.trainingDummy": "보스 자리(임시 표적)",
-
   "school.hectar": "헥타르",
   "school.acro": "아크로",
-
   "skill.magiTurret": "마기 자동포탑",
   "skill.magiTurret.short": "포탑",
   "skill.magiTurret.desc": "주변에 포탑을 설치한다. 포탑은 가까운 적을 자동으로 쏜다. 최대 {maxCount}기, 탄 피해 {damage}",
@@ -116,11 +110,9 @@
   "skill.reductionist.desc": "적을 공격하면 체력 {hitHeal}, 처치하면 {killHeal}을 회복한다",
   "skill.reductionist.awakened": "제1원리",
   "skill.reductionist.awakened.desc": "준 피해 일부를 흡혈하고, 처치 시 기초 단위({basicUnit})만큼 회복한다. 넘치는 회복은 보호막(최대 {shieldCap})이 된다",
-
   "ultimate.firstLaw": "열역학 제1법칙",
   "ultimate.firstLaw.short": "궁",
   "ultimate.firstLaw.desc": "마기 입자를 만들어 적에게 던진다. 닿으면 폭발해 범위 피해 {damage}",
-
   "card.title.skill": "스킬 카드",
   "card.title.stat": "스탯 카드",
   "card.title.boss": "보스 보상 — 스킬 카드",
@@ -140,7 +132,6 @@
   "card.active": "액티브",
   "card.statAmount": "{stat} +{amount}",
   "card.statNow": "현재 {value} → {next}",
-
   "inventory.title": "인벤토리",
   "inventory.active": "장착",
   "inventory.passive": "패시브",
@@ -169,7 +160,6 @@
   "inventory.coins": "코인 {coins}",
   "inventory.stats": "현재 스탯",
   "inventory.dropped": "{weapon} — 발밑에 버림",
-
   "skillMsg.acquired": "{skill} 습득",
   "skillMsg.levelUp": "{skill} Lv{level}",
   "skillMsg.awakened": "각성! {skill} → {awakened}",
@@ -177,11 +167,9 @@
   "skillMsg.noTarget": "사거리 안에 적이 없음",
   "skillMsg.ultimateNotReady": "궁극기 게이지 부족",
   "skillMsg.chargeInterrupted": "충전 중단 — 쿨타임 절반 회복",
-
   "room.encounterPending": "조우 코어 — 준비 중",
   "room.energyEmpty": "에너지 부족",
   "room.pickedUp": "{weapon} 획득",
-
   "screen.death": "사망",
   "screen.chapterClear": "챕터{chapter} 클리어 (임시)",
   "screen.runClear": "런 클리어",
@@ -321,13 +309,10 @@
   "job.advancements": "전직: {list}",
   "job.close": "닫기",
   "mobile.check": "조사",
-
   "minimap.encounter": "!",
   "minimap.boss": "☠",
   "minimap.exit": "◎",
-
   "hud.coins": "◆ {coins}",
-
   "hud.hp": "체력",
   "hud.shield": "보호막",
   "hud.energy": "에너지",
@@ -348,7 +333,6 @@
   "skillMsg.greatSuccess": "대성공!",
   "skillMsg.rebel": "반역",
   "skillMsg.dominate": "지배",
-
   "mobile.attack": "공격",
   "mobile.pickup": "줍기",
   "mobile.interact": "조사",
@@ -357,11 +341,9 @@
   "mobile.pause": "Ⅱ",
   "mobile.map": "지도",
   "mobile.ultimate": "궁극기",
-
   "system.rotate": "가로 화면으로 돌려주세요",
   "system.disabledCommand": "[명령] {action} — 아직 사용할 수 없음",
   "system.command": "[명령] {action}",
-
   "debug.title": "디버그",
   "debug.fps": "FPS",
   "debug.seed": "시드",
@@ -383,7 +365,6 @@
   "debug.spawn": "적 소환",
   "debug.barrage": "적 탄막",
   "debug.eliteNone": "일반",
-
   "item.slimeStew": "슬라임 스튜",
   "item.slimeStew.desc": "체력 {th0}% 이하에서 최대 체력의 {to0}%까지 회복(1회), 이후 모든 피해 +{a0}%",
   "item.magicasol": "마기카솔",
@@ -456,7 +437,6 @@
   "debug.giveItem": "아이템 지급",
   "debug.items": "보유 아이템: {list}",
   "debug.itemsNone": "없음",
-
   "debug.encounterRandom": "조우 무작위",
   "debug.forceEncounter": "다음 조우 지정",
   "debug.hiddenBoss": "히든보스 소환",
@@ -667,5 +647,19 @@
   "elite.swift.icon": "⚡",
   "elite.explosive": "폭발",
   "elite.explosive.icon": "💣",
-  "debug.schoolPicks": "전직 집계 헥타르 {hectar} / 아크로 {acro}"
+  "debug.schoolPicks": "전직 집계 헥타르 {hectar} / 아크로 {acro}",
+  "room.start": "전투 시작",
+  "mobile.enter": "들어가기",
+  "interact.portal.pc": "F  들어가기",
+  "interact.portal.mobile": "들어가기",
+  "interact.vending.pc": "F  물약 구매 (코인 {price})",
+  "interact.vending.mobile": "물약 구매 (코인 {price})",
+  "vending.soldOut": "품절",
+  "vending.heal": "체력 +{n}",
+  "asset.vending": "물약 자판기",
+  "asset.potion": "회복 물약",
+  "asset.obstacle": "지형지물",
+  "asset.decal": "바닥 장식",
+  "itemGet.next.pc": "아무 키나 눌러 계속",
+  "itemGet.next.mobile": "화면을 눌러 계속"
 }

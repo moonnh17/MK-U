@@ -2,6 +2,7 @@
  * 적 쪽 위험 지대(예고 원·장판 등). 플레이어만 피해를 받는다.
  * 근접·장판 공격이라 벡터굴절역장·칼 탄 베기의 대상이 아니다.
  */
+import { bus } from '../core/events';
 import { shake } from './juice';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
@@ -65,6 +66,7 @@ export class SectorBlast implements Hazard {
     const half = (this.arcDeg * Math.PI) / 360;
     const f = host.scene.add.graphics().setDepth(6);
     f.fillStyle(this.color, 0.6).slice(this.at.x, this.at.y, this.radius, this.angle - half, this.angle + half, false).fillPath();
+    bus.emit('sfx', { id: 'bossSlam' });
     flash(host, f);
     return false;
   }
@@ -309,6 +311,7 @@ export class DelayedBlast implements Hazard {
     if (this.left > 0) return true;
     const p = host.playerPos();
     if (Math.hypot(p.x - this.at.x, p.y - this.at.y) <= this.radius + host.playerRadius) host.hurtPlayer(this.damage);
+    bus.emit('sfx', { id: 'explosion' });
     const flash = host.scene.add.circle(this.at.x, this.at.y, this.radius, this.color, 0.6).setDepth(6);
     host.scene.time.delayedCall(150, () => flash.destroy());
     return false;
@@ -389,6 +392,7 @@ export class RectBlast implements Hazard {
     const p = host.playerPos();
     const pr = host.playerRadius;
     if (p.x + pr >= r.x && p.x - pr <= r.x + r.w && p.y + pr >= r.y && p.y - pr <= r.y + r.h) host.hurtPlayer(this.damage);
+    bus.emit('sfx', { id: 'explosion' });
     const flash = host.scene.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, this.color, 0.6).setDepth(6);
     host.scene.time.delayedCall(150, () => flash.destroy());
     return false;
@@ -434,6 +438,7 @@ export class FollowBlast implements Hazard {
     if (this.left > 0) return true;
     if (Math.hypot(p.x - this.pos.x, p.y - this.pos.y) <= this.radius + host.playerRadius) host.hurtPlayer(this.damage);
     const f = host.scene.add.circle(this.pos.x, this.pos.y, this.radius, this.color, 0.6).setDepth(6);
+    bus.emit('sfx', { id: 'explosion' });
     flash(host, f);
     return false;
   }

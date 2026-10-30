@@ -128,4 +128,42 @@ function paste(dst, src, x, y) {
   }
 }
 
-module.exports = { read, write, blank, crop, resize, bbox, paste };
+/** 좌우 뒤집기 */
+function flipX(img) {
+  const out = blank(img.w, img.h);
+  for (let y = 0; y < img.h; y++) for (let x = 0; x < img.w; x++) img.px.copy(out.px, (y * img.w + (img.w - 1 - x)) * 4, (y * img.w + x) * 4, (y * img.w + x) * 4 + 4);
+  return out;
+}
+
+/** (x, y)에서 가장 가까운 불투명 픽셀이 속한 덩어리만 잘라낸다 (묶음 그림에서 소품 하나 꺼내기) */
+function component(img, x, y, cut = 40, search = 40) {
+  const on = (i, j) => i >= 0 && j >= 0 && i < img.w && j < img.h && img.px[(j * img.w + i) * 4 + 3] > cut;
+  let sx = -1, sy = -1, best = Infinity;
+  for (let j = y - search; j <= y + search; j++) for (let i = x - search; i <= x + search; i++) {
+    const d = (i - x) ** 2 + (j - y) ** 2;
+    if (d < best && on(i, j)) { best = d; sx = i; sy = j; }
+  }
+  if (sx < 0) throw new Error(`component 없음 ${x},${y}`);
+  const seen = new Uint8Array(img.w * img.h);
+  const stack = [[sx, sy]];
+  seen[sy * img.w + sx] = 1;
+  let x0 = sx, x1 = sx, y0 = sy, y1 = sy;
+  const pts = [];
+  while (stack.length) {
+    const [i, j] = stack.pop();
+    pts.push(i, j);
+    if (i < x0) x0 = i; if (i > x1) x1 = i; if (j < y0) y0 = j; if (j > y1) y1 = j;
+    for (let dj = -2; dj <= 2; dj++) for (let di = -2; di <= 2; di++) {
+      const a = i + di, b = j + dj;
+      if (on(a, b) && !seen[b * img.w + a]) { seen[b * img.w + a] = 1; stack.push([a, b]); }
+    }
+  }
+  const out = blank(x1 - x0 + 1, y1 - y0 + 1);
+  for (let p = 0; p < pts.length; p += 2) {
+    const i = pts[p], j = pts[p + 1];
+    img.px.copy(out.px, ((j - y0) * out.w + (i - x0)) * 4, (j * img.w + i) * 4, (j * img.w + i) * 4 + 4);
+  }
+  return out;
+}
+
+module.exports = { read, write, blank, crop, resize, bbox, paste, flipX, component };

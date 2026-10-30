@@ -110,6 +110,11 @@ export function gaugeFromDamage(def: UltimateDef, skillId: string | null, damage
 }
 
 /** 대성공 1회당 (아크로) */
+/** 에너지를 쓸 때 차는 게이지 (마기학자 기본 궁극기) */
+export function gaugeFromEnergy(def: UltimateDef, spent: number): number {
+  return def.gauge.kind === 'energy' ? Math.max(0, spent) * def.gauge.perEnergy : 0;
+}
+
 export function gaugeFromGreatSuccess(def: UltimateDef): number {
   return def.gauge.kind === 'damage' ? (def.gauge.perGreatSuccess ?? 0) : 0;
 }

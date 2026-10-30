@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 153개 · 그림 있음 90개
+전체 209개 · 그림 있음 146개
 
 ## player (3)
 
@@ -65,38 +65,38 @@
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
-| `enemy_fusion_akgwi` | 융합악귀 | 26×26 | feet | #7a1f3a | mku/enemy_fusion_akgwi.png (2프레임) |
-| `enemy_electric_ring` | 전기환띠 | 28×28 | feet | #3a9ad9 | mku/enemy_electric_ring.png (2프레임) |
+| `enemy_fusion_akgwi` | 융합악귀 | 39×39 | feet | #7a1f3a | mku/enemy_fusion_akgwi.png (2프레임) |
+| `enemy_electric_ring` | 전기환띠 | 42×42 | feet | #3a9ad9 | mku/enemy_electric_ring.png (2프레임) |
 | `enemy_training_dummy` | 보스 자리(임시 표적) | 24×24 | feet | #8a5ad9 | — |
-| `enemy_ancestor_echo` | 선조의 잔상 | 28×28 | feet | #b0583a | mku/enemy_ancestor_echo.png (3프레임) |
-| `enemy_royal_mage` | 왕실특무마기법사 외 1곳 | 22×22 | feet | #6a4ad9 | — |
-| `enemy_orion_crusader` | 오리온의 성전사 | 28×28 | feet | #d9c25a | — |
-| `enemy_hectar_chief` | 헥타르 수석 연구원 | 24×24 | feet | #3a9aff | mku/enemy_hectar_chief.png (5프레임) |
-| `enemy_magi_golem` | 마기골렘 | 32×32 | feet | #8a6a4a | mku/enemy_magi_golem.png (2프레임) |
-| `enemy_eclipse` | 식광 | 28×28 | feet | #c8a8ff | mku/enemy_eclipse.png (10프레임) |
-| `enemy_magi_kaiser` | 마기카이저 | 34×34 | feet | #d02828 | mku/enemy_magi_kaiser.png (10프레임) |
-| `enemy_fusion_akgwi_phase1` | 융합악귀 (1단계) | 26×26 | feet | #7a1f3a | — |
-| `enemy_fusion_akgwi_phase2` | 융합악귀 (2단계) | 26×26 | feet | #7a1f3a | mku/enemy_fusion_akgwi_phase2.png (2프레임) |
-| `enemy_electric_ring_phase1` | 전기환띠 (1단계) | 28×28 | feet | #3a9ad9 | — |
-| `enemy_electric_ring_phase2` | 전기환띠 (2단계) | 28×28 | feet | #3a9ad9 | — |
-| `enemy_hectar_chief_phase1` | 헥타르 수석 연구원 (1단계) | 24×24 | feet | #3a9aff | — |
-| `enemy_hectar_chief_phase2` | 헥타르 수석 연구원 (2단계) | 24×24 | feet | #3a9aff | — |
-| `enemy_magi_golem_phase1` | 마기골렘 (1단계) | 32×32 | feet | #8a6a4a | — |
-| `enemy_magi_golem_phase2` | 마기골렘 (2단계) | 32×32 | feet | #8a6a4a | mku/enemy_magi_golem_phase2.png (2프레임) |
-| `enemy_eclipse_phase1` | 식광 (1단계) | 28×28 | feet | #c8a8ff | — |
-| `enemy_eclipse_phase2` | 식광 (2단계) | 28×28 | feet | #c8a8ff | mku/enemy_eclipse_phase2.png (10프레임) |
-| `enemy_magi_kaiser_phase1` | 마기카이저 (1단계) | 34×34 | feet | #d02828 | mku/enemy_magi_kaiser_phase1.png (4프레임) |
-| `enemy_magi_kaiser_phase2` | 마기카이저 (2단계) | 34×34 | feet | #d02828 | mku/enemy_magi_kaiser_phase2.png (10프레임) |
-| `enemy_magi_kaiser_phase3` | 마기카이저 (3단계) | 34×34 | feet | #d02828 | mku/enemy_magi_kaiser_phase3.png (10프레임) |
-| `enemy_magi_kaiser_phase4` | 마기카이저 (4단계) | 34×34 | feet | #d02828 | — |
-| `enemy_ancestor_echo_phase1` | 선조의 잔상 (1단계) | 28×28 | feet | #b0583a | — |
-| `enemy_ancestor_echo_phase2` | 선조의 잔상 (2단계) | 28×28 | feet | #b0583a | — |
-| `enemy_royal_mage_phase1` | 왕실특무마기법사 (1단계) | 22×22 | feet | #6a4ad9 | — |
-| `enemy_royal_mage_phase2` | 왕실특무마기법사 (2단계) | 22×22 | feet | #6a4ad9 | — |
-| `enemy_orion_crusader_phase1` | 오리온의 성전사 (1단계) | 28×28 | feet | #d9c25a | — |
-| `enemy_orion_crusader_phase2` | 오리온의 성전사 (2단계) | 28×28 | feet | #d9c25a | — |
+| `enemy_ancestor_echo` | 선조의 잔상 | 42×42 | feet | #b0583a | mku/enemy_ancestor_echo.png (3프레임) |
+| `enemy_royal_mage` | 왕실특무마기법사 외 1곳 | 33×33 | feet | #6a4ad9 | — |
+| `enemy_orion_crusader` | 오리온의 성전사 | 42×42 | feet | #d9c25a | — |
+| `enemy_hectar_chief` | 헥타르 수석 연구원 | 36×36 | feet | #3a9aff | mku/enemy_hectar_chief.png (5프레임) |
+| `enemy_magi_golem` | 마기골렘 | 48×48 | feet | #8a6a4a | mku/enemy_magi_golem.png (2프레임) |
+| `enemy_eclipse` | 식광 | 42×42 | feet | #c8a8ff | mku/enemy_eclipse.png (10프레임) |
+| `enemy_magi_kaiser` | 마기카이저 | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser.png (10프레임) |
+| `enemy_fusion_akgwi_phase1` | 융합악귀 (1단계) | 39×39 | feet | #7a1f3a | — |
+| `enemy_fusion_akgwi_phase2` | 융합악귀 (2단계) | 39×39 | feet | #7a1f3a | mku/enemy_fusion_akgwi_phase2.png (2프레임) |
+| `enemy_electric_ring_phase1` | 전기환띠 (1단계) | 42×42 | feet | #3a9ad9 | — |
+| `enemy_electric_ring_phase2` | 전기환띠 (2단계) | 42×42 | feet | #3a9ad9 | — |
+| `enemy_hectar_chief_phase1` | 헥타르 수석 연구원 (1단계) | 36×36 | feet | #3a9aff | — |
+| `enemy_hectar_chief_phase2` | 헥타르 수석 연구원 (2단계) | 36×36 | feet | #3a9aff | — |
+| `enemy_magi_golem_phase1` | 마기골렘 (1단계) | 48×48 | feet | #8a6a4a | — |
+| `enemy_magi_golem_phase2` | 마기골렘 (2단계) | 48×48 | feet | #8a6a4a | mku/enemy_magi_golem_phase2.png (2프레임) |
+| `enemy_eclipse_phase1` | 식광 (1단계) | 42×42 | feet | #c8a8ff | — |
+| `enemy_eclipse_phase2` | 식광 (2단계) | 42×42 | feet | #c8a8ff | mku/enemy_eclipse_phase2.png (10프레임) |
+| `enemy_magi_kaiser_phase1` | 마기카이저 (1단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase1.png (4프레임) |
+| `enemy_magi_kaiser_phase2` | 마기카이저 (2단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase2.png (10프레임) |
+| `enemy_magi_kaiser_phase3` | 마기카이저 (3단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase3.png (10프레임) |
+| `enemy_magi_kaiser_phase4` | 마기카이저 (4단계) | 51×51 | feet | #d02828 | — |
+| `enemy_ancestor_echo_phase1` | 선조의 잔상 (1단계) | 42×42 | feet | #b0583a | — |
+| `enemy_ancestor_echo_phase2` | 선조의 잔상 (2단계) | 42×42 | feet | #b0583a | — |
+| `enemy_royal_mage_phase1` | 왕실특무마기법사 (1단계) | 33×33 | feet | #6a4ad9 | — |
+| `enemy_royal_mage_phase2` | 왕실특무마기법사 (2단계) | 33×33 | feet | #6a4ad9 | — |
+| `enemy_orion_crusader_phase1` | 오리온의 성전사 (1단계) | 42×42 | feet | #d9c25a | — |
+| `enemy_orion_crusader_phase2` | 오리온의 성전사 (2단계) | 42×42 | feet | #d9c25a | — |
 
-## prop (7)
+## prop (47)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -107,20 +107,63 @@
 | `spire_medium` | 마기수집첨탑(중형) | 16×48 | feet | #3a0e12 | mku/spire_medium.png (1프레임) |
 | `prop_exit_portal` | 출구 포털 | 20×20 | feet | #5ae0ff | — |
 | `prop_encounter_core` | 조우 칸 코어 | 14×14 | feet | #ffd23f | — |
+| `obstacle_c1_0` | 지형지물 (1장) | 16×16 | feet | #0c0e14 | mku/obstacle_c1_0.png (1프레임) |
+| `obstacle_c1_1` | 지형지물 (1장) | 16×16 | feet | #0c0e14 | mku/obstacle_c1_1.png (1프레임) |
+| `obstacle_c1_2` | 지형지물 (1장) | 16×16 | feet | #0c0e14 | mku/obstacle_c1_2.png (1프레임) |
+| `obstacle_c1_3` | 지형지물 (1장) | 16×16 | feet | #0c0e14 | mku/obstacle_c1_3.png (1프레임) |
+| `obstacle_c1_4` | 지형지물 (1장) | 16×16 | feet | #0c0e14 | mku/obstacle_c1_4.png (1프레임) |
+| `obstacle_c1_5` | 지형지물 (1장) | 16×16 | feet | #0c0e14 | mku/obstacle_c1_5.png (1프레임) |
+| `decal_c1_0` | 바닥 장식 (1장) | 16×16 | feet | #2a2d36 | mku/decal_c1_0.png (1프레임) |
+| `decal_c1_1` | 바닥 장식 (1장) | 16×16 | feet | #2a2d36 | mku/decal_c1_1.png (1프레임) |
+| `decal_c1_2` | 바닥 장식 (1장) | 16×16 | feet | #2a2d36 | mku/decal_c1_2.png (1프레임) |
+| `decal_c1_3` | 바닥 장식 (1장) | 16×16 | feet | #2a2d36 | mku/decal_c1_3.png (1프레임) |
+| `decal_c1_4` | 바닥 장식 (1장) | 16×16 | feet | #2a2d36 | mku/decal_c1_4.png (1프레임) |
+| `decal_c1_5` | 바닥 장식 (1장) | 16×16 | feet | #2a2d36 | mku/decal_c1_5.png (1프레임) |
+| `decal_c1_6` | 바닥 장식 (1장) | 16×16 | feet | #2a2d36 | mku/decal_c1_6.png (1프레임) |
+| `obstacle_c2_0` | 지형지물 (2장) | 16×16 | feet | #0c0e14 | mku/obstacle_c2_0.png (1프레임) |
+| `obstacle_c2_1` | 지형지물 (2장) | 16×16 | feet | #0c0e14 | mku/obstacle_c2_1.png (1프레임) |
+| `obstacle_c2_2` | 지형지물 (2장) | 16×16 | feet | #0c0e14 | mku/obstacle_c2_2.png (1프레임) |
+| `obstacle_c2_3` | 지형지물 (2장) | 16×16 | feet | #0c0e14 | mku/obstacle_c2_3.png (1프레임) |
+| `obstacle_c2_4` | 지형지물 (2장) | 16×16 | feet | #0c0e14 | mku/obstacle_c2_4.png (1프레임) |
+| `obstacle_c2_5` | 지형지물 (2장) | 16×16 | feet | #0c0e14 | mku/obstacle_c2_5.png (1프레임) |
+| `decal_c2_0` | 바닥 장식 (2장) | 16×16 | feet | #2a2d36 | mku/decal_c2_0.png (1프레임) |
+| `decal_c2_1` | 바닥 장식 (2장) | 16×16 | feet | #2a2d36 | mku/decal_c2_1.png (1프레임) |
+| `decal_c2_2` | 바닥 장식 (2장) | 16×16 | feet | #2a2d36 | mku/decal_c2_2.png (1프레임) |
+| `decal_c2_3` | 바닥 장식 (2장) | 16×16 | feet | #2a2d36 | mku/decal_c2_3.png (1프레임) |
+| `decal_c2_4` | 바닥 장식 (2장) | 16×16 | feet | #2a2d36 | mku/decal_c2_4.png (1프레임) |
+| `decal_c2_5` | 바닥 장식 (2장) | 16×16 | feet | #2a2d36 | mku/decal_c2_5.png (1프레임) |
+| `decal_c2_6` | 바닥 장식 (2장) | 16×16 | feet | #2a2d36 | mku/decal_c2_6.png (1프레임) |
+| `obstacle_c3_0` | 지형지물 (3장) | 16×16 | feet | #0c0e14 | mku/obstacle_c3_0.png (1프레임) |
+| `obstacle_c3_1` | 지형지물 (3장) | 16×16 | feet | #0c0e14 | mku/obstacle_c3_1.png (1프레임) |
+| `obstacle_c3_2` | 지형지물 (3장) | 16×16 | feet | #0c0e14 | mku/obstacle_c3_2.png (1프레임) |
+| `obstacle_c3_3` | 지형지물 (3장) | 16×16 | feet | #0c0e14 | mku/obstacle_c3_3.png (1프레임) |
+| `obstacle_c3_4` | 지형지물 (3장) | 16×16 | feet | #0c0e14 | mku/obstacle_c3_4.png (1프레임) |
+| `obstacle_c3_5` | 지형지물 (3장) | 16×16 | feet | #0c0e14 | mku/obstacle_c3_5.png (1프레임) |
+| `decal_c3_0` | 바닥 장식 (3장) | 16×16 | feet | #2a2d36 | mku/decal_c3_0.png (1프레임) |
+| `decal_c3_1` | 바닥 장식 (3장) | 16×16 | feet | #2a2d36 | mku/decal_c3_1.png (1프레임) |
+| `decal_c3_2` | 바닥 장식 (3장) | 16×16 | feet | #2a2d36 | mku/decal_c3_2.png (1프레임) |
+| `decal_c3_3` | 바닥 장식 (3장) | 16×16 | feet | #2a2d36 | mku/decal_c3_3.png (1프레임) |
+| `decal_c3_4` | 바닥 장식 (3장) | 16×16 | feet | #2a2d36 | mku/decal_c3_4.png (1프레임) |
+| `decal_c3_5` | 바닥 장식 (3장) | 16×16 | feet | #2a2d36 | mku/decal_c3_5.png (1프레임) |
+| `decal_c3_6` | 바닥 장식 (3장) | 16×16 | feet | #2a2d36 | mku/decal_c3_6.png (1프레임) |
+| `prop_vending` | 물약 자판기 | 22×32 | feet | #3a7bff | mku/prop_vending.png (1프레임) |
 
-## pickup (2)
+## pickup (3)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `pickup_energy` | 에너지 구슬 | 4×4 | center | #3fc8e0 | — |
 | `pickup_coin` | 코인 | 4×4 | center | #ffd23f | — |
+| `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (12)
+## skill (14)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `skill_turret` | 마기 자동포탑 (turret) | 8×8 | center | #4fb3d9 | mku/skill_turret.png (1프레임) |
+| `skill_turret_head` | 마기 자동포탑 (turretHead) | 8×8 | center | #8fd3f0 | mku/skill_turret_head.png (1프레임) |
 | `skill_turret_big` | 마기 자동포탑 (bigTurret) | 16×16 | center | #8ae0ff | mku/skill_turret_big.png (1프레임) |
+| `skill_turret_big_head` | 마기 자동포탑 (bigTurretHead) | 16×16 | center | #b8ecff | mku/skill_turret_big_head.png (1프레임) |
 | `skill_turret_shell` | 마기 자동포탑 (shell) | 5×5 | center | #ffb04a | — |
 | `skill_mine` | 마기 지뢰 (mine) | 5×5 | center | #d9a03b | mku/skill_mine.png (1프레임) |
 | `skill_mine_chain` | 마기 지뢰 (chainMine) | 5×5 | center | #ff6ad9 | — |
@@ -202,7 +245,7 @@
 | `icon_gemini` | 미모사 제미니 (icon) | 16×16 | center | #4ab0ff | mku/icon_gemini.png (1프레임) |
 | `portrait_gemini` | 미모사 제미니 (portrait) | 48×64 | center | #4ab0ff | mku/portrait_gemini.png (1프레임) |
 
-## tile (10)
+## tile (23)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -216,6 +259,19 @@
 | `tile_corridor_c3` | 복도 바닥 (3장) | 16×16 | center | #120708 | mku/tile_corridor_c3.png (1프레임) |
 | `tile_wall_c3` | 벽 (3장) | 16×16 | center | #5a1a1e | mku/tile_wall_c3.png (1프레임) |
 | `tile_door` | 잠긴 문 | 16×16 | center | #c8643a | — |
+| `tile_floor_c1_v0` | 방 바닥 (1장 변형) | 16×16 | center | #1c2430 | mku/tile_floor_c1_v0.png (1프레임) |
+| `tile_floor_c1_v1` | 방 바닥 (1장 변형) | 16×16 | center | #1c2430 | mku/tile_floor_c1_v1.png (1프레임) |
+| `tile_floor_c1_v2` | 방 바닥 (1장 변형) | 16×16 | center | #1c2430 | mku/tile_floor_c1_v2.png (1프레임) |
+| `tile_floor_c1_v3` | 방 바닥 (1장 변형) | 16×16 | center | #1c2430 | mku/tile_floor_c1_v3.png (1프레임) |
+| `tile_floor_c1_v4` | 방 바닥 (1장 변형) | 16×16 | center | #1c2430 | mku/tile_floor_c1_v4.png (1프레임) |
+| `tile_floor_c1_v5` | 방 바닥 (1장 변형) | 16×16 | center | #1c2430 | mku/tile_floor_c1_v5.png (1프레임) |
+| `tile_floor_c2_v0` | 방 바닥 (2장 변형) | 16×16 | center | #1e2630 | mku/tile_floor_c2_v0.png (1프레임) |
+| `tile_floor_c2_v1` | 방 바닥 (2장 변형) | 16×16 | center | #1e2630 | mku/tile_floor_c2_v1.png (1프레임) |
+| `tile_floor_c2_v2` | 방 바닥 (2장 변형) | 16×16 | center | #1e2630 | mku/tile_floor_c2_v2.png (1프레임) |
+| `tile_floor_c2_v3` | 방 바닥 (2장 변형) | 16×16 | center | #1e2630 | mku/tile_floor_c2_v3.png (1프레임) |
+| `tile_floor_c3_v0` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v0.png (1프레임) |
+| `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
+| `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
 ## fx (6)
 

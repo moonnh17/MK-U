@@ -10,7 +10,7 @@
       "tags": ["tech", "ranged"],
       "sources": { "explosion": ["tech", "ranged"] },
       "gaugeMax": 100,
-      "gauge": { "kind": "kill" },
+      "gauge": { "kind": "energy", "perEnergy": 1 },
       "values": { "damage": 40, "radius": 40, "projectileSpeed": 220, "range": 220 },
       "color": "#ff9a3c",
       "sprites": {

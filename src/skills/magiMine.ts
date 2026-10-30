@@ -4,6 +4,7 @@
  * 스테이지가 끝날 때까지 남고, 최대 개수를 넘으면 오래된 지뢰부터 사라진다.
  * 각성 '무한연쇄기폭'(기술·마기·원거리): 지뢰 폭발로 처치하면 그 자리에 새 지뢰가 생겨 연쇄 폭파한다.
  */
+import { bus } from '../core/events';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import { hexColor } from '../core/scale';
@@ -45,6 +46,7 @@ class Mine implements SkillObject {
   }
 
   private explode(host: SkillHost): void {
+    bus.emit('sfx', { id: 'explosion' });
     const v = this.s.values;
     const awakened = this.s.owned.awakened;
     const radius = host.area(v.radius!);

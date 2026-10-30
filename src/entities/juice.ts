@@ -2,9 +2,9 @@
  * 타격감 연출 (Phaser): 피해 숫자, 맞은 자리 불꽃, 처치 파편·폭발, 플레이어 피격 번쩍임·낮은 체력 맥박, 화면 흔들림.
  * 수치는 data/juice.json, 계산은 systems/juice.ts. 이펙트 그림이 없으면 도형만 쓴다.
  */
+import { getContext } from '../core/context';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
-import { getContext } from '../core/context';
 import type { Rng } from '../core/rng';
 import { hexColor } from '../core/scale';
 import type { GameData } from '../data/index';
@@ -36,6 +36,16 @@ export class Juice {
     this.j = data.juice;
     // 화면 가장자리 붉은 테두리 (일식 어둠 위)
     this.edge = scene.add.graphics().setScrollFactor(0).setDepth(17);
+  }
+
+  /** 한 색깔의 입자가 사방으로 터지고 고리가 퍼진다 (보스 단계 전환·방 클리어) */
+  colorBurst(at: Vec2, color: string, c: { particles: readonly [number, number]; particleSpeed: readonly [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number }): void {
+    const col = hexColor(color);
+    this.particles(at, c.particles, c.particleSpeed, c.particleLifeSec, c.particleSize, col);
+    for (const delay of [0, 120]) {
+      const ring = this.scene.add.circle(at.x, at.y, 6).setStrokeStyle(2, col, 1).setDepth(7);
+      this.scene.tweens.add({ targets: ring, scale: c.ringRadiusPx / 6, alpha: 0, duration: c.particleLifeSec * 1000, delay, ease: 'Cubic.easeOut', onComplete: () => ring.destroy() });
+    }
   }
 
   /** 맞은 적 위로 튀어 오르는 피해 숫자 (동시 max개, 넘으면 오래된 것부터 지운다) */
@@ -130,13 +140,15 @@ export class Juice {
     const c = hexColor(p.color);
     // 화면 고정 오브젝트도 카메라 확대를 받으므로 보이는 화면 테두리를 지역 좌표로 바꿔 그린다
     const z = cam.zoom;
+    // edgePx는 기준 해상도 px, 그리는 좌표는 캔버스 px ÷ 확대
+    const r = getContext().renderScale;
     const tl = screenToFixed(0, 0, cam.width, cam.height, z);
     const w = cam.width / z;
     const h = cam.height / z;
     // 바깥쪽이 진하고 안쪽으로 옅어지는 테두리
     for (let i = 0; i < p.edgePx; i += 2) {
-      this.edge.lineStyle(2 / z, c, alpha * (1 - i / p.edgePx));
-      this.edge.strokeRect(tl.x + i / z, tl.y + i / z, w - (i * 2) / z, h - (i * 2) / z);
+      this.edge.lineStyle((2 * r) / z, c, alpha * (1 - i / p.edgePx));
+      this.edge.strokeRect(tl.x + (i * r) / z, tl.y + (i * r) / z, w - (i * 2 * r) / z, h - (i * 2 * r) / z);
     }
   }
 

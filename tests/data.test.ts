@@ -42,8 +42,8 @@ describe('데이터 검증', () => {
 
   it('방 개수 규칙이 기획서와 같다', () => {
     const r = gameData.mapgen.stageRules;
-    expect(r.normal.combatRooms).toEqual([4, 5]);
-    expect(r.boss.combatRooms).toEqual([2, 3]);
+    expect(r.normal.combatRooms).toEqual([2, 3]);
+    expect(r.boss.combatRooms).toEqual([1, 2]);
     expect(r.normal.encounterRooms).toBe(1);
     expect(r.boss.bossRooms).toBe(1);
     expect(gameData.mapgen.bossStages).toEqual([2, 5]);

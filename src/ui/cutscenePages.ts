@@ -18,7 +18,7 @@ export interface CutIcon {
 export type CutIn =
   | { kind: 'skillAwakening'; icon: CutIcon; flash: string }
   | { kind: 'ultimateAwakening'; from: CutIcon[]; to: CutIcon; flash: string }
-  | { kind: 'advancement'; flash: string; emblem: CutIcon; broken: CutIcon[]; gains: (CutIcon & { plus: number })[] };
+  | { kind: 'advancement'; flash: string; emblem: CutIcon; broken: CutIcon[]; gains: (CutIcon & { plus: number })[]; actorFrom: string; actorTo: string };
 
 /** 컷씬 하나: id(현재의 기억 등록) + 컷인 + 설명창 */
 export interface Cutscene {
@@ -131,6 +131,8 @@ export function advancementCut(
       emblem: { label: advName, color: adv.color },
       broken: log.removed.map((r) => icon(r.skillId)),
       gains: [...plus].map(([id, n]) => ({ ...icon(id), plus: n })),
+      actorFrom: ctx.data.player.spriteKey,
+      actorTo: artKeys.playerSchool(adv.id),
     },
     pages: [
       {

@@ -21,8 +21,8 @@
   "stageRules": {
     "normal": {
       "combatRooms": [
-        4,
-        5
+        2,
+        3
       ],
       "encounterRooms": 1,
       "bossRooms": 0,
@@ -31,8 +31,8 @@
     },
     "boss": {
       "combatRooms": [
-        2,
-        3
+        1,
+        2
       ],
       "encounterRooms": 1,
       "bossRooms": 1,
@@ -368,5 +368,38 @@
         ]
       }
     ]
+  },
+  "dressing": {
+    "floorVariants": {
+      "1": 6,
+      "2": 4,
+      "3": 3
+    },
+    "obstacleKinds": 6,
+    "obstacleStepPx": 16,
+    "decalKinds": 7,
+    "decalsPerRoom": [
+      8,
+      16
+    ],
+    "decalColor": "#2a2d36",
+    "obstacleBaseColor": "#0c0e14"
+  },
+  "vending": {
+    "spriteKey": "prop_vending",
+    "color": "#3a7bff",
+    "size": 22,
+    "height": 32,
+    "price": 12,
+    "stock": 3,
+    "healRatio": 0.3,
+    "cornerInsetPx": 34,
+    "potion": {
+      "spriteKey": "pickup_potion",
+      "color": "#e23a4c",
+      "size": 9,
+      "height": 12
+    },
+    "pickupRadius": 12
   }
 }

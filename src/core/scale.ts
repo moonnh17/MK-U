@@ -1,14 +1,21 @@
 import type { UiMode } from '../input/uiMode';
 
 /**
- * 화면 배율 (순수 함수).
- * - PC: 정수 배 (최소 1)
- * - 모바일: 화면에 꽉 차는 비정수 배 (정수 배면 폰에서 여백이 너무 커서. DECISIONS 참고)
+ * 화면 배율 (순수 함수): 기준 해상도 1px이 창에서 몇 CSS px인지. PC·모바일 모두 창에 꽉 차게.
+ * (캔버스를 고해상도로 그리므로 정수 배가 아니어도 도트가 뭉개지지 않는다. DECISIONS 참고)
  */
-export function computeZoom(viewW: number, viewH: number, baseW: number, baseH: number, mode: UiMode): number {
-  const fit = Math.min(viewW / baseW, viewH / baseH);
-  if (mode === 'mobile') return Math.max(fit, 0.25);
-  return Math.max(1, Math.floor(fit));
+export function computeZoom(viewW: number, viewH: number, baseW: number, baseH: number): number {
+  return Math.max(Math.min(viewW / baseW, viewH / baseH), 0.25);
+}
+
+/**
+ * 게임 1px을 캔버스 몇 px로 그릴지: 화면(창을 최대로 키웠을 때)의 실제 픽셀 수에 맞춘 정수.
+ * 시작할 때 한 번 정한다. 창 크기가 바뀌면 캔버스 표시 크기만 바뀐다.
+ */
+export function renderScale(screenW: number, screenH: number, dpr: number, baseW: number, baseH: number, min: number, max: number): number {
+  const long = Math.max(screenW, screenH);
+  const short = Math.min(screenW, screenH);
+  return Math.max(min, Math.min(max, Math.ceil(Math.min(long / baseW, short / baseH) * dpr)));
 }
 
 /** "#rrggbb" → 0xrrggbb */

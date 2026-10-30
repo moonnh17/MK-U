@@ -275,7 +275,6 @@ export function validateGameData(d: GameData): Errors {
   checkUnique(errors, 'items', it.items.map((x) => x.id));
   checkPositive(errors, 'items.transferPerPickup', it.transferPerPickup, true);
   checkPositive(errors, 'items.chapterCommonShift', it.chapterCommonShift, true);
-  checkPositive(errors, 'items.pickupCardSec', it.pickupCardSec);
   for (const [k, v] of Object.entries({ ...it.treasureWeights, ...it.raidWeights })) {
     if (!gradeIds.has(k)) errors.push(`items: 알 수 없는 등급 '${k}'`);
     checkPositive(errors, `items.weights.${k}`, v, true);
@@ -600,11 +599,13 @@ export function validateGameData(d: GameData): Errors {
     checkTags(w, x.tags);
     checkSources(w, x.sources);
     checkPositive(errors, `${w}.gaugeMax`, x.gaugeMax);
-    if (x.gauge?.kind === 'damage') {
+    if (x.gauge?.kind === 'energy') {
+      checkPositive(errors, `${w}.gauge.perEnergy`, x.gauge.perEnergy);
+    } else if (x.gauge?.kind === 'damage') {
       checkPositive(errors, `${w}.gauge.perDamage`, x.gauge.perDamage);
       for (const id of x.gauge.skills) if (!d.skills.skills.some((s) => s.id === id)) errors.push(`${w}.gauge.skills: 없는 스킬 '${id}'`);
     } else if (x.gauge?.kind !== 'kill') {
-      errors.push(`${w}.gauge: kind는 kill 또는 damage`);
+      errors.push(`${w}.gauge: kind는 kill·energy·damage`);
     }
     if (x.school !== undefined && !(SCHOOL_IDS as readonly string[]).includes(x.school)) errors.push(`${w}.school: 잘못됨`);
     if (x.awakening) {
@@ -670,6 +671,7 @@ export function validateGameData(d: GameData): Errors {
   // --- UI ---
   checkPositive(errors, 'ui.baseWidth', d.ui.baseWidth);
   checkPositive(errors, 'ui.baseHeight', d.ui.baseHeight);
+  if (!(d.ui.renderScaleMin >= 1 && d.ui.renderScaleMin <= d.ui.renderScaleMax && d.ui.renderScaleMin <= d.ui.renderScaleMaxMobile)) errors.push('ui.renderScale: 1 <= min <= max');
   const mb = d.ui.mobile;
   for (const k of ['edgeMarginDp', 'attackDp', 'skillDp', 'ultimateDp', 'swapDp', 'bagDp', 'pauseDp'] as const) {
     checkPositive(errors, `ui.mobile.${k}`, mb[k]);

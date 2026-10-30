@@ -70,7 +70,7 @@
       "coins": [8, 12],
       "spriteKey": "enemy_fusion_akgwi",
       "color": "#7a1f3a",
-      "size": 26
+      "size": 39
     },
     {
       "id": "electricRing",
@@ -86,7 +86,7 @@
       "coins": [10, 14],
       "spriteKey": "enemy_electric_ring",
       "color": "#3a9ad9",
-      "size": 28
+      "size": 42
     },    {
       "id": "trainingDummy",
       "nameKey": "enemy.trainingDummy",
@@ -107,25 +107,25 @@
       "id": "ancestorEcho", "nameKey": "enemy.ancestorEcho", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
       "maxHp": 1600, "moveSpeed": 45, "contactDamage": 12, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
-      "spriteKey": "enemy_ancestor_echo", "color": "#b0583a", "size": 28
+      "spriteKey": "enemy_ancestor_echo", "color": "#b0583a", "size": 42
     },
     {
       "id": "royalMage", "nameKey": "enemy.royalMage", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
       "maxHp": 1400, "moveSpeed": 35, "contactDamage": 10, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
-      "spriteKey": "enemy_royal_mage", "color": "#6a4ad9", "size": 22
+      "spriteKey": "enemy_royal_mage", "color": "#6a4ad9", "size": 33
     },
     {
       "id": "royalMageClone", "nameKey": "enemy.royalMageClone", "chapter": 1, "rank": "normal", "ai": "idle", "summon": true,
       "maxHp": 1, "moveSpeed": 0, "contactDamage": 0, "contactIntervalSec": 1.0,
       "energyOrbs": [0, 0], "coins": [0, 0],
-      "spriteKey": "enemy_royal_mage", "color": "#6a4ad9", "size": 22
+      "spriteKey": "enemy_royal_mage", "color": "#6a4ad9", "size": 33
     },
     {
       "id": "orionCrusader", "nameKey": "enemy.orionCrusader", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
       "maxHp": 1800, "moveSpeed": 32, "contactDamage": 12, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
-      "spriteKey": "enemy_orion_crusader", "color": "#d9c25a", "size": 28
+      "spriteKey": "enemy_orion_crusader", "color": "#d9c25a", "size": 42
     },
     {
       "id": "hectarTrooper", "nameKey": "enemy.hectarTrooper", "chapter": 2, "rank": "normal", "ai": "chase",
@@ -162,13 +162,13 @@
       "id": "hectarChief", "nameKey": "enemy.hectarChief", "chapter": 2, "rank": "boss", "ai": "boss",
       "maxHp": 1800, "moveSpeed": 34, "contactDamage": 12, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
-      "spriteKey": "enemy_hectar_chief", "color": "#3a9aff", "size": 24
+      "spriteKey": "enemy_hectar_chief", "color": "#3a9aff", "size": 36
     },
     {
       "id": "magiGolem", "nameKey": "enemy.magiGolem", "chapter": 2, "rank": "boss", "ai": "boss",
       "maxHp": 2800, "moveSpeed": 26, "contactDamage": 14, "contactIntervalSec": 1.0,
       "energyOrbs": [12, 14], "coins": [14, 18],
-      "spriteKey": "enemy_magi_golem", "color": "#8a6a4a", "size": 32
+      "spriteKey": "enemy_magi_golem", "color": "#8a6a4a", "size": 48
     },
     {
       "id": "ancientOne", "nameKey": "enemy.ancientOne", "chapter": 3, "rank": "normal", "ai": "chase",
@@ -225,13 +225,13 @@
       "id": "eclipse", "nameKey": "enemy.eclipse", "chapter": 3, "rank": "boss", "ai": "boss",
       "maxHp": 3600, "moveSpeed": 32, "contactDamage": 14, "contactIntervalSec": 1.0,
       "energyOrbs": [12, 14], "coins": [14, 18],
-      "spriteKey": "enemy_eclipse", "color": "#c8a8ff", "size": 28
+      "spriteKey": "enemy_eclipse", "color": "#c8a8ff", "size": 42
     },
     {
       "id": "magiKaiser", "nameKey": "enemy.magiKaiser", "chapter": 3, "rank": "boss", "ai": "boss",
       "maxHp": 5200, "moveSpeed": 40, "contactDamage": 16, "contactIntervalSec": 1.0,
       "energyOrbs": [14, 16], "coins": [16, 20],
-      "spriteKey": "enemy_magi_kaiser", "color": "#d02828", "size": 34
+      "spriteKey": "enemy_magi_kaiser", "color": "#d02828", "size": 51
     }
   ]
 }

@@ -46,6 +46,8 @@ export class BootScene extends Phaser.Scene {
       data.pickups.coin,
       data.mapgen.props.exitPortal,
       data.mapgen.props.encounterCore,
+      data.mapgen.vending,
+      data.mapgen.vending.potion,
       ...data.skills.skills.flatMap((s) => Object.values(s.sprites)),
       ...data.ultimates.ultimates.flatMap((u) => Object.values(u.sprites)),
     ];
