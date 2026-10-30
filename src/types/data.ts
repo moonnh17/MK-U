@@ -314,6 +314,10 @@ export interface EnemyAttackDef {
   radius?: number;
   /** slam: 몸에서 강타 중심까지 최대 거리 */
   reach?: number;
+  /** slam: 내리칠 때 사방으로 퍼지는 충격 탄 */
+  ring?: { shots: number; speed: number; range: number; damage: number };
+  /** 등장 후 첫 공격을 이 시간 안에서 무작위로 늦춘다 (떼가 한꺼번에 쏘지 않게) */
+  firstDelayJitterSec?: number;
   /** lunge: 벽에 부딪히면 이 시간 기절, 그동안 받는 피해 ×stunTakenMul (마기갑충) */
   wallStunSec?: number;
   stunTakenMul?: number;
@@ -431,6 +435,8 @@ export interface HiddenBossDef extends BossCore {
 export interface BossesData {
   /** 보스방 경고 배너 시간 */
   bannerSec: number;
+  /** 보스 체력이 everyHpRatio씩 줄 때마다 에너지 구슬 orbs개 */
+  energyDrops: { everyHpRatio: number; orbs: number };
   bosses: BossDef[];
   hiddenBosses: HiddenBossDef[];
   /** 히든보스 체력·피해 배율 (챕터 번호 → 배율) */
@@ -483,6 +489,9 @@ export interface MapgenData {
   testWeapons: string[];
   /** 문 */
   door: { color: string; openColor: string };
+  /** 적 길 찾기 격자 한 칸, 장애물 여유 폭(px) */
+  pathCellPx: number;
+  pathMarginPx: number;
   props: { exitPortal: SpriteRef & { spinSec: number }; encounterCore: SpriteRef };
   /** 방 꾸미기: 챕터별 바닥 변형 수, 지형지물·바닥 장식 그림 수와 배치 */
   dressing: {
@@ -570,8 +579,12 @@ export interface PlayerData extends SpriteRef {
   blinkIntervalSec: number;
   /** 무기를 몸에서 이만큼 떨어뜨려 그린다(px) */
   weaponOffset: number;
+  /** 총구에서 목표가 이보다 가까우면 몸 기준 각도로 쏜다 */
+  muzzleMinTargetPx: number;
   /** 무기를 쥔 오른손 자리 (플레이어 기준 px, 그림이 뒤집히면 x도 뒤집는다) */
   weaponHand: { x: number; y: number };
+  /** 회피 구르기: 속도, 시간, 무적, 재사용 대기, 잔상 간격, 대기 막대 색 */
+  dodge: { speed: number; durationSec: number; invulnSec: number; cooldownSec: number; ghostEverySec: number; barColor: string };
   /** 보호막 최대치. 규칙은 나중에 정한다(M1은 바 자리만) */
   shieldMax: number;
   energy: { max: number; start: number; orbValue: number };
@@ -586,6 +599,7 @@ export interface MobileLayoutData {
   skillDp: number;
   ultimateDp: number;
   swapDp: number;
+  dodgeDp: number;
   bagDp: number;
   pauseDp: number;
   /** 버튼 사이 간격(dp) */

@@ -1,5 +1,6 @@
 {
   "bannerSec": 1.5,
+  "energyDrops": { "everyHpRatio": 0.1, "orbs": 4 },
   "bosses": [
     {
       "id": "fusionAkgwi",

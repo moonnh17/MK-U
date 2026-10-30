@@ -7,6 +7,7 @@
   },
   "buttons": {
     "attack": ["Space"],
+    "dodge": ["ShiftLeft", "ShiftRight", "KeyQ"],
     "swapWeapon": ["KeyE"],
     "interact": ["KeyF"],
     "skill1": ["Digit1", "Numpad1"],

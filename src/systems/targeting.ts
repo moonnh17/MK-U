@@ -3,6 +3,17 @@
  * 결과는 입력 배열의 인덱스로 돌려준다.
  */
 import type { Vec2 } from '../core/actions';
+
+/** 총구 자리: 손에서 조준 방향으로 length만큼 */
+export function muzzlePoint(hand: Vec2, dir: Vec2, length: number): Vec2 {
+  return { x: hand.x + dir.x * length, y: hand.y + dir.y * length };
+}
+
+/** 총구에서 목표로 가는 각도. 목표가 없거나 minDist보다 가까우면 fallback (몸 기준 조준) */
+export function muzzleAngle(muzzle: Vec2, target: Vec2 | null, fallback: number, minDist: number): number {
+  if (!target || Math.hypot(target.x - muzzle.x, target.y - muzzle.y) < minDist) return fallback;
+  return Math.atan2(target.y - muzzle.y, target.x - muzzle.x);
+}
 import type { EnemyRank } from '../types/data';
 
 export interface Target extends Vec2 {

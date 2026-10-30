@@ -334,6 +334,7 @@
   "skillMsg.rebel": "반역",
   "skillMsg.dominate": "지배",
   "mobile.attack": "공격",
+  "mobile.dodge": "회피",
   "mobile.pickup": "줍기",
   "mobile.interact": "조사",
   "mobile.swap": "교체",

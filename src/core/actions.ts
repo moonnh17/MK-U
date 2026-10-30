@@ -4,6 +4,7 @@
  */
 export const BUTTON_ACTIONS = [
   'attack',
+  'dodge',
   'skill1',
   'skill2',
   'skill3',

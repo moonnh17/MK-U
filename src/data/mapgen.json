@@ -10,6 +10,8 @@
     "height": 7
   },
   "tileSize": 16,
+  "pathCellPx": 8,
+  "pathMarginPx": 5,
   "roomTiles": {
     "width": 28,
     "height": 15

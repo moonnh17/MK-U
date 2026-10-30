@@ -1,3 +1,6 @@
+import { buildPathField, pathDir, segmentClear, type PathField } from '../systems/pathField';
+import { bossOrbDrops } from '../systems/bossEnergy';
+import { IDLE_DODGE, startDodge, stepDodge, type DodgeState } from '../systems/dodge';
 import { stampGrid } from '../systems/roomShapes';
 import Phaser from 'phaser';
 import type { ActionFrame, ButtonAction, Vec2 } from '../core/actions';
@@ -38,7 +41,7 @@ import { championWaves, raidChampions } from '../systems/champions';
 import { IMPLEMENTED_ENCOUNTERS } from '../systems/encounter';
 import { effectiveWeights, itemDamageMultiplier, readySet, rollItem, transferWeight } from '../systems/items';
 import { canBuy, merchantStock, rollEncounter, rollGrade, rollOptions, rollWeapon } from '../systems/loot';
-import { lineHits } from '../systems/targeting';
+import { lineHits, muzzleAngle, muzzlePoint } from '../systems/targeting';
 import { generateStage, type RoomNode } from '../systems/mapgen';
 import { encounterKinds, hiddenChapterMul, pickHiddenBoss } from '../systems/hiddenBoss';
 import { signatureFires, steerToward } from '../systems/motion';
@@ -237,6 +240,11 @@ export class RunScene extends Phaser.Scene {
   private aimDir: Vec2 = { x: 1, y: 0 };
   private fireCooldown = 0;
   private invuln = 0;
+  private dodge: DodgeState = IDLE_DODGE;
+  private dodgeGhostIn = 0;
+  private dodgeBar: Phaser.GameObjects.Graphics | null = null;
+  private pathFields = new Map<number, PathField>();
+  private bossHpSeen = new Map<Enemy, number>();
   private interactKind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | null = null;
   /** 상자·드롭 무기 시드 순번 */
   private lootSeq = 0;
@@ -341,6 +349,7 @@ export class RunScene extends Phaser.Scene {
       linkWindup: (e, attackId) => this.linkWindup(e, attackId),
       rng: this.rng,
       pullPlayer: (to, speed) => this.pullPlayer(to, speed),
+      pathDir: (from, radius) => this.enemyPathDir(from, radius),
     };
     this.bossHost = {
       ...this.enemyHost,
@@ -520,6 +529,10 @@ export class RunScene extends Phaser.Scene {
     this.aimDir = { x: 1, y: 0 };
     this.fireCooldown = 0;
     this.invuln = 0;
+    this.dodge = IDLE_DODGE;
+    this.dodgeBar = null;
+    this.pathFields = new Map();
+    this.bossHpSeen = new Map();
     this.interactKind = null;
     this.lootSeq = 0;
     this.toastTimes = new Map();
@@ -941,11 +954,14 @@ export class RunScene extends Phaser.Scene {
     p.shield = Math.min(p.shield, p.shieldMax);
     this.syncMaxHp();
     this.itemRt.update(dt);
+    this.updateDodge(dt, frame);
     const speed = d.player.moveSpeed * (1 + statEffect('moveSpeed', this.effStats(), d.stats)) * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus());
     if (this.dashLeft > 0) {
       // MK 돌진: 입력 대신 돌진 방향으로
       this.dashLeft -= dt;
       this.player.setVelocity(this.dashVel.x, this.dashVel.y);
+    } else if (this.dodge.left > 0) {
+      this.player.setVelocity(this.dodge.vel.x, this.dodge.vel.y);
     } else {
       this.player.setVelocity(frame.move.x * speed, frame.move.y * speed);
     }
@@ -960,6 +976,7 @@ export class RunScene extends Phaser.Scene {
       e.update(dt, this.enemyHost);
     }
     for (const b of this.bossControllers.values()) b.update(dt, this.bossHost);
+    this.updateBossEnergy();
     for (const h of [...this.hazards]) {
       if (h.update(dt, this.enemyHost)) continue;
       h.destroy();
@@ -1004,15 +1021,14 @@ export class RunScene extends Phaser.Scene {
     this.updatePotions();
     this.updateInteractHint();
 
-    const off = d.player.weaponOffset;
-    const hand = d.player.weaponHand;
     const weaponKey = this.shownWeaponKey();
+    const handAt = this.handPos();
     this.weaponSprite
       .setTexture(weaponKey)
       .setOrigin(d.art.sprites[weaponKey]?.gripX ?? 0.5, 0.5)
       // 왼쪽을 겨눌 때 총이 거꾸로 서지 않게
       .setFlipY(this.aimDir.x < 0)
-      .setPosition(this.player.x + (this.player.flipX ? -hand.x : hand.x) + this.aimDir.x * off, this.player.y + hand.y + this.aimDir.y * off)
+      .setPosition(handAt.x, handAt.y)
       .setRotation(aimAngle);
 
     animateArt(d, this.player);
@@ -1140,6 +1156,7 @@ export class RunScene extends Phaser.Scene {
     const extra = extraEliteId ? (d.elites.elites.find((x) => x.id === extraEliteId) ?? null) : null;
     const icon = [elite, extra].filter((x) => x !== null).map((x) => this.ctx.t(x!.iconKey)).join('');
     const enemy = new Enemy(this, def, pos.x, pos.y, d.waves.spawnWarnSec, elite, d.elites, icon, extra);
+    enemy.jitterFirstAttack(rng);
     this.enemyGroup.add(enemy.sprite);
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
     this.enemies.push(enemy);
@@ -1445,8 +1462,10 @@ export class RunScene extends Phaser.Scene {
       this.weaponLaser(w, st.damage * sig.damageMul * emp, st.critChance, aimAngle, sig.length, sig.width);
       return;
     }
+    const muzzle = this.muzzle();
+    const shotAngle = muzzleAngle(muzzle, this.aimTarget, aimAngle, this.ctx.data.player.muzzleMinTargetPx);
     if (w.pattern.kind === 'homing') {
-      this.fireBullet(this.player, aimAngle, st.projectileSpeed, w.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, homing: w.pattern.turnRate });
+      this.fireBullet(muzzle, shotAngle, st.projectileSpeed, w.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, homing: w.pattern.turnRate });
       return;
     }
     if (w.pattern.kind === 'lob') {
@@ -1457,7 +1476,7 @@ export class RunScene extends Phaser.Scene {
       host.addObject(
         new Explosive(host, {
           owner: 'weapon',
-          from: { x: this.player.x, y: this.player.y },
+          from: muzzle,
           to,
           speed: st.projectileSpeed,
           radius: w.pattern.radius * (1 + this.itemRt.sums.area),
@@ -1468,8 +1487,8 @@ export class RunScene extends Phaser.Scene {
       );
       return;
     }
-    for (const shot of gunShots(w, aimAngle, this.rng)) {
-      this.fireBullet(this.player, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance });
+    for (const shot of gunShots(w, shotAngle, this.rng)) {
+      this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance });
     }
   }
 
@@ -1505,6 +1524,92 @@ export class RunScene extends Phaser.Scene {
     b.setDepth(5);
     b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>() });
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
+  }
+
+  /** 무기를 쥔 손 자리 (그림이 뒤집히면 x도 뒤집고, 조준 방향으로 살짝 내민다) */
+  private handPos(): Vec2 {
+    const { weaponHand: hand, weaponOffset: off } = this.ctx.data.player;
+    return { x: this.player.x + (this.player.flipX ? -hand.x : hand.x) + this.aimDir.x * off, y: this.player.y + hand.y + this.aimDir.y * off };
+  }
+
+  /** 탄이 나가는 자리: 무기 끝. 끝이 벽·장애물 너머면 몸 가운데 (벽 뒤로 쏘지 않게) */
+  private muzzle(): Vec2 {
+    const body = { x: this.player.x, y: this.player.y };
+    const rid = this.session.currentRoomId;
+    if (rid === null) return body;
+    const art = this.ctx.data.art.sprites[this.weaponDef().spriteKey];
+    const at = muzzlePoint(this.handPos(), this.aimDir, art ? art.frameWidth * (1 - (art.gripX ?? 0.5)) : 0);
+    const node = this.session.map.rooms[rid]!;
+    const inside = contains(interiorRect(node, this.m), at.x, at.y);
+    return inside && segmentClear(body, at, this.obstacles.get(rid) ?? []) ? at : body;
+  }
+
+  /** 회피 입력·잔상·재사용 막대 */
+  private updateDodge(dt: number, frame: ActionFrame): void {
+    const c = this.ctx.data.player.dodge;
+    this.dodge = stepDodge(this.dodge, dt);
+    if (frame.pressed.has('dodge') && this.dashLeft <= 0) {
+      const started = startDodge(this.dodge.cooldown, frame.move, this.aimDir, c);
+      if (started) {
+        this.dodge = started;
+        this.dodgeGhostIn = 0;
+        sfx('dash');
+      }
+    }
+    if (this.dodge.left > 0) {
+      this.dodgeGhostIn -= dt;
+      if (this.dodgeGhostIn <= 0) {
+        this.dodgeGhostIn = c.ghostEverySec;
+        const f = this.player.frame;
+        const ghost = this.add.image(this.player.x, this.player.y, this.player.texture.key, f.name).setOrigin(this.player.originX, this.player.originY).setFlipX(this.player.flipX).setAlpha(0.45).setDepth(3).setTint(hexColor(c.barColor));
+        this.tweens.add({ targets: ghost, alpha: 0, duration: c.durationSec * 1000, onComplete: () => ghost.destroy() });
+      }
+    }
+    this.dodgeBar ??= this.add.graphics().setDepth(6);
+    this.dodgeBar.clear();
+    if (this.dodge.cooldown > 0) {
+      const w = 14;
+      const k = 1 - this.dodge.cooldown / c.cooldownSec;
+      const x = this.player.x - w / 2;
+      const y = this.player.y + 7;
+      this.dodgeBar.fillStyle(0x000000, 0.6).fillRect(x, y, w, 2).fillStyle(hexColor(c.barColor), 1).fillRect(x, y, w * k, 2);
+    }
+  }
+
+  /** 적 길 찾기: 곧장 갈 수 있으면 null, 막혔으면 이 방 격자로 돌아가는 방향 */
+  private enemyPathDir(from: Vec2, radius: number): Vec2 | null {
+    const rid = this.session.currentRoomId;
+    if (rid === null) return null;
+    const obs = this.obstacles.get(rid);
+    if (!obs || obs.length === 0 || segmentClear(from, this.player, obs, radius)) return null;
+    let field = this.pathFields.get(rid);
+    if (!field) {
+      const mg = this.ctx.data.mapgen;
+      field = buildPathField(interiorRect(this.session.map.rooms[rid]!, this.m), obs, mg.pathCellPx, mg.pathMarginPx);
+      this.pathFields.set(rid, field);
+    }
+    return pathDir(field, from, this.player);
+  }
+
+  /** 보스 체력이 일정 비율 줄 때마다 보스와 플레이어 사이에 에너지 구슬 */
+  private updateBossEnergy(): void {
+    const d = this.ctx.data;
+    for (const e of this.bossControllers.keys()) {
+      const ratio = e.hp / e.maxHp;
+      const n = bossOrbDrops(this.bossHpSeen.get(e) ?? 1, ratio, d.bosses.energyDrops);
+      this.bossHpSeen.set(e, ratio);
+      if (n <= 0) continue;
+      const x = (e.sprite.x + this.player.x) / 2;
+      const y = (e.sprite.y + this.player.y) / 2;
+      const pop = d.juice.death.orbPopPx;
+      for (let i = 0; i < n; i++) {
+        const a = this.rng.range(0, Math.PI * 2);
+        const r = this.rng.range(pop[0], pop[1]);
+        const pk = new Pickup(this, 'energy', e.sprite.x, e.sprite.y, d.pickups);
+        this.tweens.add({ targets: pk.sprite, x: x + Math.cos(a) * r, y: y + Math.sin(a) * r, duration: d.juice.death.orbPopSec * 1000, ease: 'Back.easeOut' });
+        this.pickups.push(pk);
+      }
+    }
   }
 
   /** 무기 치명 판정 */
@@ -1720,7 +1825,7 @@ export class RunScene extends Phaser.Scene {
   /** 피해를 받았으면 true */
   /** 피해를 받았으면 true. attacker: 때린 적(반사용, 모르면 null) */
   private hurtPlayer(amount: number, attacker: Enemy | null = null): boolean {
-    if (this.invuln > 0 || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
+    if (this.invuln > 0 || this.dodge.invuln > 0 || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
     // 특무 인장: 피해를 받기 직전 순간이동으로 피한다 (피격 무적과 같은 시간)
     if (this.itemRt.tryDodge()) {
       this.invuln = this.ctx.data.player.hurtInvulnSec;
@@ -2014,7 +2119,8 @@ export class RunScene extends Phaser.Scene {
   }
 
   private onEnemyBulletHit(b: Phaser.Physics.Arcade.Image): void {
-    if (!b.active) return;
+    // 구르는 동안에는 탄이 몸을 지나간다
+    if (!b.active || this.dodge.invuln > 0) return;
     const damage = b.getData('damage') as number;
     b.destroy();
     this.hurtPlayer(damage);

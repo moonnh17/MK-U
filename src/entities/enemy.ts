@@ -23,6 +23,8 @@ export interface EnemyHost extends HazardHost {
   linkWindup(e: Enemy, attackId: string): void;
   /** 집행자 밧줄: 플레이어를 to까지 speed로 끌어당긴다. 걸리는 시간(초) */
   pullPlayer(to: Vec2, speed: number): number;
+  /** 플레이어까지 장애물에 막혔으면 돌아가는 방향, 곧장 갈 수 있으면 null */
+  pathDir(from: Vec2, radius: number): Vec2 | null;
 }
 
 /** 장애물에 막혔을 때 옆으로 비켜 가는 시간(초) */
@@ -272,6 +274,14 @@ export class Enemy {
       const k = this.def.keepDistance ? keepDistanceStep(dist, this.def.keepDistance, KEEP_BAND) : 1;
       let vx = (dx / len) * k;
       let vy = (dy / len) * k;
+      // 다가갈 때 장애물이 가로막으면 돌아간다
+      if (k === 1) {
+        const around = host.pathDir(this.sprite, this.radius);
+        if (around) {
+          vx = around.x;
+          vy = around.y;
+        }
+      }
       // 장애물(벽)에 막히면 잠깐 옆으로 비켜 간다 (막힐 때마다 반대쪽으로)
       const body = this.sprite.body as Phaser.Physics.Arcade.Body | null;
       if (k !== 0 && body && !body.blocked.none && this.sideLeft <= 0) {
@@ -397,6 +407,11 @@ export class Enemy {
     this.shotTimer = a.shotGapSec ?? 0;
   }
 
+  /** 떼가 한꺼번에 쏘지 않게 첫 공격을 늦춘다 */
+  jitterFirstAttack(rng: Rng): void {
+    for (const a of this.attacks) if (a.firstDelayJitterSec) this.ai.cooldowns[a.id] = (this.ai.cooldowns[a.id] ?? 0) + rng.range(0, a.firstDelayJitterSec);
+  }
+
   /** 지나간 자리에 장판 (어느 기억) */
   private dropTrail(dt: number, speed: number, host: EnemyHost): void {
     const t = this.def.trail;
@@ -498,6 +513,9 @@ export class Enemy {
         if (Math.hypot(p.x - this.slamAt.x, p.y - this.slamAt.y) <= a.radius! + host.playerRadius) host.hurtPlayer(a.damage * this.damageMul, this);
         const flash = this.scene.add.circle(this.slamAt.x, this.slamAt.y, a.radius!, TELEGRAPH_COLOR, 0.5).setDepth(6);
         this.scene.time.delayedCall(120, () => flash.destroy());
+        if (a.ring) {
+          for (let k = 0; k < a.ring.shots; k++) host.fireEnemyBullet(this.slamAt, (k / a.ring.shots) * Math.PI * 2, a.ring.speed, a.ring.range, a.ring.damage * this.damageMul, true);
+        }
       }
     }
   }

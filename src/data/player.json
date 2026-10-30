@@ -4,9 +4,18 @@
   "hurtInvulnSec": 0.5,
   "blinkIntervalSec": 0.08,
   "weaponOffset": 1,
+  "muzzleMinTargetPx": 12,
   "weaponHand": {
     "x": -4.5,
     "y": -6.5
+  },
+  "dodge": {
+    "speed": 300,
+    "durationSec": 0.2,
+    "invulnSec": 0.28,
+    "cooldownSec": 1.2,
+    "ghostEverySec": 0.04,
+    "barColor": "#7ad8ff"
   },
   "shieldMax": 0,
   "energy": {

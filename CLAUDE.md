@@ -46,7 +46,7 @@ public/assets/
 ## 설계 원칙
 
 1. **데이터 주도**: 수치·확률·이름·설명은 `src/data/*.json`에 둔다. 코드에 숫자를 박지 마라. 아이템·무기 효과는 `기준값 × 그룹 배율`로 계산하고, 그룹 배율 표도 데이터로 둔다(초기값은 임시, 밸런스는 나중에).
-2. **입력과 로직 분리**: 키보드·터치는 `input/`에서 `ActionCommand`로 바꾼다. 명령은 `move, attack, skill1~4, ultimate, swapWeapon, interact, inventory, map, pause`. 게임 로직은 명령만 받고, 키 이름이나 터치 좌표를 직접 읽지 않는다.
+2. **입력과 로직 분리**: 키보드·터치는 `input/`에서 `ActionCommand`로 바꾼다. 명령은 `move, attack, dodge, skill1~4, ultimate, swapWeapon, interact, inventory, map, pause`. 게임 로직은 명령만 받고, 키 이름이나 터치 좌표를 직접 읽지 않는다.
 3. **순수 함수 + 테스트 먼저**: 맵 생성, 피해·태그 배율, 확률, 전직 변환, 결정 산식 같은 공식은 Phaser에 의존하지 않는 순수 함수로 만들고 테스트를 먼저 쓴다.
 4. **시드 RNG**: 모든 랜덤은 시드 가능한 RNG(`core/rng.ts`)를 쓴다. `?seed=123`으로 재현할 수 있어야 한다.
 5. **텍스트 분리**: UI 문구와 대사는 `src/data/text/ko.json`에 둔다. 한국어가 기본이다.

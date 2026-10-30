@@ -39,6 +39,7 @@ interface JoystickState {
 
 const CONTROL_IDS: TouchControlId[] = [
   'attack',
+  'dodge',
   'skill1',
   'skill2',
   'skill3',
