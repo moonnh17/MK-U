@@ -3,10 +3,9 @@
   "sprites": {
     "player_human": {
       "file": "mku/player_human.png",
-      "frameWidth": 66,
-      "frameHeight": 78,
+      "frameWidth": 22,
+      "frameHeight": 26,
       "frames": 5,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -22,10 +21,9 @@
     },
     "player_hectar": {
       "file": "mku/player_hectar.png",
-      "frameWidth": 57,
-      "frameHeight": 78,
+      "frameWidth": 19,
+      "frameHeight": 26,
       "frames": 5,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -41,10 +39,9 @@
     },
     "player_acro": {
       "file": "mku/player_acro.png",
-      "frameWidth": 78,
-      "frameHeight": 75,
+      "frameWidth": 26,
+      "frameHeight": 25,
       "frames": 5,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -60,10 +57,9 @@
     },
     "enemy_tomakki": {
       "file": "mku/enemy_tomakki.png",
-      "frameWidth": 42,
-      "frameHeight": 36,
+      "frameWidth": 14,
+      "frameHeight": 12,
       "frames": 4,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -80,10 +76,9 @@
     },
     "enemy_gaedeulgae": {
       "file": "mku/enemy_gaedeulgae.png",
-      "frameWidth": 57,
-      "frameHeight": 54,
+      "frameWidth": 19,
+      "frameHeight": 18,
       "frames": 5,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -99,10 +94,9 @@
     },
     "enemy_akgwi": {
       "file": "mku/enemy_akgwi.png",
-      "frameWidth": 69,
-      "frameHeight": 72,
+      "frameWidth": 23,
+      "frameHeight": 24,
       "frames": 6,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -118,10 +112,9 @@
     },
     "enemy_hectar_trooper": {
       "file": "mku/enemy_hectar_trooper.png",
-      "frameWidth": 33,
-      "frameHeight": 66,
+      "frameWidth": 11,
+      "frameHeight": 22,
       "frames": 5,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -137,10 +130,9 @@
     },
     "enemy_hectar_chief": {
       "file": "mku/enemy_hectar_chief.png",
-      "frameWidth": 36,
-      "frameHeight": 72,
+      "frameWidth": 18,
+      "frameHeight": 36,
       "frames": 5,
-      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -156,10 +148,9 @@
     },
     "enemy_magi_beetle": {
       "file": "mku/enemy_magi_beetle.png",
-      "frameWidth": 72,
-      "frameHeight": 60,
+      "frameWidth": 24,
+      "frameHeight": 20,
       "frames": 10,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -175,10 +166,9 @@
     },
     "enemy_a_memory": {
       "file": "mku/enemy_a_memory.png",
-      "frameWidth": 63,
-      "frameHeight": 72,
+      "frameWidth": 21,
+      "frameHeight": 24,
       "frames": 14,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -194,10 +184,9 @@
     },
     "enemy_ancient_one": {
       "file": "mku/enemy_ancient_one.png",
-      "frameWidth": 78,
-      "frameHeight": 78,
+      "frameWidth": 26,
+      "frameHeight": 26,
       "frames": 12,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -213,10 +202,9 @@
     },
     "enemy_hatred_shard": {
       "file": "mku/enemy_hatred_shard.png",
-      "frameWidth": 66,
-      "frameHeight": 36,
+      "frameWidth": 22,
+      "frameHeight": 12,
       "frames": 10,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -232,10 +220,9 @@
     },
     "enemy_executor": {
       "file": "mku/enemy_executor.png",
-      "frameWidth": 114,
-      "frameHeight": 105,
+      "frameWidth": 38,
+      "frameHeight": 35,
       "frames": 13,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -251,10 +238,9 @@
     },
     "enemy_archon": {
       "file": "mku/enemy_archon.png",
-      "frameWidth": 66,
-      "frameHeight": 90,
+      "frameWidth": 22,
+      "frameHeight": 30,
       "frames": 13,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -270,10 +256,9 @@
     },
     "enemy_fusion_akgwi": {
       "file": "mku/enemy_fusion_akgwi.png",
-      "frameWidth": 144,
-      "frameHeight": 138,
+      "frameWidth": 48,
+      "frameHeight": 46,
       "frames": 2,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -289,10 +274,9 @@
     },
     "enemy_fusion_akgwi_phase2": {
       "file": "mku/enemy_fusion_akgwi_phase2.png",
-      "frameWidth": 156,
-      "frameHeight": 111,
+      "frameWidth": 52,
+      "frameHeight": 37,
       "frames": 2,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -308,10 +292,9 @@
     },
     "enemy_electric_ring": {
       "file": "mku/enemy_electric_ring.png",
-      "frameWidth": 114,
-      "frameHeight": 150,
+      "frameWidth": 38,
+      "frameHeight": 50,
       "frames": 2,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -327,10 +310,9 @@
     },
     "enemy_magi_golem": {
       "file": "mku/enemy_magi_golem.png",
-      "frameWidth": 168,
-      "frameHeight": 162,
+      "frameWidth": 56,
+      "frameHeight": 54,
       "frames": 2,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -346,10 +328,9 @@
     },
     "enemy_magi_golem_phase2": {
       "file": "mku/enemy_magi_golem_phase2.png",
-      "frameWidth": 180,
-      "frameHeight": 153,
+      "frameWidth": 60,
+      "frameHeight": 51,
       "frames": 2,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -365,10 +346,9 @@
     },
     "enemy_eclipse": {
       "file": "mku/enemy_eclipse.png",
-      "frameWidth": 150,
-      "frameHeight": 150,
+      "frameWidth": 50,
+      "frameHeight": 50,
       "frames": 10,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -384,10 +364,9 @@
     },
     "enemy_eclipse_phase2": {
       "file": "mku/enemy_eclipse_phase2.png",
-      "frameWidth": 168,
-      "frameHeight": 168,
+      "frameWidth": 56,
+      "frameHeight": 56,
       "frames": 10,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -403,10 +382,9 @@
     },
     "enemy_magi_kaiser": {
       "file": "mku/enemy_magi_kaiser.png",
-      "frameWidth": 198,
-      "frameHeight": 159,
+      "frameWidth": 66,
+      "frameHeight": 53,
       "frames": 10,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -422,10 +400,9 @@
     },
     "enemy_magi_kaiser_phase1": {
       "file": "mku/enemy_magi_kaiser_phase1.png",
-      "frameWidth": 198,
-      "frameHeight": 156,
+      "frameWidth": 66,
+      "frameHeight": 52,
       "frames": 4,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -436,10 +413,9 @@
     },
     "enemy_magi_kaiser_phase2": {
       "file": "mku/enemy_magi_kaiser_phase2.png",
-      "frameWidth": 198,
-      "frameHeight": 159,
+      "frameWidth": 66,
+      "frameHeight": 53,
       "frames": 10,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -455,10 +431,9 @@
     },
     "enemy_magi_kaiser_phase3": {
       "file": "mku/enemy_magi_kaiser_phase3.png",
-      "frameWidth": 210,
-      "frameHeight": 135,
+      "frameWidth": 70,
+      "frameHeight": 45,
       "frames": 10,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -474,10 +449,9 @@
     },
     "enemy_ancestor_echo": {
       "file": "mku/enemy_ancestor_echo.png",
-      "frameWidth": 93,
-      "frameHeight": 132,
+      "frameWidth": 31,
+      "frameHeight": 44,
       "frames": 3,
-      "density": 3,
       "anims": {
         "idle": {
           "from": 0,
@@ -493,451 +467,387 @@
     },
     "spire_small": {
       "file": "mku/spire_small.png",
-      "frameWidth": 42,
-      "frameHeight": 132,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 14,
+      "frameHeight": 44,
+      "frames": 1
     },
     "spire_medium": {
       "file": "mku/spire_medium.png",
-      "frameWidth": 36,
-      "frameHeight": 156,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 12,
+      "frameHeight": 52,
+      "frames": 1
     },
     "skill_turret": {
       "file": "mku/skill_turret.png",
-      "frameWidth": 42,
-      "frameHeight": 33,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 14,
+      "frameHeight": 11,
+      "frames": 1
     },
     "skill_turret_big": {
       "file": "mku/skill_turret_big.png",
-      "frameWidth": 66,
-      "frameHeight": 63,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 22,
+      "frameHeight": 21,
+      "frames": 1
     },
     "skill_mine": {
       "file": "mku/skill_mine.png",
-      "frameWidth": 27,
-      "frameHeight": 18,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 9,
+      "frameHeight": 6,
+      "frames": 1
     },
     "skill_drone": {
       "file": "mku/skill_drone.png",
-      "frameWidth": 33,
-      "frameHeight": 33,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 11,
+      "frameHeight": 11,
+      "frames": 1
     },
     "fx_hit_tech": {
       "file": "mku/fx_hit_tech.png",
-      "frameWidth": 48,
-      "frameHeight": 33,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 16,
+      "frameHeight": 11,
+      "frames": 1
     },
     "fx_hit_magic": {
       "file": "mku/fx_hit_magic.png",
-      "frameWidth": 48,
-      "frameHeight": 42,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 16,
+      "frameHeight": 14,
+      "frames": 1
     },
     "fx_hit_physical": {
       "file": "mku/fx_hit_physical.png",
-      "frameWidth": 33,
-      "frameHeight": 42,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 11,
+      "frameHeight": 14,
+      "frames": 1
     },
     "fx_explosion": {
       "file": "mku/fx_explosion.png",
-      "frameWidth": 114,
-      "frameHeight": 120,
-      "frames": 5,
-      "density": 3
+      "frameWidth": 38,
+      "frameHeight": 40,
+      "frames": 5
     },
     "fx_elite_burst": {
       "file": "mku/fx_elite_burst.png",
-      "frameWidth": 132,
-      "frameHeight": 81,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 44,
+      "frameHeight": 27,
+      "frames": 1
     },
     "fx_spawn": {
       "file": "mku/fx_spawn.png",
-      "frameWidth": 78,
-      "frameHeight": 78,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 26,
+      "frameHeight": 26,
+      "frames": 1
     },
     "icon_skill_magiTurret": {
       "file": "mku/icon_skill_magiTurret.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_skill_magiMine": {
       "file": "mku/icon_skill_magiMine.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_skill_antimatterCannon": {
       "file": "mku/icon_skill_antimatterCannon.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_skill_magiField": {
       "file": "mku/icon_skill_magiField.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_skill_railgun": {
       "file": "mku/icon_skill_railgun.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_skill_combatDrone": {
       "file": "mku/icon_skill_combatDrone.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_skill_unstableSubject": {
       "file": "mku/icon_skill_unstableSubject.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_skill_magiCorruption": {
       "file": "mku/icon_skill_magiCorruption.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_skill_experimentalWeapon": {
       "file": "mku/icon_skill_experimentalWeapon.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_skill_purifyingWings": {
       "file": "mku/icon_skill_purifyingWings.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_skill_mkPrototype": {
       "file": "mku/icon_skill_mkPrototype.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_skill_reductionist": {
       "file": "mku/icon_skill_reductionist.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_ult_firstLaw": {
       "file": "mku/icon_ult_firstLaw.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_ult_thunderbolt": {
       "file": "mku/icon_ult_thunderbolt.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_ult_singularity": {
       "file": "mku/icon_ult_singularity.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "icon_gemini": {
       "file": "mku/icon_gemini.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "portrait_gemini": {
       "file": "mku/portrait_gemini.png",
-      "frameWidth": 288,
-      "frameHeight": 384,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 96,
+      "frameHeight": 128,
+      "frames": 1
     },
     "item_slime_stew": {
       "file": "mku/item_slime_stew.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_magicasol": {
       "file": "mku/item_magicasol.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_nameless_sword": {
       "file": "mku/item_nameless_sword.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_nameless_helm": {
       "file": "mku/item_nameless_helm.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_broken_blade": {
       "file": "mku/item_broken_blade.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_broken_hilt": {
       "file": "mku/item_broken_hilt.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_elegant_magi": {
       "file": "mku/item_elegant_magi.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_antimatter_sample": {
       "file": "mku/item_antimatter_sample.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_combat_theory": {
       "file": "mku/item_combat_theory.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_oak_heart": {
       "file": "mku/item_oak_heart.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_hanwoo_steak": {
       "file": "mku/item_hanwoo_steak.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_lee_seal": {
       "file": "mku/item_lee_seal.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_magowiki_codex": {
       "file": "mku/item_magowiki_codex.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_lsd_r": {
       "file": "mku/item_lsd_r.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_hanabi": {
       "file": "mku/item_hanabi.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_afro_belt": {
       "file": "mku/item_afro_belt.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_regulus_shard": {
       "file": "mku/item_regulus_shard.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_caesar_crown": {
       "file": "mku/item_caesar_crown.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_acrux_cross": {
       "file": "mku/item_acrux_cross.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_orion_belt": {
       "file": "mku/item_orion_belt.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_divine_sword": {
       "file": "mku/item_divine_sword.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_al_gul_blade": {
       "file": "mku/item_al_gul_blade.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_hectar_ram": {
       "file": "mku/item_hectar_ram.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_wonhon_lump": {
       "file": "mku/item_wonhon_lump.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1,
-      "density": 2
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_gihwan_arm": {
       "file": "mku/item_gihwan_arm.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1,
-      "density": 2
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "item_ancient_core": {
       "file": "mku/item_ancient_core.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1,
-      "density": 2
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "tile_floor_c1": {
       "file": "mku/tile_floor_c1.png",
-      "frameWidth": 192,
-      "frameHeight": 192,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
     },
     "tile_corridor_c1": {
       "file": "mku/tile_corridor_c1.png",
-      "frameWidth": 192,
-      "frameHeight": 192,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
     },
     "tile_wall_c1": {
       "file": "mku/tile_wall_c1.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "tile_floor_c2": {
       "file": "mku/tile_floor_c2.png",
-      "frameWidth": 192,
-      "frameHeight": 192,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
     },
     "tile_corridor_c2": {
       "file": "mku/tile_corridor_c2.png",
-      "frameWidth": 192,
-      "frameHeight": 192,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
     },
     "tile_wall_c2": {
       "file": "mku/tile_wall_c2.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     },
     "tile_floor_c3": {
       "file": "mku/tile_floor_c3.png",
-      "frameWidth": 192,
-      "frameHeight": 192,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
     },
     "tile_corridor_c3": {
       "file": "mku/tile_corridor_c3.png",
-      "frameWidth": 192,
-      "frameHeight": 192,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
     },
     "tile_wall_c3": {
       "file": "mku/tile_wall_c3.png",
-      "frameWidth": 96,
-      "frameHeight": 96,
-      "frames": 1,
-      "density": 3
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
     }
   }
 }

@@ -1,7 +1,6 @@
 {
   "baseWidth": 480,
   "baseHeight": 270,
-  "renderScale": 2,
   "backgroundColor": "#0b0f14",
   "hud": {
     "margin": 6,

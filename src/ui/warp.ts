@@ -48,8 +48,8 @@ export class Warp {
       this.streaks = [];
       return;
     }
-    const W = this.ctx.data.ui.baseWidth;
-    const H = this.ctx.data.ui.baseHeight;
+    const W = this.scene.scale.gameSize.width;
+    const H = this.scene.scale.gameSize.height;
     const cx = W / 2;
     const cy = H / 2;
     this.g.fillStyle(hexColor(p.bgColor), this.alpha).fillRect(0, 0, W, H);
