@@ -168,7 +168,7 @@
   "skillMsg.ultimateNotReady": "궁극기 게이지 부족",
   "skillMsg.chargeInterrupted": "충전 중단 — 쿨타임 절반 회복",
   "room.encounterPending": "조우 코어 — 준비 중",
-  "room.energyEmpty": "에너지 부족",
+  "room.energyEmpty": "에너지 부족! 주먹으로 공격",
   "room.pickedUp": "{weapon} 획득",
   "screen.death": "사망",
   "screen.chapterClear": "챕터{chapter} 클리어 (임시)",

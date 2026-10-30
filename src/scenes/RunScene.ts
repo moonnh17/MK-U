@@ -75,6 +75,7 @@ import {
   plainWeapon,
   projectilesCut,
   rollCrit,
+  canFire,
   spendEnergy,
   swapWeapon,
   weaponStats,
@@ -1004,7 +1005,7 @@ export class RunScene extends Phaser.Scene {
 
     const off = d.player.weaponOffset;
     this.weaponSprite
-      .setTexture(this.weaponDef().spriteKey)
+      .setTexture(this.shownWeaponKey())
       .setPosition(this.player.x + this.aimDir.x * off, this.player.y + this.aimDir.y * off)
       .setRotation(aimAngle);
 
@@ -1269,6 +1270,14 @@ export class RunScene extends Phaser.Scene {
     return this.fist;
   }
 
+  /** 손에 보이는 무기: 에너지가 모자라 쏠 수 없는 총이면 주먹 */
+  private shownWeaponKey(): string {
+    const item = this.weaponItem();
+    const def = this.weaponDefOf(item.defId);
+    if (def.category === 'blade' || canFire(this.session.player.energy, this.weaponStatsOf(item))) return def.spriteKey;
+    return this.weaponDefOf(this.fistItem().defId).spriteKey;
+  }
+
   private weaponDef(): WeaponDef {
     return this.weaponDefOf(this.weaponItem().defId);
   }
@@ -1412,6 +1421,13 @@ export class RunScene extends Phaser.Scene {
     if (left === null) {
       this.session.energyEmptyAt = this.time.now;
       this.toastThrottled(this.ctx.t('room.energyEmpty'));
+      // 에너지가 모자라면 총 대신 주먹으로 친다 (잠긴 방에서 공격 수단이 사라지지 않게)
+      const fist = this.fistItem();
+      const fistStats = this.weaponStatsOf(fist);
+      this.fireCooldown = fistStats.fireIntervalSec;
+      const fistDef = this.weaponDefOf(fist.defId);
+      sfx(weaponSfx(fistDef));
+      this.melee(fistDef, fistStats, aimAngle, 0, null, this.itemRt.consumeEmpowered());
       return;
     }
     const udef = this.ultimateDef();
