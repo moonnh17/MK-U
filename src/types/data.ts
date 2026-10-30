@@ -628,6 +628,10 @@ export interface HudLayoutData {
 export interface UiData {
   baseWidth: number;
   baseHeight: number;
+  /** 게임 1px을 캔버스 몇 px로 그릴지 (기기 화면에 맞춰 이 범위에서 고른다) */
+  renderScaleMin: number;
+  renderScaleMax: number;
+  renderScaleMaxMobile: number;
   backgroundColor: string;
   /** HUD 배치 (기준 해상도 px) */
   hud: HudLayoutData;
@@ -1091,6 +1095,8 @@ export interface ArtSpriteDef {
   frameHeight: number;
   /** 프레임 수 (없으면 1) */
   frames?: number;
+  /** 게임 1px에 들어간 그림 픽셀 수 (없으면 1). frameWidth·frameHeight는 실제 픽셀, 게임 크기는 그 나누기 density */
+  density?: number;
   /** 없으면 그림 종류별 기본값 (캐릭터·오브젝트는 feet, 탄·픽업·스킬·무기는 center) */
   anchor?: ArtAnchor;
   /** 프레임 애니메이션 (플레이어·적): 멈춰 있을 때 idle, 움직일 때 move. 없으면 첫 프레임 그대로 */

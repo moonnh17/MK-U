@@ -1,3 +1,4 @@
+import { artDensity } from '../systems/art';
 import Phaser from 'phaser';
 import { getContext } from '../core/context';
 import type { Rect } from '../systems/worldLayout';
@@ -15,7 +16,7 @@ export class Door {
   ) {
     const cx = r.x + r.w / 2;
     const cy = r.y + r.h / 2;
-    this.rect = (key && scene.textures.exists(key) ? scene.add.tileSprite(cx, cy, r.w, r.h, key) : scene.add.rectangle(cx, cy, r.w, r.h, color)).setDepth(1);
+    this.rect = (key && scene.textures.exists(key) ? scene.add.tileSprite(cx, cy, r.w, r.h, key).setTileScale(1 / artDensity(getContext().data.art, key)) : scene.add.rectangle(cx, cy, r.w, r.h, color)).setDepth(1);
     group.add(this.rect);
     this.setLocked(false);
   }

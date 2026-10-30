@@ -178,6 +178,11 @@ export function fitHitbox(
   return { originX: 0.5, originY: cy / fh, offsetX: fw / 2 - hw / 2, offsetY: cy - hh / 2 };
 }
 
+/** 게임 1px에 들어간 그림 픽셀 수 */
+export function artDensity(art: ArtData, key: string): number {
+  return art.sprites[key]?.density ?? 1;
+}
+
 /** art.json 검사: 데이터에 없는 키, 파일 경로, 프레임 값 */
 export function validateArt(art: ArtData, refs: readonly AssetRef[]): string[] {
   const errors: string[] = [];
@@ -189,6 +194,7 @@ export function validateArt(art: ArtData, refs: readonly AssetRef[]): string[] {
     if (!/^[\w\-./]+\.png$/i.test(s.file) || s.file.includes('..') || s.file.startsWith('/')) errors.push(`${w}.file: basePath 아래 .png 상대 경로`);
     for (const k of ['frameWidth', 'frameHeight'] as const) if (!(Number.isInteger(s[k]) && s[k] > 0)) errors.push(`${w}.${k}: 양의 정수`);
     if (s.frames !== undefined && !(Number.isInteger(s.frames) && s.frames >= 1)) errors.push(`${w}.frames: 1 이상 정수`);
+    if (s.density !== undefined && !(Number.isInteger(s.density) && s.density >= 1 && s.frameWidth % s.density === 0 && s.frameHeight % s.density === 0)) errors.push(`${w}.density: 프레임 크기를 나누어떨어지게 하는 1 이상 정수`);
     if (s.anchor !== undefined && s.anchor !== 'center' && s.anchor !== 'feet') errors.push(`${w}.anchor: center · feet`);
     if (s.facing !== undefined && s.facing !== 'right' && s.facing !== 'left') errors.push(`${w}.facing: right · left`);
     const frames = s.frames ?? 1;
@@ -211,7 +217,7 @@ export function assetsMarkdown(refs: readonly AssetRef[], art: ArtData, text: Re
     '`npm run assets`로 데이터에서 다시 만든다. 직접 고치지 말 것.',
     '',
     `- 그림 파일: \`public/${art.basePath}\` 아래 PNG. 키마다 한 장, 프레임은 가로로 이어 붙인다.`,
-    '- 등록: `src/data/art.json`의 `sprites`에 `"키": { "file", "frameWidth", "frameHeight", "frames", "anchor" }`. 적지 않은 키는 색 사각형 그대로.',
+    '- 등록: `src/data/art.json`의 `sprites`에 `"키": { "file", "frameWidth", "frameHeight", "frames", "anchor", "density" }`. 권장 크기는 게임 크기이고, 더 고운 그림은 그 정수 배로 그려 `density`에 배수를 적는다(frameWidth·frameHeight는 실제 픽셀). 적지 않은 키는 색 사각형 그대로.',
     '- 크기: 권장 캔버스 = 판정 크기. 더 크게 그려도 판정은 그대로다. 기준점 feet는 판정이 그림 아래쪽에, center는 가운데에 놓인다.',
     '- 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.',
     '- item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).',

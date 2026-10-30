@@ -22,9 +22,9 @@ body {
   justify-content: center;
 }
 
+/* 캔버스가 이미 고해상도라, 창에 맞출 때 생기는 소수 배는 부드럽게 */
 #game canvas {
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+  image-rendering: auto !important;
 }
 
 /* 모바일 터치 컨트롤: 캔버스 위에 실제 dp(CSS px) 단위로 그린다 */

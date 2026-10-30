@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { getContext } from '../core/context';
 import { hexColor } from '../core/scale';
+import { applyArtDensity } from '../entities/art';
 import { animKey } from '../systems/art';
 import type { ArtAnimId, SpriteRef } from '../types/data';
 
@@ -27,6 +28,8 @@ export class BootScene extends Phaser.Scene {
     for (const [key, s] of Object.entries(data.art.sprites)) {
       if (!this.textures.exists(key)) continue;
       ctx.artLoaded.add(key);
+      // 타일은 반복해서 까는 TileSprite가 실제 픽셀을 읽으므로 그쪽에서 줄인다
+      if (!key.startsWith('tile_')) applyArtDensity(this.textures.get(key), s.density ?? 1);
       for (const [id, a] of Object.entries(s.anims ?? {}) as [ArtAnimId, { from: number; to: number; fps: number }][]) {
         this.anims.create({ key: animKey(key, id), frames: this.anims.generateFrameNumbers(key, { start: a.from, end: a.to }), frameRate: a.fps, repeat: -1 });
       }

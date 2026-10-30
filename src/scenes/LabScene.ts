@@ -5,7 +5,7 @@ import { getContext, type GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { registerGemini } from '../core/save';
 import { hexColor } from '../core/scale';
-import { animateArt, fitArt } from '../entities/art';
+import { animateArt, fitArt, fitBaseCamera } from '../entities/art';
 import { hasLines, storyFor } from '../systems/gemini';
 import { jobChoices, nearestInteractable, portalActive } from '../systems/lab';
 import type { LabObjectDef } from '../types/data';
@@ -54,6 +54,7 @@ export class LabScene extends Phaser.Scene {
     const d = this.ctx.data;
     const L = d.lab;
     const c = L.colors;
+    fitBaseCamera(this, d.ui.baseWidth, d.ui.baseHeight, this.ctx.renderScale);
 
     this.drawRoom();
     this.walls = this.physics.add.staticGroup();

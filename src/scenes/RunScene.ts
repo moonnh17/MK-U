@@ -1,3 +1,4 @@
+import { artDensity } from '../systems/art';
 import Phaser from 'phaser';
 import type { ActionFrame, ButtonAction, Vec2 } from '../core/actions';
 import { getContext, type GameContext } from '../core/context';
@@ -366,7 +367,7 @@ export class RunScene extends Phaser.Scene {
     // 카메라: 확대하고 첫 프레임부터 제자리 (다음부터는 부드럽게 따라간다)
     {
       const cam = this.cameras.main;
-      cam.setZoom(d.ui.camera.zoom);
+      cam.setZoom(d.ui.camera.zoom * this.ctx.renderScale);
       const t0 = this.cameraTarget();
       cam.setScroll(t0.x - cam.width / 2, t0.y - cam.height / 2);
     }
@@ -587,7 +588,7 @@ export class RunScene extends Phaser.Scene {
 
   /** 방 바닥·벽: 타일 그림(key)이 있으면 반복해서 깔고, 없으면 색 사각형 */
   private addRect(r: Rect, color: number, depth: number, key?: string): Phaser.GameObjects.Rectangle | Phaser.GameObjects.TileSprite {
-    if (key && this.textures.exists(key)) return this.add.tileSprite(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, key).setDepth(depth);
+    if (key && this.textures.exists(key)) return this.add.tileSprite(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, key).setTileScale(1 / artDensity(this.ctx.data.art, key)).setDepth(depth);
     return this.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, color).setDepth(depth);
   }
 
@@ -609,7 +610,7 @@ export class RunScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const rid = roomAt(this.session.map, this.m, this.player.x, this.player.y);
     const room = rid !== null ? roomRect(this.session.map.rooms[rid]!, this.m) : null;
-    return cameraFocus({ x: this.player.x, y: this.player.y }, this.aimTarget, viewSize(cam.width, cam.height, rules.zoom), rules, room);
+    return cameraFocus({ x: this.player.x, y: this.player.y }, this.aimTarget, viewSize(cam.width, cam.height, rules.zoom * this.ctx.renderScale), rules, room);
   }
 
   /** 보스 등장 컷 시작: 게임을 멈추고 카메라가 보스 쪽으로 다가간다 */
@@ -621,7 +622,7 @@ export class RunScene extends Phaser.Scene {
     this.setModal('intro');
     const cam = this.cameras.main;
     cam.pan(e.sprite.x, e.sprite.y, bi.panSec * 1000, 'Sine.easeInOut');
-    cam.zoomTo(this.ctx.data.ui.camera.zoom * bi.zoom, bi.panSec * 1000);
+    cam.zoomTo(this.ctx.data.ui.camera.zoom * this.ctx.renderScale * bi.zoom, bi.panSec * 1000);
   }
 
   /** 등장 컷 한 프레임: 단계가 바뀔 때마다 연출. 아무 키·탭이면 건너뛴다 */
@@ -662,7 +663,7 @@ export class RunScene extends Phaser.Scene {
       bus.emit('bossIntroBand', { name: '', sub: '' });
       const tgt = this.cameraTarget();
       cam.pan(tgt.x, tgt.y, bi.returnSec * 1000, 'Sine.easeInOut');
-      cam.zoomTo(this.ctx.data.ui.camera.zoom, bi.returnSec * 1000);
+      cam.zoomTo(this.ctx.data.ui.camera.zoom * this.ctx.renderScale, bi.returnSec * 1000);
     } else if (st === 'done') {
       this.finishIntro();
     }
@@ -676,7 +677,7 @@ export class RunScene extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.panEffect.reset();
     cam.zoomEffect.reset();
-    cam.setZoom(this.ctx.data.ui.camera.zoom);
+    cam.setZoom(this.ctx.data.ui.camera.zoom * this.ctx.renderScale);
     const tgt = this.cameraTarget();
     cam.setScroll(tgt.x - cam.width / 2, tgt.y - cam.height / 2);
     this.tweens.killTweensOf(it.e.sprite);
@@ -696,7 +697,7 @@ export class RunScene extends Phaser.Scene {
     this.setModal('portal');
     sfx('warp');
     const cam = this.cameras.main;
-    cam.zoomTo(this.ctx.data.ui.camera.zoom * p.zoom, p.suckSec * 1000, 'Quad.easeIn');
+    cam.zoomTo(this.ctx.data.ui.camera.zoom * this.ctx.renderScale * p.zoom, p.suckSec * 1000, 'Quad.easeIn');
     cam.pan(portal.x, portal.y, p.suckSec * 1000, 'Sine.easeInOut');
     this.weaponSprite.setVisible(false);
     this.tweens.add({
@@ -741,7 +742,7 @@ export class RunScene extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.flash(bp.flashMs, c.red, c.green, c.blue);
     sfx('bossPhase');
-    const base = this.ctx.data.ui.camera.zoom;
+    const base = this.ctx.data.ui.camera.zoom * this.ctx.renderScale;
     this.tweens.add({ targets: cam, zoom: base * bp.zoom, duration: (bp.zoomSec * 1000) / 2, yoyo: true, onComplete: () => cam.setZoom(base) });
     bus.emit('banner', { text, color, size: bp.bannerSize, sec: bp.bannerSec });
   }

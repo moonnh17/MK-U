@@ -22,6 +22,8 @@ export interface GameContext {
   save: SaveStore;
   /** 실제로 불러온 그림의 spriteKey (Boot가 채운다. 화면 아이콘이 그림을 쓸지 정할 때) */
   artLoaded: Set<string>;
+  /** 게임 1px을 캔버스 몇 px로 그리는지 (카메라 확대에 곱한다) */
+  renderScale: number;
   t(key: string, vars?: Record<string, string | number>): string;
 }
 
