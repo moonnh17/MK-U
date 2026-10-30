@@ -1330,3 +1330,22 @@ body {
 .iw-detail .iw-desc.dim {
   opacity: 0.7;
 }
+
+/* 낮은 가로 화면(모바일): 인벤토리가 화면보다 길면 스크롤, 설명 칸은 촘촘하게 */
+#inventory-window {
+  overflow-y: auto;
+  justify-content: safe center;
+}
+#inventory-window.mobile .iw-detail {
+  min-height: 0;
+  padding: 5px 8px;
+  gap: 2px;
+}
+#inventory-window.mobile .iw-detail .iw-desc,
+#inventory-window.mobile .iw-dsub,
+#inventory-window.mobile .iw-dmeta {
+  font-size: 10px;
+}
+#inventory-window.mobile .iw-dname {
+  font-size: 12px;
+}

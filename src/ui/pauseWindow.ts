@@ -7,6 +7,7 @@ import { bus } from '../core/events';
 export class PauseWindow {
   private readonly root: HTMLDivElement;
   private readonly sound: HTMLButtonElement;
+  private readonly hint: HTMLElement;
 
   constructor(private readonly ctx: GameContext) {
     const t = ctx.t;
@@ -30,6 +31,7 @@ export class PauseWindow {
     });
     const hint = document.createElement('small');
     hint.textContent = t('pause.hint');
+    this.hint = hint;
     box.append(title, resume, this.sound, hint);
     this.root.appendChild(box);
     document.body.appendChild(this.root);
@@ -42,5 +44,7 @@ export class PauseWindow {
 
   private refresh(): void {
     this.sound.textContent = this.ctx.t(this.ctx.save.data.muted ? 'pause.soundOff' : 'pause.soundOn');
+    // 키보드 안내는 PC에서만
+    this.hint.style.display = this.ctx.uiMode === 'mobile' ? 'none' : '';
   }
 }
