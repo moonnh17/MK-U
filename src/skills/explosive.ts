@@ -39,7 +39,7 @@ export class Explosive implements SkillObject {
     const dy = spec.to.y - spec.from.y;
     this.left = Math.hypot(dx, dy);
     this.dir = this.left > 0 ? { x: dx / this.left, y: dy / this.left } : { x: 0, y: 0 };
-    this.img = host.sprite(this.x, this.y, spec.sprite).setDepth(5);
+    this.img = host.sprite(this.x, this.y, spec.sprite).setDepth(5).setRotation(Math.atan2(dy, dx));
   }
 
   update(dt: number, host: SkillHost): boolean {

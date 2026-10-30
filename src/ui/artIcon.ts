@@ -8,7 +8,9 @@ export function applyArtIcon(el: HTMLElement, ctx: GameContext, key: string | nu
   const s = key && ctx.artLoaded.has(key) ? ctx.data.art.sprites[key] : undefined;
   if (s) {
     // 가로 프레임 스트립의 첫 칸만 보이게 (프레임 수만큼 가로로 늘린다)
-    el.style.background = `url("${ctx.data.art.basePath}${s.file}") 0 0 / ${(s.frames ?? 1) * 100}% 100% no-repeat`;
+    // 한 칸짜리는 비율을 지킨다 (가로로 긴 무기가 칸에 맞춰 늘어나지 않게)
+    const frames = s.frames ?? 1;
+    el.style.background = `url("${ctx.data.art.basePath}${s.file}") ${frames > 1 ? `0 0 / ${frames * 100}% 100%` : 'center / contain'} no-repeat`;
     el.style.imageRendering = 'pixelated';
     el.classList.add('has-art');
     return true;

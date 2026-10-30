@@ -76,8 +76,8 @@ function sheet(key, frames, fit, opts = {}) {
       const iw = Math.max(1, Math.round(b.w * si)), ih = Math.max(1, Math.round(b.h * si));
       small = k.blank(fw, fh);
       k.paste(small, k.resize(k.crop(f, b.x, b.y, b.w, b.h), iw, ih, 0.5), Math.round((fw - iw) / 2), fh - ih);
-    } else small = k.resize(cell, fw, fh, opts.soft ? null : 0.5);
-    if (opts.dim) for (let p = 0; p < small.px.length; p += 4) for (let c = 0; c < 3; c++) small.px[p + c] = Math.round(small.px[p + c] * opts.dim);
+    } else small = k.resize(cell, fw, fh, opts.soft ? null : opts.alphaCut ?? 0.5);
+    if (opts.dim) for (let p = 0; p < small.px.length; p += 4) for (let c = 0; c < 3; c++) small.px[p + c] = Math.min(255, Math.round(small.px[p + c] * opts.dim));
     k.paste(outImg, small, i * fw, 0);
   });
   const file = `${OUT_DIR}/${key}.png`;
@@ -281,6 +281,266 @@ prop('prop_vending', 'ruins', 545, 465, 32);
   const file = `${OUT_DIR}/pickup_potion.png`;
   k.write(path.join(REPO, 'public/assets', file), im);
   sprites.pickup_potion = { file, frameWidth: im.w, frameHeight: im.h, frames: 1 };
+}
+
+// ---------- 직접 찍은 도트 (원본에 없는 무기·탄·상자 등) ----------
+// 글자 하나가 한 칸이다. . 투명, 그 외는 팔레트 색. 줄 길이가 달라도 오른쪽을 비운다
+const PAL = {
+  K: [24, 20, 30], d: [70, 76, 92], m: [130, 138, 156], l: [196, 204, 220], w: [240, 244, 255],
+  b: [92, 58, 36], B: [150, 100, 60], g: [232, 190, 70], G: [168, 120, 40], Y: [255, 226, 120], r: [214, 58, 70],
+  c: [90, 220, 240], C: [40, 130, 190], p: [120, 84, 220], P: [200, 170, 255], s: [232, 196, 160], S: [180, 130, 100],
+  o: [96, 120, 84], O: [60, 80, 58], n: [60, 72, 110], N: [38, 46, 74], e: [255, 154, 60], E: [200, 80, 30], y: [255, 240, 170],
+};
+function dots(key, rows, opts = {}) {
+  const pal = { ...PAL, ...opts.pal };
+  const sc = opts.scale ?? 1;
+  const w = Math.max(...rows.map((r) => r.length));
+  const im = k.blank(w * sc, rows.length * sc);
+  rows.forEach((r, y) => [...r].forEach((ch, x) => {
+    if (ch === '.') return;
+    if (!pal[ch]) throw new Error(`${key}: 팔레트에 없는 글자 ${ch}`);
+    for (let j = 0; j < sc; j++) for (let i = 0; i < sc; i++) {
+      const o = (((y * sc + j) * im.w) + x * sc + i) * 4;
+      im.px[o] = pal[ch][0]; im.px[o + 1] = pal[ch][1]; im.px[o + 2] = pal[ch][2]; im.px[o + 3] = 255;
+    }
+  }));
+  const file = `${OUT_DIR}/${key}.png`;
+  k.write(path.join(REPO, 'public/assets', file), im);
+  sprites[key] = { file, frameWidth: im.w, frameHeight: im.h, frames: 1, ...(opts.extra ?? {}) };
+}
+/** 무기는 오른쪽을 보게 그린다. gripX: 손에 쥐는 가로 위치(0~1) */
+const weapon = (key, gripX, rows, pal) => dots(key, rows, { pal, extra: { gripX } });
+weapon('weapon_pistol', 0.4, [
+  '.KKKKKKKKKK',
+  'KllllllllmK',
+  'KmmmmmmmddK',
+  '.KKdBBKKKK.',
+  '...KBBK....',
+  '...KbBK....',
+  '...KKKK....',
+]);
+weapon('weapon_smg', 0.4, [
+  '.....KK.......',
+  '.KKKKKKKKKKKK.',
+  'KmlllllllllmmK',
+  'KdmmmmmmmmmddK',
+  '.KKKdBKKdKKKK.',
+  '....KBK.KdK...',
+  '....KbK.KdK...',
+  '....KKK.KKK...',
+]);
+weapon('weapon_shotgun', 0.4, [
+  '........KKKKKKKKK',
+  'KKKK..KKlllllllmK',
+  'KBBBKKKmmmmmmmmdK',
+  'KbBBBBBKKbBBBKKKK',
+  '.KKKbBBK.KKKKK...',
+  '....KKKK.........',
+]);
+weapon('weapon_rifle', 0.35, [
+  '.......KKKK.........',
+  'KKKK.KKKKKKKKKKKKKKK',
+  'KoooKKooooooollllllK',
+  'KOoooooooooodKKKKKKK',
+  '.KKOOKKdKKOOK.......',
+  '...KKK.KdK.KK.......',
+  '.......KKK..........',
+]);
+weapon('weapon_sniper', 0.3, [
+  '......KKKKKKK...........',
+  '......KcCnnnK...........',
+  'KKKK...KKKKK............',
+  'KnnnKKKKKKKKKKKKKKKKKKKK',
+  'KnnnnnnnmmlllllllllllllK',
+  '.KKKnnKKdKKKKKKKKKKKKKKK',
+  '...KKK.KdK..............',
+  '.......KK...............',
+]);
+weapon('weapon_grenade_launcher', 0.35, [
+  '....KKKKKKKKKKK.',
+  'KKKKKGGGGGGGGGGK',
+  'KBBBKGgggggggGGK',
+  'KbBBKGGGGGGGGGGK',
+  '.KKBKKKKKKKKKKK.',
+  '...KdKGGGK......',
+  '...KdKGGGK......',
+  '...KKKKKKK......',
+]);
+weapon('weapon_dagger', 0.2, [
+  '...K........',
+  '..KgKKKKKK..',
+  'KKKgKwwwwlK.',
+  'KbBgKlllmmdK',
+  'KKKgKmmmdK..',
+  '..KgKKKKK...',
+  '...K........',
+]);
+weapon('weapon_longsword', 0.15, [
+  '...K..............',
+  '..KgKKKKKKKKKKKK..',
+  'KKKgKwwwwwwwwwwlK.',
+  'KbBgKlllllllllmmdK',
+  'KKKgKmmmmmmmmmdK..',
+  '..KgKKKKKKKKKKK...',
+  '...K..............',
+]);
+weapon('weapon_greatsword', 0.15, [
+  '....KK................',
+  '....KgK...............',
+  '....KgKKKKKKKKKKKKKKK.',
+  '.KKKKgKwwwwwwwwwwwwwlK',
+  'KbBbBgKlllllllllllllmK',
+  'KbBbBgKmmmmmmmmmmmmmdK',
+  '.KKKKgKdddddddddddddK.',
+  '....KgKKKKKKKKKKKKKK..',
+  '....KgK...............',
+  '....KK................',
+]);
+weapon('weapon_spear', 0.3, [
+  '.....................KK...',
+  '....................KlmK..',
+  'KKKKKKKKKKKKKKKKKKKKKlllKK',
+  'KbBBBBBBBBBBBBBBBBBgKwwwmK',
+  'KKKKKKKKKKKKKKKKKKKKKmmmKK',
+  '....................KmdK..',
+  '.....................KK...',
+]);
+weapon('weapon_hammer', 0.25, [
+  '...........KKKKKK',
+  '...........KlllmK',
+  '...........KlmmdK',
+  '...........KlmmdK',
+  'KKKKKKKKKKKKlmmdK',
+  'KbBBBBBBBBBBlmmdK',
+  'KKKKKKKKKKKKlmmdK',
+  '...........KlmmdK',
+  '...........KlmmdK',
+  '...........KmmddK',
+  '...........KKKKKK',
+]);
+weapon('weapon_avior_staff', 0.3, [
+  '................KKK.',
+  '...............KPpK.',
+  '..............KPpPpK',
+  'KKKKKKKKKKKKKKKPwPpK',
+  'KbBBBBBBBBBBBBgKPpPK',
+  'KKKKKKKKKKKKKKKgKpPK',
+  '................KKK.',
+]);
+weapon('weapon_fist', 0.5, [
+  '.KKKKK..',
+  'KsssssK.',
+  'KssssssK',
+  'KSsssssK',
+  'KSSsssSK',
+  '.KSSSSK.',
+  '..KKKK..',
+]);
+// 원본에 있는 전설 무기: 대각선·세로 그림을 오른쪽으로 돌린다
+function bigWeapon(key, f, deg, fit, gripX, dim) {
+  // 활시위·칼날처럼 가는 선이 줄이다 사라지지 않게 알파 기준을 낮춘다
+  sprites[key] = { ...sheet(key, [k.rotate(load(f), deg)], fit, { alphaCut: 0.25, dim }), gripX };
+}
+// 환디는 원본이 어두워 바닥에 묻히므로 밝힌다
+bigWeapon('weapon_handi', 'items/bow-hwandi.png', 45, 26, 0.5, 1.9);
+bigWeapon('weapon_rasalgethi_club', 'items/rasalgethi.png', 45, 22, 0.2);
+bigWeapon('weapon_rasalhague_sword', 'warrior/p-sword-single.png', 90, 26, 0.15);
+
+// 탄·줍는 것
+dots('projectile_player', ['.ggg.', 'gYyYg', 'gyyyg', 'gYyYg', '.ggg.']);
+dots('enemy_bullet', ['..KKK..', '.KrrrK.', 'KrrwrrK', 'KrwwwrK', 'KrrwrrK', '.KrrrK.', '..KKK..']);
+dots('pickup_coin', ['..KKK..', '.KYYYK.', 'KYYgYGK', 'KYYgYGK', 'KYYgYGK', '.KGGGK.', '..KKK..']);
+dots('pickup_energy', ['...K...', '..KwK..', '.KwcCK.', 'KwccCCK', 'KcccCCK', '.KcCCK.', '..KCK..', '...K...']);
+
+// 상자: 나무(무기) / 푸른 금속(아이템)
+const CHEST = [
+  '..KKKKKKKKKKKKKK..',
+  '.KBBBBgBBBBgBBBBK.',
+  'KBBBBBgBBBBgBBBBBK',
+  'KbbbbbgbbbbgbbbbbK',
+  'KKKKKKKKKKKKKKKKKK',
+  'KBBBBBgKggKgBBBBBK',
+  'KBBBBBgKgGKgBBBBBK',
+  'KbBBBBgKKKKgBBBBbK',
+  'KbbbbbgbbbbgbbbbbK',
+  '.KKKKKKKKKKKKKKKK.',
+];
+dots('chest_weapon', CHEST);
+dots('chest_item', CHEST, { pal: { B: PAL.C, b: PAL.n, g: PAL.c, G: PAL.C } });
+dots('merchant_stand', [
+  'KKKKKKKKKKKKKKKKKKKK',
+  'KlllllllllllllllllmK',
+  'KmmmmmmmmmmmmmmmmmdK',
+  'KKKKKKKKKKKKKKKKKKKK',
+  '..KddK........KddK..',
+  '..KddK........KddK..',
+  '..KKKK........KKKK..',
+]);
+dots('enemy_training_dummy', [
+  '......KKKK......', '.....KBBBBK.....', '....KBBBBBBK....', '....KBBKKBBK....', '....KBBBBBBK....', '.....KBBBBK.....',
+  'KKKKKKKbbKKKKKKK', 'KBBBBBBBBBBBBBBK', 'KbbbbbbBBbbbbbbK', 'KKKKKKKBBKKKKKKK',
+  '......KBBK......', '......KBbK......', '......KBBK......', '......KbBK......', '......KBBK......', '......KBbK......',
+  '.....KKBBKK.....', '....KbbbbbbK....', '....KKKKKKKK....',
+]);
+
+// 포털·코어
+sprites.prop_exit_portal = sheet('prop_exit_portal', single('rift/frame-1.png'), 36);
+sprites.prop_encounter_core = sheet('prop_encounter_core', single('mimosa/frames/crystal.png'), 24);
+
+// 스킬 오브젝트 (탄은 오른쪽을 본다)
+sprites.skill_turret_shell = sheet('skill_turret_shell', [gaps('awakening/turret-shell.png')[0]], 9);
+sprites.skill_mine_chain = sheet('skill_mine_chain', [gaps('awakening/mine-mini.png')[0]], 8);
+sprites.skill_antimatter_charge = sheet('skill_antimatter_charge', single('new-skills/antimatter-charge-1.png'), 7);
+sprites.skill_antimatter_shell = sheet('skill_antimatter_shell', single('new-skills/antimatter-projectile-1.png'), 16);
+sprites.skill_subject = sheet('skill_subject', [gaps('acro-awakening/specimen-idle.png')[0]], 16);
+sprites.skill_experiment_shell = sheet('skill_experiment_shell', single('acro/shot-0.png'), 13);
+dots('ult_first_law', ['...EEE...', '.EEeeeEE.', '.EeeyyeE.', 'EeeywyyeE', 'EeywwwyeE', 'EeeywyyeE', '.EeeyyeE.', '.EEeeeEE.', '...EEE...']);
+sprites.ult_singularity = sheet('ult_singularity', single('acro/well-2.png'), 14);
+
+// 히든보스: 오리온의 성전사 = 성기사 몸체. 왕실특무마기법사는 원본에 없어 연구원을 보라색으로 물들여 쓴다 (임시)
+actor('enemy_orion_crusader', gaps('warrior/paladin-idle.png'), gaps('warrior/paladin-move.png'), 56);
+{
+  const fr = cells('spires/researcher-v141.png', 96, 192).slice(0, 4).map((f) => {
+    const t = k.crop(f, 0, 0, f.w, f.h);
+    for (let p = 0; p < t.px.length; p += 4) { t.px[p] = Math.round(t.px[p] * 0.62); t.px[p + 1] = Math.round(t.px[p + 1] * 0.45); }
+    return t;
+  });
+  actor('enemy_royal_mage', [fr[0]], fr, 46);
+}
+
+// 아이템 아이콘 (원본에 맞는 것이 없는 둘은 직접 찍는다)
+sprites.item_death_whistle = icon('item_death_whistle', 'warrior/icon-b-shout.png', 32);
+sprites.item_orion_shield = icon('item_orion_shield', 'warrior/icon-p-shield.png', 32);
+sprites.item_eclipse_core = icon('item_eclipse_core', 'eclipse/totality-sun.png', 32);
+dots('item_royal_seal', [
+  '.....KKKKKK.....', '...KKppppppKK...', '..KppPPPPPPppK..', '.KpPPpPPPPpPPpK.', '.KpPpPPggPPpPpK.', 'KpPPPPggggPPPPpK', 'KpPPPggwwggPPPpK', 'KpPPggwwwwggPPpK',
+  'KpPPggwwwwggPPpK', 'KpPPPggwwggPPPpK', 'KpPPPPggggPPPPpK', '.KpPpPPggPPpPpK.', '.KpPPpPPPPpPPpK.', '..KppPPPPPPppK..', '...KKppppppKK...', '.....KKKKKK.....',
+], { scale: 2 });
+dots('item_gisup_stone', [
+  '................', '....KKKKKK......', '...KmmmmlKK.....', '..KmlllmmmlK....', '..KmldmmdmlKK...', '..KmmmmmmmmmK...', '..KmddmmdmmlK...', '..KmmmmmmmmlK...',
+  '..KmdmmddmmmK...', '..KmmmmmmmmmK...', '..KmddmmmdmlK...', '..KmmmmmmmmmK...', '..KdmmmdmmmdK...', '..KddKmmmKddK...', '...KK.KdK.KK....', '......KK........',
+], { scale: 2 });
+
+// 실험장
+const labProp = (key, x, y, fit) => { sprites[key] = sheet(key, [k.component(load('environment/ruins-atlas.png'), x, y)], fit); };
+labProp('lab_capsule', 180, 570, 32);
+labProp('lab_codex', 345, 455, 28);
+sprites.lab_job_device = sheet('lab_job_device', single('mimosa/frames/device.png'), 32);
+sprites.lab_portal = sheet('lab_portal', single('fusion/vfx-portal.png'), 34);
+sprites.lab_archive = sheet('lab_archive', single('mimosa/frames/data.png'), 28);
+sprites.lab_gemini = sheet('lab_gemini', single('story/mg-full.png'), 32);
+{
+  const im = k.blank(100, 12);
+  for (let y = 0; y < 12; y++) for (let x = 0; x < 100; x++) {
+    const edge = x === 0 || y === 0 || x === 99 || y === 11;
+    const inner = x === 1 || y === 1 || x === 98 || y === 10;
+    const c = edge ? PAL.K : inner ? PAL.n : [6, 9, 12];
+    const o = (y * 100 + x) * 4;
+    im.px[o] = c[0]; im.px[o + 1] = c[1]; im.px[o + 2] = c[2]; im.px[o + 3] = 255;
+  }
+  const file = `${OUT_DIR}/lab_window.png`;
+  k.write(path.join(REPO, 'public/assets', file), im);
+  sprites.lab_window = { file, frameWidth: 100, frameHeight: 12, frames: 1 };
 }
 
 const artPath = path.join(REPO, 'src/data/art.json');

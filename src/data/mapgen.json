@@ -55,6 +55,7 @@
   },
   "props": {
     "exitPortal": {
+      "spinSec": 6,
       "spriteKey": "prop_exit_portal",
       "color": "#5ae0ff",
       "size": 20

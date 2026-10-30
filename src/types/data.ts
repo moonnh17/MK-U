@@ -483,7 +483,7 @@ export interface MapgenData {
   testWeapons: string[];
   /** 문 */
   door: { color: string; openColor: string };
-  props: { exitPortal: SpriteRef; encounterCore: SpriteRef };
+  props: { exitPortal: SpriteRef & { spinSec: number }; encounterCore: SpriteRef };
   /** 방 꾸미기: 챕터별 바닥 변형 수, 지형지물·바닥 장식 그림 수와 배치 */
   dressing: {
     floorVariants: Record<string, number>;
@@ -1111,6 +1111,8 @@ export interface ArtSpriteDef {
   frames?: number;
   /** 돌아가는 머리(포탑): 회전 중심, 받침 위 높이, 그림의 기울기, 총구까지 거리 */
   aim?: { pivotX: number; pivotY: number; mountY: number; tiltDeg: number; muzzlePx: number };
+  /** 무기: 손에 쥐는 가로 위치 0~1 (없으면 가운데) */
+  gripX?: number;
   /** 없으면 그림 종류별 기본값 (캐릭터·오브젝트는 feet, 탄·픽업·스킬·무기는 center) */
   anchor?: ArtAnchor;
   /** 프레임 애니메이션 (플레이어·적): 멈춰 있을 때 idle, 움직일 때 move. 없으면 첫 프레임 그대로 */

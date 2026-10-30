@@ -862,6 +862,7 @@ export class RunScene extends Phaser.Scene {
     const c = roomCenter(node, this.m);
     const sprite = this.add.image(c.x, c.y, ref.spriteKey).setDepth(2);
     this.tweens.add({ targets: sprite, alpha: 0.5, duration: 500, yoyo: true, repeat: -1 });
+    this.tweens.add({ targets: sprite, angle: 360, duration: ref.spinSec * 1000, repeat: -1 });
     this.portals.push({ sprite, roomId: node.id, radius: ref.size / 2 });
   }
 
@@ -1005,8 +1006,12 @@ export class RunScene extends Phaser.Scene {
 
     const off = d.player.weaponOffset;
     const hand = d.player.weaponHand;
+    const weaponKey = this.shownWeaponKey();
     this.weaponSprite
-      .setTexture(this.shownWeaponKey())
+      .setTexture(weaponKey)
+      .setOrigin(d.art.sprites[weaponKey]?.gripX ?? 0.5, 0.5)
+      // 왼쪽을 겨눌 때 총이 거꾸로 서지 않게
+      .setFlipY(this.aimDir.x < 0)
       .setPosition(this.player.x + (this.player.flipX ? -hand.x : hand.x) + this.aimDir.x * off, this.player.y + hand.y + this.aimDir.y * off)
       .setRotation(aimAngle);
 

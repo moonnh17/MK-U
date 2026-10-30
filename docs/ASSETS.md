@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 209개 · 그림 있음 146개
+전체 209개 · 그림 있음 194개
 
 ## player (3)
 
@@ -22,29 +22,29 @@
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
-| `weapon_pistol` | 권총 | 6×6 | center | #c8c8c8 | — |
-| `weapon_shotgun` | 산탄총 | 8×8 | center | #c89a5a | — |
-| `weapon_longsword` | 장검 | 10×10 | center | #e0e8ff | — |
-| `weapon_smg` | 기관단총 | 7×7 | center | #9ab0c8 | — |
-| `weapon_rifle` | 소총 | 9×9 | center | #7a9a6a | — |
-| `weapon_sniper` | 저격총 | 10×10 | center | #5a6a8a | — |
-| `weapon_grenade_launcher` | 유탄발사기 | 9×9 | center | #8a7a3a | — |
-| `weapon_dagger` | 단검 | 6×6 | center | #d0d8e8 | — |
-| `weapon_greatsword` | 대검 | 12×12 | center | #b0b8d0 | — |
-| `weapon_spear` | 창 | 12×12 | center | #c8b07a | — |
-| `weapon_hammer` | 해머 | 10×10 | center | #8a8a9a | — |
-| `weapon_handi` | 신궁 환디 | 12×12 | center | #ff3b3b | — |
-| `weapon_rasalgethi_club` | 라스알게티의 곤봉 | 11×11 | center | #b0583a | — |
-| `weapon_avior_staff` | 아비오르의 지팡이 | 11×11 | center | #8a6aff | — |
-| `weapon_rasalhague_sword` | 라스알히게의 검 | 11×11 | center | #e8d24a | — |
-| `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | — |
+| `weapon_pistol` | 권총 | 6×6 | center | #c8c8c8 | mku/weapon_pistol.png (1프레임) |
+| `weapon_shotgun` | 산탄총 | 8×8 | center | #c89a5a | mku/weapon_shotgun.png (1프레임) |
+| `weapon_longsword` | 장검 | 10×10 | center | #e0e8ff | mku/weapon_longsword.png (1프레임) |
+| `weapon_smg` | 기관단총 | 7×7 | center | #9ab0c8 | mku/weapon_smg.png (1프레임) |
+| `weapon_rifle` | 소총 | 9×9 | center | #7a9a6a | mku/weapon_rifle.png (1프레임) |
+| `weapon_sniper` | 저격총 | 10×10 | center | #5a6a8a | mku/weapon_sniper.png (1프레임) |
+| `weapon_grenade_launcher` | 유탄발사기 | 9×9 | center | #8a7a3a | mku/weapon_grenade_launcher.png (1프레임) |
+| `weapon_dagger` | 단검 | 6×6 | center | #d0d8e8 | mku/weapon_dagger.png (1프레임) |
+| `weapon_greatsword` | 대검 | 12×12 | center | #b0b8d0 | mku/weapon_greatsword.png (1프레임) |
+| `weapon_spear` | 창 | 12×12 | center | #c8b07a | mku/weapon_spear.png (1프레임) |
+| `weapon_hammer` | 해머 | 10×10 | center | #8a8a9a | mku/weapon_hammer.png (1프레임) |
+| `weapon_handi` | 신궁 환디 | 12×12 | center | #ff3b3b | mku/weapon_handi.png (1프레임) |
+| `weapon_rasalgethi_club` | 라스알게티의 곤봉 | 11×11 | center | #b0583a | mku/weapon_rasalgethi_club.png (1프레임) |
+| `weapon_avior_staff` | 아비오르의 지팡이 | 11×11 | center | #8a6aff | mku/weapon_avior_staff.png (1프레임) |
+| `weapon_rasalhague_sword` | 라스알히게의 검 | 11×11 | center | #e8d24a | mku/weapon_rasalhague_sword.png (1프레임) |
+| `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | mku/weapon_fist.png (1프레임) |
 
 ## projectile (2)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
-| `projectile_player` | 플레이어 탄 | 3×3 | center | #fff3a0 | — |
-| `enemy_bullet` | 적 탄 | 4×4 | center | #ff5a5a | — |
+| `projectile_player` | 플레이어 탄 | 3×3 | center | #fff3a0 | mku/projectile_player.png (1프레임) |
+| `enemy_bullet` | 적 탄 | 4×4 | center | #ff5a5a | mku/enemy_bullet.png (1프레임) |
 
 ## enemy (10)
 
@@ -67,10 +67,10 @@
 | --- | --- | --- | --- | --- | --- |
 | `enemy_fusion_akgwi` | 융합악귀 | 39×39 | feet | #7a1f3a | mku/enemy_fusion_akgwi.png (2프레임) |
 | `enemy_electric_ring` | 전기환띠 | 42×42 | feet | #3a9ad9 | mku/enemy_electric_ring.png (2프레임) |
-| `enemy_training_dummy` | 보스 자리(임시 표적) | 24×24 | feet | #8a5ad9 | — |
+| `enemy_training_dummy` | 보스 자리(임시 표적) | 24×24 | feet | #8a5ad9 | mku/enemy_training_dummy.png (1프레임) |
 | `enemy_ancestor_echo` | 선조의 잔상 | 42×42 | feet | #b0583a | mku/enemy_ancestor_echo.png (3프레임) |
-| `enemy_royal_mage` | 왕실특무마기법사 외 1곳 | 33×33 | feet | #6a4ad9 | — |
-| `enemy_orion_crusader` | 오리온의 성전사 | 42×42 | feet | #d9c25a | — |
+| `enemy_royal_mage` | 왕실특무마기법사 외 1곳 | 33×33 | feet | #6a4ad9 | mku/enemy_royal_mage.png (5프레임) |
+| `enemy_orion_crusader` | 오리온의 성전사 | 42×42 | feet | #d9c25a | mku/enemy_orion_crusader.png (9프레임) |
 | `enemy_hectar_chief` | 헥타르 수석 연구원 | 36×36 | feet | #3a9aff | mku/enemy_hectar_chief.png (5프레임) |
 | `enemy_magi_golem` | 마기골렘 | 48×48 | feet | #8a6a4a | mku/enemy_magi_golem.png (2프레임) |
 | `enemy_eclipse` | 식광 | 42×42 | feet | #c8a8ff | mku/enemy_eclipse.png (10프레임) |
@@ -100,13 +100,13 @@
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
-| `chest_weapon` | 무기 상자 | 14×14 | feet | #a07a3a | — |
-| `chest_item` | 아이템 상자 | 14×14 | feet | #5a8ad9 | — |
-| `merchant_stand` | 상인 진열대 | 12×12 | feet | #4a5a6a | — |
+| `chest_weapon` | 무기 상자 | 14×14 | feet | #a07a3a | mku/chest_weapon.png (1프레임) |
+| `chest_item` | 아이템 상자 | 14×14 | feet | #5a8ad9 | mku/chest_item.png (1프레임) |
+| `merchant_stand` | 상인 진열대 | 12×12 | feet | #4a5a6a | mku/merchant_stand.png (1프레임) |
 | `spire_small` | 마기수집첨탑(소형) | 10×44 | feet | #15151c | mku/spire_small.png (1프레임) |
 | `spire_medium` | 마기수집첨탑(중형) | 16×48 | feet | #3a0e12 | mku/spire_medium.png (1프레임) |
-| `prop_exit_portal` | 출구 포털 | 20×20 | feet | #5ae0ff | — |
-| `prop_encounter_core` | 조우 칸 코어 | 14×14 | feet | #ffd23f | — |
+| `prop_exit_portal` | 출구 포털 | 20×20 | feet | #5ae0ff | mku/prop_exit_portal.png (1프레임) |
+| `prop_encounter_core` | 조우 칸 코어 | 14×14 | feet | #ffd23f | mku/prop_encounter_core.png (1프레임) |
 | `obstacle_c1_0` | 지형지물 (1장) | 16×16 | feet | #0c0e14 | mku/obstacle_c1_0.png (1프레임) |
 | `obstacle_c1_1` | 지형지물 (1장) | 16×16 | feet | #0c0e14 | mku/obstacle_c1_1.png (1프레임) |
 | `obstacle_c1_2` | 지형지물 (1장) | 16×16 | feet | #0c0e14 | mku/obstacle_c1_2.png (1프레임) |
@@ -152,8 +152,8 @@
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
-| `pickup_energy` | 에너지 구슬 | 4×4 | center | #3fc8e0 | — |
-| `pickup_coin` | 코인 | 4×4 | center | #ffd23f | — |
+| `pickup_energy` | 에너지 구슬 | 4×4 | center | #3fc8e0 | mku/pickup_energy.png (1프레임) |
+| `pickup_coin` | 코인 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
 ## skill (14)
@@ -164,28 +164,28 @@
 | `skill_turret_head` | 마기 자동포탑 (turretHead) | 8×8 | center | #8fd3f0 | mku/skill_turret_head.png (1프레임) |
 | `skill_turret_big` | 마기 자동포탑 (bigTurret) | 16×16 | center | #8ae0ff | mku/skill_turret_big.png (1프레임) |
 | `skill_turret_big_head` | 마기 자동포탑 (bigTurretHead) | 16×16 | center | #b8ecff | mku/skill_turret_big_head.png (1프레임) |
-| `skill_turret_shell` | 마기 자동포탑 (shell) | 5×5 | center | #ffb04a | — |
+| `skill_turret_shell` | 마기 자동포탑 (shell) | 5×5 | center | #ffb04a | mku/skill_turret_shell.png (1프레임) |
 | `skill_mine` | 마기 지뢰 (mine) | 5×5 | center | #d9a03b | mku/skill_mine.png (1프레임) |
-| `skill_mine_chain` | 마기 지뢰 (chainMine) | 5×5 | center | #ff6ad9 | — |
-| `skill_antimatter_charge` | 반물질포 (charge) | 4×4 | center | #c98aff | — |
-| `skill_antimatter_shell` | 반물질포 (shell) | 9×9 | center | #a05ad9 | — |
+| `skill_mine_chain` | 마기 지뢰 (chainMine) | 5×5 | center | #ff6ad9 | mku/skill_mine_chain.png (1프레임) |
+| `skill_antimatter_charge` | 반물질포 (charge) | 4×4 | center | #c98aff | mku/skill_antimatter_charge.png (1프레임) |
+| `skill_antimatter_shell` | 반물질포 (shell) | 9×9 | center | #a05ad9 | mku/skill_antimatter_shell.png (1프레임) |
 | `skill_drone` | 전투 드론 (drone) | 5×5 | center | #5ad9c0 | mku/skill_drone.png (1프레임) |
-| `skill_subject` | 불안정 실험체 (subject) | 7×7 | center | #9ad94a | — |
-| `skill_experiment_shell` | 실험 병기 (shell) | 6×6 | center | #d9d03b | — |
-| `ult_first_law` | 열역학 제1법칙 (particle) | 8×8 | center | #ff9a3c | — |
-| `ult_singularity` | 특이점 실험 (core) | 10×10 | center | #ff3a4a | — |
+| `skill_subject` | 불안정 실험체 (subject) | 7×7 | center | #9ad94a | mku/skill_subject.png (1프레임) |
+| `skill_experiment_shell` | 실험 병기 (shell) | 6×6 | center | #d9d03b | mku/skill_experiment_shell.png (1프레임) |
+| `ult_first_law` | 열역학 제1법칙 (particle) | 8×8 | center | #ff9a3c | mku/ult_first_law.png (1프레임) |
+| `ult_singularity` | 특이점 실험 (core) | 10×10 | center | #ff3a4a | mku/ult_singularity.png (1프레임) |
 
 ## lab (7)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
-| `lab_capsule` | 실험체 캡슐 | 22×26 | feet | #9ad8e0 | — |
-| `lab_job_device` | 직업 선택 장치 | 28×18 | feet | #e0c060 | — |
-| `lab_portal` | 시뮬레이션 포털 | 34×22 | feet | #7a5aff | — |
-| `lab_codex` | 도감 단말 | 20×24 | feet | #5a9ab0 | — |
-| `lab_archive` | 기억조각 보관대 | 24×26 | feet | #b07ae0 | — |
-| `lab_gemini` | 미모사 제미니 | 14×22 | feet | #7ae0e0 | — |
-| `lab_window` | 관측창 | 100×12 | feet | #06090c | — |
+| `lab_capsule` | 실험체 캡슐 | 22×26 | feet | #9ad8e0 | mku/lab_capsule.png (1프레임) |
+| `lab_job_device` | 직업 선택 장치 | 28×18 | feet | #e0c060 | mku/lab_job_device.png (1프레임) |
+| `lab_portal` | 시뮬레이션 포털 | 34×22 | feet | #7a5aff | mku/lab_portal.png (1프레임) |
+| `lab_codex` | 도감 단말 | 20×24 | feet | #5a9ab0 | mku/lab_codex.png (1프레임) |
+| `lab_archive` | 기억조각 보관대 | 24×26 | feet | #b07ae0 | mku/lab_archive.png (1프레임) |
+| `lab_gemini` | 미모사 제미니 | 14×22 | feet | #7ae0e0 | mku/lab_gemini.png (1프레임) |
+| `lab_window` | 관측창 | 100×12 | feet | #06090c | mku/lab_window.png (1프레임) |
 
 ## item (31)
 
@@ -206,7 +206,7 @@
 | `item_magowiki_codex` | 마고위키 필사본 | 8×8 | center | #e0c060 | mku/item_magowiki_codex.png (1프레임) |
 | `item_lsd_r` | LSD-R | 8×8 | center | #e070c0 | mku/item_lsd_r.png (1프레임) |
 | `item_hanabi` | 한아비 | 8×8 | center | #ffb04a | mku/item_hanabi.png (1프레임) |
-| `item_gisup_stone` | 기숲 비석의 조각 | 8×8 | center | #7a8a9a | — |
+| `item_gisup_stone` | 기숲 비석의 조각 | 8×8 | center | #7a8a9a | mku/item_gisup_stone.png (1프레임) |
 | `item_afro_belt` | 아프로 씨의 벨트 | 8×8 | center | #a45cff | mku/item_afro_belt.png (1프레임) |
 | `item_regulus_shard` | 레굴루스의 의식조각 | 8×8 | center | #8a6aff | mku/item_regulus_shard.png (1프레임) |
 | `item_caesar_crown` | 카이사르의 왕관 | 8×8 | center | #ffd23f | mku/item_caesar_crown.png (1프레임) |
@@ -216,12 +216,12 @@
 | `item_al_gul_blade` | 알 굴 참마검 | 8×8 | center | #ffe08a | mku/item_al_gul_blade.png (1프레임) |
 | `item_wonhon_lump` | 원혼 덩어리 | 8×8 | center | #7a1f3a | mku/item_wonhon_lump.png (1프레임) |
 | `item_gihwan_arm` | 기환의 팔 | 8×8 | center | #3a9ad9 | mku/item_gihwan_arm.png (1프레임) |
-| `item_death_whistle` | 바바리안 데스 휘슬 | 8×8 | center | #c86a3a | — |
-| `item_royal_seal` | 특무 인장 | 8×8 | center | #6a4ad9 | — |
-| `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | — |
+| `item_death_whistle` | 바바리안 데스 휘슬 | 8×8 | center | #c86a3a | mku/item_death_whistle.png (1프레임) |
+| `item_royal_seal` | 특무 인장 | 8×8 | center | #6a4ad9 | mku/item_royal_seal.png (1프레임) |
+| `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | mku/item_orion_shield.png (1프레임) |
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | mku/item_hectar_ram.png (1프레임) |
 | `item_ancient_core` | 고대병기의 코어 | 8×8 | center | #9a4aff | mku/item_ancient_core.png (1프레임) |
-| `item_eclipse_core` | 식광의 핵 | 8×8 | center | #c8a8ff | — |
+| `item_eclipse_core` | 식광의 핵 | 8×8 | center | #c8a8ff | mku/item_eclipse_core.png (1프레임) |
 
 ## icon (17)
 

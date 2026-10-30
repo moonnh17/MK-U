@@ -1198,6 +1198,334 @@
       "frameWidth": 9,
       "frameHeight": 12,
       "frames": 1
+    },
+    "weapon_pistol": {
+      "file": "mku/weapon_pistol.png",
+      "frameWidth": 11,
+      "frameHeight": 7,
+      "frames": 1,
+      "gripX": 0.4
+    },
+    "weapon_smg": {
+      "file": "mku/weapon_smg.png",
+      "frameWidth": 14,
+      "frameHeight": 8,
+      "frames": 1,
+      "gripX": 0.4
+    },
+    "weapon_shotgun": {
+      "file": "mku/weapon_shotgun.png",
+      "frameWidth": 17,
+      "frameHeight": 6,
+      "frames": 1,
+      "gripX": 0.4
+    },
+    "weapon_rifle": {
+      "file": "mku/weapon_rifle.png",
+      "frameWidth": 20,
+      "frameHeight": 7,
+      "frames": 1,
+      "gripX": 0.35
+    },
+    "weapon_sniper": {
+      "file": "mku/weapon_sniper.png",
+      "frameWidth": 24,
+      "frameHeight": 8,
+      "frames": 1,
+      "gripX": 0.3
+    },
+    "weapon_grenade_launcher": {
+      "file": "mku/weapon_grenade_launcher.png",
+      "frameWidth": 16,
+      "frameHeight": 8,
+      "frames": 1,
+      "gripX": 0.35
+    },
+    "weapon_dagger": {
+      "file": "mku/weapon_dagger.png",
+      "frameWidth": 12,
+      "frameHeight": 7,
+      "frames": 1,
+      "gripX": 0.2
+    },
+    "weapon_longsword": {
+      "file": "mku/weapon_longsword.png",
+      "frameWidth": 18,
+      "frameHeight": 7,
+      "frames": 1,
+      "gripX": 0.15
+    },
+    "weapon_greatsword": {
+      "file": "mku/weapon_greatsword.png",
+      "frameWidth": 22,
+      "frameHeight": 10,
+      "frames": 1,
+      "gripX": 0.15
+    },
+    "weapon_spear": {
+      "file": "mku/weapon_spear.png",
+      "frameWidth": 26,
+      "frameHeight": 7,
+      "frames": 1,
+      "gripX": 0.3
+    },
+    "weapon_hammer": {
+      "file": "mku/weapon_hammer.png",
+      "frameWidth": 17,
+      "frameHeight": 11,
+      "frames": 1,
+      "gripX": 0.25
+    },
+    "weapon_avior_staff": {
+      "file": "mku/weapon_avior_staff.png",
+      "frameWidth": 20,
+      "frameHeight": 7,
+      "frames": 1,
+      "gripX": 0.3
+    },
+    "weapon_fist": {
+      "file": "mku/weapon_fist.png",
+      "frameWidth": 8,
+      "frameHeight": 7,
+      "frames": 1,
+      "gripX": 0.5
+    },
+    "weapon_handi": {
+      "file": "mku/weapon_handi.png",
+      "frameWidth": 9,
+      "frameHeight": 26,
+      "frames": 1,
+      "gripX": 0.5
+    },
+    "weapon_rasalgethi_club": {
+      "file": "mku/weapon_rasalgethi_club.png",
+      "frameWidth": 22,
+      "frameHeight": 9,
+      "frames": 1,
+      "gripX": 0.2
+    },
+    "weapon_rasalhague_sword": {
+      "file": "mku/weapon_rasalhague_sword.png",
+      "frameWidth": 26,
+      "frameHeight": 4,
+      "frames": 1,
+      "gripX": 0.15
+    },
+    "projectile_player": {
+      "file": "mku/projectile_player.png",
+      "frameWidth": 5,
+      "frameHeight": 5,
+      "frames": 1
+    },
+    "enemy_bullet": {
+      "file": "mku/enemy_bullet.png",
+      "frameWidth": 7,
+      "frameHeight": 7,
+      "frames": 1
+    },
+    "pickup_coin": {
+      "file": "mku/pickup_coin.png",
+      "frameWidth": 7,
+      "frameHeight": 7,
+      "frames": 1
+    },
+    "pickup_energy": {
+      "file": "mku/pickup_energy.png",
+      "frameWidth": 7,
+      "frameHeight": 8,
+      "frames": 1
+    },
+    "chest_weapon": {
+      "file": "mku/chest_weapon.png",
+      "frameWidth": 18,
+      "frameHeight": 10,
+      "frames": 1
+    },
+    "chest_item": {
+      "file": "mku/chest_item.png",
+      "frameWidth": 18,
+      "frameHeight": 10,
+      "frames": 1
+    },
+    "merchant_stand": {
+      "file": "mku/merchant_stand.png",
+      "frameWidth": 20,
+      "frameHeight": 7,
+      "frames": 1
+    },
+    "enemy_training_dummy": {
+      "file": "mku/enemy_training_dummy.png",
+      "frameWidth": 16,
+      "frameHeight": 19,
+      "frames": 1
+    },
+    "prop_exit_portal": {
+      "file": "mku/prop_exit_portal.png",
+      "frameWidth": 36,
+      "frameHeight": 35,
+      "frames": 1
+    },
+    "prop_encounter_core": {
+      "file": "mku/prop_encounter_core.png",
+      "frameWidth": 14,
+      "frameHeight": 24,
+      "frames": 1
+    },
+    "skill_turret_shell": {
+      "file": "mku/skill_turret_shell.png",
+      "frameWidth": 9,
+      "frameHeight": 7,
+      "frames": 1
+    },
+    "skill_mine_chain": {
+      "file": "mku/skill_mine_chain.png",
+      "frameWidth": 7,
+      "frameHeight": 8,
+      "frames": 1
+    },
+    "skill_antimatter_charge": {
+      "file": "mku/skill_antimatter_charge.png",
+      "frameWidth": 7,
+      "frameHeight": 7,
+      "frames": 1
+    },
+    "skill_antimatter_shell": {
+      "file": "mku/skill_antimatter_shell.png",
+      "frameWidth": 16,
+      "frameHeight": 8,
+      "frames": 1
+    },
+    "skill_subject": {
+      "file": "mku/skill_subject.png",
+      "frameWidth": 15,
+      "frameHeight": 16,
+      "frames": 1
+    },
+    "skill_experiment_shell": {
+      "file": "mku/skill_experiment_shell.png",
+      "frameWidth": 13,
+      "frameHeight": 6,
+      "frames": 1
+    },
+    "ult_first_law": {
+      "file": "mku/ult_first_law.png",
+      "frameWidth": 9,
+      "frameHeight": 9,
+      "frames": 1
+    },
+    "ult_singularity": {
+      "file": "mku/ult_singularity.png",
+      "frameWidth": 12,
+      "frameHeight": 14,
+      "frames": 1
+    },
+    "enemy_orion_crusader": {
+      "file": "mku/enemy_orion_crusader.png",
+      "frameWidth": 52,
+      "frameHeight": 56,
+      "frames": 9,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 2,
+          "fps": 4
+        },
+        "move": {
+          "from": 3,
+          "to": 8,
+          "fps": 8
+        }
+      }
+    },
+    "enemy_royal_mage": {
+      "file": "mku/enemy_royal_mage.png",
+      "frameWidth": 26,
+      "frameHeight": 46,
+      "frames": 5,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        }
+      }
+    },
+    "item_death_whistle": {
+      "file": "mku/item_death_whistle.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_orion_shield": {
+      "file": "mku/item_orion_shield.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_eclipse_core": {
+      "file": "mku/item_eclipse_core.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_royal_seal": {
+      "file": "mku/item_royal_seal.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "item_gisup_stone": {
+      "file": "mku/item_gisup_stone.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "lab_capsule": {
+      "file": "mku/lab_capsule.png",
+      "frameWidth": 18,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "lab_codex": {
+      "file": "mku/lab_codex.png",
+      "frameWidth": 28,
+      "frameHeight": 19,
+      "frames": 1
+    },
+    "lab_job_device": {
+      "file": "mku/lab_job_device.png",
+      "frameWidth": 32,
+      "frameHeight": 20,
+      "frames": 1
+    },
+    "lab_portal": {
+      "file": "mku/lab_portal.png",
+      "frameWidth": 34,
+      "frameHeight": 30,
+      "frames": 1
+    },
+    "lab_archive": {
+      "file": "mku/lab_archive.png",
+      "frameWidth": 16,
+      "frameHeight": 28,
+      "frames": 1
+    },
+    "lab_gemini": {
+      "file": "mku/lab_gemini.png",
+      "frameWidth": 20,
+      "frameHeight": 32,
+      "frames": 1
+    },
+    "lab_window": {
+      "file": "mku/lab_window.png",
+      "frameWidth": 100,
+      "frameHeight": 12,
+      "frames": 1
     }
   }
 }

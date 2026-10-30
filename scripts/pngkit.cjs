@@ -135,6 +135,19 @@ function flipX(img) {
   return out;
 }
 
+/** 시계 방향으로 deg도 돌린다 (캔버스는 잘리지 않게 넓힌다) */
+function rotate(img, deg) {
+  const r = (deg * Math.PI) / 180, c = Math.cos(r), s = Math.sin(r);
+  const w = Math.ceil(Math.abs(img.w * c) + Math.abs(img.h * s)), h = Math.ceil(Math.abs(img.w * s) + Math.abs(img.h * c));
+  const out = blank(w, h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const dx = x - w / 2, dy = y - h / 2;
+    const sx = Math.floor(dx * c + dy * s + img.w / 2), sy = Math.floor(-dx * s + dy * c + img.h / 2);
+    if (sx >= 0 && sy >= 0 && sx < img.w && sy < img.h) img.px.copy(out.px, (y * w + x) * 4, (sy * img.w + sx) * 4, (sy * img.w + sx) * 4 + 4);
+  }
+  return out;
+}
+
 /** (x, y)에서 가장 가까운 불투명 픽셀이 속한 덩어리만 잘라낸다 (묶음 그림에서 소품 하나 꺼내기) */
 function component(img, x, y, cut = 40, search = 40) {
   const on = (i, j) => i >= 0 && j >= 0 && i < img.w && j < img.h && img.px[(j * img.w + i) * 4 + 3] > cut;
@@ -166,4 +179,4 @@ function component(img, x, y, cut = 40, search = 40) {
   return out;
 }
 
-module.exports = { read, write, blank, crop, resize, bbox, paste, flipX, component };
+module.exports = { read, write, blank, crop, resize, bbox, paste, flipX, rotate, component };
