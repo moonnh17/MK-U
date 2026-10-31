@@ -1,3 +1,4 @@
+import { pickTrack } from '../systems/music';
 import Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import { makeFallbackSeed } from '../core/config';
@@ -45,6 +46,7 @@ export class LabScene extends Phaser.Scene {
   }
 
   create(): void {
+    bus.emit('music', { track: pickTrack(getContext().data.sounds.music, { place: 'lab' }) });
     this.ctx = getContext();
     this.ctx.session = null;
     this.near = null;

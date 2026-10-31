@@ -1,5 +1,19 @@
 {
   "masterVolume": 0.5,
+  "music": {
+    "basePath": "assets/music/",
+    "fadeSec": 1.2,
+    "labTrack": "lab",
+    "runTrack": "run",
+    "bossTracks": { "1": "boss1", "2": "boss2", "3": "boss3" },
+    "tracks": {
+      "lab": { "file": "architecture-of-doubt.mp3", "volume": 0.5 },
+      "run": { "file": "ruins-loop.ogg", "volume": 0.45 },
+      "boss1": { "file": "corrupted-technology.mp3", "volume": 0.55 },
+      "boss2": { "file": "corrupted-simulation.mp3", "volume": 0.55 },
+      "boss3": { "file": "despair-grandeur.mp3", "volume": 0.55 }
+    }
+  },
   "muteKey": "KeyM",
   "defaultGapSec": 0.03,
   "defaultMaxVoices": 4,

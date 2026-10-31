@@ -1,3 +1,4 @@
+import { clampVolume } from '../systems/music';
 /**
  * 영구 저장 (localStorage). 런 사이에 남는 것만: 마기력 결정, 직업별 강화, 처음 본 컷씬·제미니 대사, 과거의 기억 조각, 첫 실행 여부.
  * 읽다가 실패하거나 내용이 깨져 있으면 기본값으로 시작한다(게임은 저장 없이도 돌아간다).
@@ -29,10 +30,15 @@ export interface SaveData {
   gemini: Record<string, { lines: string[]; order: number }>;
   /** 소리 꺼 둠 */
   muted: boolean;
+  /** 음악·효과음 음량 0~1 */
+  musicVolume: number;
+  sfxVolume: number;
+  /** 첫 방 조작 안내를 봤는지 */
+  tutorialDone: boolean;
 }
 
 export function defaultSave(): SaveData {
-  return { version: SAVE_VERSION, crystals: 0, upgrades: {}, cutscenes: {}, pastShards: 0, firstRunDone: false, gemini: {}, muted: false };
+  return { version: SAVE_VERSION, crystals: 0, upgrades: {}, cutscenes: {}, pastShards: 0, firstRunDone: false, gemini: {}, muted: false, musicVolume: 1, sfxVolume: 1, tutorialDone: false };
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -78,6 +84,9 @@ export function parseSave(raw: string | null): SaveData {
     pastShards: nonNeg(o.pastShards, 0),
     firstRunDone: o.firstRunDone === true,
     muted: o.muted === true,
+    musicVolume: clampVolume(o.musicVolume, 1),
+    sfxVolume: clampVolume(o.sfxVolume, 1),
+    tutorialDone: o.tutorialDone === true,
   };
 }
 

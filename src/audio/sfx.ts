@@ -28,6 +28,7 @@ export class Sfx {
     });
     bus.on('sfx', ({ id }) => this.play(id));
     bus.on('muteToggle', () => this.setMuted(!ctx.save.data.muted));
+    bus.on('volumeChanged', () => this.applyGain());
   }
 
   get muted(): boolean {
@@ -37,9 +38,13 @@ export class Sfx {
   private setMuted(m: boolean): void {
     this.ctx.save.data.muted = m;
     this.ctx.save.write();
-    if (this.master) this.master.gain.value = m ? 0 : this.ctx.data.sounds.masterVolume;
+    this.applyGain();
     bus.emit('muteChanged', { muted: m });
     bus.emit('toast', { text: this.ctx.t(m ? 'sound.off' : 'sound.on') });
+  }
+
+  private applyGain(): void {
+    if (this.master) this.master.gain.value = this.muted ? 0 : this.ctx.data.sounds.masterVolume * this.ctx.save.data.sfxVolume;
   }
 
   private ensure(): AudioContext | null {
@@ -48,7 +53,7 @@ export class Sfx {
       if (!AC) return null;
       this.ac = new AC();
       this.master = this.ac.createGain();
-      this.master.gain.value = this.muted ? 0 : this.ctx.data.sounds.masterVolume;
+      this.applyGain();
       this.master.connect(this.ac.destination);
       // 1초짜리 흰 잡음 (잡음 층이 함께 쓴다)
       const len = this.ac.sampleRate;

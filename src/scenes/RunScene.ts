@@ -19,6 +19,7 @@ import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
 import { Spire } from '../entities/spire';
 import { Darkness } from '../entities/darkness';
 import { PanicFx } from '../entities/panicFx';
+import { pickTrack } from '../systems/music';
 import { BreakableProp, Statue } from '../entities/roomProp';
 import { crateDrops, placeRoomProps } from '../systems/roomProps';
 import { applyMental, lowSanityBonus, sanityMaxFor, stepSanity } from '../systems/sanity';
@@ -251,6 +252,7 @@ export class RunScene extends Phaser.Scene {
   private invuln = 0;
   private dodge: DodgeState = IDLE_DODGE;
   private dodgeGhostIn = 0;
+  private tutorialTexts: Phaser.GameObjects.Text[] = [];
   private panicFx: PanicFx | null = null;
   private panicTinted = false;
   private dodgeFxRng: Rng | null = null;
@@ -395,6 +397,7 @@ export class RunScene extends Phaser.Scene {
     this.enemyBullets = this.physics.add.group();
 
     this.buildWorld();
+    this.showTutorial();
 
     const start = roomCenter(map.rooms[map.startId]!, this.m);
     this.player = this.physics.add.sprite(start.x, start.y, d.player.spriteKey).setDepth(4);
@@ -558,6 +561,7 @@ export class RunScene extends Phaser.Scene {
     this.fireCooldown = 0;
     this.invuln = 0;
     this.dodge = IDLE_DODGE;
+    this.tutorialTexts = [];
     this.panicFx = null;
     this.panicTinted = false;
     this.dodgeBar = null;
@@ -1055,6 +1059,7 @@ export class RunScene extends Phaser.Scene {
   override update(_time: number, deltaMs: number): void {
     let dt = Math.min(deltaMs / 1000, 0.05);
     let frame = this.ctx.input.poll();
+    this.updateMusic();
     // 보스 처치 슬로모션: 물리·트윈·게임 시간을 함께 늦춘다
     if (this.slowT !== null) {
       this.slowT += dt;
@@ -1181,6 +1186,7 @@ export class RunScene extends Phaser.Scene {
     this.updatePotions();
     this.updateInteractHint();
     this.updateDoorIcons();
+    this.updateTutorial();
 
     const weaponKey = this.shownWeaponKey();
     const handAt = this.handPos();
@@ -1851,6 +1857,35 @@ export class RunScene extends Phaser.Scene {
       const a = s.shots === 1 ? base : base - spread / 2 + (spread * i) / (s.shots - 1);
       this.fireBullet(from, a, s.projectileSpeed, s.range, s.damage, s.tags, 'dodge', { pierce: 0, crit: 0, tint: s.tint });
     }
+  }
+
+  /** 보스와 마주하면 챕터 보스 곡, 아니면 런 곡 (같은 곡이면 음악 쪽에서 무시한다) */
+  private updateMusic(): void {
+    const facingBoss = this.enemies.some((e) => !e.dead && (e.rank === 'boss' || e.rank === 'hiddenBoss'));
+    bus.emit('music', { track: pickTrack(this.ctx.data.sounds.music, { place: 'run', chapter: this.session.stage.chapter, facingBoss }) });
+  }
+
+  /** 첫 런 시작 방: 조작 안내. 다른 방으로 가면 사라지고 다시 나오지 않는다 */
+  private showTutorial(): void {
+    const save = this.ctx.save;
+    if (save.data.tutorialDone || this.session.stage.chapter !== 1 || this.session.stage.stage !== 1) return;
+    const c = this.ctx.data.ui.tutorial;
+    const center = roomCenter(this.session.map.rooms[this.session.map.startId]!, this.m);
+    const keys = this.ctx.uiMode === 'mobile' ? c.mobile : c.pc;
+    this.tutorialTexts = keys.map((k, i) =>
+      this.add
+        .text(center.x, center.y + c.offsetY + i * c.lineGapPx, this.ctx.t(k), { fontFamily: 'sans-serif', fontSize: `${c.fontPx}px`, color: '#ffffff', stroke: '#000000', strokeThickness: 2, align: 'center' })
+        .setOrigin(0.5)
+        .setDepth(6),
+    );
+  }
+
+  private updateTutorial(): void {
+    if (this.tutorialTexts.length === 0 || this.session.currentRoomId === this.session.map.startId) return;
+    for (const t of this.tutorialTexts) t.destroy();
+    this.tutorialTexts = [];
+    this.ctx.save.data.tutorialDone = true;
+    this.ctx.save.write();
   }
 
   /** 정신력 값 반영. 패닉에 들어가고 나올 때 알린다 */

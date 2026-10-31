@@ -107,5 +107,22 @@
     "zoom": 1.35,
     "lean": 0.35,
     "playerMarginPx": 40
+  },
+  "tutorial": {
+    "offsetY": -62,
+    "fontPx": 8,
+    "lineGapPx": 11,
+    "pc": [
+      "tutorial.pc.1",
+      "tutorial.pc.2",
+      "tutorial.pc.3",
+      "tutorial.pc.4"
+    ],
+    "mobile": [
+      "tutorial.mobile.1",
+      "tutorial.mobile.2",
+      "tutorial.mobile.3",
+      "tutorial.mobile.4"
+    ]
   }
 }

@@ -26,6 +26,7 @@ import { JobWindow } from './ui/jobWindow';
 import { ArchiveWindow } from './ui/archiveWindow';
 import { GeminiMini } from './ui/geminiMini';
 import { PauseWindow } from './ui/pauseWindow';
+import { Music } from './audio/music';
 import { Sfx } from './audio/sfx';
 import { StoryWindow } from './ui/storyWindow';
 import { SettlementWindow } from './ui/settlementWindow';
@@ -169,6 +170,7 @@ new StoryWindow(ctx);
 new GeminiMini(ctx);
 new PauseWindow(ctx);
 new Sfx(ctx);
+new Music(ctx);
 window.addEventListener('resize', () => game.scale.setZoom(cssZoom()));
 
 applyUiMode(ctx.uiMode);

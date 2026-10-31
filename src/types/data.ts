@@ -740,6 +740,8 @@ export interface HudLayoutData {
 }
 
 export interface UiData {
+  /** 첫 방 조작 안내: 방 가운데 기준 위치, 글자, PC·모바일 문구 키 */
+  tutorial: { offsetY: number; fontPx: number; lineGapPx: number; pc: string[]; mobile: string[] };
   baseWidth: number;
   baseHeight: number;
   /** 게임 1px을 캔버스 몇 px로 그릴지 (기기 화면에 맞춰 이 범위에서 고른다) */
@@ -1319,8 +1321,21 @@ export interface SoundDef {
   maxVoices?: number;
 }
 
+export interface MusicData {
+  /** public/ 아래 음악 폴더 */
+  basePath: string;
+  /** 곡을 겹쳐 넘기는 시간(초) */
+  fadeSec: number;
+  labTrack: string;
+  runTrack: string;
+  /** 챕터 → 보스 곡 id */
+  bossTracks: Record<string, string>;
+  tracks: Record<string, { file: string; volume: number }>;
+}
+
 export interface SoundsData {
   masterVolume: number;
+  music: MusicData;
   /** 소리 켜기·끄기 키 (KeyboardEvent.code) */
   muteKey: string;
   defaultGapSec: number;

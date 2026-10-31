@@ -34,6 +34,9 @@ export interface GameEvents {
   sfx: { id: SfxId };
   /** 소리 켜기·끄기 요청 / 바뀜 */
   muteToggle: Record<string, never>;
+  /** 이 곡을 튼다 (같은 곡이면 그대로) */
+  music: { track: string };
+  volumeChanged: Record<string, never>;
   muteChanged: { muted: boolean };
   /** 일시정지 창의 '계속하기' */
   pauseResume: Record<string, never>;

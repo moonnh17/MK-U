@@ -1416,6 +1416,19 @@ body {
   border: 2px solid #4a5a74;
   text-align: center;
 }
+.pw-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.pw-volume span {
+  min-width: 44px;
+  text-align: left;
+}
+.pw-volume input {
+  flex: 1;
+}
 .pw-box b {
   font-size: 18px;
 }
