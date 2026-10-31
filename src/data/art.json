@@ -57,8 +57,8 @@
     },
     "enemy_tomakki": {
       "file": "mku/enemy_tomakki.png",
-      "frameWidth": 14,
-      "frameHeight": 12,
+      "frameWidth": 16,
+      "frameHeight": 14,
       "frames": 4,
       "anims": {
         "idle": {
@@ -76,8 +76,8 @@
     },
     "enemy_gaedeulgae": {
       "file": "mku/enemy_gaedeulgae.png",
-      "frameWidth": 19,
-      "frameHeight": 18,
+      "frameWidth": 21,
+      "frameHeight": 20,
       "frames": 5,
       "anims": {
         "idle": {
@@ -94,8 +94,8 @@
     },
     "enemy_akgwi": {
       "file": "mku/enemy_akgwi.png",
-      "frameWidth": 23,
-      "frameHeight": 24,
+      "frameWidth": 25,
+      "frameHeight": 26,
       "frames": 6,
       "anims": {
         "idle": {
@@ -112,8 +112,8 @@
     },
     "enemy_ghost_shooter": {
       "file": "mku/enemy_ghost_shooter.png",
-      "frameWidth": 26,
-      "frameHeight": 23,
+      "frameWidth": 28,
+      "frameHeight": 25,
       "frames": 4,
       "anims": {
         "idle": {
@@ -130,8 +130,8 @@
     },
     "enemy_hectar_trooper": {
       "file": "mku/enemy_hectar_trooper.png",
-      "frameWidth": 11,
-      "frameHeight": 22,
+      "frameWidth": 13,
+      "frameHeight": 24,
       "frames": 5,
       "anims": {
         "idle": {
@@ -148,8 +148,8 @@
     },
     "enemy_hectar_chief": {
       "file": "mku/enemy_hectar_chief.png",
-      "frameWidth": 27,
-      "frameHeight": 54,
+      "frameWidth": 29,
+      "frameHeight": 56,
       "frames": 5,
       "anims": {
         "idle": {
@@ -166,8 +166,8 @@
     },
     "enemy_magi_beetle": {
       "file": "mku/enemy_magi_beetle.png",
-      "frameWidth": 24,
-      "frameHeight": 20,
+      "frameWidth": 26,
+      "frameHeight": 22,
       "frames": 10,
       "anims": {
         "idle": {
@@ -184,8 +184,8 @@
     },
     "enemy_a_memory": {
       "file": "mku/enemy_a_memory.png",
-      "frameWidth": 21,
-      "frameHeight": 24,
+      "frameWidth": 23,
+      "frameHeight": 26,
       "frames": 14,
       "anims": {
         "idle": {
@@ -202,8 +202,8 @@
     },
     "enemy_ancient_one": {
       "file": "mku/enemy_ancient_one.png",
-      "frameWidth": 26,
-      "frameHeight": 26,
+      "frameWidth": 28,
+      "frameHeight": 28,
       "frames": 12,
       "anims": {
         "idle": {
@@ -220,8 +220,8 @@
     },
     "enemy_hatred_shard": {
       "file": "mku/enemy_hatred_shard.png",
-      "frameWidth": 22,
-      "frameHeight": 12,
+      "frameWidth": 24,
+      "frameHeight": 14,
       "frames": 10,
       "anims": {
         "idle": {
@@ -238,8 +238,8 @@
     },
     "enemy_executor": {
       "file": "mku/enemy_executor.png",
-      "frameWidth": 38,
-      "frameHeight": 35,
+      "frameWidth": 40,
+      "frameHeight": 37,
       "frames": 13,
       "anims": {
         "idle": {
@@ -256,8 +256,8 @@
     },
     "enemy_archon": {
       "file": "mku/enemy_archon.png",
-      "frameWidth": 22,
-      "frameHeight": 30,
+      "frameWidth": 24,
+      "frameHeight": 32,
       "frames": 13,
       "anims": {
         "idle": {
@@ -274,8 +274,8 @@
     },
     "enemy_fusion_akgwi": {
       "file": "mku/enemy_fusion_akgwi.png",
-      "frameWidth": 72,
-      "frameHeight": 69,
+      "frameWidth": 74,
+      "frameHeight": 71,
       "frames": 2,
       "anims": {
         "idle": {
@@ -292,8 +292,8 @@
     },
     "enemy_fusion_akgwi_phase2": {
       "file": "mku/enemy_fusion_akgwi_phase2.png",
-      "frameWidth": 78,
-      "frameHeight": 55,
+      "frameWidth": 80,
+      "frameHeight": 57,
       "frames": 2,
       "anims": {
         "idle": {
@@ -310,8 +310,8 @@
     },
     "enemy_electric_ring": {
       "file": "mku/enemy_electric_ring.png",
-      "frameWidth": 57,
-      "frameHeight": 75,
+      "frameWidth": 59,
+      "frameHeight": 77,
       "frames": 2,
       "anims": {
         "idle": {
@@ -328,8 +328,8 @@
     },
     "enemy_magi_golem": {
       "file": "mku/enemy_magi_golem.png",
-      "frameWidth": 84,
-      "frameHeight": 80,
+      "frameWidth": 86,
+      "frameHeight": 82,
       "frames": 2,
       "anims": {
         "idle": {
@@ -346,8 +346,8 @@
     },
     "enemy_magi_golem_phase2": {
       "file": "mku/enemy_magi_golem_phase2.png",
-      "frameWidth": 90,
-      "frameHeight": 76,
+      "frameWidth": 92,
+      "frameHeight": 78,
       "frames": 2,
       "anims": {
         "idle": {
@@ -364,8 +364,8 @@
     },
     "enemy_eclipse": {
       "file": "mku/enemy_eclipse.png",
-      "frameWidth": 75,
-      "frameHeight": 75,
+      "frameWidth": 77,
+      "frameHeight": 77,
       "frames": 10,
       "anims": {
         "idle": {
@@ -382,8 +382,8 @@
     },
     "enemy_eclipse_phase2": {
       "file": "mku/enemy_eclipse_phase2.png",
-      "frameWidth": 84,
-      "frameHeight": 84,
+      "frameWidth": 86,
+      "frameHeight": 86,
       "frames": 10,
       "anims": {
         "idle": {
@@ -400,8 +400,8 @@
     },
     "enemy_magi_kaiser": {
       "file": "mku/enemy_magi_kaiser.png",
-      "frameWidth": 99,
-      "frameHeight": 79,
+      "frameWidth": 101,
+      "frameHeight": 81,
       "frames": 10,
       "anims": {
         "idle": {
@@ -418,8 +418,8 @@
     },
     "enemy_magi_kaiser_phase1": {
       "file": "mku/enemy_magi_kaiser_phase1.png",
-      "frameWidth": 99,
-      "frameHeight": 78,
+      "frameWidth": 101,
+      "frameHeight": 80,
       "frames": 4,
       "anims": {
         "idle": {
@@ -431,8 +431,8 @@
     },
     "enemy_magi_kaiser_phase2": {
       "file": "mku/enemy_magi_kaiser_phase2.png",
-      "frameWidth": 99,
-      "frameHeight": 79,
+      "frameWidth": 101,
+      "frameHeight": 81,
       "frames": 10,
       "anims": {
         "idle": {
@@ -449,8 +449,8 @@
     },
     "enemy_magi_kaiser_phase3": {
       "file": "mku/enemy_magi_kaiser_phase3.png",
-      "frameWidth": 105,
-      "frameHeight": 67,
+      "frameWidth": 107,
+      "frameHeight": 69,
       "frames": 10,
       "anims": {
         "idle": {
@@ -467,8 +467,8 @@
     },
     "enemy_ancestor_echo": {
       "file": "mku/enemy_ancestor_echo.png",
-      "frameWidth": 47,
-      "frameHeight": 66,
+      "frameWidth": 49,
+      "frameHeight": 68,
       "frames": 3,
       "anims": {
         "idle": {
@@ -1541,8 +1541,8 @@
     },
     "enemy_orion_crusader": {
       "file": "mku/enemy_orion_crusader.png",
-      "frameWidth": 52,
-      "frameHeight": 56,
+      "frameWidth": 54,
+      "frameHeight": 58,
       "frames": 9,
       "anims": {
         "idle": {
@@ -1559,8 +1559,8 @@
     },
     "enemy_royal_mage": {
       "file": "mku/enemy_royal_mage.png",
-      "frameWidth": 26,
-      "frameHeight": 46,
+      "frameWidth": 28,
+      "frameHeight": 48,
       "frames": 5,
       "anims": {
         "idle": {

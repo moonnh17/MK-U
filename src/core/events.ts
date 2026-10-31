@@ -1,3 +1,4 @@
+import type { WeaponItem } from '../systems/weapons';
 import type { CutIn, CutPage } from '../ui/cutscenePages';
 import type { SfxId } from '../systems/sound';
 import type { ButtonAction } from './actions';
@@ -34,6 +35,8 @@ export interface GameEvents {
   sfx: { id: SfxId };
   /** 소리 켜기·끄기 요청 / 바뀜 */
   muteToggle: Record<string, never>;
+  /** 지금 앞에 있는 바닥 무기·진열 무기 (없으면 null) */
+  weaponTip: { item: WeaponItem | null };
   /** 이 곡을 튼다 (같은 곡이면 그대로) */
   music: { track: string };
   volumeChanged: Record<string, never>;

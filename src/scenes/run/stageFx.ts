@@ -96,6 +96,31 @@ export class StageFx {
    * 포탈 타기: 게임을 멈추고 캐릭터가 포탈 가운데로 빨려 들어가며(돌며 작아짐) 카메라가 확대된다.
    * 다 들어가면 이동 화면(빛줄기)을 덮고 잠깐 뒤 then (카드 고르기).
    */
+  /** 플레이어 사망: 번쩍인 뒤 쓰러지며 흩어지고, 카메라가 다가간다. 끝나면 then */
+  playDeath(then: () => void): void {
+    const r = this.run;
+    const c = r.ctx.data.juice.playerDeath;
+    const ms = c.sec * 1000;
+    const pl = r.player;
+    r.weaponSprite.setVisible(false);
+    pl.setVelocity(0, 0).setAlpha(1).setTintFill(0xffffff);
+    bus.emit('sfx', { id: 'playerHurt' });
+    bus.emit('sfx', { id: 'panic' });
+    r.cameras.main.flash(c.flashMs, 255, 60, 60);
+    r.cameras.main.shake(c.flashMs * 2, 0.01 / r.ctx.renderScale);
+    r.time.delayedCall(c.flashMs, () => pl.clearTint().setTint(hexColor(c.tint)));
+    for (let i = 0; i < c.shards; i++) {
+      const a = (i / c.shards) * Math.PI * 2;
+      const dist = 16 + (i % 5) * 7;
+      const shard = r.add.rectangle(pl.x, pl.y - 6, 2, 2, hexColor(c.tint)).setDepth(7);
+      r.tweens.add({ targets: shard, x: pl.x + Math.cos(a) * dist, y: pl.y - 6 + Math.sin(a) * dist, alpha: 0, duration: ms * 0.7, ease: 'Quad.easeOut', onComplete: () => shard.destroy() });
+    }
+    r.tweens.add({ targets: pl, angle: pl.flipX ? -90 : 90, duration: ms * 0.35, ease: 'Bounce.easeOut' });
+    r.tweens.add({ targets: pl, alpha: 0.35, delay: ms * 0.45, duration: ms * 0.5 });
+    r.tweens.add({ targets: r.cameras.main, zoom: r.cameras.main.zoom * c.zoom, duration: ms, ease: 'Sine.easeInOut' });
+    r.time.delayedCall(ms, then);
+  }
+
   warpOut(then: () => void): void {
     const p = this.run.ctx.data.juice.portal;
     const portal = this.run.nearest(this.run.portals.map((x) => ({ x: x.sprite.x, y: x.sprite.y })), Infinity) ?? { x: this.run.player.x, y: this.run.player.y };

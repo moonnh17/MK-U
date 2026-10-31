@@ -60,7 +60,7 @@ export interface StatRule {
 }
 
 /** 스탯 표의 태그 외 효과 */
-export const STAT_EFFECT_IDS = ['maxHp', 'damageReduction', 'moveSpeed', 'skillArea', 'energyGain', 'coinGain', 'mentalResist'] as const;
+export const STAT_EFFECT_IDS = ['maxHp', 'damageReduction', 'moveSpeed', 'skillArea', 'energyGain', 'coinGain', 'mentalResist', 'dodgeCooldown'] as const;
 export type StatEffectId = (typeof STAT_EFFECT_IDS)[number];
 
 export interface StatsData {
@@ -402,6 +402,8 @@ export interface ElitesData {
 
 /** 보스 패턴 하나. values의 키Enraged가 있으면 강화 단계에서 그 값을 쓴다 */
 export interface BossPatternDef {
+  /** 근접은 플레이어가 maxRange 안에 있을 때만 쓴다 */
+  reach: 'melee' | 'ranged';
   id: string;
   weight: number;
   cooldownSec: number;
@@ -452,7 +454,7 @@ export interface BossesData {
   /** 보스방 경고 배너 시간 */
   bannerSec: number;
   /** 보스 체력이 everyHpRatio씩 줄 때마다 에너지 구슬 orbs개 */
-  energyDrops: { everyHpRatio: number; orbs: number };
+  energyDrops: { everyHpRatio: number; orbs: number; halfHpOrbs: number };
   bosses: BossDef[];
   hiddenBosses: HiddenBossDef[];
   /** 히든보스 체력·피해 배율 (챕터 번호 → 배율) */
@@ -557,6 +559,8 @@ export interface MapgenData {
   /** otherRooms: 전투 칸 밖의 방에 장애물이 나올 확률 (open 틀만: 가운데가 비어 포털·코어·진열대를 가리지 않는다) */
   obstacles: { chance: number; doorLaneTiles: number; otherRooms: Partial<Record<RoomKind, number>>; layouts: { id: string; weight: number; open?: boolean; blocks: { x: number; y: number; w: number; h: number }[] }[] };
   roomProps: RoomPropsData;
+  /** 전투 없는 조우 칸(보물·상인)이 될 확률과 그 방 크기 */
+  encounterPeaceful: { chance: number; size: string };
 }
 
 export interface PickupsData {
@@ -1274,6 +1278,8 @@ export interface JuiceData {
   /** 잠깐 멈춤(초). 끝난 뒤 minGapSec 동안은 다시 멈추지 않는다 */
   hitStop: { melee: number; crit: number; eliteKill: number; bossKill: number; minGapSec: number };
   /** 처치: 파편, 번쩍임, 보상 구슬이 튀어 나가는 거리·시간 */
+  /** 플레이어 사망 연출 */
+  playerDeath: { sec: number; zoom: number; flashMs: number; tint: string; shards: number };
   death: { shards: IntRange; eliteShards: IntRange; shardSpeed: [number, number]; shardLifeSec: number; shardSize: number; flashSec: number; orbPopPx: [number, number]; orbPopSec: number };
   /** 플레이어 피격: 화면 가장자리 붉은 번쩍임, 낮은 체력 맥박 */
   playerHurt: { flashSec: number; flashAlpha: number; lowHpRatio: number; pulseSec: number; pulseAlpha: number; color: string; edgePx: number };

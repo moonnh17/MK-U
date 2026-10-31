@@ -53,6 +53,24 @@ function gaps(f, cut = 40, minGap = 3) {
 }
 const single = (f) => [load(f)];
 
+const ENEMY_OUTLINE = [255, 36, 36];
+/** 프레임마다 1칸씩 넓혀 그림 둘레에 테두리를 두른다 */
+function outlined(img, fw, fh, n, color) {
+  const out = k.blank((fw + 2) * n, fh + 2);
+  for (let i = 0; i < n; i++) k.paste(out, k.crop(img, i * fw, 0, fw, fh), i * (fw + 2) + 1, 1);
+  const on = (x, y) => x >= 0 && y >= 0 && x < out.w && y < out.h && out.px[(y * out.w + x) * 4 + 3] > 0;
+  const marks = [];
+  for (let y = 0; y < out.h; y++) for (let x = 0; x < out.w; x++) {
+    if (on(x, y)) continue;
+    // 옆 프레임으로 넘어가지 않게 같은 칸 안만 본다
+    const cell = Math.floor(x / (fw + 2));
+    const same = (a) => Math.floor(a / (fw + 2)) === cell;
+    if ((same(x - 1) && on(x - 1, y)) || (same(x + 1) && on(x + 1, y)) || on(x, y - 1) || on(x, y + 1)) marks.push((y * out.w + x) * 4);
+  }
+  for (const o of marks) { out.px[o] = color[0]; out.px[o + 1] = color[1]; out.px[o + 2] = color[2]; out.px[o + 3] = 255; }
+  return out;
+}
+
 /**
  * 프레임들을 같은 칸에 발밑·가운데 맞춰 놓고, 가장 긴 변이 fit px가 되게 같은 배율로 줄여 가로로 잇는다.
  * 반환: { file, frameWidth, frameHeight, frames }
@@ -81,6 +99,11 @@ function sheet(key, frames, fit, opts = {}) {
     k.paste(outImg, small, i * fw, 0);
   });
   const file = `${OUT_DIR}/${key}.png`;
+  if (opts.outline) {
+    const framed = outlined(outImg, fw, fh, frames.length, opts.outline);
+    k.write(path.join(REPO, 'public/assets', file), framed);
+    return { file, frameWidth: fw + 2, frameHeight: fh + 2, frames: frames.length };
+  }
   k.write(path.join(REPO, 'public/assets', file), outImg);
   return { file, frameWidth: fw, frameHeight: fh, frames: frames.length };
 }
@@ -112,6 +135,8 @@ const sprites = {};
 const anim = (n0, n1, fps) => ({ from: n0, to: n1, fps });
 /** idle 프레임 + move 프레임을 한 시트로 */
 function actor(key, idle, move, fit, opts = {}) {
+  // 적은 빨간 테두리로 배경과 확실히 구분한다
+  if (key.startsWith('enemy_')) opts = { ...opts, outline: ENEMY_OUTLINE };
   const s = sheet(key, [...idle, ...move], fit, opts);
   const anims = {};
   if (idle.length) anims.idle = anim(0, idle.length - 1, opts.idleFps ?? 4);
@@ -241,7 +266,7 @@ for (const [key, f] of Object.entries(ITEM)) sprites[key] = icon(key, f, CARD_IC
 // ---------- 방 타일 (terrain.png: 1행 돌, 2행 푸른 기술, 3행 붉은 균열) ----------
 // 3장은 붉은 적이 묻히지 않게 붉은 점이 드문 칸을 더 어둡게
 const TILE_ROW = { 1: [0, 0], 2: [3, 1], 3: [2, 2] };
-const FLOOR_DIM = { 1: 0.6, 2: 0.6, 3: 0.4 };
+const FLOOR_DIM = { 1: 0.45, 2: 0.45, 3: 0.32 };
 for (const [c, [col, row]] of Object.entries(TILE_ROW)) {
   // 바닥은 어둡게 눌러 캐릭터가 잘 보이게, 벽은 바닥보다 밝게
   sprites[`tile_floor_c${c}`] = tile(`tile_floor_c${c}`, col, row, 64, FLOOR_DIM[c]);
@@ -273,7 +298,7 @@ const DECALS = {
   2: [['ruins', 70, 345, 56], ['ruins', 170, 345, 56], ['ruins', 560, 345, 56], ['ruins', 610, 965, 28], ['ruins', 715, 965, 26], ['ruins', 810, 965, 26], ['cave', 720, 995, 34]],
   3: [['ruins', 885, 965, 28], ['ruins', 975, 965, 26], ['ruins', 1075, 965, 22], ['ruins', 1160, 975, 36], ['ruins', 790, 345, 56], ['ruins', 1290, 345, 56], ['cave', 1180, 985, 24]],
 };
-for (const [c, list] of Object.entries(DECALS)) list.forEach(([f, x, y, fit], i) => prop(`decal_c${c}_${i}`, f, x, y, fit, 0.8));
+for (const [c, list] of Object.entries(DECALS)) list.forEach(([f, x, y, fit], i) => prop(`decal_c${c}_${i}`, f, x, y, fit, 0.5));
 // 자판기
 prop('prop_vending', 'ruins', 545, 465, 32);
 // 물약: 원본에 없어 직접 찍는다 (. 투명, o 테두리, g 유리, r 물약, w 빛, c 코르크)

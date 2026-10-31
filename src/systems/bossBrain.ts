@@ -14,6 +14,8 @@ export interface BossPatternRule {
   durationSec: number;
   /** 1 = 처음부터, 2 = 강화 단계부터 */
   phase: 1 | 2;
+  /** 근접 패턴은 플레이어가 가까이 있을 때만(maxRange), 원거리는 어디서나 */
+  reach?: 'melee' | 'ranged';
   /** 플레이어가 이 거리 안일 때만 */
   maxRange?: number;
   /** 시간 단계가 이 값 이상일 때부터 */

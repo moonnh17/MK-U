@@ -57,6 +57,14 @@ export function rollWeapon(
   return { defId: def.id, grade, options: rollOptions(rng, def, count, options) };
 }
 
+/** 전투 없는 유형 */
+const PEACEFUL: ReadonlySet<EncounterKindId> = new Set(['treasure', 'merchant']);
+
+/** 이 조우 칸에서 나올 수 있는 유형: 작은 평화로운 방이면 보물·상인, 아니면 전투 유형 */
+export function encounterPool(kinds: ReadonlySet<EncounterKindId>, peaceful: boolean): Set<EncounterKindId> {
+  return new Set([...kinds].filter((k) => PEACEFUL.has(k) === peaceful));
+}
+
 /** 조우 칸 유형. 아직 만들지 않은 유형(implemented에 없는 것)은 빼고 뽑는다 */
 export function rollEncounter(rng: Rng, weights: Record<EncounterKindId, number>, implemented: ReadonlySet<EncounterKindId>): EncounterKindId {
   const pool = (Object.entries(weights) as [EncounterKindId, number][])

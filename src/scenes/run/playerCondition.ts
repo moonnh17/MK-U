@@ -1,5 +1,6 @@
 /** 플레이어 상태: 회피(점멸·진격), 정신력·패닉, 보스전 에너지 구슬, 피격 깜빡임. */
-import { bossOrbDrops } from '../../systems/bossEnergy';
+import { statEffect } from '../../systems/stats';
+import { bossHalfOrbs, bossOrbDrops } from '../../systems/bossEnergy';
 import { IDLE_DODGE, blinkTarget, dodgeConfig, startDodge, stepDodge, zigzag, type DodgeState } from '../../systems/dodge';
 import Phaser from 'phaser';
 import type { ActionFrame, Vec2 } from '../../core/actions';
@@ -26,11 +27,17 @@ export class PlayerCondition {
   constructor(private readonly run: RunScene) {}
 
   /** 회피 입력·잔상·재사용 막대 */
+  /** 민첩이 재사용을 줄인다 */
+  dodgeCooldownSec(): number {
+    const d = this.run.ctx.data;
+    return d.player.dodge.cooldownSec * (1 - statEffect('dodgeCooldown', this.run.effStats(), d.stats));
+  }
+
   updateDodge(dt: number, frame: ActionFrame): void {
     const c = this.run.ctx.data.player.dodge;
     this.dodge = stepDodge(this.dodge, dt);
     if (frame.pressed.has('dodge') && this.run.dashLeft <= 0) {
-      const started = startDodge(this.dodge.cooldown, frame.move, this.run.aimDir, c);
+      const started = startDodge(this.dodge.cooldown, frame.move, this.run.aimDir, { ...c, cooldownSec: this.dodgeCooldownSec() });
       if (started) {
         this.dodge = started;
         this.dodgeGhostIn = 0;
@@ -42,7 +49,7 @@ export class PlayerCondition {
         }
       }
     }
-    this.run.session.dodgeView = { nameKey: dodgeConfig(c, this.run.session.player.advancement).nameKey, left: this.dodge.cooldown, total: c.cooldownSec };
+    this.run.session.dodgeView = { nameKey: dodgeConfig(c, this.run.session.player.advancement).nameKey, left: this.dodge.cooldown, total: this.dodgeCooldownSec() };
     if (this.dodge.left > 0) {
       this.dodgeGhostIn -= dt;
       if (this.dodgeGhostIn <= 0) {
@@ -56,7 +63,7 @@ export class PlayerCondition {
     this.dodgeBar.clear();
     if (this.dodge.cooldown > 0) {
       const w = 14;
-      const k = 1 - this.dodge.cooldown / c.cooldownSec;
+      const k = 1 - this.dodge.cooldown / this.dodgeCooldownSec();
       const x = this.run.player.x - w / 2;
       const y = this.run.player.y + 7;
       this.dodgeBar.fillStyle(0x000000, 0.6).fillRect(x, y, w, 2).fillStyle(hexColor(c.barColor), 1).fillRect(x, y, w * k, 2);
@@ -157,7 +164,8 @@ export class PlayerCondition {
     const d = this.run.ctx.data;
     for (const e of this.run.bossControllers.keys()) {
       const ratio = e.hp / e.maxHp;
-      const n = bossOrbDrops(this.bossHpSeen.get(e) ?? 1, ratio, d.bosses.energyDrops);
+      const prev = this.bossHpSeen.get(e) ?? 1;
+      const n = bossOrbDrops(prev, ratio, d.bosses.energyDrops) + bossHalfOrbs(prev, ratio, d.bosses.energyDrops);
       this.bossHpSeen.set(e, ratio);
       if (n <= 0) continue;
       const x = (e.sprite.x + this.run.player.x) / 2;

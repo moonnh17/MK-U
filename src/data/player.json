@@ -6,8 +6,8 @@
   "weaponOffset": 1,
   "muzzleMinTargetPx": 12,
   "weaponHand": {
-    "x": -4.5,
-    "y": -6.5
+    "x": 0,
+    "y": -6
   },
   "dodge": {
     "nameKey": "dodge.name",
@@ -17,12 +17,31 @@
     "cooldownSec": 2,
     "schools": {
       "hectar": {
-        "kind": "blink", "nameKey": "dodge.hectar", "descKey": "dodge.hectar.desc",
-        "distancePx": 48, "invulnSec": 0.2, "stepPx": 4, "boltColor": "#9fd8ff", "boltSec": 0.22, "boltSegments": 7, "boltAmpPx": 7
+        "kind": "blink",
+        "nameKey": "dodge.hectar",
+        "descKey": "dodge.hectar.desc",
+        "distancePx": 48,
+        "invulnSec": 0.2,
+        "stepPx": 4,
+        "boltColor": "#9fd8ff",
+        "boltSec": 0.22,
+        "boltSegments": 7,
+        "boltAmpPx": 7
       },
       "acro": {
-        "kind": "shot", "nameKey": "dodge.acro", "descKey": "dodge.acro.desc",
-        "shots": 3, "spreadDeg": 30, "damage": 6, "projectileSpeed": 260, "range": 170, "tags": ["magic", "ranged"], "tint": "#ff5a64"
+        "kind": "shot",
+        "nameKey": "dodge.acro",
+        "descKey": "dodge.acro.desc",
+        "shots": 3,
+        "spreadDeg": 30,
+        "damage": 6,
+        "projectileSpeed": 260,
+        "range": 170,
+        "tags": [
+          "magic",
+          "ranged"
+        ],
+        "tint": "#ff5a64"
       }
     },
     "ghostEverySec": 0.04,
@@ -31,7 +50,7 @@
   "sanity": {
     "base": 50,
     "perWillpower": 5,
-    "regenPerSec": 2,
+    "regenPerSec": 1,
     "bossDrainPerSec": 1,
     "panic": {
       "regenPerSec": 4,
@@ -44,7 +63,10 @@
       "shakeIntensity": 0.004,
       "lines": 9,
       "lineEverySec": 0.09,
-      "lineWidthPx": [1, 3],
+      "lineWidthPx": [
+        1,
+        3
+      ],
       "lineSegments": 6,
       "lineAmpPx": 14,
       "lineAlpha": 0.9,

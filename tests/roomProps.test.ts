@@ -31,7 +31,7 @@ describe('방 소품 배치', () => {
   it('보스방에는 상자·석상이 없고, 시작 방에 석상이 없다', () => {
     expect(P.rules.bossRoom!.crates).toEqual([0, 0]);
     expect(P.rules.bossRoom!.statueChance).toBe(0);
-    expect(P.rules.startRoom!.statueChance).toBe(0);
+    expect(P.rules.startRoom).toBeUndefined();
   });
   it('내구도', () => {
     expect(damageProp(5, 2)).toEqual({ hp: 3, broken: false });
@@ -53,9 +53,9 @@ describe('늘어난 지형지물', () => {
   it('배치 틀이 14종이다', () => {
     expect(D.obstacles.layouts).toHaveLength(14);
   });
-  it('조우·출구 방에도 장애물이 나오되 가운데가 비는 틀만 쓴다', () => {
+  it('싸우는 조우 칸에도 장애물이 나오되 가운데가 비는 틀만 쓴다', () => {
     const open = new Set(D.obstacles.layouts.filter((l) => l.open).map((l) => l.id));
-    for (const kind of ['encounterRoom', 'exitRoom'] as const) {
+    for (const kind of ['encounterRoom'] as const) {
       const seen = new Set<string>();
       for (let seed = 1; seed < 200; seed++) {
         const s = pickRoomShape(new Rng(seed), kind, D);
@@ -68,7 +68,7 @@ describe('늘어난 지형지물', () => {
     }
   });
   it('가운데가 비는 틀: 모든 크기에서 가운데(상인 진열대 폭 포함)가 비고 끊기지 않는다', () => {
-    const used = new Set([...D.roomSizeRules.encounterRoom, ...D.roomSizeRules.exitRoom].map((r) => r.size));
+    const used = new Set([...D.roomSizeRules.encounterRoom].map((r) => r.size));
     for (const l of D.obstacles.layouts.filter((x) => x.open)) {
       for (const s of D.roomSizes.filter((x) => used.has(x.id))) {
         const iw = s.w - 2;

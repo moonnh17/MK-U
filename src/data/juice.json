@@ -223,5 +223,12 @@
     "chargeSec": 3,
     "particles": 280,
     "burstHoldSec": 0.9
+  },
+  "playerDeath": {
+    "sec": 1.5,
+    "zoom": 1.35,
+    "flashMs": 140,
+    "tint": "#ff3a3a",
+    "shards": 22
   }
 }

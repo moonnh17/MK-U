@@ -110,12 +110,8 @@
     ],
     "exitRoom": [
       {
-        "size": "small",
+        "size": "starter",
         "weight": 1
-      },
-      {
-        "size": "medium",
-        "weight": 2
       }
     ],
     "combatRoom": [
@@ -568,8 +564,7 @@
       }
     ],
     "otherRooms": {
-      "encounterRoom": 0.6,
-      "exitRoom": 0.5
+      "encounterRoom": 0.6
     }
   },
   "dressing": {
@@ -582,8 +577,8 @@
     "obstacleStepPx": 16,
     "decalKinds": 7,
     "decalsPerRoom": [
-      8,
-      16
+      2,
+      5
     ],
     "decalColor": "#2a2d36",
     "obstacleBaseColor": "#0c0e14"
@@ -611,17 +606,6 @@
     "centerClearPx": 44,
     "edgeInsetPx": 14,
     "rules": {
-      "startRoom": {
-        "crates": [
-          1,
-          2
-        ],
-        "barrels": [
-          0,
-          1
-        ],
-        "statueChance": 0
-      },
       "combatRoom": {
         "crates": [
           2,
@@ -643,17 +627,6 @@
           1
         ],
         "statueChance": 0.25
-      },
-      "exitRoom": {
-        "crates": [
-          1,
-          2
-        ],
-        "barrels": [
-          0,
-          0
-        ],
-        "statueChance": 0.15
       },
       "bossRoom": {
         "crates": [
@@ -741,5 +714,9 @@
         "bossRoom": "#ff6b6b"
       }
     }
+  },
+  "encounterPeaceful": {
+    "chance": 0.56,
+    "size": "starter"
   }
 }

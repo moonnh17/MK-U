@@ -14,6 +14,7 @@ import { sfx, type Prop, type Vending } from './shared';
 
 export class LootInteract {
   floorWeapons: FloorWeapon[] = [];
+  private tipItem: WeaponItem | null = null;
   chests: Chest[] = [];
   stands: MerchantStand[] = [];
   vendings: Vending[] = [];
@@ -191,6 +192,12 @@ export class LootInteract {
   }
 
   updateInteractHint(): void {
+    // 앞에 있는 무기의 정보를 화면 아래에
+    const tip = this.nearestFloorWeapon()?.item ?? this.nearStand()?.stock.weapon ?? null;
+    if (tip !== this.tipItem) {
+      this.tipItem = tip;
+      bus.emit('weaponTip', { item: tip });
+    }
     const vending = this.nearVending();
     const portal = this.nearPortal();
     const statue = this.run.roomProps.nearStatue();

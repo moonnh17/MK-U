@@ -7,6 +7,11 @@ export interface BossEnergyRule {
   orbs: number;
 }
 
+/** 체력이 처음 절반 아래로 내려가는 순간의 추가 구슬 */
+export function bossHalfOrbs(prevRatio: number, ratio: number, r: { halfHpOrbs: number }): number {
+  return prevRatio > 0.5 && ratio <= 0.5 ? r.halfHpOrbs : 0;
+}
+
 export function bossOrbDrops(prevRatio: number, ratio: number, r: BossEnergyRule): number {
   if (ratio >= prevRatio) return 0;
   const steps = (v: number) => Math.ceil(v / r.everyHpRatio - 1e-9);

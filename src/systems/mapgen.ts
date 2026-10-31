@@ -27,6 +27,8 @@ export interface RoomNode {
   size?: { w: number; h: number };
   /** 장애물 배치 틀 id (없으면 null) */
   layout?: string | null;
+  /** 조우 칸: 전투 없는 유형(보물·상인)만 나온다. 작고 소품이 없다 */
+  peaceful?: boolean;
 }
 
 export interface StageMap {
@@ -64,6 +66,12 @@ export function generateStage(seed: number, chapter: number, stage: number, data
         const s = pickRoomShape(shapeRng, n.kind, data);
         n.size = { w: s.w, h: s.h };
         n.layout = s.layout;
+        if (n.kind === 'encounterRoom' && shapeRng.chance(data.encounterPeaceful.chance)) {
+          const small = data.roomSizes.find((x) => x.id === data.encounterPeaceful.size)!;
+          n.peaceful = true;
+          n.size = { w: small.w, h: small.h };
+          n.layout = null;
+        }
       }
       return map;
     }

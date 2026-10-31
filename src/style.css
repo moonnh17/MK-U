@@ -1583,3 +1583,412 @@ body {
 #card-window .cw-name {
   color: #fff;
 }
+
+/* 바닥 무기 안내 */
+#weapon-tip {
+  position: fixed;
+  left: 50%;
+  bottom: 26%;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: none;
+  gap: 10px;
+  align-items: center;
+  max-width: min(460px, 92vw);
+  padding: 8px 12px;
+  background: rgba(9, 13, 20, 0.92);
+  border: 2px solid #fff;
+  border-radius: 8px;
+  color: #eef2f7;
+  font-family: sans-serif;
+  pointer-events: none;
+}
+.wt-icon {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  background-color: #05080d;
+  border-radius: 6px;
+}
+.wt-name {
+  font-size: 15px;
+  font-weight: bold;
+}
+.wt-line {
+  font-size: 13px;
+  line-height: 1.35;
+}
+.wt-line.sig {
+  color: #ffd98a;
+}
+
+/* 캐릭터 정보창 */
+#inventory-window {
+  justify-content: flex-start;
+  background: rgba(5, 8, 12, 0.95);
+  overflow-y: auto;
+}
+#inventory-window .iw-head {
+  width: min(1180px, 100%);
+  flex-shrink: 0;
+}
+.iw-sheet {
+  width: min(1180px, 100%);
+  display: grid;
+  grid-template-columns: minmax(250px, 1fr) minmax(280px, 1.15fr) minmax(320px, 1.35fr);
+  gap: 10px;
+  align-items: start;
+}
+#inventory-window.mobile .iw-sheet {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+.iw-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.iw-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  padding: 10px;
+  background: #101722;
+  border: 1px solid #3a4a60;
+  border-radius: 8px;
+}
+.iw-panel-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffe6a8;
+  border-bottom: 1px solid #3a4a60;
+  padding-bottom: 5px;
+}
+.iw-hero {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.iw-face {
+  flex-shrink: 0;
+  width: 84px;
+  height: 84px;
+  background-color: #05080d;
+  border: 2px solid #3a4a60;
+  border-radius: 8px;
+}
+.iw-job {
+  font-size: 17px;
+  font-weight: bold;
+}
+.iw-adv {
+  font-size: 13px;
+  color: #c4ccd8;
+}
+.iw-coins {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #cdb0ff;
+}
+.iw-meter {
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+}
+.iw-meter-track {
+  height: 9px;
+  background: #05080d;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.iw-meter-track i {
+  display: block;
+  height: 100%;
+}
+.iw-meter b {
+  font-weight: normal;
+  color: #eef2f7;
+}
+.iw-weapons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.iw-weaponcard {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px;
+  background: #0a1018;
+  border: 1px solid #3a4a60;
+  border-radius: 6px;
+}
+.iw-weaponcard.holding {
+  box-shadow: 0 0 0 1px #ffd23f inset;
+}
+.iw-weaponcard small {
+  color: #9aa6b6;
+  font-size: 11px;
+}
+.iw-weapontop {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.iw-weaponicon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  background-color: #05080d;
+  border-radius: 4px;
+}
+.iw-statrow {
+  display: flex;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #1e2a3a;
+}
+.iw-statrow:last-child {
+  border-bottom: none;
+}
+.iw-staticon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+}
+.iw-statmain {
+  flex: 1;
+  min-width: 0;
+}
+.iw-stattop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+}
+.iw-statname {
+  font-size: 15px;
+  font-weight: bold;
+}
+.iw-stattop > b {
+  font-size: 17px;
+  color: #fff;
+}
+.iw-stattop small {
+  font-size: 11px;
+  font-weight: normal;
+}
+.iw-stattop small.up {
+  color: #7fe08a;
+}
+.iw-stattop small.down {
+  color: #ff8a8a;
+}
+.iw-statdesc {
+  font-size: 12px;
+  color: #aeb8c6;
+  line-height: 1.35;
+}
+.iw-statfx {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 3px;
+}
+.iw-statfx span {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 9px;
+  background: #1c2a3c;
+  color: #cfe0f4;
+}
+#inventory-window .iw-skills .iw-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#inventory-window .iw-skills .iw-slot {
+  flex: 1 1 74px;
+  min-width: 74px;
+  min-height: 92px;
+  padding: 4px;
+  text-align: center;
+}
+#inventory-window .iw-skill {
+  padding: 3px;
+  text-align: center;
+}
+.iw-skillicon {
+  display: block;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 2px;
+  border-radius: 4px;
+}
+#inventory-window .iw-skills .iw-name {
+  font-size: 12px;
+  line-height: 1.2;
+}
+#inventory-window .iw-lv,
+#inventory-window .iw-req {
+  font-size: 10px;
+}
+.iw-itemgrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.iw-itemcell {
+  width: 48px;
+  height: 48px;
+  padding: 2px;
+  background: #05080d;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.iw-itemcell span {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+#inventory-window .iw-detail {
+  min-height: 92px;
+  padding: 8px;
+  background: #0a1018;
+  border: 1px solid #3a4a60;
+  border-radius: 6px;
+}
+#inventory-window .iw-desc {
+  font-size: 13px;
+  line-height: 1.4;
+}
+#inventory-window.mobile {
+  padding: 6px 10px;
+}
+
+/* 결산 */
+#settlement {
+  gap: 10px;
+}
+.st-banner {
+  width: min(1100px, 100%);
+  flex-shrink: 0;
+  padding: 8px 0;
+  text-align: center;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+}
+.st-banner b {
+  font-size: 30px;
+  letter-spacing: 6px;
+}
+.st-banner.dead {
+  color: #ff6a6a;
+  border-color: #7a2230;
+  background: linear-gradient(90deg, transparent, rgba(122, 34, 48, 0.45), transparent);
+}
+.st-banner.clear {
+  color: #ffe08a;
+  border-color: #8a6a22;
+  background: linear-gradient(90deg, transparent, rgba(138, 106, 34, 0.45), transparent);
+}
+#settlement .st-body {
+  width: min(1100px, 100%);
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.3fr) minmax(240px, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+#settlement.mobile .st-body {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+#settlement .st-col {
+  width: auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.st-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px;
+  background: #101722;
+  border: 1px solid #3a4a60;
+  border-radius: 8px;
+}
+.st-hero b {
+  font-size: 18px;
+}
+.st-heroface {
+  width: 120px;
+  height: 120px;
+  background-color: #05080d;
+  border-radius: 8px;
+}
+.st-heroface.dead {
+  filter: grayscale(0.85) brightness(0.75);
+}
+.st-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.st-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 7px 2px;
+  background: #101722;
+  border: 1px solid #3a4a60;
+  border-radius: 6px;
+}
+.st-tile b {
+  font-size: 20px;
+  color: #fff;
+}
+.st-tile span {
+  font-size: 11px;
+  color: #aeb8c6;
+}
+.st-mini {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #aeb8c6;
+}
+.st-icons,
+#settlement .st-bosses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.st-iconcell {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  padding: 2px;
+  box-sizing: border-box;
+  background: #05080d;
+  border: 2px solid #3a4a60;
+  border-radius: 6px;
+}
+.st-iconcell span {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.st-iconcell small {
+  position: absolute;
+  right: 1px;
+  bottom: 0;
+  font-size: 10px;
+  color: #ffd23f;
+  text-shadow: 0 0 2px #000, 0 0 2px #000;
+}

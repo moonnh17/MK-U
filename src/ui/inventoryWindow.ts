@@ -1,22 +1,24 @@
 /**
- * 인벤토리 (DOM). 열려 있는 동안 게임은 멈춘다.
- * 스킬 탭: 장착 4칸 + 패시브 1칸 + 궁극기(고정) + 보관 목록. 각 스킬의 Lv·각성·요구 스탯 진행도.
- *   교체: 끌어다 놓기(PC) 또는 스킬 탭 → 칸 탭(모바일·PC 공통).
- * 아이템 탭: 무기 2칸(버리기), 얻은 아이템, 현재 버프, 코인, 현재 스탯 6종.
+ * 캐릭터 정보창 (DOM). 열려 있는 동안 게임은 멈춘다. RPG 정보창처럼 한 화면에 모은다.
+ * 왼쪽: 캐릭터(모습·체력·정신력·에너지·무기·버프) / 가운데: 능력치 6종과 그 의미·지금 효과 /
+ * 오른쪽: 스킬(장착 4칸 + 패시브 + 궁극기 + 보관), 아이템, 설명 칸.
+ * 스킬 교체: 끌어다 놓기(PC) 또는 스킬 탭 → 칸 탭. 모바일은 화면이 낮아 세 칸을 탭으로 나눈다.
  */
 import { applyArtIcon } from './artIcon';
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { conversionLines } from './cutscenePages';
-import { gradeMultiplier } from '../systems/damage';
+import { artKeys } from '../systems/art';
+import { statSheetLines } from '../systems/statSheet';
+import { weaponInfoLines } from './weaponInfo';
 import { findSkill, skillValues, storedSkills } from '../systems/skills';
 import { skillTags, tagBadges } from '../systems/tags';
-import { emptyHanded, weaponStats, type WeaponItem } from '../systems/weapons';
+import { emptyHanded, type WeaponItem } from '../systems/weapons';
 import { STAT_IDS, type TagId } from '../types/data';
 import { itemDescParams } from './itemCard';
 
 type Target = number | 'passive';
-type Tab = 'skill' | 'items';
+type Tab = 'character' | 'skill' | 'items';
 
 const DRAG_START_PX = 6;
 
@@ -30,7 +32,7 @@ export class InventoryWindow {
   private detailEl: HTMLDivElement | null = null;
   private drag: { id: string; x: number; y: number; ghost: HTMLDivElement | null } | null = null;
   private noticeTimer = 0;
-  private tab: Tab = 'skill';
+  private tab: Tab = 'character';
 
   constructor(private readonly ctx: GameContext) {
     this.root = document.createElement('div');
@@ -62,42 +64,165 @@ export class InventoryWindow {
 
   private render(): void {
     const t = this.ctx.t;
-    const d = this.ctx.data;
     const p = this.ctx.session?.player;
     if (!p) return;
+    const mobile = this.ctx.uiMode === 'mobile';
     this.root.className = this.ctx.uiMode;
     this.root.replaceChildren();
+    this.detailEl = null;
 
     const head = document.createElement('div');
     head.className = 'iw-head';
     const title = document.createElement('b');
-    title.textContent = t('inventory.title');
-    const tabs = document.createElement('div');
-    tabs.className = 'iw-tabs';
-    for (const id of ['skill', 'items'] as const) {
-      const b = document.createElement('button');
-      b.textContent = t(`inventory.tab.${id}`);
-      b.classList.toggle('on', this.tab === id);
-      b.addEventListener('click', () => {
-        this.tab = id;
-        this.selected = null;
-        this.render();
-      });
-      tabs.appendChild(b);
-    }
+    title.textContent = t('inventory.character');
     const close = document.createElement('button');
     close.textContent = t('inventory.close');
     close.addEventListener('click', () => bus.emit('inventoryCloseRequest', {}));
-    head.append(title, tabs, close);
-    if (this.tab === 'items') {
-      this.root.append(head, this.itemsTab());
-      return;
+    head.appendChild(title);
+    if (mobile) {
+      const tabs = document.createElement('div');
+      tabs.className = 'iw-tabs';
+      for (const id of ['character', 'skill', 'items'] as const) {
+        const b = document.createElement('button');
+        b.textContent = t(`inventory.tab.${id}`);
+        b.classList.toggle('on', this.tab === id);
+        b.addEventListener('click', () => {
+          this.tab = id;
+          this.selected = null;
+          this.render();
+        });
+        tabs.appendChild(b);
+      }
+      head.appendChild(tabs);
     }
+    head.appendChild(close);
 
-    const hint = document.createElement('div');
-    hint.className = 'iw-hint';
-    hint.textContent = t('inventory.hint');
+    const body = document.createElement('div');
+    body.className = 'iw-sheet';
+    if (mobile) {
+      if (this.tab === 'character') body.append(this.characterPanel(), this.statsPanel());
+      else if (this.tab === 'skill') body.append(this.skillPanel());
+      else body.append(this.itemPanel());
+    } else {
+      const right = document.createElement('div');
+      right.className = 'iw-col iw-col-right';
+      right.append(this.skillPanel(), this.itemPanel());
+      body.append(this.characterPanel(), this.statsPanel(), right);
+    }
+    this.root.append(head, body);
+    this.refreshDetail();
+  }
 
+  private panel(titleText: string, cls = ''): HTMLDivElement {
+    const el = document.createElement('div');
+    el.className = `iw-panel ${cls}`;
+    const h = document.createElement('div');
+    h.className = 'iw-panel-title';
+    h.textContent = titleText;
+    el.appendChild(h);
+    return el;
+  }
+
+  /** 체력·정신력·에너지 막대 */
+  private meter(label: string, value: number, max: number, color: string): HTMLDivElement {
+    const row = document.createElement('div');
+    row.className = 'iw-meter';
+    const name = document.createElement('span');
+    name.textContent = label;
+    const track = document.createElement('div');
+    track.className = 'iw-meter-track';
+    const fill = document.createElement('i');
+    fill.style.width = `${max > 0 ? Math.min(100, (value / max) * 100) : 0}%`;
+    fill.style.background = color;
+    track.appendChild(fill);
+    const num = document.createElement('b');
+    num.textContent = `${Math.ceil(value)} / ${Math.round(max)}`;
+    row.append(name, track, num);
+    return row;
+  }
+
+  /** 왼쪽: 캐릭터 모습과 상태, 무기 */
+  private characterPanel(): HTMLDivElement {
+    const t = this.ctx.t;
+    const d = this.ctx.data;
+    const s = this.ctx.session!;
+    const p = s.player;
+    const el = this.panel(t('inventory.tab.character'), 'iw-char');
+    const job = d.jobs.jobs.find((j) => j.id === p.job);
+    const adv = job?.advancements.find((a) => a.id === p.advancement);
+    const hero = document.createElement('div');
+    hero.className = 'iw-hero';
+    const face = document.createElement('span');
+    face.className = 'iw-face';
+    const schoolKey = p.advancement ? artKeys.playerSchool(p.advancement) : null;
+    applyArtIcon(face, this.ctx, schoolKey && this.ctx.artLoaded.has(schoolKey) ? schoolKey : d.player.spriteKey, d.player.color);
+    const who = document.createElement('div');
+    who.className = 'iw-who';
+    who.append(this.line('iw-job', job ? t(job.nameKey) : p.job), this.line('iw-adv', adv ? t(adv.nameKey) : t('settlement.noAdv'), adv?.color), this.line('iw-coins', t('inventory.coins', { coins: Math.floor(p.coins) })));
+    hero.append(face, who);
+    const bars = d.ui.hud.bars;
+    el.append(hero, this.meter(t('inventory.hp'), p.hp, p.maxHp, bars.hpColor), this.meter(t('inventory.sanity'), p.sanity, p.sanityMax, bars.sanityColor), this.meter(t('inventory.energy'), p.energy, p.energyMax, bars.energyColor));
+
+    const weapons = document.createElement('div');
+    weapons.className = 'iw-weapons';
+    ([0, 1] as const).forEach((i) => weapons.appendChild(this.weaponCard(i, p.weapons.slots[i], p.weapons.active === i)));
+    el.append(this.line('iw-sub', t('inventory.weapons')), weapons);
+    if (emptyHanded(p.weapons)) {
+      const fist = d.weapons.weapons.find((w) => w.id === d.weapons.fistWeapon)!;
+      el.appendChild(this.line('iw-hint', t('inventory.emptyHands', { fist: t(fist.nameKey) })));
+    }
+    el.append(this.line('iw-sub', t('inventory.buffs')), this.line('iw-desc', s.buffs.length ? s.buffs.map((b) => `${b.label} ${Math.ceil(b.leftSec)}`).join(' · ') : t('inventory.noBuffs')));
+    return el;
+  }
+
+  /** 가운데: 능력치 — 값, 무슨 뜻인지, 지금 얼마나 효과를 주는지 */
+  private statsPanel(): HTMLDivElement {
+    const t = this.ctx.t;
+    const d = this.ctx.data;
+    const s = this.ctx.session!;
+    const el = this.panel(t('inventory.statsTitle'), 'iw-statsheet');
+    for (const id of STAT_IDS) {
+      const row = document.createElement('div');
+      row.className = 'iw-statrow';
+      const icon = document.createElement('span');
+      icon.className = 'iw-staticon';
+      applyArtIcon(icon, this.ctx, artKeys.statIcon(id));
+      const main = document.createElement('div');
+      main.className = 'iw-statmain';
+      const top = document.createElement('div');
+      top.className = 'iw-stattop';
+      const value = Math.round(s.effStats[id] * 10) / 10;
+      const bonus = Math.round((value - s.player.stats[id]) * 10) / 10;
+      const num = document.createElement('b');
+      num.textContent = String(value);
+      if (bonus !== 0) {
+        const extra = document.createElement('small');
+        extra.textContent = ` (${s.player.stats[id]} ${bonus > 0 ? '+' : ''}${bonus})`;
+        extra.className = bonus > 0 ? 'up' : 'down';
+        num.appendChild(extra);
+      }
+      top.append(this.line('iw-statname', t(`stat.${id}`)), num);
+      main.append(top, this.line('iw-statdesc', t(`stat.${id}.desc`)));
+      const fx = document.createElement('div');
+      fx.className = 'iw-statfx';
+      for (const l of statSheetLines(id, s.effStats, d.stats, d.tags, d.player.sanity)) {
+        const chip = document.createElement('span');
+        chip.textContent = t(l.key, { v: l.value });
+        fx.appendChild(chip);
+      }
+      main.appendChild(fx);
+      row.append(icon, main);
+      el.appendChild(row);
+    }
+    return el;
+  }
+
+  /** 오른쪽 위: 스킬 칸과 보관 목록 */
+  private skillPanel(): HTMLDivElement {
+    const t = this.ctx.t;
+    const d = this.ctx.data;
+    const p = this.ctx.session!.player;
+    const el = this.panel(t('inventory.skills'), 'iw-skills');
     const equipRow = document.createElement('div');
     equipRow.className = 'iw-row';
     p.loadout.active.forEach((id, i) => equipRow.appendChild(this.slot(t('inventory.active') + ` ${i + 1}`, id, i)));
@@ -105,160 +230,101 @@ export class InventoryWindow {
     const ult = d.ultimates.ultimates.find((u) => u.id === p.ultimate.id);
     const ultEl = document.createElement('div');
     ultEl.className = 'iw-slot fixed';
-    ultEl.innerHTML = '<small></small><div class="iw-name"></div>';
-    ultEl.querySelector('small')!.textContent = t('inventory.ultimate');
-    ultEl.querySelector('.iw-name')!.textContent = ult ? t(p.ultimate.awakened && ult.awakening ? ult.awakening.nameKey : ult.nameKey) : '';
+    const ultSmall = document.createElement('small');
+    ultSmall.textContent = t('inventory.ultimate');
+    ultEl.appendChild(ultSmall);
+    if (ult) {
+      const icon = document.createElement('span');
+      icon.className = 'iw-skillicon';
+      applyArtIcon(icon, this.ctx, artKeys.ultimateIcon(ult.id));
+      ultEl.append(icon, this.line('iw-name', t(p.ultimate.awakened && ult.awakening ? ult.awakening.nameKey : ult.nameKey)));
+    }
     ultEl.addEventListener('click', () => this.showDetail('ultimate'));
     ultEl.addEventListener('mouseenter', () => this.showDetail('ultimate'));
     equipRow.appendChild(ultEl);
-
-    const storedTitle = document.createElement('div');
-    storedTitle.className = 'iw-sub';
-    storedTitle.textContent = t('inventory.stored');
     const storedRow = document.createElement('div');
     storedRow.className = 'iw-row stored';
     const stored = storedSkills(p.loadout);
-    if (stored.length === 0) {
-      const none = document.createElement('div');
-      none.className = 'iw-none';
-      none.textContent = t('inventory.none');
-      storedRow.appendChild(none);
-    }
+    if (stored.length === 0) storedRow.appendChild(this.line('iw-none', t('inventory.none')));
     for (const id of stored) storedRow.appendChild(this.skillCard(id));
-
-    this.detailEl = document.createElement('div');
-    this.detailEl.className = 'iw-detail';
-    this.root.append(head, hint, equipRow, storedTitle, storedRow, this.detailEl);
-    this.showDetail(this.detailId ?? this.selected ?? p.loadout.active.find((x) => x !== null) ?? null);
+    el.append(equipRow, this.line('iw-sub', t('inventory.stored')), storedRow, this.line('iw-hint', t('inventory.hint')));
+    if (this.ctx.uiMode === 'mobile') el.appendChild(this.makeDetail());
     // 전직 후 스킬 변환 기록
     if (p.advancementLog) {
-      const logTitle = document.createElement('div');
-      logTitle.className = 'iw-sub';
-      logTitle.textContent = t('inventory.advancementLog', { adv: t(`job.adv.${p.advancementLog.school}`) });
-      const logBody = document.createElement('div');
-      logBody.className = 'iw-log';
-      logBody.textContent = conversionLines(p.advancementLog, this.ctx).join(' · ');
-      this.root.append(logTitle, logBody);
+      el.append(this.line('iw-sub', t('inventory.advancementLog', { adv: t(`job.adv.${p.advancementLog.school}`) })), this.line('iw-log', conversionLines(p.advancementLog, this.ctx).join(' · ')));
     }
+    return el;
   }
 
-  /** 아이템 탭 */
-  private itemsTab(): HTMLDivElement {
+  /** 오른쪽 아래: 아이템 아이콘 + 설명 칸 */
+  private itemPanel(): HTMLDivElement {
     const t = this.ctx.t;
     const d = this.ctx.data;
-    const s = this.ctx.session!;
-    const p = s.player;
-    const body = document.createElement('div');
-    body.className = 'iw-items';
-    const section = (titleText: string, ...children: HTMLElement[]) => {
-      const sec = document.createElement('div');
-      sec.className = 'iw-sec';
-      const h = document.createElement('div');
-      h.className = 'iw-sub';
-      h.textContent = titleText;
-      sec.append(h, ...children);
-      return sec;
-    };
-    const line = (cls: string, text: string, color?: string) => {
-      const el = document.createElement('div');
-      el.className = cls;
-      el.textContent = text;
-      if (color) el.style.color = color;
-      return el;
-    };
-
-    // 무기 2칸
-    const weapons = document.createElement('div');
-    weapons.className = 'iw-row';
-    ([0, 1] as const).forEach((i) => weapons.appendChild(this.weaponCard(i, p.weapons.slots[i], p.weapons.active === i)));
-    const wsec = section(t('inventory.weapons'), weapons);
-    if (emptyHanded(p.weapons)) {
-      const fist = d.weapons.weapons.find((w) => w.id === d.weapons.fistWeapon)!;
-      wsec.appendChild(line('iw-hint', t('inventory.emptyHands', { fist: t(fist.nameKey) })));
-    }
-
-    // 얻은 아이템
-    const list = document.createElement('div');
-    list.className = 'iw-itemlist';
-    if (p.items.length === 0) list.appendChild(line('iw-none', t('inventory.noItems')));
+    const p = this.ctx.session!.player;
+    const el = this.panel(t('inventory.items'), 'iw-itemspanel');
+    const grid = document.createElement('div');
+    grid.className = 'iw-itemgrid';
+    if (p.items.length === 0) grid.appendChild(this.line('iw-none', t('inventory.noItems')));
     for (const id of p.items) {
       const def = d.items.items.find((x) => x.id === id);
       if (!def) continue;
       const grade = d.groupMultipliers.grades.find((g) => g.id === def.grade);
-      const el = document.createElement('div');
-      el.className = 'iw-item';
-      const name = document.createElement('div');
-      name.className = 'iw-name';
+      const cell = document.createElement('button');
+      cell.className = 'iw-itemcell';
+      cell.style.borderColor = grade?.color ?? '#ffffff';
+      cell.title = t(def.nameKey);
       const icon = document.createElement('span');
-      icon.className = 'cw-icon';
       applyArtIcon(icon, this.ctx, def.spriteKey, def.color);
-      name.append(icon, t(def.nameKey));
-      name.style.color = grade?.color ?? '#ffffff';
-      el.append(name, line('iw-grade', grade ? t(grade.nameKey) : ''), line('iw-desc', t(def.descKey, itemDescParams(def, d.groupMultipliers))));
-      list.appendChild(el);
+      cell.appendChild(icon);
+      const show = () => this.showDetail(`item:${id}`);
+      cell.addEventListener('click', show);
+      cell.addEventListener('mouseenter', show);
+      grid.appendChild(cell);
     }
-
-    // 버프 · 코인 · 스탯
-    const buffs = line('iw-desc', s.buffs.length ? s.buffs.map((b) => `${b.label} ${Math.ceil(b.leftSec)}`).join(' · ') : t('inventory.noBuffs'));
-    const stats = document.createElement('div');
-    stats.className = 'iw-stats';
-    for (const id of STAT_IDS) stats.appendChild(line('iw-stat', `${t(`stat.${id}`)} ${Math.round(s.effStats[id] * 10) / 10}`));
-    const status = document.createElement('div');
-    status.className = 'iw-status';
-    status.append(
-      section(t('inventory.buffs'), buffs),
-      section(t('inventory.coins', { coins: Math.floor(p.coins) })),
-      section(t('inventory.stats'), stats),
-    );
-
-    body.append(wsec, section(t('inventory.items'), list), status);
-    return body;
+    el.append(grid, this.makeDetail());
+    return el;
   }
 
-  /** 무기 한 칸: 이름·등급·수치·옵션·고유 효과·장착 보너스 + 버리기 */
+  private makeDetail(): HTMLDivElement {
+    this.detailEl = document.createElement('div');
+    this.detailEl.className = 'iw-detail';
+    return this.detailEl;
+  }
+
+  /** 다시 그린 뒤 설명 칸을 채운다 */
+  private refreshDetail(): void {
+    if (!this.detailEl) return;
+    const p = this.ctx.session?.player;
+    this.showDetail(this.detailId ?? this.selected ?? p?.loadout.active.find((x) => x !== null) ?? null);
+  }
+
+  /** 무기 한 칸: 아이콘·이름·등급·수치·옵션·고유 효과·장착 보너스 + 버리기 */
   private weaponCard(slot: 0 | 1, item: WeaponItem | null, holding: boolean): HTMLDivElement {
     const t = this.ctx.t;
     const d = this.ctx.data;
     const el = document.createElement('div');
-    el.className = 'iw-slot iw-weapon';
+    el.className = 'iw-weaponcard';
+    el.classList.toggle('holding', holding && !!item);
     const small = document.createElement('small');
     small.textContent = t('inventory.slot', { n: slot + 1 }) + (holding && item ? ` · ${t('inventory.holding')}` : '');
     el.appendChild(small);
     if (!item) {
-      const empty = document.createElement('div');
-      empty.className = 'iw-empty';
-      empty.textContent = t('inventory.empty');
-      el.appendChild(empty);
+      el.appendChild(this.line('iw-empty', t('inventory.empty')));
       return el;
     }
     const def = d.weapons.weapons.find((w) => w.id === item.defId)!;
     const grade = d.groupMultipliers.grades.find((g) => g.id === item.grade);
-    const st = weaponStats(def, item, gradeMultiplier(item.grade, d.groupMultipliers));
-    const add = (cls: string, text: string, color?: string) => {
-      const x = document.createElement('div');
-      x.className = cls;
-      x.textContent = text;
-      if (color) x.style.color = color;
-      el.appendChild(x);
-    };
-    add('iw-name', t(def.nameKey), grade?.color);
-    add('iw-grade', grade ? t(grade.nameKey) : '');
-    add('iw-desc', t('inventory.weaponStats', { damage: Math.round(st.damage * 10) / 10, interval: Math.round(st.fireIntervalSec * 100) / 100, energy: st.energyCost }));
-    for (const o of item.options) {
-      const odef = d.weapons.options.find((x) => x.id === o.id);
-      if (odef) add('iw-desc', t(odef.nameKey, { value: o.id === 'energyCost' ? o.value : Math.round(o.value * 100) }));
-    }
-    const sig = def.signature;
-    if (sig) {
-      const params: Record<string, string | number> = { every: sig.every };
-      if (sig.kind !== 'space') params.dmg = sig.damageMul;
-      if (sig.kind === 'bigSmash') params.rad = sig.radiusMul;
-      add('iw-desc sig', t(`weapon.sigDesc.${sig.kind}`, params));
-    }
-    const bonus = def.equipBonus;
-    for (const [k, v] of Object.entries(bonus?.stats ?? {})) add('iw-desc sig', t('weapon.bonus.stat', { stat: t(`stat.${k}`), value: v ?? 0 }));
-    if (bonus?.rangedDamage) add('iw-desc sig', t('weapon.bonus.ranged', { value: Math.round(bonus.rangedDamage * 100) }));
-    if (bonus?.meleeDamage) add('iw-desc sig', t('weapon.bonus.melee', { value: Math.round(bonus.meleeDamage * 100) }));
+    if (grade) el.style.borderColor = grade.color;
+    const top = document.createElement('div');
+    top.className = 'iw-weapontop';
+    const icon = document.createElement('span');
+    icon.className = 'iw-weaponicon';
+    applyArtIcon(icon, this.ctx, def.spriteKey, def.color);
+    const names = document.createElement('div');
+    names.append(this.line('iw-name', t(def.nameKey), grade?.color), this.line('iw-grade', grade ? t(grade.nameKey) : ''));
+    top.append(icon, names);
+    el.appendChild(top);
+    for (const l of weaponInfoLines(this.ctx, item)) el.appendChild(this.line(l.sig ? 'iw-desc sig' : 'iw-desc', l.text));
     const drop = document.createElement('button');
     drop.className = 'iw-drop';
     drop.textContent = t('inventory.drop');
@@ -299,6 +365,9 @@ export class InventoryWindow {
     if (this.selected === id) el.classList.add('selected');
     el.dataset.skill = id;
     el.style.borderColor = owned.awakened ? sb.awakenedColor : (sb.levelColors[owned.level - 1] ?? sb.emptyColor);
+    const icon = document.createElement('span');
+    icon.className = 'iw-skillicon';
+    applyArtIcon(icon, this.ctx, artKeys.skillIcon(id));
     const name = document.createElement('div');
     name.className = 'iw-name';
     name.textContent = owned.awakened ? t(def.awakening.nameKey) : t(def.nameKey);
@@ -311,7 +380,7 @@ export class InventoryWindow {
     const a = def.awakening;
     req.textContent = t('inventory.requirement', { stat: t(`stat.${a.requiredStat}`), value: p.stats[a.requiredStat], need: a.requiredValue });
     req.classList.toggle('met', p.stats[a.requiredStat] >= a.requiredValue);
-    el.append(name, lv, req);
+    el.append(icon, name, lv, req);
     el.addEventListener('pointerdown', (e) => {
       e.stopPropagation();
       this.drag = { id, x: e.clientX, y: e.clientY, ghost: null };
@@ -335,7 +404,14 @@ export class InventoryWindow {
     const d = this.ctx.data;
     const p = this.ctx.session?.player;
     if (!p || !id) {
-      box.appendChild(this.line('iw-hint', t('inventory.detailHint')));
+      box.appendChild(this.line('iw-hint', t('inventory.itemHint')));
+      return;
+    }
+    if (id.startsWith('item:')) {
+      const def = d.items.items.find((x) => x.id === id.slice(5));
+      if (!def) return;
+      const grade = d.groupMultipliers.grades.find((g) => g.id === def.grade);
+      box.append(this.line('iw-dname', t(def.nameKey), grade?.color), this.line('iw-dmeta', grade ? t(grade.nameKey) : ''), this.line('iw-desc', t(def.descKey, itemDescParams(def, d.groupMultipliers))));
       return;
     }
     if (id === 'ultimate') {

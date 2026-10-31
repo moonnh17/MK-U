@@ -7,7 +7,7 @@ import { Pickup } from '../../entities/pickup';
 import { assignElites, eliteCount, pickTwoElites } from '../../systems/elites';
 import { IMPLEMENTED_ENCOUNTERS } from '../../systems/encounter';
 import { effectiveWeights } from '../../systems/items';
-import { merchantStock, rollEncounter } from '../../systems/loot';
+import { encounterPool, merchantStock, rollEncounter } from '../../systems/loot';
 import { encounterKinds, pickHiddenBoss } from '../../systems/hiddenBoss';
 import { spireEliteCount, spireItemChoices, spireSize, type SpireEvent } from '../../systems/spire';
 import { planCombatWaves, RoomState } from '../../systems/roomState';
@@ -40,7 +40,7 @@ export class Encounters {
     const node = map.rooms[roomId]!;
     const rng = Rng.derive(this.run.ctx.config.seed, `encounter-${stage.chapter}-${stage.stage}-${roomId}`);
     const met = this.run.session.player.hiddenBossesMet;
-    const kind = this.forcedEncounter ?? rollEncounter(rng, d.loot.encounter.weights, encounterKinds(IMPLEMENTED_ENCOUNTERS, d.bosses.hiddenBosses, met));
+    const kind = this.forcedEncounter ?? rollEncounter(rng, d.loot.encounter.weights, encounterPool(encounterKinds(IMPLEMENTED_ENCOUNTERS, d.bosses.hiddenBosses, met), !!node.peaceful));
     this.forcedEncounter = null;
     this.run.session.encounters.set(roomId, kind);
     const c = roomCenter(node, this.run.m);

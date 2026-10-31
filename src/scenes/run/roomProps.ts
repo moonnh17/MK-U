@@ -25,7 +25,7 @@ export class RoomProps {
   addRoomProps(node: RoomNode, obs: readonly Rect[]): void {
     const rp = this.run.ctx.data.mapgen.roomProps;
     const rule = rp.rules[node.kind];
-    if (!rule) return;
+    if (!rule || node.peaceful) return;
     const rng = Rng.derive(this.run.ctx.config.seed, `props-${this.run.session.map.chapter}-${this.run.session.map.stage}-${node.id}`);
     const c = roomCenter(node, this.run.m);
     const clear = rp.centerClearPx;

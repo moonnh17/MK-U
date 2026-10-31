@@ -73,6 +73,8 @@ export class RunScene extends Phaser.Scene {
   world!: WorldBuilder;
   debugTools!: RunDebug;
   ctx!: GameContext;
+  /** 사망 연출 중 */
+  dying = false;
   session!: RunSession;
   m!: WorldMetrics;
   rng!: Rng;
@@ -381,6 +383,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   resetFields(): void {
+    this.dying = false;
     this.doorsByRoom = new Map();
     this.rooms = new Map();
     this.enemies = [];
@@ -499,6 +502,7 @@ export class RunScene extends Phaser.Scene {
       bus.emit('command', { action, enabled });
     }
 
+    if (this.dying && !this.session.outcome) return;
     if (this.session.outcome) {
       if (frame.pressed.has('attack') || frame.pressed.has('interact')) this.restartRun();
       return;
@@ -1024,7 +1028,7 @@ export class RunScene extends Phaser.Scene {
   /** 피해를 받았으면 true */
   /** 피해를 받았으면 true. attacker: 때린 적(반사용, 모르면 null) */
   hurtPlayer(amount: number, attacker: Enemy | null = null, mentalRaw?: number): boolean {
-    if (this.invuln > 0 || this.condition.dodge.invuln > 0 || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
+    if (this.invuln > 0 || this.condition.dodge.invuln > 0 || this.dying || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
     // 특무 인장: 피해를 받기 직전 순간이동으로 피한다 (피격 무적과 같은 시간)
     if (this.itemRt.tryDodge()) {
       this.invuln = this.ctx.data.player.hurtInvulnSec;
@@ -1057,7 +1061,7 @@ export class RunScene extends Phaser.Scene {
     this.itemRt.onHurt(taken, attacker);
     if (p.hp > 0) this.itemRt.tryHeal();
     else if (this.itemRt.tryRevive()) this.cameras.main.flash(200, 255, 255, 255);
-    if (p.hp <= 0) this.endRun({ type: 'dead' });
+    if (p.hp <= 0) this.beginDeath();
     return true;
   }
 
@@ -1293,6 +1297,16 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
+  /** 사망: 연출을 보여 준 뒤 결산으로 */
+  beginDeath(): void {
+    if (this.dying) return;
+    this.dying = true;
+    this.loot.setInteractHint(null);
+    bus.emit('weaponTip', { item: null });
+    this.physics.pause();
+    this.stageFx.playDeath(() => this.endRun({ type: 'dead' }));
+  }
+
   endRun(outcome: NonNullable<RunSession['outcome']>): void {
     this.session.outcome = outcome;
     // 결산: 결정을 계산해 바로 저장에 더한다 (결산 화면을 닫지 않고 꺼도 남게)
@@ -1305,7 +1319,6 @@ export class RunScene extends Phaser.Scene {
     this.session.settlement = { runClear, crystals, balance: save.data.crystals, shardsOwned: save.data.pastShards };
     this.physics.pause();
     this.player.setAlpha(1);
-    if (outcome.type === 'dead') this.player.setTint(0x555555);
     this.loot.setInteractHint(null);
     bus.emit('overlay', { open: true });
   }

@@ -28,6 +28,7 @@ import { GeminiMini } from './ui/geminiMini';
 import { PauseWindow } from './ui/pauseWindow';
 import { Music } from './audio/music';
 import { Sfx } from './audio/sfx';
+import { WeaponTip } from './ui/weaponTip';
 import { StoryWindow } from './ui/storyWindow';
 import { SettlementWindow } from './ui/settlementWindow';
 import type { TouchControlId } from './ui/mobileLayout';
@@ -170,6 +171,7 @@ new StoryWindow(ctx);
 new GeminiMini(ctx);
 new PauseWindow(ctx);
 new Sfx(ctx);
+new WeaponTip(ctx);
 new Music(ctx);
 window.addEventListener('resize', () => game.scale.setZoom(cssZoom()));
 
