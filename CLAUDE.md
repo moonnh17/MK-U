@@ -33,7 +33,7 @@ src/
   main.ts
   core/             설정, 시드 RNG, 이벤트 버스, ActionCommand 타입
   input/            keyboard, touch(가상 조이스틱·버튼), inputManager
-  scenes/           Boot, Run(전투 씬), UI(HUD)
+  scenes/           Boot, Run(전투 씬), UI(HUD)  run/은 전투 씬 부품
   systems/          mapgen, combat, weapons, ai, damage(태그 계산)
   entities/         player, enemy, projectile, pickup, door
   ui/               hud, minimap, joystick, buttons
