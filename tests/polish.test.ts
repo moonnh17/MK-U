@@ -9,6 +9,7 @@ import { cardStillValid } from '../src/systems/cards';
 import { enemyStageScale } from '../src/systems/champions';
 import { readyWeaponSet } from '../src/systems/items';
 import { weaponPose } from '../src/systems/motion';
+import { spinUpMul, weaponStats } from '../src/systems/weapons';
 import { statSheetLines } from '../src/systems/statSheet';
 import { statEffect } from '../src/systems/stats';
 import { startingStats } from '../src/systems/damage';
@@ -176,6 +177,45 @@ describe('든 무기의 움직임', () => {
     expect(weaponPose('smash', 0.64, s).rot).toBeGreaterThan(0.4);
     expect(weaponPose('thrust', 0.35, { px: 14 }).push).toBeCloseTo(14);
     expect(weaponPose('thrust', 1, { px: 14 }).push).toBeCloseTo(0);
+  });
+});
+
+describe('무기 밸런스', () => {
+  const g = D.groupMultipliers.grades;
+  const w = (id: string) => D.weapons.weapons.find((x) => x.id === id)!;
+  it('등급이 오를수록 피해·에너지 배율이 커진다', () => {
+    for (let i = 1; i < g.length; i++) {
+      expect(g[i]!.damageMultiplier).toBeGreaterThan(g[i - 1]!.damageMultiplier);
+      expect(g[i]!.energyMultiplier).toBeGreaterThan(g[i - 1]!.energyMultiplier);
+    }
+    const st = weaponStats(w('rifle'), { defId: 'rifle', grade: 'rare', options: [] }, 1.4, 1.5);
+    expect(st.damage).toBeCloseTo(7);
+    expect(st.energyCost).toBeCloseTo(1.5);
+  });
+  it('저격총·대검은 레어, 장검은 없다, 전설은 모두 추가 능력이 있다', () => {
+    expect(w('sniper').grade).toBe('rare');
+    expect(w('greatsword').grade).toBe('rare');
+    expect(D.weapons.weapons.some((x) => x.id === 'longsword')).toBe(false);
+    for (const x of D.weapons.weapons.filter((y) => y.grade === 'legendary')) {
+      expect(!!(x.signature || x.pierce || x.chargeMoveSpeed || x.meleeShot || x.charge), x.id).toBe(true);
+    }
+  });
+  it('활은 차징 무기, 화살 그림이 있다', () => {
+    const bows = D.weapons.weapons.filter((x) => x.category === 'bow');
+    expect(bows.map((x) => x.id).sort()).toEqual(['curvedBow', 'zephyr']);
+    for (const b of bows) {
+      expect(b.charge, b.id).toBeDefined();
+      expect(b.shot, b.id).toBeDefined();
+    }
+  });
+  it('MG70: 쏠수록 빨라지고 상한이 있다', () => {
+    const s = w('mg70').spinUp!;
+    expect(spinUpMul(1, s)).toBe(1);
+    expect(spinUpMul(5, s)).toBeGreaterThan(1);
+    expect(spinUpMul(10000, s)).toBe(s.maxMul);
+  });
+  it('반물질 권총은 차징이 모자라면 나가지 않는다', () => {
+    expect(w('antimatterPistol').charge!.minRatio).toBeGreaterThan(0);
   });
 });
 

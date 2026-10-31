@@ -135,6 +135,7 @@ export function validateGameData(d: GameData): Errors {
     if (!gradeIds.has(g.id)) errors.push(`${w}: 알 수 없는 등급`);
     checkPositive(errors, `${w}.damageMultiplier`, g.damageMultiplier);
     checkPositive(errors, `${w}.randomOptions`, g.randomOptions, true);
+    checkPositive(errors, `${w}.energyMultiplier`, g.energyMultiplier);
     if (!HEX_COLOR.test(g.color)) errors.push(`${w}: color는 #RRGGBB`);
     needText(w, g.nameKey);
   }
@@ -162,12 +163,14 @@ export function validateGameData(d: GameData): Errors {
     const required =
       wpn.category === 'gun'
         ? named ? ['ranged'] : ['tech', 'ranged']
+        : wpn.category === 'bow'
+          ? ['ranged']
         : wpn.category === 'blade'
           ? named ? ['melee'] : ['physical', 'melee']
           : wpn.category === 'staff'
             ? named ? ['ranged'] : ['magic', 'ranged']
             : null;
-    if (!required) errors.push(`${w}: category는 gun · blade · staff`);
+    if (!required) errors.push(`${w}: category는 gun · blade · staff · bow`);
     else for (const t of required) if (!wpn.tags.includes(t as never)) errors.push(`${w}: ${wpn.category}는 '${t}' 태그 필요`);
     checkPositive(errors, `${w}.baseDamage`, wpn.baseDamage);
     checkPositive(errors, `${w}.fireIntervalSec`, wpn.fireIntervalSec);
@@ -217,7 +220,13 @@ export function validateGameData(d: GameData): Errors {
     } else if (p.kind !== 'single') {
       errors.push(`${w}: 알 수 없는 pattern.kind`);
     }
-    if ((p.kind === 'lob' || p.kind === 'single' || p.kind === 'spread') && wpn.category !== 'gun') errors.push(`${w}: ${p.kind}는 총 패턴`);
+    if (p.kind === 'single' && wpn.category === 'blade') errors.push(`${w}: single은 쏘는 무기 패턴`);
+    if ((p.kind === 'lob' || p.kind === 'spread') && wpn.category !== 'gun') errors.push(`${w}: ${p.kind}는 총 패턴`);
+    if (wpn.category === 'bow' && !wpn.charge) errors.push(`${w}: 활은 차징 무기`);
+    if (wpn.shot) checkSprite(errors, `${w}.shot`, wpn.shot);
+    if (wpn.fireFlash) checkSprite(errors, `${w}.fireFlash`, wpn.fireFlash);
+    if (wpn.lobBlast) checkSprite(errors, `${w}.lobBlast`, wpn.lobBlast);
+    if (wpn.spinUp && wpn.spinUp.maxMul < 1) errors.push(`${w}.spinUp.maxMul: 1 이상`);
     if ((p.kind === 'arc' || p.kind === 'line' || p.kind === 'smash') && wpn.category !== 'blade') errors.push(`${w}: ${p.kind}는 칼 패턴`);
     if (p.kind === 'homing' && wpn.category !== 'staff') errors.push(`${w}: homing은 지팡이 패턴`);
     if (wpn.charge) for (const k of ['maxSec', 'damageMul', 'radiusMul'] as const) checkPositive(errors, `${w}.charge.${k}`, wpn.charge[k]);

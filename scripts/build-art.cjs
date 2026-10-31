@@ -472,15 +472,6 @@ weapon('weapon_dagger', 0.2, [
   '..KgKKKKK...',
   '...K........',
 ]);
-weapon('weapon_longsword', 0.15, [
-  '...K..............',
-  '..KgKKKKKKKKKKKK..',
-  'KKKgKwwwwwwwwwwlK.',
-  'KbBgKlllllllllmmdK',
-  'KKKgKmmmmmmmmmdK..',
-  '..KgKKKKKKKKKKK...',
-  '...K..............',
-]);
 weapon('weapon_greatsword', 0.15, [
   '....KK................',
   '....KgK...............',
@@ -524,6 +515,43 @@ weapon('weapon_avior_staff', 0.3, [
   'KKKKKKKKKKKKKKKgKpPK',
   '................KKK.',
 ]);
+weapon('weapon_curved_bow', 0.8, [
+  '.lKK.......',
+  '.l.KbK.....',
+  '.l..KbBK...',
+  '.l...KbBK..',
+  '.l....KbBK.',
+  '.l.....KbK.',
+  '.l.....KbBK',
+  '.l......KbK',
+  '.l......KbK',
+  '.l......KGK',
+  '.l......KGK',
+  '.l......KGK',
+  '.l......KbK',
+  '.l......KbK',
+  '.l.....KbBK',
+  '.l.....KbK.',
+  '.l....KbBK.',
+  '.l...KbBK..',
+  '.l..KbBK...',
+  '.l.KbK.....',
+  '.lKK.......',
+]);
+dots('projectile_arrow', [
+  'm.m............l..',
+  'wmmK...........lm.',
+  '.wbBBBBBBBBBBBBmlw',
+  'wmmK...........lm.',
+  'm.m............l..',
+]);
+dots('projectile_zephyr_arrow', [
+  'c.c............C..',
+  'wccC...........CC.',
+  '.wCcccccccccccccww',
+  'wccC...........CC.',
+  'c.c............C..',
+]);
 weapon('weapon_fist', 0.5, [
   '.KKKKK..',
   'KsssssK.',
@@ -546,6 +574,47 @@ bigWeapon('weapon_broken_blade', 'items/broken-blade.png', 45, 14, 0.3);
 bigWeapon('weapon_al_gul_blade', 'items/al-ghul.png', -90, 28, 0.2);
 bigWeapon('weapon_hanabi', 'items/hanabi.png', 135, 28, 0.2);
 // 사용자 제공 유니크 무기 (검은 배경을 지운다)
+/** 흰 배경 지우기: 가장자리에 닿거나 넓은 흰 덩어리만 지운다 (무기 안쪽 구멍도 뚫리고 작은 하이라이트는 남는다) */
+function knockWhite(im, min = 228, hole = 25) {
+  const seen = new Uint8Array(im.w * im.h);
+  const pale = (p) => im.px[p * 4 + 3] < 40 || Math.min(im.px[p * 4], im.px[p * 4 + 1], im.px[p * 4 + 2]) >= min;
+  for (let s = 0; s < im.w * im.h; s++) {
+    if (seen[s] || !pale(s)) continue;
+    const list = [];
+    const stack = [s];
+    seen[s] = 1;
+    let edge = false;
+    while (stack.length) {
+      const p = stack.pop();
+      list.push(p);
+      const x = p % im.w;
+      const y = (p - x) / im.w;
+      if (x === 0 || y === 0 || x === im.w - 1 || y === im.h - 1) edge = true;
+      for (const n of [x > 0 ? p - 1 : -1, x < im.w - 1 ? p + 1 : -1, y > 0 ? p - im.w : -1, y < im.h - 1 ? p + im.w : -1]) {
+        if (n >= 0 && !seen[n] && pale(n)) { seen[n] = 1; stack.push(n); }
+      }
+    }
+    if (edge || list.length >= hole) for (const p of list) im.px[p * 4 + 3] = 0;
+  }
+  return im;
+}
+function userWhite(key, file, { rotate = 0, flip = false, fit, gripX, dim, min }) {
+  let im = knockWhite(k.read(path.join(__dirname, 'art-src/weapons', file)), min);
+  if (flip) im = k.flipX(im);
+  if (rotate) im = k.rotate(im, rotate);
+  sprites[key] = { ...sheet(key, [im], fit, { alphaCut: 0.25, dim }), gripX };
+}
+userWhite('weapon_zephyr', 'zephyr.png', { rotate: 90, fit: 34, gripX: 0.8, min: 235 });
+userWhite('weapon_flame_staff', 'flame_staff.png', { rotate: 36, fit: 28, gripX: 0.35 });
+userWhite('weapon_magi_fang', 'fang.png', { rotate: 19, fit: 30, gripX: 0.18 });
+userWhite('weapon_mg70', 'mg70.png', { fit: 30, gripX: 0.3, dim: 1.5 });
+userWhite('weapon_soul_calibur', 'soul.png', { flip: true, fit: 36, gripX: 0.24, dim: 1.9 });
+userWhite('weapon_antimatter_pistol', 'antimatter_pistol.png', { fit: 22, gripX: 0.18 });
+{
+  // 소울 칼리버 시트 오른쪽 아래의 방전 파티클
+  const sheetIm = knockWhite(k.read(path.join(__dirname, 'art-src/weapons/soul_sheet.png')));
+  sprites.fx_soul_burst = sheet('fx_soul_burst', [k.crop(sheetIm, 714, 553, 658, 217)], 44, { alphaCut: 0.25 });
+}
 function userWeapon(key, file, { rotate = 0, flip = false, fit, gripX, black = 40, dim }) {
   let im = k.read(path.join(__dirname, 'art-src/weapons', file));
   const seen = new Uint8Array(im.w * im.h);

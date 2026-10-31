@@ -52,7 +52,7 @@ describe('음 높이·무기 소리', () => {
   });
   it('칼은 휘두르기, 지팡이는 마법탄, 유탄은 발사음, 산탄총·저격총은 데이터대로', () => {
     const w = (id: string) => gameData.weapons.weapons.find((x) => x.id === id)!;
-    expect(weaponSfx(w('longsword'))).toBe('swing');
+    expect(weaponSfx(w('dagger'))).toBe('swing');
     expect(weaponSfx(w('pistol'))).toBe('shotPistol');
     expect(weaponSfx(w('shotgun'))).toBe('shotShotgun');
     expect(weaponSfx(w('sniper'))).toBe('shotSniper');

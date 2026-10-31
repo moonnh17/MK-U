@@ -152,6 +152,8 @@ export interface GradeDef {
   color: string;
   /** 기준 피해 배율 (무기·아이템 공통 그룹 배율) */
   damageMultiplier: number;
+  /** 무기 에너지 소모 배율 (높은 등급일수록 많이 먹는다) */
+  energyMultiplier: number;
   /** 무작위 추가 옵션 개수 */
   randomOptions: number;
 }
@@ -169,7 +171,7 @@ export interface GroupMultipliersData {
 // ---------- 무기 ----------
 
 /** gun: 총 / blade: 칼(둔기 포함) / staff: 마법 지팡이(탄을 쏘고 에너지를 쓴다, 아비오르의 지팡이) */
-export type WeaponCategory = 'gun' | 'blade' | 'staff';
+export type WeaponCategory = 'gun' | 'blade' | 'staff' | 'bow';
 
 /**
  * 유니크 무기의 고유 효과: every번째 공격마다 발동.
@@ -239,7 +241,25 @@ export interface WeaponDef extends SpriteRef {
   /** 총: 탄이 적을 몇 마리 더 뚫는지 */
   pierce?: number;
   /** 칼: 누르고 있으면 차지(대검). 놓으면 휘두른다 */
-  charge?: { maxSec: number; damageMul: number; radiusMul: number };
+  charge?: { maxSec: number; damageMul: number; radiusMul: number; minRatio?: number };
+  /** 차징 중 이동속도 증가 (서풍) */
+  chargeMoveSpeed?: number;
+  /** 탄 그림 (화살 등). 없으면 공통 탄 */
+  shot?: SpriteRef;
+  /** 쏠수록 발사가 빨라진다 (MG70). resetSec 동안 안 쏘면 처음부터 */
+  spinUp?: { perShot: number; maxMul: number; resetSec: number };
+  /** 화염: 날아가며 커지고 흐려진다 */
+  flame?: { scaleTo: number };
+  /** 근접 공격과 함께 탄을 쏜다. 에너지가 모자라면 탄만 나가지 않는다 */
+  meleeShot?: { damageMul: number; speed: number; range: number; energyCost: number; color: string };
+  /** 공격할 때 흘리는 파티클 */
+  attackParticles?: { color: string };
+  /** 그림 안 마력 중심(가로·세로 0~1). onCharge면 차징 중, 아니면 발사 때 번쩍인다 */
+  core?: { u: number; v: number; color: string; onCharge?: boolean };
+  /** 발사할 때 마력 중심에서 터지는 그림 */
+  fireFlash?: SpriteRef;
+  /** 폭발탄이 터질 때 그림 */
+  lobBlast?: SpriteRef;
   /** 맞은 적을 밀어낸다(해머). 거대 엘리트·보스는 면역 */
   knockback?: { distance: number; sec: number };
   /** 총: 맞힌 뒤 가까운 다른 적으로 튕긴다 */
@@ -1345,6 +1365,8 @@ export interface JuiceData {
     thrust: { sec: number; px: number };
     smash: { sec: number; fromDeg: number; toDeg: number };
     wave: { sec: number; deg: number };
+    /** 차징·흘리는 파티클 간격, 모여드는 거리·시간, 중심 빛 크기 */
+    chargeCore: { everySec: number; gatherPx: number; gatherSec: number; glowPx: number };
     fitInterval: number;
     ghostAlpha: number;
     ghostFadeSec: number;

@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 300개 · 그림 있음 285개
+전체 309개 · 그림 있음 294개
 
 ## player (3)
 
@@ -18,13 +18,12 @@
 | `player_hectar` | 플레이어 헥타르 | 10×10 | feet | #e8e2d0 | mku/player_hectar.png (5프레임) |
 | `player_acro` | 플레이어 아크로 | 10×10 | feet | #e8e2d0 | mku/player_acro.png (5프레임) |
 
-## weapon (25)
+## weapon (31)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `weapon_pistol` | 권총 | 6×6 | center | #c8c8c8 | mku/weapon_pistol.png (1프레임) |
 | `weapon_shotgun` | 산탄총 | 8×8 | center | #c89a5a | mku/weapon_shotgun.png (1프레임) |
-| `weapon_longsword` | 장검 | 10×10 | center | #e0e8ff | mku/weapon_longsword.png (1프레임) |
 | `weapon_smg` | 기관단총 | 7×7 | center | #9ab0c8 | mku/weapon_smg.png (1프레임) |
 | `weapon_rifle` | 소총 | 9×9 | center | #7a9a6a | mku/weapon_rifle.png (1프레임) |
 | `weapon_sniper` | 저격총 | 10×10 | center | #5a6a8a | mku/weapon_sniper.png (1프레임) |
@@ -46,14 +45,26 @@
 | `weapon_algieba_sling` | 알기에바의 새총 | 11×11 | center | #5ad0f0 | mku/weapon_algieba_sling.png (1프레임) |
 | `weapon_nekkar_cleaver` | 네카르의 식칼 | 9×9 | center | #a03a3a | mku/weapon_nekkar_cleaver.png (1프레임) |
 | `weapon_argo_banner` | 아르고 원정대의 깃발 | 14×14 | center | #d02a3a | mku/weapon_argo_banner.png (1프레임) |
+| `weapon_curved_bow` | 곡궁 | 9×9 | center | #a0784a | mku/weapon_curved_bow.png (1프레임) |
+| `weapon_mg70` | 헥타르제 MG70 | 11×11 | center | #3a9ad9 | mku/weapon_mg70.png (1프레임) |
+| `weapon_flame_staff` | 보급형 마력사출기 | 10×10 | center | #ff7a2a | mku/weapon_flame_staff.png (1프레임) |
+| `weapon_zephyr` | 서풍 | 10×10 | center | #5ad0d0 | mku/weapon_zephyr.png (1프레임) |
+| `weapon_soul_calibur` | 소울 칼리버 | 12×12 | center | #7a4ad0 | mku/weapon_soul_calibur.png (1프레임) |
+| `weapon_magi_fang` | 마기족의 송곳니 | 11×11 | center | #c0202a | mku/weapon_magi_fang.png (1프레임) |
+| `weapon_antimatter_pistol` | 반물질 권총 | 9×9 | center | #3a7bff | mku/weapon_antimatter_pistol.png (1프레임) |
 | `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | mku/weapon_fist.png (1프레임) |
 
-## projectile (9)
+## projectile (14)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `fx_golem_laser` | 고대병기의 코어 (fx) | 12×12 | center | #a05aff | mku/fx_golem_laser.png (1프레임) |
 | `fx_eclipse_meteor` | 식광의 핵 (fx) | 10×10 | center | #ff3a4a | mku/fx_eclipse_meteor.png (1프레임) |
+| `projectile_arrow` | 곡궁 (fx) | 3×3 | center | #c8a070 | mku/projectile_arrow.png (1프레임) |
+| `projectile_zephyr_arrow` | 서풍 (fx) | 3×3 | center | #7ae8f0 | mku/projectile_zephyr_arrow.png (1프레임) |
+| `fx_soul_burst` | 소울 칼리버 (fx) | 20×20 | center | #c060ff | mku/fx_soul_burst.png (1프레임) |
+| `skill_antimatter_shellA` | 반물질 권총 (fx) 외 1곳 | 9×9 | center | #5ab0ff | mku/skill_antimatter_shellA.png (6프레임) |
+| `skill_antimatter_blastA` | 반물질 권총 (fx) 외 1곳 | 24×24 | center | #5ab0ff | mku/skill_antimatter_blastA.png (6프레임) |
 | `projectile_player` | 플레이어 탄 | 3×3 | center | #fff3a0 | mku/projectile_player.png (1프레임) |
 | `fx_melee_slash` | 근접 이펙트 (fx) | 20×20 | center | #ffffff | mku/fx_melee_slash.png (6프레임) |
 | `fx_melee_slam` | 근접 이펙트 (fx) | 20×20 | center | #ffffff | mku/fx_melee_slam.png (8프레임) |
@@ -178,7 +189,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (81)
+## skill (79)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -220,10 +231,8 @@
 | `skill_antimatter_blast3` | 반물질포 (blast3) | 20×20 | center | #a05ad9 | mku/skill_antimatter_blast3.png (1프레임) |
 | `skill_antimatter_collapse` | 반물질포 (collapse) | 20×20 | center | #a05ad9 | mku/skill_antimatter_collapse.png (4프레임) |
 | `skill_antimatter_chargeA` | 반물질포 (chargeA) | 8×8 | center | #c98aff | mku/skill_antimatter_chargeA.png (6프레임) |
-| `skill_antimatter_shellA` | 반물질포 (shellA) | 9×9 | center | #a05ad9 | mku/skill_antimatter_shellA.png (6프레임) |
 | `skill_antimatter_trailA` | 반물질포 (trailA) | 9×9 | center | #a05ad9 | mku/skill_antimatter_trailA.png (4프레임) |
 | `skill_antimatter_impactA` | 반물질포 (impactA) | 20×20 | center | #a05ad9 | mku/skill_antimatter_impactA.png (3프레임) |
-| `skill_antimatter_blastA` | 반물질포 (blastA) | 24×24 | center | #a05ad9 | mku/skill_antimatter_blastA.png (6프레임) |
 | `skill_field1` | 마기역장 (shield1) | 24×24 | center | #8aa4c8 | mku/skill_field1.png (1프레임) |
 | `skill_field2` | 마기역장 (shield2) | 24×24 | center | #8aa4c8 | mku/skill_field2.png (1프레임) |
 | `skill_field3` | 마기역장 (shield3) | 24×24 | center | #8aa4c8 | mku/skill_field3.png (1프레임) |

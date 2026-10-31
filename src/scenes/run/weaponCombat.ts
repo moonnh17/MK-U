@@ -23,7 +23,8 @@ import { signatureFires, weaponPose, type WeaponMotionKind, type WeaponMotionPar
 import { corruptedDamage, skillChance } from '../../systems/acro';
 import { hpStance } from '../../systems/vitals';
 import { gainGauge } from '../../systems/skills';
-import { gunShots, inArc, projectilesCut, rollCrit, spendEnergy, type WeaponItem, type WeaponStats } from '../../systems/weapons';
+import { gradeEnergyMultiplier } from '../../systems/damage';
+import { gunShots, inArc, projectilesCut, rollCrit, spendEnergy, spinUpMul, type WeaponItem, type WeaponStats } from '../../systems/weapons';
 import { contains, interiorRect } from '../../systems/worldLayout';
 import type { SpriteRef, WeaponSignature, SpaceRule, TagId, WeaponDef } from '../../types/data';
 import type { RunScene } from '../RunScene';
@@ -38,6 +39,12 @@ export class WeaponCombat {
   charging = false;
   chargeT = 0;
   chargeFx: Phaser.GameObjects.Graphics | null = null;
+  /** 활: 시위에 건 화살 */
+  nockArrow: Phaser.GameObjects.Image | null = null;
+  private chargeSparkIn = 0;
+  /** MG70: 연속으로 쏜 수와 쉰 시간 */
+  private spinShots = 0;
+  private spinIdle = 0;
   fireCooldown = 0;
   /** 공격력 버프 (아르고 원정대의 깃발) */
   buffLeft = 0;
@@ -49,7 +56,7 @@ export class WeaponCombat {
   /** 휘두를 때마다 참격 방향을 뒤집는다 */
   private swingFlip = false;
   /** 든 무기의 움직임 (없으면 제자리) */
-  motion: { kind: WeaponMotionKind; t: number; sec: number; params: WeaponMotionParams; ghost: string | null; lastRot: number | null } | null = null;
+  motion: { kind: WeaponMotionKind; t: number; sec: number; params: WeaponMotionParams; ghost: string | null; lastRot: number | null; particles: string | null } | null = null;
 
   constructor(private readonly run: RunScene) {}
 
@@ -57,7 +64,12 @@ export class WeaponCombat {
   updateAttack(dt: number, held: boolean, aimAngle: number): void {
     this.fireCooldown -= dt;
     this.updateBuff(dt);
-    const charge = this.run.weaponDef().charge;
+    const def = this.run.weaponDef();
+    if (def.spinUp) {
+      this.spinIdle += dt;
+      if (this.spinIdle > def.spinUp.resetSec) this.spinShots = 0;
+    }
+    const charge = def.charge;
     if (!charge) {
       if (held && this.fireCooldown <= 0) this.attack(aimAngle, 0);
       return;
@@ -68,23 +80,96 @@ export class WeaponCombat {
         this.chargeT = Math.min(charge.maxSec, this.chargeT + dt);
       }
     } else if (this.charging) {
-      this.attack(aimAngle, this.chargeT / charge.maxSec);
+      const ratio = this.chargeT / charge.maxSec;
+      // 차징이 모자라면 나가지 않는다 (반물질 권총)
+      if (ratio >= (charge.minRatio ?? 0)) this.attack(aimAngle, ratio);
       this.resetCharge();
     }
-    this.drawCharge(charge.maxSec);
+    this.drawCharge(charge.maxSec, dt);
   }
 
   resetCharge(): void {
     this.charging = false;
     this.chargeT = 0;
     this.chargeFx?.clear();
+    this.nockArrow?.destroy();
+    this.nockArrow = null;
   }
 
-  drawCharge(maxSec: number): void {
+  /** 차징 중 이동속도 증가 (서풍) */
+  chargeMoveBonus(): number {
+    return this.charging ? (this.run.weaponDef().chargeMoveSpeed ?? 0) : 0;
+  }
+
+  /** 그림 안 마력 중심의 월드 좌표 (든 무기의 회전·뒤집힘을 따른다) */
+  private corePoint(core: NonNullable<WeaponDef['core']>): Vec2 {
+    const s = this.run.weaponSprite;
+    const lx = (core.u - s.originX) * s.displayWidth;
+    const ly = (core.v - s.originY) * s.displayHeight * (s.flipY ? -1 : 1);
+    const c = Math.cos(s.rotation);
+    const n = Math.sin(s.rotation);
+    return { x: s.x + lx * c - ly * n, y: s.y + lx * n + ly * c };
+  }
+
+  /** 차징 연출: 활은 화살을 당기고, 마력 중심이 있으면 파티클이 모여들며 번쩍인다 */
+  private chargeLook(k: number, dt: number): void {
+    const w = this.run.weaponDef();
+    if (w.category === 'bow' && w.shot) {
+      this.nockArrow ??= this.run.add.image(0, 0, w.shot.spriteKey).setDepth(4.2);
+      const hand = this.handPos();
+      const back = 8 * k;
+      this.nockArrow.setPosition(hand.x + this.run.aimDir.x * (2 - back), hand.y + this.run.aimDir.y * (2 - back)).setRotation(Math.atan2(this.run.aimDir.y, this.run.aimDir.x));
+    }
+    this.chargeSparkIn -= dt;
+    if (this.chargeSparkIn > 0) return;
+    const m = this.run.ctx.data.juice.weaponMotion.chargeCore;
+    this.chargeSparkIn = m.everySec;
+    const at = this.run.player;
+    if (w.attackParticles) this.spark(at.x + this.run.rng.range(-8, 8), at.y + this.run.rng.range(-6, 6), w.attackParticles.color, 0, -14);
+    const core = w.core;
+    if (!core?.onCharge) return;
+    const c = this.corePoint(core);
+    const col = hexColor(core.color);
+    const a = this.run.rng.range(0, Math.PI * 2);
+    const r = m.gatherPx * this.run.rng.range(0.6, 1);
+    const dot = this.run.add.rectangle(c.x + Math.cos(a) * r, c.y + Math.sin(a) * r, 1.5, 1.5, col, 1).setDepth(6).setBlendMode(Phaser.BlendModes.ADD);
+    this.run.tweens.add({ targets: dot, x: c.x, y: c.y, duration: m.gatherSec * 1000, ease: 'Quad.easeIn', onComplete: () => dot.destroy() });
+    // 찰수록 중심의 빛이 커지고, 다 차면 크게 번쩍인다
+    const glow = this.run.add.circle(c.x, c.y, 1 + m.glowPx * k, col, 0.35 + 0.5 * k).setDepth(6).setBlendMode(Phaser.BlendModes.ADD);
+    this.run.tweens.add({ targets: glow, alpha: 0, scale: 0.6, duration: m.everySec * 2000, onComplete: () => glow.destroy() });
+    if (k >= 1) this.run.juice.sparkle(c, core.color, this.run.ctx.data.juice.weaponMotion.staff);
+  }
+
+  /** 작은 파티클 하나 */
+  private spark(x: number, y: number, color: string, dx: number, dy: number): void {
+    const p = this.run.add.rectangle(x, y, 2, 2, hexColor(color), 1).setDepth(6).setBlendMode(Phaser.BlendModes.ADD);
+    this.run.tweens.add({ targets: p, x: x + dx, y: y + dy, alpha: 0, duration: 320, ease: 'Quad.easeOut', onComplete: () => p.destroy() });
+  }
+
+  /** 탄이 날아가는 동안: 화염은 커지며 흐려지고, 파티클을 흘리는 탄은 뒤로 흘린다 */
+  bulletLook(b: Phaser.Physics.Arcade.Image, dist: number, dt: number): void {
+    const flame = b.getData('flame') as number | undefined;
+    if (flame) {
+      const k = Math.min(1, dist / (b.getData('range') as number));
+      b.setScale(1 + (flame - 1) * k).setAlpha(1 - 0.75 * k);
+    }
+    const trail = b.getData('trail') as string | undefined;
+    if (!trail) return;
+    const left = ((b.getData('trailIn') as number | undefined) ?? 0) - dt;
+    if (left > 0) {
+      b.setData('trailIn', left);
+      return;
+    }
+    b.setData('trailIn', this.run.ctx.data.juice.weaponMotion.chargeCore.everySec);
+    this.spark(b.x, b.y, trail, this.run.rng.range(-5, 5), this.run.rng.range(-5, 5));
+  }
+
+  drawCharge(maxSec: number, dt = 0): void {
     if (!this.chargeFx) this.chargeFx = this.run.add.graphics().setDepth(6);
     this.chargeFx.clear();
     if (!this.charging) return;
     const k = this.chargeT / maxSec;
+    this.chargeLook(k, dt);
     this.chargeFx.lineStyle(2, k >= 1 ? 0xffd23f : 0xffffff, 0.8).beginPath();
     this.chargeFx.arc(this.run.player.x, this.run.player.y, 12, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k, false).strokePath();
   }
@@ -96,6 +181,11 @@ export class WeaponCombat {
     const st = this.run.weaponStatsOf(item);
     const p = this.run.session.player;
     this.fireCooldown = st.fireIntervalSec;
+    if (w.spinUp) {
+      this.spinShots++;
+      this.spinIdle = 0;
+      this.fireCooldown = st.fireIntervalSec / spinUpMul(this.spinShots, w.spinUp);
+    }
     // 유니크 고유 효과: 들고 있는 무기의 공격을 센다 (바꾸면 처음부터)
     if (this.sigItem !== item) {
       this.sigItem = item;
@@ -126,9 +216,10 @@ export class WeaponCombat {
     const udef = this.run.skillRt.ultimateDef();
     p.ultimate.gauge = gainGauge(p.ultimate.gauge, udef.gaugeMax, gaugeFromEnergy(udef, p.energy - left));
     p.energy = left;
-    this.startShotMotion(w, st.fireIntervalSec);
+    this.startShotMotion(w, this.fireCooldown);
     sfx(sig?.kind === 'laser' ? 'shotLaser' : weaponSfx(w));
-    const emp = this.run.itemRt.consumeEmpowered();
+    // 쏘는 무기의 차징: 모은 만큼 피해 증가
+    const emp = this.run.itemRt.consumeEmpowered() * (w.charge ? 1 + (w.charge.damageMul - 1) * chargeRatio : 1);
     if (sig?.kind === 'laser') {
       this.weaponLaser(w, st.damage * sig.damageMul * emp, st.critChance, aimAngle, sig.length, sig.width, sig.beam?.spriteKey);
       return;
@@ -154,16 +245,17 @@ export class WeaponCombat {
           from: muzzle,
           to,
           speed: st.projectileSpeed,
-          radius: w.pattern.radius * (1 + this.run.itemRt.sums.area),
+          radius: w.pattern.radius * (1 + this.run.itemRt.sums.area) * (w.charge ? 1 + (w.charge.radiusMul - 1) * chargeRatio : 1),
           base: st.damage * emp,
           tags: w.tags,
-          sprite: this.run.ctx.data.weapons.projectile,
+          sprite: w.shot ?? this.run.ctx.data.weapons.projectile,
+          blasts: w.lobBlast ? [w.lobBlast] : undefined,
         }),
       );
       return;
     }
     for (const shot of gunShots(w, shotAngle, this.run.rng)) {
-      this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, ricochet: w.ricochet, tint: w.ricochet ? w.color : undefined });
+      this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, ricochet: w.ricochet, tint: w.ricochet || w.flame ? w.color : undefined, sprite: w.shot, flame: w.flame?.scaleTo, trail: w.attackParticles?.color });
     }
   }
 
@@ -175,6 +267,13 @@ export class WeaponCombat {
       this.run.juice.sparkle(this.muzzle(), w.color, m.staff);
       return;
     }
+    // 발사 번쩍임: 마력 중심 (소울 칼리버)
+    if (w.core && !w.core.onCharge) {
+      const c = this.corePoint(w.core);
+      this.run.juice.sparkle(c, w.core.color, m.staff);
+      if (w.fireFlash) playFx(this.run, w.fireFlash, c.x, c.y, { w: w.fireFlash.size * 2, depth: 7 });
+    }
+    if (w.attackParticles) this.run.juice.sparkle(this.muzzle(), w.attackParticles.color, m.staff);
     const heavy = Math.min(1, intervalSec / m.recoil.refIntervalSec);
     this.setMotion('recoil', m.recoil.sec, intervalSec, { rad: (m.recoil.kickDeg * heavy * Math.PI) / 180, px: m.recoil.minPx + (m.recoil.maxPx - m.recoil.minPx) * heavy }, null);
   }
@@ -191,7 +290,7 @@ export class WeaponCombat {
   }
 
   private setMotion(kind: WeaponMotionKind, sec: number, intervalSec: number, params: WeaponMotionParams, ghost: string | null): void {
-    this.motion = { kind, t: 0, sec: Math.min(sec, intervalSec * this.run.ctx.data.juice.weaponMotion.fitInterval), params, ghost, lastRot: null };
+    this.motion = { kind, t: 0, sec: Math.min(sec, intervalSec * this.run.ctx.data.juice.weaponMotion.fitInterval), params, ghost, lastRot: null, particles: this.run.weaponDef().attackParticles?.color ?? null };
   }
 
   /** 이번 프레임 든 무기의 자세 (조준이 왼쪽이면 호출한 쪽이 각도를 뒤집는다) */
@@ -217,6 +316,11 @@ export class WeaponCombat {
     m.lastRot = sprite.rotation;
     const moved = Math.abs(diff) > 0.001 || push !== 0;
     if (!moved) return;
+    // 칼끝에서 파티클을 흘린다 (마기족의 송곳니)
+    if (m.particles) {
+      const len = sprite.displayWidth * (1 - sprite.originX);
+      this.spark(sprite.x + Math.cos(sprite.rotation) * len, sprite.y + Math.sin(sprite.rotation) * len, m.particles, this.run.rng.range(-6, 6), this.run.rng.range(-6, 6));
+    }
     const steps = Math.max(1, Math.min(5, Math.ceil(Math.abs(diff) / ((c.ghostStepDeg * Math.PI) / 180))));
     const col = hexColor(m.ghost);
     for (let i = 1; i <= steps; i++) {
@@ -307,7 +411,7 @@ export class WeaponCombat {
     base: number,
     tags: readonly TagId[],
     source: string | null = null,
-    opts: { pierce: number; crit: number; homing?: number; tint?: string; sprite?: SpriteRef; ricochet?: { bounces: number; range: number } } = { pierce: 0, crit: 0 },
+    opts: { pierce: number; crit: number; homing?: number; tint?: string; sprite?: SpriteRef; ricochet?: { bounces: number; range: number }; flame?: number; trail?: string } = { pierce: 0, crit: 0 },
   ): void {
     const proj = this.run.ctx.data.weapons.projectile;
     const b = this.run.bullets.create(from.x, from.y, opts.sprite?.spriteKey ?? proj.spriteKey) as Phaser.Physics.Arcade.Sprite;
@@ -318,7 +422,7 @@ export class WeaponCombat {
     }
     fitArt(this.run.ctx.data, b, proj.size, proj.height ?? proj.size);
     b.setDepth(5);
-    b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>(), bounces: opts.ricochet?.bounces ?? 0, bounceRange: opts.ricochet?.range ?? 0 });
+    b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>(), bounces: opts.ricochet?.bounces ?? 0, bounceRange: opts.ricochet?.range ?? 0, flame: opts.flame ?? 0, trail: opts.trail });
     if (opts.tint) b.setTint(hexColor(opts.tint));
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
   }
@@ -401,6 +505,7 @@ export class WeaponCombat {
       this.gustFx(origin, r, color);
     }
     this.startMeleeMotion(w, st.fireIntervalSec, color);
+    if (w.meleeShot) this.fireMeleeShot(w, w.meleeShot, st, aimAngle);
     if (w.selfBuff) this.applyBuff(w.selfBuff);
     for (const e of targets) {
       const at = { x: e.sprite.x, y: e.sprite.y };
@@ -433,6 +538,15 @@ export class WeaponCombat {
         b.destroy();
       }
     }
+  }
+
+  /** 베면서 쏘는 탄 (에너지가 모자라면 베기만 한다) */
+  private fireMeleeShot(w: WeaponDef, s: NonNullable<WeaponDef['meleeShot']>, st: WeaponStats, aimAngle: number): void {
+    const p = this.run.session.player;
+    const cost = s.energyCost * gradeEnergyMultiplier(w.grade, this.run.ctx.data.groupMultipliers);
+    if (p.energy < cost) return;
+    p.energy -= cost;
+    this.fireBullet(this.muzzle(), aimAngle, s.speed, s.range, st.damage * s.damageMul, ['physical', 'ranged'], null, { pierce: 0, crit: st.critChance, tint: s.color, trail: s.color });
   }
 
   /** 근접 이펙트 한 번: 무기 색을 입히고 밝은 심을 겹친다. 공격이 빠른 무기는 그만큼 빨리 돈다 */

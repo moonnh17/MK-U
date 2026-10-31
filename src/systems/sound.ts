@@ -92,6 +92,7 @@ export function pitchFactor(rng: Rng, jitter: number): number {
 export function weaponSfx(w: Pick<WeaponDef, 'category' | 'pattern'> & { sfx?: string }): SfxId {
   if (w.sfx && (SFX_IDS as readonly string[]).includes(w.sfx)) return w.sfx as SfxId;
   if (w.category === 'blade') return 'swing';
+  if (w.category === 'bow') return 'shotLob';
   if (w.category === 'staff' || w.pattern.kind === 'homing') return 'shotStaff';
   if (w.pattern.kind === 'lob') return 'shotLob';
   return 'shotPistol';

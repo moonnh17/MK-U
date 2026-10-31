@@ -49,7 +49,7 @@ describe('calcDamage 태그 배율', () => {
 describe('그룹 배율', () => {
   it('등급 배율을 데이터에서 읽는다', () => {
     expect(gradeMultiplier('common', gameData.groupMultipliers)).toBe(1);
-    expect(gradeMultiplier('rare', gameData.groupMultipliers)).toBe(1.2);
-    expect(gradeMultiplier('mythic', gameData.groupMultipliers)).toBe(2);
+    expect(gradeMultiplier('rare', gameData.groupMultipliers)).toBe(1.4);
+    expect(gradeMultiplier('mythic', gameData.groupMultipliers)).toBe(3);
   });
 });

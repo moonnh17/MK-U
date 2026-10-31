@@ -1,6 +1,6 @@
 /** 무기 한 자루의 설명 줄: 인벤토리와 바닥 무기 안내가 함께 쓴다. */
 import type { GameContext } from '../core/context';
-import { gradeMultiplier } from '../systems/damage';
+import { gradeEnergyMultiplier, gradeMultiplier } from '../systems/damage';
 import { weaponStats, type WeaponItem } from '../systems/weapons';
 
 export interface WeaponInfoLine {
@@ -13,9 +13,9 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
   const t = ctx.t;
   const d = ctx.data;
   const def = d.weapons.weapons.find((w) => w.id === item.defId)!;
-  const st = weaponStats(def, item, gradeMultiplier(item.grade, d.groupMultipliers));
+  const st = weaponStats(def, item, gradeMultiplier(item.grade, d.groupMultipliers), gradeEnergyMultiplier(item.grade, d.groupMultipliers));
   const out: WeaponInfoLine[] = [
-    { text: t('inventory.weaponStats', { damage: Math.round(st.damage * 10) / 10, interval: Math.round(st.fireIntervalSec * 100) / 100, energy: st.energyCost }) },
+    { text: t('inventory.weaponStats', { damage: Math.round(st.damage * 10) / 10, interval: Math.round(st.fireIntervalSec * 100) / 100, energy: Math.round(st.energyCost * 100) / 100 }) },
     { text: t('weapon.info.range', { range: def.range, category: t(`weapon.category.${def.category}`) }) },
   ];
   if (st.critChance > 0) out.push({ text: t('weapon.info.crit', { value: Math.round(st.critChance * 100) }) });
@@ -24,6 +24,14 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
     if (odef) out.push({ text: t(odef.nameKey, { value: o.id === 'energyCost' ? o.value : Math.round(o.value * 100) }) });
   }
   if (def.pattern.kind === 'meteor') out.push({ text: t('weapon.sigDesc.meteor'), sig: true });
+  if (def.pierce) out.push({ text: t('weapon.sigDesc.pierce'), sig: true });
+  if (def.flame) out.push({ text: t('weapon.sigDesc.flame'), sig: true });
+  if (def.spinUp) out.push({ text: t('weapon.sigDesc.spinUp', { n: def.spinUp.maxMul }), sig: true });
+  if (def.charge) out.push({ text: t('weapon.sigDesc.charge', { n: def.charge.damageMul }), sig: true });
+  if (def.charge?.minRatio) out.push({ text: t('weapon.sigDesc.minCharge'), sig: true });
+  if (def.category !== 'blade' && def.pattern.kind === 'lob') out.push({ text: t('weapon.sigDesc.explosive'), sig: true });
+  if (def.chargeMoveSpeed) out.push({ text: t('weapon.sigDesc.chargeMove', { v: Math.round(def.chargeMoveSpeed * 100) }), sig: true });
+  if (def.meleeShot) out.push({ text: t('weapon.sigDesc.meleeShot', { n: def.meleeShot.damageMul, e: Math.round(def.meleeShot.energyCost * gradeEnergyMultiplier(item.grade, d.groupMultipliers) * 100) / 100 }), sig: true });
   if (def.ricochet) out.push({ text: t('weapon.sigDesc.ricochet', { n: def.ricochet.bounces }), sig: true });
   if (def.bleed) out.push({ text: t('weapon.sigDesc.bleed'), sig: true });
   if (def.selfBuff) out.push({ text: t('weapon.sigDesc.gust', { dmg: Math.round(def.selfBuff.damage * 100), sec: def.selfBuff.sec }), sig: true });

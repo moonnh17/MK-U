@@ -91,6 +91,10 @@ export function spaceDamage(rank: EnemyRank, enemyMaxHp: number, damage: number,
 }
 
 /** 기준값 × 그룹(등급) 배율 */
+export function gradeEnergyMultiplier(grade: GradeId, groups: GroupMultipliersData): number {
+  return groups.grades.find((g) => g.id === grade)?.energyMultiplier ?? 1;
+}
+
 export function gradeMultiplier(grade: GradeId, groups: GroupMultipliersData): number {
   return groups.grades.find((g) => g.id === grade)?.damageMultiplier ?? 1;
 }

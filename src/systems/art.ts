@@ -100,6 +100,9 @@ export function collectAssets(d: GameData): AssetRef[] {
   for (const w of d.weapons.weapons) {
     add('weapon', w, w.nameKey);
     if (w.pattern.kind === 'meteor') add('projectile', w.pattern.sprite, w.nameKey, '#fx');
+    if (w.shot) add('projectile', w.shot, w.nameKey, '#fx');
+    if (w.fireFlash) add('projectile', w.fireFlash, w.nameKey, '#fx');
+    if (w.lobBlast) add('projectile', w.lobBlast, w.nameKey, '#fx');
     if (w.signature?.kind === 'laser' && w.signature.beam) add('projectile', w.signature.beam, w.nameKey, '#fx');
   }
   add('projectile', d.weapons.projectile, 'asset.playerBullet');

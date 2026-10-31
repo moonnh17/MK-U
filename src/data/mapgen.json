@@ -49,7 +49,7 @@
   "bossPlaceholderEnemy": "trainingDummy",
   "testWeapons": [
     "shotgun",
-    "longsword"
+    "dagger"
   ],
   "door": {
     "color": "#c8643a",

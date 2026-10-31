@@ -6,6 +6,7 @@ import { hexColor } from '../core/scale';
 import type { RunSession } from '../core/session';
 import type { UiMode } from '../input/uiMode';
 import { storedSkills } from '../systems/skills';
+import { gradeEnergyMultiplier } from '../systems/damage';
 import { activeWeapon, otherWeapon, weaponStats } from '../systems/weapons';
 import { Minimap } from './minimap';
 
@@ -192,7 +193,7 @@ export class Hud {
     const sub = weapons.find((w) => w.id === subItem?.defId);
     const gradeColor = (g: string | undefined) => this.ctx.data.groupMultipliers.grades.find((x) => x.id === g)?.color ?? '#ffffff';
     this.mainWeaponText.setText(main ? this.ctx.t(main.nameKey) : '').setColor(gradeColor(mainItem?.grade));
-    const cost = main && mainItem ? weaponStats(main, mainItem, 1).energyCost : 0;
+    const cost = main && mainItem ? weaponStats(main, mainItem, 1, gradeEnergyMultiplier(mainItem.grade, this.ctx.data.groupMultipliers)).energyCost : 0;
     this.mainCostText.setText(String(cost)).setColor(empty ? '#ff5555' : this.ctx.data.ui.hud.bars.energyColor);
     this.subWeaponText.setText(sub ? this.ctx.t(sub.nameKey) : '').setColor(gradeColor(subItem?.grade));
 

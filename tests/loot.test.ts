@@ -14,8 +14,8 @@ const def = (id: string) => W.weapons.find((w) => w.id === id)!;
 describe('무기 종류 (기획서 무기 표)', () => {
   it('총 6종·칼 5종 + 신궁 환디', () => {
     const by = (c: string) => W.weapons.filter((w) => w.category === c && w.droppable).map((w) => w.id).sort();
-    expect(by('gun')).toEqual(['algiebaSling', 'grenadeLauncher', 'pistol', 'rifle', 'shotgun', 'smg', 'sniper']);
-    expect(by('blade')).toEqual(['argoBanner', 'brokenBlade', 'dagger', 'greatsword', 'hammer', 'hanabi', 'longsword', 'nekkarCleaver', 'spear']);
+    expect(by('gun')).toEqual(['algiebaSling', 'antimatterPistol', 'grenadeLauncher', 'mg70', 'pistol', 'rifle', 'shotgun', 'smg', 'sniper', 'soulCalibur']);
+    expect(by('blade')).toEqual(['argoBanner', 'brokenBlade', 'dagger', 'greatsword', 'hammer', 'hanabi', 'magiFang', 'nekkarCleaver', 'spear']);
     const handi = def('handi');
     expect(handi.grade).toBe('mythic');
     expect(handi.droppable).toBe(false);
@@ -82,7 +82,7 @@ describe('등급·신화', () => {
     }
     // 칼에는 탄속·에너지 옵션이 붙지 않는다
     for (let s = 0; s < 40; s++) {
-      for (const o of rollOptions(new Rng(s), def('longsword'), 2, W.options)) expect(['crit', 'attackSpeed']).toContain(o.id);
+      for (const o of rollOptions(new Rng(s), def('dagger'), 2, W.options)) expect(['crit', 'attackSpeed']).toContain(o.id);
       // 에너지를 쓰지 않는 무기에는 에너지 감소가 붙지 않는다
       for (const o of rollOptions(new Rng(s), { ...def('pistol'), energyCost: 0 }, 3, W.options)) expect(o.id).not.toBe('energyCost');
     }

@@ -1337,13 +1337,6 @@
       "frames": 1,
       "gripX": 0.2
     },
-    "weapon_longsword": {
-      "file": "mku/weapon_longsword.png",
-      "frameWidth": 18,
-      "frameHeight": 7,
-      "frames": 1,
-      "gripX": 0.15
-    },
     "weapon_greatsword": {
       "file": "mku/weapon_greatsword.png",
       "frameWidth": 22,
@@ -1371,6 +1364,25 @@
       "frameHeight": 7,
       "frames": 1,
       "gripX": 0.3
+    },
+    "weapon_curved_bow": {
+      "file": "mku/weapon_curved_bow.png",
+      "frameWidth": 11,
+      "frameHeight": 21,
+      "frames": 1,
+      "gripX": 0.8
+    },
+    "projectile_arrow": {
+      "file": "mku/projectile_arrow.png",
+      "frameWidth": 18,
+      "frameHeight": 5,
+      "frames": 1
+    },
+    "projectile_zephyr_arrow": {
+      "file": "mku/projectile_zephyr_arrow.png",
+      "frameWidth": 18,
+      "frameHeight": 5,
+      "frames": 1
     },
     "weapon_fist": {
       "file": "mku/weapon_fist.png",
@@ -1426,6 +1438,61 @@
       "frames": 1,
       "density": 2,
       "gripX": 0.2
+    },
+    "weapon_zephyr": {
+      "file": "mku/weapon_zephyr.png",
+      "frameWidth": 24,
+      "frameHeight": 68,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.8
+    },
+    "weapon_flame_staff": {
+      "file": "mku/weapon_flame_staff.png",
+      "frameWidth": 56,
+      "frameHeight": 20,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.35
+    },
+    "weapon_magi_fang": {
+      "file": "mku/weapon_magi_fang.png",
+      "frameWidth": 60,
+      "frameHeight": 20,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.18
+    },
+    "weapon_mg70": {
+      "file": "mku/weapon_mg70.png",
+      "frameWidth": 60,
+      "frameHeight": 20,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.3
+    },
+    "weapon_soul_calibur": {
+      "file": "mku/weapon_soul_calibur.png",
+      "frameWidth": 72,
+      "frameHeight": 22,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.24
+    },
+    "weapon_antimatter_pistol": {
+      "file": "mku/weapon_antimatter_pistol.png",
+      "frameWidth": 44,
+      "frameHeight": 24,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.18
+    },
+    "fx_soul_burst": {
+      "file": "mku/fx_soul_burst.png",
+      "frameWidth": 88,
+      "frameHeight": 28,
+      "frames": 1,
+      "density": 2
     },
     "weapon_nekkar_cleaver": {
       "file": "mku/weapon_nekkar_cleaver.png",

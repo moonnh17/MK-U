@@ -163,6 +163,7 @@
     "thrust": { "sec": 0.18, "px": 14 },
     "smash": { "sec": 0.3, "fromDeg": -110, "toDeg": 30 },
     "wave": { "sec": 0.8, "deg": 24 },
+    "chargeCore": { "everySec": 0.05, "gatherPx": 14, "gatherSec": 0.2, "glowPx": 6 },
     "fitInterval": 0.85,
     "ghostAlpha": 0.55,
     "ghostFadeSec": 0.16,

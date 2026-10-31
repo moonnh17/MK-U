@@ -13,10 +13,10 @@
     "buffSparkSec": 0.1
   },
   "options": [
-    { "id": "crit", "nameKey": "weaponOpt.crit", "value": [0.08, 0.15], "categories": ["gun", "blade", "staff"] },
-    { "id": "projectileSpeed", "nameKey": "weaponOpt.projectileSpeed", "value": [0.15, 0.3], "categories": ["gun", "staff"] },
-    { "id": "energyCost", "nameKey": "weaponOpt.energyCost", "value": [1, 1], "categories": ["gun", "staff"], "needsEnergy": true },
-    { "id": "attackSpeed", "nameKey": "weaponOpt.attackSpeed", "value": [0.1, 0.2], "categories": ["gun", "blade", "staff"] }
+    { "id": "crit", "nameKey": "weaponOpt.crit", "value": [0.08, 0.15], "categories": ["gun", "blade", "staff", "bow"] },
+    { "id": "projectileSpeed", "nameKey": "weaponOpt.projectileSpeed", "value": [0.15, 0.3], "categories": ["gun", "staff", "bow"] },
+    { "id": "energyCost", "nameKey": "weaponOpt.energyCost", "value": [1, 1], "categories": ["gun", "staff", "bow"], "needsEnergy": true },
+    { "id": "attackSpeed", "nameKey": "weaponOpt.attackSpeed", "value": [0.1, 0.2], "categories": ["gun", "blade", "staff", "bow"] }
   ],
   "weapons": [
     {
@@ -56,24 +56,6 @@
       "size": 8
     },
     {
-      "id": "longsword",
-      "nameKey": "weapon.longsword",
-      "category": "blade",
-      "fxColor": "#e0e8ff", "grade": "common",
-      "tags": ["physical", "melee"],
-      "baseDamage": 7,
-      "fireIntervalSec": 0.4,
-      "energyCost": 0,
-      "pattern": { "kind": "arc", "arcDeg": 180, "radius": 39 },
-      "projectileSpeed": 0,
-      "range": 39,
-      "cutsProjectiles": true,
-      "droppable": true,
-      "spriteKey": "weapon_longsword",
-      "color": "#e0e8ff",
-      "size": 10
-    },
-    {
       "id": "smg", "nameKey": "weapon.smg", "category": "gun", "grade": "common", "tags": ["tech", "ranged"],
       "baseDamage": 2, "fireIntervalSec": 0.09, "energyCost": 1, "pattern": { "kind": "single", "jitterDeg": 12 },
       "projectileSpeed": 280, "range": 220, "cutsProjectiles": false, "droppable": true,
@@ -86,7 +68,7 @@
       "spriteKey": "weapon_rifle", "color": "#7a9a6a", "size": 9
     },
     {
-      "id": "sniper", "sfx": "shotSniper", "nameKey": "weapon.sniper", "category": "gun", "grade": "legendary", "tags": ["tech", "ranged"],
+      "id": "sniper", "sfx": "shotSniper", "nameKey": "weapon.sniper", "category": "gun", "grade": "rare", "tags": ["tech", "ranged"],
       "baseDamage": 18, "fireIntervalSec": 0.9, "energyCost": 4, "pattern": { "kind": "single" }, "pierce": 3,
       "projectileSpeed": 520, "range": 420, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_sniper", "color": "#5a6a8a", "size": 10
@@ -104,7 +86,7 @@
       "spriteKey": "weapon_dagger", "color": "#d0d8e8", "size": 6
     },
     {
-      "id": "greatsword", "nameKey": "weapon.greatsword", "category": "blade", "fxColor": "#8ab0ff", "grade": "legendary", "tags": ["physical", "melee"],
+      "id": "greatsword", "nameKey": "weapon.greatsword", "category": "blade", "fxColor": "#8ab0ff", "grade": "rare", "tags": ["physical", "melee"],
       "baseDamage": 12, "fireIntervalSec": 0.7, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 220, "radius": 50 },
       "charge": { "maxSec": 1.0, "damageMul": 2.5, "radiusMul": 1.4 },
       "projectileSpeed": 0, "range": 50, "cutsProjectiles": true, "droppable": true,
@@ -219,6 +201,64 @@
       "upright": true,
       "projectileSpeed": 0, "range": 95, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_argo_banner", "color": "#d02a3a", "size": 14
+    },
+    {
+      "id": "curvedBow", "nameKey": "weapon.curvedBow", "category": "bow", "grade": "common", "tags": ["physical", "ranged"],
+      "baseDamage": 6, "fireIntervalSec": 0.5, "energyCost": 1, "pattern": { "kind": "single" },
+      "charge": { "maxSec": 0.7, "damageMul": 2.5, "radiusMul": 1 },
+      "shot": { "spriteKey": "projectile_arrow", "color": "#c8a070", "size": 3 },
+      "projectileSpeed": 340, "range": 300, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_curved_bow", "color": "#a0784a", "size": 9
+    },
+    {
+      "id": "mg70", "nameKey": "weapon.mg70", "category": "gun", "grade": "rare", "tags": ["tech", "ranged"],
+      "baseDamage": 2.5, "fireIntervalSec": 0.2, "energyCost": 0.5, "pattern": { "kind": "single", "jitterDeg": 6 },
+      "spinUp": { "perShot": 0.08, "maxMul": 2.8, "resetSec": 0.7 },
+      "projectileSpeed": 340, "range": 280, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_mg70", "color": "#3a9ad9", "size": 11
+    },
+    {
+      "id": "flameStaff", "nameKey": "weapon.flameStaff", "category": "staff", "grade": "rare", "tags": ["magic", "ranged"],
+      "baseDamage": 2, "fireIntervalSec": 0.1, "energyCost": 0.5, "pattern": { "kind": "single", "jitterDeg": 14 }, "pierce": 2,
+      "flame": { "scaleTo": 3 },
+      "projectileSpeed": 170, "range": 110, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_flame_staff", "color": "#ff7a2a", "size": 10
+    },
+    {
+      "id": "zephyr", "nameKey": "weapon.zephyr", "category": "bow", "grade": "legendary", "tags": ["physical", "ranged"],
+      "baseDamage": 8, "fireIntervalSec": 0.45, "energyCost": 1, "pattern": { "kind": "single" },
+      "charge": { "maxSec": 0.6, "damageMul": 3, "radiusMul": 1 },
+      "chargeMoveSpeed": 0.35,
+      "attackParticles": { "color": "#7ae8f0" },
+      "shot": { "spriteKey": "projectile_zephyr_arrow", "color": "#7ae8f0", "size": 3 },
+      "projectileSpeed": 400, "range": 340, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_zephyr", "color": "#5ad0d0", "size": 10
+    },
+    {
+      "id": "soulCalibur", "sfx": "shotSniper", "nameKey": "weapon.soulCalibur", "category": "gun", "grade": "legendary", "tags": ["tech", "ranged"],
+      "baseDamage": 34, "fireIntervalSec": 1.6, "energyCost": 10, "pattern": { "kind": "single" }, "pierce": 99,
+      "core": { "u": 0.36, "v": 0.36, "color": "#c060ff" },
+      "fireFlash": { "spriteKey": "fx_soul_burst", "color": "#c060ff", "size": 20 },
+      "projectileSpeed": 640, "range": 460, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_soul_calibur", "color": "#7a4ad0", "size": 12
+    },
+    {
+      "id": "magiFang", "fxColor": "#ff2a4a", "nameKey": "weapon.magiFang", "category": "blade", "grade": "legendary", "tags": ["physical", "melee"],
+      "baseDamage": 12, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 110, "radius": 40 },
+      "meleeShot": { "damageMul": 0.7, "speed": 300, "range": 200, "energyCost": 1, "color": "#ff2a4a" },
+      "attackParticles": { "color": "#ff2a4a" },
+      "projectileSpeed": 0, "range": 40, "cutsProjectiles": true, "droppable": true,
+      "spriteKey": "weapon_magi_fang", "color": "#c0202a", "size": 11
+    },
+    {
+      "id": "antimatterPistol", "nameKey": "weapon.antimatterPistol", "category": "gun", "grade": "legendary", "tags": ["tech", "ranged"],
+      "baseDamage": 20, "fireIntervalSec": 0.9, "energyCost": 5, "pattern": { "kind": "lob", "radius": 30 },
+      "charge": { "maxSec": 1, "damageMul": 2.5, "radiusMul": 1.3, "minRatio": 0.5 },
+      "core": { "u": 0.56, "v": 0.47, "color": "#5ab0ff", "onCharge": true },
+      "shot": { "spriteKey": "skill_antimatter_shellA", "color": "#5ab0ff", "size": 9 },
+      "lobBlast": { "spriteKey": "skill_antimatter_blastA", "color": "#5ab0ff", "size": 24 },
+      "projectileSpeed": 300, "range": 280, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_antimatter_pistol", "color": "#3a7bff", "size": 9
     },
     {
       "id": "fist", "nameKey": "weapon.fist", "category": "blade", "fxColor": "#ffe0c0", "grade": "common", "tags": ["physical", "melee"],

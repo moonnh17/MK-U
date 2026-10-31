@@ -37,7 +37,7 @@ import { DelayedBlast, type Hazard } from '../entities/hazard';
 import { Pickup } from '../entities/pickup';
 import { nearestEnemy, type SkillHost } from '../skills/host';
 import { runStartOffers, stageEndOffers } from '../systems/cards';
-import { gradeMultiplier, type Stats } from '../systems/damage';
+import { gradeEnergyMultiplier, gradeMultiplier, type Stats } from '../systems/damage';
 import { assignElites, eliteCount } from '../systems/elites';
 import { championWaves, enemyStageScale, raidChampions } from '../systems/champions';
 import { rollOptions } from '../systems/loot';
@@ -417,6 +417,7 @@ export class RunScene extends Phaser.Scene {
     this.combat.charging = false;
     this.combat.chargeT = 0;
     this.combat.chargeFx = null;
+    this.combat.nockArrow = null;
     this.skillRt.skillObjects = [];
     this.hazards = [];
     this.bossControllers = new Map();
@@ -552,7 +553,7 @@ export class RunScene extends Phaser.Scene {
     if (p.panic && !this.itemRt.first('panicCalm')) frame = { ...frame, move: { x: -frame.move.x, y: -frame.move.y } };
     this.itemRt.update(dt);
     this.condition.updateDodge(dt, frame);
-    const speed = d.player.moveSpeed * (1 + statEffect('moveSpeed', this.effStats(), d.stats)) * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus());
+    const speed = d.player.moveSpeed * (1 + statEffect('moveSpeed', this.effStats(), d.stats)) * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus()) * (1 + this.combat.chargeMoveBonus());
     if (this.dashLeft > 0) {
       // MK 돌진: 입력 대신 돌진 방향으로
       this.dashLeft -= dt;
@@ -882,7 +883,8 @@ export class RunScene extends Phaser.Scene {
 
   /** 등급 배율·옵션을 반영한 무기 수치. 태그 보정은 hit()에서 */
   weaponStatsOf(item: WeaponItem): WeaponStats {
-    return weaponStats(this.weaponDefOf(item.defId), item, gradeMultiplier(item.grade, this.ctx.data.groupMultipliers));
+    const g = this.ctx.data.groupMultipliers;
+    return weaponStats(this.weaponDefOf(item.defId), item, gradeMultiplier(item.grade, g), gradeEnergyMultiplier(item.grade, g));
   }
 
   /** 실제로 쓰는 스탯: 기본 스탯 + 들고 있는 무기의 보너스(신궁 환디 힘 +30) */
@@ -1098,6 +1100,7 @@ export class RunScene extends Phaser.Scene {
         b.destroy();
         continue;
       }
+      this.combat.bulletLook(b, dist, dt);
       // 유도탄(지팡이): 남은 사거리 안 가장 가까운 적 쪽으로 휜다
       const turn = b.getData('homing') as number;
       if (turn > 0) {

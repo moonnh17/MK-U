@@ -32,16 +32,21 @@ export interface WeaponStats {
   critChance: number;
 }
 
-/** 등급 배율·옵션을 반영한 실제 수치 */
-export function weaponStats(def: WeaponDef, item: WeaponItem, gradeMul: number): WeaponStats {
+/** 등급 배율·옵션을 반영한 실제 수치 (energyMul: 등급 에너지 배율) */
+export function weaponStats(def: WeaponDef, item: WeaponItem, gradeMul: number, energyMul = 1): WeaponStats {
   const opt = (id: WeaponOption['id']) => item.options.filter((o) => o.id === id).reduce((s, o) => s + o.value, 0);
   return {
     damage: def.baseDamage * gradeMul,
     fireIntervalSec: def.fireIntervalSec / (1 + opt('attackSpeed')),
-    energyCost: Math.max(0, def.energyCost - opt('energyCost')),
+    energyCost: Math.max(0, def.energyCost * energyMul - opt('energyCost')),
     projectileSpeed: def.projectileSpeed * (1 + opt('projectileSpeed')),
     critChance: Math.min(1, (def.critChance ?? 0) + opt('crit')),
   };
+}
+
+/** 쏠수록 빨라지는 무기의 발사 속도 배율 (MG70) */
+export function spinUpMul(shots: number, spin: { perShot: number; maxMul: number }): number {
+  return Math.min(spin.maxMul, 1 + Math.max(0, shots - 1) * spin.perShot);
 }
 
 /** 치명: 확률로 피해 × 배율 */

@@ -94,7 +94,7 @@ describe('에너지', () => {
   it('장검은 에너지 0이라 언제나 쓸 수 있고, 권총은 탄당 1을 쓴다', () => {
     expect(canFire(0, weapon('pistol'))).toBe(false);
     expect(spendEnergy(1, weapon('pistol'))).toBe(0);
-    expect(spendEnergy(0, weapon('longsword'))).toBe(0);
+    expect(spendEnergy(0, weapon('dagger'))).toBe(0);
   });
 
   it('산탄총은 에너지를 소모하고, 부족하면 쏠 수 없다', () => {
@@ -153,7 +153,7 @@ describe('공격 패턴', () => {
   });
 
   it('장검은 앞쪽의 일반 투사체만 지운다', () => {
-    const cut = projectilesCut(weapon('longsword'), { x: 0, y: 0 }, 0, [
+    const cut = projectilesCut(weapon('greatsword'), { x: 0, y: 0 }, 0, [
       { x: 15, y: 0, cuttable: true },
       { x: -15, y: 0, cuttable: true },
       { x: 10, y: 5, cuttable: false },
