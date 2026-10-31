@@ -1,9 +1,9 @@
-import type { Dir } from '../systems/mapgen';
 import { buildPathField, pathDir, segmentClear, type PathField } from '../systems/pathField';
 import { bossOrbDrops } from '../systems/bossEnergy';
 import { IDLE_DODGE, blinkTarget, dodgeConfig, startDodge, stepDodge, zigzag, type DodgeState } from '../systems/dodge';
 import { stampGrid } from '../systems/roomShapes';
 import Phaser from 'phaser';
+import { RoomProps } from './run/roomProps';
 import { SKILL_ACTIONS, sfx, type Modal, type Offer, type Prop, type RunSceneData, type Vending } from './run/shared';
 import type { ActionFrame, Vec2 } from '../core/actions';
 import { getContext, type GameContext } from '../core/context';
@@ -21,8 +21,7 @@ import { Spire } from '../entities/spire';
 import { Darkness } from '../entities/darkness';
 import { PanicFx } from '../entities/panicFx';
 import { pickTrack } from '../systems/music';
-import { BreakableProp, Statue } from '../entities/roomProp';
-import { crateDrops, placeRoomProps } from '../systems/roomProps';
+import { BreakableProp } from '../entities/roomProp';
 import { applyMental, lowSanityBonus, sanityMaxFor, stepSanity } from '../systems/sanity';
 import { animateArt, fitArt } from '../entities/art';
 import { Juice, shake } from '../entities/juice';
@@ -69,6 +68,7 @@ import type { BleedRule, DodgeSchoolDef, EncounterKindId, GeminiEventId, GradeId
 export type { RunSceneData } from './run/shared';
 
 export class RunScene extends Phaser.Scene {
+  roomProps!: RoomProps;
   ctx!: GameContext;
   session!: RunSession;
   m!: WorldMetrics;
@@ -92,10 +92,6 @@ export class RunScene extends Phaser.Scene {
   enemyRoom = new Map<Enemy, number>();
   pickups: Pickup[] = [];
   floorWeapons: FloorWeapon[] = [];
-  propGroup!: Phaser.Physics.Arcade.StaticGroup;
-  breakables: BreakableProp[] = [];
-  statues: Statue[] = [];
-  doorIcons: { text: Phaser.GameObjects.Text; roomId: number; to: number }[] = [];
   portals: Prop[] = [];
   vendings: Vending[] = [];
   potions: Phaser.GameObjects.Image[] = [];
@@ -211,6 +207,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.roomProps = new RoomProps(this);
     this.ctx = getContext();
     const d = this.ctx.data;
     this.resetFields();
@@ -312,7 +309,7 @@ export class RunScene extends Phaser.Scene {
 
     this.walls = this.physics.add.staticGroup();
     this.doorGroup = this.physics.add.staticGroup();
-    this.propGroup = this.physics.add.staticGroup();
+    this.roomProps.propGroup = this.physics.add.staticGroup();
     this.enemyGroup = this.physics.add.group();
     this.bullets = this.physics.add.group();
     this.enemyBullets = this.physics.add.group();
@@ -337,8 +334,8 @@ export class RunScene extends Phaser.Scene {
 
     this.physics.add.collider(this.player, this.walls);
     this.physics.add.collider(this.player, this.doorGroup);
-    this.physics.add.collider(this.player, this.propGroup);
-    this.physics.add.collider(this.enemyGroup, this.propGroup);
+    this.physics.add.collider(this.player, this.roomProps.propGroup);
+    this.physics.add.collider(this.enemyGroup, this.roomProps.propGroup);
     this.physics.add.collider(this.enemyGroup, this.walls);
     this.physics.add.collider(this.enemyGroup, this.doorGroup);
     this.physics.add.collider(this.enemyGroup, this.enemyGroup);
@@ -350,11 +347,11 @@ export class RunScene extends Phaser.Scene {
     const propHit = (b: unknown, s: unknown, amount: (bullet: Phaser.GameObjects.GameObject) => number) => {
       const bullet = b as Phaser.GameObjects.GameObject;
       const prop = (s as Phaser.GameObjects.GameObject).getData('prop') as BreakableProp | undefined;
-      if (prop) this.damageBreakable(prop, amount(bullet));
+      if (prop) this.roomProps.damageBreakable(prop, amount(bullet));
       bullet.destroy();
     };
-    this.physics.add.collider(this.bullets, this.propGroup, (b, s) => propHit(b, s, (x) => x.getData('base') as number));
-    this.physics.add.collider(this.enemyBullets, this.propGroup, (b, s) => propHit(b, s, (x) => x.getData('damage') as number));
+    this.physics.add.collider(this.bullets, this.roomProps.propGroup, (b, s) => propHit(b, s, (x) => x.getData('base') as number));
+    this.physics.add.collider(this.enemyBullets, this.roomProps.propGroup, (b, s) => propHit(b, s, (x) => x.getData('damage') as number));
     this.physics.add.overlap(this.bullets, this.enemyGroup, (b, e) => this.onBulletHit(b as Phaser.Physics.Arcade.Image, e as Phaser.Physics.Arcade.Image));
     this.physics.add.overlap(this.player, this.enemyBullets, (_p, b) => this.onEnemyBulletHit(b as Phaser.Physics.Arcade.Image));
     this.physics.add.overlap(this.player, this.enemyGroup, (_p, e) =>
@@ -448,9 +445,9 @@ export class RunScene extends Phaser.Scene {
     this.enemyRoom = new Map();
     this.pickups = [];
     this.floorWeapons = [];
-    this.breakables = [];
-    this.statues = [];
-    this.doorIcons = [];
+    this.roomProps.breakables = [];
+    this.roomProps.statues = [];
+    this.roomProps.doorIcons = [];
     this.portals = [];
     this.vendings = [];
     this.potions = [];
@@ -561,136 +558,9 @@ export class RunScene extends Phaser.Scene {
         fitArt(d, core, ref.size, ref.height ?? ref.size);
         this.cores.push({ sprite: core, roomId: node.id, radius: ref.size / 2 });
       }
-      this.addRoomProps(node, obs);
-      this.addDoorIcons(node);
+      this.roomProps.addRoomProps(node, obs);
+      this.roomProps.addDoorIcons(node);
     }
-  }
-
-  /** 상자·통·석상을 놓는다 (같은 시드면 같은 자리) */
-  addRoomProps(node: RoomNode, obs: readonly Rect[]): void {
-    const rp = this.ctx.data.mapgen.roomProps;
-    const rule = rp.rules[node.kind];
-    if (!rule) return;
-    const rng = Rng.derive(this.ctx.config.seed, `props-${this.session.map.chapter}-${this.session.map.stage}-${node.id}`);
-    const c = roomCenter(node, this.m);
-    const clear = rp.centerClearPx;
-    const grow = (o: Rect, g: number): Rect => ({ x: o.x - g, y: o.y - g, w: o.w + g * 2, h: o.h + g * 2 });
-    const avoid: Rect[] = [
-      ...obs.map((o) => grow(o, rp.edgeInsetPx)),
-      { x: c.x - clear, y: c.y - clear, w: clear * 2, h: clear * 2 },
-      ...(Object.keys(node.doors) as Dir[]).map((dir) => grow(doorRect(node, dir, this.m), rp.doorClearPx)),
-      ...this.vendings.map((v) => grow({ x: v.x, y: v.y, w: 0, h: 0 }, clear)),
-    ];
-    for (const s of placeRoomProps(rng, interiorRect(node, this.m, rp.edgeInsetPx), avoid, rule, rp.spacingPx, rp.statues.map((x) => x.kind))) {
-      if (s.kind === 'statue') {
-        const def = rp.statues.find((x) => x.kind === s.statue)!;
-        this.statues.push(new Statue(this, s.statue, def.spriteKey, s.x, s.y, this.propGroup));
-      } else {
-        const def = rp[s.kind];
-        this.breakables.push(new BreakableProp(this, s.kind, def.spriteKey, s.x, s.y, def.hp, this.propGroup));
-      }
-    }
-  }
-
-  /** 문 안쪽에 그 너머 방 종류를 표시한다 (가 본 적 없는 방만) */
-  addDoorIcons(node: RoomNode): void {
-    const icon = this.ctx.data.mapgen.roomProps.doorIcon;
-    const map = this.session.map;
-    for (const [dir, to] of Object.entries(node.doors) as [Dir, number][]) {
-      const r = doorRect(node, dir, this.m);
-      const kind = map.rooms[to]!.kind;
-      const x = r.x + r.w / 2 + (dir === 'w' ? icon.insetPx : dir === 'e' ? -icon.insetPx : 0);
-      const y = r.y + r.h / 2 + (dir === 'n' ? icon.insetPx : dir === 's' ? -icon.insetPx : 0);
-      const text = this.add
-        .text(x, y, this.ctx.t(icon.keys[kind]), { fontFamily: 'sans-serif', fontSize: `${icon.fontPx}px`, fontStyle: 'bold', color: icon.colors[kind], stroke: '#000000', strokeThickness: 3 })
-        .setOrigin(0.5)
-        .setDepth(3)
-        .setVisible(false);
-      this.doorIcons.push({ text, roomId: node.id, to });
-    }
-  }
-
-  /** 지금 방의 문 표시만 보인다 (전투 중에는 숨긴다) */
-  updateDoorIcons(): void {
-    const rid = this.session.currentRoomId;
-    const locked = rid !== null && this.rooms.get(rid)?.phase === 'locked';
-    for (const d of this.doorIcons) d.text.setVisible(d.roomId === rid && !locked && !this.session.visited.has(d.to));
-  }
-
-  /** 상자·통에 피해. 상자는 드롭, 통은 잠시 뒤 폭발 */
-  damageBreakable(p: BreakableProp, amount: number): void {
-    if (!p.damage(amount)) return;
-    const d = this.ctx.data;
-    const rp = d.mapgen.roomProps;
-    const at = { x: p.x, y: p.y };
-    this.breakables = this.breakables.filter((x) => x !== p);
-    if (p.kind === 'crate') {
-      sfx('kill');
-      this.juice.death(p.sprite as unknown as Phaser.GameObjects.Sprite, rp.crate.color, false);
-      p.destroy();
-      this.popPickups('coin', at, crateDrops(this.rng, rp.crate.coins));
-      this.popPickups('energy', at, crateDrops(this.rng, rp.crate.energy));
-      return;
-    }
-    // 통: 몸체는 바로 비키고, 깜빡이다 터진다
-    p.sprite.setTint(0xffffff);
-    (p.sprite.body as Phaser.Physics.Arcade.StaticBody).enable = false;
-    this.time.delayedCall(rp.barrel.fuseSec * 1000, () => this.explodeBarrel(p, at));
-  }
-
-  explodeBarrel(p: BreakableProp, at: Vec2): void {
-    const b = this.ctx.data.mapgen.roomProps.barrel;
-    p.destroy();
-    sfx('explosion');
-    shake(this, 'light');
-    this.juice.explosionNear(at, 0);
-    for (const e of [...this.enemies]) {
-      if (!e.dead && Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= b.radius + e.radius) this.hit(e, b.damage, b.tags, 'barrel');
-    }
-    if (Math.hypot(this.player.x - at.x, this.player.y - at.y) <= b.radius + this.ctx.data.player.size / 2) this.hurtPlayer(b.playerDamage);
-    this.blastProps(at, b.radius, b.hp + this.ctx.data.mapgen.roomProps.crate.hp);
-  }
-
-  /** 범위 안의 상자·통에 피해 (통 폭발은 옆 통으로 이어진다) */
-  blastProps(at: Vec2, radius: number, damage: number): void {
-    for (const p of [...this.breakables]) if (Math.hypot(p.x - at.x, p.y - at.y) <= radius) this.damageBreakable(p, damage);
-  }
-
-  /** 근접 공격 판정 안의 소품에 피해 */
-  meleeProps(amount: number, inside: (p: BreakableProp) => boolean): void {
-    for (const p of [...this.breakables]) if (inside(p)) this.damageBreakable(p, amount);
-  }
-
-  /** 그 자리에서 튀어 나가는 코인·에너지 */
-  popPickups(kind: 'coin' | 'energy', at: Vec2, n: number): void {
-    const d = this.ctx.data;
-    const pop = d.juice.death;
-    for (let i = 0; i < n; i++) {
-      const a = this.rng.range(0, Math.PI * 2);
-      const r = this.rng.range(pop.orbPopPx[0], pop.orbPopPx[1]);
-      const pk = new Pickup(this, kind, at.x, at.y, d.pickups);
-      this.tweens.add({ targets: pk.sprite, x: at.x + Math.cos(a) * r, y: at.y + Math.sin(a) * r, duration: pop.orbPopSec * 1000, ease: 'Back.easeOut' });
-      this.pickups.push(pk);
-    }
-  }
-
-  /** 석상 사용: 비율만큼 회복하고 꺼진다 */
-  useStatue(s: Statue): void {
-    const def = this.ctx.data.mapgen.roomProps.statues.find((x) => x.kind === s.kind)!;
-    const p = this.session.player;
-    if (s.kind === 'heal') p.hp = Math.min(p.maxHp, p.hp + p.maxHp * def.value);
-    else if (s.kind === 'energy') p.energy = Math.min(p.energyMax, p.energy + p.energyMax * def.value);
-    else p.sanity = Math.min(p.sanityMax, p.sanity + p.sanityMax * def.value);
-    s.use();
-    sfx('heal');
-    this.floatLabel({ x: s.x, y: s.y - 10 }, this.ctx.t(`statue.${s.kind}`), def.color);
-  }
-
-  nearStatue(): Statue | null {
-    return this.nearest(
-      this.statues.filter((s) => !s.used),
-      this.ctx.data.pickups.interactRadius,
-    );
   }
 
   /** 바닥 장식: 밟고 지나가는 잔해·패널 (지형지물 자리는 피한다) */
@@ -1106,7 +976,7 @@ export class RunScene extends Phaser.Scene {
     this.updateInvuln(dt);
     this.updatePotions();
     this.updateInteractHint();
-    this.updateDoorIcons();
+    this.roomProps.updateDoorIcons();
     this.updateTutorial();
 
     const weaponKey = this.shownWeaponKey();
@@ -1638,7 +1508,7 @@ export class RunScene extends Phaser.Scene {
       for (const e of [...this.enemies]) {
         if (!e.dead && Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= radius + e.radius) this.hit(e, this.critRoll(base, st.critChance, at), w.tags);
       }
-      this.blastProps(at, radius, base);
+      this.roomProps.blastProps(at, radius, base);
     });
   }
 
@@ -1746,7 +1616,7 @@ export class RunScene extends Phaser.Scene {
     const blocked = (x: number, y: number) =>
       this.physics.overlapRect(x - r, y - r, r * 2, r * 2, false, true).some((b) => {
         const go = b.gameObject;
-        return this.walls.contains(go) || this.doorGroup.contains(go) || this.propGroup.contains(go);
+        return this.walls.contains(go) || this.doorGroup.contains(go) || this.roomProps.propGroup.contains(go);
       });
     const to = blinkTarget(from, dir, s.distancePx, s.stepPx, blocked);
     this.player.setPosition(to.x, to.y);
@@ -1925,22 +1795,22 @@ export class RunScene extends Phaser.Scene {
     if (p.kind === 'arc') {
       const radius = p.radius * radMul;
       targets = enemies.filter((e) => inArc(origin, aimAngle, p.arcDeg, radius, e.sprite, e.radius));
-      this.meleeProps(st.damage * dmgMul, (b) => inArc(origin, aimAngle, p.arcDeg, radius, b, 6));
+      this.roomProps.meleeProps(st.damage * dmgMul, (b) => inArc(origin, aimAngle, p.arcDeg, radius, b, 6));
       const half = (p.arcDeg * Math.PI) / 360;
       g.slice(origin.x, origin.y, radius, aimAngle - half, aimAngle + half, false).fillPath();
     } else if (p.kind === 'line') {
       const len = p.length * radMul;
       const idx = lineHits(origin, dir, len, p.width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
       targets = idx.map((i) => enemies[i]!);
-      const propIdx = lineHits(origin, dir, len, p.width / 2, this.breakables.map((b) => ({ x: b.x, y: b.y, radius: 6 })));
-      const lined = new Set(propIdx.map((i) => this.breakables[i]!));
-      this.meleeProps(st.damage * dmgMul, (b) => lined.has(b));
+      const propIdx = lineHits(origin, dir, len, p.width / 2, this.roomProps.breakables.map((b) => ({ x: b.x, y: b.y, radius: 6 })));
+      const lined = new Set(propIdx.map((i) => this.roomProps.breakables[i]!));
+      this.roomProps.meleeProps(st.damage * dmgMul, (b) => lined.has(b));
       g.lineStyle(p.width, 0xffffff, 0.45).lineBetween(origin.x, origin.y, origin.x + dir.x * len, origin.y + dir.y * len);
     } else if (p.kind === 'smash') {
       const c = { x: origin.x + dir.x * p.reach, y: origin.y + dir.y * p.reach };
       const r = p.radius * radMul;
       targets = enemies.filter((e) => Math.hypot(e.sprite.x - c.x, e.sprite.y - c.y) <= r + e.radius);
-      this.meleeProps(st.damage * dmgMul, (b) => Math.hypot(b.x - c.x, b.y - c.y) <= r + 6);
+      this.roomProps.meleeProps(st.damage * dmgMul, (b) => Math.hypot(b.x - c.x, b.y - c.y) <= r + 6);
       g.fillCircle(c.x, c.y, r);
     }
     for (const e of targets) {
@@ -2329,7 +2199,7 @@ export class RunScene extends Phaser.Scene {
         e.converted = true;
         this.onEnemyKilled(e);
       },
-      blastProps: (at, radius, damage) => this.blastProps(at, radius, damage),
+      blastProps: (at, radius, damage) => this.roomProps.blastProps(at, radius, damage),
       heal: (amount, overflow) => {
         const p = this.session.player;
         const v = heal(p, amount);
@@ -3053,9 +2923,9 @@ export class RunScene extends Phaser.Scene {
       bus.emit('toast', { text: t('merchant.bought', { weapon: this.weaponName(stand.stock.weapon) }) });
       return;
     }
-    const nearStatue = this.nearStatue();
+    const nearStatue = this.roomProps.nearStatue();
     if (nearStatue && !this.nearVending()) {
-      this.useStatue(nearStatue);
+      this.roomProps.useStatue(nearStatue);
       return;
     }
     const vending = this.nearVending();
@@ -3292,7 +3162,7 @@ export class RunScene extends Phaser.Scene {
   updateInteractHint(): void {
     const vending = this.nearVending();
     const portal = this.nearPortal();
-    const statue = this.nearStatue();
+    const statue = this.roomProps.nearStatue();
     const kind = this.nearestFloorWeapon() ? 'weapon' : this.nearChest() ? 'chest' : this.nearStand() ? 'merchant' : vending ? 'vending' : portal ? 'portal' : statue ? 'statue' : null;
     if (kind !== this.interactKind) this.setInteractHint(kind);
     // 포탈·자판기: 머리 위에 조작 안내
