@@ -581,94 +581,130 @@
       "frameHeight": 26,
       "frames": 1
     },
+    "icon_stat_strength": {
+      "file": "mku/icon_stat_strength.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_stat_toughness": {
+      "file": "mku/icon_stat_toughness.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_stat_agility": {
+      "file": "mku/icon_stat_agility.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_stat_intelligence": {
+      "file": "mku/icon_stat_intelligence.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_stat_magiPower": {
+      "file": "mku/icon_stat_magiPower.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_stat_willpower": {
+      "file": "mku/icon_stat_willpower.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
     "icon_skill_magiTurret": {
       "file": "mku/icon_skill_magiTurret.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_skill_magiMine": {
       "file": "mku/icon_skill_magiMine.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_skill_antimatterCannon": {
       "file": "mku/icon_skill_antimatterCannon.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_skill_magiField": {
       "file": "mku/icon_skill_magiField.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_skill_railgun": {
       "file": "mku/icon_skill_railgun.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_skill_combatDrone": {
       "file": "mku/icon_skill_combatDrone.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_skill_unstableSubject": {
       "file": "mku/icon_skill_unstableSubject.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_skill_magiCorruption": {
       "file": "mku/icon_skill_magiCorruption.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_skill_experimentalWeapon": {
       "file": "mku/icon_skill_experimentalWeapon.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_skill_purifyingWings": {
       "file": "mku/icon_skill_purifyingWings.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_skill_mkPrototype": {
       "file": "mku/icon_skill_mkPrototype.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_skill_reductionist": {
       "file": "mku/icon_skill_reductionist.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_ult_firstLaw": {
       "file": "mku/icon_ult_firstLaw.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_ult_thunderbolt": {
       "file": "mku/icon_ult_thunderbolt.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_ult_singularity": {
       "file": "mku/icon_ult_singularity.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "icon_gemini": {
@@ -685,140 +721,140 @@
     },
     "item_slime_stew": {
       "file": "mku/item_slime_stew.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_magicasol": {
       "file": "mku/item_magicasol.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_nameless_sword": {
       "file": "mku/item_nameless_sword.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_nameless_helm": {
       "file": "mku/item_nameless_helm.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_broken_hilt": {
       "file": "mku/item_broken_hilt.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_elegant_magi": {
       "file": "mku/item_elegant_magi.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_antimatter_sample": {
       "file": "mku/item_antimatter_sample.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_combat_theory": {
       "file": "mku/item_combat_theory.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_oak_heart": {
       "file": "mku/item_oak_heart.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_hanwoo_steak": {
       "file": "mku/item_hanwoo_steak.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_lee_seal": {
       "file": "mku/item_lee_seal.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_magowiki_codex": {
       "file": "mku/item_magowiki_codex.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_lsd_r": {
       "file": "mku/item_lsd_r.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_afro_belt": {
       "file": "mku/item_afro_belt.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_regulus_shard": {
       "file": "mku/item_regulus_shard.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_caesar_crown": {
       "file": "mku/item_caesar_crown.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_acrux_cross": {
       "file": "mku/item_acrux_cross.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_orion_belt": {
       "file": "mku/item_orion_belt.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_warrior_memory": {
       "file": "mku/item_warrior_memory.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_atros_codex": {
       "file": "mku/item_atros_codex.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_divine_sword": {
       "file": "mku/item_divine_sword.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_hectar_ram": {
       "file": "mku/item_hectar_ram.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_wonhon_lump": {
       "file": "mku/item_wonhon_lump.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "tile_floor_c1": {
@@ -1541,26 +1577,26 @@
     },
     "item_death_whistle": {
       "file": "mku/item_death_whistle.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_orion_shield": {
       "file": "mku/item_orion_shield.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_royal_seal": {
       "file": "mku/item_royal_seal.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "item_gisup_stone": {
       "file": "mku/item_gisup_stone.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 64,
+      "frameHeight": 64,
       "frames": 1
     },
     "lab_capsule": {

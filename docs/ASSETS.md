@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 219개 · 그림 있음 204개
+전체 225개 · 그림 있음 210개
 
 ## player (3)
 
@@ -233,10 +233,16 @@
 | `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | mku/item_orion_shield.png (1프레임) |
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | mku/item_hectar_ram.png (1프레임) |
 
-## icon (17)
+## icon (23)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
+| `icon_stat_strength` | 힘 | 16×16 | center | #4a5562 | mku/icon_stat_strength.png (1프레임) |
+| `icon_stat_toughness` | 견고 | 16×16 | center | #4a5562 | mku/icon_stat_toughness.png (1프레임) |
+| `icon_stat_agility` | 민첩 | 16×16 | center | #4a5562 | mku/icon_stat_agility.png (1프레임) |
+| `icon_stat_intelligence` | 지능 | 16×16 | center | #4a5562 | mku/icon_stat_intelligence.png (1프레임) |
+| `icon_stat_magiPower` | 마기력 | 16×16 | center | #4a5562 | mku/icon_stat_magiPower.png (1프레임) |
+| `icon_stat_willpower` | 정신력 | 16×16 | center | #4a5562 | mku/icon_stat_willpower.png (1프레임) |
 | `icon_skill_magiTurret` | 마기 자동포탑 | 16×16 | center | #4fb3d9 | mku/icon_skill_magiTurret.png (1프레임) |
 | `icon_skill_magiMine` | 마기 지뢰 | 16×16 | center | #d9a03b | mku/icon_skill_magiMine.png (1프레임) |
 | `icon_skill_antimatterCannon` | 반물질포 | 16×16 | center | #a05ad9 | mku/icon_skill_antimatterCannon.png (1프레임) |

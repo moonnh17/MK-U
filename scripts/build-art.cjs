@@ -203,13 +203,17 @@ sprites.fx_elite_burst = sheet('fx_elite_burst', single('fusion/vfx-explode.png'
 sprites.fx_spawn = sheet('fx_spawn', single('fusion/vfx-smoke.png'), 26);
 
 // ---------- 스킬·궁극기 아이콘 ----------
+// 카드 창에서 크게 보여 주므로 넉넉하게 만든다
+const CARD_ICON = 64;
+const STAT_ICON = { strength: 'strength', toughness: 'fortitude', agility: 'agility', intelligence: 'intellect', magiPower: 'magic', willpower: 'spirit' };
+for (const [id, f] of Object.entries(STAT_ICON)) sprites[`icon_stat_${id}`] = icon(`icon_stat_${id}`, `icons/${f}.png`, CARD_ICON);
 const SKILL_ICON = {
   magiTurret: 'turret', magiMine: 'mine', antimatterCannon: 'antimatter', magiField: 'field', railgun: 'rail', combatDrone: 'drone',
   unstableSubject: 'specimen', magiCorruption: 'mutate', experimentalWeapon: 'laser', purifyingWings: 'purify', mkPrototype: 'mk', reductionist: 'reduction',
 };
-for (const [id, f] of Object.entries(SKILL_ICON)) sprites[`icon_skill_${id}`] = icon(`icon_skill_${id}`, `icons/${f}.png`, 32);
+for (const [id, f] of Object.entries(SKILL_ICON)) sprites[`icon_skill_${id}`] = icon(`icon_skill_${id}`, `icons/${f}.png`, CARD_ICON);
 const ULT_ICON = { firstLaw: 'repeat', thunderbolt: 'thunder', singularity: 'singularity' };
-for (const [id, f] of Object.entries(ULT_ICON)) sprites[`icon_ult_${id}`] = icon(`icon_ult_${id}`, `icons/${f}.png`, 32);
+for (const [id, f] of Object.entries(ULT_ICON)) sprites[`icon_ult_${id}`] = icon(`icon_ult_${id}`, `icons/${f}.png`, CARD_ICON);
 
 // ---------- 미모사 제미니 ----------
 sprites.icon_gemini = icon('icon_gemini', 'story/mg-portrait.png', 32, { x: 380, y: 230, w: 500, h: 500 });
@@ -232,7 +236,7 @@ const ITEM = {
   item_divine_sword: 'items/sword-youngdi.png', item_hectar_ram: 'items/hectar-ram.png',
   item_wonhon_lump: 'rewards/ghost-icon.png',
 };
-for (const [key, f] of Object.entries(ITEM)) sprites[key] = icon(key, f, 32);
+for (const [key, f] of Object.entries(ITEM)) sprites[key] = icon(key, f, CARD_ICON);
 
 // ---------- 방 타일 (terrain.png: 1행 돌, 2행 푸른 기술, 3행 붉은 균열) ----------
 // 3장은 붉은 적이 묻히지 않게 붉은 점이 드문 칸을 더 어둡게
@@ -541,16 +545,16 @@ actor('enemy_orion_crusader', gaps('warrior/paladin-idle.png'), gaps('warrior/pa
 }
 
 // 아이템 아이콘 (원본에 맞는 것이 없는 둘은 직접 찍는다)
-sprites.item_death_whistle = icon('item_death_whistle', 'warrior/icon-b-shout.png', 32);
-sprites.item_orion_shield = icon('item_orion_shield', 'warrior/icon-p-shield.png', 32);
+sprites.item_death_whistle = icon('item_death_whistle', 'warrior/icon-b-shout.png', CARD_ICON);
+sprites.item_orion_shield = icon('item_orion_shield', 'warrior/icon-p-shield.png', CARD_ICON);
 dots('item_royal_seal', [
   '.....KKKKKK.....', '...KKppppppKK...', '..KppPPPPPPppK..', '.KpPPpPPPPpPPpK.', '.KpPpPPggPPpPpK.', 'KpPPPPggggPPPPpK', 'KpPPPggwwggPPPpK', 'KpPPggwwwwggPPpK',
   'KpPPggwwwwggPPpK', 'KpPPPggwwggPPPpK', 'KpPPPPggggPPPPpK', '.KpPpPPggPPpPpK.', '.KpPPpPPPPpPPpK.', '..KppPPPPPPppK..', '...KKppppppKK...', '.....KKKKKK.....',
-], { scale: 2 });
+], { scale: 4 });
 dots('item_gisup_stone', [
   '................', '....KKKKKK......', '...KmmmmlKK.....', '..KmlllmmmlK....', '..KmldmmdmlKK...', '..KmmmmmmmmmK...', '..KmddmmdmmlK...', '..KmmmmmmmmlK...',
   '..KmdmmddmmmK...', '..KmmmmmmmmmK...', '..KmddmmmdmlK...', '..KmmmmmmmmmK...', '..KdmmmdmmmdK...', '..KddKmmmKddK...', '...KK.KdK.KK....', '......KK........',
-], { scale: 2 });
+], { scale: 4 });
 
 // 실험장
 const labProp = (key, x, y, fit) => { sprites[key] = sheet(key, [k.component(load('environment/ruins-atlas.png'), x, y)], fit); };

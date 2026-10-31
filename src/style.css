@@ -1493,3 +1493,93 @@ body {
 #inventory-window.mobile .iw-dname {
   font-size: 12px;
 }
+
+/* 선택 카드: 큰 아이콘과 읽기 쉬운 글자 */
+#card-window.pc .cw-card {
+  width: min(250px, 31vw);
+  min-height: 320px;
+  padding: 12px;
+  gap: 7px;
+}
+#card-window .cw-hero {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 2px solid;
+  border-radius: 8px;
+  background: #070b11;
+}
+#card-window .cw-hero span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+}
+#card-window .cw-hero.empty {
+  display: none;
+}
+#card-window.pc .cw-hero {
+  width: 104px;
+  height: 104px;
+  padding: 4px;
+  align-self: center;
+}
+#card-window.mobile .cw-hero {
+  width: 60px;
+  height: 60px;
+  padding: 2px;
+}
+#card-window.pc .cw-top {
+  font-size: 12px;
+  color: #c4ccd8;
+}
+#card-window.pc .cw-name {
+  font-size: 19px;
+  line-height: 1.25;
+  text-align: center;
+}
+#card-window .cw-sub {
+  color: #c4ccd8;
+}
+#card-window.pc .cw-sub,
+#card-window.pc .cw-level {
+  text-align: center;
+  font-size: 13px;
+}
+#card-window.pc .cw-badges {
+  justify-content: center;
+}
+#card-window .cw-desc {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #eef2f7;
+}
+#card-window.mobile .cw-left {
+  width: 200px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+#card-window.mobile .cw-left-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+#card-window.mobile .cw-name {
+  font-size: 15px;
+  line-height: 1.2;
+}
+#card-window.mobile .cw-desc {
+  font-size: 13px;
+  line-height: 1.35;
+}
+#card-window {
+  background: rgba(5, 8, 12, 0.93);
+}
+#card-window .cw-name {
+  color: #fff;
+}

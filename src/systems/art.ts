@@ -18,6 +18,7 @@ export const PORTRAIT_SIZE = { w: 48, h: 64 };
 /** 그림 키 규칙 (데이터에 spriteKey가 없는 화면 그림) */
 export const artKeys = {
   skillIcon: (skillId: string) => `icon_skill_${skillId}`,
+  statIcon: (statId: string) => `icon_stat_${statId}`,
   ultimateIcon: (ultimateId: string) => `icon_ult_${ultimateId}`,
   geminiIcon: 'icon_gemini',
   geminiPortrait: 'portrait_gemini',
@@ -125,6 +126,7 @@ export function collectAssets(d: GameData): AssetRef[] {
   for (const o of d.lab.objects) add('lab', { spriteKey: o.spriteKey, color: o.color, size: o.w, height: o.h }, `lab.object.${o.kind}`);
   for (const it of d.items.items) add('item', it, it.nameKey);
   // 화면 아이콘: 스킬·궁극기·제미니 (HUD 칸·카드·인벤토리·컷씬)
+  for (const s of d.stats.stats) add('icon', { spriteKey: artKeys.statIcon(s.id), color: d.ui.hud.skillbar.emptyColor, size: ICON_SIZE }, s.nameKey);
   for (const s of d.skills.skills) add('icon', { spriteKey: artKeys.skillIcon(s.id), color: s.color, size: ICON_SIZE }, s.nameKey);
   for (const u of d.ultimates.ultimates) add('icon', { spriteKey: artKeys.ultimateIcon(u.id), color: u.color, size: ICON_SIZE }, u.nameKey);
   add('icon', { spriteKey: artKeys.geminiIcon, color: d.gemini.color, size: ICON_SIZE }, 'gemini.name', '#icon');

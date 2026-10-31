@@ -61,13 +61,13 @@ export class CardWindow {
       const name = document.createElement('div');
       name.className = 'cw-name';
       name.textContent = v.name;
-      name.style.color = v.accent;
-      if (v.icon) {
-        const icon = document.createElement('span');
-        icon.className = 'cw-icon';
-        // 스킬 카드는 그림이 있을 때만 아이콘을 붙인다
-        if (applyArtIcon(icon, this.ctx, v.icon.key, v.icon.color) || !v.icon.artOnly) name.prepend(icon);
-      }
+      // 큰 아이콘: 카드에서 가장 먼저 눈에 들어오게 (그림이 없으면 색 칸, artOnly면 칸을 비운다)
+      const hero = document.createElement('div');
+      hero.className = 'cw-hero';
+      hero.style.borderColor = v.accent;
+      const heroArt = document.createElement('span');
+      if (v.icon && (applyArtIcon(heroArt, this.ctx, v.icon.key, v.icon.color) || !v.icon.artOnly)) hero.appendChild(heroArt);
+      else hero.classList.add('empty');
       const sub = document.createElement('div');
       sub.className = 'cw-sub';
       sub.textContent = [v.subName, v.school].filter(Boolean).join(' · ');
@@ -89,7 +89,10 @@ export class CardWindow {
         // 모바일 가로 화면은 높이가 낮아 한 장을 두 줄로: [이름·레벨] [종류·계열·배지 / 설명]
         const left = document.createElement('div');
         left.className = 'cw-left';
-        left.append(name, level);
+        const leftText = document.createElement('div');
+        leftText.className = 'cw-left-text';
+        leftText.append(name, level);
+        left.append(hero, leftText);
         const meta = document.createElement('div');
         meta.className = 'cw-meta';
         top.textContent = [v.kindLabel, sub.textContent].filter(Boolean).join(' · ');
@@ -99,7 +102,7 @@ export class CardWindow {
         right.append(meta, desc);
         el.append(left, right);
       } else {
-        el.append(top, name, sub, badges, level, desc);
+        el.append(top, hero, name, sub, level, badges, desc);
       }
       el.addEventListener('click', () => {
         if (!mobile) {

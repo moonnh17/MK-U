@@ -50,6 +50,7 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
       badges: [],
       accent: adv.color,
       school: '',
+      icon: ult ? { color: adv.color, key: artKeys.ultimateIcon(ult.id), artOnly: true } : undefined,
     };
   }
   if (card.kind === 'item') {
@@ -79,6 +80,7 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
       badges: [],
       accent: grade?.color ?? '#ffffff',
       school: '',
+      icon: { color: grade?.color ?? '#ffffff', key: artKeys.statIcon(card.stat), artOnly: true },
     };
   }
 
