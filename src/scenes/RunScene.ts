@@ -1,8 +1,8 @@
 import { buildPathField, pathDir, segmentClear, type PathField } from '../systems/pathField';
-import { bossOrbDrops } from '../systems/bossEnergy';
-import { IDLE_DODGE, blinkTarget, dodgeConfig, startDodge, stepDodge, zigzag, type DodgeState } from '../systems/dodge';
+import { IDLE_DODGE, zigzag } from '../systems/dodge';
 import { stampGrid } from '../systems/roomShapes';
 import Phaser from 'phaser';
+import { PlayerCondition } from './run/playerCondition';
 import { RoomProps } from './run/roomProps';
 import { SKILL_ACTIONS, sfx, type Modal, type Offer, type Prop, type RunSceneData, type Vending } from './run/shared';
 import type { ActionFrame, Vec2 } from '../core/actions';
@@ -19,10 +19,9 @@ import { Enemy, type EnemyHost } from '../entities/enemy';
 import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
 import { Spire } from '../entities/spire';
 import { Darkness } from '../entities/darkness';
-import { PanicFx } from '../entities/panicFx';
 import { pickTrack } from '../systems/music';
 import { BreakableProp } from '../entities/roomProp';
-import { applyMental, lowSanityBonus, sanityMaxFor, stepSanity } from '../systems/sanity';
+import { applyMental, lowSanityBonus } from '../systems/sanity';
 import { animateArt, fitArt } from '../entities/art';
 import { Juice, shake } from '../entities/juice';
 import { cameraFocus, viewSize } from '../systems/camera';
@@ -62,13 +61,14 @@ import { addStat, damageTaken, maxHpFor, setStat, statEffect } from '../systems/
 import { applyBleed, buffDuration, canAutoCast, chargeTime, skillTags, tickBleed } from '../systems/tags';
 import { activeWeapon, dropWeaponAt, autoAim, gainEnergy, gunShots, inArc, normalize, pickUpWeapon, plainWeapon, projectilesCut, rollCrit, canFire, spendEnergy, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, corridors, doorRect, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, obstacleRects, wallRects, type Rect, type WorldMetrics } from '../systems/worldLayout';
-import type { BleedRule, DodgeSchoolDef, EncounterKindId, GeminiEventId, GradeId, HiddenBossDef, WeaponSignature, SchoolId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
+import type { BleedRule, EncounterKindId, GeminiEventId, GradeId, HiddenBossDef, WeaponSignature, SchoolId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
 
 export class RunScene extends Phaser.Scene {
   roomProps!: RoomProps;
+  condition!: PlayerCondition;
   ctx!: GameContext;
   session!: RunSession;
   m!: WorldMetrics;
@@ -167,15 +167,8 @@ export class RunScene extends Phaser.Scene {
   aimDir: Vec2 = { x: 1, y: 0 };
   fireCooldown = 0;
   invuln = 0;
-  dodge: DodgeState = IDLE_DODGE;
-  dodgeGhostIn = 0;
   tutorialTexts: Phaser.GameObjects.Text[] = [];
-  panicFx: PanicFx | null = null;
-  panicTinted = false;
-  dodgeFxRng: Rng | null = null;
-  dodgeBar: Phaser.GameObjects.Graphics | null = null;
   pathFields = new Map<number, PathField>();
-  bossHpSeen = new Map<Enemy, number>();
   interactKind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | null = null;
   /** 상자·드롭 무기 시드 순번 */
   lootSeq = 0;
@@ -207,6 +200,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.condition = new PlayerCondition(this);
     this.roomProps = new RoomProps(this);
     this.ctx = getContext();
     const d = this.ctx.data;
@@ -478,13 +472,13 @@ export class RunScene extends Phaser.Scene {
     this.aimDir = { x: 1, y: 0 };
     this.fireCooldown = 0;
     this.invuln = 0;
-    this.dodge = IDLE_DODGE;
+    this.condition.dodge = IDLE_DODGE;
     this.tutorialTexts = [];
-    this.panicFx = null;
-    this.panicTinted = false;
-    this.dodgeBar = null;
+    this.condition.panicFx = null;
+    this.condition.panicTinted = false;
+    this.condition.dodgeBar = null;
     this.pathFields = new Map();
-    this.bossHpSeen = new Map();
+    this.condition.bossHpSeen = new Map();
     this.interactKind = null;
     this.lootSeq = 0;
     this.toastTimes = new Map();
@@ -906,18 +900,18 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     const mods = this.playerMods();
     this.syncMaxHp();
-    this.updateSanity(dt);
+    this.condition.updateSanity(dt);
     // 패닉: 방향이 뒤집힌다
     if (p.panic && !this.itemRt.first('panicCalm')) frame = { ...frame, move: { x: -frame.move.x, y: -frame.move.y } };
     this.itemRt.update(dt);
-    this.updateDodge(dt, frame);
+    this.condition.updateDodge(dt, frame);
     const speed = d.player.moveSpeed * (1 + statEffect('moveSpeed', this.effStats(), d.stats)) * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus());
     if (this.dashLeft > 0) {
       // MK 돌진: 입력 대신 돌진 방향으로
       this.dashLeft -= dt;
       this.player.setVelocity(this.dashVel.x, this.dashVel.y);
-    } else if (this.dodge.left > 0) {
-      this.player.setVelocity(this.dodge.vel.x, this.dodge.vel.y);
+    } else if (this.condition.dodge.left > 0) {
+      this.player.setVelocity(this.condition.dodge.vel.x, this.condition.dodge.vel.y);
     } else {
       this.player.setVelocity(frame.move.x * speed, frame.move.y * speed);
     }
@@ -932,7 +926,7 @@ export class RunScene extends Phaser.Scene {
       e.update(dt, this.enemyHost);
     }
     for (const b of this.bossControllers.values()) b.update(dt, this.bossHost);
-    this.updateBossEnergy();
+    this.condition.updateBossEnergy();
     for (const h of [...this.hazards]) {
       if (h.update(dt, this.enemyHost)) continue;
       h.destroy();
@@ -973,7 +967,7 @@ export class RunScene extends Phaser.Scene {
 
     this.updateBullets(dt);
     this.updatePickups(dt);
-    this.updateInvuln(dt);
+    this.condition.updateInvuln(dt);
     this.updatePotions();
     this.updateInteractHint();
     this.roomProps.updateDoorIcons();
@@ -1475,7 +1469,7 @@ export class RunScene extends Phaser.Scene {
     const idx = chainTargets(origin, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })), sig.jumps, sig.range, new Set());
     if (idx.length === 0) return;
     sfx('blink');
-    const rng = (this.dodgeFxRng ??= Rng.derive(this.ctx.config.seed, 'dodge-fx'));
+    const rng = (this.condition.dodgeFxRng ??= Rng.derive(this.ctx.config.seed, 'dodge-fx'));
     const g = this.add.graphics().setDepth(6);
     let at = origin;
     for (const i of idx) {
@@ -1571,85 +1565,6 @@ export class RunScene extends Phaser.Scene {
     return inside && segmentClear(body, at, this.obstacles.get(rid) ?? []) ? at : body;
   }
 
-  /** 회피 입력·잔상·재사용 막대 */
-  updateDodge(dt: number, frame: ActionFrame): void {
-    const c = this.ctx.data.player.dodge;
-    this.dodge = stepDodge(this.dodge, dt);
-    if (frame.pressed.has('dodge') && this.dashLeft <= 0) {
-      const started = startDodge(this.dodge.cooldown, frame.move, this.aimDir, c);
-      if (started) {
-        this.dodge = started;
-        this.dodgeGhostIn = 0;
-        const school = dodgeConfig(c, this.session.player.advancement).school;
-        if (school?.kind === 'blink') this.blink(school, started.vel);
-        else {
-          sfx('dash');
-          if (school?.kind === 'shot') this.dodgeShot(school);
-        }
-      }
-    }
-    this.session.dodgeView = { nameKey: dodgeConfig(c, this.session.player.advancement).nameKey, left: this.dodge.cooldown, total: c.cooldownSec };
-    if (this.dodge.left > 0) {
-      this.dodgeGhostIn -= dt;
-      if (this.dodgeGhostIn <= 0) {
-        this.dodgeGhostIn = c.ghostEverySec;
-        const f = this.player.frame;
-        const ghost = this.add.image(this.player.x, this.player.y, this.player.texture.key, f.name).setOrigin(this.player.originX, this.player.originY).setFlipX(this.player.flipX).setAlpha(0.45).setDepth(3).setTint(hexColor(c.barColor));
-        this.tweens.add({ targets: ghost, alpha: 0, duration: c.durationSec * 1000, onComplete: () => ghost.destroy() });
-      }
-    }
-    this.dodgeBar ??= this.add.graphics().setDepth(6);
-    this.dodgeBar.clear();
-    if (this.dodge.cooldown > 0) {
-      const w = 14;
-      const k = 1 - this.dodge.cooldown / c.cooldownSec;
-      const x = this.player.x - w / 2;
-      const y = this.player.y + 7;
-      this.dodgeBar.fillStyle(0x000000, 0.6).fillRect(x, y, w, 2).fillStyle(hexColor(c.barColor), 1).fillRect(x, y, w * k, 2);
-    }
-  }
-
-  /** 점멸: 벽을 뚫지 않는 데까지 순간이동하고, 지나간 자리에 번개가 지직거린다 */
-  blink(s: Extract<DodgeSchoolDef, { kind: 'blink' }>, dir: Vec2): void {
-    const from = { x: this.player.x, y: this.player.y };
-    const r = this.ctx.data.player.size / 2;
-    const blocked = (x: number, y: number) =>
-      this.physics.overlapRect(x - r, y - r, r * 2, r * 2, false, true).some((b) => {
-        const go = b.gameObject;
-        return this.walls.contains(go) || this.doorGroup.contains(go) || this.roomProps.propGroup.contains(go);
-      });
-    const to = blinkTarget(from, dir, s.distancePx, s.stepPx, blocked);
-    this.player.setPosition(to.x, to.y);
-    (this.player.body as Phaser.Physics.Arcade.Body).reset(to.x, to.y);
-    this.dodge = { ...this.dodge, left: 0, invuln: s.invulnSec };
-    sfx('blink');
-    const color = hexColor(s.boltColor);
-    const g = this.add.graphics().setDepth(6);
-    const rng = (this.dodgeFxRng ??= Rng.derive(this.ctx.config.seed, 'dodge-fx'));
-    const draw = () => {
-      g.clear();
-      const pts = zigzag(from, to, s.boltSegments, s.boltAmpPx, rng);
-      g.lineStyle(3, color, 0.35).strokePoints(pts);
-      g.lineStyle(1, 0xffffff, 1).strokePoints(pts);
-    };
-    draw();
-    // 번개 모양을 몇 번 바꿔 지직거린다
-    this.time.addEvent({ delay: (s.boltSec * 1000) / 4, repeat: 2, callback: draw });
-    this.tweens.add({ targets: g, alpha: 0, delay: s.boltSec * 500, duration: s.boltSec * 500, onComplete: () => g.destroy() });
-    this.cameras.main.flash(50, 150, 210, 255);
-  }
-
-  /** 진격: 구르는 순간 조준 방향으로 부채꼴 탄 */
-  dodgeShot(s: Extract<DodgeSchoolDef, { kind: 'shot' }>): void {
-    const from = { x: this.player.x, y: this.player.y };
-    const base = muzzleAngle(from, this.aimTarget, Math.atan2(this.aimDir.y, this.aimDir.x), 0);
-    const spread = (s.spreadDeg * Math.PI) / 180;
-    for (let i = 0; i < s.shots; i++) {
-      const a = s.shots === 1 ? base : base - spread / 2 + (spread * i) / (s.shots - 1);
-      this.fireBullet(from, a, s.projectileSpeed, s.range, s.damage, s.tags, 'dodge', { pierce: 0, crit: 0, tint: s.tint });
-    }
-  }
-
   /** 보스와 마주하면 챕터 보스 곡, 아니면 런 곡 (같은 곡이면 음악 쪽에서 무시한다) */
   updateMusic(): void {
     const facingBoss = this.enemies.some((e) => !e.dead && (e.rank === 'boss' || e.rank === 'hiddenBoss'));
@@ -1679,54 +1594,6 @@ export class RunScene extends Phaser.Scene {
     this.ctx.save.write();
   }
 
-  /** 정신력 값 반영. 패닉에 들어가고 나올 때 알린다 */
-  setSanity(next: { sanity: number; panic: boolean }): void {
-    const p = this.session.player;
-    const was = p.panic;
-    p.sanity = next.sanity;
-    p.panic = next.panic;
-    if (!was && p.panic) {
-      sfx('panic');
-      this.toastThrottled(this.ctx.t(this.itemRt.panicAwaken() ? 'panic.awaken' : 'panic.enter'));
-    } else if (was && !p.panic) this.toastThrottled(this.ctx.t('panic.exit'));
-  }
-
-  /** 최대치 동기화, 회복·보스 감소, 패닉 연출·각성 */
-  updateSanity(dt: number): void {
-    const d = this.ctx.data;
-    const p = this.session.player;
-    const cfg = d.player.sanity;
-    const max = sanityMaxFor(this.effStats(false).willpower, cfg) + p.meta.sanity;
-    if (max !== p.sanityMax) {
-      if (max > p.sanityMax) p.sanity += max - p.sanityMax;
-      p.sanityMax = max;
-      p.sanity = Math.min(p.sanity, max);
-    }
-    const facingBoss = this.enemies.some((e) => e.rank === 'boss' || e.rank === 'hiddenBoss');
-    this.setSanity(stepSanity(p, dt, facingBoss, cfg));
-
-    if (p.panic) {
-      // 아트로스 비석 필사본: 시야 방해가 준다
-      const calm = this.itemRt.first('panicCalm')?.visionMul ?? 1;
-      this.panicFx ??= new PanicFx(this, { ...cfg.panic, darkAlpha: cfg.panic.darkAlpha * calm, lines: Math.round(cfg.panic.lines * calm), lightRadius: cfg.panic.lightRadius / calm }, Rng.derive(this.ctx.config.seed, 'panic-fx'), this.ctx.renderScale);
-      const cam = this.cameras.main;
-      this.panicFx.update(dt, cam.width / 2 + (this.player.x - cam.midPoint.x), cam.height / 2 + (this.player.y - cam.midPoint.y));
-    } else if (this.panicFx) {
-      this.panicFx.destroy();
-      this.panicFx = null;
-    }
-    // 각성: 체력이 닳는다 (죽지는 않는다)
-    const awaken = p.panic ? this.itemRt.panicAwaken() : null;
-    if (awaken) {
-      p.hp = Math.max(Math.min(p.hp, 1), p.hp - awaken.hpPerSec * dt);
-      this.player.setTint(hexColor(cfg.panic.awakenTint));
-      this.panicTinted = true;
-    } else if (this.panicTinted) {
-      this.player.clearTint();
-      this.panicTinted = false;
-    }
-  }
-
   /** 적 길 찾기: 곧장 갈 수 있으면 null, 막혔으면 이 방 격자로 돌아가는 방향 */
   enemyPathDir(from: Vec2, radius: number): Vec2 | null {
     const rid = this.session.currentRoomId;
@@ -1740,27 +1607,6 @@ export class RunScene extends Phaser.Scene {
       this.pathFields.set(rid, field);
     }
     return pathDir(field, from, this.player);
-  }
-
-  /** 보스 체력이 일정 비율 줄 때마다 보스와 플레이어 사이에 에너지 구슬 */
-  updateBossEnergy(): void {
-    const d = this.ctx.data;
-    for (const e of this.bossControllers.keys()) {
-      const ratio = e.hp / e.maxHp;
-      const n = bossOrbDrops(this.bossHpSeen.get(e) ?? 1, ratio, d.bosses.energyDrops);
-      this.bossHpSeen.set(e, ratio);
-      if (n <= 0) continue;
-      const x = (e.sprite.x + this.player.x) / 2;
-      const y = (e.sprite.y + this.player.y) / 2;
-      const pop = d.juice.death.orbPopPx;
-      for (let i = 0; i < n; i++) {
-        const a = this.rng.range(0, Math.PI * 2);
-        const r = this.rng.range(pop[0], pop[1]);
-        const pk = new Pickup(this, 'energy', e.sprite.x, e.sprite.y, d.pickups);
-        this.tweens.add({ targets: pk.sprite, x: x + Math.cos(a) * r, y: y + Math.sin(a) * r, duration: d.juice.death.orbPopSec * 1000, ease: 'Back.easeOut' });
-        this.pickups.push(pk);
-      }
-    }
   }
 
   /** 무기 치명 판정 */
@@ -1992,7 +1838,7 @@ export class RunScene extends Phaser.Scene {
   /** 피해를 받았으면 true */
   /** 피해를 받았으면 true. attacker: 때린 적(반사용, 모르면 null) */
   hurtPlayer(amount: number, attacker: Enemy | null = null, mentalRaw?: number): boolean {
-    if (this.invuln > 0 || this.dodge.invuln > 0 || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
+    if (this.invuln > 0 || this.condition.dodge.invuln > 0 || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
     // 특무 인장: 피해를 받기 직전 순간이동으로 피한다 (피격 무적과 같은 시간)
     if (this.itemRt.tryDodge()) {
       this.invuln = this.ctx.data.player.hurtInvulnSec;
@@ -2012,7 +1858,7 @@ export class RunScene extends Phaser.Scene {
     // 정신 피해: 패닉 중이면 체력 피해로 바뀐다
     const mental = (mentalRaw ?? amount * (attacker?.def.mentalRatio ?? 0)) * (1 - statEffect('mentalResist', this.effStats(), this.ctx.data.stats));
     const m = applyMental(p, mental);
-    this.setSanity(m);
+    this.condition.setSanity(m);
     const v = takeDamage(p, taken + m.hpDamage);
     p.hp = v.hp;
     this.invuln = this.ctx.data.player.hurtInvulnSec;
@@ -2027,16 +1873,6 @@ export class RunScene extends Phaser.Scene {
     else if (this.itemRt.tryRevive()) this.cameras.main.flash(200, 255, 255, 255);
     if (p.hp <= 0) this.endRun({ type: 'dead' });
     return true;
-  }
-
-  updateInvuln(dt: number): void {
-    if (this.invuln <= 0) {
-      this.player.setAlpha(1);
-      return;
-    }
-    this.invuln -= dt;
-    const blink = this.ctx.data.player.blinkIntervalSec;
-    this.player.setAlpha(Math.floor(this.invuln / blink) % 2 === 0 ? 0.3 : 1);
   }
 
   updateBullets(dt: number): void {
@@ -2204,7 +2040,7 @@ export class RunScene extends Phaser.Scene {
         const p = this.session.player;
         const v = heal(p, amount);
         p.hp = v.hp;
-        if (overflow) this.setSanity({ sanity: Math.min(p.sanityMax, p.sanity + v.overflow), panic: p.panic });
+        if (overflow) this.condition.setSanity({ sanity: Math.min(p.sanityMax, p.sanity + v.overflow), panic: p.panic });
       },
       payHp: (ratio) => {
         const p = this.session.player;
@@ -2293,7 +2129,7 @@ export class RunScene extends Phaser.Scene {
   onEnemyBulletHit(b: Phaser.Physics.Arcade.Image): void {
     if (!b.active) return;
     // 구르는 동안에는 탄이 몸을 지나간다 (헥타르 RAM: 스칠 때 에너지)
-    if (this.dodge.invuln > 0) {
+    if (this.condition.dodge.invuln > 0) {
       const graze = this.itemRt.first('grazeEnergy');
       if (graze && !b.getData('grazed')) {
         b.setData('grazed', true);
