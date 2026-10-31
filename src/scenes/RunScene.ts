@@ -2,6 +2,7 @@ import { buildPathField, pathDir, segmentClear, type PathField } from '../system
 import { IDLE_DODGE, zigzag } from '../systems/dodge';
 import { stampGrid } from '../systems/roomShapes';
 import Phaser from 'phaser';
+import { StageFx } from './run/stageFx';
 import { PlayerCondition } from './run/playerCondition';
 import { RoomProps } from './run/roomProps';
 import { SKILL_ACTIONS, sfx, type Modal, type Offer, type Prop, type RunSceneData, type Vending } from './run/shared';
@@ -19,13 +20,12 @@ import { Enemy, type EnemyHost } from '../entities/enemy';
 import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
 import { Spire } from '../entities/spire';
 import { Darkness } from '../entities/darkness';
-import { pickTrack } from '../systems/music';
 import { BreakableProp } from '../entities/roomProp';
 import { applyMental, lowSanityBonus } from '../systems/sanity';
 import { animateArt, fitArt } from '../entities/art';
 import { Juice, shake } from '../entities/juice';
 import { cameraFocus, viewSize } from '../systems/camera';
-import { bossIntroStage, bossIntroTotal, damageKind, HitStop, slowMoScale, type IntroStage } from '../systems/juice';
+import { damageKind, HitStop, slowMoScale } from '../systems/juice';
 import { weaponSfx } from '../systems/sound';
 import { artKeys, type TilePart } from '../systems/art';
 import { ItemRuntime } from '../items/runtime';
@@ -69,6 +69,7 @@ export type { RunSceneData } from './run/shared';
 export class RunScene extends Phaser.Scene {
   roomProps!: RoomProps;
   condition!: PlayerCondition;
+  stageFx!: StageFx;
   ctx!: GameContext;
   session!: RunSession;
   m!: WorldMetrics;
@@ -120,8 +121,6 @@ export class RunScene extends Phaser.Scene {
   hitStop!: HitStop;
   stopping = false;
   pendingCrit = false;
-  /** 보스 등장 컷 (그동안 게임은 멈춘다) */
-  intro: { e: Enemy; t: number; stage: IntroStage } | null = null;
   /** 방 장애물 (적 소환 자리를 피한다) */
   obstacles = new Map<number, Rect[]>();
   /** 지금 조준 중인 적 (카메라가 그쪽으로 기운다) */
@@ -167,7 +166,6 @@ export class RunScene extends Phaser.Scene {
   aimDir: Vec2 = { x: 1, y: 0 };
   fireCooldown = 0;
   invuln = 0;
-  tutorialTexts: Phaser.GameObjects.Text[] = [];
   pathFields = new Map<number, PathField>();
   interactKind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | null = null;
   /** 상자·드롭 무기 시드 순번 */
@@ -200,6 +198,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.stageFx = new StageFx(this);
     this.condition = new PlayerCondition(this);
     this.roomProps = new RoomProps(this);
     this.ctx = getContext();
@@ -235,7 +234,7 @@ export class RunScene extends Phaser.Scene {
     this.hitStop = new HitStop(d.juice.hitStop.minGapSec);
     this.stopping = false;
     this.pendingCrit = false;
-    this.intro = null;
+    this.stageFx.intro = null;
     this.slowT = null;
     // 슬로모션 중에 스테이지를 넘어가도 배속이 남지 않게
     this.physics.world.timeScale = 1;
@@ -298,7 +297,7 @@ export class RunScene extends Phaser.Scene {
       addObstacle: (at, radius, doorClear) => this.addObstacle(at, radius, doorClear),
       chapterRoster: () => this.chapterRoster(),
       arena: () => this.currentArena(),
-      bossPhaseFx: (text, color, at) => this.bossPhaseFx(text, color, at),
+      bossPhaseFx: (text, color, at) => this.stageFx.bossPhaseFx(text, color, at),
     };
 
     this.walls = this.physics.add.staticGroup();
@@ -309,14 +308,14 @@ export class RunScene extends Phaser.Scene {
     this.enemyBullets = this.physics.add.group();
 
     this.buildWorld();
-    this.showTutorial();
+    this.stageFx.showTutorial();
 
     const start = roomCenter(map.rooms[map.startId]!, this.m);
     this.player = this.physics.add.sprite(start.x, start.y, d.player.spriteKey).setDepth(4);
     fitArt(d, this.player, d.player.size, d.player.height ?? d.player.size);
     this.applyPlayerArt();
     this.weaponSprite = this.add.image(start.x, start.y, this.weaponDef().spriteKey).setDepth(4);
-    if (this.initData.warpIn) this.warpIn();
+    if (this.initData.warpIn) this.stageFx.warpIn();
     // 카메라: 확대하고 첫 프레임부터 제자리 (다음부터는 부드럽게 따라간다)
     {
       const cam = this.cameras.main;
@@ -473,7 +472,7 @@ export class RunScene extends Phaser.Scene {
     this.fireCooldown = 0;
     this.invuln = 0;
     this.condition.dodge = IDLE_DODGE;
-    this.tutorialTexts = [];
+    this.stageFx.tutorialTexts = [];
     this.condition.panicFx = null;
     this.condition.panicTinted = false;
     this.condition.dodgeBar = null;
@@ -653,7 +652,7 @@ export class RunScene extends Phaser.Scene {
 
   /** 보스 체력바에 띄울 보스 (보스가 부른 적·분신 제외, 등장 컷 동안은 없음) */
   bossView(): RunSession['boss'] {
-    if (this.intro) return null;
+    if (this.stageFx.intro) return null;
     for (const [e, c] of this.bossControllers) {
       if (e.dead) continue;
       return { name: this.ctx.t(e.def.nameKey), hp: e.hp, maxHp: e.maxHp, markers: c.def.enrageAt > 0 ? [c.def.enrageAt] : [], color: e.def.color };
@@ -668,154 +667,6 @@ export class RunScene extends Phaser.Scene {
     const rid = roomAt(this.session.map, this.m, this.player.x, this.player.y);
     const room = rid !== null ? roomRect(this.session.map.rooms[rid]!, this.m) : null;
     return cameraFocus({ x: this.player.x, y: this.player.y }, this.aimTarget, viewSize(cam.width, cam.height, rules.zoom * this.ctx.renderScale), rules, room);
-  }
-
-  /** 보스 등장 컷 시작: 게임을 멈추고 카메라가 보스 쪽으로 다가간다 */
-  startBossIntro(e: Enemy): void {
-    const bi = this.ctx.data.juice.bossIntro;
-    e.warn = bossIntroTotal(bi) + 0.1;
-    e.sprite.setAlpha(0);
-    this.intro = { e, t: 0, stage: 'pan' };
-    this.setModal('intro');
-    const cam = this.cameras.main;
-    cam.pan(e.sprite.x, e.sprite.y, bi.panSec * 1000, 'Sine.easeInOut');
-    cam.zoomTo(this.ctx.data.ui.camera.zoom * this.ctx.renderScale * bi.zoom, bi.panSec * 1000);
-  }
-
-  /** 등장 컷 한 프레임: 단계가 바뀔 때마다 연출. 아무 키·탭이면 건너뛴다 */
-  updateIntro(dt: number, frame: ActionFrame): void {
-    const it = this.intro!;
-    const d = this.ctx.data;
-    const bi = d.juice.bossIntro;
-    it.t += dt;
-    if (frame.pressed.size > 0 && it.t > 0.2) {
-      this.finishIntro();
-      return;
-    }
-    const st = bossIntroStage(it.t, bi).stage;
-    if (st === it.stage) return;
-    it.stage = st;
-    const e = it.e;
-    const cam = this.cameras.main;
-    if (st === 'drop') {
-      // 커다랗게 떠 있다가 내려찍는다
-      e.sprite.setAlpha(1).setScale(e.baseScale * 1.8);
-      this.tweens.add({
-        targets: e.sprite,
-        scale: e.baseScale,
-        duration: bi.dropSec * 1000,
-        ease: 'Quad.easeIn',
-        onComplete: () => {
-          shake(this, 'heavy');
-          sfx('bossSlam');
-          this.juice.landing({ x: e.sprite.x, y: e.sprite.y }, e.radius);
-        },
-      });
-    } else if (st === 'name') {
-      const { stage } = this.session;
-      const hidden = e.rank === 'hiddenBoss';
-      const sub = hidden ? this.ctx.t('boss.intro.hidden') : this.ctx.t('boss.intro.stage', { chapter: stage.chapter, stage: stage.stage });
-      bus.emit('bossIntroBand', { name: this.ctx.t(e.def.nameKey), sub });
-    } else if (st === 'return') {
-      bus.emit('bossIntroBand', { name: '', sub: '' });
-      const tgt = this.cameraTarget();
-      cam.pan(tgt.x, tgt.y, bi.returnSec * 1000, 'Sine.easeInOut');
-      cam.zoomTo(this.ctx.data.ui.camera.zoom * this.ctx.renderScale, bi.returnSec * 1000);
-    } else if (st === 'done') {
-      this.finishIntro();
-    }
-  }
-
-  /** 등장 컷 끝 (또는 건너뜀): 카메라를 제자리로, 보스를 깨운다 */
-  finishIntro(): void {
-    const it = this.intro;
-    if (!it) return;
-    this.intro = null;
-    const cam = this.cameras.main;
-    cam.panEffect.reset();
-    cam.zoomEffect.reset();
-    cam.setZoom(this.ctx.data.ui.camera.zoom * this.ctx.renderScale);
-    const tgt = this.cameraTarget();
-    cam.setScroll(tgt.x - cam.width / 2, tgt.y - cam.height / 2);
-    this.tweens.killTweensOf(it.e.sprite);
-    it.e.sprite.setAlpha(1).setScale(it.e.baseScale);
-    it.e.warn = 0;
-    bus.emit('bossIntroBand', { name: '', sub: '' });
-    if (this.modal === 'intro') this.setModal(null);
-  }
-
-  /**
-   * 포탈 타기: 게임을 멈추고 캐릭터가 포탈 가운데로 빨려 들어가며(돌며 작아짐) 카메라가 확대된다.
-   * 다 들어가면 이동 화면(빛줄기)을 덮고 잠깐 뒤 then (카드 고르기).
-   */
-  warpOut(then: () => void): void {
-    const p = this.ctx.data.juice.portal;
-    const portal = this.nearest(this.portals.map((x) => ({ x: x.sprite.x, y: x.sprite.y })), Infinity) ?? { x: this.player.x, y: this.player.y };
-    this.setModal('portal');
-    sfx('warp');
-    const cam = this.cameras.main;
-    cam.zoomTo(this.ctx.data.ui.camera.zoom * this.ctx.renderScale * p.zoom, p.suckSec * 1000, 'Quad.easeIn');
-    cam.pan(portal.x, portal.y, p.suckSec * 1000, 'Sine.easeInOut');
-    this.weaponSprite.setVisible(false);
-    this.tweens.add({
-      targets: this.player,
-      x: portal.x,
-      y: portal.y,
-      scale: 0,
-      angle: 540,
-      duration: p.suckSec * 1000,
-      ease: 'Quad.easeIn',
-      onComplete: () => {
-        bus.emit('warp', { on: true });
-        // 덮인 뒤 잠깐 있다가 카드 (트윈은 모달 중에도 돈다)
-        this.tweens.add({
-          targets: this.player,
-          alpha: 0,
-          duration: (p.fadeInSec + p.holdSec) * 1000,
-          onComplete: () => {
-            if (this.modal === 'portal') this.setModal(null);
-            then();
-          },
-        });
-      },
-    });
-  }
-
-  /** 포탈을 타고 도착: 이동 화면을 걷고 캐릭터가 빛 속에서 커지며 나타난다 */
-  warpIn(): void {
-    const p = this.ctx.data.juice.portal;
-    bus.emit('warp', { on: false });
-    sfx('warpArrive');
-    this.player.setScale(0).setAngle(-360);
-    this.tweens.add({ targets: this.player, scale: 1, angle: 0, duration: p.arriveSec * 1000, delay: p.fadeOutSec * 500, ease: 'Back.easeOut' });
-    const ring = this.add.circle(this.player.x, this.player.y, 6).setStrokeStyle(2, hexColor(p.color), 1).setDepth(5);
-    this.tweens.add({ targets: ring, scale: 5, alpha: 0, duration: p.arriveSec * 1000 * 1.4, delay: p.fadeOutSec * 500, onComplete: () => ring.destroy() });
-  }
-
-  /** 보스 강화·단계 개방: 번쩍임, 짧은 확대, 화면 가운데 큰 이름 */
-  bossPhaseFx(text: string, color: string, at: Vec2): void {
-    const bp = this.ctx.data.juice.bossPhase;
-    const c = Phaser.Display.Color.HexStringToColor(color);
-    const cam = this.cameras.main;
-    cam.flash(bp.flashMs, c.red, c.green, c.blue);
-    sfx('bossPhase');
-    this.juice.colorBurst(at, color, bp);
-    const base = this.ctx.data.ui.camera.zoom * this.ctx.renderScale;
-    this.tweens.add({ targets: cam, zoom: base * bp.zoom, duration: (bp.zoomSec * 1000) / 2, yoyo: true, onComplete: () => cam.setZoom(base) });
-    bus.emit('banner', { text, color, size: bp.bannerSize, sec: bp.bannerSec });
-  }
-
-  /** 보스 처치: 슬로모션 + 흰 번쩍임 + 연쇄 폭발 */
-  startBossKill(at: Vec2): void {
-    const k = this.ctx.data.juice.bossKill;
-    this.slowT = 0;
-    this.cameras.main.flash(k.flashMs, 255, 255, 255);
-    for (let i = 0; i < k.explosions; i++) {
-      this.time.delayedCall(i * k.stepSec * 1000, () => {
-        this.juice.explosionNear(at, k.spreadPx);
-        sfx('explosion');
-      });
-    }
   }
 
   addPortal(node: RoomNode): void {
@@ -844,7 +695,7 @@ export class RunScene extends Phaser.Scene {
   override update(_time: number, deltaMs: number): void {
     let dt = Math.min(deltaMs / 1000, 0.05);
     let frame = this.ctx.input.poll();
-    this.updateMusic();
+    this.stageFx.updateMusic();
     // 보스 처치 슬로모션: 물리·트윈·게임 시간을 함께 늦춘다
     if (this.slowT !== null) {
       this.slowT += dt;
@@ -854,7 +705,7 @@ export class RunScene extends Phaser.Scene {
       if (sc >= 1) this.slowT = null;
       dt *= sc;
     }
-    if (this.intro) this.updateIntro(dt, frame);
+    if (this.stageFx.intro) this.stageFx.updateIntro(dt, frame);
     this.session.boss = this.bossView();
 
     for (const action of frame.pressed) {
@@ -971,7 +822,7 @@ export class RunScene extends Phaser.Scene {
     this.updatePotions();
     this.updateInteractHint();
     this.roomProps.updateDoorIcons();
-    this.updateTutorial();
+    this.stageFx.updateTutorial();
 
     const weaponKey = this.shownWeaponKey();
     const handAt = this.handPos();
@@ -1008,7 +859,7 @@ export class RunScene extends Phaser.Scene {
         // 보스방: 경고 배너를 띄우고 그동안 보스 소환을 미룬다
         const boss = state.kind === 'bossRoom' ? state.waves[0]?.[0] : undefined;
         const bossDef = boss ? this.ctx.data.enemies.enemies.find((e) => e.id === boss) : undefined;
-        if (bossDef) this.showBossWarning(this.ctx.t(bossDef.nameKey));
+        if (bossDef) this.stageFx.showBossWarning(this.ctx.t(bossDef.nameKey));
         this.handleRoomEvents(rid, state.enter(bossDef ? this.ctx.data.bosses.bannerSec : 0));
         // 바바리안 데스 휘슬: 전투 칸에 들어갈 때 함성
         if (state.kind === 'combatRoom') this.itemRt.triggerRoar();
@@ -1124,7 +975,7 @@ export class RunScene extends Phaser.Scene {
       }
       if (core) {
         this.bossControllers.set(enemy, new BossController(enemy, core, mul));
-        if (!this.intro) this.startBossIntro(enemy);
+        if (!this.stageFx.intro) this.stageFx.startBossIntro(enemy);
       }
       // 식광: 일식 어둠
       const dk = core?.darkness;
@@ -1565,35 +1416,6 @@ export class RunScene extends Phaser.Scene {
     return inside && segmentClear(body, at, this.obstacles.get(rid) ?? []) ? at : body;
   }
 
-  /** 보스와 마주하면 챕터 보스 곡, 아니면 런 곡 (같은 곡이면 음악 쪽에서 무시한다) */
-  updateMusic(): void {
-    const facingBoss = this.enemies.some((e) => !e.dead && (e.rank === 'boss' || e.rank === 'hiddenBoss'));
-    bus.emit('music', { track: pickTrack(this.ctx.data.sounds.music, { place: 'run', chapter: this.session.stage.chapter, facingBoss }) });
-  }
-
-  /** 첫 런 시작 방: 조작 안내. 다른 방으로 가면 사라지고 다시 나오지 않는다 */
-  showTutorial(): void {
-    const save = this.ctx.save;
-    if (save.data.tutorialDone || this.session.stage.chapter !== 1 || this.session.stage.stage !== 1) return;
-    const c = this.ctx.data.ui.tutorial;
-    const center = roomCenter(this.session.map.rooms[this.session.map.startId]!, this.m);
-    const keys = this.ctx.uiMode === 'mobile' ? c.mobile : c.pc;
-    this.tutorialTexts = keys.map((k, i) =>
-      this.add
-        .text(center.x, center.y + c.offsetY + i * c.lineGapPx, this.ctx.t(k), { fontFamily: 'sans-serif', fontSize: `${c.fontPx}px`, color: '#ffffff', stroke: '#000000', strokeThickness: 2, align: 'center' })
-        .setOrigin(0.5)
-        .setDepth(6),
-    );
-  }
-
-  updateTutorial(): void {
-    if (this.tutorialTexts.length === 0 || this.session.currentRoomId === this.session.map.startId) return;
-    for (const t of this.tutorialTexts) t.destroy();
-    this.tutorialTexts = [];
-    this.ctx.save.data.tutorialDone = true;
-    this.ctx.save.write();
-  }
-
   /** 적 길 찾기: 곧장 갈 수 있으면 null, 막혔으면 이 방 격자로 돌아가는 방향 */
   enemyPathDir(from: Vec2, radius: number): Vec2 | null {
     const rid = this.session.currentRoomId;
@@ -1734,7 +1556,7 @@ export class RunScene extends Phaser.Scene {
     this.juice.death(e.sprite, e.def.color, big);
     sfx(big ? 'explosion' : 'kill');
     if (big) this.hitStop.request(e.rank === 'boss' || e.rank === 'hiddenBoss' ? d.juice.hitStop.bossKill : d.juice.hitStop.eliteKill);
-    if (this.bossControllers.has(e)) this.startBossKill({ x, y });
+    if (this.bossControllers.has(e)) this.stageFx.startBossKill({ x, y });
     this.recordKill(e);
     // 집정관: 같은 방에서 죽은 적의 에너지를 흡수한다 (그 적의 에너지 구슬은 떨어지지 않음)
     const absorbed = this.archonAbsorb(e, roomId);
@@ -1941,22 +1763,6 @@ export class RunScene extends Phaser.Scene {
     if (!refractable) b.setTint(0xff2a2a);
     if (homing > 0) b.setScale(1.5);
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
-  }
-
-  /** 보스방 경고: 화면 가운데 WARNING + 보스 이름 */
-  showBossWarning(name: string): void {
-    sfx('warning');
-    const cam = this.cameras.main;
-    const sec = this.ctx.data.bosses.bannerSec;
-    const style = { fontFamily: 'sans-serif', color: '#ff4a4a', stroke: '#000000', strokeThickness: 3 };
-    const head = this.add.text(cam.width / 2, cam.height / 2 - 10, this.ctx.t('boss.warning'), { ...style, fontSize: '20px' });
-    const sub = this.add.text(cam.width / 2, cam.height / 2 + 12, name, { ...style, fontSize: '12px', color: '#ffffff' });
-    for (const t of [head, sub]) {
-      t.setOrigin(0.5).setScrollFactor(0).setDepth(20);
-      this.tweens.add({ targets: t, alpha: 0.3, duration: 250, yoyo: true, repeat: Math.max(0, Math.round((sec * 1000) / 500) - 1) });
-      this.time.delayedCall(sec * 1000, () => t.destroy());
-    }
-    shake(this, 'rumble', sec * 1000);
   }
 
   updatePickups(dt: number): void {
@@ -3060,7 +2866,7 @@ export class RunScene extends Phaser.Scene {
     this.session.player.record.stagesCleared++;
     if (adv.type === 'stage' || adv.type === 'chapter') {
       // 포탈에 빨려 들어가 이동 화면에서 스테이지 끝 카드를 고른 뒤 다음 스테이지로
-      this.warpOut(() =>
+      this.stageFx.warpOut(() =>
         this.queueOffers([{ kind: afterStage, boss: false }], () => {
           const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [], warpIn: true };
           this.scene.restart(data);
