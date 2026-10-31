@@ -118,9 +118,9 @@
     },
     "enemy_ghost_shooter": {
       "file": "mku/enemy_ghost_shooter.png",
-      "frameWidth": 50,
+      "frameWidth": 52,
       "frameHeight": 54,
-      "frames": 4,
+      "frames": 6,
       "density": 2,
       "anims": {
         "idle": {
@@ -130,8 +130,14 @@
         },
         "move": {
           "from": 1,
-          "to": 3,
-          "fps": 8
+          "to": 2,
+          "fps": 4
+        },
+        "aim": {
+          "from": 3,
+          "to": 5,
+          "fps": 5,
+          "loop": false
         }
       }
     },

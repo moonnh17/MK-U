@@ -4,6 +4,7 @@ import type { Vec2 } from '../core/actions';
 import type { Rng } from '../core/rng';
 import { hexColor } from '../core/scale';
 import { archonMods, archonStage, rescaleHp } from '../systems/champions';
+import { animKey, facingFlip } from '../systems/art';
 import { spawnRise } from '../systems/juice';
 import type { CorruptionState } from '../systems/acro';
 import { effectiveRank, eliteMods, type EliteMods } from '../systems/elites';
@@ -108,6 +109,8 @@ export class Enemy {
   private spawnSmoke: Phaser.GameObjects.Image | null = null;
   /** 집정관: 흡수량·단계·후광 */
   private absorbed = 0;
+  /** 챕터 체력 배율 (집정관 단계 체력·흡수량 계산에 함께 쓴다) */
+  private hpScale = 1;
   absorbStage = 0;
   private halo: Phaser.GameObjects.Arc | null = null;
 
@@ -128,7 +131,7 @@ export class Enemy {
     this.maxHp = def.maxHp * this.mods.hpMul;
     this.hp = this.maxHp;
     this.warn = warnSec;
-    this.attacks = [...this.elites.flatMap((x) => x.extraAttacks ?? []), ...(def.attacks ?? [])];
+    this.attacks = [...(def.noEliteAttacks ? [] : this.elites.flatMap((x) => x.extraAttacks ?? [])), ...(def.attacks ?? [])];
     // 첫 공격은 등장 직후 바로 나오지 않게
     this.ai = initialAi(this.attacks, warnSec);
     this.sprite = scene.physics.add.sprite(x, y, def.spriteKey);
@@ -165,6 +168,12 @@ export class Enemy {
   setMaxHp(v: number): void {
     this.maxHp = v;
     this.hp = v;
+  }
+
+  /** 챕터 체력 배율 — 소환 직후에만 */
+  scaleHp(k: number): void {
+    this.hpScale = k;
+    this.setMaxHp(this.maxHp * k);
   }
 
   setExtraScale(k: number): void {
@@ -204,7 +213,7 @@ export class Enemy {
     if (this.dead) return;
     // 지난 프레임 움직임으로 idle·move 애니메이션·좌우 반전
     const data = getContext().data;
-    animateArt(data, this.sprite);
+    this.animate(data);
     // 맞은 직후: 가로로 넓고 세로로 낮게 찌그러졌다 돌아온다
     if (this.squashLeft > 0) {
       const hf = data.juice.hitFlash;
@@ -348,6 +357,17 @@ export class Enemy {
     }
   }
 
+  /** 조준 중 준비 자세(유령 사수 활 당기기)가 있으면 그것을, 아니면 idle·move */
+  private animate(data: ReturnType<typeof getContext>['data']): void {
+    const aim = animKey(this.def.spriteKey, 'aim');
+    if (this.ai.phase !== 'windup' && !(this.ai.phase === 'act' && this.sprite.anims.currentAnim?.key === aim) || !this.scene.anims.exists(aim)) {
+      animateArt(data, this.sprite);
+      return;
+    }
+    this.sprite.setFlipX(facingFlip(this.aim.x * 100, this.sprite.flipX, data.art.sprites[this.def.spriteKey]?.facing));
+    if (this.sprite.anims.currentAnim?.key !== aim) this.sprite.play(aim);
+  }
+
   /** 집행자 밧줄: 끝이 플레이어에 닿으면 끌어당기고, 끌려온 자리에 도끼 예고 */
   private updateRope(dt: number, a: EnemyAttackDef, host: EnemyHost): void {
     if (this.ropeHit) return;
@@ -376,7 +396,7 @@ export class Enemy {
   absorb(amount: number): number | null {
     const def = this.def.absorb;
     if (!def || this.dead) return null;
-    this.absorbed += amount;
+    this.absorbed += amount / this.hpScale;
     const stage = archonStage(this.absorbed, def);
     if (stage === this.absorbStage) return null;
     this.setAbsorbStage(stage);
@@ -393,7 +413,7 @@ export class Enemy {
   private setAbsorbStage(stage: number): void {
     const def = this.def.absorb!;
     const m = archonMods(stage, def);
-    const max = this.def.maxHp * this.mods.hpMul * m.hpMul;
+    const max = this.def.maxHp * this.hpScale * this.mods.hpMul * m.hpMul;
     this.hp = rescaleHp(this.hp, this.maxHp, max);
     this.maxHp = max;
     this.damageMul = m.damageMul;

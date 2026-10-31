@@ -1,6 +1,6 @@
 /**
  * 반물질포 (헥타르, 기술·원거리·차징).
- * 한 번 누르면 충전(민첩으로 빨라짐)이 시작되고, 충전이 끝나면 가장 가까운 적에게 대형 포탄을 자동으로 쏜다.
+ * 한 번 누르면 충전이 시작되고, 충전이 끝나면 가장 가까운 적에게 대형 포탄을 자동으로 쏜다.
  * 충전 중에도 움직일 수 있다. 충전 중 피해를 받으면 충전이 끊기고 쿨타임의 절반을 돌려받는다.
  * 각성 '다연장반입자포': 충전 뒤 4포신이 연속 포격하고, 매 발 밀집 지역·강적을 자동 조준한다.
  */
@@ -28,7 +28,7 @@ class Charge implements SkillObject {
     private readonly s: SkillCast,
   ) {
     this.createdAt = host.scene.time.now;
-    this.total = host.chargeTime(s.values.chargeSec!, skillTags(s.def, s.owned.awakened));
+    this.total = s.values.chargeSec!;
     this.shotsLeft = s.owned.awakened ? s.values.barrels! : 1;
     const ref = s.owned.awakened ? s.def.sprites.chargeA! : levelRef(s, 'charge');
     this.orb = host.sprite(0, 0, ref).setDepth(6);

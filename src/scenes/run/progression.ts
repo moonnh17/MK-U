@@ -3,7 +3,7 @@ import type { ActionFrame } from '../../core/actions';
 import { bus } from '../../core/events';
 import { Rng } from '../../core/rng';
 import { isSkillImplemented } from '../../skills/registry';
-import { applyCard, drawSkillCards, drawStatCards, type AnyCard } from '../../systems/cards';
+import { applyCard, drawSkillCards, drawStatCards, type AnyCard, type Card } from '../../systems/cards';
 import { convertSkills, judgeSchool, skillAllowed, topSchools, ultimateAwakeningReady } from '../../systems/advancement';
 import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type Cutscene } from '../../ui/cutscenePages';
 import { type RoomNode } from '../../systems/mapgen';
@@ -93,10 +93,7 @@ export class Progression {
       bus.emit('cardsShow', { titleKey: 'card.title.spire', cards, reroll: null });
       return;
     }
-    const cards =
-      next.kind === 'skill'
-        ? drawSkillCards(rng, p.loadout, p.stats, d.skills, d.cards, (id) => isSkillImplemented(id) && skillAllowed(findSkill(d.skills, id), p.advancement))
-        : drawStatCards(rng, d.cards.cardCount, d.cards);
+    const cards = next.kind === 'skill' ? this.drawSkills(rng) : drawStatCards(rng, d.cards.cardCount, d.cards);
     this.currentCards = cards;
     this.run.setModal('cards');
     const cost = d.cards.rerollCost;
@@ -105,6 +102,47 @@ export class Progression {
       cards,
       reroll: { cost, enabled: !this.rerolled && Math.floor(p.coins) >= cost, used: this.rerolled },
     });
+  }
+
+  private drawSkills(rng: Rng): Card[] {
+    const d = this.run.ctx.data;
+    const p = this.run.session.player;
+    return drawSkillCards(rng, p.loadout, p.stats, d.skills, d.cards, (id) => isSkillImplemented(id) && skillAllowed(findSkill(d.skills, id), p.advancement));
+  }
+
+  /** 상점 진열: 카드 보상과 같은 규칙으로 뽑는다 */
+  drawShopCards(kind: 'skillShop' | 'statShop', rng: Rng): Card[] {
+    const d = this.run.ctx.data;
+    return kind === 'skillShop' ? this.drawSkills(rng).slice(0, d.loot.skillShop.count) : drawStatCards(rng, d.loot.statShop.count, d.cards);
+  }
+
+  /** 카드 보상을 받는다 (상점 구매도 같다). 각성이면 연출을 다 본 뒤 then */
+  grantCard(card: Card, then: () => void): void {
+    const d = this.run.ctx.data;
+    const t = this.run.ctx.t;
+    const before = { hp: this.run.session.player.hp, maxHp: this.run.session.player.maxHp };
+    const r = applyCard(this.run.session.player, card, { skills: d.skills, stats: d.stats, baseMaxHp: d.player.maxHp });
+    this.run.session.player = { ...r.holder, ...before };
+    this.run.syncMaxHp();
+    if (card.kind === 'stat') {
+      bus.emit('toast', { text: t('skillMsg.statUp', { stat: t(`stat.${card.stat}`), amount: card.amount }) });
+    } else {
+      const def = findSkill(d.skills, card.skillId);
+      const owned = r.holder.loadout.owned[card.skillId]!;
+      const skill = t(def.nameKey);
+      if (card.kind === 'skillNew') bus.emit('toast', { text: t('skillMsg.acquired', { skill }) });
+      else if (card.kind === 'skillLevelUp') bus.emit('toast', { text: t('skillMsg.levelUp', { skill, level: owned.level }) });
+      if (r.stored) bus.emit('storedNotice', { skillId: card.skillId });
+      if (card.kind === 'awakening') {
+        // 각성: 컷인 → 설명창, 궁극기 각성 조건을 채웠으면 이어서
+        const cuts = [skillAwakeningCut(this.run.ctx, card.skillId, r.holder.stats)];
+        const u = this.checkUltimateAwakening();
+        if (u) cuts.push(u);
+        this.playCutscenes(cuts, then);
+        return;
+      }
+    }
+    then();
   }
 
   /** 카드창마다 1회, 코인으로 다시 뽑기 */
@@ -135,31 +173,7 @@ export class Progression {
       });
       return;
     }
-    const d = this.run.ctx.data;
-    const t = this.run.ctx.t;
-    const before = { hp: this.run.session.player.hp, maxHp: this.run.session.player.maxHp };
-    const r = applyCard(this.run.session.player, card, { skills: d.skills, stats: d.stats, baseMaxHp: d.player.maxHp });
-    this.run.session.player = { ...r.holder, ...before };
-    this.run.syncMaxHp();
-    if (card.kind === 'stat') {
-      bus.emit('toast', { text: t('skillMsg.statUp', { stat: t(`stat.${card.stat}`), amount: card.amount }) });
-    } else {
-      const def = findSkill(d.skills, card.skillId);
-      const owned = r.holder.loadout.owned[card.skillId]!;
-      const skill = t(def.nameKey);
-      if (card.kind === 'skillNew') bus.emit('toast', { text: t('skillMsg.acquired', { skill }) });
-      else if (card.kind === 'skillLevelUp') bus.emit('toast', { text: t('skillMsg.levelUp', { skill, level: owned.level }) });
-      if (r.stored) bus.emit('storedNotice', { skillId: card.skillId });
-      if (card.kind === 'awakening') {
-        // 각성: 컷인 → 설명창, 궁극기 각성 조건을 채웠으면 이어서
-        const cuts = [skillAwakeningCut(this.run.ctx, card.skillId, r.holder.stats)];
-        const u = this.checkUltimateAwakening();
-        if (u) cuts.push(u);
-        this.playCutscenes(cuts, () => this.openNextCards());
-        return;
-      }
-    }
-    this.openNextCards();
+    this.grantCard(card, () => this.openNextCards());
   }
 
   /** 컷인 → 설명창을 차례로 보여 주고, 다 넘기면 then */

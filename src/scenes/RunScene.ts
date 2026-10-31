@@ -39,7 +39,7 @@ import { nearestEnemy, type SkillHost } from '../skills/host';
 import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { gradeMultiplier, type Stats } from '../systems/damage';
 import { assignElites, eliteCount } from '../systems/elites';
-import { championWaves, raidChampions } from '../systems/champions';
+import { championWaves, enemyHpScale, raidChampions } from '../systems/champions';
 import { rollOptions } from '../systems/loot';
 import { generateStage } from '../systems/mapgen';
 import { hiddenChapterMul } from '../systems/hiddenBoss';
@@ -53,7 +53,7 @@ import { absorbHit } from '../systems/shield';
 import { corruptedDamage, tickCorruption } from '../systems/acro';
 import { hpStance, takeDamage } from '../systems/vitals';
 import { gainGauge, tickCooldowns } from '../systems/skills';
-import { damageTaken, maxHpFor, setStat, statEffect } from '../systems/stats';
+import { maxHpFor, setStat, statEffect } from '../systems/stats';
 import { buffDuration, tickBleed } from '../systems/tags';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
@@ -402,6 +402,7 @@ export class RunScene extends Phaser.Scene {
     this.cores = [];
     this.loot.chests = [];
     this.loot.stands = [];
+    this.loot.cardStands = [];
     this.encounters.raidRooms = new Set();
     this.encounters.hiddenBossRooms = new Map();
     this.encounters.spires = [];
@@ -628,6 +629,11 @@ export class RunScene extends Phaser.Scene {
     this.updateCamera();
     const cam = this.cameras.main;
     // 화면 고정 어둠도 확대를 받는다: 지역 좌표 = 화면 가운데 + (플레이어 − 보이는 곳 가운데)
+    if (this.darknessBoss && this.bossControllers.get(this.darknessBoss)?.enraged) {
+      this.darkness?.lift();
+      this.darkness = null;
+      this.darknessBoss = null;
+    }
     this.darkness?.update(dt, cam.width / 2 + (this.player.x - cam.midPoint.x), cam.height / 2 + (this.player.y - cam.midPoint.y));
     this.skillRt.refreshSkillView();
     if (frame.pressed.has('inventory')) this.progression.openInventory();
@@ -749,6 +755,7 @@ export class RunScene extends Phaser.Scene {
     const extra = extraEliteId ? (d.elites.elites.find((x) => x.id === extraEliteId) ?? null) : null;
     const icon = [elite, extra].filter((x) => x !== null).map((x) => this.ctx.t(x!.iconKey)).join('');
     const enemy = new Enemy(this, def, pos.x, pos.y, d.waves.spawnWarnSec, elite, d.elites, icon, extra);
+    if (def.ai !== 'boss' && !def.summon) enemy.scaleHp(enemyHpScale(this.session.stage.chapter, this.session.stage.stage, d.enemies.hpScale));
     enemy.jitterFirstAttack(rng);
     this.enemyGroup.add(enemy.sprite);
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
@@ -1046,7 +1053,7 @@ export class RunScene extends Phaser.Scene {
     }
     const p = this.session.player;
     const stance = this.itemRt.first('hpStance');
-    const taken = damageTaken(amount, this.effStats(), this.ctx.data.stats) * (1 - this.skillRt.playerMods().damageReduction) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard()) * (stance ? 1 - hpStance(p.hp, p.maxHp, stance).taken : 1);
+    const taken = amount * (1 - this.skillRt.playerMods().damageReduction) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard()) * (stance ? 1 - hpStance(p.hp, p.maxHp, stance).taken : 1);
     // 정신 피해: 패닉 중이면 체력 피해로 바뀐다
     const mental = (mentalRaw ?? amount * (attacker?.def.mentalRatio ?? 0)) * (1 - statEffect('mentalResist', this.effStats(), this.ctx.data.stats));
     const m = applyMental(p, mental);
@@ -1305,6 +1312,7 @@ export class RunScene extends Phaser.Scene {
     this.dying = true;
     this.loot.setInteractHint(null);
     bus.emit('weaponTip', { item: null });
+    bus.emit('cardTip', { card: null });
     this.physics.pause();
     this.stageFx.playDeath(() => this.endRun({ type: 'dead' }));
   }

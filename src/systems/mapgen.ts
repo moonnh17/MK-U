@@ -27,8 +27,10 @@ export interface RoomNode {
   size?: { w: number; h: number };
   /** 장애물 배치 틀 id (없으면 null) */
   layout?: string | null;
-  /** 조우 칸: 전투 없는 유형(보물·상인)만 나온다. 작고 소품이 없다 */
+  /** 조우 칸: 전투 없는 유형(보물·상점)만 나온다. 작고 소품이 없다 */
   peaceful?: boolean;
+  /** 방 가운데 월드 좌표 (compactRooms). 없으면 격자 칸 가운데 */
+  center?: { x: number; y: number };
 }
 
 export interface StageMap {
@@ -73,10 +75,43 @@ export function generateStage(seed: number, chapter: number, stage: number, data
           n.layout = null;
         }
       }
+      compactRooms(map.rooms, data);
       return map;
     }
   }
   throw new Error(`맵 생성 실패: seed=${seed} ${chapter}-${stage}`);
+}
+
+/**
+ * 방 사이가 복도 길이만큼만 벌어지게 좁혀 놓는다. 같은 줄·칸의 방은 가운데가 같아 복도가 곧게 이어진다.
+ * 줄은 그 줄에서 가장 높은 방 기준으로 쌓아 서로 겹치지 않으므로, 칸은 같은 줄의 방끼리만 비교해 당긴다.
+ */
+export function compactRooms(rooms: RoomNode[], data: MapgenData): void {
+  const tile = data.tileSize;
+  const gap = data.corridor.lengthTiles * tile;
+  const wOf = (n: RoomNode) => (n.size?.w ?? data.roomTiles.width) * tile;
+  const hOf = (n: RoomNode) => (n.size?.h ?? data.roomTiles.height) * tile;
+  const uniqueSorted = (v: number[]) => [...new Set(v)].sort((a, b) => a - b);
+
+  const rowY = new Map<number, number>();
+  let top = 0;
+  for (const gy of uniqueSorted(rooms.map((n) => n.gy))) {
+    const h = Math.max(...rooms.filter((n) => n.gy === gy).map(hOf));
+    rowY.set(gy, top + h / 2);
+    top += h + gap;
+  }
+  /** 줄별로 지금까지 놓은 방의 오른쪽 끝 */
+  const rowRight = new Map<number, number>();
+  let prevX = 0;
+  for (const gx of uniqueSorted(rooms.map((n) => n.gx))) {
+    const col = rooms.filter((n) => n.gx === gx);
+    const x = Math.max(prevX, ...col.map((n) => wOf(n) / 2 + (rowRight.has(n.gy) ? rowRight.get(n.gy)! + gap : 0)));
+    for (const n of col) {
+      n.center = { x, y: rowY.get(n.gy)! };
+      rowRight.set(n.gy, x + wOf(n) / 2);
+    }
+    prevX = x;
+  }
 }
 
 function tryGenerate(

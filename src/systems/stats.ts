@@ -11,11 +11,6 @@ export function maxHpFor(baseMaxHp: number, stats: Stats, data: StatsData): numb
   return baseMaxHp + statEffect('maxHp', stats, data);
 }
 
-/** 받는 피해 (견고 감소 적용) */
-export function damageTaken(amount: number, stats: Stats, data: StatsData): number {
-  return amount * (1 - statEffect('damageReduction', stats, data));
-}
-
 export interface StatHolder {
   stats: Stats;
   hp: number;

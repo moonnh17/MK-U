@@ -156,6 +156,15 @@
     "markerColor": "#ffd23f",
     "fontSize": 8
   },
+  "shieldSpawn": {
+    "particles": [26, 34],
+    "particleSpeed": [40, 120],
+    "particleLifeSec": 0.45,
+    "particleSize": 2,
+    "ringRadiusPx": 26,
+    "growSec": 0.32,
+    "startScale": 0.15
+  },
   "bossPhase": {
     "flashMs": 250,
     "zoom": 1.12,

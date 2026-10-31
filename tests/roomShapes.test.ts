@@ -37,16 +37,28 @@ describe('방 크기 틀', () => {
 });
 
 describe('월드 배치', () => {
-  it('방은 격자 칸 안 가운데, 칸 좌표로 찾을 수 있다', () => {
-    for (let seed = 1; seed < 15; seed++) {
-      const map = generateStage(seed, 1, 1, D);
-      for (const n of map.rooms) {
-        const r = roomRect(n, m);
-        expect(r.x).toBeGreaterThanOrEqual(n.gx * m.strideX);
-        expect(r.x + r.w).toBeLessThanOrEqual(n.gx * m.strideX + m.cellW);
+  it('방은 겹치지 않고 좌표로 찾을 수 있다', () => {
+    for (let seed = 1; seed < 150; seed++) {
+      const map = generateStage(seed, 1 + (seed % 3), 1 + (seed % 5), D);
+      const rects = map.rooms.map((n) => roomRect(n, m));
+      for (const [i, n] of map.rooms.entries()) {
+        const r = rects[i]!;
+        expect(r.x).toBeGreaterThanOrEqual(0);
+        expect(r.y).toBeGreaterThanOrEqual(0);
         expect(roomAt(map, m, r.x + r.w / 2, r.y + r.h / 2)).toBe(n.id);
+        for (const o of rects.slice(i + 1)) expect(r.x < o.x + o.w && o.x < r.x + r.w && r.y < o.y + o.h && o.y < r.y + r.h).toBe(false);
+        // 복도가 다른 방을 뚫고 지나가지 않는다
+        for (const c of corridors(map, m)) {
+          const hit = c.floor.x < r.x + r.w && r.x < c.floor.x + c.floor.w && c.floor.y < r.y + r.h && r.y < c.floor.y + c.floor.h;
+          expect(hit, `seed ${seed} room ${n.id}`).toBe(false);
+        }
       }
     }
+  });
+  it('복도는 평균적으로 짧다', () => {
+    const lens: number[] = [];
+    for (let seed = 1; seed < 150; seed++) for (const c of corridors(generateStage(seed, 1, 1, D), m)) lens.push(Math.max(c.floor.w, c.floor.h) / m.tile);
+    expect(lens.reduce((a, b) => a + b, 0) / lens.length).toBeLessThan(8);
   });
   it('복도는 두 방 벽을 잇고(길이 > 0), 마주 보는 문은 같은 높이', () => {
     for (let seed = 1; seed < 15; seed++) {

@@ -157,9 +157,9 @@
       "tags": ["buff"],
       "sources": {},
       "levels": [
-        { "cooldownSec": 12, "values": { "hits": 1, "durationSec": 6, "blockInvulnSec": 0.5, "fxRadius": 12 } },
-        { "cooldownSec": 10, "values": { "hits": 1, "durationSec": 7, "blockInvulnSec": 0.5, "fxRadius": 12 } },
-        { "cooldownSec": 8, "values": { "hits": 1, "durationSec": 8, "blockInvulnSec": 0.5, "fxRadius": 12 } }
+        { "cooldownSec": 12, "values": { "hits": 1, "durationSec": 6, "blockInvulnSec": 0.5, "fxRadius": 18 } },
+        { "cooldownSec": 10, "values": { "hits": 1, "durationSec": 7, "blockInvulnSec": 0.5, "fxRadius": 18 } },
+        { "cooldownSec": 8, "values": { "hits": 1, "durationSec": 8, "blockInvulnSec": 0.5, "fxRadius": 18 } }
       ],
       "awakening": {
         "nameKey": "skill.magiField.awakened",

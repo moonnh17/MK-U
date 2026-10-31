@@ -17,7 +17,7 @@
     "height": 15
   },
   "corridor": {
-    "lengthTiles": 5,
+    "lengthTiles": 2,
     "widthTiles": 3
   },
   "stageRules": {

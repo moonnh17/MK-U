@@ -1,6 +1,6 @@
 /**
  * 태그 판정 (순수 함수). 원본 구조의 이름을 따른다:
- * skillTags(id) · hasTag · taggedChance · chargeSpeed · canAutoCast · tagBadges.
+ * skillTags(id) · hasTag · taggedChance · canAutoCast · tagBadges.
  * 태그는 성질과 보정 대상만 나타내고, 스킬 고유의 발동 조건을 대체하지 않는다.
  */
 import type { Vec2 } from '../core/actions';
@@ -50,16 +50,6 @@ export function taggedChance(baseChance: number, capKey: string, stats: Stats, d
   const cap = r.caps[capKey];
   if (cap === undefined) throw new Error(`확률 상한 '${capKey}' 없음`);
   return Math.min(cap, baseChance * r.base ** (stats[r.stat] - r.pivot));
-}
-
-/** 차징 속도 배율 (1 = 기본) */
-export function chargeSpeed(stats: Stats, data: TagsData): number {
-  return 1 + linearBonus(linearRule('charging', data), stats);
-}
-
-/** 충전 시간. 차징 태그가 있을 때만 줄어든다 */
-export function chargeTime(baseSec: number, tags: readonly TagId[], stats: Stats, data: TagsData): number {
-  return hasTag(tags, 'charging') ? baseSec / chargeSpeed(stats, data) : baseSec;
 }
 
 /** 시간제 버프 지속시간. 버프 태그가 있을 때만 늘어난다(영구 효과·회복량·쿨타임은 그대로) */

@@ -1,5 +1,6 @@
 {
   "projectile": { "spriteKey": "enemy_bullet", "color": "#ff5a5a", "size": 4 },
+  "hpScale": { "2": { "base": 1.6, "perStage": 0.2 }, "3": { "base": 2.8, "perStage": 0.4 } },
   "debugBarrage": { "count": 12, "distance": 90, "speed": 90, "damage": 5 },
   "enemies": [
     {
@@ -9,7 +10,8 @@
       "rank": "normal",
       "ai": "chase",
       "maxHp": 6,
-      "moveSpeed": 45,
+      "moveSpeed": 68,
+      "noEliteAttacks": true,
       "contactDamage": 5,
       "contactIntervalSec": 0.8,
       "energyOrbs": [0, 1],
@@ -171,13 +173,13 @@
     },
     {
       "id": "hectarChief", "nameKey": "enemy.hectarChief", "chapter": 2, "rank": "boss", "ai": "boss",
-      "maxHp": 2700, "moveSpeed": 34, "contactDamage": 12, "contactIntervalSec": 1.0,
+      "maxHp": 4500, "moveSpeed": 34, "contactDamage": 12, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
       "spriteKey": "enemy_hectar_chief", "color": "#3a9aff", "size": 36
     },
     {
       "id": "magiGolem", "nameKey": "enemy.magiGolem", "chapter": 2, "rank": "boss", "ai": "boss",
-      "maxHp": 4200, "moveSpeed": 26, "contactDamage": 14, "contactIntervalSec": 1.0,
+      "maxHp": 7500, "moveSpeed": 26, "contactDamage": 14, "contactIntervalSec": 1.0,
       "energyOrbs": [12, 14], "coins": [14, 18],
       "spriteKey": "enemy_magi_golem", "color": "#8a6a4a", "size": 48
     },
@@ -234,13 +236,13 @@
     },
     {
       "id": "eclipse", "nameKey": "enemy.eclipse", "chapter": 3, "rank": "boss", "ai": "boss",
-      "maxHp": 5400, "moveSpeed": 32, "contactDamage": 14, "contactIntervalSec": 1.0,
+      "maxHp": 11000, "moveSpeed": 32, "contactDamage": 14, "contactIntervalSec": 1.0,
       "energyOrbs": [12, 14], "coins": [14, 18],
       "spriteKey": "enemy_eclipse", "color": "#c8a8ff", "size": 42
     },
     {
       "id": "magiKaiser", "nameKey": "enemy.magiKaiser", "chapter": 3, "rank": "boss", "ai": "boss",
-      "maxHp": 13000, "moveSpeed": 40, "contactDamage": 16, "contactIntervalSec": 1.0,
+      "maxHp": 26000, "moveSpeed": 40, "contactDamage": 16, "contactIntervalSec": 1.0,
       "energyOrbs": [14, 16], "coins": [16, 20],
       "spriteKey": "enemy_magi_kaiser", "color": "#d02828", "size": 51
     }

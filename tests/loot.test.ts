@@ -93,16 +93,16 @@ describe('무기 수치', () => {
 });
 
 describe('조우 칸', () => {
-  const all = new Set<EncounterKindId>(['treasure', 'merchant', 'raid', 'magiSpire', 'hiddenBoss']);
-  it('기획서 확률: 보물 31·상인 25·습격 25·첨탑 18·히든보스 1', () => {
-    expect(L.encounter.weights).toEqual({ treasure: 31, merchant: 25, raid: 25, magiSpire: 18, hiddenBoss: 1 });
+  const all = new Set<EncounterKindId>(['treasure', 'merchant', 'skillShop', 'statShop', 'raid', 'magiSpire', 'hiddenBoss']);
+  it('기획서 확률: 보물 20·상인 16·스킬 상점 10·스탯 상점 10·습격 25·첨탑 18·히든보스 1', () => {
+    expect(L.encounter.weights).toEqual({ treasure: 20, merchant: 16, skillShop: 10, statShop: 10, raid: 25, magiSpire: 18, hiddenBoss: 1 });
     const count: Record<string, number> = {};
     const r = new Rng(9);
     for (let i = 0; i < 5000; i++) {
       const k = rollEncounter(r, L.encounter.weights, all);
       count[k] = (count[k] ?? 0) + 1;
     }
-    expect(count.treasure! / 5000).toBeCloseTo(0.31, 1);
+    expect(count.treasure! / 5000).toBeCloseTo(0.2, 1);
     expect(count.hiddenBoss! / 5000).toBeLessThan(0.03);
   });
   it('아직 없는 유형은 빼고 뽑는다', () => {

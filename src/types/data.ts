@@ -60,7 +60,7 @@ export interface StatRule {
 }
 
 /** 스탯 표의 태그 외 효과 */
-export const STAT_EFFECT_IDS = ['maxHp', 'damageReduction', 'moveSpeed', 'skillArea', 'energyGain', 'coinGain', 'mentalResist', 'dodgeCooldown'] as const;
+export const STAT_EFFECT_IDS = ['maxHp', 'moveSpeed', 'skillArea', 'energyGain', 'coinGain', 'mentalResist', 'dodgeCooldown'] as const;
 export type StatEffectId = (typeof STAT_EFFECT_IDS)[number];
 
 export interface StatsData {
@@ -290,6 +290,8 @@ export interface EnemyDef extends SpriteRef {
   attacks?: EnemyAttackDef[];
   /** 보스가 부르는 적(분신). 챕터 로스터·웨이브에 들지 않는다 */
   summon?: boolean;
+  /** 변이가 붙어도 변이 공격(도약 등)을 쓰지 않는다 */
+  noEliteAttacks?: boolean;
   /** 원거리 적: 플레이어와 이 거리를 유지한다 */
   keepDistance?: number;
   trail?: EnemyTrailDef;
@@ -464,6 +466,8 @@ export interface BossesData {
 }
 
 export interface EnemiesData {
+  /** 챕터별 일반 적·정예 체력 배율: base + perStage × (스테이지 − 1). 없는 챕터는 1 */
+  hpScale: Record<string, { base: number; perStage: number }>;
   /** 적 투사체 모양 */
   projectile: SpriteRef;
   /** 디버그 '적 탄막': 플레이어 주위에서 플레이어를 향해 일반 탄을 쏜다(벡터굴절역장 확인용) */
@@ -975,7 +979,7 @@ export interface ItemsData {
 
 // ---------- 전리품·조우 ----------
 
-export type EncounterKindId = 'treasure' | 'merchant' | 'raid' | 'magiSpire' | 'hiddenBoss';
+export type EncounterKindId = 'treasure' | 'merchant' | 'skillShop' | 'statShop' | 'raid' | 'magiSpire' | 'hiddenBoss';
 
 export interface LootData {
   /** 아이템·무기를 얻을 때마다 신화로 바뀌는 고정 확률 */
@@ -987,6 +991,12 @@ export interface LootData {
   /** 전투 칸을 깼을 때 무기가 떨어질 확률과 등급 */
   combatDrop: { chance: number; weights: Partial<Record<GradeId, number>> };
   merchant: { count: number; weights: Partial<Record<GradeId, number>>; prices: Record<GradeId, number> };
+  /** 상점 진열대 위 아이콘 크기(px) */
+  cardStandIconPx: number;
+  /** 스킬 상점: 카드 종류별 가격 */
+  skillShop: { count: number; prices: { skillNew: number; skillLevelUp: number; awakening: number } };
+  /** 스탯 상점: 스탯 카드 등급별 가격 */
+  statShop: { count: number; prices: Record<string, number> };
   encounter: { weights: Record<EncounterKindId, number> };
   raid: { waves: IntRange; sizeMul: number; elitesPerWave: number; coins: IntRange };
   chest: { weapon: SpriteRef; item: SpriteRef; openRadius: number };
@@ -1240,7 +1250,7 @@ export interface ArtSpriteDef {
   facing?: 'right' | 'left';
 }
 
-export type ArtAnimId = 'idle' | 'move' | 'play';
+export type ArtAnimId = 'idle' | 'move' | 'play' | 'aim';
 
 /** 프레임 번호 from~to(0부터, 둘 다 포함)를 초당 fps장으로 반복 */
 export interface ArtAnimDef {
@@ -1302,6 +1312,8 @@ export interface JuiceData {
   advancement: { chargeSec: number; particles: number; burstHoldSec: number };
   /** 전투 시작 띠 */
   combatStart: { sec: number; color: string; size: number; bandPx: number };
+  /** 마기역장이 생길 때: 입자가 뿜어져 나오며 막이 작게 시작해 몸을 덮는다 */
+  shieldSpawn: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; growSec: number; startScale: number };
   bossPhase: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; flashMs: number; zoom: number; zoomSec: number; bannerSec: number; bannerSize: number };
   /** 보스 처치: slowSec 동안 slowScale 배속에서 점점 원래대로, 연쇄 폭발 */
   bossKill: { slowSec: number; slowScale: number; explosions: number; spreadPx: number; stepSec: number; flashMs: number };

@@ -46,7 +46,6 @@ export interface SkillHost {
   removeObject(o: SkillObject): void;
   objects(): readonly SkillObject[];
   /** 충전 시간 (차징 태그: 민첩) */
-  chargeTime(baseSec: number, tags: readonly TagId[]): number;
   /** 시간제 버프 지속시간 (버프 태그: 정신력) */
   buffDuration(baseSec: number, tags: readonly TagId[]): number;
   /** 플레이어 보호막(마기역장)을 씌운다. 다시 쓰면 새것으로 바뀐다 */

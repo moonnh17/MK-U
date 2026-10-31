@@ -4,7 +4,9 @@ import { gameData } from '../src/data/index';
 import { generateStage } from '../src/systems/mapgen';
 import { availablePatterns, initialBoss } from '../src/systems/bossBrain';
 import { bossHalfOrbs } from '../src/systems/bossEnergy';
-import { encounterPool } from '../src/systems/loot';
+import { cardPrice, cardStock, encounterPool } from '../src/systems/loot';
+import { cardStillValid } from '../src/systems/cards';
+import { enemyHpScale } from '../src/systems/champions';
 import { statSheetLines } from '../src/systems/statSheet';
 import { statEffect } from '../src/systems/stats';
 import { startingStats } from '../src/systems/damage';
@@ -70,11 +72,11 @@ describe('전투 없는 방', () => {
   it('평화로운 칸 확률은 보물·상인 가중치와 맞는다', () => {
     const w = D.loot.encounter.weights;
     const sum = Object.values(w).reduce((a, b) => a + b, 0);
-    expect(D.mapgen.encounterPeaceful.chance).toBeCloseTo((w.treasure + w.merchant) / sum, 2);
+    expect(D.mapgen.encounterPeaceful.chance).toBeCloseTo((w.treasure + w.merchant + w.skillShop + w.statShop) / sum, 2);
   });
-  it('평화로운 칸은 보물·상인만, 아니면 전투 유형만', () => {
+  it('평화로운 칸은 보물·상점만, 아니면 전투 유형만', () => {
     const all = new Set(Object.keys(D.loot.encounter.weights) as (keyof typeof D.loot.encounter.weights)[]);
-    expect([...encounterPool(all, true)].sort()).toEqual(['merchant', 'treasure']);
+    expect([...encounterPool(all, true)].sort()).toEqual(['merchant', 'skillShop', 'statShop', 'treasure']);
     expect(encounterPool(all, false).has('merchant')).toBe(false);
     expect(encounterPool(all, false).has('raid')).toBe(true);
   });
@@ -114,5 +116,54 @@ describe('화면 수치', () => {
   });
   it('사망 연출 시간이 있다', () => {
     expect(D.juice.playerDeath.sec).toBeGreaterThan(0.5);
+  });
+});
+
+describe('스킬·스탯 상점', () => {
+  const owned = { level: 1, awakened: false, order: 0 };
+  const lo = (o: Record<string, typeof owned>) => ({ active: [null, null, null, null], passive: null, owned: o }) as never;
+  it('카드 종류·등급별 가격', () => {
+    expect(cardPrice({ kind: 'skillNew', skillId: 'x' }, D.loot)).toBe(D.loot.skillShop.prices.skillNew);
+    expect(cardPrice({ kind: 'awakening', skillId: 'x' }, D.loot)).toBe(D.loot.skillShop.prices.awakening);
+    for (const g of D.cards.statGrades) expect(cardPrice({ kind: 'stat', stat: 'strength', amount: g.amount, grade: g.id }, D.loot)).toBeGreaterThan(0);
+  });
+  it('진열 카드는 아직 안 팔렸다', () => {
+    expect(cardStock([{ kind: 'skillNew', skillId: 'x' }], D.loot)[0]).toMatchObject({ sold: false, price: D.loot.skillShop.prices.skillNew });
+  });
+  it('그사이 같은 스킬을 얻었으면 진열 카드는 무효', () => {
+    expect(cardStillValid({ kind: 'skillNew', skillId: 'magiField' }, lo({}), D.skills)).toBe(true);
+    expect(cardStillValid({ kind: 'skillNew', skillId: 'magiField' }, lo({ magiField: owned }), D.skills)).toBe(false);
+    expect(cardStillValid({ kind: 'skillLevelUp', skillId: 'magiField' }, lo({ magiField: { ...owned, level: D.skills.maxLevel } }), D.skills)).toBe(false);
+    expect(cardStillValid({ kind: 'awakening', skillId: 'magiField' }, lo({ magiField: { ...owned, awakened: true } }), D.skills)).toBe(false);
+    expect(cardStillValid({ kind: 'stat', stat: 'strength', amount: 3, grade: 'low' }, lo({}), D.skills)).toBe(true);
+  });
+});
+
+describe('후반 체력', () => {
+  const t = D.enemies.hpScale;
+  it('1장은 그대로, 2·3장은 스테이지가 갈수록 커진다', () => {
+    expect(enemyHpScale(1, 5, t)).toBe(1);
+    expect(enemyHpScale(2, 1, t)).toBeGreaterThan(1);
+    expect(enemyHpScale(2, 5, t)).toBeGreaterThan(enemyHpScale(2, 1, t));
+    expect(enemyHpScale(3, 1, t)).toBeGreaterThan(enemyHpScale(2, 5, t));
+    expect(enemyHpScale(3, 5, t)).toBeGreaterThan(enemyHpScale(3, 1, t));
+  });
+  it('뒤 챕터 보스일수록 체력이 많다', () => {
+    const order = ['electricRing', 'hectarChief', 'magiGolem', 'eclipse', 'magiKaiser'].map(hp);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+});
+
+describe('회복·재화', () => {
+  const cd = (id: string) => (D.items.items.find((i) => i.id === id)!.effects[0] as { cooldownSec: number }).cooldownSec;
+  it('회복 아이템 재사용 3배', () => {
+    expect(cd('magicasol')).toBe(60);
+    expect(cd('hanwooSteak')).toBe(60);
+  });
+  it('마기 입자 획득 절반', () => {
+    expect(D.pickups.coin.value).toBe(0.5);
+  });
+  it('토마끼는 변이 공격을 쓰지 않는다', () => {
+    expect(D.enemies.enemies.find((e) => e.id === 'tomakki')!.noEliteAttacks).toBe(true);
   });
 });

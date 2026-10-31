@@ -1,11 +1,13 @@
 /**
- * 바닥 무기·진열대 앞에 서면 화면 아래에 뜨는 무기 정보.
- * 줍기 전에 스탯과 효과를 볼 수 있게 한다. 누르는 것은 없다(게임을 막지 않는다).
+ * 바닥 무기·진열대 앞에 서면 화면 아래에 뜨는 무기·카드 정보.
+ * 줍거나 사기 전에 스탯과 효과를 볼 수 있게 한다. 누르는 것은 없다(게임을 막지 않는다).
  */
 import { applyArtIcon } from './artIcon';
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
+import type { Card } from '../systems/cards';
 import type { WeaponItem } from '../systems/weapons';
+import { describeCard } from './cardView';
 import { weaponInfoLines } from './weaponInfo';
 
 export class WeaponTip {
@@ -16,9 +18,40 @@ export class WeaponTip {
     this.root.id = 'weapon-tip';
     document.body.appendChild(this.root);
     bus.on('weaponTip', ({ item }) => this.show(item));
+    bus.on('cardTip', ({ card }) => this.showCard(card));
     bus.on('modal', ({ kind }) => {
       if (kind) this.show(null);
     });
+  }
+
+  /** 상점 진열대 앞: 카드 내용과 태그 */
+  private showCard(card: Card | null): void {
+    const session = this.ctx.session;
+    if (!card || !session) {
+      this.root.style.display = 'none';
+      return;
+    }
+    const v = describeCard(card, session.player, this.ctx);
+    this.root.replaceChildren();
+    this.root.style.borderColor = v.accent;
+    const icon = document.createElement('span');
+    icon.className = 'wt-icon';
+    applyArtIcon(icon, this.ctx, v.icon?.key);
+    const body = document.createElement('div');
+    body.className = 'wt-body';
+    const name = document.createElement('div');
+    name.className = 'wt-name';
+    name.textContent = `${v.name} · ${v.levelText}`;
+    name.style.color = v.accent;
+    const kind = document.createElement('div');
+    kind.className = 'wt-line';
+    kind.textContent = [v.kindLabel, v.school, ...v.badges.map((b) => this.ctx.t(b.nameKey))].filter(Boolean).join(' · ');
+    const desc = document.createElement('div');
+    desc.className = 'wt-line sig';
+    desc.textContent = v.desc;
+    body.append(name, kind, desc);
+    this.root.append(icon, body);
+    this.root.style.display = 'flex';
   }
 
   private show(item: WeaponItem | null): void {

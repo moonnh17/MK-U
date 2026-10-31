@@ -13,7 +13,7 @@ import { applyCorruption, skillChance } from '../../systems/acro';
 import { combineMods, heal, payHp, type PlayerMods } from '../../systems/vitals';
 import { cooldownLeft, findSkill, gainGauge, refundCooldown, skillValues } from '../../systems/skills';
 import { statEffect } from '../../systems/stats';
-import { applyBleed, buffDuration, canAutoCast, chargeTime, skillTags } from '../../systems/tags';
+import { applyBleed, buffDuration, canAutoCast, skillTags } from '../../systems/tags';
 import type { BleedRule, SkillDef, SpaceRule, UltimateDef } from '../../types/data';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
@@ -71,7 +71,6 @@ export class SkillRuntime {
         const udef = this.ultimateDef();
         ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gaugeFromGreatSuccess(udef));
       },
-      chargeTime: (sec, tags) => chargeTime(sec, tags, this.run.effStats(), ctx.data.tags),
       buffDuration: (sec, tags) => buffDuration(sec, tags, this.run.effStats(), ctx.data.tags) * (tags.includes('buff') ? 1 + this.run.itemRt.sums.buffDuration : 1),
       setShield: (shield, opts) => {
         this.shield = shield;
@@ -157,36 +156,50 @@ export class SkillRuntime {
     if (this.shield) this.shield = tickShield(this.shield, dt);
     const s = this.shield;
     const opts = this.shieldOpts;
+    // 몸 그림 가운데 (판정 자리는 발쪽이다)
+    const at = this.run.player.getCenter();
     if (!s || !opts) {
-      if (this.shieldFx && this.lastShieldOpts?.look?.end) playFx(this.run, this.lastShieldOpts.look.end, this.run.player.x, this.run.player.y, { w: this.lastShieldOpts.fxRadius * 2.4, depth: 5 });
+      if (this.shieldFx && this.lastShieldOpts?.look?.end) playFx(this.run, this.lastShieldOpts.look.end, at.x, at.y, { w: this.lastShieldOpts.fxRadius * 2.4, depth: 5 });
+      if (this.shieldFx) this.run.tweens.killTweensOf(this.shieldFx);
       this.shieldFx?.destroy();
       this.shieldFx = null;
       this.lastShieldOpts = null;
       return;
     }
     const color = hexColor(opts.color);
-    if (this.lastShieldOpts !== opts) {
+    const fresh = this.lastShieldOpts !== opts;
+    if (fresh) {
+      if (this.shieldFx) this.run.tweens.killTweensOf(this.shieldFx);
       this.shieldFx?.destroy();
       this.shieldFx = null;
       this.lastShieldOpts = opts;
-      if (opts.look?.spawn) playFx(this.run, opts.look.spawn, this.run.player.x, this.run.player.y, { w: opts.fxRadius * 2.4, depth: 5 });
+      this.run.juice.colorBurst({ x: at.x, y: at.y }, opts.color, this.run.ctx.data.juice.shieldSpawn);
+      if (opts.look?.spawn) playFx(this.run, opts.look.spawn, at.x, at.y, { w: opts.fxRadius * 2.4, depth: 5 });
     }
     if (opts.look) {
       if (!this.shieldFx) {
-        const body = this.run.add.sprite(this.run.player.x, this.run.player.y, opts.look.body.spriteKey).setDepth(5);
+        const body = this.run.add.sprite(at.x, at.y, opts.look.body.spriteKey).setDepth(5);
         body.setDisplaySize(opts.fxRadius * 2.2, (opts.fxRadius * 2.2 * body.height) / Math.max(1, body.width));
         loopArt(body, opts.look.body);
         this.shieldFx = body;
       }
       // 막기 횟수를 다 쓰면 흐려진다
-      this.shieldFx.setPosition(this.run.player.x, this.run.player.y).setAlpha(s.hits > 0 ? 1 : 0.5);
+      this.shieldFx.setPosition(at.x, at.y).setAlpha(s.hits > 0 ? 1 : 0.5);
     } else {
       if (!this.shieldFx) this.shieldFx = this.run.add.circle(0, 0, opts.fxRadius).setDepth(5);
       (this.shieldFx as Phaser.GameObjects.Arc)
         .setRadius(opts.fxRadius)
-        .setPosition(this.run.player.x, this.run.player.y)
+        .setPosition(at.x, at.y)
         .setStrokeStyle(s.hits > 0 ? 2 : 1, color, 0.9)
         .setFillStyle(color, s.refractRadius > 0 ? 0.15 : 0.08);
+    }
+    if (fresh) {
+      // 작게 시작해 온몸을 덮을 때까지 커진다
+      const sp = this.run.ctx.data.juice.shieldSpawn;
+      const fx = this.shieldFx!;
+      const { scaleX, scaleY } = fx;
+      fx.setScale(scaleX * sp.startScale, scaleY * sp.startScale);
+      this.run.tweens.add({ targets: fx, scaleX, scaleY, duration: sp.growSec * 1000, ease: 'Back.easeOut' });
     }
     if (s.refractRadius <= 0) return;
     for (const b of [...this.run.enemyBullets.getChildren()] as Phaser.Physics.Arcade.Image[]) {

@@ -110,6 +110,15 @@ export function drawStatCards(rng: Rng, count: number, cards: CardsData): Card[]
   });
 }
 
+/** 진열해 둔 카드가 아직 의미가 있는지 (그사이 보스 카드로 같은 스킬을 올렸으면 아니다) */
+export function cardStillValid(card: Card, lo: SkillLoadout, skills: SkillsData): boolean {
+  if (card.kind === 'stat') return true;
+  const owned = lo.owned[card.skillId];
+  if (card.kind === 'skillNew') return !owned;
+  if (card.kind === 'skillLevelUp') return !!owned && owned.level < skills.maxLevel;
+  return !!owned && !owned.awakened;
+}
+
 // ---------- 적용 ----------
 
 export interface CardHolder {

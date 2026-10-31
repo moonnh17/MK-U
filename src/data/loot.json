@@ -11,7 +11,9 @@
     "weights": { "common": 50, "rare": 40, "legendary": 10 },
     "prices": { "common": 15, "rare": 30, "legendary": 60, "unique": 120, "mythic": 300 }
   },
-  "encounter": { "weights": { "treasure": 31, "merchant": 25, "raid": 25, "magiSpire": 18, "hiddenBoss": 1 } },
+  "skillShop": { "count": 3, "prices": { "skillNew": 30, "skillLevelUp": 30, "awakening": 50 } },
+  "statShop": { "count": 3, "prices": { "low": 12, "mid": 20, "high": 32 } },
+  "encounter": { "weights": { "treasure": 20, "merchant": 16, "skillShop": 10, "statShop": 10, "raid": 25, "magiSpire": 18, "hiddenBoss": 1 } },
   "raid": { "waves": [3, 4], "sizeMul": 1.5, "elitesPerWave": 2, "coins": [15, 20] },
   "chest": {
     "weapon": { "spriteKey": "chest_weapon", "color": "#a07a3a", "size": 14 },
@@ -20,6 +22,7 @@
   },
   "merchantStand": { "spriteKey": "merchant_stand", "color": "#4a5a6a", "size": 12 },
   "standSpacing": 64,
+  "cardStandIconPx": 18,
   "spire": {
     "small": {
       "sprite": { "spriteKey": "spire_small", "color": "#15151c", "size": 10, "height": 44 },

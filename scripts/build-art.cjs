@@ -202,10 +202,13 @@ function cleanFrame(f) {
 function actor(key, idle, move, fit, opts = {}) {
   // 적은 빨간 테두리로 배경과 확실히 구분한다
   if (key.startsWith('enemy_')) opts = { ...opts, outline: ENEMY_OUTLINE };
-  const s = sheet(key, [...idle, ...move].map((f) => (key.startsWith('enemy_') ? cleanFrame(f) : f)), fit, opts);
+  const pose = opts.pose ?? null;
+  const s = sheet(key, [...idle, ...move, ...(pose ? pose.frames : [])].map((f) => (key.startsWith('enemy_') ? cleanFrame(f) : f)), fit, opts);
   const anims = {};
   if (idle.length) anims.idle = anim(0, idle.length - 1, opts.idleFps ?? 4);
   if (move.length) anims.move = anim(idle.length, idle.length + move.length - 1, opts.moveFps ?? 8);
+  // 공격 준비 자세: 한 번 돌고 마지막 칸에서 멈춘다
+  if (pose) anims.aim = { ...anim(idle.length + move.length, idle.length + move.length + pose.frames.length - 1, pose.fps), loop: false };
   sprites[key] = { ...s, anims, ...(opts.facing ? { facing: opts.facing } : {}) };
 }
 
@@ -222,8 +225,8 @@ const M = (row) => cells('monsters.png', 256, 256, [row * 4, row * 4 + 1, row * 
 { const r = M(1); actor('enemy_gaedeulgae', [r[0]], r, 19); }
 { const r = M(2); actor('enemy_akgwi', [r[0], r[1]], r, 24); }
 
-// 유령 사수: 6번째 줄. 마지막 칸이 활을 당긴 자세
-{ const r = M(5); actor('enemy_ghost_shooter', [r[0]], [r[0], r[1], r[2]], 26); }
+// 유령 사수: 6번째 줄. 화살을 잡고(1) 시위에 걸어(2) 끝까지 당긴다(3)
+{ const r = M(5); actor('enemy_ghost_shooter', [r[0]], [r[0], r[1]], 26, { moveFps: 4, pose: { frames: [r[1], r[2], r[3]], fps: 5 } }); }
 
 // ---------- 2장 ----------
 actor('enemy_hectar_trooper', [strip('spires/trooper.png', 4)[0]], strip('spires/trooper.png', 4), 22);

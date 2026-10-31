@@ -4,6 +4,7 @@
  */
 import type { Rng } from '../core/rng';
 import type { EncounterKindId, GradeId, GroupMultipliersData, LootData, WeaponDef, WeaponOptionDef } from '../types/data';
+import type { Card } from './cards';
 import type { WeaponItem, WeaponOption } from './weapons';
 
 /** 가중치 표에서 등급 하나 → 고정 확률로 신화 */
@@ -58,9 +59,9 @@ export function rollWeapon(
 }
 
 /** 전투 없는 유형 */
-const PEACEFUL: ReadonlySet<EncounterKindId> = new Set(['treasure', 'merchant']);
+const PEACEFUL: ReadonlySet<EncounterKindId> = new Set(['treasure', 'merchant', 'skillShop', 'statShop']);
 
-/** 이 조우 칸에서 나올 수 있는 유형: 작은 평화로운 방이면 보물·상인, 아니면 전투 유형 */
+/** 이 조우 칸에서 나올 수 있는 유형: 작은 평화로운 방이면 보물·상점, 아니면 전투 유형 */
 export function encounterPool(kinds: ReadonlySet<EncounterKindId>, peaceful: boolean): Set<EncounterKindId> {
   return new Set([...kinds].filter((k) => PEACEFUL.has(k) === peaceful));
 }
@@ -92,6 +93,22 @@ export function merchantStock(
     const weapon = rollWeapon(rng, grade, weapons, options, groups, loot.uniqueWeaponFallback);
     return { weapon, price: loot.merchant.prices[weapon.grade], sold: false };
   });
+}
+
+/** 스킬·스탯 상점의 진열품 하나 */
+export interface CardStock {
+  card: Card;
+  price: number;
+  sold: boolean;
+}
+
+/** 카드 가격. 스킬 상점에 스킬이 모자라면 스탯 카드가 섞이므로 종류로 고른다 */
+export function cardPrice(card: Card, loot: LootData): number {
+  return card.kind === 'stat' ? loot.statShop.prices[card.grade]! : loot.skillShop.prices[card.kind];
+}
+
+export function cardStock(cards: readonly Card[], loot: LootData): CardStock[] {
+  return cards.map((card) => ({ card, price: cardPrice(card, loot), sold: false }));
 }
 
 /** 살 수 있는지 (코인은 소수로 들고 있어 내림해서 비교) */

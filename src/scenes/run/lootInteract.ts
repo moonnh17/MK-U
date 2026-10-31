@@ -2,10 +2,13 @@
 import Phaser from 'phaser';
 import { bus } from '../../core/events';
 import { Rng } from '../../core/rng';
-import { Chest, MerchantStand, type ChestKind } from '../../entities/chest';
+import { CardStand, Chest, MerchantStand, type ChestKind } from '../../entities/chest';
 import { FloorWeapon } from '../../entities/pickup';
+import { describeCard } from '../../ui/cardView';
+import { artKeys } from '../../systems/art';
+import { cardStillValid, type Card } from '../../systems/cards';
 import { effectiveWeights, readySet, rollItem, transferWeight } from '../../systems/items';
-import { canBuy, rollGrade, rollWeapon } from '../../systems/loot';
+import { canBuy, cardStock, rollGrade, rollWeapon } from '../../systems/loot';
 import { heal } from '../../systems/vitals';
 import { dropWeaponAt, pickUpWeapon, plainWeapon, type WeaponItem } from '../../systems/weapons';
 import type { GradeId } from '../../types/data';
@@ -17,6 +20,8 @@ export class LootInteract {
   private tipItem: WeaponItem | null = null;
   chests: Chest[] = [];
   stands: MerchantStand[] = [];
+  cardStands: CardStand[] = [];
+  private tipCard: Card | null = null;
   vendings: Vending[] = [];
   potions: Phaser.GameObjects.Image[] = [];
   /** 포탈·자판기 앞에 뜨는 조작 안내 */
@@ -55,6 +60,49 @@ export class LootInteract {
       this.stands.filter((s) => !s.stock.sold),
       this.run.ctx.data.pickups.interactRadius,
     );
+  }
+
+  nearCardStand(): CardStand | null {
+    return this.run.nearest(
+      this.cardStands.filter((s) => !s.stock.sold),
+      this.run.ctx.data.pickups.interactRadius,
+    );
+  }
+
+  /** 스킬·스탯 상점: 뽑아 둔 카드를 진열한다 */
+  openCardShop(cards: readonly Card[], c: { x: number; y: number }): void {
+    const d = this.run.ctx.data;
+    const stock = cardStock(cards, d.loot);
+    stock.forEach((s, i) => {
+      const x = c.x + (i - (stock.length - 1) / 2) * d.loot.standSpacing;
+      const view = describeCard(s.card, this.run.session.player, this.run.ctx);
+      const icon = s.card.kind === 'stat' ? artKeys.statIcon(s.card.stat) : artKeys.skillIcon(s.card.skillId);
+      const label = `${view.name}\n${this.run.ctx.t('merchant.price', { price: s.price })}`;
+      this.cardStands.push(new CardStand(this.run, s, d.loot.merchantStand, icon, d.loot.cardStandIconPx, x, c.y, label, view.accent));
+    });
+  }
+
+  private buyCard(stand: CardStand): void {
+    const t = this.run.ctx.t;
+    const d = this.run.ctx.data;
+    const p = this.run.session.player;
+    const { card, price } = stand.stock;
+    if (!cardStillValid(card, p.loadout, d.skills)) {
+      this.run.toastThrottled(t('shop.stale'));
+      return;
+    }
+    if (Math.floor(p.coins) < price) {
+      this.run.toastThrottled(t('merchant.noCoins'));
+      return;
+    }
+    p.coins -= price;
+    const name = describeCard(card, p, this.run.ctx).name;
+    stand.markSold(t('merchant.sold'));
+    bus.emit('toast', { text: t('shop.bought', { name }) });
+    this.run.progression.grantCard(card, () => {
+      this.run.skillRt.refreshSkillView();
+      bus.emit('inventoryChanged', {});
+    });
   }
 
   /** 무기 이름 (일반이 아니면 등급을 앞에) */
@@ -133,6 +181,11 @@ export class LootInteract {
       bus.emit('toast', { text: t('merchant.bought', { weapon: this.weaponName(stand.stock.weapon) }) });
       return;
     }
+    const cardStand = this.nearCardStand();
+    if (cardStand) {
+      this.buyCard(cardStand);
+      return;
+    }
     const nearStatue = this.run.roomProps.nearStatue();
     if (nearStatue && !this.nearVending()) {
       this.run.roomProps.useStatue(nearStatue);
@@ -198,10 +251,15 @@ export class LootInteract {
       this.tipItem = tip;
       bus.emit('weaponTip', { item: tip });
     }
+    const cardTip = this.nearCardStand()?.stock.card ?? null;
+    if (cardTip !== this.tipCard) {
+      this.tipCard = cardTip;
+      bus.emit('cardTip', { card: cardTip });
+    }
     const vending = this.nearVending();
     const portal = this.nearPortal();
     const statue = this.run.roomProps.nearStatue();
-    const kind = this.nearestFloorWeapon() ? 'weapon' : this.nearChest() ? 'chest' : this.nearStand() ? 'merchant' : vending ? 'vending' : portal ? 'portal' : statue ? 'statue' : null;
+    const kind = this.nearestFloorWeapon() ? 'weapon' : this.nearChest() ? 'chest' : this.nearStand() || this.nearCardStand() ? 'merchant' : vending ? 'vending' : portal ? 'portal' : statue ? 'statue' : null;
     if (kind !== this.interactKind) this.setInteractHint(kind);
     // 포탈·자판기: 머리 위에 조작 안내
     const at = kind === 'vending' ? vending : kind === 'statue' ? statue : kind === 'portal' ? { x: portal!.sprite.x, y: portal!.sprite.y } : null;

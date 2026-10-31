@@ -4,7 +4,7 @@
  */
 import type Phaser from 'phaser';
 import { getContext } from '../core/context';
-import type { StockItem } from '../systems/loot';
+import type { CardStock, StockItem } from '../systems/loot';
 import { fitArt } from './art';
 import type { GradeId, SpriteRef } from '../types/data';
 
@@ -48,6 +48,36 @@ export class Chest {
   destroy(): void {
     this.sprite.scene.tweens.killTweensOf(this.sprite);
     this.sprite.destroy();
+  }
+}
+
+/** 스킬·스탯 상점 진열대 하나: 아이콘 + 이름·가격. 사면 바로 적용된다 */
+export class CardStand {
+  readonly base: Phaser.GameObjects.Image;
+  readonly iconImg: Phaser.GameObjects.Image | null;
+  readonly label: Phaser.GameObjects.Text;
+
+  constructor(scene: Phaser.Scene, readonly stock: CardStock, standRef: SpriteRef, iconKey: string, iconPx: number, x: number, y: number, text: string, color: string) {
+    this.base = scene.add.image(x, y + 4, standRef.spriteKey).setDepth(1);
+    this.iconImg = scene.textures.exists(iconKey) ? scene.add.image(x, y - 6, iconKey).setDisplaySize(iconPx, iconPx).setDepth(2) : null;
+    this.label = scene.add
+      .text(x, y + 12, text, { fontFamily: 'sans-serif', fontSize: '8px', color, stroke: '#000000', strokeThickness: 2, align: 'center' })
+      .setOrigin(0.5, 0)
+      .setDepth(3);
+  }
+
+  get x(): number {
+    return this.base.x;
+  }
+
+  get y(): number {
+    return this.base.y;
+  }
+
+  markSold(text: string): void {
+    this.stock.sold = true;
+    this.iconImg?.setVisible(false);
+    this.label.setText(text).setColor('#888888');
   }
 }
 

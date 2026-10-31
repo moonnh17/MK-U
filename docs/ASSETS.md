@@ -61,7 +61,7 @@
 | `enemy_tomakki` | 토마끼 | 8×8 | feet | #8fd16a | mku/enemy_tomakki.png (4프레임) |
 | `enemy_gaedeulgae` | 개들개 | 11×11 | feet | #c9a24a | mku/enemy_gaedeulgae.png (5프레임) |
 | `enemy_akgwi` | 악귀 | 15×15 | feet | #b0383a | mku/enemy_akgwi.png (6프레임) |
-| `enemy_ghost_shooter` | 유령 사수 | 11×11 | feet | #c0303a | mku/enemy_ghost_shooter.png (4프레임) |
+| `enemy_ghost_shooter` | 유령 사수 | 11×11 | feet | #c0303a | mku/enemy_ghost_shooter.png (6프레임) |
 | `enemy_hectar_trooper` | 헥타르 전투원 | 12×12 | feet | #3a7bff | mku/enemy_hectar_trooper.png (5프레임) |
 | `enemy_magi_beetle` | 마기갑충 | 15×15 | feet | #5a8a3a | mku/enemy_magi_beetle.png (10프레임) |
 | `enemy_a_memory` | 어느 기억 | 13×13 | feet | #8a7ab0 | mku/enemy_a_memory.png (14프레임) |

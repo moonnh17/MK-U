@@ -3,7 +3,7 @@ import type { CutIn, CutPage } from '../ui/cutscenePages';
 import type { SfxId } from '../systems/sound';
 import type { ButtonAction } from './actions';
 import type { UiMode } from '../input/uiMode';
-import type { AnyCard } from '../systems/cards';
+import type { AnyCard, Card } from '../systems/cards';
 import type { CardOfferKind, EncounterKindId, GradeId, StatId } from '../types/data';
 
 /** 이벤트 이름 → 페이로드 */
@@ -37,6 +37,7 @@ export interface GameEvents {
   muteToggle: Record<string, never>;
   /** 지금 앞에 있는 바닥 무기·진열 무기 (없으면 null) */
   weaponTip: { item: WeaponItem | null };
+  cardTip: { card: Card | null };
   /** 이 곡을 튼다 (같은 곡이면 그대로) */
   music: { track: string };
   volumeChanged: Record<string, never>;

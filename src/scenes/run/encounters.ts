@@ -60,6 +60,8 @@ export class Encounters {
         const label = `${this.run.loot.weaponName(s.weapon)}\n${this.run.ctx.t('merchant.price', { price: s.price })}`;
         this.run.loot.stands.push(new MerchantStand(this.run, s, d.loot.merchantStand, def.spriteKey, x, c.y, label, this.run.loot.gradeColor(s.weapon.grade)));
       });
+    } else if (kind === 'skillShop' || kind === 'statShop') {
+      this.run.loot.openCardShop(this.run.progression.drawShopCards(kind, rng), c);
     } else if (kind === 'raid') {
       // 전투 칸보다 웨이브·적 수가 많고, 웨이브마다 엘리트 2마리
       const r = d.loot.raid;

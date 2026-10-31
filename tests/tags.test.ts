@@ -1,13 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { gameData } from '../src/data/index';
 import { calcDamage, rangeMultiplier, spaceDamage, startingStats } from '../src/systems/damage';
-import { addStat, damageTaken, maxHpFor, statEffect } from '../src/systems/stats';
+import { addStat, maxHpFor, statEffect } from '../src/systems/stats';
 import {
   applyBleed,
   buffDuration,
   canAutoCast,
-  chargeSpeed,
-  chargeTime,
   skillTags,
   tagBadges,
   taggedChance,
@@ -66,13 +64,8 @@ describe('확률: min(상한, 기본 × 1.03^(지능−10))', () => {
 });
 
 describe('차징·버프 지속', () => {
-  it('차징: 민첩 10 초과 1당 +4%, 상한 +100%', () => {
-    expect(chargeSpeed(base(), tags)).toBe(1);
-    expect(chargeSpeed({ ...base(), agility: 20 }, tags)).toBeCloseTo(1.4);
-    expect(chargeSpeed({ ...base(), agility: 99 }, tags)).toBeCloseTo(2);
-    // 충전 시간은 속도로 나눈다. 차징 태그가 없으면 그대로
-    expect(chargeTime(2, ['tech', 'charging'], { ...base(), agility: 35 }, tags)).toBeCloseTo(1);
-    expect(chargeTime(2, ['tech'], { ...base(), agility: 35 }, tags)).toBe(2);
+  it('차징은 스탯 보정이 없다', () => {
+    expect(tags.tags.find((t) => t.id === 'charging')!.rule.kind).toBe('none');
   });
 
   it('버프: 정신력 10 초과 1당 +3%, 상한 +90%, 버프 태그가 있을 때만', () => {
@@ -143,15 +136,13 @@ describe('태그 배지', () => {
 describe('스탯 효과 (임시 수치)', () => {
   const sd = gameData.stats;
   it('시작 스탯 10이면 효과 0', () => {
-    for (const id of ['maxHp', 'damageReduction', 'moveSpeed', 'skillArea', 'energyGain'] as const) {
+    for (const id of ['maxHp', 'moveSpeed', 'skillArea', 'energyGain'] as const) {
       expect(statEffect(id, base(), sd)).toBe(0);
     }
   });
-  it('견고: 최대 체력 증가·받는 피해 감소(상한)', () => {
-    const s = { ...base(), toughness: 20 };
-    expect(maxHpFor(100, s, sd)).toBe(120);
-    expect(damageTaken(10, s, sd)).toBeCloseTo(9);
-    expect(damageTaken(10, { ...base(), toughness: 200 }, sd)).toBeCloseTo(6);
+  it('견고: 최대 체력만 늘린다', () => {
+    expect(maxHpFor(100, { ...base(), toughness: 20 }, sd)).toBe(120);
+    expect(Object.keys(sd.effects).filter((k) => sd.effects[k as keyof typeof sd.effects].stat === 'toughness')).toEqual(['maxHp']);
   });
   it('민첩: 이동속도, 마기력: 스킬 범위·에너지 획득량', () => {
     expect(statEffect('moveSpeed', { ...base(), agility: 20 }, sd)).toBeCloseTo(0.15);

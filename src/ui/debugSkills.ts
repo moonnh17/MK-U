@@ -122,7 +122,7 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
     ),
   );
   // 다음 조우 칸 유형 강제, 무기 지급, 코인
-  const encSel = select([['', t('debug.encounterRandom')], ...(['treasure', 'merchant', 'raid', 'magiSpire', 'hiddenBoss'] as const).map((k): [string, string] => [k, t(`encounter.${k}`)])]);
+  const encSel = select([['', t('debug.encounterRandom')], ...(['treasure', 'merchant', 'skillShop', 'statShop', 'raid', 'magiSpire', 'hiddenBoss'] as const).map((k): [string, string] => [k, t(`encounter.${k}`)])]);
   // 스테이지 이동 (지금 빌드 그대로)
   const stageSel = select(
     Array.from({ length: d.mapgen.chapters * d.mapgen.stagesPerChapter }, (_, i): [string, string] => {

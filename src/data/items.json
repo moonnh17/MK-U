@@ -9,7 +9,7 @@
       "effects": [{ "kind": "lowHpHeal", "threshold": 0.5, "healTo": 0.8, "cooldownSec": 0, "priority": 2, "afterDamage": 0.05 }],
       "spriteKey": "item_slime_stew", "color": "#8fd16a", "size": 8 },
     { "id": "magicasol", "nameKey": "item.magicasol", "descKey": "item.magicasol.desc", "grade": "common", "pool": "normal", "tags": [],
-      "effects": [{ "kind": "lowHpHeal", "threshold": 0.5, "healTo": 0.8, "cooldownSec": 20, "priority": 3 }],
+      "effects": [{ "kind": "lowHpHeal", "threshold": 0.5, "healTo": 0.8, "cooldownSec": 60, "priority": 3 }],
       "spriteKey": "item_magicasol", "color": "#5ac8e0", "size": 8 },
     { "id": "namelessSword", "nameKey": "item.namelessSword", "descKey": "item.namelessSword.desc", "grade": "common", "pool": "normal", "tags": ["melee"],
       "effects": [{ "kind": "damage", "scope": "melee", "value": 0.1, "group": "damagePct" }],
@@ -46,7 +46,7 @@
       "variants": [{ "job": "barbarian", "effects": [] }],
       "spriteKey": "item_oak_heart", "color": "#6a9a3a", "size": 8 },
     { "id": "hanwooSteak", "nameKey": "item.hanwooSteak", "descKey": "item.hanwooSteak.desc", "grade": "rare", "pool": "normal", "tags": [],
-      "effects": [{ "kind": "lowHpHeal", "threshold": 0.1, "healTo": 1.0, "cooldownSec": 20, "priority": 1 }],
+      "effects": [{ "kind": "lowHpHeal", "threshold": 0.1, "healTo": 1.0, "cooldownSec": 60, "priority": 1 }],
       "spriteKey": "item_hanwoo_steak", "color": "#c85a5a", "size": 8 },
 
     { "id": "leeSeal", "nameKey": "item.leeSeal", "descKey": "item.leeSeal.desc", "grade": "legendary", "pool": "normal", "tags": [],

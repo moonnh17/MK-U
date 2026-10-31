@@ -1811,16 +1811,31 @@ body {
   flex-wrap: wrap;
   gap: 6px;
 }
+/* 칸마다 같은 폭으로, 카드는 칸 안에 꼭 맞게 */
+#inventory-window .iw-skills .iw-row:not(.stored) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+  align-items: stretch;
+}
 #inventory-window .iw-skills .iw-slot {
-  flex: 1 1 74px;
-  min-width: 74px;
+  flex: 1 1 84px;
+  width: auto;
+  min-width: 0;
   min-height: 92px;
   padding: 4px;
   text-align: center;
 }
 #inventory-window .iw-skill {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
   padding: 3px;
   text-align: center;
+  overflow-wrap: anywhere;
+}
+#inventory-window .iw-skills .stored .iw-skill {
+  flex: 0 1 96px;
+  width: 96px;
 }
 .iw-skillicon {
   display: block;

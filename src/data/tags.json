@@ -43,7 +43,7 @@
       "nameKey": "tag.charging",
       "descKey": "tag.charging.desc",
       "damageGroup": "none",
-      "rule": { "kind": "linearStat", "stat": "agility", "pivot": 10, "perPoint": 0.04, "cap": 1.0 },
+      "rule": { "kind": "none" },
       "badgeColor": "#5ad98c"
     },
     {
