@@ -122,7 +122,7 @@ export class Progression {
     if (!card || this.run.modal !== 'cards') return;
     sfx('cardPick');
     if (card.kind === 'item') {
-      this.run.giveItem(card.itemId);
+      this.run.loot.giveItem(card.itemId);
       this.openNextCards();
       return;
     }
@@ -259,12 +259,12 @@ export class Progression {
     const bossItem = bossItemDef && (bossItemDef.dropChance === undefined || itemRng.chance(bossItemDef.dropChance)) ? bossItemDef : undefined;
     const reward = () => {
       this.run.addPortal(node);
-      if (weights) this.run.addChest('weapon', c.x - 40, c.y, weights);
+      if (weights) this.run.loot.addChest('weapon', c.x - 40, c.y, weights);
       // 보스 전용 아이템 확정 (무기 상자와 별도)
-      if (bossItem) this.run.addChest('item', c.x + 40, c.y, {}, bossItem.id);
+      if (bossItem) this.run.loot.addChest('item', c.x + 40, c.y, {}, bossItem.id);
       // 보스 전용 무기 확정
       const bossWeapon = d.weapons.weapons.find((w) => w.bossId === bossId);
-      if (bossWeapon) this.run.addChest('weapon', c.x + 40, c.y, {}, bossWeapon.id);
+      if (bossWeapon) this.run.loot.addChest('weapon', c.x + 40, c.y, {}, bossWeapon.id);
     };
     if (last && this.run.session.player.advancement === null) this.advance(reward);
     else reward();

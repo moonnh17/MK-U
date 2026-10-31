@@ -34,7 +34,7 @@ export class RoomProps {
       ...obs.map((o) => grow(o, rp.edgeInsetPx)),
       { x: c.x - clear, y: c.y - clear, w: clear * 2, h: clear * 2 },
       ...(Object.keys(node.doors) as Dir[]).map((dir) => grow(doorRect(node, dir, this.run.m), rp.doorClearPx)),
-      ...this.run.vendings.map((v) => grow({ x: v.x, y: v.y, w: 0, h: 0 }, clear)),
+      ...this.run.loot.vendings.map((v) => grow({ x: v.x, y: v.y, w: 0, h: 0 }, clear)),
     ];
     for (const s of placeRoomProps(rng, interiorRect(node, this.run.m, rp.edgeInsetPx), avoid, rule, rp.spacingPx, rp.statues.map((x) => x.kind))) {
       if (s.kind === 'statue') {

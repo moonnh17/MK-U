@@ -2,6 +2,7 @@ import { buildPathField, pathDir, segmentClear, type PathField } from '../system
 import { IDLE_DODGE } from '../systems/dodge';
 import { stampGrid } from '../systems/roomShapes';
 import Phaser from 'phaser';
+import { LootInteract } from './run/lootInteract';
 import { SkillRuntime } from './run/skillRuntime';
 import { Encounters } from './run/encounters';
 import { Progression } from './run/progression';
@@ -9,7 +10,7 @@ import { WeaponCombat } from './run/weaponCombat';
 import { StageFx } from './run/stageFx';
 import { PlayerCondition } from './run/playerCondition';
 import { RoomProps } from './run/roomProps';
-import { SKILL_ACTIONS, sfx, type Modal, type Prop, type RunSceneData, type Vending } from './run/shared';
+import { SKILL_ACTIONS, sfx, type Modal, type Prop, type RunSceneData } from './run/shared';
 import type { Vec2 } from '../core/actions';
 import { getContext, type GameContext } from '../core/context';
 import { bus } from '../core/events';
@@ -21,7 +22,6 @@ import { BossController } from '../bosses/bossController';
 import type { BossHost } from '../bosses/host';
 import { Door } from '../entities/door';
 import { Enemy, type EnemyHost } from '../entities/enemy';
-import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
 import { Darkness } from '../entities/darkness';
 import { BreakableProp } from '../entities/roomProp';
 import { applyMental } from '../systems/sanity';
@@ -38,8 +38,7 @@ import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { gradeMultiplier, type Stats } from '../systems/damage';
 import { assignElites, eliteCount } from '../systems/elites';
 import { championWaves, raidChampions } from '../systems/champions';
-import { effectiveWeights, readySet, rollItem, transferWeight } from '../systems/items';
-import { canBuy, rollGrade, rollOptions, rollWeapon } from '../systems/loot';
+import { rollOptions } from '../systems/loot';
 import { generateStage, type RoomNode } from '../systems/mapgen';
 import { hiddenChapterMul } from '../systems/hiddenBoss';
 import { steerToward } from '../systems/motion';
@@ -50,13 +49,13 @@ import { RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/r
 import { advanceStage, playableChapters, firstStage } from '../systems/run';
 import { absorbHit } from '../systems/shield';
 import { corruptedDamage, tickCorruption } from '../systems/acro';
-import { heal, hpStance, takeDamage } from '../systems/vitals';
+import { hpStance, takeDamage } from '../systems/vitals';
 import { findSkill, gainGauge, setSkillLevel, tickCooldowns } from '../systems/skills';
 import { damageTaken, maxHpFor, setStat, statEffect } from '../systems/stats';
 import { buffDuration, tickBleed } from '../systems/tags';
-import { activeWeapon, dropWeaponAt, autoAim, gainEnergy, normalize, pickUpWeapon, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
+import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, corridors, doorRect, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, obstacleRects, wallRects, type Rect, type WorldMetrics } from '../systems/worldLayout';
-import type { BleedRule, GradeId, StatId, TagId, WeaponDef } from '../types/data';
+import type { BleedRule, StatId, TagId, WeaponDef } from '../types/data';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -69,6 +68,7 @@ export class RunScene extends Phaser.Scene {
   progression!: Progression;
   encounters!: Encounters;
   skillRt!: SkillRuntime;
+  loot!: LootInteract;
   ctx!: GameContext;
   session!: RunSession;
   m!: WorldMetrics;
@@ -89,17 +89,8 @@ export class RunScene extends Phaser.Scene {
   enemies: Enemy[] = [];
   enemyRoom = new Map<Enemy, number>();
   pickups: Pickup[] = [];
-  floorWeapons: FloorWeapon[] = [];
   portals: Prop[] = [];
-  vendings: Vending[] = [];
-  potions: Phaser.GameObjects.Image[] = [];
-  /** 포탈·자판기 앞에 뜨는 조작 안내 */
-  interactPrompt: Phaser.GameObjects.Text | null = null;
-  /** 아직 보여주지 않은 아이템 획득 창 */
-  itemGets: { itemId: string; set: boolean }[] = [];
   cores: Prop[] = [];
-  chests: Chest[] = [];
-  stands: MerchantStand[] = [];
   /** 타격감 연출·히트스톱 (멈춘 동안은 물리와 적이 멈춘다), 다음 피해가 치명타인지 */
   juice!: Juice;
   hitStop!: HitStop;
@@ -128,9 +119,6 @@ export class RunScene extends Phaser.Scene {
   aimDir: Vec2 = { x: 1, y: 0 };
   invuln = 0;
   pathFields = new Map<number, PathField>();
-  interactKind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | null = null;
-  /** 상자·드롭 무기 시드 순번 */
-  lootSeq = 0;
   toastTimes = new Map<string, number>();
   unsubs: (() => void)[] = [];
   initData: RunSceneData = {};
@@ -149,6 +137,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.loot = new LootInteract(this);
     this.skillRt = new SkillRuntime(this);
     this.encounters = new Encounters(this);
     this.progression = new Progression(this);
@@ -316,7 +305,7 @@ export class RunScene extends Phaser.Scene {
       bus.on('restartRequested', () => this.restartRun()),
       bus.on('cardPick', ({ index }) => this.progression.pickCard(index)),
       bus.on('inventoryEquip', ({ skillId, target }) => this.progression.equip(skillId, target)),
-      bus.on('inventoryDropWeapon', ({ slot }) => this.dropFromSlot(slot)),
+      bus.on('inventoryDropWeapon', ({ slot }) => this.loot.dropFromSlot(slot)),
       bus.on('inventoryOpenRequest', () => this.progression.openInventory()),
       bus.on('inventoryCloseRequest', () => this.progression.closeInventory()),
       bus.on('debugSetSkill', (e) => this.debugSetSkill(e.skillId, e.level, e.awakened)),
@@ -355,11 +344,11 @@ export class RunScene extends Phaser.Scene {
         const d = this.ctx.data;
         const def = this.weaponDefOf(defId);
         const count = d.groupMultipliers.grades.find((g) => g.id === grade)?.randomOptions ?? 0;
-        const rng = Rng.derive(this.ctx.config.seed, `debug-weapon-${this.lootSeq++}`);
+        const rng = Rng.derive(this.ctx.config.seed, `debug-weapon-${this.loot.lootSeq++}`);
         const options = rollOptions(rng, def, count, d.weapons.options);
-        this.dropWeapon({ defId, grade, options }, this.player.x + 16, this.player.y);
+        this.loot.dropWeapon({ defId, grade, options }, this.player.x + 16, this.player.y);
       }),
-      bus.on('debugGiveItem', ({ itemId }) => this.giveItem(itemId)),
+      bus.on('debugGiveItem', ({ itemId }) => this.loot.giveItem(itemId)),
       bus.on('debugCoins', ({ amount }) => {
         this.session.player.coins += amount;
       }),
@@ -378,7 +367,7 @@ export class RunScene extends Phaser.Scene {
       for (const b of this.bossControllers.values()) b.destroy();
       this.bossControllers = new Map();
     });
-    this.setInteractHint(null);
+    this.loot.setInteractHint(null);
     this.skillRt.refreshSkillView();
 
     // 런 시작 스킬 카드 / 앞 스테이지가 넘긴 카드는 시작방에서 고른다
@@ -392,18 +381,18 @@ export class RunScene extends Phaser.Scene {
     this.enemies = [];
     this.enemyRoom = new Map();
     this.pickups = [];
-    this.floorWeapons = [];
+    this.loot.floorWeapons = [];
     this.roomProps.breakables = [];
     this.roomProps.statues = [];
     this.roomProps.doorIcons = [];
     this.portals = [];
-    this.vendings = [];
-    this.potions = [];
-    this.interactPrompt = null;
-    this.itemGets = [];
+    this.loot.vendings = [];
+    this.loot.potions = [];
+    this.loot.interactPrompt = null;
+    this.loot.itemGets = [];
     this.cores = [];
-    this.chests = [];
-    this.stands = [];
+    this.loot.chests = [];
+    this.loot.stands = [];
     this.encounters.raidRooms = new Set();
     this.encounters.hiddenBossRooms = new Map();
     this.encounters.spires = [];
@@ -433,8 +422,8 @@ export class RunScene extends Phaser.Scene {
     this.condition.dodgeBar = null;
     this.pathFields = new Map();
     this.condition.bossHpSeen = new Map();
-    this.interactKind = null;
-    this.lootSeq = 0;
+    this.loot.interactKind = null;
+    this.loot.lootSeq = 0;
     this.toastTimes = new Map();
     this.modal = null;
     this.progression.offerQueue = [];
@@ -550,40 +539,7 @@ export class RunScene extends Phaser.Scene {
     const at = corners.length > 0 ? rng.pick(corners) : roomCenter(node, this.m);
     const sprite = this.add.image(at.x, at.y, v.spriteKey).setDepth(2);
     fitArt(this.ctx.data, sprite, v.size, v.height ?? v.size);
-    this.vendings.push({ x: at.x, y: at.y, stock: v.stock, sprite });
-  }
-
-  /** 자판기에서 물약을 뽑는다: 코인을 내면 앞으로 물약이 튀어나온다 */
-  buyPotion(m: Vending): void {
-    const v = this.ctx.data.mapgen.vending;
-    const p = this.session.player;
-    if (p.coins < v.price) {
-      this.toastThrottled(this.ctx.t('merchant.noCoins'));
-      return;
-    }
-    p.coins -= v.price;
-    m.stock--;
-    sfx('vend');
-    this.tweens.add({ targets: m.sprite, x: m.x + 1.5, duration: 40, yoyo: true, repeat: 3, onComplete: () => m.sprite.setX(m.x) });
-    if (m.stock <= 0) m.sprite.setAlpha(0.45);
-    const potion = this.add.image(m.x, m.y + 4, v.potion.spriteKey).setDepth(3);
-    this.potions.push(potion);
-    this.tweens.add({ targets: potion, y: m.y + 26, x: m.x + this.rng.range(-8, 8), duration: 280, ease: 'Bounce.easeOut' });
-  }
-
-  /** 물약 줍기: 체력이 닳아 있을 때 닿으면 회복 */
-  updatePotions(): void {
-    const v = this.ctx.data.mapgen.vending;
-    const p = this.session.player;
-    this.potions = this.potions.filter((img) => {
-      if (p.hp >= p.maxHp || Math.hypot(img.x - this.player.x, img.y - this.player.y) > v.pickupRadius) return true;
-      const before = p.hp;
-      p.hp = Math.min(p.maxHp, p.hp + p.maxHp * v.healRatio);
-      sfx('heal');
-      this.floatLabel({ x: this.player.x, y: this.player.y - 8 }, this.ctx.t('vending.heal', { n: Math.round(p.hp - before) }), '#7dff9a');
-      img.destroy();
-      return false;
-    });
+    this.loot.vendings.push({ x: at.x, y: at.y, stock: v.stock, sprite });
   }
 
   /** 플레이어 모습: 전직했으면 그 학파 그림(있으면), 아니면 기본 */
@@ -641,7 +597,7 @@ export class RunScene extends Phaser.Scene {
       const x = inner.x + (inner.w * (i + 1)) / (ids.length + 1);
       const y = inner.y + (inner.h * 3) / 4;
       const def = this.weaponDefOf(id);
-      this.floorWeapons.push(new FloorWeapon(this, plainWeapon(def), def.spriteKey, x, y));
+      this.loot.floorWeapons.push(new FloorWeapon(this, plainWeapon(def), def.spriteKey, x, y));
     });
   }
 
@@ -673,9 +629,9 @@ export class RunScene extends Phaser.Scene {
       if (frame.pressed.has('attack') || frame.pressed.has('interact')) this.restartRun();
       return;
     }
-    if (!this.modal && this.itemGets.length > 0) {
+    if (!this.modal && this.loot.itemGets.length > 0) {
       this.setModal('itemGet');
-      bus.emit('itemGot', this.itemGets.shift()!);
+      bus.emit('itemGot', this.loot.itemGets.shift()!);
     }
     if (this.modal) {
       this.progression.updateModal(frame);
@@ -755,7 +711,7 @@ export class RunScene extends Phaser.Scene {
       this.combat.fireCooldown = 0;
       this.combat.resetCharge();
     }
-    if (frame.pressed.has('interact')) this.interact();
+    if (frame.pressed.has('interact')) this.loot.interact();
 
     this.combat.updateAttack(dt, frame.held.has('attack'), aimAngle);
 
@@ -774,8 +730,8 @@ export class RunScene extends Phaser.Scene {
     this.updateBullets(dt);
     this.updatePickups(dt);
     this.condition.updateInvuln(dt);
-    this.updatePotions();
-    this.updateInteractHint();
+    this.loot.updatePotions();
+    this.loot.updateInteractHint();
     this.roomProps.updateDoorIcons();
     this.stageFx.updateTutorial();
 
@@ -1139,8 +1095,8 @@ export class RunScene extends Phaser.Scene {
     // 정예: 낮은 확률로 아이템 상자
     if (e.rank === 'champion' && !e.noReward) {
       const { stage } = this.session;
-      const chestRng = Rng.derive(this.ctx.config.seed, `champion-chest-${stage.chapter}-${stage.stage}-${this.lootSeq++}`);
-      if (chestRng.chance(d.waves.champions.itemChestChance)) this.addChest('item', x, y, d.items.treasureWeights);
+      const chestRng = Rng.derive(this.ctx.config.seed, `champion-chest-${stage.chapter}-${stage.stage}-${this.loot.lootSeq++}`);
+      if (chestRng.chance(d.waves.champions.itemChestChance)) this.loot.addChest('item', x, y, d.items.treasureWeights);
     }
     // 궁극기 게이지는 적 처치로 충전
     const ult = this.session.player.ultimate;
@@ -1410,20 +1366,6 @@ export class RunScene extends Phaser.Scene {
 
   // ---------- 상호작용 ----------
 
-  nearestFloorWeapon(): FloorWeapon | null {
-    const r = this.ctx.data.pickups.interactRadius;
-    let best: FloorWeapon | null = null;
-    let bestD = r;
-    for (const fw of this.floorWeapons) {
-      const dist = Math.hypot(fw.x - this.player.x, fw.y - this.player.y);
-      if (dist <= bestD) {
-        best = fw;
-        bestD = dist;
-      }
-    }
-    return best;
-  }
-
   nearest<T extends { x: number; y: number }>(list: readonly T[], radius: number): T | null {
     let best: T | null = null;
     let bestD = radius;
@@ -1435,37 +1377,6 @@ export class RunScene extends Phaser.Scene {
       }
     }
     return best;
-  }
-
-  nearChest(): Chest | null {
-    return this.nearest(
-      this.chests.filter((c) => !c.opened),
-      this.ctx.data.loot.chest.openRadius,
-    );
-  }
-
-  nearStand(): MerchantStand | null {
-    return this.nearest(
-      this.stands.filter((s) => !s.stock.sold),
-      this.ctx.data.pickups.interactRadius,
-    );
-  }
-
-  /** 무기 이름 (일반이 아니면 등급을 앞에) */
-  weaponName(item: WeaponItem): string {
-    const t = this.ctx.t;
-    const name = t(this.weaponDefOf(item.defId).nameKey);
-    return item.grade === 'common' ? name : `${t(`grade.${item.grade}`)} ${name}`;
-  }
-
-  gradeColor(grade: GradeId): string {
-    return this.ctx.data.groupMultipliers.grades.find((g) => g.id === grade)?.color ?? '#ffffff';
-  }
-
-  /** 바닥에 무기를 놓는다 (상자·드롭·버린 무기) */
-  dropWeapon(item: WeaponItem, x: number, y: number): void {
-    const def = this.weaponDefOf(item.defId);
-    this.floorWeapons.push(new FloorWeapon(this, item, def.spriteKey, x, y, item.grade === 'common' ? null : this.gradeColor(item.grade)));
   }
 
   /** 결산 기록: 처치·엘리트·보스·히든보스, 보스는 과거의 기억 조각 판정 (분신 등 소환된 적은 세지 않는다) */
@@ -1496,150 +1407,9 @@ export class RunScene extends Phaser.Scene {
     bus.emit('toast', { text: this.ctx.t('memory.shardGot', { have: save.data.pastShards, slots: mem.pastSlots }) });
   }
 
-  /** 인벤토리에서 무기 버리기: 발밑에 떨어뜨린다 (마지막 무기를 버리면 맨손) */
-  dropFromSlot(slot: 0 | 1): void {
-    const p = this.session.player;
-    const r = dropWeaponAt(p.weapons, slot);
-    if (!r.dropped) return;
-    p.weapons = r.slots;
-    this.dropWeapon(r.dropped, this.player.x, this.player.y + 10);
-    this.combat.fireCooldown = 0;
-    this.combat.resetCharge();
-    bus.emit('toast', { text: this.ctx.t('inventory.dropped', { weapon: this.weaponName(r.dropped) }) });
-    bus.emit('inventoryChanged', {});
-  }
-
-  /** 손에 든다. 슬롯이 차 있으면 들고 있던 무기를 그 자리에 버린다 */
-  takeWeapon(item: WeaponItem, x: number, y: number): void {
-    const p = this.session.player;
-    const { slots, dropped } = pickUpWeapon(p.weapons, item);
-    p.weapons = slots;
-    if (dropped) this.dropWeapon(dropped, x, y);
-    this.combat.fireCooldown = 0;
-    this.combat.resetCharge();
-  }
-
-  rollWeaponItem(weights: Partial<Record<GradeId, number>>, label: string): WeaponItem {
-    const d = this.ctx.data;
-    const rng = Rng.derive(this.ctx.config.seed, `${label}-${this.session.stage.chapter}-${this.session.stage.stage}-${this.lootSeq++}`);
-    const grade = rollGrade(rng, weights, d.loot.mythicChance);
-    return rollWeapon(rng, grade, d.weapons.weapons, d.weapons.options, d.groupMultipliers, d.loot.uniqueWeaponFallback);
-  }
-
-  interact(): void {
-    const t = this.ctx.t;
-    const fw = this.nearestFloorWeapon();
-    if (fw) {
-      this.floorWeapons = this.floorWeapons.filter((x) => x !== fw);
-      const { x, y } = fw;
-      fw.destroy();
-      this.takeWeapon(fw.item, x, y);
-      bus.emit('toast', { text: t('room.pickedUp', { weapon: this.weaponName(fw.item) }) });
-      return;
-    }
-    const chest = this.nearChest();
-    if (chest) {
-      this.openChest(chest);
-      return;
-    }
-    const stand = this.nearStand();
-    if (stand) {
-      const p = this.session.player;
-      if (!canBuy(p.coins, stand.stock)) {
-        this.toastThrottled(t('merchant.noCoins'));
-        return;
-      }
-      p.coins -= stand.stock.price;
-      stand.markSold(t('merchant.sold'));
-      this.takeWeapon(stand.stock.weapon, stand.x, stand.y + 14);
-      bus.emit('toast', { text: t('merchant.bought', { weapon: this.weaponName(stand.stock.weapon) }) });
-      return;
-    }
-    const nearStatue = this.roomProps.nearStatue();
-    if (nearStatue && !this.nearVending()) {
-      this.roomProps.useStatue(nearStatue);
-      return;
-    }
-    const vending = this.nearVending();
-    if (vending) {
-      this.buyPotion(vending);
-      return;
-    }
-    if (this.nearPortal()) this.nextStage();
-  }
-
-  openChest(chest: Chest): void {
-    chest.open();
-    if (chest.kind === 'weapon') {
-      // 히든보스 전용 무기는 정해진 유니크 (무작위 옵션 없음)
-      const item = chest.fixedItem ? plainWeapon(this.weaponDefOf(chest.fixedItem)) : this.rollWeaponItem(chest.weights, 'chest');
-      this.dropWeapon(item, chest.x, chest.y + 14);
-      return;
-    }
-    const d = this.ctx.data;
-    const p = this.session.player;
-    let id = chest.fixedItem;
-    if (!id) {
-      const { stage } = this.session;
-      const rng = Rng.derive(this.ctx.config.seed, `item-${stage.chapter}-${stage.stage}-${this.lootSeq++}`);
-      const weights = effectiveWeights(chest.weights, stage.chapter, d.items.chapterCommonShift, p.lootShift);
-      id = rollItem(rng, weights, d.loot.mythicChance, d.items, new Set(p.itemsObtained)) ?? undefined;
-    }
-    if (id) this.giveItem(id);
-  }
-
-  /** 아이템 획득: 확률 이전 → 세트 합성 → 획득 카드 */
-  giveItem(id: string): void {
-    const d = this.ctx.data;
-    const p = this.session.player;
-    const def = d.items.items.find((x) => x.id === id);
-    if (!def || p.itemsObtained.includes(id)) return;
-    p.items = [...p.items, id];
-    p.itemsObtained = [...p.itemsObtained, id];
-    if (def.pool === 'normal') p.lootShift = transferWeight(p.lootShift, def.grade, d.items.transferPerPickup);
-    this.itemGets.push({ itemId: id, set: false });
-    // 세트: 재료가 모이면 자동 합성, 재료 효과는 사라지고 다시 나오지 않는다
-    const set = readySet(new Set(p.items), new Set(p.itemsObtained), d.items.sets);
-    if (set) {
-      p.items = [...p.items.filter((x) => !set.materials.includes(x)), set.result];
-      p.itemsObtained = [...p.itemsObtained, set.result];
-      this.itemGets.push({ itemId: set.result, set: true });
-    }
-    this.itemRt.refresh();
-  }
-
-  addChest(kind: ChestKind, x: number, y: number, weights: Partial<Record<GradeId, number>>, fixedItem?: string): void {
-    const ref = kind === 'weapon' ? this.ctx.data.loot.chest.weapon : this.ctx.data.loot.chest.item;
-    this.chests.push(new Chest(this, kind, ref, x, y, weights, fixedItem));
-  }
-
   // ---------- 조우 칸 ----------
 
   // ---------- 마기수집첨탑 ----------
-
-  updateInteractHint(): void {
-    const vending = this.nearVending();
-    const portal = this.nearPortal();
-    const statue = this.roomProps.nearStatue();
-    const kind = this.nearestFloorWeapon() ? 'weapon' : this.nearChest() ? 'chest' : this.nearStand() ? 'merchant' : vending ? 'vending' : portal ? 'portal' : statue ? 'statue' : null;
-    if (kind !== this.interactKind) this.setInteractHint(kind);
-    // 포탈·자판기: 머리 위에 조작 안내
-    const at = kind === 'vending' ? vending : kind === 'statue' ? statue : kind === 'portal' ? { x: portal!.sprite.x, y: portal!.sprite.y } : null;
-    if (!at) {
-      this.interactPrompt?.setVisible(false);
-      return;
-    }
-    const mode = this.ctx.uiMode === 'mobile' ? 'mobile' : 'pc';
-    const text = this.ctx.t(`interact.${kind}.${mode}`, { price: this.ctx.data.mapgen.vending.price, what: statue ? this.ctx.t(`statue.${statue.kind}`) : '' });
-    this.interactPrompt ??= this.add.text(0, 0, '', { fontFamily: 'sans-serif', fontSize: '9px', color: '#ffffff', stroke: '#000000', strokeThickness: 3 }).setOrigin(0.5, 1).setDepth(9);
-    if (this.interactPrompt.text !== text) this.interactPrompt.setText(text);
-    this.interactPrompt.setPosition(at.x, at.y - 22).setVisible(true);
-  }
-
-  setInteractHint(kind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | null): void {
-    this.interactKind = kind;
-    bus.emit('interactHint', { kind });
-  }
 
   /** 머리 위 잠깐 뜨는 글자 */
   floatLabel(at: Vec2, text: string, color: string): void {
@@ -1659,20 +1429,6 @@ export class RunScene extends Phaser.Scene {
   }
 
   // ---------- 진행 ----------
-
-  /** 상호작용(F)이 닿는 포탈 */
-  nearPortal(): Prop | null {
-    if (this.leaving) return null;
-    const r = this.ctx.data.pickups.interactRadius;
-    return this.portals.find((x) => Math.hypot(x.sprite.x - this.player.x, x.sprite.y - this.player.y) <= x.radius + r) ?? null;
-  }
-
-  nearVending(): Vending | null {
-    return this.nearest(
-      this.vendings.filter((v) => v.stock > 0),
-      this.ctx.data.pickups.interactRadius + this.ctx.data.mapgen.vending.size / 2,
-    );
-  }
 
   nextStage(): void {
     this.leaving = true;
@@ -1710,7 +1466,7 @@ export class RunScene extends Phaser.Scene {
     this.physics.pause();
     this.player.setAlpha(1);
     if (outcome.type === 'dead') this.player.setTint(0x555555);
-    this.setInteractHint(null);
+    this.loot.setInteractHint(null);
     bus.emit('overlay', { open: true });
   }
 

@@ -51,14 +51,14 @@ export class Encounters {
     bus.emit('toast', { text: this.run.ctx.t(`encounter.${kind}`) });
 
     if (kind === 'treasure') {
-      this.run.addChest('item', c.x, c.y, d.items.treasureWeights);
+      this.run.loot.addChest('item', c.x, c.y, d.items.treasureWeights);
     } else if (kind === 'merchant') {
       const stock = merchantStock(rng, d.loot, d.weapons.weapons, d.weapons.options, d.groupMultipliers);
       stock.forEach((s, i) => {
         const x = c.x + (i - (stock.length - 1) / 2) * d.loot.standSpacing;
         const def = this.run.weaponDefOf(s.weapon.defId);
-        const label = `${this.run.weaponName(s.weapon)}\n${this.run.ctx.t('merchant.price', { price: s.price })}`;
-        this.run.stands.push(new MerchantStand(this.run, s, d.loot.merchantStand, def.spriteKey, x, c.y, label, this.run.gradeColor(s.weapon.grade)));
+        const label = `${this.run.loot.weaponName(s.weapon)}\n${this.run.ctx.t('merchant.price', { price: s.price })}`;
+        this.run.loot.stands.push(new MerchantStand(this.run, s, d.loot.merchantStand, def.spriteKey, x, c.y, label, this.run.loot.gradeColor(s.weapon.grade)));
       });
     } else if (kind === 'raid') {
       // 전투 칸보다 웨이브·적 수가 많고, 웨이브마다 엘리트 2마리
@@ -179,8 +179,8 @@ export class Encounters {
     const hb = this.hiddenBossRooms.get(roomId)!;
     const c = roomCenter(this.run.session.map.rooms[roomId]!, this.run.m);
     this.run.progression.queueOffers([{ kind: this.run.ctx.data.cards.bossBonus, boss: true }], () => {
-      this.run.addChest('weapon', c.x - 40, c.y, {}, hb.weaponId);
-      if (!this.run.session.player.itemsObtained.includes(hb.itemId)) this.run.addChest('item', c.x + 40, c.y, {}, hb.itemId);
+      this.run.loot.addChest('weapon', c.x - 40, c.y, {}, hb.weaponId);
+      if (!this.run.session.player.itemsObtained.includes(hb.itemId)) this.run.loot.addChest('item', c.x + 40, c.y, {}, hb.itemId);
     });
   }
 
@@ -191,14 +191,14 @@ export class Encounters {
     const rng = Rng.derive(this.run.ctx.config.seed, `drop-${stage.chapter}-${stage.stage}-${roomId}`);
     if (!rng.chance(d.loot.combatDrop.chance)) return;
     // 방 가운데는 장애물일 수 있어 플레이어 발밑에 떨어뜨린다
-    this.run.dropWeapon(this.run.rollWeaponItem(d.loot.combatDrop.weights, 'drop'), this.run.player.x, this.run.player.y);
+    this.run.loot.dropWeapon(this.run.loot.rollWeaponItem(d.loot.combatDrop.weights, 'drop'), this.run.player.x, this.run.player.y);
   }
 
   /** 대규모 습격 보상: 아이템 상자(레어 이상, M4-B) + 코인 다량 */
   raidReward(roomId: number): void {
     const d = this.run.ctx.data;
     const c = roomCenter(this.run.session.map.rooms[roomId]!, this.run.m);
-    this.run.addChest('item', c.x, c.y, d.items.raidWeights);
+    this.run.loot.addChest('item', c.x, c.y, d.items.raidWeights);
     const n = this.run.rng.int(d.loot.raid.coins[0], d.loot.raid.coins[1]);
     for (let i = 0; i < n; i++) {
       const a = this.run.rng.range(0, Math.PI * 2);
