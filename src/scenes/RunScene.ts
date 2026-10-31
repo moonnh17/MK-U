@@ -1,6 +1,7 @@
 import { buildPathField, pathDir, segmentClear, type PathField } from '../systems/pathField';
 import { IDLE_DODGE } from '../systems/dodge';
 import Phaser from 'phaser';
+import { RunDebug } from './run/runDebug';
 import { WorldBuilder } from './run/worldBuilder';
 import { LootInteract } from './run/lootInteract';
 import { SkillRuntime } from './run/skillRuntime';
@@ -50,7 +51,7 @@ import { advanceStage, playableChapters, firstStage } from '../systems/run';
 import { absorbHit } from '../systems/shield';
 import { corruptedDamage, tickCorruption } from '../systems/acro';
 import { hpStance, takeDamage } from '../systems/vitals';
-import { findSkill, gainGauge, setSkillLevel, tickCooldowns } from '../systems/skills';
+import { gainGauge, tickCooldowns } from '../systems/skills';
 import { damageTaken, maxHpFor, setStat, statEffect } from '../systems/stats';
 import { buffDuration, tickBleed } from '../systems/tags';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
@@ -70,6 +71,7 @@ export class RunScene extends Phaser.Scene {
   skillRt!: SkillRuntime;
   loot!: LootInteract;
   world!: WorldBuilder;
+  debugTools!: RunDebug;
   ctx!: GameContext;
   session!: RunSession;
   m!: WorldMetrics;
@@ -138,6 +140,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.debugTools = new RunDebug(this);
     this.world = new WorldBuilder(this);
     this.loot = new LootInteract(this);
     this.skillRt = new SkillRuntime(this);
@@ -303,14 +306,14 @@ export class RunScene extends Phaser.Scene {
     cam.centerOn(start.x, start.y);
 
     this.unsubs.push(
-      bus.on('debugClearRoom', () => this.debugClearRoom()),
+      bus.on('debugClearRoom', () => this.debugTools.debugClearRoom()),
       bus.on('restartRequested', () => this.restartRun()),
       bus.on('cardPick', ({ index }) => this.progression.pickCard(index)),
       bus.on('inventoryEquip', ({ skillId, target }) => this.progression.equip(skillId, target)),
       bus.on('inventoryDropWeapon', ({ slot }) => this.loot.dropFromSlot(slot)),
       bus.on('inventoryOpenRequest', () => this.progression.openInventory()),
       bus.on('inventoryCloseRequest', () => this.progression.closeInventory()),
-      bus.on('debugSetSkill', (e) => this.debugSetSkill(e.skillId, e.level, e.awakened)),
+      bus.on('debugSetSkill', (e) => this.debugTools.debugSetSkill(e.skillId, e.level, e.awakened)),
       bus.on('debugSetStat', ({ stat, value }) => {
         const before = { hp: this.session.player.hp, maxHp: this.session.player.maxHp };
         this.session.player = { ...setStat(this.session.player, stat, value, d.player.maxHp, d.stats), ...before };
@@ -320,8 +323,8 @@ export class RunScene extends Phaser.Scene {
       bus.on('debugFillUltimate', () => {
         this.session.player.ultimate.gauge = this.skillRt.ultimateDef().gaugeMax;
       }),
-      bus.on('debugSpawn', ({ enemyId, count, elite }) => this.debugSpawn(enemyId, count, elite ?? null)),
-      bus.on('debugBarrage', () => this.debugBarrage()),
+      bus.on('debugSpawn', ({ enemyId, count, elite }) => this.debugTools.debugSpawn(enemyId, count, elite ?? null)),
+      bus.on('debugBarrage', () => this.debugTools.debugBarrage()),
       bus.on('cutsceneDone', () => this.progression.showNextCut()),
       bus.on('storyDone', () => this.progression.finishStory()),
       bus.on('itemGetDone', () => {
@@ -354,7 +357,7 @@ export class RunScene extends Phaser.Scene {
       bus.on('debugCoins', ({ amount }) => {
         this.session.player.coins += amount;
       }),
-      bus.on('debugAdvance', ({ hectar, acro }) => this.debugAdvance(hectar, acro)),
+      bus.on('debugAdvance', ({ hectar, acro }) => this.debugTools.debugAdvance(hectar, acro)),
       bus.on('debugBossHp', ({ ratio }) => {
         for (const e of this.enemies) if (e.def.rank === 'boss' || e.def.rank === 'hiddenBoss') e.hp = Math.max(1, e.maxHp * ratio);
       }),
@@ -1317,61 +1320,6 @@ export class RunScene extends Phaser.Scene {
   }
 
   // ---------- 디버그 ----------
-
-  debugClearRoom(): void {
-    const rid = this.session.currentRoomId;
-    if (rid === null) return;
-    for (const e of this.enemies.filter((x) => this.enemyRoom.get(x) === rid)) this.removeEnemy(e);
-    const state = this.rooms.get(rid);
-    if (state) this.handleRoomEvents(rid, state.forceClear());
-    const sp = this.encounters.spires.find((x) => x.roomId === rid);
-    if (sp) for (const e of sp.state.forceCharge()) this.encounters.spireEvents.push({ sp, e });
-  }
-
-  /** 디버그: 계열 집계를 정하고 바로 전직 (한 런에 한 번) */
-  debugAdvance(hectar: number, acro: number): void {
-    const p = this.session.player;
-    if (this.modal || p.advancement !== null) return;
-    p.schoolPicks = { hectar, acro };
-    this.progression.advance(() => {});
-  }
-
-  debugSetSkill(id: string, level: number, awakened: boolean): void {
-    const d = this.ctx.data;
-    const p = this.session.player;
-    p.loadout = setSkillLevel(p.loadout, findSkill(d.skills, id), level, awakened);
-    // 스킬을 없앴으면 그 스킬이 깔아 둔 오브젝트도 치운다
-    if (level <= 0) for (const o of this.skillRt.skillObjects.filter((x) => x.owner.split('.')[0] === id)) this.skillRt.removeObject(o);
-    this.skillRt.refreshSkillView();
-    bus.emit('inventoryChanged', {});
-    const u = this.progression.checkUltimateAwakening();
-    if (u && !this.modal) this.progression.playCutscenes([u], () => {});
-  }
-
-  debugSpawn(enemyId: string, count: number, elite: string | null): void {
-    const rid = this.session.currentRoomId;
-    if (rid === null || this.modal) return;
-    const rng = Rng.derive(this.ctx.config.seed, `debug-spawn-${this.time.now}`);
-    // 방 웨이브와 무관하게 소환(방 클리어 판정에 넣지 않음)
-    for (let i = 0; i < count; i++) this.spawnEnemy(enemyId, rid, rng, false, elite);
-  }
-
-  /** 플레이어 둘레에서 플레이어를 향해 일반 적 탄을 쏜다 (적 공격은 M3, 역장 확인용) */
-  debugBarrage(): void {
-    if (this.modal || this.session.outcome) return;
-    const d = this.ctx.data.enemies;
-    const cfg = d.debugBarrage;
-    for (let i = 0; i < cfg.count; i++) {
-      const a = (i * Math.PI * 2) / cfg.count;
-      const x = this.player.x + Math.cos(a) * cfg.distance;
-      const y = this.player.y + Math.sin(a) * cfg.distance;
-      const b = this.enemyBullets.create(x, y, d.projectile.spriteKey) as Phaser.Physics.Arcade.Image;
-      fitArt(this.ctx.data, b, d.projectile.size, d.projectile.height ?? d.projectile.size);
-      b.setDepth(5);
-      b.setData({ damage: cfg.damage, refractable: true, cuttable: true });
-      b.setVelocity(-Math.cos(a) * cfg.speed, -Math.sin(a) * cfg.speed);
-    }
-  }
 
   /** 카메라: 조준 중인 적 쪽으로 기울어 따라가고(없으면 플레이어), 방 바깥은 보이지 않게 */
   updateCamera(): void {
