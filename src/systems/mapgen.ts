@@ -169,7 +169,8 @@ function tryGenerate(
   // 가지: 전투 칸 나머지 + 조우 칸 (+ 일반 스테이지에서 출구가 끝 방이 아닌 경우는 없음)
   const branchKinds: RoomKind[] = [];
   for (let i = 0; i < branchCombat; i++) branchKinds.push('combatRoom');
-  for (let i = 0; i < rule.encounterRooms; i++) branchKinds.push('encounterRoom');
+  const encounters = rule.encounterRooms + (rng.chance(data.extraEncounterChance) ? 1 : 0);
+  for (let i = 0; i < encounters; i++) branchKinds.push('encounterRoom');
 
   for (const k of rng.shuffle(branchKinds)) {
     // 끝 방에는 붙이지 않는다(막다른 방 유지). 시작방 바로 옆 조우 칸도 허용.

@@ -25,6 +25,8 @@ export class SkillRuntime {
   shield: ShieldState | null = null;
   shieldOpts: ShieldOpts | null = null;
   shieldFx: Phaser.GameObjects.Arc | Phaser.GameObjects.Sprite | null = null;
+  /** 겹 수만큼 그리는 테두리 */
+  shieldRim: Phaser.GameObjects.Graphics | null = null;
   /** 끝날 때 종료 이펙트를 내기 위해 기억한다 */
   private lastShieldOpts: ShieldOpts | null = null;
   /** 지금 깔려 있는 패시브 (id:레벨:각성). 바뀌면 오브젝트를 다시 깐다 */
@@ -72,6 +74,7 @@ export class SkillRuntime {
         ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gaugeFromGreatSuccess(udef));
       },
       buffDuration: (sec, tags) => buffDuration(sec, tags, this.run.effStats(), ctx.data.tags) * (tags.includes('buff') ? 1 + this.run.itemRt.sums.buffDuration : 1),
+      shield: () => this.shield,
       setShield: (shield, opts) => {
         this.shield = shield;
         this.shieldOpts = opts;
@@ -163,6 +166,8 @@ export class SkillRuntime {
       if (this.shieldFx) this.run.tweens.killTweensOf(this.shieldFx);
       this.shieldFx?.destroy();
       this.shieldFx = null;
+      this.shieldRim?.destroy();
+      this.shieldRim = null;
       this.lastShieldOpts = null;
       return;
     }
@@ -183,15 +188,17 @@ export class SkillRuntime {
         loopArt(body, opts.look.body);
         this.shieldFx = body;
       }
-      // 막기 횟수를 다 쓰면 흐려진다
-      this.shieldFx.setPosition(at.x, at.y).setAlpha(s.hits > 0 ? 1 : 0.5);
+      // 겹이 쌓일수록 진해진다 (다 쓰고 굴절만 남으면 가장 흐리게)
+      const look = this.run.ctx.data.juice.shieldSpawn;
+      this.shieldFx.setPosition(at.x, at.y).setAlpha(look.stacks[Math.max(0, s.hits - 1)]!.bodyAlpha);
+      this.drawShieldRim(at, opts.fxRadius, s.hits);
     } else {
       if (!this.shieldFx) this.shieldFx = this.run.add.circle(0, 0, opts.fxRadius).setDepth(5);
       (this.shieldFx as Phaser.GameObjects.Arc)
         .setRadius(opts.fxRadius)
         .setPosition(at.x, at.y)
         .setStrokeStyle(s.hits > 0 ? 2 : 1, color, 0.9)
-        .setFillStyle(color, s.refractRadius > 0 ? 0.15 : 0.08);
+        .setFillStyle(color, s.refractLeftSec > 0 ? 0.15 : 0.08);
     }
     if (fresh) {
       // 작게 시작해 온몸을 덮을 때까지 커진다
@@ -201,7 +208,7 @@ export class SkillRuntime {
       fx.setScale(scaleX * sp.startScale, scaleY * sp.startScale);
       this.run.tweens.add({ targets: fx, scaleX, scaleY, duration: sp.growSec * 1000, ease: 'Back.easeOut' });
     }
-    if (s.refractRadius <= 0) return;
+    if (s.refractLeftSec <= 0) return;
     for (const b of [...this.run.enemyBullets.getChildren()] as Phaser.Physics.Arcade.Image[]) {
       const dist = Math.hypot(b.x - this.run.player.x, b.y - this.run.player.y);
       if (!refracts(s, dist, b.getData('refractable') !== false)) continue;
@@ -212,13 +219,25 @@ export class SkillRuntime {
     }
   }
 
+  /** 겹 수를 테두리 줄 수·굵기·밝기로 보여 준다 */
+  private drawShieldRim(at: { x: number; y: number }, radius: number, hits: number): void {
+    const sp = this.run.ctx.data.juice.shieldSpawn;
+    this.shieldRim ??= this.run.add.graphics().setDepth(5);
+    this.shieldRim.clear();
+    if (hits <= 0) return;
+    const c = sp.stacks[hits - 1]!;
+    this.shieldRim.lineStyle(c.lineWidth, hexColor(c.color), c.lineAlpha);
+    for (let i = 0; i < c.rings; i++) this.shieldRim.strokeCircle(at.x, at.y, radius + i * sp.ringGapPx);
+  }
+
   /** HUD '현재 버프': 보호막 + 스킬 오브젝트가 알리는 상태(충전 등) */
   buffViews(): BuffView[] {
     const out: BuffView[] = [];
     const s = this.shield;
     if (s && this.shieldOpts) {
-      const key = s.refractRadius > 0 ? 'buff.magiField.refract' : 'buff.magiField';
-      out.push({ id: 'magiField', label: this.run.ctx.t(key), color: this.shieldOpts.color, leftSec: s.leftSec, totalSec: s.totalSec });
+      // 겹 수를 숫자로 보여 준다
+      if (s.hits > 0) out.push({ id: 'magiField', label: this.run.ctx.t('buff.magiField'), color: this.shieldOpts.color, leftSec: s.hits, totalSec: s.maxHits });
+      if (s.refractLeftSec > 0) out.push({ id: 'magiFieldRefract', label: this.run.ctx.t('buff.magiField.refract'), color: this.shieldOpts.color, leftSec: s.refractLeftSec, totalSec: s.refractTotalSec });
     }
     for (const o of this.skillObjects) {
       const b = o.buff?.(this.run.host);

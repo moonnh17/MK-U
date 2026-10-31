@@ -154,6 +154,31 @@ describe('후반 체력', () => {
   });
 });
 
+describe('조우 칸 수', () => {
+  it('스테이지마다 1개, 확률적으로 2개', () => {
+    let two = 0;
+    const n = 400;
+    for (let seed = 1; seed <= n; seed++) {
+      const c = generateStage(seed, 1, 1, D.mapgen).rooms.filter((r) => r.kind === 'encounterRoom').length;
+      expect([1, 2]).toContain(c);
+      if (c === 2) two++;
+    }
+    expect(two / n).toBeGreaterThan(D.mapgen.extraEncounterChance - 0.1);
+    expect(two / n).toBeLessThan(D.mapgen.extraEncounterChance + 0.1);
+  });
+});
+
+describe('스킬 피해', () => {
+  it('레벨이 오를수록, 각성하면 더 세다', () => {
+    const sk = D.skills.skills.find((x) => x.id === 'railgun')!;
+    expect(sk.levels[1]!.values.damage).toBe(34);
+    expect(sk.levels[2]!.values.damage).toBe(49);
+    expect(sk.awakening.values.damage).toBe(52);
+    expect(sk.levels[0]!.values.damage).toBe(20);
+    expect(D.skills.skills.find((x) => x.id === 'mkPrototype')!.levels[2]!.values.damageReduction).toBe(0.3);
+  });
+});
+
 describe('회복·재화', () => {
   const cd = (id: string) => (D.items.items.find((i) => i.id === id)!.effects[0] as { cooldownSec: number }).cooldownSec;
   it('회복 아이템 재사용 3배', () => {

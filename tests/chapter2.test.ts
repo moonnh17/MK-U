@@ -49,7 +49,7 @@ describe('챕터2 보스 전용 아이템', () => {
 describe('중형 첨탑', () => {
   const M = gameData.loot.spire.medium;
   it('가중치 레어 30 · 전설 45 · 유니크 25, 강적 75%', () => {
-    expect(M.weights).toEqual({ rare: 30, legendary: 45, unique: 25 });
+    expect(M.weights).toEqual({ rare: 42, legendary: 40, unique: 18 });
     expect(M.strongChance).toBe(0.75);
   });
   it('1장·2장 초반은 소형만, 2-3부터 50%, 3장은 늘 중형', () => {

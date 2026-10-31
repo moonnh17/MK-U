@@ -527,6 +527,8 @@ export interface MapgenData {
   /** 방 하나의 크기(타일). 화면 한 칸에 들어가게 잡는다 */
   roomTiles: { width: number; height: number };
   corridor: { lengthTiles: number; widthTiles: number };
+  /** 스테이지에 조우 칸이 하나 더 생길 확률 */
+  extraEncounterChance: number;
   stageRules: Record<StageKind, StageRoomRule>;
   /** 전투 칸 웨이브 수 */
   combatWaves: IntRange;
@@ -1313,7 +1315,7 @@ export interface JuiceData {
   /** 전투 시작 띠 */
   combatStart: { sec: number; color: string; size: number; bandPx: number };
   /** 마기역장이 생길 때: 입자가 뿜어져 나오며 막이 작게 시작해 몸을 덮는다 */
-  shieldSpawn: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; growSec: number; startScale: number };
+  shieldSpawn: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; growSec: number; startScale: number; stacks: { bodyAlpha: number; rings: number; lineWidth: number; lineAlpha: number; color: string }[]; ringGapPx: number };
   bossPhase: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; flashMs: number; zoom: number; zoomSec: number; bannerSec: number; bannerSize: number };
   /** 보스 처치: slowSec 동안 slowScale 배속에서 점점 원래대로, 연쇄 폭발 */
   bossKill: { slowSec: number; slowScale: number; explosions: number; spreadPx: number; stepSec: number; flashMs: number };

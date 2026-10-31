@@ -10,8 +10,8 @@ const I = gameData.items;
 const rules: SpireRules = { fallSec: 1, riseSec: 1, chargePerKill: { normal: 0.25, elite: 0.5 }, minAlive: 2, spawnGapSec: 1 };
 
 describe('첨탑 데이터 (기획서 소형 표)', () => {
-  it('소형 첨탑 가중치 레어 50 · 전설 35 · 유니크 15, 신화는 고정 0.1%', () => {
-    expect(S.small.weights).toEqual({ rare: 50, legendary: 35, unique: 15 });
+  it('소형 첨탑 가중치 레어 62 · 전설 28 · 유니크 10, 신화는 고정 0.1%', () => {
+    expect(S.small.weights).toEqual({ rare: 62, legendary: 28, unique: 10 });
     expect(gameData.loot.mythicChance).toBe(0.001);
   });
   it('카드 3장 중 1장', () => {
@@ -117,6 +117,6 @@ describe('아이템 선택 카드', () => {
   it('확률 이전은 첨탑 가중치에도 적용되고, 일반 칸이 없어 챕터 이동은 영향 없음', () => {
     const shift = transferWeight(transferWeight({}, 'rare', 2), 'legendary', 2);
     const w = effectiveWeights(S.small.weights, 3, I.chapterCommonShift, shift);
-    expect(w).toEqual({ rare: 48, legendary: 35, unique: 17 });
+    expect(w).toEqual({ rare: 60, legendary: 28, unique: 12 });
   });
 });

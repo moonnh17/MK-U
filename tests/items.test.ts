@@ -110,9 +110,9 @@ describe('등급 가중치', () => {
   });
   it('챕터마다 일반 −15를 상위 등급에 비율대로', () => {
     const w = effectiveWeights(I.treasureWeights, 2, 15, {});
-    expect(w.common).toBe(45);
-    expect((w.rare ?? 0) + (w.legendary ?? 0) + (w.unique ?? 0)).toBeCloseTo(55);
-    expect(w.rare! / w.legendary!).toBeCloseTo(30 / 9);
+    expect(w.common).toBe(53);
+    expect((w.rare ?? 0) + (w.legendary ?? 0) + (w.unique ?? 0)).toBeCloseTo(47);
+    expect(w.rare! / w.legendary!).toBeCloseTo(26 / 5.5);
   });
   it('가중치는 0 아래로 내려가지 않는다', () => {
     expect(effectiveWeights({ common: 1, rare: 1 }, 1, 15, { common: -5 }).common).toBe(0);

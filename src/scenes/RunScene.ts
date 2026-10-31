@@ -419,6 +419,7 @@ export class RunScene extends Phaser.Scene {
     this.skillRt.shield = null;
     this.skillRt.shieldOpts = null;
     this.skillRt.shieldFx = null;
+    this.skillRt.shieldRim = null;
     this.skillRt.passiveKey = '';
     this.skillRt.passiveId = null;
     this.dashLeft = 0;

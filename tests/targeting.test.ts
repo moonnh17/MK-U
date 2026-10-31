@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { absorbHit, makeShield, refracts, tickShield } from '../src/systems/shield';
+import { absorbHit, refracts, stackShield, tickShield } from '../src/systems/shield';
 import {
   bestClusterTarget,
   chainTargets,
@@ -72,25 +72,35 @@ describe('ringPoints', () => {
 });
 
 describe('마기역장 보호막', () => {
-  it('공격 1회를 막고 사라진다', () => {
-    const s = makeShield(1, 6, 0);
+  it('쓸 때마다 한 겹씩 3겹까지 쌓인다', () => {
+    let s = stackShield(null, 1, 3);
+    expect(s.hits).toBe(1);
+    for (let i = 0; i < 5; i++) s = stackShield(s, 1, 3);
+    expect(s.hits).toBe(3);
+  });
+  it('공격마다 한 겹씩 막고 다 쓰면 사라진다', () => {
+    let s = stackShield(stackShield(null, 1, 3), 1, 3) as ReturnType<typeof stackShield> | null;
     const a = absorbHit(s);
     expect(a.blocked).toBe(true);
-    expect(a.shield).toBeNull();
-    expect(absorbHit(a.shield).blocked).toBe(false);
+    expect(a.shield?.hits).toBe(1);
+    s = absorbHit(a.shield).shield;
+    expect(s).toBeNull();
+    expect(absorbHit(s).blocked).toBe(false);
   });
-  it('시간이 끝나면 사라진다', () => {
-    const s = makeShield(1, 1, 0);
-    expect(tickShield(s, 0.5)?.leftSec).toBeCloseTo(0.5);
-    expect(tickShield(s, 1)).toBeNull();
+  it('시간이 지나도 사라지지 않는다', () => {
+    expect(tickShield(stackShield(null, 1, 3), 100000)?.hits).toBe(1);
   });
-  it('각성: 막기 횟수를 다 써도 지속시간 동안 일반 탄을 지운다', () => {
-    const after = absorbHit(makeShield(1, 6, 30)).shield;
+  it('각성: 막기를 다 써도 굴절 시간 동안 일반 탄을 지우고, 끝나면 굴절만 멈춘다', () => {
+    const after = absorbHit(stackShield(null, 1, 3, 6, 30)).shield;
     expect(after).not.toBeNull();
     expect(refracts(after, 20, true)).toBe(true);
     expect(refracts(after, 40, true)).toBe(false);
     // 무효화할 수 없는 탄(근접·장판·보스 대형 레이저)
     expect(refracts(after, 20, false)).toBe(false);
-    expect(refracts(makeShield(1, 6, 0), 5, true)).toBe(false);
+    expect(tickShield(after!, 7)).toBeNull();
+    const kept = tickShield(stackShield(null, 1, 3, 6, 30), 7);
+    expect(kept?.hits).toBe(1);
+    expect(refracts(kept, 20, true)).toBe(false);
+    expect(refracts(stackShield(null, 1, 3), 5, true)).toBe(false);
   });
 });

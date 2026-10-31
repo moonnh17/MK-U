@@ -27,7 +27,7 @@ describe('맵 생성', () => {
       const boss = stageKindOf(stage, m) === 'boss';
 
       expect(count(map, 'startRoom')).toBe(1);
-      expect(count(map, 'encounterRoom')).toBe(1);
+      expect([1, 2]).toContain(count(map, 'encounterRoom'));
       const combat = count(map, 'combatRoom');
       if (boss) {
         expect(combat).toBeGreaterThanOrEqual(1);

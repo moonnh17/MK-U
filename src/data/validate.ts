@@ -482,7 +482,7 @@ export function validateGameData(d: GameData): Errors {
   for (const [kind, rule] of Object.entries(m.stageRules)) {
     const w = `mapgen.stageRules.${kind}`;
     checkRange(errors, `${w}.combatRooms`, rule.combatRooms);
-    const total = 1 + rule.combatRooms[1] + rule.encounterRooms + rule.bossRooms + rule.exitRooms;
+    const total = 1 + rule.combatRooms[1] + rule.encounterRooms + 1 + rule.bossRooms + rule.exitRooms;
     if (total > m.grid.width * m.grid.height) errors.push(`${w}: 방 수(${total})가 격자보다 많음`);
     const lastCount = rule.lastRoom === 'bossRoom' ? rule.bossRooms : rule.lastRoom === 'exitRoom' ? rule.exitRooms : 0;
     if (lastCount !== 1) errors.push(`${w}: lastRoom '${rule.lastRoom}'은 정확히 1개여야 함`);
