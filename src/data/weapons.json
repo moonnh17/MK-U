@@ -68,7 +68,7 @@
       "spriteKey": "weapon_rifle", "color": "#7a9a6a", "size": 9
     },
     {
-      "id": "sniper", "sfx": "shotSniper", "nameKey": "weapon.sniper", "category": "gun", "grade": "rare", "tags": ["tech", "ranged"],
+      "id": "sniper", "sfx": "shotSniper", "nameKey": "weapon.sniper", "category": "gun", "critChance": 0.3, "grade": "rare", "tags": ["tech", "ranged"],
       "baseDamage": 18, "fireIntervalSec": 0.9, "energyCost": 4, "pattern": { "kind": "single" }, "pierce": 3,
       "projectileSpeed": 520, "range": 420, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_sniper", "color": "#5a6a8a", "size": 10
@@ -80,13 +80,13 @@
       "spriteKey": "weapon_grenade_launcher", "color": "#8a7a3a", "size": 9
     },
     {
-      "id": "dagger", "nameKey": "weapon.dagger", "category": "blade", "fxColor": "#9af0d0", "grade": "common", "tags": ["physical", "melee"],
+      "id": "dagger", "nameKey": "weapon.dagger", "category": "blade", "fxColor": "#9af0d0", "critChance": 0.3, "grade": "common", "tags": ["physical", "melee"],
       "baseDamage": 4, "fireIntervalSec": 0.16, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 70, "radius": 28 },
       "projectileSpeed": 0, "range": 28, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_dagger", "color": "#d0d8e8", "size": 6
     },
     {
-      "id": "greatsword", "nameKey": "weapon.greatsword", "category": "blade", "fxColor": "#8ab0ff", "grade": "rare", "tags": ["physical", "melee"],
+      "id": "greatsword", "nameKey": "weapon.greatsword", "category": "blade", "fxColor": "#8ab0ff", "critChance": 0.3, "grade": "rare", "tags": ["physical", "melee"],
       "baseDamage": 12, "fireIntervalSec": 0.7, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 220, "radius": 50 },
       "charge": { "maxSec": 1.0, "damageMul": 2.5, "radiusMul": 1.4 },
       "projectileSpeed": 0, "range": 50, "cutsProjectiles": true, "droppable": true,
@@ -128,20 +128,20 @@
       "spriteKey": "weapon_avior_staff", "color": "#8a6aff", "size": 11
     },
     {
-      "id": "rasalhagueSword", "nameKey": "weapon.rasalhagueSword", "category": "blade", "fxColor": "#ffe85a", "grade": "unique", "tags": ["physical", "melee"],
+      "id": "rasalhagueSword", "nameKey": "weapon.rasalhagueSword", "category": "blade", "fxColor": "#ffe85a", "critChance": 0.3, "grade": "unique", "tags": ["physical", "melee"],
       "baseDamage": 13, "fireIntervalSec": 0.55, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 150, "radius": 45 },
       "signature": { "every": 3, "kind": "space" },
       "projectileSpeed": 0, "range": 45, "cutsProjectiles": true, "droppable": false,
       "spriteKey": "weapon_rasalhague_sword", "color": "#e8d24a", "size": 11
     },
     {
-      "id": "brokenBlade", "nameKey": "weapon.brokenBlade", "category": "blade", "fxColor": "#c8ccd8", "grade": "common", "tags": ["physical", "melee"],
+      "id": "brokenBlade", "nameKey": "weapon.brokenBlade", "category": "blade", "fxColor": "#c8ccd8", "critChance": 0.3, "grade": "common", "tags": ["physical", "melee"],
       "baseDamage": 5, "fireIntervalSec": 0.22, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 90, "radius": 22 },
       "projectileSpeed": 0, "range": 22, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_broken_blade", "color": "#b8bcc8", "size": 6
     },
     {
-      "id": "hanabi", "nameKey": "weapon.hanabi", "category": "blade", "fxColor": "#ff9a4a", "grade": "legendary", "tags": ["physical", "melee"],
+      "id": "hanabi", "nameKey": "weapon.hanabi", "category": "blade", "fxColor": "#ff9a4a", "critChance": 0.3, "grade": "legendary", "tags": ["physical", "melee"],
       "baseDamage": 14, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 140, "radius": 42 },
       "equipBonus": { "jobDamage": { "barbarian": 0.3 } },
       "signature": { "every": 3, "kind": "bigSmash", "damageMul": 2, "radiusMul": 1.3 },
@@ -151,7 +151,7 @@
     {
       "id": "alGulBlade", "nameKey": "weapon.alGulBlade", "category": "blade", "fxColor": "#d8f0ff", "grade": "unique", "tags": ["physical", "melee"],
       "baseDamage": 18, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 120, "radius": 42 },
-      "critChance": 0.1,
+      "critChance": 0.3,
       "equipBonus": { "bossDamage": 0.2 },
       "signature": { "every": 3, "kind": "bigSmash", "damageMul": 1.5, "radiusMul": 1.9 },
       "projectileSpeed": 0, "range": 42, "cutsProjectiles": true, "droppable": false,
@@ -205,7 +205,7 @@
     {
       "id": "curvedBow", "nameKey": "weapon.curvedBow", "category": "bow", "grade": "common", "tags": ["physical", "ranged"],
       "baseDamage": 6, "fireIntervalSec": 0.5, "energyCost": 1, "pattern": { "kind": "single" },
-      "charge": { "maxSec": 0.7, "damageMul": 2.5, "radiusMul": 1 },
+      "charge": { "maxSec": 0.7, "damageMul": 2.5, "radiusMul": 1, "critAtMax": 0.7 },
       "shot": { "spriteKey": "projectile_arrow", "color": "#c8a070", "size": 3 },
       "projectileSpeed": 340, "range": 300, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_curved_bow", "color": "#a0784a", "size": 9
@@ -227,7 +227,7 @@
     {
       "id": "zephyr", "nameKey": "weapon.zephyr", "category": "bow", "grade": "legendary", "tags": ["physical", "ranged"],
       "baseDamage": 8, "fireIntervalSec": 0.45, "energyCost": 1, "pattern": { "kind": "single" },
-      "charge": { "maxSec": 0.6, "damageMul": 3, "radiusMul": 1 },
+      "charge": { "maxSec": 0.6, "damageMul": 3, "radiusMul": 1, "critAtMax": 0.7 },
       "chargeMoveSpeed": 0.35,
       "attackParticles": { "color": "#7ae8f0" },
       "shot": { "spriteKey": "projectile_zephyr_arrow", "color": "#7ae8f0", "size": 3 },
@@ -235,7 +235,7 @@
       "spriteKey": "weapon_zephyr", "color": "#5ad0d0", "size": 10
     },
     {
-      "id": "soulCalibur", "sfx": "shotSniper", "nameKey": "weapon.soulCalibur", "category": "gun", "grade": "legendary", "tags": ["tech", "ranged"],
+      "id": "soulCalibur", "sfx": "shotSniper", "nameKey": "weapon.soulCalibur", "category": "gun", "critChance": 0.3, "grade": "legendary", "tags": ["tech", "ranged"],
       "baseDamage": 34, "fireIntervalSec": 1.6, "energyCost": 10, "pattern": { "kind": "single" }, "pierce": 99,
       "core": { "u": 0.36, "v": 0.36, "color": "#c060ff" },
       "fireFlash": { "spriteKey": "fx_soul_burst", "color": "#c060ff", "size": 20 },
@@ -243,7 +243,7 @@
       "spriteKey": "weapon_soul_calibur", "color": "#7a4ad0", "size": 12
     },
     {
-      "id": "magiFang", "fxColor": "#ff2a4a", "nameKey": "weapon.magiFang", "category": "blade", "grade": "legendary", "tags": ["physical", "melee"],
+      "id": "magiFang", "fxColor": "#ff2a4a", "nameKey": "weapon.magiFang", "category": "blade", "critChance": 0.3, "grade": "legendary", "tags": ["physical", "melee"],
       "baseDamage": 12, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 110, "radius": 40 },
       "meleeShot": { "damageMul": 0.7, "speed": 300, "range": 200, "energyCost": 1, "color": "#ff2a4a" },
       "attackParticles": { "color": "#ff2a4a" },

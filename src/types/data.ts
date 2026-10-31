@@ -241,7 +241,8 @@ export interface WeaponDef extends SpriteRef {
   /** 총: 탄이 적을 몇 마리 더 뚫는지 */
   pierce?: number;
   /** 칼: 누르고 있으면 차지(대검). 놓으면 휘두른다 */
-  charge?: { maxSec: number; damageMul: number; radiusMul: number; minRatio?: number };
+  /** critAtMax: 완전 차지 때의 치명타 확률 (활) */
+  charge?: { maxSec: number; damageMul: number; radiusMul: number; minRatio?: number; critAtMax?: number };
   /** 차징 중 이동속도 증가 (서풍) */
   chargeMoveSpeed?: number;
   /** 탄 그림 (화살 등). 없으면 공통 탄 */

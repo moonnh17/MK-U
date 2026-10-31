@@ -24,7 +24,7 @@ import { corruptedDamage, skillChance } from '../../systems/acro';
 import { hpStance } from '../../systems/vitals';
 import { gainGauge } from '../../systems/skills';
 import { gradeEnergyMultiplier } from '../../systems/damage';
-import { gunShots, inArc, projectilesCut, rollCrit, spendEnergy, spinUpMul, type WeaponItem, type WeaponStats } from '../../systems/weapons';
+import { chargedCrit, gunShots, inArc, projectilesCut, rollCrit, spendEnergy, spinUpMul, type WeaponItem, type WeaponStats } from '../../systems/weapons';
 import { contains, interiorRect } from '../../systems/worldLayout';
 import type { SpriteRef, WeaponSignature, SpaceRule, TagId, WeaponDef } from '../../types/data';
 import type { RunScene } from '../RunScene';
@@ -255,7 +255,7 @@ export class WeaponCombat {
       return;
     }
     for (const shot of gunShots(w, shotAngle, this.run.rng)) {
-      this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, ricochet: w.ricochet, tint: w.ricochet || w.flame ? w.color : undefined, sprite: w.shot, flame: w.flame?.scaleTo, trail: w.attackParticles?.color });
+      this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: chargedCrit(st.critChance, chargeRatio, w.charge?.critAtMax), ricochet: w.ricochet, tint: w.ricochet || w.flame ? w.color : undefined, sprite: w.shot, flame: w.flame?.scaleTo, trail: w.attackParticles?.color });
     }
   }
 

@@ -28,6 +28,7 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
   if (def.flame) out.push({ text: t('weapon.sigDesc.flame'), sig: true });
   if (def.spinUp) out.push({ text: t('weapon.sigDesc.spinUp', { n: def.spinUp.maxMul }), sig: true });
   if (def.charge) out.push({ text: t('weapon.sigDesc.charge', { n: def.charge.damageMul }), sig: true });
+  if (def.charge?.critAtMax) out.push({ text: t('weapon.sigDesc.chargeCrit', { v: Math.round(def.charge.critAtMax * 100) }), sig: true });
   if (def.charge?.minRatio) out.push({ text: t('weapon.sigDesc.minCharge'), sig: true });
   if (def.category !== 'blade' && def.pattern.kind === 'lob') out.push({ text: t('weapon.sigDesc.explosive'), sig: true });
   if (def.chargeMoveSpeed) out.push({ text: t('weapon.sigDesc.chargeMove', { v: Math.round(def.chargeMoveSpeed * 100) }), sig: true });

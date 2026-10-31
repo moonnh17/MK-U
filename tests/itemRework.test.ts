@@ -24,11 +24,11 @@ describe('아이템에서 무기로', () => {
   it('부러진 칼날은 사거리가 가장 짧은 축이다', () => {
     expect(w('brokenBlade').range).toBeLessThanOrEqual(w('dagger').range);
   });
-  it('알 굴 참마검: 보스 추가 피해, 3타 광범위, 치명타 10%', () => {
+  it('알 굴 참마검: 보스 추가 피해, 3타 광범위, 치명타 30%', () => {
     const a = w('alGulBlade');
     expect(a.equipBonus?.bossDamage).toBeGreaterThan(0);
     expect(a.signature).toMatchObject({ every: 3, kind: 'bigSmash' });
-    expect(weaponStats(a, { defId: a.id, grade: 'unique', options: [] }, 1).critChance).toBeCloseTo(0.1);
+    expect(weaponStats(a, { defId: a.id, grade: 'unique', options: [] }, 1).critChance).toBeCloseTo(0.3);
   });
   it('기환의 팔: 3타마다 번개 / 한아비: 바바리안 +30%, 3타 강화', () => {
     expect(w('gihwanArm').signature).toMatchObject({ every: 3, kind: 'chainBolt' });

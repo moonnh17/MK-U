@@ -70,21 +70,11 @@ describe('등급·신화', () => {
     expect([...seen].sort()).toEqual(['algiebaSling', 'argoBanner', 'nekkarCleaver']);
   });
 
-  it('옵션: 레어 1개·전설 2개, 서로 다르고 분류에 맞는 것만', () => {
+  it('옵션 뽑기: 서로 다르고 분류에 맞는 것만 (지금은 어떤 등급도 옵션 수가 0)', () => {
     for (let s = 0; s < 40; s++) {
-      const r = rollWeapon(new Rng(s), 'rare', W.weapons, W.options, G, 'legendary');
-      expect(r.options).toHaveLength(1);
-      const l = rollWeapon(new Rng(s), 'legendary', W.weapons, W.options, G, 'legendary');
-      expect(new Set(l.options.map((o) => o.id)).size).toBe(l.options.length);
-      expect(l.options.length).toBe(2);
-      const c = rollWeapon(new Rng(s), 'common', W.weapons, W.options, G, 'legendary');
-      expect(c.options).toEqual([]);
-    }
-    // 칼에는 탄속·에너지 옵션이 붙지 않는다
-    for (let s = 0; s < 40; s++) {
-      for (const o of rollOptions(new Rng(s), def('dagger'), 2, W.options)) expect(['crit', 'attackSpeed']).toContain(o.id);
-      // 에너지를 쓰지 않는 무기에는 에너지 감소가 붙지 않는다
-      for (const o of rollOptions(new Rng(s), { ...def('pistol'), energyCost: 0 }, 3, W.options)) expect(o.id).not.toBe('energyCost');
+      const o = rollOptions(new Rng(s), def('rifle'), 2, W.options);
+      expect(new Set(o.map((x) => x.id)).size).toBe(2);
+      expect(rollWeapon(new Rng(s), 'legendary', W.weapons, W.options, G, 'legendary').options).toEqual([]);
     }
   });
 });

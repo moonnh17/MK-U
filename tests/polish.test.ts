@@ -9,7 +9,7 @@ import { cardStillValid } from '../src/systems/cards';
 import { enemyStageScale } from '../src/systems/champions';
 import { readyWeaponSet } from '../src/systems/items';
 import { weaponPose } from '../src/systems/motion';
-import { spinUpMul, weaponStats } from '../src/systems/weapons';
+import { chargedCrit, spinUpMul, weaponStats } from '../src/systems/weapons';
 import { statSheetLines } from '../src/systems/statSheet';
 import { statEffect } from '../src/systems/stats';
 import { startingStats } from '../src/systems/damage';
@@ -216,6 +216,28 @@ describe('무기 밸런스', () => {
   });
   it('반물질 권총은 차징이 모자라면 나가지 않는다', () => {
     expect(w('antimatterPistol').charge!.minRatio).toBeGreaterThan(0);
+  });
+});
+
+describe('무기 옵션·치명타', () => {
+  const w = (id: string) => D.weapons.weapons.find((x) => x.id === id)!;
+  it('어떤 등급의 무기도 무작위 옵션이 붙지 않는다', () => {
+    for (const g of ['common', 'rare', 'legendary', 'unique'] as const) {
+      for (let s = 0; s < 40; s++) expect(rollWeapon(new Rng(s), g, D.weapons.weapons, D.weapons.options, D.groupMultipliers, D.loot.uniqueWeaponFallback).options).toEqual([]);
+    }
+  });
+  it('저격총·검 계열은 치명타 30%', () => {
+    for (const id of ['sniper', 'soulCalibur', 'dagger', 'brokenBlade', 'greatsword', 'hanabi', 'alGulBlade', 'rasalhagueSword', 'magiFang']) expect(w(id).critChance, id).toBe(0.3);
+  });
+  it('활은 차징할수록 치명타가 올라 최대 70%', () => {
+    for (const id of ['curvedBow', 'zephyr']) {
+      const max = w(id).charge!.critAtMax;
+      expect(max, id).toBe(0.7);
+      expect(chargedCrit(0, 0, max)).toBe(0);
+      expect(chargedCrit(0, 0.5, max)).toBeCloseTo(0.35);
+      expect(chargedCrit(0, 1, max)).toBeCloseTo(0.7);
+    }
+    expect(chargedCrit(0.3, 1, undefined)).toBe(0.3);
   });
 });
 

@@ -354,6 +354,7 @@
   "weapon.sigDesc.flame": "짧은 거리에 화염을 뿜는다",
   "weapon.sigDesc.spinUp": "쏠수록 발사 속도 증가 (최대 ×{n})",
   "weapon.sigDesc.charge": "누르고 있으면 차징, 최대 피해 ×{n}",
+  "weapon.sigDesc.chargeCrit": "차징할수록 치명타 확률 증가 (최대 {v}%)",
   "weapon.sigDesc.minCharge": "충분히 차징하지 않으면 발사되지 않는다",
   "weapon.sigDesc.explosive": "맞은 자리에서 터지는 폭발탄",
   "weapon.sigDesc.chargeMove": "차징 중 이동속도 +{v}%",
