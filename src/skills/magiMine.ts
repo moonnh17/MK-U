@@ -13,12 +13,15 @@ import { levelRef, loopArt, playFx, stretchFx } from './skillFx';
 import { trimOldest, type SkillCast, type SkillHost, type SkillImpl, type SkillObject } from './host';
 
 const ID = 'magiMine';
+/** 던질 때 포물선 높이(px) */
+const THROW_ARC_PX = 16;
 
 class Mine implements SkillObject {
   readonly owner = ID;
   readonly createdAt: number;
   private readonly img: Phaser.GameObjects.Sprite;
   private t = 0;
+  private armed = false;
 
   constructor(
     host: SkillHost,
@@ -38,9 +41,13 @@ class Mine implements SkillObject {
   update(dt: number, host: SkillHost): boolean {
     this.t += dt;
     const k = this.throwSec > 0 ? Math.min(1, this.t / this.throwSec) : 1;
-    this.img.setPosition(this.from.x + (this.to.x - this.from.x) * k, this.from.y + (this.to.y - this.from.y) * k);
+    this.img.setPosition(this.from.x + (this.to.x - this.from.x) * k, this.from.y + (this.to.y - this.from.y) * k - Math.sin(k * Math.PI) * (this.throwSec > 0 ? THROW_ARC_PX : 0));
     if (this.t < this.throwSec + this.armSec) return true;
-    this.img.setAlpha(1);
+    if (!this.armed) {
+      this.armed = true;
+      this.img.setAlpha(1);
+      host.scene.tweens.add({ targets: this.img, scaleX: this.img.scaleX * 1.4, scaleY: this.img.scaleY * 1.4, duration: 90, yoyo: true });
+    }
     const r = this.s.values.triggerRadius!;
     if (!host.enemies().some((e) => Math.hypot(e.sprite.x - this.to.x, e.sprite.y - this.to.y) <= r + e.radius)) return true;
     this.explode(host);
@@ -75,6 +82,7 @@ class Mine implements SkillObject {
   }
 
   destroy(): void {
+    this.img.scene.tweens.killTweensOf(this.img);
     this.img.destroy();
   }
 }

@@ -4,9 +4,10 @@ import { gameData } from '../src/data/index';
 import { generateStage } from '../src/systems/mapgen';
 import { availablePatterns, initialBoss } from '../src/systems/bossBrain';
 import { bossHalfOrbs } from '../src/systems/bossEnergy';
-import { cardPrice, cardStock, encounterPool } from '../src/systems/loot';
+import { cardPrice, cardStock, encounterPool, rollWeapon } from '../src/systems/loot';
 import { cardStillValid } from '../src/systems/cards';
-import { enemyHpScale } from '../src/systems/champions';
+import { enemyStageScale } from '../src/systems/champions';
+import { readyWeaponSet } from '../src/systems/items';
 import { statSheetLines } from '../src/systems/statSheet';
 import { statEffect } from '../src/systems/stats';
 import { startingStats } from '../src/systems/damage';
@@ -142,15 +143,40 @@ describe('스킬·스탯 상점', () => {
 describe('후반 체력', () => {
   const t = D.enemies.hpScale;
   it('1장은 그대로, 2·3장은 스테이지가 갈수록 커진다', () => {
-    expect(enemyHpScale(1, 5, t)).toBe(1);
-    expect(enemyHpScale(2, 1, t)).toBeGreaterThan(1);
-    expect(enemyHpScale(2, 5, t)).toBeGreaterThan(enemyHpScale(2, 1, t));
-    expect(enemyHpScale(3, 1, t)).toBeGreaterThan(enemyHpScale(2, 5, t));
-    expect(enemyHpScale(3, 5, t)).toBeGreaterThan(enemyHpScale(3, 1, t));
+    expect(enemyStageScale(1, 5, t)).toBe(1);
+    expect(enemyStageScale(2, 1, t)).toBeGreaterThan(1);
+    expect(enemyStageScale(2, 5, t)).toBeGreaterThan(enemyStageScale(2, 1, t));
+    expect(enemyStageScale(3, 1, t)).toBeGreaterThan(enemyStageScale(2, 5, t));
+    expect(enemyStageScale(3, 5, t)).toBeGreaterThan(enemyStageScale(3, 1, t));
   });
   it('뒤 챕터 보스일수록 체력이 많다', () => {
     const order = ['electricRing', 'hectarChief', 'magiGolem', 'eclipse', 'magiKaiser'].map(hp);
     expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+});
+
+describe('적 피해 배율', () => {
+  const t = D.enemies.damageScale;
+  it('1장부터 늘고 뒤로 갈수록 커진다', () => {
+    const order = [[1, 1], [1, 5], [2, 1], [2, 5], [3, 1], [3, 5]].map(([c, s]) => enemyStageScale(c!, s!, t));
+    expect(order[0]).toBeGreaterThan(1);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(new Set(order).size).toBe(order.length);
+  });
+});
+
+describe('무기 세트', () => {
+  const sets = D.items.weaponSets;
+  it('부러진 칼날 + 망가진 손잡이 = 알 굴 참마검', () => {
+    expect(sets).toContainEqual({ weapon: 'brokenBlade', item: 'brokenHilt', result: 'alGulBlade' });
+    expect(readyWeaponSet([null, { defId: 'brokenBlade' }], ['brokenHilt'], sets)).toMatchObject({ slot: 1 });
+    expect(readyWeaponSet([{ defId: 'pistol' }, null], ['brokenHilt'], sets)).toBeNull();
+    expect(readyWeaponSet([{ defId: 'brokenBlade' }, null], [], sets)).toBeNull();
+  });
+  it('결과물은 일반 경로로 나오지 않는다', () => {
+    expect(D.weapons.weapons.find((w) => w.id === 'alGulBlade')!.droppable).toBe(false);
+    for (const s of D.items.sets) expect(D.items.items.find((i) => i.id === s.result)!.pool).toBe('set');
+    for (let seed = 0; seed < 300; seed++) expect(rollWeapon(new Rng(seed), 'unique', D.weapons.weapons, D.weapons.options, D.groupMultipliers, D.loot.uniqueWeaponFallback).defId).not.toBe('alGulBlade');
   });
 });
 

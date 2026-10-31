@@ -35,9 +35,9 @@ describe('아이템에서 무기로', () => {
     expect(w('hanabi').equipBonus?.jobDamage?.barbarian).toBe(0.3);
     expect(w('hanabi').signature).toMatchObject({ every: 3 });
   });
-  it('유니크 판정이면 드롭 유니크(알 굴 참마검), 일반 판정에는 상위 무기가 안 나온다', () => {
+  it('유니크 판정은 드롭 유니크가 없어 전설로 대체되고, 일반 판정에는 상위 무기가 안 나온다', () => {
     for (let s = 0; s < 100; s++) {
-      expect(rollWeapon(new Rng(s), 'unique', W.weapons, W.options, gameData.groupMultipliers, 'legendary').defId).toBe('alGulBlade');
+      expect(rollWeapon(new Rng(s), 'unique', W.weapons, W.options, gameData.groupMultipliers, 'legendary').grade).toBe('legendary');
       const common = rollWeapon(new Rng(s), 'common', W.weapons, W.options, gameData.groupMultipliers, 'legendary').defId;
       expect(['alGulBlade', 'hanabi']).not.toContain(common);
     }

@@ -36,6 +36,14 @@ export interface Offer {
   schools?: SchoolId[];
 }
 
+/** 아이템 획득 창 한 장. from: 합쳐지는 재료 그림(세트) / weapon: itemId가 무기 id */
+export interface ItemGet {
+  itemId: string;
+  set: boolean;
+  weapon?: boolean;
+  from?: { key: string; color: string }[];
+}
+
 export type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | 'intro' | 'pause' | 'portal' | 'itemGet' | null;
 
 /** 조우 칸 물약 자판기 */

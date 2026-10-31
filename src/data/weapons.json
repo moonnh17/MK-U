@@ -163,7 +163,7 @@
       "critChance": 0.1,
       "equipBonus": { "bossDamage": 0.2 },
       "signature": { "every": 3, "kind": "bigSmash", "damageMul": 1.5, "radiusMul": 1.9 },
-      "projectileSpeed": 0, "range": 42, "cutsProjectiles": true, "droppable": true,
+      "projectileSpeed": 0, "range": 42, "cutsProjectiles": true, "droppable": false,
       "spriteKey": "weapon_al_gul_blade", "color": "#c8ccd8", "size": 11
     },
     {

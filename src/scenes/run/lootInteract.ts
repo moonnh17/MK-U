@@ -7,13 +7,13 @@ import { FloorWeapon } from '../../entities/pickup';
 import { describeCard } from '../../ui/cardView';
 import { artKeys } from '../../systems/art';
 import { cardStillValid, type Card } from '../../systems/cards';
-import { effectiveWeights, readySet, rollItem, transferWeight } from '../../systems/items';
+import { effectiveWeights, readySet, readyWeaponSet, rollItem, transferWeight } from '../../systems/items';
 import { canBuy, cardStock, rollGrade, rollWeapon } from '../../systems/loot';
 import { heal } from '../../systems/vitals';
 import { dropWeaponAt, pickUpWeapon, plainWeapon, type WeaponItem } from '../../systems/weapons';
 import type { GradeId } from '../../types/data';
 import type { RunScene } from '../RunScene';
-import { sfx, type Prop, type Vending } from './shared';
+import { sfx, type ItemGet, type Prop, type Vending } from './shared';
 
 export class LootInteract {
   floorWeapons: FloorWeapon[] = [];
@@ -27,7 +27,7 @@ export class LootInteract {
   /** 포탈·자판기 앞에 뜨는 조작 안내 */
   interactPrompt: Phaser.GameObjects.Text | null = null;
   /** 아직 보여주지 않은 아이템 획득 창 */
-  itemGets: { itemId: string; set: boolean }[] = [];
+  itemGets: ItemGet[] = [];
   interactKind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | null = null;
   /** 상자·드롭 무기 시드 순번 */
   lootSeq = 0;
@@ -143,6 +143,34 @@ export class LootInteract {
     if (dropped) this.dropWeapon(dropped, x, y);
     this.run.combat.fireCooldown = 0;
     this.run.combat.resetCharge();
+    this.checkWeaponSet();
+  }
+
+  /** 무기 세트: 재료 무기를 들고 재료 아이템을 가졌으면 그 슬롯의 무기가 결과물로 바뀐다 */
+  private checkWeaponSet(): void {
+    const d = this.run.ctx.data;
+    const p = this.run.session.player;
+    const ready = readyWeaponSet(p.weapons.slots, p.items, d.items.weaponSets);
+    if (!ready) return;
+    const { set, slot } = ready;
+    const slots: typeof p.weapons.slots = [...p.weapons.slots];
+    slots[slot] = plainWeapon(this.run.weaponDefOf(set.result));
+    p.weapons = { ...p.weapons, slots };
+    p.items = p.items.filter((x) => x !== set.item);
+    this.run.combat.fireCooldown = 0;
+    this.run.combat.resetCharge();
+    this.run.itemRt.refresh();
+    const itemDef = d.items.items.find((x) => x.id === set.item)!;
+    const weaponDef = this.run.weaponDefOf(set.weapon);
+    this.itemGets.push({
+      itemId: set.result,
+      set: true,
+      weapon: true,
+      from: [
+        { key: weaponDef.spriteKey, color: weaponDef.color },
+        { key: itemDef.spriteKey, color: itemDef.color },
+      ],
+    });
   }
 
   rollWeaponItem(weights: Partial<Record<GradeId, number>>, label: string): WeaponItem {
@@ -234,9 +262,11 @@ export class LootInteract {
     if (set) {
       p.items = [...p.items.filter((x) => !set.materials.includes(x)), set.result];
       p.itemsObtained = [...p.itemsObtained, set.result];
-      this.itemGets.push({ itemId: set.result, set: true });
+      const from = set.materials.map((m) => d.items.items.find((x) => x.id === m)!).map((m) => ({ key: m.spriteKey, color: m.color }));
+      this.itemGets.push({ itemId: set.result, set: true, from });
     }
     this.run.itemRt.refresh();
+    this.checkWeaponSet();
   }
 
   addChest(kind: ChestKind, x: number, y: number, weights: Partial<Record<GradeId, number>>, fixedItem?: string): void {

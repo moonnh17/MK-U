@@ -4,6 +4,7 @@
   "transferPerPickup": 2,
   "chapterCommonShift": 15,
   "sets": [{ "materials": ["namelessSword", "namelessHelm"], "result": "warriorMemory" }],
+  "weaponSets": [{ "weapon": "brokenBlade", "item": "brokenHilt", "result": "alGulBlade" }],
   "items": [
     { "id": "slimeStew", "nameKey": "item.slimeStew", "descKey": "item.slimeStew.desc", "grade": "common", "pool": "normal", "tags": [],
       "effects": [{ "kind": "lowHpHeal", "threshold": 0.5, "healTo": 0.8, "cooldownSec": 0, "priority": 2, "afterDamage": 0.05 }],

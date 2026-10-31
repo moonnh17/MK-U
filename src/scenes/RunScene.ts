@@ -39,7 +39,7 @@ import { nearestEnemy, type SkillHost } from '../skills/host';
 import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { gradeMultiplier, type Stats } from '../systems/damage';
 import { assignElites, eliteCount } from '../systems/elites';
-import { championWaves, enemyHpScale, raidChampions } from '../systems/champions';
+import { championWaves, enemyStageScale, raidChampions } from '../systems/champions';
 import { rollOptions } from '../systems/loot';
 import { generateStage } from '../systems/mapgen';
 import { hiddenChapterMul } from '../systems/hiddenBoss';
@@ -221,8 +221,8 @@ export class RunScene extends Phaser.Scene {
       scene: this,
       playerPos: () => ({ x: this.player.x, y: this.player.y }),
       playerRadius: d.player.size / 2,
-      hurtPlayer: (amount, attacker, mental) => this.hurtPlayer(amount, attacker ?? null, mental),
-      fireEnemyBullet: (from, angle, speed, range, damage, refractable, mental) => this.fireEnemyBullet(from, angle, speed, range, damage, refractable, 0, mental),
+      hurtPlayer: (amount, attacker, mental) => this.hurtPlayer(amount * this.enemyDamageMul(), attacker ?? null, mental === undefined ? undefined : mental * this.enemyDamageMul()),
+      fireEnemyBullet: (from, angle, speed, range, damage, refractable, mental) => this.fireEnemyBullet(from, angle, speed, range, damage * this.enemyDamageMul(), refractable, 0, (mental ?? 0) * this.enemyDamageMul()),
       addHazard: (h) => this.hazards.push(h),
       linkWindup: (e, attackId) => this.linkWindup(e, attackId),
       rng: this.rng,
@@ -235,8 +235,8 @@ export class RunScene extends Phaser.Scene {
       t: (key) => this.ctx.t(key),
       addHazard: (h) => this.hazards.push(h),
       fireEnemyBullet: (from, angle, speed, range, damage, refractable) =>
-        this.fireEnemyBullet(from, angle, speed, range, damage, refractable),
-      fireEnemyMissile: (from, angle, speed, range, damage, turnRate) => this.fireEnemyBullet(from, angle, speed, range, damage, true, turnRate),
+        this.fireEnemyBullet(from, angle, speed, range, damage * this.enemyDamageMul(), refractable),
+      fireEnemyMissile: (from, angle, speed, range, damage, turnRate) => this.fireEnemyBullet(from, angle, speed, range, damage * this.enemyDamageMul(), true, turnRate),
       pushPlayer: (v) => {
         const body = this.player.body as Phaser.Physics.Arcade.Body;
         body.velocity.x += v.x;
@@ -756,7 +756,7 @@ export class RunScene extends Phaser.Scene {
     const extra = extraEliteId ? (d.elites.elites.find((x) => x.id === extraEliteId) ?? null) : null;
     const icon = [elite, extra].filter((x) => x !== null).map((x) => this.ctx.t(x!.iconKey)).join('');
     const enemy = new Enemy(this, def, pos.x, pos.y, d.waves.spawnWarnSec, elite, d.elites, icon, extra);
-    if (def.ai !== 'boss' && !def.summon) enemy.scaleHp(enemyHpScale(this.session.stage.chapter, this.session.stage.stage, d.enemies.hpScale));
+    if (def.ai !== 'boss' && !def.summon) enemy.scaleHp(enemyStageScale(this.session.stage.chapter, this.session.stage.stage, d.enemies.hpScale));
     enemy.jitterFirstAttack(rng);
     this.enemyGroup.add(enemy.sprite);
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
@@ -1031,10 +1031,15 @@ export class RunScene extends Phaser.Scene {
     if (!enemy || enemy.dead || enemy.warn > 0 || enemy.def.contactDamage <= 0) return;
     const now = this.time.now;
     if (now - enemy.lastContactAt < enemy.def.contactIntervalSec * 1000) return;
-    if (this.hurtPlayer(enemy.def.contactDamage * enemy.damageMul, enemy)) enemy.lastContactAt = now;
+    if (this.hurtPlayer(enemy.def.contactDamage * enemy.damageMul * this.enemyDamageMul(), enemy)) enemy.lastContactAt = now;
   }
 
-  /** 피해를 받았으면 true */
+  /** 지금 챕터·스테이지의 적 피해 배율 */
+  enemyDamageMul(): number {
+    const { chapter, stage } = this.session.stage;
+    return enemyStageScale(chapter, stage, this.ctx.data.enemies.damageScale);
+  }
+
   /** 피해를 받았으면 true. attacker: 때린 적(반사용, 모르면 null) */
   hurtPlayer(amount: number, attacker: Enemy | null = null, mentalRaw?: number): boolean {
     if (this.invuln > 0 || this.condition.dodge.invuln > 0 || this.dying || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
@@ -1049,7 +1054,10 @@ export class RunScene extends Phaser.Scene {
       this.skillRt.shield = absorbed.shield;
       this.invuln = this.skillRt.shieldOpts?.blockInvulnSec ?? 0;
       this.cameras.main.flash(60, 140, 170, 210);
-      if (this.skillRt.shieldOpts?.look?.block) playFx(this, this.skillRt.shieldOpts.look.block, this.player.x, this.player.y);
+      if (this.skillRt.shieldOpts?.look?.block) {
+        const at = this.player.getCenter();
+        playFx(this, this.skillRt.shieldOpts.look.block, at.x, at.y);
+      }
       return true;
     }
     const p = this.session.player;

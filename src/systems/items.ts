@@ -221,6 +221,16 @@ export function readySet(owned: ReadonlySet<string>, obtained: ReadonlySet<strin
   return sets.find((s) => !obtained.has(s.result) && s.materials.every((m) => owned.has(m))) ?? null;
 }
 
+/** 무기 슬롯에 재료 무기가 있고 재료 아이템을 가졌으면 그 세트와 슬롯 */
+export function readyWeaponSet(slots: readonly ({ defId: string } | null)[], items: readonly string[], sets: ItemsData['weaponSets']): { set: ItemsData['weaponSets'][number]; slot: number } | null {
+  for (const set of sets) {
+    if (!items.includes(set.item)) continue;
+    const slot = slots.findIndex((w) => w?.defId === set.weapon);
+    if (slot !== -1) return { set, slot };
+  }
+  return null;
+}
+
 type Eff<K extends ItemEffect['kind']> = Extract<ItemEffect, { kind: K }>;
 
 /** 함성(바바리안 데스 휘슬): 직업 변형의 함성 효과 증가를 곱한 값. 없으면 null */

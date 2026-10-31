@@ -288,6 +288,13 @@ export function validateGameData(d: GameData): Errors {
   }
   if ((it.raidWeights.common ?? 0) > 0) errors.push('items.raidWeights: 레어 이상만');
   const itemIds = new Set(it.items.map((x) => x.id));
+  for (const s of it.weaponSets) {
+    const res = d.weapons.weapons.find((w) => w.id === s.result);
+    if (!d.weapons.weapons.some((w) => w.id === s.weapon)) errors.push(`items.weaponSets: 없는 무기 '${s.weapon}'`);
+    if (!itemIds.has(s.item)) errors.push(`items.weaponSets: 없는 아이템 '${s.item}'`);
+    if (!res) errors.push(`items.weaponSets: 없는 무기 '${s.result}'`);
+    else if (res.droppable) errors.push(`items.weaponSets: 결과 '${s.result}'는 드롭되면 안 됨`);
+  }
   for (const s of it.sets) {
     for (const m of [...s.materials, s.result]) if (!itemIds.has(m)) errors.push(`items.sets: 없는 아이템 '${m}'`);
     if (it.items.find((x) => x.id === s.result)?.pool !== 'set') errors.push(`items.sets: '${s.result}'는 pool set이어야 함`);

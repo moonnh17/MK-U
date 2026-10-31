@@ -22,6 +22,9 @@ class Charge implements SkillObject {
   private t = 0;
   private shotsLeft: number;
   private shotTimer = 0;
+  private readonly shotsTotal: number;
+  /** 충전 구체가 플레이어를 따라오는 빠르기 */
+  private readonly followRate = 18;
 
   constructor(
     host: SkillHost,
@@ -30,14 +33,16 @@ class Charge implements SkillObject {
     this.createdAt = host.scene.time.now;
     this.total = s.values.chargeSec!;
     this.shotsLeft = s.owned.awakened ? s.values.barrels! : 1;
+    this.shotsTotal = this.shotsLeft;
     const ref = s.owned.awakened ? s.def.sprites.chargeA! : levelRef(s, 'charge');
-    this.orb = host.sprite(0, 0, ref).setDepth(6);
+    const p = host.playerPos();
+    const aim = host.aimDir();
+    this.orb = host.sprite(p.x + aim.x * 8, p.y + aim.y * 8, ref).setDepth(6);
     loopArt(this.orb, ref);
-    this.follow(host);
   }
 
   update(dt: number, host: SkillHost): boolean {
-    this.follow(host);
+    this.follow(dt, host);
     if (this.t < this.total) {
       this.t += dt;
       // 각성 그림은 프레임이 스스로 커진다
@@ -48,20 +53,23 @@ class Charge implements SkillObject {
     if (this.shotTimer > 0) return true;
     this.fire(host);
     this.shotsLeft--;
+    // 쏠수록 구체가 줄어든다
+    this.orb.setScale(this.shotsLeft / this.shotsTotal);
     this.shotTimer = this.s.values.barrelIntervalSec ?? 0;
     return this.shotsLeft > 0;
   }
 
-  private follow(host: SkillHost): void {
+  private follow(dt: number, host: SkillHost): void {
     const p = host.playerPos();
     const aim = host.aimDir();
-    this.orb.setPosition(p.x + aim.x * 8, p.y + aim.y * 8);
+    const k = Math.min(1, dt * this.followRate);
+    this.orb.setPosition(this.orb.x + (p.x + aim.x * 8 - this.orb.x) * k, this.orb.y + (p.y + aim.y * 8 - this.orb.y) * k);
   }
 
   private fire(host: SkillHost): void {
     const v = this.s.values;
     const sp = this.s.def.sprites;
-    const from = host.playerPos();
+    const from = { x: this.orb.x, y: this.orb.y };
     const enemies = host.enemies();
     let target = null;
     if (this.s.owned.awakened) {

@@ -51,6 +51,7 @@ class Drone implements SkillObject {
     const target = this.s.owned.awakened ? this.swarm(dt, host) : this.orbit(host);
     this.img.setPosition(this.pos.x, this.pos.y);
     if (this.s.owned.awakened) this.lookSwarm(before, target);
+    else if (target) this.img.setFlipX(target.x < this.pos.x);
     if (!target || this.fireTimer > 0) return true;
     const dist = Math.hypot(target.x - this.pos.x, target.y - this.pos.y);
     if (dist > v.range!) return true;

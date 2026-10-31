@@ -156,6 +156,7 @@
     "markerColor": "#ffd23f",
     "fontSize": 8
   },
+  "turretRecoil": { "sec": 0.16, "px": 3.5, "bigPx": 1.5, "squash": 0.18 },
   "shieldSpawn": {
     "particles": [26, 34],
     "particleSpeed": [40, 120],

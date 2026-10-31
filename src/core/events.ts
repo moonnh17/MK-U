@@ -75,7 +75,7 @@ export interface GameEvents {
   debugCoins: { amount: number };
   debugGiveItem: { itemId: string };
   /** 아이템을 얻었다 (set: 세트 합성 결과) */
-  itemGot: { itemId: string; set: boolean };
+  itemGot: { itemId: string; set: boolean; weapon?: boolean; from?: { key: string; color: string }[] };
   /** 카드 선택창 → 이 카드를 골랐다 */
   cardPick: { index: number };
   /** 인벤토리 → 스킬을 칸에 넣는다 */

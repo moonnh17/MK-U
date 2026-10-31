@@ -465,9 +465,13 @@ export interface BossesData {
   rubbleColor: string;
 }
 
+export type StageScaleTable = Record<string, { base: number; perStage: number }>;
+
 export interface EnemiesData {
   /** 챕터별 일반 적·정예 체력 배율: base + perStage × (스테이지 − 1). 없는 챕터는 1 */
-  hpScale: Record<string, { base: number; perStage: number }>;
+  hpScale: StageScaleTable;
+  /** 챕터별 모든 적·보스의 피해 배율 (식은 hpScale과 같다) */
+  damageScale: StageScaleTable;
   /** 적 투사체 모양 */
   projectile: SpriteRef;
   /** 디버그 '적 탄막': 플레이어 주위에서 플레이어를 향해 일반 탄을 쏜다(벡터굴절역장 확인용) */
@@ -975,6 +979,8 @@ export interface ItemsData {
   chapterCommonShift: number;
   /** 세트 합성: 재료 → 결과 */
   sets: { materials: string[]; result: string }[];
+  /** 무기 세트: 든 무기 + 아이템 → 그 슬롯의 새 무기 (아이템은 사라진다) */
+  weaponSets: { weapon: string; item: string; result: string }[];
   /** 획득 카드 표시 시간(초) */
   items: ItemDef[];
 }
@@ -1314,6 +1320,8 @@ export interface JuiceData {
   advancement: { chargeSec: number; particles: number; burstHoldSec: number };
   /** 전투 시작 띠 */
   combatStart: { sec: number; color: string; size: number; bandPx: number };
+  /** 포탑이 쏠 때 포신이 뒤로 밀렸다 돌아온다 */
+  turretRecoil: { sec: number; px: number; bigPx: number; squash: number };
   /** 마기역장이 생길 때: 입자가 뿜어져 나오며 막이 작게 시작해 몸을 덮는다 */
   shieldSpawn: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; growSec: number; startScale: number; stacks: { bodyAlpha: number; rings: number; lineWidth: number; lineAlpha: number; color: string }[]; ringGapPx: number };
   bossPhase: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; flashMs: number; zoom: number; zoomSec: number; bannerSec: number; bannerSize: number };

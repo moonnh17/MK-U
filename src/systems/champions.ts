@@ -3,7 +3,7 @@
  * 3장 전투 칸 일부 웨이브에 1마리(방마다 상한), 대규모 습격은 한 웨이브에 하나 또는 둘. 보스방에는 나오지 않는다.
  */
 import type { Rng } from '../core/rng';
-import type { ArchonAbsorbDef, ChampionRules, EnemiesData } from '../types/data';
+import type { ArchonAbsorbDef, ChampionRules, StageScaleTable } from '../types/data';
 
 /** 이 챕터·스테이지 전투 칸에 정예가 나오는지 */
 export function championStage(chapter: number, stage: number, rules: ChampionRules): boolean {
@@ -46,8 +46,8 @@ export function archonMods(stage: number, def: ArchonAbsorbDef): { hpMul: number
 }
 
 /** 최대 체력 배율이 바뀔 때 남은 체력 비율을 유지한다 */
-/** 챕터·스테이지가 뒤로 갈수록 커지는 일반 적·정예 체력 배율 */
-export function enemyHpScale(chapter: number, stage: number, table: EnemiesData['hpScale']): number {
+/** 챕터·스테이지가 뒤로 갈수록 커지는 적 배율 (체력·피해) */
+export function enemyStageScale(chapter: number, stage: number, table: StageScaleTable): number {
   const r = table[String(chapter)];
   return r ? r.base + r.perStage * (stage - 1) : 1;
 }
