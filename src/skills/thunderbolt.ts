@@ -16,6 +16,8 @@ import { nearestEnemy, type SkillHost, type SkillObject, type UltimateCast, type
 const ID = 'thunderbolt';
 const CUT_VORTEX_PX = 44;
 const CUT_STEP_MS = 70;
+/** 판정 폭에 대한 절단 그림 굵기 */
+const CUT_THICK = 3;
 /** 참격 그림이 원래 기운 각도 (오른쪽 위) */
 const SLASH_ART_RAD = -Math.PI / 4;
 
@@ -37,7 +39,7 @@ function cutFx(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: 
   const angle = Math.atan2(dir.y, dir.x);
   playFx(host.scene, sp.cut1!, from.x, from.y, { w: CUT_VORTEX_PX, fadeSec: 0.3 });
   [sp.cut2!, sp.cut3!, sp.cut4!].forEach((ref, i) => {
-    host.scene.time.delayedCall(i * CUT_STEP_MS, () => playFx(host.scene, ref, mid.x, mid.y, { w: length, rotation: angle, fadeSec: 0.2 }));
+    host.scene.time.delayedCall(i * CUT_STEP_MS, () => playFx(host.scene, ref, mid.x, mid.y, { w: length, h: u.values.width! * CUT_THICK, rotation: angle, fadeSec: 0.2 }));
   });
 }
 

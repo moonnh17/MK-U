@@ -750,7 +750,7 @@ hFx('skill_fieldA_contact', '06', AW, '탄막접촉', 26);
 hFx('skill_fieldA_hex', '06', AW, '육각방어', 18);
 hFx('skill_fieldA_deflect', '06', AW, '굴절', 20);
 // 레일건
-[['1', 'Lv1'], ['2', 'Lv3'], ['3', 'Lv5']].forEach(([n, lv]) => hFx(`skill_rail_beam${n}`, '07', lv, '관통광선', 60));
+[['1', 'Lv1'], ['2', 'Lv3'], ['3', 'Lv5']].forEach(([n, lv]) => hFx(`skill_rail_beam${n}`, '07', lv, '관통광선', 120));
 hFx('skill_rail_hit', '07', 'Lv1', '명중', 20);
 hFx('skill_rail_charge', '07', 'Lv3', '충전', 14);
 hFx('skill_rail_end', '07', 'Lv3', '종점폭발', 22);
@@ -762,7 +762,7 @@ hFx('skill_railA_hit', '07', AW, '명중', 20);
 hFx('skill_railA_burst', '07', AW, '전자기파동', 30);
 hFx('skill_railA_chain', '07', AW, '연쇄전격', 34);
 // 벼락
-[1, 2, 3, 4].forEach((i) => hFx(`ult_cut${i}`, '08', '기본', `공간절단_단계${i}`, 90));
+[1, 2, 3, 4].forEach((i) => hFx(`ult_cut${i}`, '08', '기본', `공간절단_단계${i}`, i === 1 ? 60 : 260));
 hFx('ult_kera_slash', '08', AW, '참격', 40);
 
 const artPath = path.join(REPO, 'src/data/art.json');

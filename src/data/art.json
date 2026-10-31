@@ -2388,22 +2388,22 @@
     },
     "skill_rail_beam1": {
       "file": "mku/skill_rail_beam1.png",
-      "frameWidth": 120,
-      "frameHeight": 66,
+      "frameWidth": 240,
+      "frameHeight": 132,
       "frames": 1,
       "density": 2
     },
     "skill_rail_beam2": {
       "file": "mku/skill_rail_beam2.png",
-      "frameWidth": 120,
-      "frameHeight": 56,
+      "frameWidth": 240,
+      "frameHeight": 110,
       "frames": 1,
       "density": 2
     },
     "skill_rail_beam3": {
       "file": "mku/skill_rail_beam3.png",
-      "frameWidth": 120,
-      "frameHeight": 48,
+      "frameWidth": 240,
+      "frameHeight": 96,
       "frames": 1,
       "density": 2
     },
@@ -2519,29 +2519,29 @@
     },
     "ult_cut1": {
       "file": "mku/ult_cut1.png",
-      "frameWidth": 180,
-      "frameHeight": 174,
+      "frameWidth": 120,
+      "frameHeight": 116,
       "frames": 1,
       "density": 2
     },
     "ult_cut2": {
       "file": "mku/ult_cut2.png",
-      "frameWidth": 180,
-      "frameHeight": 78,
+      "frameWidth": 520,
+      "frameHeight": 226,
       "frames": 1,
       "density": 2
     },
     "ult_cut3": {
       "file": "mku/ult_cut3.png",
-      "frameWidth": 180,
-      "frameHeight": 60,
+      "frameWidth": 520,
+      "frameHeight": 170,
       "frames": 1,
       "density": 2
     },
     "ult_cut4": {
       "file": "mku/ult_cut4.png",
-      "frameWidth": 180,
-      "frameHeight": 78,
+      "frameWidth": 520,
+      "frameHeight": 222,
       "frames": 1,
       "density": 2
     },
