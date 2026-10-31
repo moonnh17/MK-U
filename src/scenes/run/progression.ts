@@ -258,7 +258,7 @@ export class Progression {
     const itemRng = Rng.derive(this.run.ctx.config.seed, `boss-item-${stage.chapter}-${stage.stage}`);
     const bossItem = bossItemDef && (bossItemDef.dropChance === undefined || itemRng.chance(bossItemDef.dropChance)) ? bossItemDef : undefined;
     const reward = () => {
-      this.run.addPortal(node);
+      this.run.world.addPortal(node);
       if (weights) this.run.loot.addChest('weapon', c.x - 40, c.y, weights);
       // 보스 전용 아이템 확정 (무기 상자와 별도)
       if (bossItem) this.run.loot.addChest('item', c.x + 40, c.y, {}, bossItem.id);

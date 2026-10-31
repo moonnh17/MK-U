@@ -1,7 +1,7 @@
 import { buildPathField, pathDir, segmentClear, type PathField } from '../systems/pathField';
 import { IDLE_DODGE } from '../systems/dodge';
-import { stampGrid } from '../systems/roomShapes';
 import Phaser from 'phaser';
+import { WorldBuilder } from './run/worldBuilder';
 import { LootInteract } from './run/lootInteract';
 import { SkillRuntime } from './run/skillRuntime';
 import { Encounters } from './run/encounters';
@@ -29,23 +29,23 @@ import { animateArt, fitArt } from '../entities/art';
 import { Juice, shake } from '../entities/juice';
 import { cameraFocus, viewSize } from '../systems/camera';
 import { HitStop, slowMoScale } from '../systems/juice';
-import { artKeys, type TilePart } from '../systems/art';
+import { artKeys } from '../systems/art';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
-import { FloorWeapon, Pickup } from '../entities/pickup';
+import { Pickup } from '../entities/pickup';
 import { nearestEnemy, type SkillHost } from '../skills/host';
 import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { gradeMultiplier, type Stats } from '../systems/damage';
 import { assignElites, eliteCount } from '../systems/elites';
 import { championWaves, raidChampions } from '../systems/champions';
 import { rollOptions } from '../systems/loot';
-import { generateStage, type RoomNode } from '../systems/mapgen';
+import { generateStage } from '../systems/mapgen';
 import { hiddenChapterMul } from '../systems/hiddenBoss';
 import { steerToward } from '../systems/motion';
 import { crystalBreakdown, rollShard } from '../systems/runRecord';
 import { MiniQueue } from '../systems/gemini';
 import { inSpireCircle } from '../systems/spire';
-import { RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
+import { RoomState, type RoomEvent, type Wave } from '../systems/roomState';
 import { advanceStage, playableChapters, firstStage } from '../systems/run';
 import { absorbHit } from '../systems/shield';
 import { corruptedDamage, tickCorruption } from '../systems/acro';
@@ -54,7 +54,7 @@ import { findSkill, gainGauge, setSkillLevel, tickCooldowns } from '../systems/s
 import { damageTaken, maxHpFor, setStat, statEffect } from '../systems/stats';
 import { buffDuration, tickBleed } from '../systems/tags';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
-import { contains, corridors, doorRect, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, obstacleRects, wallRects, type Rect, type WorldMetrics } from '../systems/worldLayout';
+import { contains, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
 import type { BleedRule, StatId, TagId, WeaponDef } from '../types/data';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
@@ -69,6 +69,7 @@ export class RunScene extends Phaser.Scene {
   encounters!: Encounters;
   skillRt!: SkillRuntime;
   loot!: LootInteract;
+  world!: WorldBuilder;
   ctx!: GameContext;
   session!: RunSession;
   m!: WorldMetrics;
@@ -137,6 +138,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.world = new WorldBuilder(this);
     this.loot = new LootInteract(this);
     this.skillRt = new SkillRuntime(this);
     this.encounters = new Encounters(this);
@@ -238,7 +240,7 @@ export class RunScene extends Phaser.Scene {
       removeMinion: (e) => {
         if (!e.dead) this.removeEnemy(e);
       },
-      addObstacle: (at, radius, doorClear) => this.addObstacle(at, radius, doorClear),
+      addObstacle: (at, radius, doorClear) => this.world.addObstacle(at, radius, doorClear),
       chapterRoster: () => this.chapterRoster(),
       arena: () => this.currentArena(),
       bossPhaseFx: (text, color, at) => this.stageFx.bossPhaseFx(text, color, at),
@@ -251,7 +253,7 @@ export class RunScene extends Phaser.Scene {
     this.bullets = this.physics.add.group();
     this.enemyBullets = this.physics.add.group();
 
-    this.buildWorld();
+    this.world.buildWorld();
     this.stageFx.showTutorial();
 
     const start = roomCenter(map.rooms[map.startId]!, this.m);
@@ -267,7 +269,7 @@ export class RunScene extends Phaser.Scene {
       const t0 = this.cameraTarget();
       cam.setScroll(t0.x - cam.width / 2, t0.y - cam.height / 2);
     }
-    if (stage.chapter === 1 && stage.stage === 1 && this.ctx.config.testWeapons) this.placeTestWeapons();
+    if (stage.chapter === 1 && stage.stage === 1 && this.ctx.config.testWeapons) this.world.placeTestWeapons();
 
     this.physics.add.collider(this.player, this.walls);
     this.physics.add.collider(this.player, this.doorGroup);
@@ -438,110 +440,6 @@ export class RunScene extends Phaser.Scene {
 
   // ---------- 월드 ----------
 
-  buildWorld(): void {
-    const d = this.ctx.data;
-    const { map } = this.session;
-    // 챕터가 바뀌면 방 색(타일 자리)도 바뀐다
-    const theme = d.ui.chapterRooms[String(this.session.stage.chapter)] ?? d.ui.room;
-    const floor = hexColor(theme.floorColor);
-    const wall = hexColor(theme.wallColor);
-    const corridorColor = hexColor(theme.corridorColor);
-    const doorColor = hexColor(d.mapgen.door.color);
-
-    // 타일 그림이 있으면 반복해서 깔고, 없으면 색
-    const chapter = this.session.stage.chapter;
-    const tile = (part: TilePart) => artKeys.tile(part, chapter);
-    for (const c of corridors(map, this.m)) {
-      this.addRect(c.floor, corridorColor, 0, tile('corridor'));
-      for (const w of c.walls) this.walls.add(this.addRect(w, wall, 1, tile('wall')));
-    }
-
-    for (const node of map.rooms) {
-      // 바닥: 방마다 변형 하나 (같은 시드면 같은 방)
-      const dress = Rng.derive(this.ctx.config.seed, `dress-${map.chapter}-${map.stage}-${node.id}`);
-      const floorN = d.mapgen.dressing.floorVariants[String(chapter)] ?? 0;
-      this.addRect(roomRect(node, this.m), floor, 0, floorN > 0 ? artKeys.floorVariant(chapter, dress.int(0, floorN - 1)) : tile('floor'));
-      for (const w of wallRects(node, this.m)) this.walls.add(this.addRect(w, wall, 1, tile('wall')));
-      // 장애물: 벽처럼 이동과 탄(플레이어·적)을 막는다
-      const obs = obstacleRects(node, this.m, d.mapgen);
-      this.obstacles.set(node.id, obs);
-      this.addDecals(node, chapter, obs, dress);
-      for (const o of obs) this.dressObstacle(o, chapter, dress);
-
-      const doors: Door[] = [];
-      for (const dir of Object.keys(node.doors) as ('n' | 's' | 'e' | 'w')[]) {
-        doors.push(new Door(this, doorRect(node, dir, this.m), doorColor, this.doorGroup, artKeys.door));
-      }
-      this.doorsByRoom.set(node.id, doors);
-
-      const waves = wavesForRoom(
-        this.ctx.config.seed,
-        map.chapter,
-        map.stage,
-        node.id,
-        node.kind,
-        d.mapgen.combatWaves,
-        d.bosses.bosses.find((b) => b.chapter === map.chapter && b.stage === map.stage)?.id ?? d.mapgen.bossPlaceholderEnemy,
-        d.waves,
-      );
-      this.rooms.set(node.id, new RoomState(node.kind, waves, d.waves.waveDelaySec));
-
-      const c = roomCenter(node, this.m);
-      if (node.kind === 'exitRoom') this.addPortal(node);
-      if (node.kind === 'encounterRoom') {
-        this.addVending(node, obs, dress);
-        const ref = d.mapgen.props.encounterCore;
-        const core = this.add.image(c.x, c.y, ref.spriteKey).setDepth(2);
-        fitArt(d, core, ref.size, ref.height ?? ref.size);
-        this.cores.push({ sprite: core, roomId: node.id, radius: ref.size / 2 });
-      }
-      this.roomProps.addRoomProps(node, obs);
-      this.roomProps.addDoorIcons(node);
-    }
-  }
-
-  /** 바닥 장식: 밟고 지나가는 잔해·패널 (지형지물 자리는 피한다) */
-  addDecals(node: RoomNode, chapter: number, obs: readonly Rect[], rng: Rng): void {
-    const dr = this.ctx.data.mapgen.dressing;
-    const inner = interiorRect(node, this.m, 8);
-    const n = rng.int(dr.decalsPerRoom[0], dr.decalsPerRoom[1]);
-    for (let i = 0; i < n; i++) {
-      const x = rng.range(inner.x, inner.x + inner.w);
-      const y = rng.range(inner.y, inner.y + inner.h);
-      const key = artKeys.decal(chapter, rng.int(0, dr.decalKinds - 1));
-      if (!this.ctx.artLoaded.has(key) || obs.some((o) => contains({ x: o.x - 16, y: o.y - 16, w: o.w + 32, h: o.h + 32 }, x, y))) continue;
-      this.add.image(x, y, key).setDepth(0.2).setFlipX(rng.chance(0.5));
-    }
-  }
-
-  /** 지형지물: 판정은 사각형 그대로, 겉모습은 챕터 소품을 빽빽이 찍어 바닥과 확실히 다르게 */
-  dressObstacle(o: Rect, chapter: number, rng: Rng): void {
-    const dr = this.ctx.data.mapgen.dressing;
-    this.add.rectangle(o.x + o.w / 2 + 2, o.y + o.h / 2 + 5, o.w, o.h, 0x000000, 0.5).setDepth(0.5);
-    this.walls.add(this.add.rectangle(o.x + o.w / 2, o.y + o.h / 2, o.w, o.h, hexColor(dr.obstacleBaseColor)).setDepth(1));
-    for (const p of stampGrid(o, dr.obstacleStepPx)) {
-      const key = artKeys.obstacle(chapter, rng.int(0, dr.obstacleKinds - 1));
-      if (!this.ctx.artLoaded.has(key)) continue;
-      this.add.image(p.x, p.y + 4, key).setOrigin(0.5, 0.8).setDepth(1.1 + p.y * 1e-5).setFlipX(rng.chance(0.5));
-    }
-  }
-
-  /** 물약 자판기: 방 모서리 중 지형지물이 없는 곳 */
-  addVending(node: RoomNode, obs: readonly Rect[], rng: Rng): void {
-    const v = this.ctx.data.mapgen.vending;
-    const inner = interiorRect(node, this.m, v.cornerInsetPx);
-    const corners = [
-      { x: inner.x, y: inner.y },
-      { x: inner.x + inner.w, y: inner.y },
-      { x: inner.x, y: inner.y + inner.h },
-      { x: inner.x + inner.w, y: inner.y + inner.h },
-    ].filter((p) => !obs.some((o) => contains({ x: o.x - 24, y: o.y - 24, w: o.w + 48, h: o.h + 48 }, p.x, p.y)));
-    const at = corners.length > 0 ? rng.pick(corners) : roomCenter(node, this.m);
-    const sprite = this.add.image(at.x, at.y, v.spriteKey).setDepth(2);
-    fitArt(this.ctx.data, sprite, v.size, v.height ?? v.size);
-    this.loot.vendings.push({ x: at.x, y: at.y, stock: v.stock, sprite });
-  }
-
   /** 플레이어 모습: 전직했으면 그 학파 그림(있으면), 아니면 기본 */
   applyPlayerArt(): void {
     const d = this.ctx.data;
@@ -551,12 +449,6 @@ export class RunScene extends Phaser.Scene {
     this.player.anims.stop();
     this.player.setTexture(key, 0);
     fitArt(d, this.player, d.player.size, d.player.height ?? d.player.size);
-  }
-
-  /** 방 바닥·벽: 타일 그림(key)이 있으면 반복해서 깔고, 없으면 색 사각형 */
-  addRect(r: Rect, color: number, depth: number, key?: string): Phaser.GameObjects.Rectangle | Phaser.GameObjects.TileSprite {
-    if (key && this.textures.exists(key)) return this.add.tileSprite(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, key).setDepth(depth);
-    return this.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, color).setDepth(depth);
   }
 
   // ---------- 보스 연출 ----------
@@ -578,27 +470,6 @@ export class RunScene extends Phaser.Scene {
     const rid = roomAt(this.session.map, this.m, this.player.x, this.player.y);
     const room = rid !== null ? roomRect(this.session.map.rooms[rid]!, this.m) : null;
     return cameraFocus({ x: this.player.x, y: this.player.y }, this.aimTarget, viewSize(cam.width, cam.height, rules.zoom * this.ctx.renderScale), rules, room);
-  }
-
-  addPortal(node: RoomNode): void {
-    const ref = this.ctx.data.mapgen.props.exitPortal;
-    const c = roomCenter(node, this.m);
-    const sprite = this.add.image(c.x, c.y, ref.spriteKey).setDepth(2);
-    this.tweens.add({ targets: sprite, alpha: 0.5, duration: 500, yoyo: true, repeat: -1 });
-    this.tweens.add({ targets: sprite, angle: 360, duration: ref.spinSec * 1000, repeat: -1 });
-    this.portals.push({ sprite, roomId: node.id, radius: ref.size / 2 });
-  }
-
-  placeTestWeapons(): void {
-    const node = this.session.map.rooms[this.session.map.startId]!;
-    const inner = interiorRect(node, this.m);
-    const ids = this.ctx.data.mapgen.testWeapons;
-    ids.forEach((id, i) => {
-      const x = inner.x + (inner.w * (i + 1)) / (ids.length + 1);
-      const y = inner.y + (inner.h * 3) / 4;
-      const def = this.weaponDefOf(id);
-      this.loot.floorWeapons.push(new FloorWeapon(this, plainWeapon(def), def.spriteKey, x, y));
-    });
   }
 
   // ---------- 루프 ----------
@@ -865,7 +736,7 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     const node = this.session.map.rooms[roomId]!;
     const def = d.enemies.enemies.find((e) => e.id === id)!;
-    const pos = def.ai === 'idle' ? roomCenter(node, this.m) : this.spawnPoint(node, rng, def.size / 2);
+    const pos = def.ai === 'idle' ? roomCenter(node, this.m) : this.world.spawnPoint(node, rng, def.size / 2);
     const elite = eliteId ? (d.elites.elites.find((x) => x.id === eliteId) ?? null) : null;
     const extra = extraEliteId ? (d.elites.elites.find((x) => x.id === extraEliteId) ?? null) : null;
     const icon = [elite, extra].filter((x) => x !== null).map((x) => this.ctx.t(x!.iconKey)).join('');
@@ -953,40 +824,6 @@ export class RunScene extends Phaser.Scene {
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
     this.enemies.push(enemy);
     return enemy;
-  }
-
-  /** 지면 파괴 잔해: 벽처럼 막는다. 플레이어 자리·문 근처에는 만들지 않는다(갇힘 방지) */
-  addObstacle(at: Vec2, radius: number, doorClear: number): { destroy(): void } | null {
-    const d = this.ctx.data;
-    if (Math.hypot(this.player.x - at.x, this.player.y - at.y) <= radius + d.player.size / 2 + 2) return null;
-    const rid = this.session.currentRoomId;
-    for (const door of rid === null ? [] : (this.doorsByRoom.get(rid) ?? [])) {
-      if (Math.hypot(door.rect.x - at.x, door.rect.y - at.y) <= doorClear + radius) return null;
-    }
-    const rect = this.add.rectangle(at.x, at.y, radius * 2, radius * 2, hexColor(d.bosses.rubbleColor)).setDepth(1);
-    this.walls.add(rect);
-    return { destroy: () => this.walls.remove(rect, true, true) };
-  }
-
-  spawnPoint(node: RoomNode, rng: Rng, radius: number): Vec2 {
-    const inner = interiorRect(node, this.m, radius);
-    const minDist = this.ctx.data.waves.spawnMinPlayerDistance;
-    let best: Vec2 = { x: inner.x, y: inner.y };
-    let bestDist = -1;
-    const obs = this.obstacles.get(node.id) ?? [];
-    const blocked = (p: Vec2) => obs.some((o) => p.x > o.x - radius && p.x < o.x + o.w + radius && p.y > o.y - radius && p.y < o.y + o.h + radius);
-    for (let i = 0; i < 30; i++) {
-      const p = { x: rng.range(inner.x, inner.x + inner.w), y: rng.range(inner.y, inner.y + inner.h) };
-      // 장애물 안에는 소환하지 않는다
-      if (blocked(p)) continue;
-      const dist = Math.hypot(p.x - this.player.x, p.y - this.player.y);
-      if (dist >= minDist) return p;
-      if (dist > bestDist) {
-        best = p;
-        bestDist = dist;
-      }
-    }
-    return best;
   }
 
   // ---------- 전투 ----------
