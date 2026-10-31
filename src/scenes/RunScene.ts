@@ -4,13 +4,14 @@ import { bossOrbDrops } from '../systems/bossEnergy';
 import { IDLE_DODGE, blinkTarget, dodgeConfig, startDodge, stepDodge, zigzag, type DodgeState } from '../systems/dodge';
 import { stampGrid } from '../systems/roomShapes';
 import Phaser from 'phaser';
-import type { ActionFrame, ButtonAction, Vec2 } from '../core/actions';
+import { SKILL_ACTIONS, sfx, type Modal, type Offer, type Prop, type RunSceneData, type Vending } from './run/shared';
+import type { ActionFrame, Vec2 } from '../core/actions';
 import { getContext, type GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { DISABLED_ACTIONS } from '../core/features';
 import { Rng } from '../core/rng';
 import { hexColor } from '../core/scale';
-import { newPlayerState, type BuffView, type PlayerState, type RunSession, type SkillSlotView } from '../core/session';
+import { newPlayerState, type BuffView, type RunSession, type SkillSlotView } from '../core/session';
 import { BossController } from '../bosses/bossController';
 import type { BossHost } from '../bosses/host';
 import { Door } from '../entities/door';
@@ -27,10 +28,7 @@ import { animateArt, fitArt } from '../entities/art';
 import { Juice, shake } from '../entities/juice';
 import { cameraFocus, viewSize } from '../systems/camera';
 import { bossIntroStage, bossIntroTotal, damageKind, HitStop, slowMoScale, type IntroStage } from '../systems/juice';
-import { weaponSfx, type SfxId } from '../systems/sound';
-
-/** 효과음 하나 (합성은 audio/sfx.ts) */
-const sfx = (id: SfxId) => bus.emit('sfx', { id });
+import { weaponSfx } from '../systems/sound';
 import { artKeys, type TilePart } from '../systems/art';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
@@ -56,230 +54,153 @@ import { registerCutscene, registerGemini } from '../core/save';
 import { hasLines, MiniQueue, pickMini, saidKeys, storyFor } from '../systems/gemini';
 import { inSpireCircle, spireEliteCount, spireItemChoices, spireSize, type SpireEvent } from '../systems/spire';
 import { planCombatWaves, RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
-import { advanceStage, playableChapters, firstStage, type StageRef } from '../systems/run';
+import { advanceStage, playableChapters, firstStage } from '../systems/run';
 import { absorbHit, refracts, tickShield, type ShieldState } from '../systems/shield';
 import { applyCorruption, corruptedDamage, skillChance, tickCorruption } from '../systems/acro';
 import { combineMods, heal, hpStance, payHp, takeDamage, type PlayerMods } from '../systems/vitals';
-import {
-  cooldownLeft,
-  equipSkill,
-  findSkill,
-  gainGauge,
-  refundCooldown,
-  setSkillLevel,
-  skillValues,
-  tickCooldowns,
-} from '../systems/skills';
+import { cooldownLeft, equipSkill, findSkill, gainGauge, refundCooldown, setSkillLevel, skillValues, tickCooldowns } from '../systems/skills';
 import { addStat, damageTaken, maxHpFor, setStat, statEffect } from '../systems/stats';
 import { applyBleed, buffDuration, canAutoCast, chargeTime, skillTags, tickBleed } from '../systems/tags';
-import {
-  activeWeapon,
-  dropWeaponAt,
-  autoAim,
-  gainEnergy,
-  gunShots,
-  inArc,
-  normalize,
-  pickUpWeapon,
-  plainWeapon,
-  projectilesCut,
-  rollCrit,
-  canFire,
-  spendEnergy,
-  swapWeapon,
-  weaponStats,
-  type WeaponItem,
-  type WeaponStats,
-} from '../systems/weapons';
-import {
-  contains,
-  corridors,
-  doorRect,
-  interiorRect,
-  mapBounds,
-  metrics,
-  roomAt,
-  roomCenter,
-  roomRect,
-  obstacleRects,
-  wallRects,
-  type Rect,
-  type WorldMetrics,
-} from '../systems/worldLayout';
-import type { BleedRule, CardOfferKind, DodgeSchoolDef, EncounterKindId, GeminiEventId, GradeId, HiddenBossDef, WeaponSignature, SchoolId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
-
-export interface RunSceneData {
-  stage?: StageRef;
-  player?: PlayerState;
-  /** 이 스테이지 시작방에서 고를 카드 */
-  offers?: CardOfferKind[];
-  /** 새 런: 실험장에서 고른 직업 */
-  job?: string;
-  /** 포탈을 타고 왔다 (도착 연출, 이동 화면을 걷는다) */
-  warpIn?: boolean;
-}
-
-interface Prop {
-  sprite: Phaser.GameObjects.Image;
-  roomId: number;
-  radius: number;
-}
-
-interface Offer {
-  kind: CardOfferKind | 'item' | 'school';
-  boss: boolean;
-  /** 아이템 선택 카드(첨탑): 미리 뽑아 둔 아이템 */
-  items?: string[];
-  /** 학파 선택 카드(전직 동점): 동점인 학파 */
-  schools?: SchoolId[];
-}
-
-type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | 'intro' | 'pause' | 'portal' | 'itemGet' | null;
-
-/** 조우 칸 물약 자판기 */
-interface Vending {
-  x: number;
-  y: number;
-  stock: number;
-  sprite: Phaser.GameObjects.Image;
-}
-
-const SKILL_ACTIONS: ButtonAction[] = ['skill1', 'skill2', 'skill3', 'skill4'];
+import { activeWeapon, dropWeaponAt, autoAim, gainEnergy, gunShots, inArc, normalize, pickUpWeapon, plainWeapon, projectilesCut, rollCrit, canFire, spendEnergy, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
+import { contains, corridors, doorRect, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, obstacleRects, wallRects, type Rect, type WorldMetrics } from '../systems/worldLayout';
+import type { BleedRule, DodgeSchoolDef, EncounterKindId, GeminiEventId, GradeId, HiddenBossDef, WeaponSignature, SchoolId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
+export type { RunSceneData } from './run/shared';
+
 export class RunScene extends Phaser.Scene {
-  private ctx!: GameContext;
-  private session!: RunSession;
-  private m!: WorldMetrics;
-  private rng!: Rng;
-  private host!: SkillHost;
+  ctx!: GameContext;
+  session!: RunSession;
+  m!: WorldMetrics;
+  rng!: Rng;
+  host!: SkillHost;
   /** 피해를 준 스킬 id별 SkillHost (학파 궁극기 게이지가 출처를 본다) */
-  private hosts = new Map<string, SkillHost>();
+  hosts = new Map<string, SkillHost>();
 
-  private player!: Phaser.Physics.Arcade.Sprite;
-  private weaponSprite!: Phaser.GameObjects.Image;
-  private walls!: Phaser.Physics.Arcade.StaticGroup;
-  private doorGroup!: Phaser.Physics.Arcade.StaticGroup;
-  private enemyGroup!: Phaser.Physics.Arcade.Group;
-  private bullets!: Phaser.Physics.Arcade.Group;
+  player!: Phaser.Physics.Arcade.Sprite;
+  weaponSprite!: Phaser.GameObjects.Image;
+  walls!: Phaser.Physics.Arcade.StaticGroup;
+  doorGroup!: Phaser.Physics.Arcade.StaticGroup;
+  enemyGroup!: Phaser.Physics.Arcade.Group;
+  bullets!: Phaser.Physics.Arcade.Group;
   /** 적 투사체 (M3부터 사용, 칼 탄 베기 대상) */
-  private enemyBullets!: Phaser.Physics.Arcade.Group;
+  enemyBullets!: Phaser.Physics.Arcade.Group;
 
-  private doorsByRoom = new Map<number, Door[]>();
-  private rooms = new Map<number, RoomState>();
-  private enemies: Enemy[] = [];
-  private enemyRoom = new Map<Enemy, number>();
-  private pickups: Pickup[] = [];
-  private floorWeapons: FloorWeapon[] = [];
-  private propGroup!: Phaser.Physics.Arcade.StaticGroup;
-  private breakables: BreakableProp[] = [];
-  private statues: Statue[] = [];
-  private doorIcons: { text: Phaser.GameObjects.Text; roomId: number; to: number }[] = [];
-  private portals: Prop[] = [];
-  private vendings: Vending[] = [];
-  private potions: Phaser.GameObjects.Image[] = [];
+  doorsByRoom = new Map<number, Door[]>();
+  rooms = new Map<number, RoomState>();
+  enemies: Enemy[] = [];
+  enemyRoom = new Map<Enemy, number>();
+  pickups: Pickup[] = [];
+  floorWeapons: FloorWeapon[] = [];
+  propGroup!: Phaser.Physics.Arcade.StaticGroup;
+  breakables: BreakableProp[] = [];
+  statues: Statue[] = [];
+  doorIcons: { text: Phaser.GameObjects.Text; roomId: number; to: number }[] = [];
+  portals: Prop[] = [];
+  vendings: Vending[] = [];
+  potions: Phaser.GameObjects.Image[] = [];
   /** 포탈·자판기 앞에 뜨는 조작 안내 */
-  private interactPrompt: Phaser.GameObjects.Text | null = null;
+  interactPrompt: Phaser.GameObjects.Text | null = null;
   /** 아직 보여주지 않은 아이템 획득 창 */
-  private itemGets: { itemId: string; set: boolean }[] = [];
-  private cores: Prop[] = [];
-  private chests: Chest[] = [];
-  private stands: MerchantStand[] = [];
+  itemGets: { itemId: string; set: boolean }[] = [];
+  cores: Prop[] = [];
+  chests: Chest[] = [];
+  stands: MerchantStand[] = [];
   /** 대규모 습격이 벌어진 조우 칸 */
-  private raidRooms = new Set<number>();
+  raidRooms = new Set<number>();
   /** 히든보스가 나온 조우 칸 → 그 히든보스 */
-  private hiddenBossRooms = new Map<number, HiddenBossDef>();
+  hiddenBossRooms = new Map<number, HiddenBossDef>();
   /** 디버그: 다음 히든보스 지정 */
-  private forcedHiddenBoss: string | null = null;
+  forcedHiddenBoss: string | null = null;
   /** 유니크 고유 효과: 지금 무기로 한 공격 수 */
-  private sigItem: WeaponItem | null = null;
-  private sigCount = 0;
+  sigItem: WeaponItem | null = null;
+  sigCount = 0;
   /** 학파 선택 카드를 고른 뒤 전직을 마치고 할 일 */
-  private pendingAdvance: (() => void) | null = null;
+  pendingAdvance: (() => void) | null = null;
   /** 마기수집첨탑 (조우 칸 하나에 하나) */
-  private spires: Spire[] = [];
+  spires: Spire[] = [];
   /** 타격감 연출·히트스톱 (멈춘 동안은 물리와 적이 멈춘다), 다음 피해가 치명타인지 */
-  private juice!: Juice;
-  private hitStop!: HitStop;
-  private stopping = false;
-  private pendingCrit = false;
+  juice!: Juice;
+  hitStop!: HitStop;
+  stopping = false;
+  pendingCrit = false;
   /** 보스 등장 컷 (그동안 게임은 멈춘다) */
-  private intro: { e: Enemy; t: number; stage: IntroStage } | null = null;
+  intro: { e: Enemy; t: number; stage: IntroStage } | null = null;
   /** 방 장애물 (적 소환 자리를 피한다) */
-  private obstacles = new Map<number, Rect[]>();
+  obstacles = new Map<number, Rect[]>();
   /** 지금 조준 중인 적 (카메라가 그쪽으로 기운다) */
-  private aimTarget: Vec2 | null = null;
+  aimTarget: Vec2 | null = null;
   /** 보스 처치 슬로모션 경과(초), 없으면 null */
-  private slowT: number | null = null;
+  slowT: number | null = null;
   /** 일식 어둠과 그 보스 (식광) */
-  private darkness: Darkness | null = null;
-  private darknessBoss: Enemy | null = null;
+  darkness: Darkness | null = null;
+  darknessBoss: Enemy | null = null;
   /** 강적이 나올 중형 첨탑 (첫 무리 때 소환) */
-  private spireStrong = new Set<Spire>();
+  spireStrong = new Set<Spire>();
   /** 처치 중에 생긴 첨탑 이벤트 (다음 updateSpires에서 처리) */
-  private spireEvents: { sp: Spire; e: SpireEvent }[] = [];
+  spireEvents: { sp: Spire; e: SpireEvent }[] = [];
   /** 대검 차지 */
-  private charging = false;
-  private chargeT = 0;
-  private chargeFx: Phaser.GameObjects.Graphics | null = null;
+  charging = false;
+  chargeT = 0;
+  chargeFx: Phaser.GameObjects.Graphics | null = null;
   /** 디버그: 다음 조우 칸 유형 강제 */
-  private forcedEncounter: EncounterKindId | null = null;
+  forcedEncounter: EncounterKindId | null = null;
   /** 이번 카드창에서 리롤을 썼는지 */
-  private rerolled = false;
-  private currentOffer: Offer | null = null;
-  private skillObjects: SkillObject[] = [];
+  rerolled = false;
+  currentOffer: Offer | null = null;
+  skillObjects: SkillObject[] = [];
   /** 적 쪽 위험 지대(폭발 엘리트 지연 폭발 등) */
-  private hazards: Hazard[] = [];
-  private enemyHost!: EnemyHost;
+  hazards: Hazard[] = [];
+  enemyHost!: EnemyHost;
   /** 아이템 발동형 효과·상태 */
-  private itemRt!: ItemRuntime;
-  private bossHost!: BossHost;
+  itemRt!: ItemRuntime;
+  bossHost!: BossHost;
   /** 보스 적 → 패턴 컨트롤러 */
-  private bossControllers = new Map<Enemy, BossController>();
+  bossControllers = new Map<Enemy, BossController>();
   /** 마기역장 보호막 */
-  private shield: ShieldState | null = null;
-  private shieldOpts: ShieldOpts | null = null;
-  private shieldFx: Phaser.GameObjects.Arc | null = null;
+  shield: ShieldState | null = null;
+  shieldOpts: ShieldOpts | null = null;
+  shieldFx: Phaser.GameObjects.Arc | null = null;
   /** 지금 깔려 있는 패시브 (id:레벨:각성). 바뀌면 오브젝트를 다시 깐다 */
-  private passiveKey = '';
-  private passiveId: string | null = null;
+  passiveKey = '';
+  passiveId: string | null = null;
   /** MK 돌진 */
-  private dashLeft = 0;
-  private dashVel: Vec2 = { x: 0, y: 0 };
+  dashLeft = 0;
+  dashVel: Vec2 = { x: 0, y: 0 };
 
-  private aimDir: Vec2 = { x: 1, y: 0 };
-  private fireCooldown = 0;
-  private invuln = 0;
-  private dodge: DodgeState = IDLE_DODGE;
-  private dodgeGhostIn = 0;
-  private tutorialTexts: Phaser.GameObjects.Text[] = [];
-  private panicFx: PanicFx | null = null;
-  private panicTinted = false;
-  private dodgeFxRng: Rng | null = null;
-  private dodgeBar: Phaser.GameObjects.Graphics | null = null;
-  private pathFields = new Map<number, PathField>();
-  private bossHpSeen = new Map<Enemy, number>();
-  private interactKind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | null = null;
+  aimDir: Vec2 = { x: 1, y: 0 };
+  fireCooldown = 0;
+  invuln = 0;
+  dodge: DodgeState = IDLE_DODGE;
+  dodgeGhostIn = 0;
+  tutorialTexts: Phaser.GameObjects.Text[] = [];
+  panicFx: PanicFx | null = null;
+  panicTinted = false;
+  dodgeFxRng: Rng | null = null;
+  dodgeBar: Phaser.GameObjects.Graphics | null = null;
+  pathFields = new Map<number, PathField>();
+  bossHpSeen = new Map<Enemy, number>();
+  interactKind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | null = null;
   /** 상자·드롭 무기 시드 순번 */
-  private lootSeq = 0;
-  private toastTimes = new Map<string, number>();
-  private unsubs: (() => void)[] = [];
-  private initData: RunSceneData = {};
+  lootSeq = 0;
+  toastTimes = new Map<string, number>();
+  unsubs: (() => void)[] = [];
+  initData: RunSceneData = {};
 
   // 카드·인벤토리
-  private modal: Modal = null;
-  private offerQueue: Offer[] = [];
-  private afterOffers: (() => void)[] = [];
-  private currentCards: AnyCard[] | null = null;
+  modal: Modal = null;
+  offerQueue: Offer[] = [];
+  afterOffers: (() => void)[] = [];
+  currentCards: AnyCard[] | null = null;
   /** 컷인 → 설명창 대기열과 다 본 뒤 할 일 */
   /** 미모사 제미니 미니 대사 순서, 스토리 대화가 끝난 뒤 할 일 */
-  private mini!: MiniQueue;
-  private storyThen: (() => void) | null = null;
-  private cutQueue: Cutscene[] = [];
-  private afterCuts: (() => void) | null = null;
-  private cardSeq = 0;
+  mini!: MiniQueue;
+  storyThen: (() => void) | null = null;
+  cutQueue: Cutscene[] = [];
+  afterCuts: (() => void) | null = null;
+  cardSeq = 0;
   /** 포털을 탔다(카드를 고르는 동안 포털을 다시 밟지 않게) */
-  private leaving = false;
+  leaving = false;
 
   constructor() {
     super('Run');
@@ -520,7 +441,7 @@ export class RunScene extends Phaser.Scene {
     this.queueOffers(offers.map((kind) => ({ kind, boss: false })));
   }
 
-  private resetFields(): void {
+  resetFields(): void {
     this.doorsByRoom = new Map();
     this.rooms = new Map();
     this.enemies = [];
@@ -583,7 +504,7 @@ export class RunScene extends Phaser.Scene {
 
   // ---------- 월드 ----------
 
-  private buildWorld(): void {
+  buildWorld(): void {
     const d = this.ctx.data;
     const { map } = this.session;
     // 챕터가 바뀌면 방 색(타일 자리)도 바뀐다
@@ -646,7 +567,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 상자·통·석상을 놓는다 (같은 시드면 같은 자리) */
-  private addRoomProps(node: RoomNode, obs: readonly Rect[]): void {
+  addRoomProps(node: RoomNode, obs: readonly Rect[]): void {
     const rp = this.ctx.data.mapgen.roomProps;
     const rule = rp.rules[node.kind];
     if (!rule) return;
@@ -672,7 +593,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 문 안쪽에 그 너머 방 종류를 표시한다 (가 본 적 없는 방만) */
-  private addDoorIcons(node: RoomNode): void {
+  addDoorIcons(node: RoomNode): void {
     const icon = this.ctx.data.mapgen.roomProps.doorIcon;
     const map = this.session.map;
     for (const [dir, to] of Object.entries(node.doors) as [Dir, number][]) {
@@ -690,14 +611,14 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 지금 방의 문 표시만 보인다 (전투 중에는 숨긴다) */
-  private updateDoorIcons(): void {
+  updateDoorIcons(): void {
     const rid = this.session.currentRoomId;
     const locked = rid !== null && this.rooms.get(rid)?.phase === 'locked';
     for (const d of this.doorIcons) d.text.setVisible(d.roomId === rid && !locked && !this.session.visited.has(d.to));
   }
 
   /** 상자·통에 피해. 상자는 드롭, 통은 잠시 뒤 폭발 */
-  private damageBreakable(p: BreakableProp, amount: number): void {
+  damageBreakable(p: BreakableProp, amount: number): void {
     if (!p.damage(amount)) return;
     const d = this.ctx.data;
     const rp = d.mapgen.roomProps;
@@ -717,7 +638,7 @@ export class RunScene extends Phaser.Scene {
     this.time.delayedCall(rp.barrel.fuseSec * 1000, () => this.explodeBarrel(p, at));
   }
 
-  private explodeBarrel(p: BreakableProp, at: Vec2): void {
+  explodeBarrel(p: BreakableProp, at: Vec2): void {
     const b = this.ctx.data.mapgen.roomProps.barrel;
     p.destroy();
     sfx('explosion');
@@ -731,17 +652,17 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 범위 안의 상자·통에 피해 (통 폭발은 옆 통으로 이어진다) */
-  private blastProps(at: Vec2, radius: number, damage: number): void {
+  blastProps(at: Vec2, radius: number, damage: number): void {
     for (const p of [...this.breakables]) if (Math.hypot(p.x - at.x, p.y - at.y) <= radius) this.damageBreakable(p, damage);
   }
 
   /** 근접 공격 판정 안의 소품에 피해 */
-  private meleeProps(amount: number, inside: (p: BreakableProp) => boolean): void {
+  meleeProps(amount: number, inside: (p: BreakableProp) => boolean): void {
     for (const p of [...this.breakables]) if (inside(p)) this.damageBreakable(p, amount);
   }
 
   /** 그 자리에서 튀어 나가는 코인·에너지 */
-  private popPickups(kind: 'coin' | 'energy', at: Vec2, n: number): void {
+  popPickups(kind: 'coin' | 'energy', at: Vec2, n: number): void {
     const d = this.ctx.data;
     const pop = d.juice.death;
     for (let i = 0; i < n; i++) {
@@ -754,7 +675,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 석상 사용: 비율만큼 회복하고 꺼진다 */
-  private useStatue(s: Statue): void {
+  useStatue(s: Statue): void {
     const def = this.ctx.data.mapgen.roomProps.statues.find((x) => x.kind === s.kind)!;
     const p = this.session.player;
     if (s.kind === 'heal') p.hp = Math.min(p.maxHp, p.hp + p.maxHp * def.value);
@@ -765,7 +686,7 @@ export class RunScene extends Phaser.Scene {
     this.floatLabel({ x: s.x, y: s.y - 10 }, this.ctx.t(`statue.${s.kind}`), def.color);
   }
 
-  private nearStatue(): Statue | null {
+  nearStatue(): Statue | null {
     return this.nearest(
       this.statues.filter((s) => !s.used),
       this.ctx.data.pickups.interactRadius,
@@ -773,7 +694,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 바닥 장식: 밟고 지나가는 잔해·패널 (지형지물 자리는 피한다) */
-  private addDecals(node: RoomNode, chapter: number, obs: readonly Rect[], rng: Rng): void {
+  addDecals(node: RoomNode, chapter: number, obs: readonly Rect[], rng: Rng): void {
     const dr = this.ctx.data.mapgen.dressing;
     const inner = interiorRect(node, this.m, 8);
     const n = rng.int(dr.decalsPerRoom[0], dr.decalsPerRoom[1]);
@@ -787,7 +708,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 지형지물: 판정은 사각형 그대로, 겉모습은 챕터 소품을 빽빽이 찍어 바닥과 확실히 다르게 */
-  private dressObstacle(o: Rect, chapter: number, rng: Rng): void {
+  dressObstacle(o: Rect, chapter: number, rng: Rng): void {
     const dr = this.ctx.data.mapgen.dressing;
     this.add.rectangle(o.x + o.w / 2 + 2, o.y + o.h / 2 + 5, o.w, o.h, 0x000000, 0.5).setDepth(0.5);
     this.walls.add(this.add.rectangle(o.x + o.w / 2, o.y + o.h / 2, o.w, o.h, hexColor(dr.obstacleBaseColor)).setDepth(1));
@@ -799,7 +720,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 물약 자판기: 방 모서리 중 지형지물이 없는 곳 */
-  private addVending(node: RoomNode, obs: readonly Rect[], rng: Rng): void {
+  addVending(node: RoomNode, obs: readonly Rect[], rng: Rng): void {
     const v = this.ctx.data.mapgen.vending;
     const inner = interiorRect(node, this.m, v.cornerInsetPx);
     const corners = [
@@ -815,7 +736,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 자판기에서 물약을 뽑는다: 코인을 내면 앞으로 물약이 튀어나온다 */
-  private buyPotion(m: Vending): void {
+  buyPotion(m: Vending): void {
     const v = this.ctx.data.mapgen.vending;
     const p = this.session.player;
     if (p.coins < v.price) {
@@ -833,7 +754,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 물약 줍기: 체력이 닳아 있을 때 닿으면 회복 */
-  private updatePotions(): void {
+  updatePotions(): void {
     const v = this.ctx.data.mapgen.vending;
     const p = this.session.player;
     this.potions = this.potions.filter((img) => {
@@ -848,7 +769,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 플레이어 모습: 전직했으면 그 학파 그림(있으면), 아니면 기본 */
-  private applyPlayerArt(): void {
+  applyPlayerArt(): void {
     const d = this.ctx.data;
     const school = this.session.player.advancement;
     const key = school && this.ctx.artLoaded.has(artKeys.playerSchool(school)) ? artKeys.playerSchool(school) : d.player.spriteKey;
@@ -859,7 +780,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 방 바닥·벽: 타일 그림(key)이 있으면 반복해서 깔고, 없으면 색 사각형 */
-  private addRect(r: Rect, color: number, depth: number, key?: string): Phaser.GameObjects.Rectangle | Phaser.GameObjects.TileSprite {
+  addRect(r: Rect, color: number, depth: number, key?: string): Phaser.GameObjects.Rectangle | Phaser.GameObjects.TileSprite {
     if (key && this.textures.exists(key)) return this.add.tileSprite(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, key).setDepth(depth);
     return this.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, color).setDepth(depth);
   }
@@ -867,7 +788,7 @@ export class RunScene extends Phaser.Scene {
   // ---------- 보스 연출 ----------
 
   /** 보스 체력바에 띄울 보스 (보스가 부른 적·분신 제외, 등장 컷 동안은 없음) */
-  private bossView(): RunSession['boss'] {
+  bossView(): RunSession['boss'] {
     if (this.intro) return null;
     for (const [e, c] of this.bossControllers) {
       if (e.dead) continue;
@@ -877,7 +798,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 카메라가 평소 볼 곳: 플레이어(조준 적 쪽으로 기울어), 방 안이면 방 경계 안 */
-  private cameraTarget(): Vec2 {
+  cameraTarget(): Vec2 {
     const rules = this.ctx.data.ui.camera;
     const cam = this.cameras.main;
     const rid = roomAt(this.session.map, this.m, this.player.x, this.player.y);
@@ -886,7 +807,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 보스 등장 컷 시작: 게임을 멈추고 카메라가 보스 쪽으로 다가간다 */
-  private startBossIntro(e: Enemy): void {
+  startBossIntro(e: Enemy): void {
     const bi = this.ctx.data.juice.bossIntro;
     e.warn = bossIntroTotal(bi) + 0.1;
     e.sprite.setAlpha(0);
@@ -898,7 +819,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 등장 컷 한 프레임: 단계가 바뀔 때마다 연출. 아무 키·탭이면 건너뛴다 */
-  private updateIntro(dt: number, frame: ActionFrame): void {
+  updateIntro(dt: number, frame: ActionFrame): void {
     const it = this.intro!;
     const d = this.ctx.data;
     const bi = d.juice.bossIntro;
@@ -942,7 +863,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 등장 컷 끝 (또는 건너뜀): 카메라를 제자리로, 보스를 깨운다 */
-  private finishIntro(): void {
+  finishIntro(): void {
     const it = this.intro;
     if (!it) return;
     this.intro = null;
@@ -963,7 +884,7 @@ export class RunScene extends Phaser.Scene {
    * 포탈 타기: 게임을 멈추고 캐릭터가 포탈 가운데로 빨려 들어가며(돌며 작아짐) 카메라가 확대된다.
    * 다 들어가면 이동 화면(빛줄기)을 덮고 잠깐 뒤 then (카드 고르기).
    */
-  private warpOut(then: () => void): void {
+  warpOut(then: () => void): void {
     const p = this.ctx.data.juice.portal;
     const portal = this.nearest(this.portals.map((x) => ({ x: x.sprite.x, y: x.sprite.y })), Infinity) ?? { x: this.player.x, y: this.player.y };
     this.setModal('portal');
@@ -997,7 +918,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 포탈을 타고 도착: 이동 화면을 걷고 캐릭터가 빛 속에서 커지며 나타난다 */
-  private warpIn(): void {
+  warpIn(): void {
     const p = this.ctx.data.juice.portal;
     bus.emit('warp', { on: false });
     sfx('warpArrive');
@@ -1008,7 +929,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 보스 강화·단계 개방: 번쩍임, 짧은 확대, 화면 가운데 큰 이름 */
-  private bossPhaseFx(text: string, color: string, at: Vec2): void {
+  bossPhaseFx(text: string, color: string, at: Vec2): void {
     const bp = this.ctx.data.juice.bossPhase;
     const c = Phaser.Display.Color.HexStringToColor(color);
     const cam = this.cameras.main;
@@ -1021,7 +942,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 보스 처치: 슬로모션 + 흰 번쩍임 + 연쇄 폭발 */
-  private startBossKill(at: Vec2): void {
+  startBossKill(at: Vec2): void {
     const k = this.ctx.data.juice.bossKill;
     this.slowT = 0;
     this.cameras.main.flash(k.flashMs, 255, 255, 255);
@@ -1033,7 +954,7 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
-  private addPortal(node: RoomNode): void {
+  addPortal(node: RoomNode): void {
     const ref = this.ctx.data.mapgen.props.exitPortal;
     const c = roomCenter(node, this.m);
     const sprite = this.add.image(c.x, c.y, ref.spriteKey).setDepth(2);
@@ -1042,7 +963,7 @@ export class RunScene extends Phaser.Scene {
     this.portals.push({ sprite, roomId: node.id, radius: ref.size / 2 });
   }
 
-  private placeTestWeapons(): void {
+  placeTestWeapons(): void {
     const node = this.session.map.rooms[this.session.map.startId]!;
     const inner = interiorRect(node, this.m);
     const ids = this.ctx.data.mapgen.testWeapons;
@@ -1207,7 +1128,7 @@ export class RunScene extends Phaser.Scene {
     if (frame.pressed.has('inventory')) this.openInventory();
   }
 
-  private updateRooms(dt: number): void {
+  updateRooms(dt: number): void {
     const { map, visited } = this.session;
     const rid = roomAt(map, this.m, this.player.x, this.player.y);
     if (rid !== null) {
@@ -1234,7 +1155,7 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
-  private handleRoomEvents(roomId: number, events: RoomEvent[]): void {
+  handleRoomEvents(roomId: number, events: RoomEvent[]): void {
     for (const e of events) {
       if (e.type === 'lock') {
         this.setRoomLocked(roomId, true);
@@ -1275,13 +1196,13 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
-  private setRoomLocked(roomId: number, locked: boolean): void {
+  setRoomLocked(roomId: number, locked: boolean): void {
     const doors = this.doorsByRoom.get(roomId) ?? [];
     if (doors.length > 0 && doors.some((d) => d.rect.visible !== locked)) sfx(locked ? 'doorLock' : 'doorOpen');
     for (const door of doors) door.setLocked(locked);
   }
 
-  private spawnWave(roomId: number, wave: Wave, index: number): void {
+  spawnWave(roomId: number, wave: Wave, index: number): void {
     const { map } = this.session;
     const rng = Rng.derive(this.ctx.config.seed, `spawn-${map.chapter}-${map.stage}-${roomId}-${index}`);
     // 전투 칸 웨이브의 일반 적 일부를 엘리트로 (보스방 제외)
@@ -1314,7 +1235,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** extraEliteId: 두 번째 엘리트 (중형 첨탑 강적) */
-  private spawnEnemy(id: string, roomId: number, rng: Rng, countForRoom: boolean, eliteId: string | null = null, extraEliteId: string | null = null): void {
+  spawnEnemy(id: string, roomId: number, rng: Rng, countForRoom: boolean, eliteId: string | null = null, extraEliteId: string | null = null): void {
     const d = this.ctx.data;
     const node = this.session.map.rooms[roomId]!;
     const def = d.enemies.enemies.find((e) => e.id === id)!;
@@ -1352,20 +1273,20 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 지금 챕터 웨이브에 나오는 일반 적 (중복 없이) */
-  private chapterRoster(): string[] {
+  chapterRoster(): string[] {
     const d = this.ctx.data;
     const ids = new Set(d.waves.waves.filter((w) => w.chapter === this.session.stage.chapter).flatMap((w) => w.spawns.map((s) => s.enemy)));
     return [...ids].filter((id) => d.enemies.enemies.find((e) => e.id === id)?.rank === 'normal');
   }
 
   /** 플레이어가 있는 방 안쪽 */
-  private currentArena(): Rect {
+  currentArena(): Rect {
     const rid = this.session.currentRoomId ?? this.session.map.startId;
     return interiorRect(this.session.map.rooms[rid]!, this.m);
   }
 
   /** 특무 인장: 방 안, 벽·잔해가 없는 쪽으로 짧게 순간이동 */
-  private blinkPlayer(distance: number): void {
+  blinkPlayer(distance: number): void {
     const a = this.currentArena();
     const r = this.ctx.data.player.size / 2;
     const base = this.rng.range(0, Math.PI * 2);
@@ -1384,7 +1305,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 전술 연계: 같은 방의 같은 적 중 연계 거리 안에 있는 것이 함께 조준한다 */
-  private linkWindup(src: Enemy, attackId: string): void {
+  linkWindup(src: Enemy, attackId: string): void {
     const a = src.def.attacks?.find((x) => x.id === attackId);
     const r = a?.linkRadius;
     if (!r) return;
@@ -1396,7 +1317,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 보스가 부르는 적(분신): 방 웨이브 수에 들어가지 않는다 */
-  private spawnMinion(id: string, at: Vec2, maxHp?: number): Enemy {
+  spawnMinion(id: string, at: Vec2, maxHp?: number): Enemy {
     const d = this.ctx.data;
     const def = d.enemies.enemies.find((e) => e.id === id)!;
     const enemy = new Enemy(this, def, at.x, at.y, 0, null, d.elites);
@@ -1409,7 +1330,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 지면 파괴 잔해: 벽처럼 막는다. 플레이어 자리·문 근처에는 만들지 않는다(갇힘 방지) */
-  private addObstacle(at: Vec2, radius: number, doorClear: number): { destroy(): void } | null {
+  addObstacle(at: Vec2, radius: number, doorClear: number): { destroy(): void } | null {
     const d = this.ctx.data;
     if (Math.hypot(this.player.x - at.x, this.player.y - at.y) <= radius + d.player.size / 2 + 2) return null;
     const rid = this.session.currentRoomId;
@@ -1421,7 +1342,7 @@ export class RunScene extends Phaser.Scene {
     return { destroy: () => this.walls.remove(rect, true, true) };
   }
 
-  private spawnPoint(node: RoomNode, rng: Rng, radius: number): Vec2 {
+  spawnPoint(node: RoomNode, rng: Rng, radius: number): Vec2 {
     const inner = interiorRect(node, this.m, radius);
     const minDist = this.ctx.data.waves.spawnMinPlayerDistance;
     let best: Vec2 = { x: inner.x, y: inner.y };
@@ -1444,42 +1365,42 @@ export class RunScene extends Phaser.Scene {
 
   // ---------- 전투 ----------
 
-  private weaponDefOf(id: string): WeaponDef {
+  weaponDefOf(id: string): WeaponDef {
     return this.ctx.data.weapons.weapons.find((w) => w.id === id)!;
   }
 
   /** 들고 있는 무기 (등급·옵션이 붙은 실물) */
-  private weaponItem(): WeaponItem {
+  weaponItem(): WeaponItem {
     // 맨손이면 주먹 (슬롯에 들지 않는다)
     return activeWeapon(this.session.player.weapons) ?? this.fistItem();
   }
 
-  private fist: WeaponItem | null = null;
-  private fistItem(): WeaponItem {
+  fist: WeaponItem | null = null;
+  fistItem(): WeaponItem {
     this.fist ??= plainWeapon(this.weaponDefOf(this.ctx.data.weapons.fistWeapon));
     return this.fist;
   }
 
   /** 손에 보이는 무기: 에너지가 모자라 쏠 수 없는 총이면 주먹 */
-  private shownWeaponKey(): string {
+  shownWeaponKey(): string {
     const item = this.weaponItem();
     const def = this.weaponDefOf(item.defId);
     if (def.category === 'blade' || canFire(this.session.player.energy, this.weaponStatsOf(item))) return def.spriteKey;
     return this.weaponDefOf(this.fistItem().defId).spriteKey;
   }
 
-  private weaponDef(): WeaponDef {
+  weaponDef(): WeaponDef {
     return this.weaponDefOf(this.weaponItem().defId);
   }
 
   /** 등급 배율·옵션을 반영한 무기 수치. 태그 보정은 hit()에서 */
-  private weaponStatsOf(item: WeaponItem): WeaponStats {
+  weaponStatsOf(item: WeaponItem): WeaponStats {
     return weaponStats(this.weaponDefOf(item.defId), item, gradeMultiplier(item.grade, this.ctx.data.groupMultipliers));
   }
 
   /** 실제로 쓰는 스탯: 기본 스탯 + 들고 있는 무기의 보너스(신궁 환디 힘 +30) */
   /** awaken=false: 패닉 각성 보너스를 뺀 값 (최대 체력·정신력은 각성으로 늘지 않는다) */
-  private effStats(awaken = true): Stats {
+  effStats(awaken = true): Stats {
     const out = { ...this.session.player.stats };
     for (const [k, v] of Object.entries(this.weaponDef().equipBonus?.stats ?? {})) out[k as StatId] += v ?? 0;
     // 패닉 각성
@@ -1492,14 +1413,14 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 근접·원거리 피해 증가: 들고 있는 무기 + 아이템 (같은 종류라 더한다) */
-  private rangeBonus(): RangeBonus {
+  rangeBonus(): RangeBonus {
     const b = this.weaponDef().equipBonus;
     const it = this.itemRt.sums.damage;
     return { melee: (b?.meleeDamage ?? 0) + it.melee, ranged: (b?.rangedDamage ?? 0) + it.ranged };
   }
 
   /** 피해 한 번. 태그 보정은 이 공격(source)의 태그로 계산한다 */
-  private hit(enemy: Enemy, base: number, tags: readonly TagId[], source: string | null = null): boolean {
+  hit(enemy: Enemy, base: number, tags: readonly TagId[], source: string | null = null): boolean {
     if (enemy.dead) return false;
     const d = this.ctx.data;
     const stats = this.effStats();
@@ -1528,7 +1449,7 @@ export class RunScene extends Phaser.Scene {
 
   /** 계산이 끝난 피해를 넣는다. 환원주의자 등에게 알리고, 죽였으면 true */
   /** fx: 타격(태그·치명·공간격). 없으면 출혈·변질 같은 지속 피해(작은 회색 숫자, 불꽃 없음) */
-  private applyDamage(enemy: Enemy, dmg: number, source: string | null = null, fx?: { tags: readonly TagId[]; crit: boolean; space: boolean }): boolean {
+  applyDamage(enemy: Enemy, dmg: number, source: string | null = null, fx?: { tags: readonly TagId[]; crit: boolean; space: boolean }): boolean {
     if (enemy.dead) return false;
     // 보스 강화 단계 진입 중 무적
     if (enemy.invuln > 0) return false;
@@ -1558,16 +1479,16 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 지금 스킬 오브젝트들이 주는 플레이어 보정 */
-  private playerMods(): PlayerMods {
+  playerMods(): PlayerMods {
     return combineMods(this.skillObjects.flatMap((o) => (o.playerMods ? [o.playerMods()] : [])));
   }
 
-  private tagRule<T>(id: TagId): T {
+  tagRule<T>(id: TagId): T {
     return this.ctx.data.tags.tags.find((t) => t.id === id)!.rule as T;
   }
 
   /** Space를 누르고 있으면 연사. 차지 무기(대검)는 누르는 동안 모았다가 놓을 때 휘두른다 */
-  private updateAttack(dt: number, held: boolean, aimAngle: number): void {
+  updateAttack(dt: number, held: boolean, aimAngle: number): void {
     this.fireCooldown -= dt;
     const charge = this.weaponDef().charge;
     if (!charge) {
@@ -1586,13 +1507,13 @@ export class RunScene extends Phaser.Scene {
     this.drawCharge(charge.maxSec);
   }
 
-  private resetCharge(): void {
+  resetCharge(): void {
     this.charging = false;
     this.chargeT = 0;
     this.chargeFx?.clear();
   }
 
-  private drawCharge(maxSec: number): void {
+  drawCharge(maxSec: number): void {
     if (!this.chargeFx) this.chargeFx = this.add.graphics().setDepth(6);
     this.chargeFx.clear();
     if (!this.charging) return;
@@ -1602,7 +1523,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** chargeRatio: 0~1 (차지 무기만) */
-  private attack(aimAngle: number, chargeRatio: number): void {
+  attack(aimAngle: number, chargeRatio: number): void {
     const item = this.weaponItem();
     const w = this.weaponDefOf(item.defId);
     const st = this.weaponStatsOf(item);
@@ -1679,7 +1600,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 기환의 팔: 가까운 적에서 적으로 튕기는 번개 */
-  private chainBolt(w: WeaponDef, st: WeaponStats, sig: Extract<WeaponSignature, { kind: 'chainBolt' }>, origin: Vec2): void {
+  chainBolt(w: WeaponDef, st: WeaponStats, sig: Extract<WeaponSignature, { kind: 'chainBolt' }>, origin: Vec2): void {
     const enemies = this.enemies.filter((e) => !e.dead);
     const idx = chainTargets(origin, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })), sig.jumps, sig.range, new Set());
     if (idx.length === 0) return;
@@ -1700,7 +1621,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 식광의 핵: 가까운 적 자리에 운석이 떨어져 터진다 */
-  private dropMeteor(w: WeaponDef, st: WeaponStats, p: Extract<WeaponDef['pattern'], { kind: 'meteor' }>, base: number): void {
+  dropMeteor(w: WeaponDef, st: WeaponStats, p: Extract<WeaponDef['pattern'], { kind: 'meteor' }>, base: number): void {
     const host = this.hostFor('weapon');
     const target = nearestEnemy(host, this.player, w.range);
     const at = target ? { x: target.sprite.x, y: target.sprite.y } : { x: this.player.x + this.aimDir.x * w.range * 0.5, y: this.player.y + this.aimDir.y * w.range * 0.5 };
@@ -1722,7 +1643,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 지팡이 고유 효과: 조준 방향 직선 레이저 (관통, 치명 판정) */
-  private weaponLaser(w: WeaponDef, base: number, crit: number, aimAngle: number, length: number, width: number, beamKey?: string): void {
+  weaponLaser(w: WeaponDef, base: number, crit: number, aimAngle: number, length: number, width: number, beamKey?: string): void {
     const origin = { x: this.player.x, y: this.player.y };
     const dir = { x: Math.cos(aimAngle), y: Math.sin(aimAngle) };
     const len = length * (1 + this.itemRt.sums.area);
@@ -1743,7 +1664,7 @@ export class RunScene extends Phaser.Scene {
     this.time.delayedCall(this.ctx.data.ui.slashFxSec * 1000, () => g.destroy());
   }
 
-  private fireBullet(
+  fireBullet(
     from: Vec2,
     angle: number,
     speed: number,
@@ -1763,13 +1684,13 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 무기를 쥔 손 자리 (그림이 뒤집히면 x도 뒤집고, 조준 방향으로 살짝 내민다) */
-  private handPos(): Vec2 {
+  handPos(): Vec2 {
     const { weaponHand: hand, weaponOffset: off } = this.ctx.data.player;
     return { x: this.player.x + (this.player.flipX ? -hand.x : hand.x) + this.aimDir.x * off, y: this.player.y + hand.y + this.aimDir.y * off };
   }
 
   /** 탄이 나가는 자리: 무기 끝. 끝이 벽·장애물 너머면 몸 가운데 (벽 뒤로 쏘지 않게) */
-  private muzzle(): Vec2 {
+  muzzle(): Vec2 {
     const body = { x: this.player.x, y: this.player.y };
     const rid = this.session.currentRoomId;
     if (rid === null) return body;
@@ -1781,7 +1702,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 회피 입력·잔상·재사용 막대 */
-  private updateDodge(dt: number, frame: ActionFrame): void {
+  updateDodge(dt: number, frame: ActionFrame): void {
     const c = this.ctx.data.player.dodge;
     this.dodge = stepDodge(this.dodge, dt);
     if (frame.pressed.has('dodge') && this.dashLeft <= 0) {
@@ -1819,7 +1740,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 점멸: 벽을 뚫지 않는 데까지 순간이동하고, 지나간 자리에 번개가 지직거린다 */
-  private blink(s: Extract<DodgeSchoolDef, { kind: 'blink' }>, dir: Vec2): void {
+  blink(s: Extract<DodgeSchoolDef, { kind: 'blink' }>, dir: Vec2): void {
     const from = { x: this.player.x, y: this.player.y };
     const r = this.ctx.data.player.size / 2;
     const blocked = (x: number, y: number) =>
@@ -1849,7 +1770,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 진격: 구르는 순간 조준 방향으로 부채꼴 탄 */
-  private dodgeShot(s: Extract<DodgeSchoolDef, { kind: 'shot' }>): void {
+  dodgeShot(s: Extract<DodgeSchoolDef, { kind: 'shot' }>): void {
     const from = { x: this.player.x, y: this.player.y };
     const base = muzzleAngle(from, this.aimTarget, Math.atan2(this.aimDir.y, this.aimDir.x), 0);
     const spread = (s.spreadDeg * Math.PI) / 180;
@@ -1860,13 +1781,13 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 보스와 마주하면 챕터 보스 곡, 아니면 런 곡 (같은 곡이면 음악 쪽에서 무시한다) */
-  private updateMusic(): void {
+  updateMusic(): void {
     const facingBoss = this.enemies.some((e) => !e.dead && (e.rank === 'boss' || e.rank === 'hiddenBoss'));
     bus.emit('music', { track: pickTrack(this.ctx.data.sounds.music, { place: 'run', chapter: this.session.stage.chapter, facingBoss }) });
   }
 
   /** 첫 런 시작 방: 조작 안내. 다른 방으로 가면 사라지고 다시 나오지 않는다 */
-  private showTutorial(): void {
+  showTutorial(): void {
     const save = this.ctx.save;
     if (save.data.tutorialDone || this.session.stage.chapter !== 1 || this.session.stage.stage !== 1) return;
     const c = this.ctx.data.ui.tutorial;
@@ -1880,7 +1801,7 @@ export class RunScene extends Phaser.Scene {
     );
   }
 
-  private updateTutorial(): void {
+  updateTutorial(): void {
     if (this.tutorialTexts.length === 0 || this.session.currentRoomId === this.session.map.startId) return;
     for (const t of this.tutorialTexts) t.destroy();
     this.tutorialTexts = [];
@@ -1889,7 +1810,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 정신력 값 반영. 패닉에 들어가고 나올 때 알린다 */
-  private setSanity(next: { sanity: number; panic: boolean }): void {
+  setSanity(next: { sanity: number; panic: boolean }): void {
     const p = this.session.player;
     const was = p.panic;
     p.sanity = next.sanity;
@@ -1901,7 +1822,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 최대치 동기화, 회복·보스 감소, 패닉 연출·각성 */
-  private updateSanity(dt: number): void {
+  updateSanity(dt: number): void {
     const d = this.ctx.data;
     const p = this.session.player;
     const cfg = d.player.sanity;
@@ -1937,7 +1858,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 적 길 찾기: 곧장 갈 수 있으면 null, 막혔으면 이 방 격자로 돌아가는 방향 */
-  private enemyPathDir(from: Vec2, radius: number): Vec2 | null {
+  enemyPathDir(from: Vec2, radius: number): Vec2 | null {
     const rid = this.session.currentRoomId;
     if (rid === null) return null;
     const obs = this.obstacles.get(rid);
@@ -1952,7 +1873,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 보스 체력이 일정 비율 줄 때마다 보스와 플레이어 사이에 에너지 구슬 */
-  private updateBossEnergy(): void {
+  updateBossEnergy(): void {
     const d = this.ctx.data;
     for (const e of this.bossControllers.keys()) {
       const ratio = e.hp / e.maxHp;
@@ -1973,7 +1894,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 무기 치명 판정 */
-  private critRoll(base: number, chance: number, at: Vec2): number {
+  critRoll(base: number, chance: number, at: Vec2): number {
     const r = rollCrit(this.rng, base, chance, this.ctx.data.weapons.critMultiplier);
     // 치명타는 바로 이어지는 피해의 숫자를 크고 노랗게 (at은 예전 '치명' 글자 자리, 지금은 쓰지 않음)
     void at;
@@ -1985,7 +1906,7 @@ export class RunScene extends Phaser.Scene {
    * 칼: 베기(arc) · 찌르기(line, 관통) · 내려찍기(smash, 넉백).
    * sig: 이번 공격에 발동한 유니크 고유 효과(네메아의 종말 = 피해·범위 증가, 공간 가르기 = 공간격) / emp: 피해 배율(특무 인장)
    */
-  private melee(w: WeaponDef, st: WeaponStats, aimAngle: number, chargeRatio: number, sig: WeaponSignature | null, emp: number): void {
+  melee(w: WeaponDef, st: WeaponStats, aimAngle: number, chargeRatio: number, sig: WeaponSignature | null, emp: number): void {
     const origin = { x: this.player.x, y: this.player.y };
     const dir = { x: Math.cos(aimAngle), y: Math.sin(aimAngle) };
     const big = sig?.kind === 'bigSmash' ? sig : null;
@@ -2055,7 +1976,7 @@ export class RunScene extends Phaser.Scene {
     this.time.delayedCall(this.ctx.data.ui.slashFxSec * 1000, () => g.destroy());
   }
 
-  private onBulletHit(b: Phaser.Physics.Arcade.Image, sprite: Phaser.Physics.Arcade.Image): void {
+  onBulletHit(b: Phaser.Physics.Arcade.Image, sprite: Phaser.Physics.Arcade.Image): void {
     const enemy = sprite.getData('enemy') as Enemy | undefined;
     if (!b.active || !enemy || enemy.dead) return;
     // 관통탄: 같은 적은 한 번만
@@ -2074,7 +1995,7 @@ export class RunScene extends Phaser.Scene {
     this.hit(enemy, base, tags, source);
   }
 
-  private onEnemyKilled(e: Enemy): void {
+  onEnemyKilled(e: Enemy): void {
     const d = this.ctx.data;
     const roomId = this.enemyRoom.get(e);
     const { x, y } = e.sprite;
@@ -2144,7 +2065,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 집정관 흡수: 같은 방의 살아 있는 집정관 중 가장 가까운 하나가 죽은 적의 최대 체력만큼. 흡수했으면 true */
-  private archonAbsorb(dead: Enemy, roomId: number | undefined): boolean {
+  archonAbsorb(dead: Enemy, roomId: number | undefined): boolean {
     if (roomId === undefined) return false;
     const { x, y } = dead.sprite;
     const archons = this.enemies.filter((a) => a !== dead && !a.dead && a.def.absorb && this.enemyRoom.get(a) === roomId);
@@ -2158,7 +2079,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 변질 시간, 변질된 적 색 */
-  private updateCorruption(dt: number): void {
+  updateCorruption(dt: number): void {
     const color = hexColor(this.ctx.data.ui.corruptionColor);
     for (const e of this.enemies) {
       if (!e.corruption || e.dead) continue;
@@ -2168,7 +2089,7 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
-  private removeEnemy(e: Enemy): void {
+  removeEnemy(e: Enemy): void {
     if (e === this.darknessBoss) {
       this.darkness?.lift();
       this.darkness = null;
@@ -2181,7 +2102,7 @@ export class RunScene extends Phaser.Scene {
     e.destroy();
   }
 
-  private updateBleeds(dt: number): void {
+  updateBleeds(dt: number): void {
     const rule = this.tagRule<BleedRule>('bleed');
     for (const e of [...this.enemies]) {
       if (!e.bleed || e.dead) continue;
@@ -2191,7 +2112,7 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
-  private onContact(enemy: Enemy | undefined): void {
+  onContact(enemy: Enemy | undefined): void {
     if (!enemy || enemy.dead || enemy.warn > 0 || enemy.def.contactDamage <= 0) return;
     const now = this.time.now;
     if (now - enemy.lastContactAt < enemy.def.contactIntervalSec * 1000) return;
@@ -2200,7 +2121,7 @@ export class RunScene extends Phaser.Scene {
 
   /** 피해를 받았으면 true */
   /** 피해를 받았으면 true. attacker: 때린 적(반사용, 모르면 null) */
-  private hurtPlayer(amount: number, attacker: Enemy | null = null, mentalRaw?: number): boolean {
+  hurtPlayer(amount: number, attacker: Enemy | null = null, mentalRaw?: number): boolean {
     if (this.invuln > 0 || this.dodge.invuln > 0 || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
     // 특무 인장: 피해를 받기 직전 순간이동으로 피한다 (피격 무적과 같은 시간)
     if (this.itemRt.tryDodge()) {
@@ -2238,7 +2159,7 @@ export class RunScene extends Phaser.Scene {
     return true;
   }
 
-  private updateInvuln(dt: number): void {
+  updateInvuln(dt: number): void {
     if (this.invuln <= 0) {
       this.player.setAlpha(1);
       return;
@@ -2248,7 +2169,7 @@ export class RunScene extends Phaser.Scene {
     this.player.setAlpha(Math.floor(this.invuln / blink) % 2 === 0 ? 0.3 : 1);
   }
 
-  private updateBullets(dt: number): void {
+  updateBullets(dt: number): void {
     for (const b of this.bullets.getChildren() as Phaser.Physics.Arcade.Image[]) {
       const dist = Math.hypot(b.x - (b.getData('ox') as number), b.y - (b.getData('oy') as number));
       if (dist > (b.getData('range') as number)) {
@@ -2281,7 +2202,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 식광의 핵: at 둘레의 약한 적 탄(굴절 가능)을 지운다 */
-  private absorbEnemyBullets(at: Vec2, radius: number): number {
+  absorbEnemyBullets(at: Vec2, radius: number): number {
     let n = 0;
     for (const b of [...(this.enemyBullets.getChildren() as Phaser.Physics.Arcade.Image[])]) {
       if (b.getData('refractable') === false || Math.hypot(b.x - at.x, b.y - at.y) > radius) continue;
@@ -2292,7 +2213,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 집행자 밧줄: 플레이어를 to까지 끌어당긴다 (그동안 입력 무시). 걸리는 시간 */
-  private pullPlayer(to: Vec2, speed: number): number {
+  pullPlayer(to: Vec2, speed: number): number {
     const dx = to.x - this.player.x;
     const dy = to.y - this.player.y;
     const dist = Math.hypot(dx, dy);
@@ -2304,7 +2225,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 적 탄. refractable=false면 굴절·탄 베기 불가(보스 대형 레이저 등). homing: 플레이어 쪽으로 휘는 속도(rad/s, 유도 미사일) */
-  private fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, homing = 0, mental = 0): void {
+  fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, homing = 0, mental = 0): void {
     const ep = this.ctx.data.enemies.projectile;
     const b = this.enemyBullets.create(from.x, from.y, ep.spriteKey) as Phaser.Physics.Arcade.Image;
     fitArt(this.ctx.data, b, ep.size, ep.height ?? ep.size);
@@ -2317,7 +2238,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 보스방 경고: 화면 가운데 WARNING + 보스 이름 */
-  private showBossWarning(name: string): void {
+  showBossWarning(name: string): void {
     sfx('warning');
     const cam = this.cameras.main;
     const sec = this.ctx.data.bosses.bannerSec;
@@ -2332,7 +2253,7 @@ export class RunScene extends Phaser.Scene {
     shake(this, 'rumble', sec * 1000);
   }
 
-  private updatePickups(dt: number): void {
+  updatePickups(dt: number): void {
     const d = this.ctx.data;
     const p = this.session.player;
     const orb = d.player.energy.orbValue * (1 + statEffect('energyGain', this.effStats(), d.stats));
@@ -2352,7 +2273,7 @@ export class RunScene extends Phaser.Scene {
   // ---------- 스킬 ----------
 
   /** source(스킬 id, 'magiTurret.shell'처럼 하위 오브젝트면 앞부분)를 단 SkillHost */
-  private hostFor(owner: string | null): SkillHost {
+  hostFor(owner: string | null): SkillHost {
     const source = owner ? owner.split('.')[0]! : null;
     const key = source ?? '';
     let h = this.hosts.get(key);
@@ -2363,7 +2284,7 @@ export class RunScene extends Phaser.Scene {
     return h;
   }
 
-  private makeHost(source: string | null): SkillHost {
+  makeHost(source: string | null): SkillHost {
     const ctx = this.ctx;
     return {
       scene: this,
@@ -2447,13 +2368,13 @@ export class RunScene extends Phaser.Scene {
     };
   }
 
-  private removeObject(o: SkillObject): void {
+  removeObject(o: SkillObject): void {
     this.skillObjects = this.skillObjects.filter((x) => x !== o);
     o.destroy();
   }
 
   /** 장착 패시브가 바뀌면(장착·해제·레벨·각성) 이전 오브젝트를 치우고 다시 깐다 */
-  private syncPassive(): void {
+  syncPassive(): void {
     const p = this.session.player;
     const id = p.loadout.passive;
     const owned = id ? p.loadout.owned[id] : undefined;
@@ -2470,7 +2391,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 보호막 시간, 플레이어 둘레 표시, 각성(벡터굴절역장) 일반 탄 무효화 */
-  private updateShield(dt: number): void {
+  updateShield(dt: number): void {
     if (this.shield) this.shield = tickShield(this.shield, dt);
     const s = this.shield;
     const opts = this.shieldOpts;
@@ -2495,11 +2416,11 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
-  private fxAt(obj: Phaser.GameObjects.GameObject): void {
+  fxAt(obj: Phaser.GameObjects.GameObject): void {
     this.time.delayedCall(this.ctx.data.ui.slashFxSec * 1000, () => obj.destroy());
   }
 
-  private onEnemyBulletHit(b: Phaser.Physics.Arcade.Image): void {
+  onEnemyBulletHit(b: Phaser.Physics.Arcade.Image): void {
     if (!b.active) return;
     // 구르는 동안에는 탄이 몸을 지나간다 (헥타르 RAM: 스칠 때 에너지)
     if (this.dodge.invuln > 0) {
@@ -2519,7 +2440,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** HUD '현재 버프': 보호막 + 스킬 오브젝트가 알리는 상태(충전 등) */
-  private buffViews(): BuffView[] {
+  buffViews(): BuffView[] {
     const out: BuffView[] = [];
     const s = this.shield;
     if (s && this.shieldOpts) {
@@ -2535,13 +2456,13 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 스킬 범위 보정 (마기력) */
-  private area(radius: number): number {
+  area(radius: number): number {
     const d = this.ctx.data;
     return radius * (1 + statEffect('skillArea', this.effStats(), d.stats)) * (1 + this.itemRt.sums.area);
   }
 
   /** 기환의 팔: 힘·마기력 범위 보정 (마기력 범위 규칙을 힘에도 같은 식으로) */
-  private burstArea(radius: number): number {
+  burstArea(radius: number): number {
     const d = this.ctx.data;
     const st = this.effStats();
     const byStr = statEffect('skillArea', { ...st, magiPower: st.strength }, d.stats);
@@ -2549,7 +2470,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 최대 체력 = 기본 + 견고(아이템 스탯 포함) + 아이템. 늘면 그만큼 현재 체력도 채운다 */
-  private syncMaxHp(): void {
+  syncMaxHp(): void {
     const d = this.ctx.data;
     const p = this.session.player;
     // 기본 체력(+영구 강화) + 견고 + 아이템
@@ -2560,18 +2481,18 @@ export class RunScene extends Phaser.Scene {
     p.hp = Math.min(p.hp, p.maxHp);
   }
 
-  private ultimateDef(): UltimateDef {
+  ultimateDef(): UltimateDef {
     const id = this.session.player.ultimate.id;
     return this.ctx.data.ultimates.ultimates.find((u) => u.id === id)!;
   }
 
   /** 근접 스킬은 사거리 안에 적이 있어야 발동한다 */
-  private skillUsable(def: SkillDef, awakened: boolean, values: Record<string, number>): boolean {
+  skillUsable(def: SkillDef, awakened: boolean, values: Record<string, number>): boolean {
     const targets = this.enemies.filter((e) => !e.dead).map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius }));
     return canAutoCast(skillTags(def, awakened), this.area(values.range ?? 0), this.player, targets);
   }
 
-  private castSlot(i: number): void {
+  castSlot(i: number): void {
     const p = this.session.player;
     const id = p.loadout.active[i];
     if (!id || cooldownLeft(p.cooldowns, id) > 0) return;
@@ -2590,7 +2511,7 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
-  private castUltimate(): void {
+  castUltimate(): void {
     const ult = this.session.player.ultimate;
     const def = this.ultimateDef();
     const impl = ultimateImpl(def.id);
@@ -2607,7 +2528,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** HUD·터치 버튼이 그릴 스킬 칸 (액티브 4 + 궁극기 + 패시브) */
-  private refreshSkillView(): void {
+  refreshSkillView(): void {
     const d = this.ctx.data;
     const t = this.ctx.t;
     const p = this.session.player;
@@ -2662,7 +2583,7 @@ export class RunScene extends Phaser.Scene {
 
   // ---------- 카드·인벤토리 ----------
 
-  private setModal(kind: Modal): void {
+  setModal(kind: Modal): void {
     if (this.modal === kind) return;
     this.modal = kind;
     if (kind) {
@@ -2675,7 +2596,7 @@ export class RunScene extends Phaser.Scene {
     bus.emit('modal', { kind });
   }
 
-  private updateModal(frame: ActionFrame): void {
+  updateModal(frame: ActionFrame): void {
     if (this.modal === 'cards') {
       // PC: 1/2/3 키로 바로 고른다 (숫자키는 skill1~3 명령으로 들어온다)
       SKILL_ACTIONS.forEach((action, i) => {
@@ -2689,13 +2610,13 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 카드를 차례로 띄운다. 다 고르면 then을 부른다 */
-  private queueOffers(offers: Offer[], then?: () => void): void {
+  queueOffers(offers: Offer[], then?: () => void): void {
     this.offerQueue.push(...offers);
     if (then) this.afterOffers.push(then);
     if (this.modal === null) this.openNextCards();
   }
 
-  private openNextCards(): void {
+  openNextCards(): void {
     const next = this.offerQueue.shift();
     if (!next) {
       this.currentCards = null;
@@ -2711,7 +2632,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 지금 카드창(currentOffer)의 카드를 뽑아 띄운다. 리롤도 이걸 다시 부른다 */
-  private showCards(): void {
+  showCards(): void {
     const next = this.currentOffer!;
     const d = this.ctx.data;
     const p = this.session.player;
@@ -2748,7 +2669,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 카드창마다 1회, 코인으로 다시 뽑기 */
-  private rerollCards(): void {
+  rerollCards(): void {
     const p = this.session.player;
     const cost = this.ctx.data.cards.rerollCost;
     if (this.modal !== 'cards' || this.rerolled || !this.currentOffer || this.currentOffer.kind === 'item' || this.currentOffer.kind === 'school' || Math.floor(p.coins) < cost) return;
@@ -2757,7 +2678,7 @@ export class RunScene extends Phaser.Scene {
     this.showCards();
   }
 
-  private pickCard(index: number): void {
+  pickCard(index: number): void {
     const card = this.currentCards?.[index];
     if (!card || this.modal !== 'cards') return;
     sfx('cardPick');
@@ -2805,7 +2726,7 @@ export class RunScene extends Phaser.Scene {
   // ---------- 연출 ----------
 
   /** 컷인 → 설명창을 차례로 보여 주고, 다 넘기면 then */
-  private playCutscenes(list: Cutscene[], then: () => void): void {
+  playCutscenes(list: Cutscene[], then: () => void): void {
     if (list.length === 0) {
       then();
       return;
@@ -2815,7 +2736,7 @@ export class RunScene extends Phaser.Scene {
     this.showNextCut();
   }
 
-  private showNextCut(): void {
+  showNextCut(): void {
     const next = this.cutQueue.shift();
     if (!next) {
       const f = this.afterCuts;
@@ -2838,7 +2759,7 @@ export class RunScene extends Phaser.Scene {
   // ---------- 미모사 제미니 ----------
 
   /** 미니 대사: 이벤트에 맞는 대사를 골라 순서에 넣는다 (같은 런 반복 없음, 빈 대사는 건너뜀). 복선 대사는 현재의 기억에 */
-  private say(event: GeminiEventId, arg?: string): void {
+  say(event: GeminiEventId, arg?: string): void {
     const d = this.ctx.data;
     const p = this.session.player;
     const rng = Rng.derive(this.ctx.config.seed, `gemini-${event}-${arg ?? ''}-${p.geminiSaid.length}`);
@@ -2853,7 +2774,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 일반 스토리 대화: 게임을 멈추고 띄운 뒤 then. 정해진 대화가 없거나 내용이 비어 있으면 바로 then */
-  private playStory(event: GeminiEventId, arg: string | undefined, then: () => void): void {
+  playStory(event: GeminiEventId, arg: string | undefined, then: () => void): void {
     const d = this.ctx.data;
     const story = storyFor(d.gemini, event, arg);
     if (!story || !hasLines(story.lines, d.text)) {
@@ -2866,7 +2787,7 @@ export class RunScene extends Phaser.Scene {
     bus.emit('storyShow', { lines: story.lines.map((k) => this.ctx.t(k)) });
   }
 
-  private finishStory(): void {
+  finishStory(): void {
     if (this.modal !== 'story') return;
     this.setModal(null);
     const f = this.storyThen;
@@ -2875,7 +2796,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 자기 학파 각성 2개면 궁극기를 자동 각성한다. 이번에 각성했으면 연출을 돌려준다 */
-  private checkUltimateAwakening(): Cutscene | null {
+  checkUltimateAwakening(): Cutscene | null {
     const d = this.ctx.data;
     const p = this.session.player;
     const def = this.ultimateDef();
@@ -2892,7 +2813,7 @@ export class RunScene extends Phaser.Scene {
   // ---------- 전직 ----------
 
   /** 보스방 카드 뒤: 챕터1 마지막 보스면 전직, 그다음 포털 */
-  private afterBossRoom(node: RoomNode): void {
+  afterBossRoom(node: RoomNode): void {
     const d = this.ctx.data;
     const { stage } = this.session;
     const last = stage.stage === d.mapgen.stagesPerChapter && stage.chapter === d.jobs.advanceAfterChapter;
@@ -2917,7 +2838,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 계열 판정. 동점이면 학파 선택 카드(원본 규칙: 플레이어가 직접 고른다) */
-  private advance(then: () => void): void {
+  advance(then: () => void): void {
     const p = this.session.player;
     const job = this.ctx.data.jobs.jobs.find((j) => j.id === p.job)!;
     const order = job.advancements.map((a) => a.id as SchoolId);
@@ -2931,7 +2852,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 스킬 변환 → 궁극기 교체 → 연출 */
-  private advanceTo(school: SchoolId, then: () => void): void {
+  advanceTo(school: SchoolId, then: () => void): void {
     const d = this.ctx.data;
     let p = this.session.player;
     const job = d.jobs.jobs.find((j) => j.id === p.job)!;
@@ -2962,16 +2883,16 @@ export class RunScene extends Phaser.Scene {
     });
   }
 
-  private openInventory(): void {
+  openInventory(): void {
     if (this.modal || this.session.outcome) return;
     this.setModal('inventory');
   }
 
-  private closeInventory(): void {
+  closeInventory(): void {
     if (this.modal === 'inventory') this.setModal(null);
   }
 
-  private equip(skillId: string, target: number | 'passive'): void {
+  equip(skillId: string, target: number | 'passive'): void {
     const d = this.ctx.data;
     const p = this.session.player;
     const r = equipSkill(p.loadout, skillId, target, d.skills);
@@ -2987,7 +2908,7 @@ export class RunScene extends Phaser.Scene {
 
   // ---------- 상호작용 ----------
 
-  private nearestFloorWeapon(): FloorWeapon | null {
+  nearestFloorWeapon(): FloorWeapon | null {
     const r = this.ctx.data.pickups.interactRadius;
     let best: FloorWeapon | null = null;
     let bestD = r;
@@ -3001,7 +2922,7 @@ export class RunScene extends Phaser.Scene {
     return best;
   }
 
-  private nearest<T extends { x: number; y: number }>(list: readonly T[], radius: number): T | null {
+  nearest<T extends { x: number; y: number }>(list: readonly T[], radius: number): T | null {
     let best: T | null = null;
     let bestD = radius;
     for (const o of list) {
@@ -3014,14 +2935,14 @@ export class RunScene extends Phaser.Scene {
     return best;
   }
 
-  private nearChest(): Chest | null {
+  nearChest(): Chest | null {
     return this.nearest(
       this.chests.filter((c) => !c.opened),
       this.ctx.data.loot.chest.openRadius,
     );
   }
 
-  private nearStand(): MerchantStand | null {
+  nearStand(): MerchantStand | null {
     return this.nearest(
       this.stands.filter((s) => !s.stock.sold),
       this.ctx.data.pickups.interactRadius,
@@ -3029,24 +2950,24 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 무기 이름 (일반이 아니면 등급을 앞에) */
-  private weaponName(item: WeaponItem): string {
+  weaponName(item: WeaponItem): string {
     const t = this.ctx.t;
     const name = t(this.weaponDefOf(item.defId).nameKey);
     return item.grade === 'common' ? name : `${t(`grade.${item.grade}`)} ${name}`;
   }
 
-  private gradeColor(grade: GradeId): string {
+  gradeColor(grade: GradeId): string {
     return this.ctx.data.groupMultipliers.grades.find((g) => g.id === grade)?.color ?? '#ffffff';
   }
 
   /** 바닥에 무기를 놓는다 (상자·드롭·버린 무기) */
-  private dropWeapon(item: WeaponItem, x: number, y: number): void {
+  dropWeapon(item: WeaponItem, x: number, y: number): void {
     const def = this.weaponDefOf(item.defId);
     this.floorWeapons.push(new FloorWeapon(this, item, def.spriteKey, x, y, item.grade === 'common' ? null : this.gradeColor(item.grade)));
   }
 
   /** 결산 기록: 처치·엘리트·보스·히든보스, 보스는 과거의 기억 조각 판정 (분신 등 소환된 적은 세지 않는다) */
-  private recordKill(e: Enemy): void {
+  recordKill(e: Enemy): void {
     if (e.def.summon || e.noReward) return;
     const r = this.session.player.record;
     r.kills++;
@@ -3074,7 +2995,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 인벤토리에서 무기 버리기: 발밑에 떨어뜨린다 (마지막 무기를 버리면 맨손) */
-  private dropFromSlot(slot: 0 | 1): void {
+  dropFromSlot(slot: 0 | 1): void {
     const p = this.session.player;
     const r = dropWeaponAt(p.weapons, slot);
     if (!r.dropped) return;
@@ -3087,7 +3008,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 손에 든다. 슬롯이 차 있으면 들고 있던 무기를 그 자리에 버린다 */
-  private takeWeapon(item: WeaponItem, x: number, y: number): void {
+  takeWeapon(item: WeaponItem, x: number, y: number): void {
     const p = this.session.player;
     const { slots, dropped } = pickUpWeapon(p.weapons, item);
     p.weapons = slots;
@@ -3096,14 +3017,14 @@ export class RunScene extends Phaser.Scene {
     this.resetCharge();
   }
 
-  private rollWeaponItem(weights: Partial<Record<GradeId, number>>, label: string): WeaponItem {
+  rollWeaponItem(weights: Partial<Record<GradeId, number>>, label: string): WeaponItem {
     const d = this.ctx.data;
     const rng = Rng.derive(this.ctx.config.seed, `${label}-${this.session.stage.chapter}-${this.session.stage.stage}-${this.lootSeq++}`);
     const grade = rollGrade(rng, weights, d.loot.mythicChance);
     return rollWeapon(rng, grade, d.weapons.weapons, d.weapons.options, d.groupMultipliers, d.loot.uniqueWeaponFallback);
   }
 
-  private interact(): void {
+  interact(): void {
     const t = this.ctx.t;
     const fw = this.nearestFloorWeapon();
     if (fw) {
@@ -3145,7 +3066,7 @@ export class RunScene extends Phaser.Scene {
     if (this.nearPortal()) this.nextStage();
   }
 
-  private openChest(chest: Chest): void {
+  openChest(chest: Chest): void {
     chest.open();
     if (chest.kind === 'weapon') {
       // 히든보스 전용 무기는 정해진 유니크 (무작위 옵션 없음)
@@ -3166,7 +3087,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 아이템 획득: 확률 이전 → 세트 합성 → 획득 카드 */
-  private giveItem(id: string): void {
+  giveItem(id: string): void {
     const d = this.ctx.data;
     const p = this.session.player;
     const def = d.items.items.find((x) => x.id === id);
@@ -3185,7 +3106,7 @@ export class RunScene extends Phaser.Scene {
     this.itemRt.refresh();
   }
 
-  private addChest(kind: ChestKind, x: number, y: number, weights: Partial<Record<GradeId, number>>, fixedItem?: string): void {
+  addChest(kind: ChestKind, x: number, y: number, weights: Partial<Record<GradeId, number>>, fixedItem?: string): void {
     const ref = kind === 'weapon' ? this.ctx.data.loot.chest.weapon : this.ctx.data.loot.chest.item;
     this.chests.push(new Chest(this, kind, ref, x, y, weights, fixedItem));
   }
@@ -3193,7 +3114,7 @@ export class RunScene extends Phaser.Scene {
   // ---------- 조우 칸 ----------
 
   /** 조우 칸 안쪽에 들어선 순간 코어가 열리며 유형이 정해진다 */
-  private resolveEncounter(roomId: number): void {
+  resolveEncounter(roomId: number): void {
     const d = this.ctx.data;
     const { map, stage } = this.session;
     const node = map.rooms[roomId]!;
@@ -3255,7 +3176,7 @@ export class RunScene extends Phaser.Scene {
 
   // ---------- 마기수집첨탑 ----------
 
-  private updateSpires(dt: number): void {
+  updateSpires(dt: number): void {
     for (const { sp, e } of this.spireEvents.splice(0)) this.handleSpireEvents(sp, [e]);
     for (const sp of this.spires) {
       if (sp.state.phase === 'done') continue;
@@ -3265,7 +3186,7 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
-  private handleSpireEvents(sp: Spire, events: SpireEvent[]): void {
+  handleSpireEvents(sp: Spire, events: SpireEvent[]): void {
     const t = this.ctx.t;
     for (const e of events) {
       if (e.type === 'landed') {
@@ -3287,7 +3208,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 방해 무리: 현재 챕터 웨이브 하나, 엘리트는 평소의 eliteMul배 (헥타르 전투원은 M6) */
-  private spawnSpireBatch(sp: Spire, index: number): void {
+  spawnSpireBatch(sp: Spire, index: number): void {
     const d = this.ctx.data;
     const { map } = this.session;
     const seed = this.ctx.config.seed;
@@ -3311,7 +3232,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 중형 첨탑 강적: 정예가 나오는 챕터(3장)는 집행자 또는 집정관, 그 전에는 엘리트 2종이 겹친 지금 챕터 일반 적 */
-  private spawnSpireStrong(sp: Spire, rng: Rng): void {
+  spawnSpireStrong(sp: Spire, rng: Rng): void {
     const d = this.ctx.data;
     if (d.waves.champions.stages[String(this.session.stage.chapter)]) {
       this.spawnEnemy(rng.pick(d.waves.champions.ids), sp.roomId, rng, true);
@@ -3325,7 +3246,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 충전 완료 보상: 아이템 카드 3장 중 1장 (확률 이전 반영, 신화는 따로) */
-  private offerSpireItems(sp: Spire): void {
+  offerSpireItems(sp: Spire): void {
     const d = this.ctx.data;
     const p = this.session.player;
     const { stage } = this.session;
@@ -3336,7 +3257,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 히든보스 처치: 보스 스킬 카드 1장 → 전용 무기 상자(왼쪽)·전용 아이템 상자(오른쪽) */
-  private hiddenBossReward(roomId: number): void {
+  hiddenBossReward(roomId: number): void {
     const hb = this.hiddenBossRooms.get(roomId)!;
     const c = roomCenter(this.session.map.rooms[roomId]!, this.m);
     this.queueOffers([{ kind: this.ctx.data.cards.bossBonus, boss: true }], () => {
@@ -3346,7 +3267,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 전투 칸을 깼을 때 낮은 확률로 무기 */
-  private combatRoomDrop(roomId: number): void {
+  combatRoomDrop(roomId: number): void {
     const d = this.ctx.data;
     const { stage } = this.session;
     const rng = Rng.derive(this.ctx.config.seed, `drop-${stage.chapter}-${stage.stage}-${roomId}`);
@@ -3356,7 +3277,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 대규모 습격 보상: 아이템 상자(레어 이상, M4-B) + 코인 다량 */
-  private raidReward(roomId: number): void {
+  raidReward(roomId: number): void {
     const d = this.ctx.data;
     const c = roomCenter(this.session.map.rooms[roomId]!, this.m);
     this.addChest('item', c.x, c.y, d.items.raidWeights);
@@ -3368,7 +3289,7 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
-  private updateInteractHint(): void {
+  updateInteractHint(): void {
     const vending = this.nearVending();
     const portal = this.nearPortal();
     const statue = this.nearStatue();
@@ -3387,13 +3308,13 @@ export class RunScene extends Phaser.Scene {
     this.interactPrompt.setPosition(at.x, at.y - 22).setVisible(true);
   }
 
-  private setInteractHint(kind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | null): void {
+  setInteractHint(kind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | null): void {
     this.interactKind = kind;
     bus.emit('interactHint', { kind });
   }
 
   /** 머리 위 잠깐 뜨는 글자 */
-  private floatLabel(at: Vec2, text: string, color: string): void {
+  floatLabel(at: Vec2, text: string, color: string): void {
     const t = this.add
       .text(at.x, at.y - 12, text, { fontFamily: 'sans-serif', fontSize: '8px', color, stroke: '#000000', strokeThickness: 2 })
       .setOrigin(0.5)
@@ -3402,7 +3323,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 같은 알림은 toastSec에 한 번만 */
-  private toastThrottled(text: string): void {
+  toastThrottled(text: string): void {
     const last = this.toastTimes.get(text) ?? -Infinity;
     if (this.time.now - last < this.ctx.data.ui.toastSec * 1000) return;
     this.toastTimes.set(text, this.time.now);
@@ -3412,20 +3333,20 @@ export class RunScene extends Phaser.Scene {
   // ---------- 진행 ----------
 
   /** 상호작용(F)이 닿는 포탈 */
-  private nearPortal(): Prop | null {
+  nearPortal(): Prop | null {
     if (this.leaving) return null;
     const r = this.ctx.data.pickups.interactRadius;
     return this.portals.find((x) => Math.hypot(x.sprite.x - this.player.x, x.sprite.y - this.player.y) <= x.radius + r) ?? null;
   }
 
-  private nearVending(): Vending | null {
+  nearVending(): Vending | null {
     return this.nearest(
       this.vendings.filter((v) => v.stock > 0),
       this.ctx.data.pickups.interactRadius + this.ctx.data.mapgen.vending.size / 2,
     );
   }
 
-  private nextStage(): void {
+  nextStage(): void {
     this.leaving = true;
     const d = this.ctx.data;
     const { afterStage } = stageEndOffers(this.session.stage, d.mapgen, d.cards);
@@ -3448,7 +3369,7 @@ export class RunScene extends Phaser.Scene {
     }
   }
 
-  private endRun(outcome: NonNullable<RunSession['outcome']>): void {
+  endRun(outcome: NonNullable<RunSession['outcome']>): void {
     this.session.outcome = outcome;
     // 결산: 결정을 계산해 바로 저장에 더한다 (결산 화면을 닫지 않고 꺼도 남게)
     const d = this.ctx.data;
@@ -3466,7 +3387,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 결산 확인 → 실험장으로 돌아간다 */
-  private restartRun(): void {
+  restartRun(): void {
     this.time.paused = false;
     bus.emit('overlay', { open: false });
     if (this.modal) bus.emit('modal', { kind: null });
@@ -3476,7 +3397,7 @@ export class RunScene extends Phaser.Scene {
 
   // ---------- 디버그 ----------
 
-  private debugClearRoom(): void {
+  debugClearRoom(): void {
     const rid = this.session.currentRoomId;
     if (rid === null) return;
     for (const e of this.enemies.filter((x) => this.enemyRoom.get(x) === rid)) this.removeEnemy(e);
@@ -3487,14 +3408,14 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 디버그: 계열 집계를 정하고 바로 전직 (한 런에 한 번) */
-  private debugAdvance(hectar: number, acro: number): void {
+  debugAdvance(hectar: number, acro: number): void {
     const p = this.session.player;
     if (this.modal || p.advancement !== null) return;
     p.schoolPicks = { hectar, acro };
     this.advance(() => {});
   }
 
-  private debugSetSkill(id: string, level: number, awakened: boolean): void {
+  debugSetSkill(id: string, level: number, awakened: boolean): void {
     const d = this.ctx.data;
     const p = this.session.player;
     p.loadout = setSkillLevel(p.loadout, findSkill(d.skills, id), level, awakened);
@@ -3506,7 +3427,7 @@ export class RunScene extends Phaser.Scene {
     if (u && !this.modal) this.playCutscenes([u], () => {});
   }
 
-  private debugSpawn(enemyId: string, count: number, elite: string | null): void {
+  debugSpawn(enemyId: string, count: number, elite: string | null): void {
     const rid = this.session.currentRoomId;
     if (rid === null || this.modal) return;
     const rng = Rng.derive(this.ctx.config.seed, `debug-spawn-${this.time.now}`);
@@ -3515,7 +3436,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 플레이어 둘레에서 플레이어를 향해 일반 적 탄을 쏜다 (적 공격은 M3, 역장 확인용) */
-  private debugBarrage(): void {
+  debugBarrage(): void {
     if (this.modal || this.session.outcome) return;
     const d = this.ctx.data.enemies;
     const cfg = d.debugBarrage;
@@ -3532,7 +3453,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 카메라: 조준 중인 적 쪽으로 기울어 따라가고(없으면 플레이어), 방 바깥은 보이지 않게 */
-  private updateCamera(): void {
+  updateCamera(): void {
     const cam = this.cameras.main;
     const target = this.cameraTarget();
     const lerp = this.ctx.data.ui.cameraLerp;
