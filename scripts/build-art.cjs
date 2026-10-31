@@ -524,6 +524,48 @@ weapon('weapon_avior_staff', 0.3, [
   'KKKKKKKKKKKKKKKgKpPK',
   '................KKK.',
 ]);
+weapon('weapon_piercing_rifle', 0.25, [
+  '.......KKKKK...........',
+  '.......KcCCK...........',
+  'KKKKKKKKKKKKKKKKKKKKKK.',
+  'KddmmmmlllllllllllcccwK',
+  'KKddmmmmmmmmmCCCCCCCcK.',
+  '..KNNKKKKKKKKKKKKKKKK..',
+  '..KNNK..KnK............',
+  '..KKKK..KnK............',
+  '........KKK............',
+]);
+weapon('weapon_beam_smg', 0.35, [
+  '....KKKKKKKKKKK..',
+  '...KmmlllPPPPPwK.',
+  'KKKKddmmmpppppPK.',
+  'KddKKKnNKKKKKKK..',
+  'KKK..KnNKKnK.....',
+  '.....KnNKKnK.....',
+  '.....KKKKKKK.....',
+]);
+weapon('weapon_thunder_dagger', 0.2, [
+  '......KKKKK......',
+  '..KKKKKccCKKKK...',
+  'KKKNNKKcwlllcwKK.',
+  'KNNNNKKcwlllllcwK',
+  'KKKNNKKcCmmmmcKK.',
+  '..KKKKKcCKKKKK...',
+  '......KKKKK......',
+]);
+weapon('weapon_crusher_hammer', 0.25, [
+  '............KKKKKKK',
+  '...........KeyyeeEK',
+  '...........KeeeeEEK',
+  '...........KmllmddK',
+  'KKKKKKKKKKKKmllmddK',
+  'KbBBBBBBBBBBmllmddK',
+  'KKKKKKKKKKKKmllmddK',
+  '...........KmllmddK',
+  '...........KeeeeEEK',
+  '...........KeyyeeEK',
+  '............KKKKKKK',
+]);
 weapon('weapon_fist', 0.5, [
   '.KKKKK..',
   'KsssssK.',

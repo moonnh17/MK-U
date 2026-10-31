@@ -14,8 +14,8 @@ const def = (id: string) => W.weapons.find((w) => w.id === id)!;
 describe('무기 종류 (기획서 무기 표)', () => {
   it('총 6종·칼 5종 + 신궁 환디', () => {
     const by = (c: string) => W.weapons.filter((w) => w.category === c && w.droppable).map((w) => w.id).sort();
-    expect(by('gun')).toEqual(['grenadeLauncher', 'pistol', 'rifle', 'shotgun', 'smg', 'sniper']);
-    expect(by('blade')).toEqual(['brokenBlade','dagger', 'greatsword', 'hammer', 'hanabi', 'longsword', 'spear']);
+    expect(by('gun')).toEqual(['beamSmg', 'grenadeLauncher', 'piercingRifle', 'pistol', 'rifle', 'shotgun', 'smg', 'sniper']);
+    expect(by('blade')).toEqual(['brokenBlade', 'crusherHammer', 'dagger', 'greatsword', 'hammer', 'hanabi', 'longsword', 'spear', 'thunderDagger']);
     const handi = def('handi');
     expect(handi.grade).toBe('mythic');
     expect(handi.droppable).toBe(false);
@@ -46,12 +46,17 @@ describe('등급·신화', () => {
     expect(rollWeapon(new Rng(1), 'mythic', W.weapons, W.options, G, 'legendary').defId).toBe('handi');
   });
 
-  it('드롭 유니크 무기가 없으면 유니크 판정은 대체 등급으로', () => {
-    for (let s = 0; s < 20; s++) {
+  it('유니크는 드롭 유니크 무기 4종 중 하나, 옵션 없음', () => {
+    const seen = new Set<string>();
+    for (let s = 0; s < 200; s++) {
       const w = rollWeapon(new Rng(s), 'unique', W.weapons, W.options, G, L.uniqueWeaponFallback);
-      expect(w.grade).toBe(L.uniqueWeaponFallback);
+      expect(w.grade).toBe('unique');
+      expect(def(w.defId).grade).toBe('unique');
       expect(def(w.defId).droppable).toBe(true);
+      expect(w.options).toEqual([]);
+      seen.add(w.defId);
     }
+    expect([...seen].sort()).toEqual(['beamSmg', 'crusherHammer', 'piercingRifle', 'thunderDagger']);
   });
 
   it('옵션: 레어 1개·전설 2개, 서로 다르고 분류에 맞는 것만', () => {

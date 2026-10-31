@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 292개 · 그림 있음 277개
+전체 296개 · 그림 있음 281개
 
 ## player (3)
 
@@ -18,7 +18,7 @@
 | `player_hectar` | 플레이어 헥타르 | 10×10 | feet | #e8e2d0 | mku/player_hectar.png (5프레임) |
 | `player_acro` | 플레이어 아크로 | 10×10 | feet | #e8e2d0 | mku/player_acro.png (5프레임) |
 
-## weapon (22)
+## weapon (26)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -43,6 +43,10 @@
 | `weapon_gihwan_arm` | 기환의 팔 | 11×11 | center | #3a7bff | mku/weapon_gihwan_arm.png (1프레임) |
 | `weapon_ancient_core` | 고대병기의 코어 | 8×8 | center | #a05aff | mku/weapon_ancient_core.png (1프레임) |
 | `weapon_eclipse_core` | 식광의 핵 | 8×8 | center | #ff3a4a | mku/weapon_eclipse_core.png (1프레임) |
+| `weapon_piercing_rifle` | 천공 저격총 | 11×11 | center | #5ad0f0 | mku/weapon_piercing_rifle.png (1프레임) |
+| `weapon_beam_smg` | 광선 기관단총 | 8×8 | center | #c8a0ff | mku/weapon_beam_smg.png (1프레임) |
+| `weapon_thunder_dagger` | 뇌격 단검 | 7×7 | center | #7ac8ff | mku/weapon_thunder_dagger.png (1프레임) |
+| `weapon_crusher_hammer` | 분쇄 해머 | 11×11 | center | #e08a3a | mku/weapon_crusher_hammer.png (1프레임) |
 | `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | mku/weapon_fist.png (1프레임) |
 
 ## projectile (4)

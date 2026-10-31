@@ -188,6 +188,35 @@
       "spriteKey": "weapon_eclipse_core", "color": "#ff3a4a", "size": 8
     },
     {
+      "id": "piercingRifle", "sfx": "shotSniper", "nameKey": "weapon.piercingRifle", "category": "gun", "grade": "unique", "tags": ["tech", "ranged"],
+      "baseDamage": 22, "fireIntervalSec": 0.9, "energyCost": 3, "pattern": { "kind": "single" }, "pierce": 99,
+      "projectileSpeed": 560, "range": 440, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_piercing_rifle", "color": "#5ad0f0", "size": 11
+    },
+    {
+      "id": "beamSmg", "nameKey": "weapon.beamSmg", "category": "gun", "grade": "unique", "tags": ["tech", "ranged"],
+      "baseDamage": 2.5, "fireIntervalSec": 0.09, "energyCost": 1, "pattern": { "kind": "single", "jitterDeg": 8 },
+      "signature": { "every": 10, "kind": "laser", "damageMul": 4, "length": 260, "width": 8 },
+      "projectileSpeed": 300, "range": 240, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_beam_smg", "color": "#c8a0ff", "size": 8
+    },
+    {
+      "id": "thunderDagger", "nameKey": "weapon.thunderDagger", "category": "blade", "grade": "unique", "tags": ["physical", "melee"],
+      "baseDamage": 5, "fireIntervalSec": 0.16, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 80, "radius": 30 },
+      "critChance": 0.1,
+      "signature": { "every": 5, "kind": "chainBolt", "damageMul": 1.5, "jumps": 4, "range": 120, "color": "#7ac8ff" },
+      "projectileSpeed": 0, "range": 30, "cutsProjectiles": true, "droppable": true,
+      "spriteKey": "weapon_thunder_dagger", "color": "#7ac8ff", "size": 7
+    },
+    {
+      "id": "crusherHammer", "nameKey": "weapon.crusherHammer", "category": "blade", "grade": "unique", "tags": ["physical", "melee"],
+      "baseDamage": 15, "fireIntervalSec": 0.75, "energyCost": 0, "pattern": { "kind": "smash", "reach": 25, "radius": 36 },
+      "knockback": { "distance": 36, "sec": 0.15 },
+      "signature": { "every": 3, "kind": "bigSmash", "damageMul": 2, "radiusMul": 1.6 },
+      "projectileSpeed": 0, "range": 61, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_crusher_hammer", "color": "#e08a3a", "size": 11
+    },
+    {
       "id": "fist", "nameKey": "weapon.fist", "category": "blade", "grade": "common", "tags": ["physical", "melee"],
       "baseDamage": 3, "fireIntervalSec": 0.35, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 90, "radius": 25 },
       "projectileSpeed": 0, "range": 25, "cutsProjectiles": false, "droppable": false,

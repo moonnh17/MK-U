@@ -1372,6 +1372,34 @@
       "frames": 1,
       "gripX": 0.3
     },
+    "weapon_piercing_rifle": {
+      "file": "mku/weapon_piercing_rifle.png",
+      "frameWidth": 23,
+      "frameHeight": 9,
+      "frames": 1,
+      "gripX": 0.25
+    },
+    "weapon_beam_smg": {
+      "file": "mku/weapon_beam_smg.png",
+      "frameWidth": 17,
+      "frameHeight": 7,
+      "frames": 1,
+      "gripX": 0.35
+    },
+    "weapon_thunder_dagger": {
+      "file": "mku/weapon_thunder_dagger.png",
+      "frameWidth": 17,
+      "frameHeight": 7,
+      "frames": 1,
+      "gripX": 0.2
+    },
+    "weapon_crusher_hammer": {
+      "file": "mku/weapon_crusher_hammer.png",
+      "frameWidth": 19,
+      "frameHeight": 11,
+      "frames": 1,
+      "gripX": 0.25
+    },
     "weapon_fist": {
       "file": "mku/weapon_fist.png",
       "frameWidth": 8,
