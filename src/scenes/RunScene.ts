@@ -1,3 +1,4 @@
+import { playFx } from '../skills/skillFx';
 import { buildPathField, pathDir, segmentClear, type PathField } from '../systems/pathField';
 import { IDLE_DODGE } from '../systems/dodge';
 import Phaser from 'phaser';
@@ -1040,6 +1041,7 @@ export class RunScene extends Phaser.Scene {
       this.skillRt.shield = absorbed.shield;
       this.invuln = this.skillRt.shieldOpts?.blockInvulnSec ?? 0;
       this.cameras.main.flash(60, 140, 170, 210);
+      if (this.skillRt.shieldOpts?.look?.block) playFx(this, this.skillRt.shieldOpts.look.block, this.player.x, this.player.y);
       return true;
     }
     const p = this.session.player;

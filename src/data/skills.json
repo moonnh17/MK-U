@@ -46,11 +46,21 @@
       },
       "color": "#4fb3d9",
       "sprites": {
-        "turret": { "spriteKey": "skill_turret", "color": "#4fb3d9", "size": 8 },
-        "turretHead": { "spriteKey": "skill_turret_head", "color": "#8fd3f0", "size": 8 },
-        "bigTurret": { "spriteKey": "skill_turret_big", "color": "#8ae0ff", "size": 16 },
-        "bigTurretHead": { "spriteKey": "skill_turret_big_head", "color": "#b8ecff", "size": 16 },
-        "shell": { "spriteKey": "skill_turret_shell", "color": "#ffb04a", "size": 5 }
+        "turret1": { "spriteKey": "skill_turret1", "color": "#4fb3d9", "size": 8 },
+        "turret2": { "spriteKey": "skill_turret2", "color": "#4fb3d9", "size": 8 },
+        "turret3": { "spriteKey": "skill_turret3", "color": "#4fb3d9", "size": 8 },
+        "turretHead1": { "spriteKey": "skill_turret1_head", "color": "#8fd3f0", "size": 8 },
+        "turretHead2": { "spriteKey": "skill_turret2_head", "color": "#8fd3f0", "size": 8 },
+        "turretHead3": { "spriteKey": "skill_turret3_head", "color": "#8fd3f0", "size": 8 },
+        "bigIdle": { "spriteKey": "skill_bigturret_idle", "color": "#8ae0ff", "size": 16 },
+        "bigRapid": { "spriteKey": "skill_bigturret_rapid", "color": "#8ae0ff", "size": 16 },
+        "bigLaser": { "spriteKey": "skill_bigturret_laser", "color": "#8ae0ff", "size": 16 },
+        "bigShell": { "spriteKey": "skill_bigturret_shell", "color": "#8ae0ff", "size": 16 },
+        "bullet": { "spriteKey": "skill_bigturret_bullet", "color": "#8ae0ff", "size": 3 },
+        "beam": { "spriteKey": "skill_bigturret_beam", "color": "#8ae0ff", "size": 6 },
+        "shell": { "spriteKey": "skill_bigturret_shot", "color": "#ffb04a", "size": 5 },
+        "blast": { "spriteKey": "skill_bigturret_blast", "color": "#8ae0ff", "size": 20 },
+        "hit": { "spriteKey": "skill_bigturret_hit", "color": "#8ae0ff", "size": 12 }
       }
     },
     {
@@ -79,8 +89,18 @@
       },
       "color": "#d9a03b",
       "sprites": {
-        "mine": { "spriteKey": "skill_mine", "color": "#d9a03b", "size": 5 },
-        "chainMine": { "spriteKey": "skill_mine_chain", "color": "#ff6ad9", "size": 5 }
+        "mine1": { "spriteKey": "skill_mine1", "color": "#d9a03b", "size": 5 },
+        "mine2": { "spriteKey": "skill_mine2", "color": "#d9a03b", "size": 5 },
+        "mine3": { "spriteKey": "skill_mine3", "color": "#d9a03b", "size": 5 },
+        "blast1": { "spriteKey": "skill_mine_blast1", "color": "#d9a03b", "size": 20 },
+        "blast2": { "spriteKey": "skill_mine_blast2", "color": "#d9a03b", "size": 20 },
+        "blast3": { "spriteKey": "skill_mine_blast3", "color": "#d9a03b", "size": 20 },
+        "chainMine": { "spriteKey": "skill_chainmine_idle", "color": "#ff6ad9", "size": 5 },
+        "chainTrigger": { "spriteKey": "skill_chainmine_trigger", "color": "#ff6ad9", "size": 8 },
+        "chainBlast": { "spriteKey": "skill_chainmine_blast", "color": "#ff6ad9", "size": 24 },
+        "chainLink": { "spriteKey": "skill_chainmine_link", "color": "#ff6ad9", "size": 8 },
+        "chainMini": { "spriteKey": "skill_chainmine_mini", "color": "#ff6ad9", "size": 5 },
+        "chainRing": { "spriteKey": "skill_chainmine_ring", "color": "#ff6ad9", "size": 16 }
       }
     },
     {
@@ -109,8 +129,21 @@
       },
       "color": "#a05ad9",
       "sprites": {
-        "charge": { "spriteKey": "skill_antimatter_charge", "color": "#c98aff", "size": 4 },
-        "shell": { "spriteKey": "skill_antimatter_shell", "color": "#a05ad9", "size": 9 }
+        "charge1": { "spriteKey": "skill_antimatter_charge1", "color": "#c98aff", "size": 4 },
+        "charge2": { "spriteKey": "skill_antimatter_charge2", "color": "#c98aff", "size": 4 },
+        "charge3": { "spriteKey": "skill_antimatter_charge3", "color": "#c98aff", "size": 4 },
+        "shell1": { "spriteKey": "skill_antimatter_shell1", "color": "#a05ad9", "size": 9 },
+        "shell2": { "spriteKey": "skill_antimatter_shell2", "color": "#a05ad9", "size": 9 },
+        "shell3": { "spriteKey": "skill_antimatter_shell3", "color": "#a05ad9", "size": 9 },
+        "blast1": { "spriteKey": "skill_antimatter_blast1", "color": "#a05ad9", "size": 20 },
+        "blast2": { "spriteKey": "skill_antimatter_blast2", "color": "#a05ad9", "size": 20 },
+        "blast3": { "spriteKey": "skill_antimatter_blast3", "color": "#a05ad9", "size": 20 },
+        "collapse": { "spriteKey": "skill_antimatter_collapse", "color": "#a05ad9", "size": 20 },
+        "chargeA": { "spriteKey": "skill_antimatter_chargeA", "color": "#c98aff", "size": 8 },
+        "shellA": { "spriteKey": "skill_antimatter_shellA", "color": "#a05ad9", "size": 9 },
+        "trailA": { "spriteKey": "skill_antimatter_trailA", "color": "#a05ad9", "size": 9 },
+        "impactA": { "spriteKey": "skill_antimatter_impactA", "color": "#a05ad9", "size": 20 },
+        "blastA": { "spriteKey": "skill_antimatter_blastA", "color": "#a05ad9", "size": 24 }
       }
     },
     {
@@ -138,7 +171,17 @@
         "values": { "hits": 1, "durationSec": 8, "refractRadius": 30, "fxRadius": 30 }
       },
       "color": "#8aa4c8",
-      "sprites": {}
+      "sprites": {
+        "shield1": { "spriteKey": "skill_field1", "color": "#8aa4c8", "size": 24 },
+        "shield2": { "spriteKey": "skill_field2", "color": "#8aa4c8", "size": 24 },
+        "shield3": { "spriteKey": "skill_field3", "color": "#8aa4c8", "size": 24 },
+        "spawnA": { "spriteKey": "skill_fieldA_spawn", "color": "#8aa4c8", "size": 24 },
+        "loopA": { "spriteKey": "skill_fieldA_loop", "color": "#8aa4c8", "size": 24 },
+        "endA": { "spriteKey": "skill_fieldA_end", "color": "#8aa4c8", "size": 24 },
+        "contactA": { "spriteKey": "skill_fieldA_contact", "color": "#8aa4c8", "size": 12 },
+        "hexA": { "spriteKey": "skill_fieldA_hex", "color": "#8aa4c8", "size": 10 },
+        "deflectA": { "spriteKey": "skill_fieldA_deflect", "color": "#8aa4c8", "size": 10 }
+      }
     },
     {
       "id": "railgun",
@@ -165,7 +208,21 @@
         "values": { "damage": 40, "length": 340, "halfWidth": 6, "waveDamage": 10, "waveRadius": 20, "chainCount": 2, "chainRange": 90, "chainDamage": 24 }
       },
       "color": "#3ba7d9",
-      "sprites": {}
+      "sprites": {
+        "beam1": { "spriteKey": "skill_rail_beam1", "color": "#6a9cff", "size": 8 },
+        "beam2": { "spriteKey": "skill_rail_beam2", "color": "#6a9cff", "size": 8 },
+        "beam3": { "spriteKey": "skill_rail_beam3", "color": "#6a9cff", "size": 8 },
+        "hit": { "spriteKey": "skill_rail_hit", "color": "#6a9cff", "size": 10 },
+        "charge": { "spriteKey": "skill_rail_charge", "color": "#6a9cff", "size": 8 },
+        "end": { "spriteKey": "skill_rail_end", "color": "#6a9cff", "size": 10 },
+        "wave": { "spriteKey": "skill_rail_wave", "color": "#6a9cff", "size": 12 },
+        "mark": { "spriteKey": "skill_rail_mark", "color": "#6a9cff", "size": 8 },
+        "chargeA": { "spriteKey": "skill_railA_charge", "color": "#6a9cff", "size": 10 },
+        "muzzleA": { "spriteKey": "skill_railA_muzzle", "color": "#6a9cff", "size": 12 },
+        "hitA": { "spriteKey": "skill_railA_hit", "color": "#6a9cff", "size": 10 },
+        "burstA": { "spriteKey": "skill_railA_burst", "color": "#6a9cff", "size": 16 },
+        "chainA": { "spriteKey": "skill_railA_chain", "color": "#6a9cff", "size": 8 }
+      }
     },
     {
       "id": "combatDrone",
@@ -193,7 +250,14 @@
       },
       "color": "#5ad9c0",
       "sprites": {
-        "drone": { "spriteKey": "skill_drone", "color": "#5ad9c0", "size": 5 }
+        "drone1": { "spriteKey": "skill_drone1", "color": "#5ad9c0", "size": 5 },
+        "drone2": { "spriteKey": "skill_drone2", "color": "#5ad9c0", "size": 5 },
+        "drone3": { "spriteKey": "skill_drone3", "color": "#5ad9c0", "size": 5 },
+        "swarmIdle": { "spriteKey": "skill_swarm_idle", "color": "#5ad9c0", "size": 8 },
+        "swarmMove": { "spriteKey": "skill_swarm_move", "color": "#5ad9c0", "size": 8 },
+        "swarmCharge": { "spriteKey": "skill_swarm_charge", "color": "#5ad9c0", "size": 8 },
+        "swarmLaser": { "spriteKey": "skill_swarm_laser", "color": "#5ad9c0", "size": 8 },
+        "shot": { "spriteKey": "skill_swarm_shot", "color": "#5ad9c0", "size": 3 }
       }
     },
     {

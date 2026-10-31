@@ -40,7 +40,7 @@ export interface SkillHost {
   /** 출혈을 건다. base는 중첩 1개당 틱 피해(태그 보정 전), tags는 출혈 공격 source의 태그 */
   bleed(enemy: Enemy, base: number, stacks: number, tags: readonly TagId[]): void;
   /** 탄 하나 (벽에 막히고, 사거리를 넘으면 사라진다) */
-  fireBullet(from: Vec2, angle: number, speed: number, range: number, base: number, tags: readonly TagId[]): void;
+  fireBullet(from: Vec2, angle: number, speed: number, range: number, base: number, tags: readonly TagId[], sprite?: SpriteRef): void;
   /** 스테이지가 끝날 때까지 매 프레임 도는 오브젝트(포탑·투사체 등) */
   addObject(o: SkillObject): void;
   removeObject(o: SkillObject): void;
@@ -70,7 +70,7 @@ export interface SkillHost {
   /** 짧은 이펙트를 fxSec 뒤에 지운다 */
   fx(obj: Phaser.GameObjects.GameObject, sec?: number): void;
   /** 색 사각형 텍스처 스프라이트 */
-  sprite(x: number, y: number, ref: SpriteRef): Phaser.GameObjects.Image;
+  sprite(x: number, y: number, ref: SpriteRef): Phaser.GameObjects.Sprite;
 }
 
 export type { BuffView };
@@ -81,6 +81,8 @@ export interface ShieldOpts {
   color: string;
   /** 플레이어 둘레 표시 반지름(px) */
   fxRadius: number;
+  /** 역장 그림: 유지 그림과 (각성) 생성·종료·막기·탄 지우기 이펙트 */
+  look?: { body: SpriteRef; spawn?: SpriteRef; end?: SpriteRef; block?: SpriteRef; contact?: SpriteRef; deflect?: SpriteRef };
 }
 
 export interface SkillObject {

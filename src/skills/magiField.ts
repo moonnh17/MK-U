@@ -6,6 +6,7 @@
  */
 import { makeShield } from '../systems/shield';
 import { skillTags } from '../systems/tags';
+import { levelRef } from './skillFx';
 import type { SkillImpl } from './host';
 
 export const magiField: SkillImpl = {
@@ -18,6 +19,9 @@ export const magiField: SkillImpl = {
       blockInvulnSec: v.blockInvulnSec!,
       color: s.def.color,
       fxRadius: awakened ? refract : v.fxRadius!,
+      look: awakened
+        ? { body: s.def.sprites.loopA!, spawn: s.def.sprites.spawnA, end: s.def.sprites.endA, block: s.def.sprites.hexA, contact: s.def.sprites.contactA, deflect: s.def.sprites.deflectA }
+        : { body: levelRef(s, 'shield') },
     });
     return true;
   },

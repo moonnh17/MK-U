@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 225개 · 그림 있음 210개
+전체 292개 · 그림 있음 277개
 
 ## player (3)
 
@@ -170,23 +170,90 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (14)
+## skill (81)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
-| `skill_turret` | 마기 자동포탑 (turret) | 8×8 | center | #4fb3d9 | mku/skill_turret.png (1프레임) |
-| `skill_turret_head` | 마기 자동포탑 (turretHead) | 8×8 | center | #8fd3f0 | mku/skill_turret_head.png (1프레임) |
-| `skill_turret_big` | 마기 자동포탑 (bigTurret) | 16×16 | center | #8ae0ff | mku/skill_turret_big.png (1프레임) |
-| `skill_turret_big_head` | 마기 자동포탑 (bigTurretHead) | 16×16 | center | #b8ecff | mku/skill_turret_big_head.png (1프레임) |
-| `skill_turret_shell` | 마기 자동포탑 (shell) | 5×5 | center | #ffb04a | mku/skill_turret_shell.png (1프레임) |
-| `skill_mine` | 마기 지뢰 (mine) | 5×5 | center | #d9a03b | mku/skill_mine.png (1프레임) |
-| `skill_mine_chain` | 마기 지뢰 (chainMine) | 5×5 | center | #ff6ad9 | mku/skill_mine_chain.png (1프레임) |
-| `skill_antimatter_charge` | 반물질포 (charge) | 4×4 | center | #c98aff | mku/skill_antimatter_charge.png (1프레임) |
-| `skill_antimatter_shell` | 반물질포 (shell) | 9×9 | center | #a05ad9 | mku/skill_antimatter_shell.png (1프레임) |
-| `skill_drone` | 전투 드론 (drone) | 5×5 | center | #5ad9c0 | mku/skill_drone.png (1프레임) |
+| `skill_turret1` | 마기 자동포탑 (turret1) | 8×8 | center | #4fb3d9 | mku/skill_turret1.png (1프레임) |
+| `skill_turret2` | 마기 자동포탑 (turret2) | 8×8 | center | #4fb3d9 | mku/skill_turret2.png (1프레임) |
+| `skill_turret3` | 마기 자동포탑 (turret3) | 8×8 | center | #4fb3d9 | mku/skill_turret3.png (1프레임) |
+| `skill_turret1_head` | 마기 자동포탑 (turretHead1) | 8×8 | center | #8fd3f0 | mku/skill_turret1_head.png (1프레임) |
+| `skill_turret2_head` | 마기 자동포탑 (turretHead2) | 8×8 | center | #8fd3f0 | mku/skill_turret2_head.png (1프레임) |
+| `skill_turret3_head` | 마기 자동포탑 (turretHead3) | 8×8 | center | #8fd3f0 | mku/skill_turret3_head.png (1프레임) |
+| `skill_bigturret_idle` | 마기 자동포탑 (bigIdle) | 16×16 | center | #8ae0ff | mku/skill_bigturret_idle.png (6프레임) |
+| `skill_bigturret_rapid` | 마기 자동포탑 (bigRapid) | 16×16 | center | #8ae0ff | mku/skill_bigturret_rapid.png (6프레임) |
+| `skill_bigturret_laser` | 마기 자동포탑 (bigLaser) | 16×16 | center | #8ae0ff | mku/skill_bigturret_laser.png (4프레임) |
+| `skill_bigturret_shell` | 마기 자동포탑 (bigShell) | 16×16 | center | #8ae0ff | mku/skill_bigturret_shell.png (6프레임) |
+| `skill_bigturret_bullet` | 마기 자동포탑 (bullet) | 3×3 | center | #8ae0ff | mku/skill_bigturret_bullet.png (3프레임) |
+| `skill_bigturret_beam` | 마기 자동포탑 (beam) | 6×6 | center | #8ae0ff | mku/skill_bigturret_beam.png (1프레임) |
+| `skill_bigturret_shot` | 마기 자동포탑 (shell) | 5×5 | center | #ffb04a | mku/skill_bigturret_shot.png (4프레임) |
+| `skill_bigturret_blast` | 마기 자동포탑 (blast) | 20×20 | center | #8ae0ff | mku/skill_bigturret_blast.png (8프레임) |
+| `skill_bigturret_hit` | 마기 자동포탑 (hit) | 12×12 | center | #8ae0ff | mku/skill_bigturret_hit.png (7프레임) |
+| `skill_mine1` | 마기 지뢰 (mine1) | 5×5 | center | #d9a03b | mku/skill_mine1.png (1프레임) |
+| `skill_mine2` | 마기 지뢰 (mine2) | 5×5 | center | #d9a03b | mku/skill_mine2.png (1프레임) |
+| `skill_mine3` | 마기 지뢰 (mine3) | 5×5 | center | #d9a03b | mku/skill_mine3.png (1프레임) |
+| `skill_mine_blast1` | 마기 지뢰 (blast1) | 20×20 | center | #d9a03b | mku/skill_mine_blast1.png (6프레임) |
+| `skill_mine_blast2` | 마기 지뢰 (blast2) | 20×20 | center | #d9a03b | mku/skill_mine_blast2.png (6프레임) |
+| `skill_mine_blast3` | 마기 지뢰 (blast3) | 20×20 | center | #d9a03b | mku/skill_mine_blast3.png (6프레임) |
+| `skill_chainmine_idle` | 마기 지뢰 (chainMine) | 5×5 | center | #ff6ad9 | mku/skill_chainmine_idle.png (4프레임) |
+| `skill_chainmine_trigger` | 마기 지뢰 (chainTrigger) | 8×8 | center | #ff6ad9 | mku/skill_chainmine_trigger.png (3프레임) |
+| `skill_chainmine_blast` | 마기 지뢰 (chainBlast) | 24×24 | center | #ff6ad9 | mku/skill_chainmine_blast.png (8프레임) |
+| `skill_chainmine_link` | 마기 지뢰 (chainLink) | 8×8 | center | #ff6ad9 | mku/skill_chainmine_link.png (3프레임) |
+| `skill_chainmine_mini` | 마기 지뢰 (chainMini) | 5×5 | center | #ff6ad9 | mku/skill_chainmine_mini.png (10프레임) |
+| `skill_chainmine_ring` | 마기 지뢰 (chainRing) | 16×16 | center | #ff6ad9 | mku/skill_chainmine_ring.png (8프레임) |
+| `skill_antimatter_charge1` | 반물질포 (charge1) | 4×4 | center | #c98aff | mku/skill_antimatter_charge1.png (1프레임) |
+| `skill_antimatter_charge2` | 반물질포 (charge2) | 4×4 | center | #c98aff | mku/skill_antimatter_charge2.png (1프레임) |
+| `skill_antimatter_charge3` | 반물질포 (charge3) | 4×4 | center | #c98aff | mku/skill_antimatter_charge3.png (1프레임) |
+| `skill_antimatter_shell1` | 반물질포 (shell1) | 9×9 | center | #a05ad9 | mku/skill_antimatter_shell1.png (1프레임) |
+| `skill_antimatter_shell2` | 반물질포 (shell2) | 9×9 | center | #a05ad9 | mku/skill_antimatter_shell2.png (1프레임) |
+| `skill_antimatter_shell3` | 반물질포 (shell3) | 9×9 | center | #a05ad9 | mku/skill_antimatter_shell3.png (1프레임) |
+| `skill_antimatter_blast1` | 반물질포 (blast1) | 20×20 | center | #a05ad9 | mku/skill_antimatter_blast1.png (1프레임) |
+| `skill_antimatter_blast2` | 반물질포 (blast2) | 20×20 | center | #a05ad9 | mku/skill_antimatter_blast2.png (1프레임) |
+| `skill_antimatter_blast3` | 반물질포 (blast3) | 20×20 | center | #a05ad9 | mku/skill_antimatter_blast3.png (1프레임) |
+| `skill_antimatter_collapse` | 반물질포 (collapse) | 20×20 | center | #a05ad9 | mku/skill_antimatter_collapse.png (4프레임) |
+| `skill_antimatter_chargeA` | 반물질포 (chargeA) | 8×8 | center | #c98aff | mku/skill_antimatter_chargeA.png (6프레임) |
+| `skill_antimatter_shellA` | 반물질포 (shellA) | 9×9 | center | #a05ad9 | mku/skill_antimatter_shellA.png (6프레임) |
+| `skill_antimatter_trailA` | 반물질포 (trailA) | 9×9 | center | #a05ad9 | mku/skill_antimatter_trailA.png (4프레임) |
+| `skill_antimatter_impactA` | 반물질포 (impactA) | 20×20 | center | #a05ad9 | mku/skill_antimatter_impactA.png (3프레임) |
+| `skill_antimatter_blastA` | 반물질포 (blastA) | 24×24 | center | #a05ad9 | mku/skill_antimatter_blastA.png (6프레임) |
+| `skill_field1` | 마기역장 (shield1) | 24×24 | center | #8aa4c8 | mku/skill_field1.png (1프레임) |
+| `skill_field2` | 마기역장 (shield2) | 24×24 | center | #8aa4c8 | mku/skill_field2.png (1프레임) |
+| `skill_field3` | 마기역장 (shield3) | 24×24 | center | #8aa4c8 | mku/skill_field3.png (1프레임) |
+| `skill_fieldA_spawn` | 마기역장 (spawnA) | 24×24 | center | #8aa4c8 | mku/skill_fieldA_spawn.png (5프레임) |
+| `skill_fieldA_loop` | 마기역장 (loopA) | 24×24 | center | #8aa4c8 | mku/skill_fieldA_loop.png (8프레임) |
+| `skill_fieldA_end` | 마기역장 (endA) | 24×24 | center | #8aa4c8 | mku/skill_fieldA_end.png (5프레임) |
+| `skill_fieldA_contact` | 마기역장 (contactA) | 12×12 | center | #8aa4c8 | mku/skill_fieldA_contact.png (8프레임) |
+| `skill_fieldA_hex` | 마기역장 (hexA) | 10×10 | center | #8aa4c8 | mku/skill_fieldA_hex.png (1프레임) |
+| `skill_fieldA_deflect` | 마기역장 (deflectA) | 10×10 | center | #8aa4c8 | mku/skill_fieldA_deflect.png (5프레임) |
+| `skill_rail_beam1` | 레일건 (beam1) | 8×8 | center | #6a9cff | mku/skill_rail_beam1.png (1프레임) |
+| `skill_rail_beam2` | 레일건 (beam2) | 8×8 | center | #6a9cff | mku/skill_rail_beam2.png (1프레임) |
+| `skill_rail_beam3` | 레일건 (beam3) | 8×8 | center | #6a9cff | mku/skill_rail_beam3.png (1프레임) |
+| `skill_rail_hit` | 레일건 (hit) | 10×10 | center | #6a9cff | mku/skill_rail_hit.png (1프레임) |
+| `skill_rail_charge` | 레일건 (charge) | 8×8 | center | #6a9cff | mku/skill_rail_charge.png (1프레임) |
+| `skill_rail_end` | 레일건 (end) | 10×10 | center | #6a9cff | mku/skill_rail_end.png (1프레임) |
+| `skill_rail_wave` | 레일건 (wave) | 12×12 | center | #6a9cff | mku/skill_rail_wave.png (1프레임) |
+| `skill_rail_mark` | 레일건 (mark) | 8×8 | center | #6a9cff | mku/skill_rail_mark.png (1프레임) |
+| `skill_railA_charge` | 레일건 (chargeA) | 10×10 | center | #6a9cff | mku/skill_railA_charge.png (8프레임) |
+| `skill_railA_muzzle` | 레일건 (muzzleA) | 12×12 | center | #6a9cff | mku/skill_railA_muzzle.png (7프레임) |
+| `skill_railA_hit` | 레일건 (hitA) | 10×10 | center | #6a9cff | mku/skill_railA_hit.png (7프레임) |
+| `skill_railA_burst` | 레일건 (burstA) | 16×16 | center | #6a9cff | mku/skill_railA_burst.png (8프레임) |
+| `skill_railA_chain` | 레일건 (chainA) | 8×8 | center | #6a9cff | mku/skill_railA_chain.png (7프레임) |
+| `skill_drone1` | 전투 드론 (drone1) | 5×5 | center | #5ad9c0 | mku/skill_drone1.png (1프레임) |
+| `skill_drone2` | 전투 드론 (drone2) | 5×5 | center | #5ad9c0 | mku/skill_drone2.png (1프레임) |
+| `skill_drone3` | 전투 드론 (drone3) | 5×5 | center | #5ad9c0 | mku/skill_drone3.png (1프레임) |
+| `skill_swarm_idle` | 전투 드론 (swarmIdle) | 8×8 | center | #5ad9c0 | mku/skill_swarm_idle.png (8프레임) |
+| `skill_swarm_move` | 전투 드론 (swarmMove) | 8×8 | center | #5ad9c0 | mku/skill_swarm_move.png (8프레임) |
+| `skill_swarm_charge` | 전투 드론 (swarmCharge) | 8×8 | center | #5ad9c0 | mku/skill_swarm_charge.png (8프레임) |
+| `skill_swarm_laser` | 전투 드론 (swarmLaser) | 8×8 | center | #5ad9c0 | mku/skill_swarm_laser.png (5프레임) |
+| `skill_swarm_shot` | 전투 드론 (shot) | 3×3 | center | #5ad9c0 | mku/skill_swarm_shot.png (3프레임) |
 | `skill_subject` | 불안정 실험체 (subject) | 7×7 | center | #9ad94a | mku/skill_subject.png (1프레임) |
 | `skill_experiment_shell` | 실험 병기 (shell) | 6×6 | center | #d9d03b | mku/skill_experiment_shell.png (1프레임) |
 | `ult_first_law` | 열역학 제1법칙 (particle) | 8×8 | center | #ff9a3c | mku/ult_first_law.png (1프레임) |
+| `ult_cut1` | 벼락 (cut1) | 20×20 | center | #6a9cff | mku/ult_cut1.png (1프레임) |
+| `ult_cut2` | 벼락 (cut2) | 20×20 | center | #6a9cff | mku/ult_cut2.png (1프레임) |
+| `ult_cut3` | 벼락 (cut3) | 20×20 | center | #6a9cff | mku/ult_cut3.png (1프레임) |
+| `ult_cut4` | 벼락 (cut4) | 20×20 | center | #6a9cff | mku/ult_cut4.png (1프레임) |
+| `ult_kera_slash` | 벼락 (slash) | 20×20 | center | #6a9cff | mku/ult_kera_slash.png (12프레임) |
 | `ult_singularity` | 특이점 실험 (core) | 10×10 | center | #ff3a4a | mku/ult_singularity.png (1프레임) |
 
 ## lab (7)

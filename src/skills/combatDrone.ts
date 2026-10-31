@@ -6,16 +6,20 @@
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
+import { animKey } from '../systems/art';
 import { skillTags } from '../systems/tags';
+import { levelRef, loopArt, poseThen } from './skillFx';
 import { priorityTarget, ringPoints } from '../systems/targeting';
 import { nearestEnemy, type PassiveImpl, type SkillCast, type SkillHost, type SkillObject } from './host';
 
 const ID = 'combatDrone';
+const MOVE_EPS = 0.05;
 
 class Drone implements SkillObject {
   readonly owner = ID;
   readonly createdAt: number;
-  private readonly img: Phaser.GameObjects.Image;
+  private readonly img: Phaser.GameObjects.Sprite;
+  private moving = false;
   private pos: Vec2;
   private phase = 0;
   private fireTimer: number;
@@ -28,7 +32,9 @@ class Drone implements SkillObject {
   ) {
     this.createdAt = host.scene.time.now;
     this.pos = this.orbitPoint(host);
-    this.img = host.sprite(this.pos.x, this.pos.y, s.def.sprites.drone!).setDepth(5);
+    const ref = s.owned.awakened ? s.def.sprites.swarmIdle! : levelRef(s, 'drone');
+    this.img = host.sprite(this.pos.x, this.pos.y, ref).setDepth(5);
+    loopArt(this.img, ref);
     // 여러 기가 한꺼번에 쏘지 않게 첫 발을 나눈다
     this.fireTimer = (s.values.fireIntervalSec! * index) / count;
   }
@@ -41,15 +47,34 @@ class Drone implements SkillObject {
     const v = this.s.values;
     this.phase += v.orbitSpeed! * dt;
     this.fireTimer -= dt;
+    const before = this.pos;
     const target = this.s.owned.awakened ? this.swarm(dt, host) : this.orbit(host);
     this.img.setPosition(this.pos.x, this.pos.y);
+    if (this.s.owned.awakened) this.lookSwarm(before, target);
     if (!target || this.fireTimer > 0) return true;
     const dist = Math.hypot(target.x - this.pos.x, target.y - this.pos.y);
     if (dist > v.range!) return true;
     const angle = Math.atan2(target.y - this.pos.y, target.x - this.pos.x);
-    host.fireBullet(this.pos, angle, v.projectileSpeed!, v.range!, v.damage!, skillTags(this.s.def, this.s.owned.awakened, 'droneShot'));
+    host.fireBullet(this.pos, angle, v.projectileSpeed!, v.range!, v.damage!, skillTags(this.s.def, this.s.owned.awakened, 'droneShot'), this.s.owned.awakened ? this.s.def.sprites.shot : undefined);
+    if (this.s.owned.awakened) poseThen(this.img, this.s.def.sprites.swarmLaser!, this.moving ? this.s.def.sprites.swarmMove! : this.s.def.sprites.swarmIdle!);
     this.fireTimer = v.fireIntervalSec!;
     return true;
+  }
+
+  /** 각성: 이동·대기 애니메이션, 목표 쪽으로 몸을 돌린다 */
+  private lookSwarm(before: Vec2, target: Vec2 | null): void {
+    const sp = this.s.def.sprites;
+    const moving = Math.hypot(this.pos.x - before.x, this.pos.y - before.y) > MOVE_EPS;
+    if (moving !== this.moving && !this.posing()) {
+      this.moving = moving;
+      loopArt(this.img, moving ? sp.swarmMove! : sp.swarmIdle!);
+    }
+    const lookX = target ? target.x - this.pos.x : this.pos.x - before.x;
+    if (Math.abs(lookX) > MOVE_EPS) this.img.setFlipX(lookX < 0);
+  }
+
+  private posing(): boolean {
+    return this.img.anims.currentAnim?.key === animKey(this.s.def.sprites.swarmLaser!.spriteKey, 'play') && this.img.anims.isPlaying;
   }
 
   /** 기본: 플레이어 둘레 공전, 드론 위치에서 가장 가까운 적 */

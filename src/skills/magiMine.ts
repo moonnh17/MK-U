@@ -7,9 +7,9 @@
 import { bus } from '../core/events';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
-import { hexColor } from '../core/scale';
 import { skillTags } from '../systems/tags';
 import { ringPoints } from '../systems/targeting';
+import { levelRef, loopArt, playFx, stretchFx } from './skillFx';
 import { trimOldest, type SkillCast, type SkillHost, type SkillImpl, type SkillObject } from './host';
 
 const ID = 'magiMine';
@@ -17,7 +17,7 @@ const ID = 'magiMine';
 class Mine implements SkillObject {
   readonly owner = ID;
   readonly createdAt: number;
-  private readonly img: Phaser.GameObjects.Image;
+  private readonly img: Phaser.GameObjects.Sprite;
   private t = 0;
 
   constructor(
@@ -29,8 +29,10 @@ class Mine implements SkillObject {
     private readonly armSec: number,
   ) {
     this.createdAt = host.scene.time.now;
-    const ref = s.owned.awakened ? s.def.sprites.chainMine! : s.def.sprites.mine!;
+    // 각성: 연쇄로 생긴 지뢰는 작은 기뢰
+    const ref = s.owned.awakened ? (throwSec === 0 ? s.def.sprites.chainMini! : s.def.sprites.chainMine!) : levelRef(s, 'mine');
     this.img = host.sprite(from.x, from.y, ref).setDepth(2).setAlpha(0.5);
+    loopArt(this.img, ref);
   }
 
   update(dt: number, host: SkillHost): boolean {
@@ -57,9 +59,19 @@ class Mine implements SkillObject {
       if (Math.hypot(pos.x - this.to.x, pos.y - this.to.y) > radius + e.radius) continue;
       if (host.hit(e, v.damage!, tags)) killedAt.push(pos);
     }
-    host.fx(host.scene.add.circle(this.to.x, this.to.y, radius, hexColor(this.s.def.color), 0.35).setDepth(6), 0.2);
+    const sp = this.s.def.sprites;
+    if (awakened) {
+      playFx(host.scene, sp.chainTrigger!, this.to.x, this.to.y);
+      playFx(host.scene, sp.chainBlast!, this.to.x, this.to.y, { w: radius * 2.6 });
+      playFx(host.scene, sp.chainRing!, this.to.x, this.to.y, { w: radius * 2 });
+    } else playFx(host.scene, levelRef(this.s, 'blast'), this.to.x, this.to.y, { w: radius * 2.4 });
     // 각성: 지뢰로 처치한 자리에 새 지뢰 (바로 활성화되어 근처 적과 연쇄)
-    if (awakened) for (const p of killedAt) place(host, this.s, p, p, 0, v.chainArmSec!);
+    if (awakened) {
+      for (const p of killedAt) {
+        if (Math.hypot(p.x - this.to.x, p.y - this.to.y) > 2) stretchFx(host.scene, sp.chainLink!, this.to, p, 8);
+        place(host, this.s, p, p, 0, v.chainArmSec!);
+      }
+    }
   }
 
   destroy(): void {

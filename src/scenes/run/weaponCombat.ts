@@ -1,4 +1,5 @@
 /** 무기 공격과 피해: 사격·근접·레이저·운석·번개, 탄 적중, 피해 계산. */
+import { loopArt } from '../../skills/skillFx';
 import { segmentClear } from '../../systems/pathField';
 import { zigzag } from '../../systems/dodge';
 import Phaser from 'phaser';
@@ -23,7 +24,7 @@ import { hpStance } from '../../systems/vitals';
 import { gainGauge } from '../../systems/skills';
 import { gunShots, inArc, projectilesCut, rollCrit, spendEnergy, type WeaponItem, type WeaponStats } from '../../systems/weapons';
 import { contains, interiorRect } from '../../systems/worldLayout';
-import type { WeaponSignature, SpaceRule, TagId, WeaponDef } from '../../types/data';
+import type { SpriteRef, WeaponSignature, SpaceRule, TagId, WeaponDef } from '../../types/data';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
 
@@ -225,10 +226,15 @@ export class WeaponCombat {
     base: number,
     tags: readonly TagId[],
     source: string | null = null,
-    opts: { pierce: number; crit: number; homing?: number; tint?: string } = { pierce: 0, crit: 0 },
+    opts: { pierce: number; crit: number; homing?: number; tint?: string; sprite?: SpriteRef } = { pierce: 0, crit: 0 },
   ): void {
     const proj = this.run.ctx.data.weapons.projectile;
-    const b = this.run.bullets.create(from.x, from.y, proj.spriteKey) as Phaser.Physics.Arcade.Image;
+    const b = this.run.bullets.create(from.x, from.y, opts.sprite?.spriteKey ?? proj.spriteKey) as Phaser.Physics.Arcade.Sprite;
+    // 스킬 전용 탄: 날아가는 쪽을 보고 프레임이 돈다
+    if (opts.sprite) {
+      b.setRotation(angle);
+      loopArt(b, opts.sprite);
+    }
     fitArt(this.run.ctx.data, b, proj.size, proj.height ?? proj.size);
     b.setDepth(5);
     b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>() });

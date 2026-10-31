@@ -220,7 +220,7 @@ export function validateArt(art: ArtData, refs: readonly AssetRef[]): string[] {
     if (s.facing !== undefined && s.facing !== 'right' && s.facing !== 'left') errors.push(`${w}.facing: right · left`);
     const frames = s.frames ?? 1;
     for (const [id, a] of Object.entries(s.anims ?? {})) {
-      if (id !== 'idle' && id !== 'move') errors.push(`${w}.anims.${id}: idle · move`);
+      if (id !== 'idle' && id !== 'move' && id !== 'play') errors.push(`${w}.anims.${id}: idle · move · play`);
       if (!a) continue;
       if (!(Number.isInteger(a.from) && Number.isInteger(a.to) && a.from >= 0 && a.from <= a.to && a.to < frames)) errors.push(`${w}.anims.${id}: 0 ≤ from ≤ to < frames(${frames})`);
       if (!(a.fps > 0)) errors.push(`${w}.anims.${id}.fps: 양수`);

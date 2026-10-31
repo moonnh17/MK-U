@@ -30,8 +30,8 @@ export class BootScene extends Phaser.Scene {
       ctx.artLoaded.add(key);
       // 타일은 반복해서 까는 TileSprite가 실제 픽셀을 읽으므로 그쪽에서 줄인다
       if (!key.startsWith('tile_')) applyArtDensity(this.textures.get(key), s.density ?? 1);
-      for (const [id, a] of Object.entries(s.anims ?? {}) as [ArtAnimId, { from: number; to: number; fps: number }][]) {
-        this.anims.create({ key: animKey(key, id), frames: this.anims.generateFrameNumbers(key, { start: a.from, end: a.to }), frameRate: a.fps, repeat: -1 });
+      for (const [id, a] of Object.entries(s.anims ?? {}) as [ArtAnimId, { from: number; to: number; fps: number; loop?: boolean }][]) {
+        this.anims.create({ key: animKey(key, id), frames: this.anims.generateFrameNumbers(key, { start: a.from, end: a.to }), frameRate: a.fps, repeat: a.loop === false ? 0 : -1 });
       }
     }
     const refs: SpriteRef[] = [

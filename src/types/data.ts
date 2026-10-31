@@ -1240,13 +1240,15 @@ export interface ArtSpriteDef {
   facing?: 'right' | 'left';
 }
 
-export type ArtAnimId = 'idle' | 'move';
+export type ArtAnimId = 'idle' | 'move' | 'play';
 
 /** 프레임 번호 from~to(0부터, 둘 다 포함)를 초당 fps장으로 반복 */
 export interface ArtAnimDef {
   from: number;
   to: number;
   fps: number;
+  /** false면 한 번만 (없으면 반복) */
+  loop?: boolean;
 }
 
 export interface ArtData {

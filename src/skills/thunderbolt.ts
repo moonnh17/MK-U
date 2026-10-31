@@ -4,6 +4,7 @@
  * 각성 '케라우노스': 푸른 벼락 강림 → 절단선 → 사선 참격 연속 → 주변 추가 타격 → 공간 균열 붕괴.
  * 보스에게는 절단선(최대 체력 비례)만 들어가고, 나머지 타격은 보스에게 피해가 없다.
  */
+import { playFx } from './skillFx';
 import { shake } from '../entities/juice';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
@@ -13,6 +14,10 @@ import { lineHits } from '../systems/targeting';
 import { nearestEnemy, type SkillHost, type SkillObject, type UltimateCast, type UltimateImpl } from './host';
 
 const ID = 'thunderbolt';
+const CUT_VORTEX_PX = 44;
+const CUT_STEP_MS = 70;
+/** 참격 그림이 원래 기운 각도 (오른쪽 위) */
+const SLASH_ART_RAD = -Math.PI / 4;
 
 function isBoss(e: Enemy): boolean {
   return e.rank === 'boss' || e.rank === 'hiddenBoss';
@@ -25,12 +30,24 @@ function line(host: SkillHost, color: number, a: Vec2, b: Vec2, width: number, s
   host.fx(g, sec);
 }
 
+/** 공간 절단 그림 4단계: 시작점 소용돌이 → 찢어짐 → 잦아듦 */
+function cutFx(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: number): void {
+  const sp = u.def.sprites;
+  const mid = { x: from.x + (dir.x * length) / 2, y: from.y + (dir.y * length) / 2 };
+  const angle = Math.atan2(dir.y, dir.x);
+  playFx(host.scene, sp.cut1!, from.x, from.y, { w: CUT_VORTEX_PX, fadeSec: 0.3 });
+  [sp.cut2!, sp.cut3!, sp.cut4!].forEach((ref, i) => {
+    host.scene.time.delayedCall(i * CUT_STEP_MS, () => playFx(host.scene, ref, mid.x, mid.y, { w: length, rotation: angle, fadeSec: 0.2 }));
+  });
+}
+
 /** 절단선: from에서 dir로 length. 보스는 최대 체력 비례 */
 function cut(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: number): void {
   const v = u.values;
   const enemies = [...host.enemies()];
   const hits = lineHits(from, dir, length, v.width! / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
-  line(host, hexColor(u.def.color), from, { x: from.x + dir.x * length, y: from.y + dir.y * length }, v.width!);
+  cutFx(host, u, from, dir, length);
+  line(host, hexColor(u.def.color), from, { x: from.x + dir.x * length, y: from.y + dir.y * length }, v.width! / 3);
   for (const i of hits) {
     const e = enemies[i]!;
     if (isBoss(e)) host.hitTrue(e, e.maxHp * v.bossMaxHpRatio!, false);
@@ -115,7 +132,8 @@ class Keraunos implements SkillObject {
         const from = { x: target.x - d.x * half, y: target.y - d.y * half };
         const enemies = [...host.enemies()];
         const hits = lineHits(from, d, v.slashLength!, v.width! / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
-        line(host, color, from, { x: from.x + d.x * v.slashLength!, y: from.y + d.y * v.slashLength! }, v.width! / 2, 0.15);
+        playFx(host.scene, u.def.sprites.slash!, target.x, target.y, { w: v.slashLength!, rotation: a - SLASH_ART_RAD });
+        line(host, color, from, { x: from.x + d.x * v.slashLength!, y: from.y + d.y * v.slashLength! }, v.width! / 6, 0.15);
         for (const k of hits) if (!isBoss(enemies[k]!)) host.hit(enemies[k]!, v.damage!, u.def.sources.slash!);
       });
     }

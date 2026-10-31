@@ -524,62 +524,6 @@
       "frames": 1,
       "density": 2
     },
-    "skill_turret": {
-      "file": "mku/skill_turret.png",
-      "frameWidth": 40,
-      "frameHeight": 24,
-      "frames": 1,
-      "density": 2
-    },
-    "skill_turret_head": {
-      "file": "mku/skill_turret_head.png",
-      "frameWidth": 36,
-      "frameHeight": 14,
-      "frames": 1,
-      "density": 2,
-      "aim": {
-        "pivotX": 0.16,
-        "pivotY": 0.65,
-        "mountY": -8,
-        "tiltDeg": 9,
-        "muzzlePx": 13
-      }
-    },
-    "skill_turret_big": {
-      "file": "mku/skill_turret_big.png",
-      "frameWidth": 52,
-      "frameHeight": 30,
-      "frames": 1,
-      "density": 2
-    },
-    "skill_turret_big_head": {
-      "file": "mku/skill_turret_big_head.png",
-      "frameWidth": 64,
-      "frameHeight": 34,
-      "frames": 1,
-      "density": 2,
-      "aim": {
-        "pivotX": 0.36,
-        "pivotY": 0.74,
-        "mountY": -11,
-        "tiltDeg": 14,
-        "muzzlePx": 17
-      }
-    },
-    "skill_mine": {
-      "file": "mku/skill_mine.png",
-      "frameWidth": 18,
-      "frameHeight": 12,
-      "frames": 1,
-      "density": 2
-    },
-    "skill_drone": {
-      "file": "mku/skill_drone.png",
-      "frameWidth": 22,
-      "frameHeight": 22,
-      "frames": 1,
-      "density": 2
-    },
     "fx_hit_tech": {
       "file": "mku/fx_hit_tech.png",
       "frameWidth": 32,
@@ -1607,34 +1551,6 @@
       "frames": 1,
       "density": 2
     },
-    "skill_turret_shell": {
-      "file": "mku/skill_turret_shell.png",
-      "frameWidth": 18,
-      "frameHeight": 14,
-      "frames": 1,
-      "density": 2
-    },
-    "skill_mine_chain": {
-      "file": "mku/skill_mine_chain.png",
-      "frameWidth": 16,
-      "frameHeight": 12,
-      "frames": 1,
-      "density": 2
-    },
-    "skill_antimatter_charge": {
-      "file": "mku/skill_antimatter_charge.png",
-      "frameWidth": 14,
-      "frameHeight": 14,
-      "frames": 1,
-      "density": 2
-    },
-    "skill_antimatter_shell": {
-      "file": "mku/skill_antimatter_shell.png",
-      "frameWidth": 32,
-      "frameHeight": 16,
-      "frames": 1,
-      "density": 2
-    },
     "skill_subject": {
       "file": "mku/skill_subject.png",
       "frameWidth": 30,
@@ -1771,6 +1687,878 @@
       "frameWidth": 100,
       "frameHeight": 12,
       "frames": 1
+    },
+    "skill_turret1": {
+      "file": "mku/skill_turret1.png",
+      "frameWidth": 40,
+      "frameHeight": 24,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_turret1_head": {
+      "file": "mku/skill_turret1_head.png",
+      "frameWidth": 36,
+      "frameHeight": 14,
+      "frames": 1,
+      "density": 2,
+      "aim": {
+        "pivotX": 0.16,
+        "pivotY": 0.65,
+        "mountY": -8,
+        "tiltDeg": 9,
+        "muzzlePx": 13
+      }
+    },
+    "skill_turret2": {
+      "file": "mku/skill_turret2.png",
+      "frameWidth": 46,
+      "frameHeight": 22,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_turret2_head": {
+      "file": "mku/skill_turret2_head.png",
+      "frameWidth": 46,
+      "frameHeight": 24,
+      "frames": 1,
+      "density": 2,
+      "aim": {
+        "pivotX": 0.18,
+        "pivotY": 0.72,
+        "mountY": -8,
+        "tiltDeg": 16,
+        "muzzlePx": 18
+      }
+    },
+    "skill_turret3": {
+      "file": "mku/skill_turret3.png",
+      "frameWidth": 50,
+      "frameHeight": 28,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_turret3_head": {
+      "file": "mku/skill_turret3_head.png",
+      "frameWidth": 60,
+      "frameHeight": 32,
+      "frames": 1,
+      "density": 2,
+      "aim": {
+        "pivotX": 0.36,
+        "pivotY": 0.74,
+        "mountY": -10,
+        "tiltDeg": 14,
+        "muzzlePx": 16
+      }
+    },
+    "skill_bigturret_idle": {
+      "file": "mku/skill_bigturret_idle.png",
+      "frameWidth": 82,
+      "frameHeight": 58,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 8,
+          "loop": true
+        }
+      }
+    },
+    "skill_bigturret_rapid": {
+      "file": "mku/skill_bigturret_rapid.png",
+      "frameWidth": 84,
+      "frameHeight": 48,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "skill_bigturret_laser": {
+      "file": "mku/skill_bigturret_laser.png",
+      "frameWidth": 82,
+      "frameHeight": 50,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "skill_bigturret_shell": {
+      "file": "mku/skill_bigturret_shell.png",
+      "frameWidth": 84,
+      "frameHeight": 58,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "skill_bigturret_bullet": {
+      "file": "mku/skill_bigturret_bullet.png",
+      "frameWidth": 18,
+      "frameHeight": 14,
+      "frames": 3,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 2,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "skill_bigturret_beam": {
+      "file": "mku/skill_bigturret_beam.png",
+      "frameWidth": 60,
+      "frameHeight": 38,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_bigturret_shot": {
+      "file": "mku/skill_bigturret_shot.png",
+      "frameWidth": 32,
+      "frameHeight": 16,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
+    "skill_bigturret_blast": {
+      "file": "mku/skill_bigturret_blast.png",
+      "frameWidth": 60,
+      "frameHeight": 54,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 7,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "skill_bigturret_hit": {
+      "file": "mku/skill_bigturret_hit.png",
+      "frameWidth": 32,
+      "frameHeight": 30,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 22,
+          "loop": false
+        }
+      }
+    },
+    "skill_mine1": {
+      "file": "mku/skill_mine1.png",
+      "frameWidth": 18,
+      "frameHeight": 12,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_mine_blast1": {
+      "file": "mku/skill_mine_blast1.png",
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 20,
+          "loop": false
+        }
+      }
+    },
+    "skill_mine2": {
+      "file": "mku/skill_mine2.png",
+      "frameWidth": 22,
+      "frameHeight": 20,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_mine_blast2": {
+      "file": "mku/skill_mine_blast2.png",
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 20,
+          "loop": false
+        }
+      }
+    },
+    "skill_mine3": {
+      "file": "mku/skill_mine3.png",
+      "frameWidth": 24,
+      "frameHeight": 26,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_mine_blast3": {
+      "file": "mku/skill_mine_blast3.png",
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 20,
+          "loop": false
+        }
+      }
+    },
+    "skill_chainmine_idle": {
+      "file": "mku/skill_chainmine_idle.png",
+      "frameWidth": 32,
+      "frameHeight": 30,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 9,
+          "loop": true
+        }
+      }
+    },
+    "skill_chainmine_trigger": {
+      "file": "mku/skill_chainmine_trigger.png",
+      "frameWidth": 40,
+      "frameHeight": 34,
+      "frames": 3,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 2,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "skill_chainmine_blast": {
+      "file": "mku/skill_chainmine_blast.png",
+      "frameWidth": 80,
+      "frameHeight": 58,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 7,
+          "fps": 20,
+          "loop": false
+        }
+      }
+    },
+    "skill_chainmine_link": {
+      "file": "mku/skill_chainmine_link.png",
+      "frameWidth": 60,
+      "frameHeight": 24,
+      "frames": 3,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 2,
+          "fps": 15,
+          "loop": true
+        }
+      }
+    },
+    "skill_chainmine_mini": {
+      "file": "mku/skill_chainmine_mini.png",
+      "frameWidth": 22,
+      "frameHeight": 22,
+      "frames": 10,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 9,
+          "fps": 14,
+          "loop": true
+        }
+      }
+    },
+    "skill_chainmine_ring": {
+      "file": "mku/skill_chainmine_ring.png",
+      "frameWidth": 56,
+      "frameHeight": 42,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 7,
+          "fps": 22,
+          "loop": false
+        }
+      }
+    },
+    "skill_drone1": {
+      "file": "mku/skill_drone1.png",
+      "frameWidth": 22,
+      "frameHeight": 22,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_drone2": {
+      "file": "mku/skill_drone2.png",
+      "frameWidth": 28,
+      "frameHeight": 26,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_drone3": {
+      "file": "mku/skill_drone3.png",
+      "frameWidth": 32,
+      "frameHeight": 34,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_swarm_idle": {
+      "file": "mku/skill_swarm_idle.png",
+      "frameWidth": 40,
+      "frameHeight": 34,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 7,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "skill_swarm_move": {
+      "file": "mku/skill_swarm_move.png",
+      "frameWidth": 40,
+      "frameHeight": 26,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 7,
+          "fps": 14,
+          "loop": true
+        }
+      }
+    },
+    "skill_swarm_charge": {
+      "file": "mku/skill_swarm_charge.png",
+      "frameWidth": 40,
+      "frameHeight": 34,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 7,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "skill_swarm_laser": {
+      "file": "mku/skill_swarm_laser.png",
+      "frameWidth": 40,
+      "frameHeight": 30,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "skill_swarm_shot": {
+      "file": "mku/skill_swarm_shot.png",
+      "frameWidth": 16,
+      "frameHeight": 10,
+      "frames": 3,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 2,
+          "fps": 15,
+          "loop": true
+        }
+      }
+    },
+    "skill_antimatter_charge1": {
+      "file": "mku/skill_antimatter_charge1.png",
+      "frameWidth": 14,
+      "frameHeight": 14,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_antimatter_shell1": {
+      "file": "mku/skill_antimatter_shell1.png",
+      "frameWidth": 24,
+      "frameHeight": 12,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_antimatter_blast1": {
+      "file": "mku/skill_antimatter_blast1.png",
+      "frameWidth": 54,
+      "frameHeight": 60,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_antimatter_charge2": {
+      "file": "mku/skill_antimatter_charge2.png",
+      "frameWidth": 18,
+      "frameHeight": 18,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_antimatter_shell2": {
+      "file": "mku/skill_antimatter_shell2.png",
+      "frameWidth": 32,
+      "frameHeight": 14,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_antimatter_blast2": {
+      "file": "mku/skill_antimatter_blast2.png",
+      "frameWidth": 70,
+      "frameHeight": 80,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_antimatter_charge3": {
+      "file": "mku/skill_antimatter_charge3.png",
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_antimatter_shell3": {
+      "file": "mku/skill_antimatter_shell3.png",
+      "frameWidth": 40,
+      "frameHeight": 16,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_antimatter_blast3": {
+      "file": "mku/skill_antimatter_blast3.png",
+      "frameWidth": 100,
+      "frameHeight": 92,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_antimatter_collapse": {
+      "file": "mku/skill_antimatter_collapse.png",
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_antimatter_chargeA": {
+      "file": "mku/skill_antimatter_chargeA.png",
+      "frameWidth": 52,
+      "frameHeight": 50,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_antimatter_shellA": {
+      "file": "mku/skill_antimatter_shellA.png",
+      "frameWidth": 44,
+      "frameHeight": 20,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 16,
+          "loop": true
+        }
+      }
+    },
+    "skill_antimatter_trailA": {
+      "file": "mku/skill_antimatter_trailA.png",
+      "frameWidth": 48,
+      "frameHeight": 24,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "skill_antimatter_impactA": {
+      "file": "mku/skill_antimatter_impactA.png",
+      "frameWidth": 78,
+      "frameHeight": 80,
+      "frames": 3,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 2,
+          "fps": 20,
+          "loop": false
+        }
+      }
+    },
+    "skill_antimatter_blastA": {
+      "file": "mku/skill_antimatter_blastA.png",
+      "frameWidth": 120,
+      "frameHeight": 118,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 20,
+          "loop": false
+        }
+      }
+    },
+    "skill_field1": {
+      "file": "mku/skill_field1.png",
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_field2": {
+      "file": "mku/skill_field2.png",
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_field3": {
+      "file": "mku/skill_field3.png",
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_fieldA_spawn": {
+      "file": "mku/skill_fieldA_spawn.png",
+      "frameWidth": 112,
+      "frameHeight": 108,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "skill_fieldA_loop": {
+      "file": "mku/skill_fieldA_loop.png",
+      "frameWidth": 96,
+      "frameHeight": 86,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 7,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "skill_fieldA_end": {
+      "file": "mku/skill_fieldA_end.png",
+      "frameWidth": 76,
+      "frameHeight": 72,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "skill_fieldA_contact": {
+      "file": "mku/skill_fieldA_contact.png",
+      "frameWidth": 52,
+      "frameHeight": 44,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 7,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "skill_fieldA_hex": {
+      "file": "mku/skill_fieldA_hex.png",
+      "frameWidth": 36,
+      "frameHeight": 36,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_fieldA_deflect": {
+      "file": "mku/skill_fieldA_deflect.png",
+      "frameWidth": 36,
+      "frameHeight": 40,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "skill_rail_beam1": {
+      "file": "mku/skill_rail_beam1.png",
+      "frameWidth": 120,
+      "frameHeight": 66,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_rail_beam2": {
+      "file": "mku/skill_rail_beam2.png",
+      "frameWidth": 120,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_rail_beam3": {
+      "file": "mku/skill_rail_beam3.png",
+      "frameWidth": 120,
+      "frameHeight": 48,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_rail_hit": {
+      "file": "mku/skill_rail_hit.png",
+      "frameWidth": 40,
+      "frameHeight": 28,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_rail_charge": {
+      "file": "mku/skill_rail_charge.png",
+      "frameWidth": 26,
+      "frameHeight": 28,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_rail_end": {
+      "file": "mku/skill_rail_end.png",
+      "frameWidth": 44,
+      "frameHeight": 34,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_rail_wave": {
+      "file": "mku/skill_rail_wave.png",
+      "frameWidth": 68,
+      "frameHeight": 30,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_rail_mark": {
+      "file": "mku/skill_rail_mark.png",
+      "frameWidth": 24,
+      "frameHeight": 28,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_railA_charge": {
+      "file": "mku/skill_railA_charge.png",
+      "frameWidth": 48,
+      "frameHeight": 36,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 7,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "skill_railA_muzzle": {
+      "file": "mku/skill_railA_muzzle.png",
+      "frameWidth": 140,
+      "frameHeight": 34,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 20,
+          "loop": false
+        }
+      }
+    },
+    "skill_railA_hit": {
+      "file": "mku/skill_railA_hit.png",
+      "frameWidth": 40,
+      "frameHeight": 38,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 22,
+          "loop": false
+        }
+      }
+    },
+    "skill_railA_burst": {
+      "file": "mku/skill_railA_burst.png",
+      "frameWidth": 60,
+      "frameHeight": 46,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 7,
+          "fps": 20,
+          "loop": false
+        }
+      }
+    },
+    "skill_railA_chain": {
+      "file": "mku/skill_railA_chain.png",
+      "frameWidth": 68,
+      "frameHeight": 38,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "ult_cut1": {
+      "file": "mku/ult_cut1.png",
+      "frameWidth": 180,
+      "frameHeight": 174,
+      "frames": 1,
+      "density": 2
+    },
+    "ult_cut2": {
+      "file": "mku/ult_cut2.png",
+      "frameWidth": 180,
+      "frameHeight": 78,
+      "frames": 1,
+      "density": 2
+    },
+    "ult_cut3": {
+      "file": "mku/ult_cut3.png",
+      "frameWidth": 180,
+      "frameHeight": 60,
+      "frames": 1,
+      "density": 2
+    },
+    "ult_cut4": {
+      "file": "mku/ult_cut4.png",
+      "frameWidth": 180,
+      "frameHeight": 78,
+      "frames": 1,
+      "density": 2
+    },
+    "ult_kera_slash": {
+      "file": "mku/ult_kera_slash.png",
+      "frameWidth": 76,
+      "frameHeight": 80,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 24,
+          "loop": false
+        }
+      }
     }
   }
 }

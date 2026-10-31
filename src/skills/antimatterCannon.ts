@@ -9,6 +9,7 @@ import { bus } from '../core/events';
 import { skillTags } from '../systems/tags';
 import { bestClusterTarget } from '../systems/targeting';
 import { Explosive } from './explosive';
+import { levelRef, loopArt } from './skillFx';
 import { nearestEnemy, type BuffView, type SkillCast, type SkillHost, type SkillImpl, type SkillObject } from './host';
 
 const ID = 'antimatterCannon';
@@ -16,7 +17,7 @@ const ID = 'antimatterCannon';
 class Charge implements SkillObject {
   readonly owner = ID;
   readonly createdAt: number;
-  private readonly orb: Phaser.GameObjects.Image;
+  private readonly orb: Phaser.GameObjects.Sprite;
   private readonly total: number;
   private t = 0;
   private shotsLeft: number;
@@ -29,7 +30,9 @@ class Charge implements SkillObject {
     this.createdAt = host.scene.time.now;
     this.total = host.chargeTime(s.values.chargeSec!, skillTags(s.def, s.owned.awakened));
     this.shotsLeft = s.owned.awakened ? s.values.barrels! : 1;
-    this.orb = host.sprite(0, 0, s.def.sprites.charge!).setDepth(6);
+    const ref = s.owned.awakened ? s.def.sprites.chargeA! : levelRef(s, 'charge');
+    this.orb = host.sprite(0, 0, ref).setDepth(6);
+    loopArt(this.orb, ref);
     this.follow(host);
   }
 
@@ -37,7 +40,8 @@ class Charge implements SkillObject {
     this.follow(host);
     if (this.t < this.total) {
       this.t += dt;
-      this.orb.setScale(1 + (2 * Math.min(1, this.t / this.total)));
+      // 각성 그림은 프레임이 스스로 커진다
+      if (!this.s.owned.awakened) this.orb.setScale(1 + (2 * Math.min(1, this.t / this.total)));
       return true;
     }
     this.shotTimer -= dt;
@@ -56,6 +60,7 @@ class Charge implements SkillObject {
 
   private fire(host: SkillHost): void {
     const v = this.s.values;
+    const sp = this.s.def.sprites;
     const from = host.playerPos();
     const enemies = host.enemies();
     let target = null;
@@ -81,7 +86,9 @@ class Charge implements SkillObject {
         radius: host.area(v.radius!),
         base: v.damage!,
         tags: skillTags(this.s.def, this.s.owned.awakened, 'blast'),
-        sprite: this.s.def.sprites.shell!,
+        sprite: this.s.owned.awakened ? sp.shellA! : levelRef(this.s, 'shell'),
+        blasts: this.s.owned.awakened ? [sp.impactA!, sp.blastA!] : [levelRef(this.s, 'blast'), sp.collapse!],
+        trail: this.s.owned.awakened ? sp.trailA : undefined,
       }),
     );
   }

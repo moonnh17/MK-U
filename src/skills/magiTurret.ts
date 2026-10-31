@@ -7,20 +7,26 @@
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import { getContext } from '../core/context';
-import { hexColor } from '../core/scale';
 import { skillTags } from '../systems/tags';
 import { Explosive } from './explosive';
+import { levelRef, loopArt, playFx, poseThen, stretchFx } from './skillFx';
 import { nearestEnemy, trimOldest, type SkillCast, type SkillHost, type SkillImpl, type SkillObject } from './host';
 
 const ID = 'magiTurret';
+/** 각성 포탑의 총구 거리·광선 굵기 (그림 기준) */
+const BIG_MUZZLE_PX = 16;
+const BEAM_PX = 8;
 
 class Turret implements SkillObject {
   readonly owner = ID;
   readonly createdAt: number;
-  private readonly legs: Phaser.GameObjects.Image;
-  private readonly head: Phaser.GameObjects.Image;
-  private readonly tilt: number;
-  private readonly muzzlePx: number;
+  /** Lv1~3: 다리 고정, 머리만 돈다 */
+  private legs: Phaser.GameObjects.Sprite | null = null;
+  private head: Phaser.GameObjects.Sprite | null = null;
+  /** 각성: 포탑 전체 애니메이션 (원본이 왼쪽을 본다) */
+  private big: Phaser.GameObjects.Sprite | null = null;
+  private tilt = 0;
+  private muzzlePx = 0;
   private readonly timers = { shot: 0, bullet: 0, laser: 0, shell: 0 };
 
   constructor(
@@ -29,10 +35,16 @@ class Turret implements SkillObject {
     private readonly s: SkillCast,
   ) {
     this.createdAt = host.scene.time.now;
-    const ref = s.owned.awakened ? s.def.sprites.bigTurret! : s.def.sprites.turret!;
-    const headRef = s.owned.awakened ? s.def.sprites.bigTurretHead! : s.def.sprites.turretHead!;
+    const sp = s.def.sprites;
+    if (s.owned.awakened) {
+      this.big = host.sprite(pos.x, pos.y, sp.bigIdle!).setDepth(2);
+      loopArt(this.big, sp.bigIdle!);
+      this.muzzlePx = BIG_MUZZLE_PX;
+      return;
+    }
+    const headRef = levelRef(s, 'turretHead');
     const aim = getContext().data.art.sprites[headRef.spriteKey]?.aim;
-    this.legs = host.sprite(pos.x, pos.y, ref).setDepth(2);
+    this.legs = host.sprite(pos.x, pos.y, levelRef(s, 'turret')).setDepth(2);
     this.head = host.sprite(pos.x, pos.y + (aim?.mountY ?? 0), headRef).setDepth(2.1);
     if (aim) this.head.setOrigin(aim.pivotX, aim.pivotY);
     this.tilt = ((aim?.tiltDeg ?? 0) * Math.PI) / 180;
@@ -41,14 +53,17 @@ class Turret implements SkillObject {
 
   update(dt: number, host: SkillHost): boolean {
     const v = this.s.values;
+    const sp = this.s.def.sprites;
     for (const k of Object.keys(this.timers) as (keyof typeof this.timers)[]) this.timers[k] -= dt;
     const target = nearestEnemy(host, this.pos, v.range!);
     if (!target) return true;
     const angle = Math.atan2(target.sprite.y - this.pos.y, target.sprite.x - this.pos.x);
-    // 왼쪽을 볼 때는 뒤집어 머리가 거꾸로 서지 않게. 총구가 그림에서 살짝 위로 기울어 있어 그만큼 돌린다
     const left = Math.cos(angle) < 0;
-    this.head.setFlipY(left).setRotation(angle + (left ? -this.tilt : this.tilt));
-    const muzzle = { x: this.head.x + Math.cos(angle) * this.muzzlePx, y: this.head.y + Math.sin(angle) * this.muzzlePx };
+    // 왼쪽을 볼 때는 뒤집어 머리가 거꾸로 서지 않게. 총구가 그림에서 살짝 위로 기울어 있어 그만큼 돌린다
+    this.head?.setFlipY(left).setRotation(angle + (left ? -this.tilt : this.tilt));
+    this.big?.setFlipX(!left);
+    const base = this.head ?? this.big!;
+    const muzzle = { x: base.x + Math.cos(angle) * this.muzzlePx, y: base.y + Math.sin(angle) * this.muzzlePx };
     const tags = (source: string) => skillTags(this.s.def, this.s.owned.awakened, source);
 
     if (!this.s.owned.awakened) {
@@ -60,14 +75,14 @@ class Turret implements SkillObject {
     }
 
     if (this.timers.bullet <= 0) {
-      host.fireBullet(muzzle, angle, v.projectileSpeed!, v.range!, v.bulletDamage!, tags('bigBullet'));
+      host.fireBullet(muzzle, angle, v.projectileSpeed!, v.range!, v.bulletDamage!, tags('bigBullet'), sp.bullet);
+      poseThen(this.big!, sp.bigRapid!, sp.bigIdle!);
       this.timers.bullet = v.bulletIntervalSec!;
     }
     if (this.timers.laser <= 0) {
-      const g = host.scene.add.graphics().setDepth(6);
-      g.lineStyle(2, hexColor(this.s.def.color), 0.9);
-      g.lineBetween(muzzle.x, muzzle.y, target.sprite.x, target.sprite.y);
-      host.fx(g);
+      stretchFx(host.scene, sp.beam!, muzzle, target.sprite, BEAM_PX);
+      playFx(host.scene, sp.hit!, target.sprite.x, target.sprite.y);
+      poseThen(this.big!, sp.bigLaser!, sp.bigIdle!);
       host.hit(target, v.laserDamage!, tags('laser'));
       this.timers.laser = v.laserIntervalSec!;
     }
@@ -81,17 +96,20 @@ class Turret implements SkillObject {
           radius: host.area(v.shellRadius!),
           base: v.shellDamage!,
           tags: tags('shell'),
-          sprite: this.s.def.sprites.shell!,
+          sprite: sp.shell!,
+          blasts: [sp.blast!],
         }),
       );
+      poseThen(this.big!, sp.bigShell!, sp.bigIdle!);
       this.timers.shell = v.shellIntervalSec!;
     }
     return true;
   }
 
   destroy(): void {
-    this.legs.destroy();
-    this.head.destroy();
+    this.legs?.destroy();
+    this.head?.destroy();
+    this.big?.destroy();
   }
 }
 

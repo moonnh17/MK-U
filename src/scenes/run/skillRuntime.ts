@@ -1,4 +1,5 @@
 /** 스킬 실행: SkillHost, 슬롯 발동, 궁극기, 패시브, 마기역장, 스킬바 표시. */
+import { loopArt, playFx } from '../../skills/skillFx';
 import Phaser from 'phaser';
 import { hexColor } from '../../core/scale';
 import { type BuffView, type SkillSlotView } from '../../core/session';
@@ -23,7 +24,9 @@ export class SkillRuntime {
   /** 마기역장 보호막 */
   shield: ShieldState | null = null;
   shieldOpts: ShieldOpts | null = null;
-  shieldFx: Phaser.GameObjects.Arc | null = null;
+  shieldFx: Phaser.GameObjects.Arc | Phaser.GameObjects.Sprite | null = null;
+  /** 끝날 때 종료 이펙트를 내기 위해 기억한다 */
+  private lastShieldOpts: ShieldOpts | null = null;
   /** 지금 깔려 있는 패시브 (id:레벨:각성). 바뀌면 오브젝트를 다시 깐다 */
   passiveKey = '';
   passiveId: string | null = null;
@@ -116,11 +119,11 @@ export class SkillRuntime {
         const perStack = calcDamage({ baseDamage: base, tags }, this.run.effStats(), ctx.data.tags, this.run.combat.rangeBonus());
         e.bleed = applyBleed(e.bleed, perStack, stacks, this.run.tagRule<BleedRule>('bleed'));
       },
-      fireBullet: (from, angle, speed, range, base, tags) => this.run.combat.fireBullet(from, angle, speed, range, base, tags, source),
+      fireBullet: (from, angle, speed, range, base, tags, sprite) => this.run.combat.fireBullet(from, angle, speed, range, base, tags, source, { pierce: 0, crit: 0, sprite }),
       addObject: (o) => this.skillObjects.push(o),
       removeObject: (o) => this.removeObject(o),
       objects: () => this.skillObjects,
-      sprite: (x, y, ref) => this.run.add.image(x, y, ref.spriteKey),
+      sprite: (x, y, ref) => this.run.add.sprite(x, y, ref.spriteKey),
       fx: (obj, sec) => {
         this.run.time.delayedCall((sec ?? ctx.data.ui.slashFxSec) * 1000, () => obj.destroy());
       },
@@ -155,22 +158,43 @@ export class SkillRuntime {
     const s = this.shield;
     const opts = this.shieldOpts;
     if (!s || !opts) {
+      if (this.shieldFx && this.lastShieldOpts?.look?.end) playFx(this.run, this.lastShieldOpts.look.end, this.run.player.x, this.run.player.y, { w: this.lastShieldOpts.fxRadius * 2.4, depth: 5 });
       this.shieldFx?.destroy();
       this.shieldFx = null;
+      this.lastShieldOpts = null;
       return;
     }
-    if (!this.shieldFx) this.shieldFx = this.run.add.circle(0, 0, opts.fxRadius).setDepth(5);
     const color = hexColor(opts.color);
-    this.shieldFx
-      .setRadius(opts.fxRadius)
-      .setPosition(this.run.player.x, this.run.player.y)
-      .setStrokeStyle(s.hits > 0 ? 2 : 1, color, 0.9)
-      .setFillStyle(color, s.refractRadius > 0 ? 0.15 : 0.08);
+    if (this.lastShieldOpts !== opts) {
+      this.shieldFx?.destroy();
+      this.shieldFx = null;
+      this.lastShieldOpts = opts;
+      if (opts.look?.spawn) playFx(this.run, opts.look.spawn, this.run.player.x, this.run.player.y, { w: opts.fxRadius * 2.4, depth: 5 });
+    }
+    if (opts.look) {
+      if (!this.shieldFx) {
+        const body = this.run.add.sprite(this.run.player.x, this.run.player.y, opts.look.body.spriteKey).setDepth(5);
+        body.setDisplaySize(opts.fxRadius * 2.2, (opts.fxRadius * 2.2 * body.height) / Math.max(1, body.width));
+        loopArt(body, opts.look.body);
+        this.shieldFx = body;
+      }
+      // 막기 횟수를 다 쓰면 흐려진다
+      this.shieldFx.setPosition(this.run.player.x, this.run.player.y).setAlpha(s.hits > 0 ? 1 : 0.5);
+    } else {
+      if (!this.shieldFx) this.shieldFx = this.run.add.circle(0, 0, opts.fxRadius).setDepth(5);
+      (this.shieldFx as Phaser.GameObjects.Arc)
+        .setRadius(opts.fxRadius)
+        .setPosition(this.run.player.x, this.run.player.y)
+        .setStrokeStyle(s.hits > 0 ? 2 : 1, color, 0.9)
+        .setFillStyle(color, s.refractRadius > 0 ? 0.15 : 0.08);
+    }
     if (s.refractRadius <= 0) return;
     for (const b of [...this.run.enemyBullets.getChildren()] as Phaser.Physics.Arcade.Image[]) {
       const dist = Math.hypot(b.x - this.run.player.x, b.y - this.run.player.y);
       if (!refracts(s, dist, b.getData('refractable') !== false)) continue;
-      this.run.fxAt(this.run.add.circle(b.x, b.y, 3, color, 0.8).setDepth(6));
+      if (opts.look?.contact) playFx(this.run, opts.look.contact, b.x, b.y);
+      if (opts.look?.deflect) playFx(this.run, opts.look.deflect, b.x, b.y);
+      if (!opts.look?.contact) this.run.fxAt(this.run.add.circle(b.x, b.y, 3, color, 0.8).setDepth(6));
       b.destroy();
     }
   }

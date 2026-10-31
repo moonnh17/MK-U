@@ -260,7 +260,7 @@ sprites.spire_medium = sheet('spire_medium', single('spires/medium-0.png'), 52);
 // ---------- 스킬 오브젝트 (헥타르) ----------
 // 포탑: 다리(고정)와 머리(적을 향해 돈다)를 나눈다. 원본 총구가 왼쪽이라 머리는 뒤집어 오른쪽을 보게 한다
 function turret(key, f, fit, headBottom, legsTop, ballX, ballY, tipX, tipY) {
-  const im = load(f);
+  const im = typeof f === 'string' ? load(f) : f;
   const whole = k.bbox(im, 40);
   const s = fit / Math.max(whole.w, whole.h);
   const legs = k.crop(im, 0, legsTop, im.w, im.h - legsTop);
@@ -278,10 +278,6 @@ function turret(key, f, fit, headBottom, legsTop, ballX, ballY, tipX, tipY) {
     muzzlePx: Math.round(Math.hypot(ballX - tipX, ballY - tipY) * s),
   };
 }
-turret('skill_turret', 'hectar/turret-1.png', 22, 105, 100, 205, 75, 40, 48);
-turret('skill_turret_big', 'hectar/turret-5.png', 32, 325, 300, 375, 245, 80, 170);
-sprites.skill_mine = sheet('skill_mine', single('hectar/mine-1.png'), 9);
-sprites.skill_drone = sheet('skill_drone', single('hectar/drone-1.png'), 11);
 
 // ---------- 타격·처치·등장 이펙트 (가장 긴 변) ----------
 sprites.fx_hit_tech = sheet('fx_hit_tech', single('basic/rail-hit.png'), 16);
@@ -614,10 +610,6 @@ sprites.prop_exit_portal = sheet('prop_exit_portal', single('rift/frame-1.png'),
 sprites.prop_encounter_core = sheet('prop_encounter_core', single('mimosa/frames/crystal.png'), 24);
 
 // 스킬 오브젝트 (탄은 오른쪽을 본다)
-sprites.skill_turret_shell = sheet('skill_turret_shell', [gaps('awakening/turret-shell.png')[0]], 9);
-sprites.skill_mine_chain = sheet('skill_mine_chain', [gaps('awakening/mine-mini.png')[0]], 8);
-sprites.skill_antimatter_charge = sheet('skill_antimatter_charge', single('new-skills/antimatter-charge-1.png'), 7);
-sprites.skill_antimatter_shell = sheet('skill_antimatter_shell', single('new-skills/antimatter-projectile-1.png'), 16);
 sprites.skill_subject = sheet('skill_subject', [gaps('acro-awakening/specimen-idle.png')[0]], 16);
 sprites.skill_experiment_shell = sheet('skill_experiment_shell', single('acro/shot-0.png'), 13);
 dots('ult_first_law', ['...EEE...', '.EEeeeEE.', '.EeeyyeE.', 'EeeywyyeE', 'EeywwwyeE', 'EeeywyyeE', '.EeeyyeE.', '.EEeeeEE.', '...EEE...']);
@@ -670,6 +662,108 @@ sprites.lab_gemini = sheet('lab_gemini', single('story/mg-full.png'), 32);
   k.write(path.join(REPO, 'public/assets', file), im);
   sprites.lab_window = { file, frameWidth: 100, frameHeight: 12, frames: 1 };
 }
+
+// ---------- 헥타르 스킬 (Lv1·3·5·각성 원본 묶음) ----------
+// 게임의 Lv1·2·3이 원본의 Lv1·3·5다. 애니메이션은 원본 파일목록의 프레임 수·FPS·반복을 그대로 쓴다
+const HECTAR_DIR = process.argv[3] ?? path.resolve(REPO, '../MKU-Hectar-Skills-Lv1-3-5-Awakened');
+const HECTAR = JSON.parse(fs.readFileSync(path.join(HECTAR_DIR, '파일목록.json'), 'utf8')).files;
+const hFile = (skill, level, label) => {
+  const f = HECTAR.find((x) => x.skill.startsWith(skill) && x.level.startsWith(level) && x.label.startsWith(label));
+  if (!f) throw new Error(`헥타르 그림 없음 ${skill} ${level} ${label}`);
+  return f;
+};
+const hImg = (skill, level, label) => k.read(path.join(HECTAR_DIR, hFile(skill, level, label).file));
+/** 이펙트: 칸 배치를 그대로 두고 줄인다(프레임이 흔들리지 않게). 빛 번짐은 반투명으로 남긴다 */
+function fxArt(key, frames, fit, anim) {
+  const fw = frames[0].w, fh = frames[0].h;
+  const s = (fit * ART_DENSITY) / Math.max(fw, fh);
+  const w = even(fw * s), h = even(fh * s);
+  const out = k.blank(w * frames.length, h);
+  frames.forEach((f, i) => k.paste(out, k.resize(f, w, h, null), i * w, 0));
+  const file = `${OUT_DIR}/${key}.png`;
+  k.write(path.join(REPO, 'public/assets', file), out);
+  sprites[key] = { file, frameWidth: w, frameHeight: h, frames: frames.length, density: ART_DENSITY };
+  if (frames.length > 1 && anim) sprites[key].anims = { play: { from: 0, to: frames.length - 1, fps: anim.fps, loop: anim.loop } };
+}
+function hFx(key, skill, level, label, fit) {
+  const f = hFile(skill, level, label);
+  const im = k.read(path.join(HECTAR_DIR, f.file));
+  const a = f.animation;
+  if (!a) return fxArt(key, [im], fit);
+  const frames = Array.from({ length: a.frames }, (_, i) => k.crop(im, i * a.frameWidth, 0, a.frameWidth, a.frameHeight));
+  fxArt(key, frames, fit, a);
+}
+const AW = '각성';
+// 포탑
+turret('skill_turret1', hImg('01', 'Lv1', '본체'), 22, 105, 100, 205, 75, 40, 48);
+turret('skill_turret2', hImg('01', 'Lv3', '본체'), 26, 222, 205, 325, 165, 45, 85);
+turret('skill_turret3', hImg('01', 'Lv5', '본체'), 30, 325, 300, 375, 245, 80, 170);
+const TK = 42 / 262; // 각성 포탑 시트는 같은 배율로 줄인다
+for (const [key, label, w] of [['idle', '대기', 253], ['rapid', '연사', 260], ['laser', '레이저발사', 253], ['shell', '포격', 262]]) hFx(`skill_bigturret_${key}`, '01', AW, label, w * TK);
+hFx('skill_bigturret_bullet', '01', AW, '탄환', 9);
+hFx('skill_bigturret_beam', '01', AW, '광선', 30);
+hFx('skill_bigturret_shot', '01', AW, '탄체', 16);
+hFx('skill_bigturret_blast', '01', AW, '폭발', 30);
+hFx('skill_bigturret_hit', '01', AW, '명중', 16);
+// 지뢰
+[['1', 'Lv1', 9], ['2', 'Lv3', 11], ['3', 'Lv5', 13]].forEach(([n, lv, fit]) => {
+  sprites[`skill_mine${n}`] = sheet(`skill_mine${n}`, [hImg('02', lv, '본체')], fit);
+  const frames = [1, 2, 3, 4, 5, 6].map((i) => hImg('02', lv, `폭발_코드렌더_프레임0${i}`));
+  fxArt(`skill_mine_blast${n}`, frames, 36, { fps: 20, loop: false });
+});
+hFx('skill_chainmine_idle', '02', AW, '대기', 16);
+hFx('skill_chainmine_trigger', '02', AW, '기폭준비', 20);
+hFx('skill_chainmine_blast', '02', AW, '폭발', 40);
+hFx('skill_chainmine_link', '02', AW, '연쇄연결', 30);
+hFx('skill_chainmine_mini', '02', AW, '소형기뢰', 11);
+hFx('skill_chainmine_ring', '02', AW, '보조고리', 28);
+// 드론
+[['1', 'Lv1', 11], ['2', 'Lv3', 14], ['3', 'Lv5', 17]].forEach(([n, lv, fit]) => {
+  sprites[`skill_drone${n}`] = sheet(`skill_drone${n}`, [hImg('03', lv, '본체')], fit);
+});
+const DK = 20 / 200;
+for (const [key, label, w] of [['idle', '대기', 200], ['move', '이동', 198], ['charge', '충전', 197], ['laser', '레이저발사', 197]]) hFx(`skill_swarm_${key}`, '03', AW, label, w * DK);
+hFx('skill_swarm_shot', '03', AW, '탄체', 8);
+// 반물질포
+[['1', 'Lv1', 7, 12, 30], ['2', 'Lv3', 9, 16, 40], ['3', 'Lv5', 12, 20, 50]].forEach(([n, lv, charge, shell, blast]) => {
+  hFx(`skill_antimatter_charge${n}`, '05', lv, '충전', charge);
+  hFx(`skill_antimatter_shell${n}`, '05', lv, '비행탄체', shell);
+  hFx(`skill_antimatter_blast${n}`, '05', lv, '폭발', blast);
+});
+{
+  const parts = [1, 2, 3, 4].map((i) => hImg('05', 'Lv1', `붕괴_공용애니프레임${i}`));
+  const size = Math.max(...parts.map((p) => Math.max(p.w, p.h)));
+  const cells2 = parts.map((p) => { const c = k.blank(size, size); k.paste(c, p, Math.round((size - p.w) / 2), Math.round((size - p.h) / 2)); return c; });
+  fxArt('skill_antimatter_collapse', cells2, 40, { fps: 12, loop: false });
+}
+hFx('skill_antimatter_chargeA', '05', AW, '충전', 26);
+hFx('skill_antimatter_shellA', '05', AW, '비행', 22);
+hFx('skill_antimatter_trailA', '05', AW, '궤적', 24);
+hFx('skill_antimatter_impactA', '05', AW, '충격', 40);
+hFx('skill_antimatter_blastA', '05', AW, '폭발', 60);
+// 역장
+[['1', 'Lv1'], ['2', 'Lv3'], ['3', 'Lv5']].forEach(([n, lv]) => hFx(`skill_field${n}`, '06', lv, '보호막', 48));
+hFx('skill_fieldA_spawn', '06', AW, '생성', 56);
+hFx('skill_fieldA_loop', '06', AW, '유지', 48);
+hFx('skill_fieldA_end', '06', AW, '종료', 38);
+hFx('skill_fieldA_contact', '06', AW, '탄막접촉', 26);
+hFx('skill_fieldA_hex', '06', AW, '육각방어', 18);
+hFx('skill_fieldA_deflect', '06', AW, '굴절', 20);
+// 레일건
+[['1', 'Lv1'], ['2', 'Lv3'], ['3', 'Lv5']].forEach(([n, lv]) => hFx(`skill_rail_beam${n}`, '07', lv, '관통광선', 60));
+hFx('skill_rail_hit', '07', 'Lv1', '명중', 20);
+hFx('skill_rail_charge', '07', 'Lv3', '충전', 14);
+hFx('skill_rail_end', '07', 'Lv3', '종점폭발', 22);
+hFx('skill_rail_wave', '07', 'Lv3', '종점파동', 34);
+hFx('skill_rail_mark', '07', 'Lv5', '분석표식', 14);
+hFx('skill_railA_charge', '07', AW, '충전', 24);
+hFx('skill_railA_muzzle', '07', AW, '총구', 70);
+hFx('skill_railA_hit', '07', AW, '명중', 20);
+hFx('skill_railA_burst', '07', AW, '전자기파동', 30);
+hFx('skill_railA_chain', '07', AW, '연쇄전격', 34);
+// 벼락
+[1, 2, 3, 4].forEach((i) => hFx(`ult_cut${i}`, '08', '기본', `공간절단_단계${i}`, 90));
+hFx('ult_kera_slash', '08', AW, '참격', 40);
 
 const artPath = path.join(REPO, 'src/data/art.json');
 const json = { basePath: 'assets/', sprites };
