@@ -1,0 +1,312 @@
+/** 스킬 실행: SkillHost, 슬롯 발동, 궁극기, 패시브, 마기역장, 스킬바 표시. */
+import Phaser from 'phaser';
+import { hexColor } from '../../core/scale';
+import { type BuffView, type SkillSlotView } from '../../core/session';
+import { artKeys } from '../../systems/art';
+import { type ShieldOpts, type SkillHost, type SkillObject } from '../../skills/host';
+import { passiveImpl, skillImpl, ultimateImpl } from '../../skills/registry';
+import { calcDamage, spaceDamage } from '../../systems/damage';
+import { gaugeFromGreatSuccess } from '../../systems/advancement';
+import { refracts, tickShield, type ShieldState } from '../../systems/shield';
+import { applyCorruption, skillChance } from '../../systems/acro';
+import { combineMods, heal, payHp, type PlayerMods } from '../../systems/vitals';
+import { cooldownLeft, findSkill, gainGauge, refundCooldown, skillValues } from '../../systems/skills';
+import { statEffect } from '../../systems/stats';
+import { applyBleed, buffDuration, canAutoCast, chargeTime, skillTags } from '../../systems/tags';
+import type { BleedRule, SkillDef, SpaceRule, UltimateDef } from '../../types/data';
+import type { RunScene } from '../RunScene';
+import { sfx } from './shared';
+
+export class SkillRuntime {
+  /** 피해를 준 스킬 id별 SkillHost (학파 궁극기 게이지가 출처를 본다) */
+  hosts = new Map<string, SkillHost>();
+  /** 마기역장 보호막 */
+  shield: ShieldState | null = null;
+  shieldOpts: ShieldOpts | null = null;
+  shieldFx: Phaser.GameObjects.Arc | null = null;
+  /** 지금 깔려 있는 패시브 (id:레벨:각성). 바뀌면 오브젝트를 다시 깐다 */
+  passiveKey = '';
+  passiveId: string | null = null;
+  skillObjects: SkillObject[] = [];
+
+  constructor(private readonly run: RunScene) {}
+
+  /** source(스킬 id, 'magiTurret.shell'처럼 하위 오브젝트면 앞부분)를 단 SkillHost */
+  hostFor(owner: string | null): SkillHost {
+    const source = owner ? owner.split('.')[0]! : null;
+    const key = source ?? '';
+    let h = this.hosts.get(key);
+    if (!h) {
+      h = this.makeHost(source);
+      this.hosts.set(key, h);
+    }
+    return h;
+  }
+
+  makeHost(source: string | null): SkillHost {
+    const ctx = this.run.ctx;
+    return {
+      scene: this.run,
+      ctx,
+      rng: this.run.rng,
+      playerPos: () => ({ x: this.run.player.x, y: this.run.player.y }),
+      aimDir: () => this.run.aimDir,
+      enemies: () => this.run.enemies.filter((e) => !e.dead),
+      stats: () => this.run.effStats(),
+      area: (r) => this.area(r),
+      hit: (e, base, tags) => this.run.combat.hit(e, base, tags, source),
+      hitTrue: (e, amount, space) => {
+        if (e.dead) return false;
+        const dmg = space ? spaceDamage(e.rank, e.maxHp, amount, this.run.tagRule<SpaceRule>('space')) : amount;
+        return this.run.combat.applyDamage(e, dmg, source);
+      },
+      hurtSelf: (amount) => {
+        this.run.hurtPlayer(amount);
+      },
+      greatSuccess: () => {
+        const ult = this.run.session.player.ultimate;
+        const udef = this.ultimateDef();
+        ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gaugeFromGreatSuccess(udef));
+      },
+      chargeTime: (sec, tags) => chargeTime(sec, tags, this.run.effStats(), ctx.data.tags),
+      buffDuration: (sec, tags) => buffDuration(sec, tags, this.run.effStats(), ctx.data.tags) * (tags.includes('buff') ? 1 + this.run.itemRt.sums.buffDuration : 1),
+      setShield: (shield, opts) => {
+        this.shield = shield;
+        this.shieldOpts = opts;
+      },
+      // 아크룩스(아크로): 대성공 +20%p, 상한 무시
+      chance: (base, capKey, tags) =>
+        Math.min(1, skillChance(base, capKey, tags, this.run.effStats(), ctx.data.tags) + (capKey === 'greatSuccess' ? this.run.itemRt.greatSuccess().bonus : 0)),
+      noGreatFailure: () => this.run.itemRt.greatSuccess().noFailure,
+      corrupt: (e, state) => {
+        if (!e.dead) e.corruption = applyCorruption(e.corruption, state);
+      },
+      defeat: (e) => {
+        if (e.dead) return;
+        e.corruption = null;
+        e.bleed = null;
+        e.converted = true;
+        this.run.onEnemyKilled(e);
+      },
+      blastProps: (at, radius, damage) => this.run.roomProps.blastProps(at, radius, damage),
+      heal: (amount, overflow) => {
+        const p = this.run.session.player;
+        const v = heal(p, amount);
+        p.hp = v.hp;
+        if (overflow) this.run.condition.setSanity({ sanity: Math.min(p.sanityMax, p.sanity + v.overflow), panic: p.panic });
+      },
+      payHp: (ratio) => {
+        const p = this.run.session.player;
+        p.hp = payHp(p.hp, ratio).hp;
+      },
+      dash: (dir, speed, sec) => {
+        sfx('dash');
+        this.run.dashVel = { x: dir.x * speed, y: dir.y * speed };
+        this.run.dashLeft = sec;
+      },
+      refundCooldown: (id, ratio) => {
+        const p = this.run.session.player;
+        const owned = p.loadout.owned[id];
+        if (!owned) return;
+        const total = skillValues(findSkill(ctx.data.skills, id), owned).cooldownSec;
+        p.cooldowns = refundCooldown(p.cooldowns, id, total * ratio);
+      },
+      bleed: (e, base, stacks, tags) => {
+        if (e.dead) return;
+        const perStack = calcDamage({ baseDamage: base, tags }, this.run.effStats(), ctx.data.tags, this.run.combat.rangeBonus());
+        e.bleed = applyBleed(e.bleed, perStack, stacks, this.run.tagRule<BleedRule>('bleed'));
+      },
+      fireBullet: (from, angle, speed, range, base, tags) => this.run.combat.fireBullet(from, angle, speed, range, base, tags, source),
+      addObject: (o) => this.skillObjects.push(o),
+      removeObject: (o) => this.removeObject(o),
+      objects: () => this.skillObjects,
+      sprite: (x, y, ref) => this.run.add.image(x, y, ref.spriteKey),
+      fx: (obj, sec) => {
+        this.run.time.delayedCall((sec ?? ctx.data.ui.slashFxSec) * 1000, () => obj.destroy());
+      },
+    };
+  }
+
+  removeObject(o: SkillObject): void {
+    this.skillObjects = this.skillObjects.filter((x) => x !== o);
+    o.destroy();
+  }
+
+  /** 장착 패시브가 바뀌면(장착·해제·레벨·각성) 이전 오브젝트를 치우고 다시 깐다 */
+  syncPassive(): void {
+    const p = this.run.session.player;
+    const id = p.loadout.passive;
+    const owned = id ? p.loadout.owned[id] : undefined;
+    const key = id && owned ? `${id}:${owned.level}:${owned.awakened}` : '';
+    if (key === this.passiveKey) return;
+    const prev = this.passiveId;
+    if (prev) for (const o of this.skillObjects.filter((x) => x.owner.split('.')[0] === prev)) this.removeObject(o);
+    this.passiveKey = key;
+    this.passiveId = id;
+    const impl = id ? passiveImpl(id) : undefined;
+    if (!id || !owned || !impl) return;
+    const def = findSkill(this.run.ctx.data.skills, id);
+    impl.activate(this.hostFor(id), { def, owned, values: skillValues(def, owned).values });
+  }
+
+  /** 보호막 시간, 플레이어 둘레 표시, 각성(벡터굴절역장) 일반 탄 무효화 */
+  updateShield(dt: number): void {
+    if (this.shield) this.shield = tickShield(this.shield, dt);
+    const s = this.shield;
+    const opts = this.shieldOpts;
+    if (!s || !opts) {
+      this.shieldFx?.destroy();
+      this.shieldFx = null;
+      return;
+    }
+    if (!this.shieldFx) this.shieldFx = this.run.add.circle(0, 0, opts.fxRadius).setDepth(5);
+    const color = hexColor(opts.color);
+    this.shieldFx
+      .setRadius(opts.fxRadius)
+      .setPosition(this.run.player.x, this.run.player.y)
+      .setStrokeStyle(s.hits > 0 ? 2 : 1, color, 0.9)
+      .setFillStyle(color, s.refractRadius > 0 ? 0.15 : 0.08);
+    if (s.refractRadius <= 0) return;
+    for (const b of [...this.run.enemyBullets.getChildren()] as Phaser.Physics.Arcade.Image[]) {
+      const dist = Math.hypot(b.x - this.run.player.x, b.y - this.run.player.y);
+      if (!refracts(s, dist, b.getData('refractable') !== false)) continue;
+      this.run.fxAt(this.run.add.circle(b.x, b.y, 3, color, 0.8).setDepth(6));
+      b.destroy();
+    }
+  }
+
+  /** HUD '현재 버프': 보호막 + 스킬 오브젝트가 알리는 상태(충전 등) */
+  buffViews(): BuffView[] {
+    const out: BuffView[] = [];
+    const s = this.shield;
+    if (s && this.shieldOpts) {
+      const key = s.refractRadius > 0 ? 'buff.magiField.refract' : 'buff.magiField';
+      out.push({ id: 'magiField', label: this.run.ctx.t(key), color: this.shieldOpts.color, leftSec: s.leftSec, totalSec: s.totalSec });
+    }
+    for (const o of this.skillObjects) {
+      const b = o.buff?.(this.run.host);
+      if (b) out.push(b);
+    }
+    out.push(...this.run.itemRt.buffs());
+    return out;
+  }
+
+  /** 스킬 범위 보정 (마기력) */
+  area(radius: number): number {
+    const d = this.run.ctx.data;
+    return radius * (1 + statEffect('skillArea', this.run.effStats(), d.stats)) * (1 + this.run.itemRt.sums.area);
+  }
+
+  /** 기환의 팔: 힘·마기력 범위 보정 (마기력 범위 규칙을 힘에도 같은 식으로) */
+  burstArea(radius: number): number {
+    const d = this.run.ctx.data;
+    const st = this.run.effStats();
+    const byStr = statEffect('skillArea', { ...st, magiPower: st.strength }, d.stats);
+    return radius * (1 + statEffect('skillArea', st, d.stats) + byStr) * (1 + this.run.itemRt.sums.area);
+  }
+
+  /** 근접 스킬은 사거리 안에 적이 있어야 발동한다 */
+  skillUsable(def: SkillDef, awakened: boolean, values: Record<string, number>): boolean {
+    const targets = this.run.enemies.filter((e) => !e.dead).map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius }));
+    return canAutoCast(skillTags(def, awakened), this.area(values.range ?? 0), this.run.player, targets);
+  }
+
+  castSlot(i: number): void {
+    const p = this.run.session.player;
+    const id = p.loadout.active[i];
+    if (!id || cooldownLeft(p.cooldowns, id) > 0) return;
+    const impl = skillImpl(id);
+    const owned = p.loadout.owned[id];
+    if (!impl || !owned) return;
+    const def = findSkill(this.run.ctx.data.skills, id);
+    const sv = skillValues(def, owned);
+    if (!this.skillUsable(def, owned.awakened, sv.values)) {
+      this.run.toastThrottled(this.run.ctx.t('skillMsg.noTarget'));
+      return;
+    }
+    if (impl.cast(this.hostFor(id), { def, owned, values: sv.values })) {
+      p.cooldowns = { ...p.cooldowns, [id]: sv.cooldownSec };
+      sfx('skill');
+    }
+  }
+
+  castUltimate(): void {
+    const ult = this.run.session.player.ultimate;
+    const def = this.ultimateDef();
+    const impl = ultimateImpl(def.id);
+    if (!impl) return;
+    if (ult.gauge < def.gaugeMax) {
+      this.run.toastThrottled(this.run.ctx.t('skillMsg.ultimateNotReady'));
+      return;
+    }
+    const values = ult.awakened && def.awakening ? { ...def.values, ...def.awakening.values } : { ...def.values };
+    if (!impl.cast(this.hostFor(def.id), { def, awakened: ult.awakened, values })) return;
+    ult.gauge = 0;
+    sfx('ultimate');
+    this.run.itemRt.onUltimate();
+  }
+
+  /** HUD·터치 버튼이 그릴 스킬 칸 (액티브 4 + 궁극기 + 패시브) */
+  refreshSkillView(): void {
+    const d = this.run.ctx.data;
+    const t = this.run.ctx.t;
+    const p = this.run.session.player;
+    const empty: SkillSlotView = {
+      skillId: null,
+      label: '',
+      level: 0,
+      awakened: false,
+      cooldownLeft: 0,
+      cooldownTotal: 0,
+      gauge: 0,
+      usable: false,
+      color: d.ui.hud.skillbar.emptyColor,
+      iconKey: null,
+    };
+    const slot = (id: string | null, active: boolean): SkillSlotView => {
+      const owned = id ? p.loadout.owned[id] : undefined;
+      if (!id || !owned) return empty;
+      const def = findSkill(d.skills, id);
+      const sv = skillValues(def, owned);
+      return {
+        skillId: id,
+        label: t(def.shortKey),
+        level: owned.level,
+        awakened: owned.awakened,
+        cooldownLeft: active ? cooldownLeft(p.cooldowns, id) : 0,
+        cooldownTotal: sv.cooldownSec,
+        gauge: 0,
+        usable: !active || this.skillUsable(def, owned.awakened, sv.values),
+        color: def.color,
+        iconKey: artKeys.skillIcon(id),
+      };
+    };
+    const ult = this.ultimateDef();
+    this.run.session.buffs = this.buffViews();
+    this.run.session.effStats = this.run.effStats();
+    this.run.session.skillView = [
+      ...p.loadout.active.map((id) => slot(id, true)),
+      {
+        ...empty,
+        skillId: ult.id,
+        label: t(p.ultimate.awakened && ult.awakening ? ult.awakening.shortKey : ult.shortKey),
+        awakened: p.ultimate.awakened,
+        gauge: p.ultimate.gauge / ult.gaugeMax,
+        usable: p.ultimate.gauge >= ult.gaugeMax,
+        color: ult.color,
+        iconKey: artKeys.ultimateIcon(ult.id),
+      },
+      slot(p.loadout.passive, false),
+    ];
+  }
+
+  ultimateDef(): UltimateDef {
+    const id = this.run.session.player.ultimate.id;
+    return this.run.ctx.data.ultimates.ultimates.find((u) => u.id === id)!;
+  }
+
+  /** 지금 스킬 오브젝트들이 주는 플레이어 보정 */
+  playerMods(): PlayerMods {
+    return combineMods(this.skillObjects.flatMap((o) => (o.playerMods ? [o.playerMods()] : [])));
+  }
+}

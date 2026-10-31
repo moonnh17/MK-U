@@ -234,7 +234,7 @@ export class Progression {
   checkUltimateAwakening(): Cutscene | null {
     const d = this.run.ctx.data;
     const p = this.run.session.player;
-    const def = this.run.ultimateDef();
+    const def = this.run.skillRt.ultimateDef();
     if (p.ultimate.awakened || !def.awakening || !def.school || p.advancement !== def.school) return null;
     if (!ultimateAwakeningReady(p.loadout, d.skills, def.school, d.ultimates.awakeningNeed)) return null;
     p.ultimate.awakened = true;
@@ -298,17 +298,17 @@ export class Progression {
     p = { ...p, ...before };
     const removed = new Set(r.log.removed.map((x) => x.skillId));
     p.cooldowns = Object.fromEntries(Object.entries(p.cooldowns).filter(([id]) => !removed.has(id)));
-    for (const o of this.run.skillObjects.filter((x) => removed.has(x.owner.split('.')[0]!))) this.run.removeObject(o);
-    const fromUlt = this.run.ultimateDef();
+    for (const o of this.run.skillRt.skillObjects.filter((x) => removed.has(x.owner.split('.')[0]!))) this.run.skillRt.removeObject(o);
+    const fromUlt = this.run.skillRt.ultimateDef();
     p.ultimate = { id: adv.ultimate!, gauge: 0, awakened: false };
     p.advancement = school;
     p.advancementLog = r.log;
     this.run.session.player = p;
     this.run.applyPlayerArt();
-    const cuts = [advancementCut(this.run.ctx, { jobNameKey: job.nameKey, adv, picks: p.schoolPicks, fromUlt, toUlt: this.run.ultimateDef(), log: r.log })];
+    const cuts = [advancementCut(this.run.ctx, { jobNameKey: job.nameKey, adv, picks: p.schoolPicks, fromUlt, toUlt: this.run.skillRt.ultimateDef(), log: r.log })];
     const u = this.checkUltimateAwakening();
     if (u) cuts.push(u);
-    this.run.refreshSkillView();
+    this.run.skillRt.refreshSkillView();
     bus.emit('inventoryChanged', {});
     this.playCutscenes(cuts, () => {
       this.say('advancement', school);
@@ -335,7 +335,7 @@ export class Progression {
       const sv = skillValues(findSkill(d.skills, id), p.loadout.owned[id]!);
       if (sv.cooldownSec > 0) p.cooldowns = { ...p.cooldowns, [id]: sv.cooldownSec };
     }
-    this.run.refreshSkillView();
+    this.run.skillRt.refreshSkillView();
     bus.emit('inventoryChanged', {});
   }
 }

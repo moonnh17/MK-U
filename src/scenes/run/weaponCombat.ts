@@ -109,7 +109,7 @@ export class WeaponCombat {
       this.melee(fistDef, fistStats, aimAngle, 0, null, this.run.itemRt.consumeEmpowered());
       return;
     }
-    const udef = this.run.ultimateDef();
+    const udef = this.run.skillRt.ultimateDef();
     p.ultimate.gauge = gainGauge(p.ultimate.gauge, udef.gaugeMax, gaugeFromEnergy(udef, p.energy - left));
     p.energy = left;
     sfx(sig?.kind === 'laser' ? 'shotLaser' : weaponSfx(w));
@@ -130,7 +130,7 @@ export class WeaponCombat {
     }
     if (w.pattern.kind === 'lob') {
       // 유탄: 사거리 안 가장 가까운 적(없으면 조준 방향) 자리에 떨어져 터진다. 자해 없음
-      const host = this.run.hostFor('weapon');
+      const host = this.run.skillRt.hostFor('weapon');
       const target = nearestEnemy(host, this.run.player, w.range);
       const to = target ? { x: target.sprite.x, y: target.sprite.y } : { x: this.run.player.x + this.run.aimDir.x * w.range, y: this.run.player.y + this.run.aimDir.y * w.range };
       host.addObject(
@@ -175,7 +175,7 @@ export class WeaponCombat {
 
   /** 식광의 핵: 가까운 적 자리에 운석이 떨어져 터진다 */
   dropMeteor(w: WeaponDef, st: WeaponStats, p: Extract<WeaponDef['pattern'], { kind: 'meteor' }>, base: number): void {
-    const host = this.run.hostFor('weapon');
+    const host = this.run.skillRt.hostFor('weapon');
     const target = nearestEnemy(host, this.run.player, w.range);
     const at = target ? { x: target.sprite.x, y: target.sprite.y } : { x: this.run.player.x + this.run.aimDir.x * w.range * 0.5, y: this.run.player.y + this.run.aimDir.y * w.range * 0.5 };
     const radius = p.radius * (1 + this.run.itemRt.sums.area);
@@ -405,10 +405,10 @@ export class WeaponCombat {
       if (fx.tags.includes('melee')) this.run.hitStop.request(hs.melee);
       if (fx.crit) this.run.hitStop.request(hs.crit);
     }
-    for (const o of [...this.run.skillObjects]) o.onDamageDealt?.(this.run.host, dealt, enemy);
+    for (const o of [...this.run.skillRt.skillObjects]) o.onDamageDealt?.(this.run.host, dealt, enemy);
     // 학파 궁극기: 정해진 스킬의 피해로 데이터 축적
     const ult = this.run.session.player.ultimate;
-    const udef = this.run.ultimateDef();
+    const udef = this.run.skillRt.ultimateDef();
     const gain = gaugeFromDamage(udef, source, dealt);
     if (gain > 0) ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gain);
     if (killed) this.run.onEnemyKilled(enemy);

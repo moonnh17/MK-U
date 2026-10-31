@@ -2,6 +2,7 @@ import { buildPathField, pathDir, segmentClear, type PathField } from '../system
 import { IDLE_DODGE } from '../systems/dodge';
 import { stampGrid } from '../systems/roomShapes';
 import Phaser from 'phaser';
+import { SkillRuntime } from './run/skillRuntime';
 import { Encounters } from './run/encounters';
 import { Progression } from './run/progression';
 import { WeaponCombat } from './run/weaponCombat';
@@ -15,7 +16,7 @@ import { bus } from '../core/events';
 import { DISABLED_ACTIONS } from '../core/features';
 import { Rng } from '../core/rng';
 import { hexColor } from '../core/scale';
-import { newPlayerState, type BuffView, type RunSession, type SkillSlotView } from '../core/session';
+import { newPlayerState, type RunSession } from '../core/session';
 import { BossController } from '../bosses/bossController';
 import type { BossHost } from '../bosses/host';
 import { Door } from '../entities/door';
@@ -32,11 +33,9 @@ import { artKeys, type TilePart } from '../systems/art';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
 import { FloorWeapon, Pickup } from '../entities/pickup';
-import { nearestEnemy, type ShieldOpts, type SkillHost, type SkillObject } from '../skills/host';
-import { passiveImpl, skillImpl, ultimateImpl } from '../skills/registry';
+import { nearestEnemy, type SkillHost } from '../skills/host';
 import { runStartOffers, stageEndOffers } from '../systems/cards';
-import { calcDamage, gradeMultiplier, spaceDamage, type Stats } from '../systems/damage';
-import { gaugeFromGreatSuccess } from '../systems/advancement';
+import { gradeMultiplier, type Stats } from '../systems/damage';
 import { assignElites, eliteCount } from '../systems/elites';
 import { championWaves, raidChampions } from '../systems/champions';
 import { effectiveWeights, readySet, rollItem, transferWeight } from '../systems/items';
@@ -49,15 +48,15 @@ import { MiniQueue } from '../systems/gemini';
 import { inSpireCircle } from '../systems/spire';
 import { RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
 import { advanceStage, playableChapters, firstStage } from '../systems/run';
-import { absorbHit, refracts, tickShield, type ShieldState } from '../systems/shield';
-import { applyCorruption, corruptedDamage, skillChance, tickCorruption } from '../systems/acro';
-import { combineMods, heal, hpStance, payHp, takeDamage, type PlayerMods } from '../systems/vitals';
-import { cooldownLeft, findSkill, gainGauge, refundCooldown, setSkillLevel, skillValues, tickCooldowns } from '../systems/skills';
+import { absorbHit } from '../systems/shield';
+import { corruptedDamage, tickCorruption } from '../systems/acro';
+import { heal, hpStance, takeDamage } from '../systems/vitals';
+import { findSkill, gainGauge, setSkillLevel, tickCooldowns } from '../systems/skills';
 import { damageTaken, maxHpFor, setStat, statEffect } from '../systems/stats';
-import { applyBleed, buffDuration, canAutoCast, chargeTime, skillTags, tickBleed } from '../systems/tags';
+import { buffDuration, tickBleed } from '../systems/tags';
 import { activeWeapon, dropWeaponAt, autoAim, gainEnergy, normalize, pickUpWeapon, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, corridors, doorRect, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, obstacleRects, wallRects, type Rect, type WorldMetrics } from '../systems/worldLayout';
-import type { BleedRule, GradeId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
+import type { BleedRule, GradeId, StatId, TagId, WeaponDef } from '../types/data';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -69,13 +68,12 @@ export class RunScene extends Phaser.Scene {
   combat!: WeaponCombat;
   progression!: Progression;
   encounters!: Encounters;
+  skillRt!: SkillRuntime;
   ctx!: GameContext;
   session!: RunSession;
   m!: WorldMetrics;
   rng!: Rng;
   host!: SkillHost;
-  /** 피해를 준 스킬 id별 SkillHost (학파 궁극기 게이지가 출처를 본다) */
-  hosts = new Map<string, SkillHost>();
 
   player!: Phaser.Physics.Arcade.Sprite;
   weaponSprite!: Phaser.GameObjects.Image;
@@ -115,7 +113,6 @@ export class RunScene extends Phaser.Scene {
   /** 일식 어둠과 그 보스 (식광) */
   darkness: Darkness | null = null;
   darknessBoss: Enemy | null = null;
-  skillObjects: SkillObject[] = [];
   /** 적 쪽 위험 지대(폭발 엘리트 지연 폭발 등) */
   hazards: Hazard[] = [];
   enemyHost!: EnemyHost;
@@ -124,13 +121,6 @@ export class RunScene extends Phaser.Scene {
   bossHost!: BossHost;
   /** 보스 적 → 패턴 컨트롤러 */
   bossControllers = new Map<Enemy, BossController>();
-  /** 마기역장 보호막 */
-  shield: ShieldState | null = null;
-  shieldOpts: ShieldOpts | null = null;
-  shieldFx: Phaser.GameObjects.Arc | null = null;
-  /** 지금 깔려 있는 패시브 (id:레벨:각성). 바뀌면 오브젝트를 다시 깐다 */
-  passiveKey = '';
-  passiveId: string | null = null;
   /** MK 돌진 */
   dashLeft = 0;
   dashVel: Vec2 = { x: 0, y: 0 };
@@ -159,6 +149,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.skillRt = new SkillRuntime(this);
     this.encounters = new Encounters(this);
     this.progression = new Progression(this);
     this.combat = new WeaponCombat(this);
@@ -210,20 +201,20 @@ export class RunScene extends Phaser.Scene {
     // 챕터를 끝내고 넘어왔다 (2장 종료 미니 대사)
     if (!newRun && stage.stage === 1 && stage.chapter > 1) this.progression.say('chapterEnd', String(stage.chapter - 1));
     this.m = metrics(d.mapgen);
-    this.hosts = new Map();
-    this.host = this.hostFor(null);
+    this.skillRt.hosts = new Map();
+    this.host = this.skillRt.hostFor(null);
     this.itemRt = new ItemRuntime({
       scene: this,
       ctx: this.ctx,
       player: () => this.session.player,
-      skill: () => this.hostFor('item'),
-      skillFor: (id) => this.hostFor(id),
+      skill: () => this.skillRt.hostFor('item'),
+      skillFor: (id) => this.skillRt.hostFor(id),
       fireBullet: (from, angle, speed, range, base, tags, pierce) => this.combat.fireBullet(from, angle, speed, range, base, tags, 'item', { pierce, crit: 0 }),
       setInvuln: (sec) => {
         this.invuln = Math.max(this.invuln, sec);
       },
-      buffDuration: (sec) => this.hostFor('item').buffDuration(sec, ['buff']),
-      burstArea: (r) => this.burstArea(r),
+      buffDuration: (sec) => this.skillRt.hostFor('item').buffDuration(sec, ['buff']),
+      burstArea: (r) => this.skillRt.burstArea(r),
       toast: (text) => bus.emit('toast', { text }),
       arena: () => this.currentArena(),
       blink: (distance) => this.blinkPlayer(distance),
@@ -336,7 +327,7 @@ export class RunScene extends Phaser.Scene {
       }),
       bus.on('debugOpenCards', ({ kind }) => this.progression.queueOffers([{ kind, boss: false }])),
       bus.on('debugFillUltimate', () => {
-        this.session.player.ultimate.gauge = this.ultimateDef().gaugeMax;
+        this.session.player.ultimate.gauge = this.skillRt.ultimateDef().gaugeMax;
       }),
       bus.on('debugSpawn', ({ enemyId, count, elite }) => this.debugSpawn(enemyId, count, elite ?? null)),
       bus.on('debugBarrage', () => this.debugBarrage()),
@@ -380,15 +371,15 @@ export class RunScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.unsubs.forEach((u) => u());
       this.unsubs = [];
-      for (const o of this.skillObjects) o.destroy();
-      this.skillObjects = [];
+      for (const o of this.skillRt.skillObjects) o.destroy();
+      this.skillRt.skillObjects = [];
       for (const h of this.hazards) h.destroy();
       this.hazards = [];
       for (const b of this.bossControllers.values()) b.destroy();
       this.bossControllers = new Map();
     });
     this.setInteractHint(null);
-    this.refreshSkillView();
+    this.skillRt.refreshSkillView();
 
     // 런 시작 스킬 카드 / 앞 스테이지가 넘긴 카드는 시작방에서 고른다
     const offers = newRun ? runStartOffers(d.cards) : (this.initData.offers ?? []);
@@ -423,14 +414,14 @@ export class RunScene extends Phaser.Scene {
     this.combat.charging = false;
     this.combat.chargeT = 0;
     this.combat.chargeFx = null;
-    this.skillObjects = [];
+    this.skillRt.skillObjects = [];
     this.hazards = [];
     this.bossControllers = new Map();
-    this.shield = null;
-    this.shieldOpts = null;
-    this.shieldFx = null;
-    this.passiveKey = '';
-    this.passiveId = null;
+    this.skillRt.shield = null;
+    this.skillRt.shieldOpts = null;
+    this.skillRt.shieldFx = null;
+    this.skillRt.passiveKey = '';
+    this.skillRt.passiveId = null;
     this.dashLeft = 0;
     this.aimDir = { x: 1, y: 0 };
     this.combat.fireCooldown = 0;
@@ -688,7 +679,7 @@ export class RunScene extends Phaser.Scene {
     }
     if (this.modal) {
       this.progression.updateModal(frame);
-      this.refreshSkillView();
+      this.skillRt.refreshSkillView();
       return;
     }
     // 미니 대사: 창이 열린 동안은 표시 시간도 멈춘다
@@ -713,7 +704,7 @@ export class RunScene extends Phaser.Scene {
 
     const p = this.session.player;
     const d = this.ctx.data;
-    const mods = this.playerMods();
+    const mods = this.skillRt.playerMods();
     this.syncMaxHp();
     this.condition.updateSanity(dt);
     // 패닉: 방향이 뒤집힌다
@@ -771,12 +762,12 @@ export class RunScene extends Phaser.Scene {
     // 스킬
     p.cooldowns = tickCooldowns(p.cooldowns, dt);
     SKILL_ACTIONS.forEach((action, i) => {
-      if (frame.pressed.has(action)) this.castSlot(i);
+      if (frame.pressed.has(action)) this.skillRt.castSlot(i);
     });
-    if (frame.pressed.has('ultimate')) this.castUltimate();
-    this.syncPassive();
-    this.updateShield(dt);
-    for (const o of [...this.skillObjects]) if (!o.update(dt, this.hostFor(o.owner))) this.removeObject(o);
+    if (frame.pressed.has('ultimate')) this.skillRt.castUltimate();
+    this.skillRt.syncPassive();
+    this.skillRt.updateShield(dt);
+    for (const o of [...this.skillRt.skillObjects]) if (!o.update(dt, this.skillRt.hostFor(o.owner))) this.skillRt.removeObject(o);
     this.updateBleeds(dt);
     this.updateCorruption(dt);
 
@@ -803,7 +794,7 @@ export class RunScene extends Phaser.Scene {
     const cam = this.cameras.main;
     // 화면 고정 어둠도 확대를 받는다: 지역 좌표 = 화면 가운데 + (플레이어 − 보이는 곳 가운데)
     this.darkness?.update(dt, cam.width / 2 + (this.player.x - cam.midPoint.x), cam.height / 2 + (this.player.y - cam.midPoint.y));
-    this.refreshSkillView();
+    this.skillRt.refreshSkillView();
     if (frame.pressed.has('inventory')) this.progression.openInventory();
   }
 
@@ -1091,11 +1082,6 @@ export class RunScene extends Phaser.Scene {
     return out;
   }
 
-  /** 지금 스킬 오브젝트들이 주는 플레이어 보정 */
-  playerMods(): PlayerMods {
-    return combineMods(this.skillObjects.flatMap((o) => (o.playerMods ? [o.playerMods()] : [])));
-  }
-
   tagRule<T>(id: TagId): T {
     return this.ctx.data.tags.tags.find((t) => t.id === id)!.rule as T;
   }
@@ -1158,7 +1144,7 @@ export class RunScene extends Phaser.Scene {
     }
     // 궁극기 게이지는 적 처치로 충전
     const ult = this.session.player.ultimate;
-    if (this.ultimateDef().gauge.kind === 'kill') ult.gauge = gainGauge(ult.gauge, this.ultimateDef().gaugeMax, d.ultimates.gaugePerKill[e.rank]);
+    if (this.skillRt.ultimateDef().gauge.kind === 'kill') ult.gauge = gainGauge(ult.gauge, this.skillRt.ultimateDef().gaugeMax, d.ultimates.gaugePerKill[e.rank]);
     // 첨탑: 원 안에서 잡으면 충전 (결과는 다음 프레임에 처리)
     const sp = roomId === undefined ? undefined : this.encounters.spires.find((x) => x.roomId === roomId);
     if (sp) {
@@ -1166,7 +1152,7 @@ export class RunScene extends Phaser.Scene {
     }
     this.removeEnemy(e);
     if (roomId !== undefined) this.rooms.get(roomId)?.enemyKilled();
-    for (const o of [...this.skillObjects]) o.onKill?.(this.host, e);
+    for (const o of [...this.skillRt.skillObjects]) o.onKill?.(this.host, e);
     this.itemRt.onKill(e.elite !== null);
     // 폭발 엘리트: 예고 원 후 지연 폭발 (반역 개체가 된 경우는 제외)
     const bl = e.elites.find((x) => x.deathBlast);
@@ -1249,16 +1235,16 @@ export class RunScene extends Phaser.Scene {
       return true;
     }
     // 마기역장: 공격을 막고 잠깐 무적
-    const absorbed = absorbHit(this.shield);
+    const absorbed = absorbHit(this.skillRt.shield);
     if (absorbed.blocked) {
-      this.shield = absorbed.shield;
-      this.invuln = this.shieldOpts?.blockInvulnSec ?? 0;
+      this.skillRt.shield = absorbed.shield;
+      this.invuln = this.skillRt.shieldOpts?.blockInvulnSec ?? 0;
       this.cameras.main.flash(60, 140, 170, 210);
       return true;
     }
     const p = this.session.player;
     const stance = this.itemRt.first('hpStance');
-    const taken = damageTaken(amount, this.effStats(), this.ctx.data.stats) * (1 - this.playerMods().damageReduction) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard()) * (stance ? 1 - hpStance(p.hp, p.maxHp, stance).taken : 1);
+    const taken = damageTaken(amount, this.effStats(), this.ctx.data.stats) * (1 - this.skillRt.playerMods().damageReduction) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard()) * (stance ? 1 - hpStance(p.hp, p.maxHp, stance).taken : 1);
     // 정신 피해: 패닉 중이면 체력 피해로 바뀐다
     const mental = (mentalRaw ?? amount * (attacker?.def.mentalRatio ?? 0)) * (1 - statEffect('mentalResist', this.effStats(), this.ctx.data.stats));
     const m = applyMental(p, mental);
@@ -1270,7 +1256,7 @@ export class RunScene extends Phaser.Scene {
     this.juice.hurt();
     sfx('playerHurt');
     // 피격에 반응하는 스킬 오브젝트 (반물질포 충전 취소 등)
-    for (const o of [...this.skillObjects]) if (o.onPlayerHurt && !o.onPlayerHurt(this.host)) this.removeObject(o);
+    for (const o of [...this.skillRt.skillObjects]) if (o.onPlayerHurt && !o.onPlayerHurt(this.host)) this.skillRt.removeObject(o);
     // 아이템: 피격 효과 → 낮은 체력 회복 → 부활
     this.itemRt.onHurt(taken, attacker);
     if (p.hp > 0) this.itemRt.tryHeal();
@@ -1289,7 +1275,7 @@ export class RunScene extends Phaser.Scene {
       // 유도탄(지팡이): 남은 사거리 안 가장 가까운 적 쪽으로 휜다
       const turn = b.getData('homing') as number;
       if (turn > 0) {
-        const t = nearestEnemy(this.hostFor('weapon'), b, (b.getData('range') as number) - dist);
+        const t = nearestEnemy(this.skillRt.hostFor('weapon'), b, (b.getData('range') as number) - dist);
         if (t) {
           const body = b.body as Phaser.Physics.Arcade.Body;
           const v = steerToward(body.velocity, b, t.sprite, turn, dt);
@@ -1366,150 +1352,6 @@ export class RunScene extends Phaser.Scene {
 
   // ---------- 스킬 ----------
 
-  /** source(스킬 id, 'magiTurret.shell'처럼 하위 오브젝트면 앞부분)를 단 SkillHost */
-  hostFor(owner: string | null): SkillHost {
-    const source = owner ? owner.split('.')[0]! : null;
-    const key = source ?? '';
-    let h = this.hosts.get(key);
-    if (!h) {
-      h = this.makeHost(source);
-      this.hosts.set(key, h);
-    }
-    return h;
-  }
-
-  makeHost(source: string | null): SkillHost {
-    const ctx = this.ctx;
-    return {
-      scene: this,
-      ctx,
-      rng: this.rng,
-      playerPos: () => ({ x: this.player.x, y: this.player.y }),
-      aimDir: () => this.aimDir,
-      enemies: () => this.enemies.filter((e) => !e.dead),
-      stats: () => this.effStats(),
-      area: (r) => this.area(r),
-      hit: (e, base, tags) => this.combat.hit(e, base, tags, source),
-      hitTrue: (e, amount, space) => {
-        if (e.dead) return false;
-        const dmg = space ? spaceDamage(e.rank, e.maxHp, amount, this.tagRule<SpaceRule>('space')) : amount;
-        return this.combat.applyDamage(e, dmg, source);
-      },
-      hurtSelf: (amount) => {
-        this.hurtPlayer(amount);
-      },
-      greatSuccess: () => {
-        const ult = this.session.player.ultimate;
-        const udef = this.ultimateDef();
-        ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gaugeFromGreatSuccess(udef));
-      },
-      chargeTime: (sec, tags) => chargeTime(sec, tags, this.effStats(), ctx.data.tags),
-      buffDuration: (sec, tags) => buffDuration(sec, tags, this.effStats(), ctx.data.tags) * (tags.includes('buff') ? 1 + this.itemRt.sums.buffDuration : 1),
-      setShield: (shield, opts) => {
-        this.shield = shield;
-        this.shieldOpts = opts;
-      },
-      // 아크룩스(아크로): 대성공 +20%p, 상한 무시
-      chance: (base, capKey, tags) =>
-        Math.min(1, skillChance(base, capKey, tags, this.effStats(), ctx.data.tags) + (capKey === 'greatSuccess' ? this.itemRt.greatSuccess().bonus : 0)),
-      noGreatFailure: () => this.itemRt.greatSuccess().noFailure,
-      corrupt: (e, state) => {
-        if (!e.dead) e.corruption = applyCorruption(e.corruption, state);
-      },
-      defeat: (e) => {
-        if (e.dead) return;
-        e.corruption = null;
-        e.bleed = null;
-        e.converted = true;
-        this.onEnemyKilled(e);
-      },
-      blastProps: (at, radius, damage) => this.roomProps.blastProps(at, radius, damage),
-      heal: (amount, overflow) => {
-        const p = this.session.player;
-        const v = heal(p, amount);
-        p.hp = v.hp;
-        if (overflow) this.condition.setSanity({ sanity: Math.min(p.sanityMax, p.sanity + v.overflow), panic: p.panic });
-      },
-      payHp: (ratio) => {
-        const p = this.session.player;
-        p.hp = payHp(p.hp, ratio).hp;
-      },
-      dash: (dir, speed, sec) => {
-        sfx('dash');
-        this.dashVel = { x: dir.x * speed, y: dir.y * speed };
-        this.dashLeft = sec;
-      },
-      refundCooldown: (id, ratio) => {
-        const p = this.session.player;
-        const owned = p.loadout.owned[id];
-        if (!owned) return;
-        const total = skillValues(findSkill(ctx.data.skills, id), owned).cooldownSec;
-        p.cooldowns = refundCooldown(p.cooldowns, id, total * ratio);
-      },
-      bleed: (e, base, stacks, tags) => {
-        if (e.dead) return;
-        const perStack = calcDamage({ baseDamage: base, tags }, this.effStats(), ctx.data.tags, this.combat.rangeBonus());
-        e.bleed = applyBleed(e.bleed, perStack, stacks, this.tagRule<BleedRule>('bleed'));
-      },
-      fireBullet: (from, angle, speed, range, base, tags) => this.combat.fireBullet(from, angle, speed, range, base, tags, source),
-      addObject: (o) => this.skillObjects.push(o),
-      removeObject: (o) => this.removeObject(o),
-      objects: () => this.skillObjects,
-      sprite: (x, y, ref) => this.add.image(x, y, ref.spriteKey),
-      fx: (obj, sec) => {
-        this.time.delayedCall((sec ?? ctx.data.ui.slashFxSec) * 1000, () => obj.destroy());
-      },
-    };
-  }
-
-  removeObject(o: SkillObject): void {
-    this.skillObjects = this.skillObjects.filter((x) => x !== o);
-    o.destroy();
-  }
-
-  /** 장착 패시브가 바뀌면(장착·해제·레벨·각성) 이전 오브젝트를 치우고 다시 깐다 */
-  syncPassive(): void {
-    const p = this.session.player;
-    const id = p.loadout.passive;
-    const owned = id ? p.loadout.owned[id] : undefined;
-    const key = id && owned ? `${id}:${owned.level}:${owned.awakened}` : '';
-    if (key === this.passiveKey) return;
-    const prev = this.passiveId;
-    if (prev) for (const o of this.skillObjects.filter((x) => x.owner.split('.')[0] === prev)) this.removeObject(o);
-    this.passiveKey = key;
-    this.passiveId = id;
-    const impl = id ? passiveImpl(id) : undefined;
-    if (!id || !owned || !impl) return;
-    const def = findSkill(this.ctx.data.skills, id);
-    impl.activate(this.hostFor(id), { def, owned, values: skillValues(def, owned).values });
-  }
-
-  /** 보호막 시간, 플레이어 둘레 표시, 각성(벡터굴절역장) 일반 탄 무효화 */
-  updateShield(dt: number): void {
-    if (this.shield) this.shield = tickShield(this.shield, dt);
-    const s = this.shield;
-    const opts = this.shieldOpts;
-    if (!s || !opts) {
-      this.shieldFx?.destroy();
-      this.shieldFx = null;
-      return;
-    }
-    if (!this.shieldFx) this.shieldFx = this.add.circle(0, 0, opts.fxRadius).setDepth(5);
-    const color = hexColor(opts.color);
-    this.shieldFx
-      .setRadius(opts.fxRadius)
-      .setPosition(this.player.x, this.player.y)
-      .setStrokeStyle(s.hits > 0 ? 2 : 1, color, 0.9)
-      .setFillStyle(color, s.refractRadius > 0 ? 0.15 : 0.08);
-    if (s.refractRadius <= 0) return;
-    for (const b of [...this.enemyBullets.getChildren()] as Phaser.Physics.Arcade.Image[]) {
-      const dist = Math.hypot(b.x - this.player.x, b.y - this.player.y);
-      if (!refracts(s, dist, b.getData('refractable') !== false)) continue;
-      this.fxAt(this.add.circle(b.x, b.y, 3, color, 0.8).setDepth(6));
-      b.destroy();
-    }
-  }
-
   fxAt(obj: Phaser.GameObjects.GameObject): void {
     this.time.delayedCall(this.ctx.data.ui.slashFxSec * 1000, () => obj.destroy());
   }
@@ -1533,36 +1375,6 @@ export class RunScene extends Phaser.Scene {
     this.hurtPlayer(damage, null, mental);
   }
 
-  /** HUD '현재 버프': 보호막 + 스킬 오브젝트가 알리는 상태(충전 등) */
-  buffViews(): BuffView[] {
-    const out: BuffView[] = [];
-    const s = this.shield;
-    if (s && this.shieldOpts) {
-      const key = s.refractRadius > 0 ? 'buff.magiField.refract' : 'buff.magiField';
-      out.push({ id: 'magiField', label: this.ctx.t(key), color: this.shieldOpts.color, leftSec: s.leftSec, totalSec: s.totalSec });
-    }
-    for (const o of this.skillObjects) {
-      const b = o.buff?.(this.host);
-      if (b) out.push(b);
-    }
-    out.push(...this.itemRt.buffs());
-    return out;
-  }
-
-  /** 스킬 범위 보정 (마기력) */
-  area(radius: number): number {
-    const d = this.ctx.data;
-    return radius * (1 + statEffect('skillArea', this.effStats(), d.stats)) * (1 + this.itemRt.sums.area);
-  }
-
-  /** 기환의 팔: 힘·마기력 범위 보정 (마기력 범위 규칙을 힘에도 같은 식으로) */
-  burstArea(radius: number): number {
-    const d = this.ctx.data;
-    const st = this.effStats();
-    const byStr = statEffect('skillArea', { ...st, magiPower: st.strength }, d.stats);
-    return radius * (1 + statEffect('skillArea', st, d.stats) + byStr) * (1 + this.itemRt.sums.area);
-  }
-
   /** 최대 체력 = 기본 + 견고(아이템 스탯 포함) + 아이템. 늘면 그만큼 현재 체력도 채운다 */
   syncMaxHp(): void {
     const d = this.ctx.data;
@@ -1573,106 +1385,6 @@ export class RunScene extends Phaser.Scene {
     if (target > p.maxHp) p.hp += target - p.maxHp;
     p.maxHp = target;
     p.hp = Math.min(p.hp, p.maxHp);
-  }
-
-  ultimateDef(): UltimateDef {
-    const id = this.session.player.ultimate.id;
-    return this.ctx.data.ultimates.ultimates.find((u) => u.id === id)!;
-  }
-
-  /** 근접 스킬은 사거리 안에 적이 있어야 발동한다 */
-  skillUsable(def: SkillDef, awakened: boolean, values: Record<string, number>): boolean {
-    const targets = this.enemies.filter((e) => !e.dead).map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius }));
-    return canAutoCast(skillTags(def, awakened), this.area(values.range ?? 0), this.player, targets);
-  }
-
-  castSlot(i: number): void {
-    const p = this.session.player;
-    const id = p.loadout.active[i];
-    if (!id || cooldownLeft(p.cooldowns, id) > 0) return;
-    const impl = skillImpl(id);
-    const owned = p.loadout.owned[id];
-    if (!impl || !owned) return;
-    const def = findSkill(this.ctx.data.skills, id);
-    const sv = skillValues(def, owned);
-    if (!this.skillUsable(def, owned.awakened, sv.values)) {
-      this.toastThrottled(this.ctx.t('skillMsg.noTarget'));
-      return;
-    }
-    if (impl.cast(this.hostFor(id), { def, owned, values: sv.values })) {
-      p.cooldowns = { ...p.cooldowns, [id]: sv.cooldownSec };
-      sfx('skill');
-    }
-  }
-
-  castUltimate(): void {
-    const ult = this.session.player.ultimate;
-    const def = this.ultimateDef();
-    const impl = ultimateImpl(def.id);
-    if (!impl) return;
-    if (ult.gauge < def.gaugeMax) {
-      this.toastThrottled(this.ctx.t('skillMsg.ultimateNotReady'));
-      return;
-    }
-    const values = ult.awakened && def.awakening ? { ...def.values, ...def.awakening.values } : { ...def.values };
-    if (!impl.cast(this.hostFor(def.id), { def, awakened: ult.awakened, values })) return;
-    ult.gauge = 0;
-    sfx('ultimate');
-    this.itemRt.onUltimate();
-  }
-
-  /** HUD·터치 버튼이 그릴 스킬 칸 (액티브 4 + 궁극기 + 패시브) */
-  refreshSkillView(): void {
-    const d = this.ctx.data;
-    const t = this.ctx.t;
-    const p = this.session.player;
-    const empty: SkillSlotView = {
-      skillId: null,
-      label: '',
-      level: 0,
-      awakened: false,
-      cooldownLeft: 0,
-      cooldownTotal: 0,
-      gauge: 0,
-      usable: false,
-      color: d.ui.hud.skillbar.emptyColor,
-      iconKey: null,
-    };
-    const slot = (id: string | null, active: boolean): SkillSlotView => {
-      const owned = id ? p.loadout.owned[id] : undefined;
-      if (!id || !owned) return empty;
-      const def = findSkill(d.skills, id);
-      const sv = skillValues(def, owned);
-      return {
-        skillId: id,
-        label: t(def.shortKey),
-        level: owned.level,
-        awakened: owned.awakened,
-        cooldownLeft: active ? cooldownLeft(p.cooldowns, id) : 0,
-        cooldownTotal: sv.cooldownSec,
-        gauge: 0,
-        usable: !active || this.skillUsable(def, owned.awakened, sv.values),
-        color: def.color,
-        iconKey: artKeys.skillIcon(id),
-      };
-    };
-    const ult = this.ultimateDef();
-    this.session.buffs = this.buffViews();
-    this.session.effStats = this.effStats();
-    this.session.skillView = [
-      ...p.loadout.active.map((id) => slot(id, true)),
-      {
-        ...empty,
-        skillId: ult.id,
-        label: t(p.ultimate.awakened && ult.awakening ? ult.awakening.shortKey : ult.shortKey),
-        awakened: p.ultimate.awakened,
-        gauge: p.ultimate.gauge / ult.gaugeMax,
-        usable: p.ultimate.gauge >= ult.gaugeMax,
-        color: ult.color,
-        iconKey: artKeys.ultimateIcon(ult.id),
-      },
-      slot(p.loadout.passive, false),
-    ];
   }
 
   // ---------- 카드·인벤토리 ----------
@@ -2036,8 +1748,8 @@ export class RunScene extends Phaser.Scene {
     const p = this.session.player;
     p.loadout = setSkillLevel(p.loadout, findSkill(d.skills, id), level, awakened);
     // 스킬을 없앴으면 그 스킬이 깔아 둔 오브젝트도 치운다
-    if (level <= 0) for (const o of this.skillObjects.filter((x) => x.owner.split('.')[0] === id)) this.removeObject(o);
-    this.refreshSkillView();
+    if (level <= 0) for (const o of this.skillRt.skillObjects.filter((x) => x.owner.split('.')[0] === id)) this.skillRt.removeObject(o);
+    this.skillRt.refreshSkillView();
     bus.emit('inventoryChanged', {});
     const u = this.progression.checkUltimateAwakening();
     if (u && !this.modal) this.progression.playCutscenes([u], () => {});
