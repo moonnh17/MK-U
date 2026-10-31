@@ -11,7 +11,7 @@ import { readyWeaponSet } from '../src/systems/items';
 import { weaponPose } from '../src/systems/motion';
 import { chargedCrit, spinUpMul, weaponStats } from '../src/systems/weapons';
 import { statSheetLines } from '../src/systems/statSheet';
-import { statEffect } from '../src/systems/stats';
+import { maxEnergyFor, statEffect } from '../src/systems/stats';
 import { startingStats } from '../src/systems/damage';
 
 const D = gameData;
@@ -104,7 +104,7 @@ describe('스탯', () => {
     }
   });
   it('정보창 줄: 값이 스탯을 따라 오른다', () => {
-    const v = (st: typeof base) => statSheetLines('strength', st, D.stats, D.tags, D.player.sanity)[0]!.value;
+    const v = (st: typeof base) => statSheetLines('strength', st, D.stats, D.tags, D.player.sanity).find((l) => l.key === 'sheet.tag.physical')!.value;
     expect(v({ ...base, strength: 20 })).toBeCloseTo(40);
     expect(statSheetLines('willpower', base, D.stats, D.tags, D.player.sanity).at(-1)).toEqual({ key: 'sheet.sanityMax', value: 100 });
   });
@@ -238,6 +238,20 @@ describe('무기 옵션·치명타', () => {
       expect(chargedCrit(0, 1, max)).toBeCloseTo(0.7);
     }
     expect(chargedCrit(0.3, 1, undefined)).toBe(0.3);
+  });
+});
+
+describe('힘과 에너지', () => {
+  const base = startingStats(D.stats.startValue);
+  it('힘 1당 최대 에너지 +5, 상한이 있고 정보창에 숫자 그대로 보인다', () => {
+    const max = D.player.energy.max;
+    expect(maxEnergyFor(max, base, D.stats)).toBe(max);
+    expect(maxEnergyFor(max, { ...base, strength: 20 }, D.stats)).toBe(max + 50);
+    expect(maxEnergyFor(max, { ...base, strength: 999 }, D.stats)).toBe(max + D.stats.effects.maxEnergy.cap);
+    expect(statSheetLines('strength', { ...base, strength: 20 }, D.stats, D.tags, D.player.sanity)).toContainEqual({ key: 'sheet.effect.maxEnergy', value: 50 });
+  });
+  it('에너지 구슬 하나가 6', () => {
+    expect(D.player.energy.orbValue).toBe(6);
   });
 });
 

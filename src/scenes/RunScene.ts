@@ -53,7 +53,7 @@ import { absorbHit } from '../systems/shield';
 import { corruptedDamage, tickCorruption } from '../systems/acro';
 import { hpStance, takeDamage } from '../systems/vitals';
 import { gainGauge, tickCooldowns } from '../systems/skills';
-import { maxHpFor, setStat, statEffect } from '../systems/stats';
+import { maxEnergyFor, maxHpFor, setStat, statEffect } from '../systems/stats';
 import { buffDuration, tickBleed } from '../systems/tags';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
@@ -548,6 +548,7 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     const mods = this.skillRt.playerMods();
     this.syncMaxHp();
+    this.syncMaxEnergy();
     this.condition.updateSanity(dt);
     // 패닉: 방향이 뒤집힌다
     if (p.panic && !this.itemRt.first('panicCalm')) frame = { ...frame, move: { x: -frame.move.x, y: -frame.move.y } };
@@ -1214,6 +1215,16 @@ export class RunScene extends Phaser.Scene {
     if (target > p.maxHp) p.hp += target - p.maxHp;
     p.maxHp = target;
     p.hp = Math.min(p.hp, p.maxHp);
+  }
+
+  /** 최대 에너지 = 기본 + 힘(아이템 스탯 포함). 늘면 그만큼 현재 에너지도 채운다 */
+  syncMaxEnergy(): void {
+    const p = this.session.player;
+    const target = maxEnergyFor(this.ctx.data.player.energy.max, this.effStats(false), this.ctx.data.stats);
+    if (target === p.energyMax) return;
+    if (target > p.energyMax) p.energy += target - p.energyMax;
+    p.energyMax = target;
+    p.energy = Math.min(p.energy, p.energyMax);
   }
 
   // ---------- 카드·인벤토리 ----------

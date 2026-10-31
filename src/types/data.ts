@@ -60,7 +60,7 @@ export interface StatRule {
 }
 
 /** 스탯 표의 태그 외 효과 */
-export const STAT_EFFECT_IDS = ['maxHp', 'moveSpeed', 'skillArea', 'energyGain', 'coinGain', 'mentalResist', 'dodgeCooldown'] as const;
+export const STAT_EFFECT_IDS = ['maxHp', 'maxEnergy', 'moveSpeed', 'skillArea', 'energyGain', 'coinGain', 'mentalResist', 'dodgeCooldown'] as const;
 export type StatEffectId = (typeof STAT_EFFECT_IDS)[number];
 
 export interface StatsData {

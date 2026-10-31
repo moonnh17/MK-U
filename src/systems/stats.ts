@@ -2,13 +2,18 @@
 import type { StatEffectId, StatId, StatsData } from '../types/data';
 import { linearBonus, type Stats } from './damage';
 
-/** maxHp는 더하는 값, 나머지는 비율 */
+/** maxHp·maxEnergy는 더하는 값, 나머지는 비율 */
 export function statEffect(id: StatEffectId, stats: Stats, data: StatsData): number {
   return linearBonus(data.effects[id], stats);
 }
 
 export function maxHpFor(baseMaxHp: number, stats: Stats, data: StatsData): number {
   return baseMaxHp + statEffect('maxHp', stats, data);
+}
+
+/** 최대 에너지 = 기본 + 힘 */
+export function maxEnergyFor(baseMax: number, stats: Stats, data: StatsData): number {
+  return baseMax + statEffect('maxEnergy', stats, data);
 }
 
 export interface StatHolder {

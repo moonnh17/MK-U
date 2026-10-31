@@ -20,7 +20,7 @@ export function statSheetLines(id: StatId, stats: Stats, sd: StatsData, tags: Ta
   for (const [effect, rule] of Object.entries(sd.effects)) {
     if (rule.stat !== id) continue;
     const v = statEffect(effect as keyof StatsData['effects'], stats, sd);
-    out.push({ key: `sheet.effect.${effect}`, value: effect === 'maxHp' ? round1(v) : round1(v * 100) });
+    out.push({ key: `sheet.effect.${effect}`, value: effect === 'maxHp' || effect === 'maxEnergy' ? round1(v) : round1(v * 100) });
   }
   for (const t of tags.tags) {
     if (t.rule.kind !== 'linearStat' || t.rule.stat !== id) continue;

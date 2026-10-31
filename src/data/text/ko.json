@@ -1,6 +1,6 @@
 {
   "stat.strength": "힘",
-  "stat.strength.desc": "물리 피해 증가, 근접 공격 강화",
+  "stat.strength.desc": "물리 피해 증가, 근접 공격 강화, 최대 에너지 증가",
   "stat.toughness": "견고",
   "stat.toughness.desc": "최대 체력 증가",
   "stat.agility": "민첩",
@@ -521,6 +521,7 @@
   "weapon.category.blade": "칼",
   "weapon.category.staff": "지팡이",
   "sheet.effect.maxHp": "최대 체력 +{v}",
+  "sheet.effect.maxEnergy": "최대 에너지 +{v}",
   "sheet.effect.moveSpeed": "이동속도 +{v}%",
   "sheet.effect.skillArea": "스킬 범위 +{v}%",
   "sheet.effect.energyGain": "에너지 획득 +{v}%",

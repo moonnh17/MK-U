@@ -76,7 +76,7 @@
   "energy": {
     "max": 200,
     "start": 200,
-    "orbValue": 5
+    "orbValue": 6
   },
   "spriteKey": "player_human",
   "color": "#e8e2d0",
