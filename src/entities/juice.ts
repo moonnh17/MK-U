@@ -50,6 +50,16 @@ export class Juice {
     }
   }
 
+  /** 지팡이: 끝에서 십자로 번쩍이고 파티클이 흩어진다 */
+  sparkle(at: Vec2, color: string, c: { particles: readonly [number, number]; particleSpeed: readonly [number, number]; particleLifeSec: number; particleSize: number; flashPx: number; flashSec: number }): void {
+    const col = hexColor(color);
+    this.particles(at, c.particles, c.particleSpeed, c.particleLifeSec, c.particleSize, col);
+    for (const [w, h, tint] of [[c.flashPx, 1.5, 0xffffff], [1.5, c.flashPx, 0xffffff], [c.flashPx * 0.55, c.flashPx * 0.55, col]] as const) {
+      const r = this.scene.add.rectangle(at.x, at.y, w, h, tint, 0.9).setDepth(7).setBlendMode('ADD');
+      this.scene.tweens.add({ targets: r, scaleX: 0.15, scaleY: 0.15, alpha: 0, duration: c.flashSec * 1000, ease: 'Quad.easeIn', onComplete: () => r.destroy() });
+    }
+  }
+
   /** 맞은 적 위로 튀어 오르는 피해 숫자 (동시 max개, 넘으면 오래된 것부터 지운다) */
   damageNumber(at: Vec2, amount: number, kind: DamageKind, boss: boolean): void {
     const d = this.j.damageNumbers;

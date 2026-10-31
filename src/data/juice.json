@@ -156,6 +156,18 @@
     "markerColor": "#ffd23f",
     "fontSize": 8
   },
+  "weaponMotion": {
+    "recoil": { "sec": 0.16, "minPx": 1.5, "maxPx": 6, "kickDeg": 14, "refIntervalSec": 0.9 },
+    "staff": { "sec": 0.2, "px": 2, "particles": [7, 10], "particleSpeed": [20, 70], "particleLifeSec": 0.38, "particleSize": 2, "flashPx": 11, "flashSec": 0.16 },
+    "swing": { "sec": 0.2, "maxArcDeg": 150 },
+    "thrust": { "sec": 0.18, "px": 14 },
+    "smash": { "sec": 0.3, "fromDeg": -110, "toDeg": 30 },
+    "wave": { "sec": 0.8, "deg": 24 },
+    "fitInterval": 0.85,
+    "ghostAlpha": 0.55,
+    "ghostFadeSec": 0.16,
+    "ghostStepDeg": 10
+  },
   "turretRecoil": { "sec": 0.16, "px": 3.5, "bigPx": 1.5, "squash": 0.18 },
   "shieldSpawn": {
     "particles": [26, 34],

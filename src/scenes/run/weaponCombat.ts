@@ -1,4 +1,4 @@
-/** 무기 공격과 피해: 사격·근접(참격·타격 이펙트)·바람과 버프·레이저·운석·번개, 탄 적중·튕김, 피해 계산. */
+/** 무기 공격과 피해: 사격·근접(참격·타격 이펙트)·든 무기의 움직임과 잔상·바람과 버프·레이저·운석·번개, 탄 적중·튕김, 피해 계산. */
 import { loopArt, playFx } from '../../skills/skillFx';
 import { segmentClear } from '../../systems/pathField';
 import { zigzag } from '../../systems/dodge';
@@ -19,7 +19,7 @@ import { calcDamage, spaceDamage, type RangeBonus } from '../../systems/damage';
 import { gaugeFromDamage, gaugeFromEnergy } from '../../systems/advancement';
 import { itemDamageMultiplier } from '../../systems/items';
 import { chainTargets, lineHits, muzzleAngle, muzzlePoint } from '../../systems/targeting';
-import { signatureFires } from '../../systems/motion';
+import { signatureFires, weaponPose, type WeaponMotionKind, type WeaponMotionParams } from '../../systems/motion';
 import { corruptedDamage, skillChance } from '../../systems/acro';
 import { hpStance } from '../../systems/vitals';
 import { gainGauge } from '../../systems/skills';
@@ -48,6 +48,8 @@ export class WeaponCombat {
   private buffSparkIn = 0;
   /** 휘두를 때마다 참격 방향을 뒤집는다 */
   private swingFlip = false;
+  /** 든 무기의 움직임 (없으면 제자리) */
+  motion: { kind: WeaponMotionKind; t: number; sec: number; params: WeaponMotionParams; ghost: string | null; lastRot: number | null } | null = null;
 
   constructor(private readonly run: RunScene) {}
 
@@ -124,6 +126,7 @@ export class WeaponCombat {
     const udef = this.run.skillRt.ultimateDef();
     p.ultimate.gauge = gainGauge(p.ultimate.gauge, udef.gaugeMax, gaugeFromEnergy(udef, p.energy - left));
     p.energy = left;
+    this.startShotMotion(w, st.fireIntervalSec);
     sfx(sig?.kind === 'laser' ? 'shotLaser' : weaponSfx(w));
     const emp = this.run.itemRt.consumeEmpowered();
     if (sig?.kind === 'laser') {
@@ -161,6 +164,73 @@ export class WeaponCombat {
     }
     for (const shot of gunShots(w, shotAngle, this.run.rng)) {
       this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, ricochet: w.ricochet, tint: w.ricochet ? w.color : undefined });
+    }
+  }
+
+  /** 총은 뒤로 튕기고(느린 총일수록 크게), 지팡이는 끝에서 번쩍인다 */
+  private startShotMotion(w: WeaponDef, intervalSec: number): void {
+    const m = this.run.ctx.data.juice.weaponMotion;
+    if (w.category === 'staff') {
+      this.setMotion('staff', m.staff.sec, intervalSec, { px: m.staff.px }, null);
+      this.run.juice.sparkle(this.muzzle(), w.color, m.staff);
+      return;
+    }
+    const heavy = Math.min(1, intervalSec / m.recoil.refIntervalSec);
+    this.setMotion('recoil', m.recoil.sec, intervalSec, { rad: (m.recoil.kickDeg * heavy * Math.PI) / 180, px: m.recoil.minPx + (m.recoil.maxPx - m.recoil.minPx) * heavy }, null);
+  }
+
+  /** 칼: 패턴에 맞는 움직임을 잔상과 함께 */
+  private startMeleeMotion(w: WeaponDef, intervalSec: number, color: string): void {
+    const m = this.run.ctx.data.juice.weaponMotion;
+    const rad = (deg: number) => (deg * Math.PI) / 180;
+    const p = w.pattern;
+    if (p.kind === 'arc') this.setMotion('swing', m.swing.sec, intervalSec, { rad: rad(Math.min(p.arcDeg, m.swing.maxArcDeg) / 2), sign: this.swingFlip ? -1 : 1 }, color);
+    else if (p.kind === 'line') this.setMotion('thrust', m.thrust.sec, intervalSec, { px: m.thrust.px }, color);
+    else if (p.kind === 'smash') this.setMotion('smash', m.smash.sec, intervalSec, { rad: rad(m.smash.fromDeg), toRad: rad(m.smash.toDeg) }, color);
+    else if (p.kind === 'gust') this.setMotion('wave', m.wave.sec, intervalSec, { rad: rad(m.wave.deg) }, color);
+  }
+
+  private setMotion(kind: WeaponMotionKind, sec: number, intervalSec: number, params: WeaponMotionParams, ghost: string | null): void {
+    this.motion = { kind, t: 0, sec: Math.min(sec, intervalSec * this.run.ctx.data.juice.weaponMotion.fitInterval), params, ghost, lastRot: null };
+  }
+
+  /** 이번 프레임 든 무기의 자세 (조준이 왼쪽이면 호출한 쪽이 각도를 뒤집는다) */
+  heldPose(dt: number): { rot: number; push: number } {
+    const m = this.motion;
+    if (!m) return { rot: 0, push: 0 };
+    m.t += dt / m.sec;
+    if (m.t >= 1) {
+      this.motion = null;
+      return { rot: 0, push: 0 };
+    }
+    return weaponPose(m.kind, m.t, m.params);
+  }
+
+  /** 움직이는 칼 뒤로 잔상: 지난 프레임과의 각도 사이도 채워 흐릿하게 이어 보이게 한다 */
+  trailHeld(sprite: Phaser.GameObjects.Image, push: number): void {
+    const m = this.motion;
+    if (!m?.ghost || m.t > 0.7) return;
+    const c = this.run.ctx.data.juice.weaponMotion;
+    const from = m.lastRot ?? sprite.rotation;
+    let diff = sprite.rotation - from;
+    diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+    m.lastRot = sprite.rotation;
+    const moved = Math.abs(diff) > 0.001 || push !== 0;
+    if (!moved) return;
+    const steps = Math.max(1, Math.min(5, Math.ceil(Math.abs(diff) / ((c.ghostStepDeg * Math.PI) / 180))));
+    const col = hexColor(m.ghost);
+    for (let i = 1; i <= steps; i++) {
+      const g = this.run.add
+        .image(sprite.x, sprite.y, sprite.texture.key)
+        .setOrigin(sprite.originX, sprite.originY)
+        .setFlip(sprite.flipX, sprite.flipY)
+        .setScale(sprite.scaleX, sprite.scaleY)
+        .setRotation(from + (diff * i) / steps)
+        .setDepth(sprite.depth - 0.1)
+        .setTint(col)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setAlpha(c.ghostAlpha * (i / steps));
+      this.run.tweens.add({ targets: g, alpha: 0, duration: c.ghostFadeSec * 1000, onComplete: () => g.destroy() });
     }
   }
 
@@ -330,6 +400,7 @@ export class WeaponCombat {
       this.run.roomProps.meleeProps(st.damage * dmgMul, (b) => Math.hypot(b.x - origin.x, b.y - origin.y) <= r + 6);
       this.gustFx(origin, r, color);
     }
+    this.startMeleeMotion(w, st.fireIntervalSec, color);
     if (w.selfBuff) this.applyBuff(w.selfBuff);
     for (const e of targets) {
       const at = { x: e.sprite.x, y: e.sprite.y };

@@ -413,6 +413,7 @@ export class RunScene extends Phaser.Scene {
     this.encounters.spireEvents = [];
     this.combat.buffLeft = 0;
     this.combat.buffAura = null;
+    this.combat.motion = null;
     this.combat.charging = false;
     this.combat.chargeT = 0;
     this.combat.chargeFx = null;
@@ -622,14 +623,16 @@ export class RunScene extends Phaser.Scene {
     const weaponKey = this.shownWeaponKey();
     const handAt = this.combat.handPos();
     const upright = this.weaponDef().upright === true;
+    const pose = this.combat.heldPose(dt);
     this.weaponSprite
       .setTexture(weaponKey)
       .setOrigin(d.art.sprites[weaponKey]?.gripX ?? 0.5, 0.5)
       // 왼쪽을 겨눌 때 총이 거꾸로 서지 않게 (깃발은 세워 든 채 좌우만 뒤집는다)
       .setFlipY(!upright && this.aimDir.x < 0)
       .setFlipX(upright && this.aimDir.x < 0)
-      .setPosition(handAt.x, handAt.y)
-      .setRotation(upright ? 0 : aimAngle);
+      .setPosition(handAt.x + this.aimDir.x * pose.push, handAt.y + this.aimDir.y * pose.push)
+      .setRotation((upright ? 0 : aimAngle) + (this.aimDir.x < 0 ? -pose.rot : pose.rot));
+    this.combat.trailHeld(this.weaponSprite, pose.push);
 
     animateArt(d, this.player);
     this.updateCamera();

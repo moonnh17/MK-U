@@ -8,6 +8,7 @@ import { cardPrice, cardStock, encounterPool, rollWeapon } from '../src/systems/
 import { cardStillValid } from '../src/systems/cards';
 import { enemyStageScale } from '../src/systems/champions';
 import { readyWeaponSet } from '../src/systems/items';
+import { weaponPose } from '../src/systems/motion';
 import { statSheetLines } from '../src/systems/statSheet';
 import { statEffect } from '../src/systems/stats';
 import { startingStats } from '../src/systems/damage';
@@ -152,6 +153,29 @@ describe('후반 체력', () => {
   it('뒤 챕터 보스일수록 체력이 많다', () => {
     const order = ['electricRing', 'hectarChief', 'magiGolem', 'eclipse', 'magiKaiser'].map(hp);
     expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+});
+
+describe('든 무기의 움직임', () => {
+  it('총: 쏘자마자 가장 크게 뒤로 튕기고 위로 들렸다 제자리로', () => {
+    const o = { rad: 0.2, px: 5 };
+    expect(weaponPose('recoil', 0, o)).toEqual({ rot: -0.2, push: -5 });
+    expect(Math.abs(weaponPose('recoil', 0.5, o).push)).toBeLessThan(5);
+    expect(weaponPose('recoil', 1, o).push === 0 || Object.is(weaponPose('recoil', 1, o).push, -0)).toBe(true);
+  });
+  it('휘두르기: 한쪽 끝에서 반대쪽 끝으로 가고, 방향을 뒤집을 수 있으며, 제자리로 돌아온다', () => {
+    const p = { rad: 1, sign: 1 };
+    expect(weaponPose('swing', 0.12, p).rot).toBeCloseTo(1);
+    expect(weaponPose('swing', 0.64, p).rot).toBeLessThan(-0.9);
+    expect(weaponPose('swing', 1, p).rot).toBeCloseTo(0);
+    expect(weaponPose('swing', 0.12, { rad: 1, sign: -1 }).rot).toBeCloseTo(-1);
+  });
+  it('내려찍기: 위에서 아래로, 찌르기: 앞으로 나갔다 돌아온다', () => {
+    const s = { rad: -2, toRad: 0.5 };
+    expect(weaponPose('smash', 0.12, s).rot).toBeCloseTo(-2);
+    expect(weaponPose('smash', 0.64, s).rot).toBeGreaterThan(0.4);
+    expect(weaponPose('thrust', 0.35, { px: 14 }).push).toBeCloseTo(14);
+    expect(weaponPose('thrust', 1, { px: 14 }).push).toBeCloseTo(0);
   });
 });
 

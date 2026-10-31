@@ -1334,6 +1334,22 @@ export interface JuiceData {
   advancement: { chargeSec: number; particles: number; burstHoldSec: number };
   /** 전투 시작 띠 */
   combatStart: { sec: number; color: string; size: number; bandPx: number };
+  /**
+   * 든 무기의 움직임. 총: 뒤로 튕김 / 지팡이: 끝에서 파티클이 번쩍임 / 칼: 휘두르기·찌르기·내려찍기·깃발 흔들기와 잔상.
+   * fitInterval: 공격 간격보다 짧게 끝내는 비율 / ghostStepDeg: 잔상을 촘촘히 채우는 각도 간격
+   */
+  weaponMotion: {
+    recoil: { sec: number; minPx: number; maxPx: number; kickDeg: number; refIntervalSec: number };
+    staff: { sec: number; px: number; particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; flashPx: number; flashSec: number };
+    swing: { sec: number; maxArcDeg: number };
+    thrust: { sec: number; px: number };
+    smash: { sec: number; fromDeg: number; toDeg: number };
+    wave: { sec: number; deg: number };
+    fitInterval: number;
+    ghostAlpha: number;
+    ghostFadeSec: number;
+    ghostStepDeg: number;
+  };
   /** 포탑이 쏠 때 포신이 뒤로 밀렸다 돌아온다 */
   turretRecoil: { sec: number; px: number; bigPx: number; squash: number };
   /** 마기역장이 생길 때: 입자가 뿜어져 나오며 막이 작게 시작해 몸을 덮는다 */
