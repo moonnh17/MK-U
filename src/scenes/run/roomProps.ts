@@ -100,7 +100,7 @@ export class RoomProps {
     shake(this.run, 'light');
     this.run.juice.explosionNear(at, 0);
     for (const e of [...this.run.enemies]) {
-      if (!e.dead && Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= b.radius + e.radius) this.run.hit(e, b.damage, b.tags, 'barrel');
+      if (!e.dead && Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= b.radius + e.radius) this.run.combat.hit(e, b.damage, b.tags, 'barrel');
     }
     if (Math.hypot(this.run.player.x - at.x, this.run.player.y - at.y) <= b.radius + this.run.ctx.data.player.size / 2) this.run.hurtPlayer(b.playerDamage);
     this.blastProps(at, b.radius, b.hp + this.run.ctx.data.mapgen.roomProps.crate.hp);

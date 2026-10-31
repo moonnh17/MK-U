@@ -100,7 +100,7 @@ export class PlayerCondition {
     const spread = (s.spreadDeg * Math.PI) / 180;
     for (let i = 0; i < s.shots; i++) {
       const a = s.shots === 1 ? base : base - spread / 2 + (spread * i) / (s.shots - 1);
-      this.run.fireBullet(from, a, s.projectileSpeed, s.range, s.damage, s.tags, 'dodge', { pierce: 0, crit: 0, tint: s.tint });
+      this.run.combat.fireBullet(from, a, s.projectileSpeed, s.range, s.damage, s.tags, 'dodge', { pierce: 0, crit: 0, tint: s.tint });
     }
   }
 
