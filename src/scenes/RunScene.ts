@@ -2,12 +2,13 @@ import { buildPathField, pathDir, segmentClear, type PathField } from '../system
 import { IDLE_DODGE } from '../systems/dodge';
 import { stampGrid } from '../systems/roomShapes';
 import Phaser from 'phaser';
+import { Progression } from './run/progression';
 import { WeaponCombat } from './run/weaponCombat';
 import { StageFx } from './run/stageFx';
 import { PlayerCondition } from './run/playerCondition';
 import { RoomProps } from './run/roomProps';
-import { SKILL_ACTIONS, sfx, type Modal, type Offer, type Prop, type RunSceneData, type Vending } from './run/shared';
-import type { ActionFrame, Vec2 } from '../core/actions';
+import { SKILL_ACTIONS, sfx, type Modal, type Prop, type RunSceneData, type Vending } from './run/shared';
+import type { Vec2 } from '../core/actions';
 import { getContext, type GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { DISABLED_ACTIONS } from '../core/features';
@@ -32,11 +33,10 @@ import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
 import { FloorWeapon, Pickup } from '../entities/pickup';
 import { nearestEnemy, type ShieldOpts, type SkillHost, type SkillObject } from '../skills/host';
-import { isSkillImplemented, passiveImpl, skillImpl, ultimateImpl } from '../skills/registry';
-import { applyCard, drawSkillCards, drawStatCards, runStartOffers, stageEndOffers, type AnyCard } from '../systems/cards';
+import { passiveImpl, skillImpl, ultimateImpl } from '../skills/registry';
+import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { calcDamage, gradeMultiplier, spaceDamage, type Stats } from '../systems/damage';
-import { convertSkills, gaugeFromGreatSuccess, judgeSchool, skillAllowed, topSchools, ultimateAwakeningReady } from '../systems/advancement';
-import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type Cutscene } from '../ui/cutscenePages';
+import { gaugeFromGreatSuccess } from '../systems/advancement';
 import { assignElites, eliteCount, pickTwoElites } from '../systems/elites';
 import { championWaves, raidChampions } from '../systems/champions';
 import { IMPLEMENTED_ENCOUNTERS } from '../systems/encounter';
@@ -46,20 +46,19 @@ import { generateStage, type RoomNode } from '../systems/mapgen';
 import { encounterKinds, hiddenChapterMul, pickHiddenBoss } from '../systems/hiddenBoss';
 import { steerToward } from '../systems/motion';
 import { crystalBreakdown, rollShard } from '../systems/runRecord';
-import { registerCutscene, registerGemini } from '../core/save';
-import { hasLines, MiniQueue, pickMini, saidKeys, storyFor } from '../systems/gemini';
+import { MiniQueue } from '../systems/gemini';
 import { inSpireCircle, spireEliteCount, spireItemChoices, spireSize, type SpireEvent } from '../systems/spire';
 import { planCombatWaves, RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
 import { advanceStage, playableChapters, firstStage } from '../systems/run';
 import { absorbHit, refracts, tickShield, type ShieldState } from '../systems/shield';
 import { applyCorruption, corruptedDamage, skillChance, tickCorruption } from '../systems/acro';
 import { combineMods, heal, hpStance, payHp, takeDamage, type PlayerMods } from '../systems/vitals';
-import { cooldownLeft, equipSkill, findSkill, gainGauge, refundCooldown, setSkillLevel, skillValues, tickCooldowns } from '../systems/skills';
-import { addStat, damageTaken, maxHpFor, setStat, statEffect } from '../systems/stats';
+import { cooldownLeft, findSkill, gainGauge, refundCooldown, setSkillLevel, skillValues, tickCooldowns } from '../systems/skills';
+import { damageTaken, maxHpFor, setStat, statEffect } from '../systems/stats';
 import { applyBleed, buffDuration, canAutoCast, chargeTime, skillTags, tickBleed } from '../systems/tags';
 import { activeWeapon, dropWeaponAt, autoAim, gainEnergy, normalize, pickUpWeapon, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, corridors, doorRect, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, obstacleRects, wallRects, type Rect, type WorldMetrics } from '../systems/worldLayout';
-import type { BleedRule, EncounterKindId, GeminiEventId, GradeId, HiddenBossDef, SchoolId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
+import type { BleedRule, EncounterKindId, GradeId, HiddenBossDef, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -69,6 +68,7 @@ export class RunScene extends Phaser.Scene {
   condition!: PlayerCondition;
   stageFx!: StageFx;
   combat!: WeaponCombat;
+  progression!: Progression;
   ctx!: GameContext;
   session!: RunSession;
   m!: WorldMetrics;
@@ -108,8 +108,6 @@ export class RunScene extends Phaser.Scene {
   hiddenBossRooms = new Map<number, HiddenBossDef>();
   /** 디버그: 다음 히든보스 지정 */
   forcedHiddenBoss: string | null = null;
-  /** 학파 선택 카드를 고른 뒤 전직을 마치고 할 일 */
-  pendingAdvance: (() => void) | null = null;
   /** 마기수집첨탑 (조우 칸 하나에 하나) */
   spires: Spire[] = [];
   /** 타격감 연출·히트스톱 (멈춘 동안은 물리와 적이 멈춘다), 다음 피해가 치명타인지 */
@@ -131,9 +129,6 @@ export class RunScene extends Phaser.Scene {
   spireEvents: { sp: Spire; e: SpireEvent }[] = [];
   /** 디버그: 다음 조우 칸 유형 강제 */
   forcedEncounter: EncounterKindId | null = null;
-  /** 이번 카드창에서 리롤을 썼는지 */
-  rerolled = false;
-  currentOffer: Offer | null = null;
   skillObjects: SkillObject[] = [];
   /** 적 쪽 위험 지대(폭발 엘리트 지연 폭발 등) */
   hazards: Hazard[] = [];
@@ -166,16 +161,6 @@ export class RunScene extends Phaser.Scene {
 
   // 카드·인벤토리
   modal: Modal = null;
-  offerQueue: Offer[] = [];
-  afterOffers: (() => void)[] = [];
-  currentCards: AnyCard[] | null = null;
-  /** 컷인 → 설명창 대기열과 다 본 뒤 할 일 */
-  /** 미모사 제미니 미니 대사 순서, 스토리 대화가 끝난 뒤 할 일 */
-  mini!: MiniQueue;
-  storyThen: (() => void) | null = null;
-  cutQueue: Cutscene[] = [];
-  afterCuts: (() => void) | null = null;
-  cardSeq = 0;
   /** 포털을 탔다(카드를 고르는 동안 포털을 다시 밟지 않게) */
   leaving = false;
 
@@ -188,6 +173,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.progression = new Progression(this);
     this.combat = new WeaponCombat(this);
     this.stageFx = new StageFx(this);
     this.condition = new PlayerCondition(this);
@@ -219,7 +205,7 @@ export class RunScene extends Phaser.Scene {
     };
     this.ctx.session = this.session;
     this.rng = Rng.derive(seed, `combat-${stage.chapter}-${stage.stage}`);
-    this.mini = new MiniQueue(d.gemini.mini.showSec, d.gemini.mini.fadeSec);
+    this.progression.mini = new MiniQueue(d.gemini.mini.showSec, d.gemini.mini.fadeSec);
     // 연출용 난수는 전투 난수와 따로 (시드 재현에 영향 없게)
     this.juice = new Juice(this, d, Rng.derive(seed, `juice-${stage.chapter}-${stage.stage}`));
     this.hitStop = new HitStop(d.juice.hitStop.minGapSec);
@@ -232,10 +218,10 @@ export class RunScene extends Phaser.Scene {
     this.tweens.timeScale = 1;
     this.aimTarget = null;
     this.obstacles = new Map();
-    this.storyThen = null;
+    this.progression.storyThen = null;
     bus.emit('geminiMini', { line: null });
     // 챕터를 끝내고 넘어왔다 (2장 종료 미니 대사)
-    if (!newRun && stage.stage === 1 && stage.chapter > 1) this.say('chapterEnd', String(stage.chapter - 1));
+    if (!newRun && stage.stage === 1 && stage.chapter > 1) this.progression.say('chapterEnd', String(stage.chapter - 1));
     this.m = metrics(d.mapgen);
     this.hosts = new Map();
     this.host = this.hostFor(null);
@@ -350,32 +336,32 @@ export class RunScene extends Phaser.Scene {
     this.unsubs.push(
       bus.on('debugClearRoom', () => this.debugClearRoom()),
       bus.on('restartRequested', () => this.restartRun()),
-      bus.on('cardPick', ({ index }) => this.pickCard(index)),
-      bus.on('inventoryEquip', ({ skillId, target }) => this.equip(skillId, target)),
+      bus.on('cardPick', ({ index }) => this.progression.pickCard(index)),
+      bus.on('inventoryEquip', ({ skillId, target }) => this.progression.equip(skillId, target)),
       bus.on('inventoryDropWeapon', ({ slot }) => this.dropFromSlot(slot)),
-      bus.on('inventoryOpenRequest', () => this.openInventory()),
-      bus.on('inventoryCloseRequest', () => this.closeInventory()),
+      bus.on('inventoryOpenRequest', () => this.progression.openInventory()),
+      bus.on('inventoryCloseRequest', () => this.progression.closeInventory()),
       bus.on('debugSetSkill', (e) => this.debugSetSkill(e.skillId, e.level, e.awakened)),
       bus.on('debugSetStat', ({ stat, value }) => {
         const before = { hp: this.session.player.hp, maxHp: this.session.player.maxHp };
         this.session.player = { ...setStat(this.session.player, stat, value, d.player.maxHp, d.stats), ...before };
         this.syncMaxHp();
       }),
-      bus.on('debugOpenCards', ({ kind }) => this.queueOffers([{ kind, boss: false }])),
+      bus.on('debugOpenCards', ({ kind }) => this.progression.queueOffers([{ kind, boss: false }])),
       bus.on('debugFillUltimate', () => {
         this.session.player.ultimate.gauge = this.ultimateDef().gaugeMax;
       }),
       bus.on('debugSpawn', ({ enemyId, count, elite }) => this.debugSpawn(enemyId, count, elite ?? null)),
       bus.on('debugBarrage', () => this.debugBarrage()),
-      bus.on('cutsceneDone', () => this.showNextCut()),
-      bus.on('storyDone', () => this.finishStory()),
+      bus.on('cutsceneDone', () => this.progression.showNextCut()),
+      bus.on('storyDone', () => this.progression.finishStory()),
       bus.on('itemGetDone', () => {
         if (this.modal === 'itemGet') this.setModal(null);
       }),
       bus.on('pauseResume', () => {
         if (this.modal === 'pause') this.setModal(null);
       }),
-      bus.on('cardReroll', () => this.rerollCards()),
+      bus.on('cardReroll', () => this.progression.rerollCards()),
       bus.on('debugForceEncounter', ({ kind }) => {
         this.forcedEncounter = kind;
       }),
@@ -419,7 +405,7 @@ export class RunScene extends Phaser.Scene {
 
     // 런 시작 스킬 카드 / 앞 스테이지가 넘긴 카드는 시작방에서 고른다
     const offers = newRun ? runStartOffers(d.cards) : (this.initData.offers ?? []);
-    this.queueOffers(offers.map((kind) => ({ kind, boss: false })));
+    this.progression.queueOffers(offers.map((kind) => ({ kind, boss: false })));
   }
 
   resetFields(): void {
@@ -473,13 +459,13 @@ export class RunScene extends Phaser.Scene {
     this.lootSeq = 0;
     this.toastTimes = new Map();
     this.modal = null;
-    this.offerQueue = [];
-    this.afterOffers = [];
-    this.currentCards = null;
-    this.cutQueue = [];
-    this.afterCuts = null;
-    this.pendingAdvance = null;
-    this.cardSeq = 0;
+    this.progression.offerQueue = [];
+    this.progression.afterOffers = [];
+    this.progression.currentCards = null;
+    this.progression.cutQueue = [];
+    this.progression.afterCuts = null;
+    this.progression.pendingAdvance = null;
+    this.progression.cardSeq = 0;
     this.leaving = false;
   }
 
@@ -714,12 +700,12 @@ export class RunScene extends Phaser.Scene {
       bus.emit('itemGot', this.itemGets.shift()!);
     }
     if (this.modal) {
-      this.updateModal(frame);
+      this.progression.updateModal(frame);
       this.refreshSkillView();
       return;
     }
     // 미니 대사: 창이 열린 동안은 표시 시간도 멈춘다
-    const ml = this.mini.update(dt);
+    const ml = this.progression.mini.update(dt);
     if (ml) bus.emit('geminiMini', ml);
     // 히트스톱: 아주 잠깐 물리·적·입력을 멈춘다 (연출 트윈은 계속)
     const stopped = this.hitStop.update(dt);
@@ -831,7 +817,7 @@ export class RunScene extends Phaser.Scene {
     // 화면 고정 어둠도 확대를 받는다: 지역 좌표 = 화면 가운데 + (플레이어 − 보이는 곳 가운데)
     this.darkness?.update(dt, cam.width / 2 + (this.player.x - cam.midPoint.x), cam.height / 2 + (this.player.y - cam.midPoint.y));
     this.refreshSkillView();
-    if (frame.pressed.has('inventory')) this.openInventory();
+    if (frame.pressed.has('inventory')) this.progression.openInventory();
   }
 
   updateRooms(dt: number): void {
@@ -891,10 +877,10 @@ export class RunScene extends Phaser.Scene {
           const end = stageEndOffers(this.session.stage, this.ctx.data.mapgen, this.ctx.data.cards);
           const bossId = this.rooms.get(roomId)?.waves[0]?.[0];
           // 식광·마기카이저: 처치 후 일반 스토리 대화 (내용이 비어 있으면 건너뜀)
-          this.playStory('bossKill', bossId, () =>
-            this.queueOffers(
+          this.progression.playStory('bossKill', bossId, () =>
+            this.progression.queueOffers(
               end.bossRoom.map((kind) => ({ kind, boss: true })),
-              () => this.afterBossRoom(node),
+              () => this.progression.afterBossRoom(node),
             ),
           );
         }
@@ -936,7 +922,7 @@ export class RunScene extends Phaser.Scene {
         ? [championWaves(Rng.derive(this.ctx.config.seed, champLabel), map.chapter, map.stage, total, d.waves.champions)[index] ?? null].filter((x): x is string => x !== null)
         : [];
     for (const id of champs) this.spawnEnemy(id, roomId, rng, true);
-    if (champs.length > 0) this.say('championMet');
+    if (champs.length > 0) this.progression.say('championMet');
     this.rooms.get(roomId)?.addAlive(champs.length);
   }
 
@@ -1717,315 +1703,11 @@ export class RunScene extends Phaser.Scene {
     bus.emit('modal', { kind });
   }
 
-  updateModal(frame: ActionFrame): void {
-    if (this.modal === 'cards') {
-      // PC: 1/2/3 키로 바로 고른다 (숫자키는 skill1~3 명령으로 들어온다)
-      SKILL_ACTIONS.forEach((action, i) => {
-        if (frame.pressed.has(action) && this.ctx.uiMode === 'pc') this.pickCard(i);
-      });
-    } else if (this.modal === 'inventory') {
-      if (frame.pressed.has('inventory') || frame.pressed.has('pause')) this.closeInventory();
-    } else if (this.modal === 'pause') {
-      if (frame.pressed.has('pause')) this.setModal(null);
-    }
-  }
-
-  /** 카드를 차례로 띄운다. 다 고르면 then을 부른다 */
-  queueOffers(offers: Offer[], then?: () => void): void {
-    this.offerQueue.push(...offers);
-    if (then) this.afterOffers.push(then);
-    if (this.modal === null) this.openNextCards();
-  }
-
-  openNextCards(): void {
-    const next = this.offerQueue.shift();
-    if (!next) {
-      this.currentCards = null;
-      if (this.modal === 'cards') this.setModal(null);
-      const calls = this.afterOffers;
-      this.afterOffers = [];
-      for (const f of calls) f();
-      return;
-    }
-    this.currentOffer = next;
-    this.rerolled = false;
-    this.showCards();
-  }
-
-  /** 지금 카드창(currentOffer)의 카드를 뽑아 띄운다. 리롤도 이걸 다시 부른다 */
-  showCards(): void {
-    const next = this.currentOffer!;
-    const d = this.ctx.data;
-    const p = this.session.player;
-    const { stage } = this.session;
-    const rng = Rng.derive(this.ctx.config.seed, `cards-${stage.chapter}-${stage.stage}-${this.cardSeq++}`);
-    if (next.kind === 'school') {
-      // 학파 선택 카드(전직 동점): 리롤 없음
-      const cards = (next.schools ?? []).map((school) => ({ kind: 'school' as const, school }));
-      this.currentCards = cards;
-      this.setModal('cards');
-      bus.emit('cardsShow', { titleKey: 'card.title.school', cards, reroll: null });
-      return;
-    }
-    if (next.kind === 'item') {
-      // 아이템 선택 카드(첨탑): 미리 뽑아 둔 아이템, 리롤 없음
-      const cards = (next.items ?? []).map((itemId) => ({ kind: 'item' as const, itemId }));
-      this.currentCards = cards;
-      this.setModal('cards');
-      bus.emit('cardsShow', { titleKey: 'card.title.spire', cards, reroll: null });
-      return;
-    }
-    const cards =
-      next.kind === 'skill'
-        ? drawSkillCards(rng, p.loadout, p.stats, d.skills, d.cards, (id) => isSkillImplemented(id) && skillAllowed(findSkill(d.skills, id), p.advancement))
-        : drawStatCards(rng, d.cards.cardCount, d.cards);
-    this.currentCards = cards;
-    this.setModal('cards');
-    const cost = d.cards.rerollCost;
-    bus.emit('cardsShow', {
-      titleKey: next.boss ? 'card.title.boss' : `card.title.${next.kind}`,
-      cards,
-      reroll: { cost, enabled: !this.rerolled && Math.floor(p.coins) >= cost, used: this.rerolled },
-    });
-  }
-
-  /** 카드창마다 1회, 코인으로 다시 뽑기 */
-  rerollCards(): void {
-    const p = this.session.player;
-    const cost = this.ctx.data.cards.rerollCost;
-    if (this.modal !== 'cards' || this.rerolled || !this.currentOffer || this.currentOffer.kind === 'item' || this.currentOffer.kind === 'school' || Math.floor(p.coins) < cost) return;
-    p.coins -= cost;
-    this.rerolled = true;
-    this.showCards();
-  }
-
-  pickCard(index: number): void {
-    const card = this.currentCards?.[index];
-    if (!card || this.modal !== 'cards') return;
-    sfx('cardPick');
-    if (card.kind === 'item') {
-      this.giveItem(card.itemId);
-      this.openNextCards();
-      return;
-    }
-    if (card.kind === 'school') {
-      const then = this.pendingAdvance ?? (() => {});
-      this.pendingAdvance = null;
-      this.advanceTo(card.school, () => {
-        this.openNextCards();
-        then();
-      });
-      return;
-    }
-    const d = this.ctx.data;
-    const t = this.ctx.t;
-    const before = { hp: this.session.player.hp, maxHp: this.session.player.maxHp };
-    const r = applyCard(this.session.player, card, { skills: d.skills, stats: d.stats, baseMaxHp: d.player.maxHp });
-    this.session.player = { ...r.holder, ...before };
-    this.syncMaxHp();
-    if (card.kind === 'stat') {
-      bus.emit('toast', { text: t('skillMsg.statUp', { stat: t(`stat.${card.stat}`), amount: card.amount }) });
-    } else {
-      const def = findSkill(d.skills, card.skillId);
-      const owned = r.holder.loadout.owned[card.skillId]!;
-      const skill = t(def.nameKey);
-      if (card.kind === 'skillNew') bus.emit('toast', { text: t('skillMsg.acquired', { skill }) });
-      else if (card.kind === 'skillLevelUp') bus.emit('toast', { text: t('skillMsg.levelUp', { skill, level: owned.level }) });
-      if (r.stored) bus.emit('storedNotice', { skillId: card.skillId });
-      if (card.kind === 'awakening') {
-        // 각성: 컷인 → 설명창, 궁극기 각성 조건을 채웠으면 이어서
-        const cuts = [skillAwakeningCut(this.ctx, card.skillId, r.holder.stats)];
-        const u = this.checkUltimateAwakening();
-        if (u) cuts.push(u);
-        this.playCutscenes(cuts, () => this.openNextCards());
-        return;
-      }
-    }
-    this.openNextCards();
-  }
-
   // ---------- 연출 ----------
-
-  /** 컷인 → 설명창을 차례로 보여 주고, 다 넘기면 then */
-  playCutscenes(list: Cutscene[], then: () => void): void {
-    if (list.length === 0) {
-      then();
-      return;
-    }
-    this.cutQueue = [...list];
-    this.afterCuts = then;
-    this.showNextCut();
-  }
-
-  showNextCut(): void {
-    const next = this.cutQueue.shift();
-    if (!next) {
-      const f = this.afterCuts;
-      this.afterCuts = null;
-      if (this.modal === 'cutscene') this.setModal(null);
-      f?.();
-      return;
-    }
-    // 현재의 기억: 처음 본 컷씬은 다시보기용으로 저장
-    const save = this.ctx.save;
-    if (registerCutscene(save.data, next.id, next.cut, next.pages)) {
-      this.session.player.record.newCutscenes.push(next.id);
-      save.write();
-    }
-    this.setModal('cutscene');
-    sfx('awaken');
-    bus.emit('cutsceneShow', next);
-  }
 
   // ---------- 미모사 제미니 ----------
 
-  /** 미니 대사: 이벤트에 맞는 대사를 골라 순서에 넣는다 (같은 런 반복 없음, 빈 대사는 건너뜀). 복선 대사는 현재의 기억에 */
-  say(event: GeminiEventId, arg?: string): void {
-    const d = this.ctx.data;
-    const p = this.session.player;
-    const rng = Rng.derive(this.ctx.config.seed, `gemini-${event}-${arg ?? ''}-${p.geminiSaid.length}`);
-    const pick = pickMini(d.gemini, event, arg, new Set(p.geminiSaid), rng, d.text);
-    if (!pick) return;
-    p.geminiSaid = [...p.geminiSaid, ...saidKeys(event, arg, pick)];
-    this.mini.push(
-      pick.lines.map((k) => ({ text: this.ctx.t(k), mood: pick.def.mood })),
-      pick.def.priority,
-    );
-    if (pick.def.record && registerGemini(this.ctx.save.data, `gemini.${pick.def.id}`, pick.lines)) this.ctx.save.write();
-  }
-
-  /** 일반 스토리 대화: 게임을 멈추고 띄운 뒤 then. 정해진 대화가 없거나 내용이 비어 있으면 바로 then */
-  playStory(event: GeminiEventId, arg: string | undefined, then: () => void): void {
-    const d = this.ctx.data;
-    const story = storyFor(d.gemini, event, arg);
-    if (!story || !hasLines(story.lines, d.text)) {
-      then();
-      return;
-    }
-    if (registerGemini(this.ctx.save.data, `gemini.${story.id}`, story.lines)) this.ctx.save.write();
-    this.storyThen = then;
-    this.setModal('story');
-    bus.emit('storyShow', { lines: story.lines.map((k) => this.ctx.t(k)) });
-  }
-
-  finishStory(): void {
-    if (this.modal !== 'story') return;
-    this.setModal(null);
-    const f = this.storyThen;
-    this.storyThen = null;
-    f?.();
-  }
-
-  /** 자기 학파 각성 2개면 궁극기를 자동 각성한다. 이번에 각성했으면 연출을 돌려준다 */
-  checkUltimateAwakening(): Cutscene | null {
-    const d = this.ctx.data;
-    const p = this.session.player;
-    const def = this.ultimateDef();
-    if (p.ultimate.awakened || !def.awakening || !def.school || p.advancement !== def.school) return null;
-    if (!ultimateAwakeningReady(p.loadout, d.skills, def.school, d.ultimates.awakeningNeed)) return null;
-    p.ultimate.awakened = true;
-    const ids = Object.entries(p.loadout.owned)
-      .filter(([id, o]) => o.awakened && findSkill(d.skills, id).school === def.school)
-      .sort((a, b) => a[1].order - b[1].order)
-      .map(([id]) => id);
-    return ultimateAwakeningCut(this.ctx, def, ids, d.ultimates.awakeningNeed);
-  }
-
   // ---------- 전직 ----------
-
-  /** 보스방 카드 뒤: 챕터1 마지막 보스면 전직, 그다음 포털 */
-  afterBossRoom(node: RoomNode): void {
-    const d = this.ctx.data;
-    const { stage } = this.session;
-    const last = stage.stage === d.mapgen.stagesPerChapter && stage.chapter === d.jobs.advanceAfterChapter;
-    // 보스 처치: 무기 상자 확정 (포털 옆)
-    const c = roomCenter(node, this.m);
-    const weights = d.loot.weaponChest[String(stage.stage)];
-    const bossId = d.bosses.bosses.find((b) => b.chapter === stage.chapter && b.stage === stage.stage)?.id;
-    const bossItemDef = d.items.items.find((x) => x.pool === 'boss' && x.bossId === bossId && !this.session.player.itemsObtained.includes(x.id));
-    const itemRng = Rng.derive(this.ctx.config.seed, `boss-item-${stage.chapter}-${stage.stage}`);
-    const bossItem = bossItemDef && (bossItemDef.dropChance === undefined || itemRng.chance(bossItemDef.dropChance)) ? bossItemDef : undefined;
-    const reward = () => {
-      this.addPortal(node);
-      if (weights) this.addChest('weapon', c.x - 40, c.y, weights);
-      // 보스 전용 아이템 확정 (무기 상자와 별도)
-      if (bossItem) this.addChest('item', c.x + 40, c.y, {}, bossItem.id);
-      // 보스 전용 무기 확정
-      const bossWeapon = d.weapons.weapons.find((w) => w.bossId === bossId);
-      if (bossWeapon) this.addChest('weapon', c.x + 40, c.y, {}, bossWeapon.id);
-    };
-    if (last && this.session.player.advancement === null) this.advance(reward);
-    else reward();
-  }
-
-  /** 계열 판정. 동점이면 학파 선택 카드(원본 규칙: 플레이어가 직접 고른다) */
-  advance(then: () => void): void {
-    const p = this.session.player;
-    const job = this.ctx.data.jobs.jobs.find((j) => j.id === p.job)!;
-    const order = job.advancements.map((a) => a.id as SchoolId);
-    const school = judgeSchool(p.schoolPicks, order);
-    if (school) {
-      this.advanceTo(school, then);
-      return;
-    }
-    this.pendingAdvance = then;
-    this.queueOffers([{ kind: 'school', boss: false, schools: topSchools(p.schoolPicks, order) }]);
-  }
-
-  /** 스킬 변환 → 궁극기 교체 → 연출 */
-  advanceTo(school: SchoolId, then: () => void): void {
-    const d = this.ctx.data;
-    let p = this.session.player;
-    const job = d.jobs.jobs.find((j) => j.id === p.job)!;
-    const adv = job.advancements.find((a) => a.id === school)!;
-    const r = convertSkills(Rng.derive(this.ctx.config.seed, 'advancement'), p.loadout, p.stats, d.skills, school, d.jobs.conversionStatAmount);
-    p = { ...p, loadout: r.loadout };
-    // 스탯 포인트는 견고(최대 체력)까지 반영되게 하나씩 더한다
-    const before = { hp: p.hp, maxHp: p.maxHp };
-    for (const s of r.log.stats) p = addStat(p, s.stat, s.amount, d.player.maxHp, d.stats);
-    p = { ...p, ...before };
-    const removed = new Set(r.log.removed.map((x) => x.skillId));
-    p.cooldowns = Object.fromEntries(Object.entries(p.cooldowns).filter(([id]) => !removed.has(id)));
-    for (const o of this.skillObjects.filter((x) => removed.has(x.owner.split('.')[0]!))) this.removeObject(o);
-    const fromUlt = this.ultimateDef();
-    p.ultimate = { id: adv.ultimate!, gauge: 0, awakened: false };
-    p.advancement = school;
-    p.advancementLog = r.log;
-    this.session.player = p;
-    this.applyPlayerArt();
-    const cuts = [advancementCut(this.ctx, { jobNameKey: job.nameKey, adv, picks: p.schoolPicks, fromUlt, toUlt: this.ultimateDef(), log: r.log })];
-    const u = this.checkUltimateAwakening();
-    if (u) cuts.push(u);
-    this.refreshSkillView();
-    bus.emit('inventoryChanged', {});
-    this.playCutscenes(cuts, () => {
-      this.say('advancement', school);
-      then();
-    });
-  }
-
-  openInventory(): void {
-    if (this.modal || this.session.outcome) return;
-    this.setModal('inventory');
-  }
-
-  closeInventory(): void {
-    if (this.modal === 'inventory') this.setModal(null);
-  }
-
-  equip(skillId: string, target: number | 'passive'): void {
-    const d = this.ctx.data;
-    const p = this.session.player;
-    const r = equipSkill(p.loadout, skillId, target, d.skills);
-    p.loadout = r.loadout;
-    // 보관함에서 꺼낸 스킬은 쿨타임이 처음부터 돈다
-    for (const id of r.restarted) {
-      const sv = skillValues(findSkill(d.skills, id), p.loadout.owned[id]!);
-      if (sv.cooldownSec > 0) p.cooldowns = { ...p.cooldowns, [id]: sv.cooldownSec };
-    }
-    this.refreshSkillView();
-    bus.emit('inventoryChanged', {});
-  }
 
   // ---------- 상호작용 ----------
 
@@ -2097,7 +1779,7 @@ export class RunScene extends Phaser.Scene {
     let shardKind: 'boss' | 'hiddenBoss' | null = null;
     if (e.rank === 'boss' && this.ctx.data.bosses.bosses.some((b) => b.id === e.def.id)) {
       r.bossKills.push({ id: e.def.id, stage: stage.stage });
-      this.say('bossKill', e.def.id);
+      this.progression.say('bossKill', e.def.id);
       shardKind = 'boss';
     } else if (e.rank === 'hiddenBoss') {
       r.hiddenBossKills.push(e.def.id);
@@ -2279,7 +1961,7 @@ export class RunScene extends Phaser.Scene {
       this.forcedHiddenBoss = null;
       const hb = forced ?? pickHiddenBoss(rng, d.bosses.hiddenBosses, p.hiddenBossesMet) ?? rng.pick(d.bosses.hiddenBosses);
       if (!p.hiddenBossesMet.includes(hb.id)) p.hiddenBossesMet = [...p.hiddenBossesMet, hb.id];
-      this.say('hiddenBoss', hb.id);
+      this.progression.say('hiddenBoss', hb.id);
       const state = new RoomState('encounterRoom', [[hb.id]], d.waves.waveDelaySec);
       this.rooms.set(roomId, state);
       this.hiddenBossRooms.set(roomId, hb);
@@ -2357,7 +2039,7 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     if (d.waves.champions.stages[String(this.session.stage.chapter)]) {
       this.spawnEnemy(rng.pick(d.waves.champions.ids), sp.roomId, rng, true);
-      this.say('championMet');
+      this.progression.say('championMet');
       return;
     }
     const roster = this.chapterRoster();
@@ -2374,14 +2056,14 @@ export class RunScene extends Phaser.Scene {
     const rng = Rng.derive(this.ctx.config.seed, `spire-items-${stage.chapter}-${stage.stage}-${sp.roomId}`);
     const weights = effectiveWeights(d.loot.spire[sp.size].weights, stage.chapter, d.items.chapterCommonShift, p.lootShift);
     const items = spireItemChoices(rng, weights, d.loot.mythicChance, d.items, new Set(p.itemsObtained), d.loot.spire.cards);
-    if (items.length > 0) this.queueOffers([{ kind: 'item', boss: false, items }]);
+    if (items.length > 0) this.progression.queueOffers([{ kind: 'item', boss: false, items }]);
   }
 
   /** 히든보스 처치: 보스 스킬 카드 1장 → 전용 무기 상자(왼쪽)·전용 아이템 상자(오른쪽) */
   hiddenBossReward(roomId: number): void {
     const hb = this.hiddenBossRooms.get(roomId)!;
     const c = roomCenter(this.session.map.rooms[roomId]!, this.m);
-    this.queueOffers([{ kind: this.ctx.data.cards.bossBonus, boss: true }], () => {
+    this.progression.queueOffers([{ kind: this.ctx.data.cards.bossBonus, boss: true }], () => {
       this.addChest('weapon', c.x - 40, c.y, {}, hb.weaponId);
       if (!this.session.player.itemsObtained.includes(hb.itemId)) this.addChest('item', c.x + 40, c.y, {}, hb.itemId);
     });
@@ -2476,7 +2158,7 @@ export class RunScene extends Phaser.Scene {
     if (adv.type === 'stage' || adv.type === 'chapter') {
       // 포탈에 빨려 들어가 이동 화면에서 스테이지 끝 카드를 고른 뒤 다음 스테이지로
       this.stageFx.warpOut(() =>
-        this.queueOffers([{ kind: afterStage, boss: false }], () => {
+        this.progression.queueOffers([{ kind: afterStage, boss: false }], () => {
           const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [], warpIn: true };
           this.scene.restart(data);
         }),
@@ -2486,7 +2168,7 @@ export class RunScene extends Phaser.Scene {
       this.endRun({ type: 'chapterClear', chapter: adv.chapter });
     } else {
       // 임시 마지막 챕터: 카드를 고른 뒤 클리어 화면
-      this.queueOffers([{ kind: afterStage, boss: false }], () => this.endRun({ type: 'chapterClear', chapter: adv.chapter }));
+      this.progression.queueOffers([{ kind: afterStage, boss: false }], () => this.endRun({ type: 'chapterClear', chapter: adv.chapter }));
     }
   }
 
@@ -2533,7 +2215,7 @@ export class RunScene extends Phaser.Scene {
     const p = this.session.player;
     if (this.modal || p.advancement !== null) return;
     p.schoolPicks = { hectar, acro };
-    this.advance(() => {});
+    this.progression.advance(() => {});
   }
 
   debugSetSkill(id: string, level: number, awakened: boolean): void {
@@ -2544,8 +2226,8 @@ export class RunScene extends Phaser.Scene {
     if (level <= 0) for (const o of this.skillObjects.filter((x) => x.owner.split('.')[0] === id)) this.removeObject(o);
     this.refreshSkillView();
     bus.emit('inventoryChanged', {});
-    const u = this.checkUltimateAwakening();
-    if (u && !this.modal) this.playCutscenes([u], () => {});
+    const u = this.progression.checkUltimateAwakening();
+    if (u && !this.modal) this.progression.playCutscenes([u], () => {});
   }
 
   debugSpawn(enemyId: string, count: number, elite: string | null): void {
