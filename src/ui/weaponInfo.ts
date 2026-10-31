@@ -24,6 +24,9 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
     if (odef) out.push({ text: t(odef.nameKey, { value: o.id === 'energyCost' ? o.value : Math.round(o.value * 100) }) });
   }
   if (def.pattern.kind === 'meteor') out.push({ text: t('weapon.sigDesc.meteor'), sig: true });
+  if (def.ricochet) out.push({ text: t('weapon.sigDesc.ricochet', { n: def.ricochet.bounces }), sig: true });
+  if (def.bleed) out.push({ text: t('weapon.sigDesc.bleed'), sig: true });
+  if (def.selfBuff) out.push({ text: t('weapon.sigDesc.gust', { dmg: Math.round(def.selfBuff.damage * 100), sec: def.selfBuff.sec }), sig: true });
   const sig = def.signature;
   if (sig) {
     const params: Record<string, string | number> = { every: sig.every };

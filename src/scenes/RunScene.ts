@@ -348,9 +348,10 @@ export class RunScene extends Phaser.Scene {
         this.encounters.forcedEncounter = 'hiddenBoss';
         this.encounters.forcedHiddenBoss = id;
       }),
-      bus.on('debugGiveWeapon', ({ defId, grade }) => {
+      bus.on('debugGiveWeapon', ({ defId }) => {
         const d = this.ctx.data;
         const def = this.weaponDefOf(defId);
+        const grade = def.grade;
         const count = d.groupMultipliers.grades.find((g) => g.id === grade)?.randomOptions ?? 0;
         const rng = Rng.derive(this.ctx.config.seed, `debug-weapon-${this.loot.lootSeq++}`);
         const options = rollOptions(rng, def, count, d.weapons.options);
@@ -410,6 +411,8 @@ export class RunScene extends Phaser.Scene {
     this.darkness = null;
     this.darknessBoss = null;
     this.encounters.spireEvents = [];
+    this.combat.buffLeft = 0;
+    this.combat.buffAura = null;
     this.combat.charging = false;
     this.combat.chargeT = 0;
     this.combat.chargeFx = null;
@@ -618,13 +621,15 @@ export class RunScene extends Phaser.Scene {
 
     const weaponKey = this.shownWeaponKey();
     const handAt = this.combat.handPos();
+    const upright = this.weaponDef().upright === true;
     this.weaponSprite
       .setTexture(weaponKey)
       .setOrigin(d.art.sprites[weaponKey]?.gripX ?? 0.5, 0.5)
-      // 왼쪽을 겨눌 때 총이 거꾸로 서지 않게
-      .setFlipY(this.aimDir.x < 0)
+      // 왼쪽을 겨눌 때 총이 거꾸로 서지 않게 (깃발은 세워 든 채 좌우만 뒤집는다)
+      .setFlipY(!upright && this.aimDir.x < 0)
+      .setFlipX(upright && this.aimDir.x < 0)
       .setPosition(handAt.x, handAt.y)
-      .setRotation(aimAngle);
+      .setRotation(upright ? 0 : aimAngle);
 
     animateArt(d, this.player);
     this.updateCamera();

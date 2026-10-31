@@ -243,6 +243,8 @@ export class SkillRuntime {
       const b = o.buff?.(this.run.host);
       if (b) out.push(b);
     }
+    const c = this.run.combat;
+    if (c.buffLeft > 0) out.push({ id: 'weaponBuff', label: this.run.ctx.t('buff.warBanner'), color: c.buffColor, leftSec: c.buffLeft, totalSec: c.buffTotal });
     out.push(...this.run.itemRt.buffs());
     return out;
   }

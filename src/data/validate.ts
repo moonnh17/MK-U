@@ -149,6 +149,7 @@ export function validateGameData(d: GameData): Errors {
     errors.push(`weapons.startWeapon: '${d.weapons.startWeapon}' 무기 없음`);
   }
   checkSprite(errors, 'weapons.projectile', d.weapons.projectile);
+  for (const k of ['slash', 'slam', 'slashBig', 'slamBig', 'buffAura'] as const) checkSprite(errors, `weapons.meleeFx.${k}`, d.weapons.meleeFx[k]);
   for (const wpn of d.weapons.weapons) {
     const w = `weapons.${wpn.id}`;
     checkSprite(errors, w, wpn);
@@ -180,6 +181,16 @@ export function validateGameData(d: GameData): Errors {
       if (sig.kind === 'laser' && wpn.category === 'blade') errors.push(`${w}: laser는 탄을 쏘는 무기만`);
     }
     if (wpn.category === 'blade' && wpn.energyCost !== 0) errors.push(`${w}: 칼은 에너지를 소모하지 않음`);
+    if (wpn.category === 'blade' && !HEX_COLOR.test(wpn.fxColor ?? '')) errors.push(`${w}.fxColor: 근접 이펙트 색 #RRGGBB`);
+    if (wpn.ricochet) {
+      checkPositive(errors, `${w}.ricochet.bounces`, wpn.ricochet.bounces);
+      checkPositive(errors, `${w}.ricochet.range`, wpn.ricochet.range);
+    }
+    if (wpn.bleed && !wpn.tags.includes('bleed')) errors.push(`${w}: 출혈 무기는 bleed 태그 필요`);
+    if (wpn.selfBuff) {
+      checkPositive(errors, `${w}.selfBuff.sec`, wpn.selfBuff.sec);
+      checkPositive(errors, `${w}.selfBuff.damage`, wpn.selfBuff.damage);
+    }
     const p = wpn.pattern;
     if (p.kind === 'spread') {
       checkRange(errors, `${w}.pattern.pellets`, p.pellets, 1);
@@ -195,6 +206,9 @@ export function validateGameData(d: GameData): Errors {
     } else if (p.kind === 'smash') {
       checkPositive(errors, `${w}.pattern.reach`, p.reach, true);
       checkPositive(errors, `${w}.pattern.radius`, p.radius);
+    } else if (p.kind === 'gust') {
+      checkPositive(errors, `${w}.pattern.radius`, p.radius);
+      if (wpn.category !== 'blade') errors.push(`${w}: gust는 칼 패턴`);
     } else if (p.kind === 'homing') {
       checkPositive(errors, `${w}.pattern.turnRate`, p.turnRate);
     } else if (p.kind === 'meteor') {

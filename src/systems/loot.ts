@@ -28,10 +28,10 @@ export function rollOptions(rng: Rng, def: WeaponDef, count: number, options: re
 const GRADE_RANK: GradeId[] = ['common', 'rare', 'legendary', 'unique', 'mythic'];
 
 /**
- * 등급에 맞는 무기 하나.
+ * 등급에 맞는 무기 하나. 무기마다 등급이 정해져 있어 그 등급의 무기만 나온다(일반 권총이 레어가 되지 않는다).
  * - 신화: 신화 무기(droppable 아님) 중 하나
- * - 유니크: 드롭되는 유니크 무기 중 하나, 없으면 fallback 등급으로
- * - 그 외: 상점·드롭용 무기(droppable) 중 하나 + 등급 옵션
+ * - 그 외: 그 등급의 드롭 무기(droppable) 중 하나 + 등급 옵션
+ * - 그 등급에 드롭 무기가 없으면 uniqueFallback(유니크일 때), 그다음 한 등급씩 아래로
  */
 export function rollWeapon(
   rng: Rng,
@@ -46,14 +46,10 @@ export function rollWeapon(
     if (mythic.length > 0) return { defId: rng.pick(mythic).id, grade: 'mythic', options: [] };
     grade = 'legendary';
   }
-  if (grade === 'unique') {
-    const unique = weapons.filter((w) => w.droppable && w.grade === 'unique');
-    if (unique.length > 0) return { defId: rng.pick(unique).id, grade: 'unique', options: [] };
-    grade = uniqueFallback;
-  }
-  // 무기 자체 등급이 굴린 등급보다 높으면 나오지 않는다
-  const rank = (g: GradeId) => GRADE_RANK.indexOf(g);
-  const def = rng.pick(weapons.filter((w) => w.droppable && rank(w.grade) <= rank(grade)));
+  const droppable = (g: GradeId) => weapons.filter((w) => w.droppable && w.grade === g);
+  if (grade === 'unique' && droppable('unique').length === 0) grade = uniqueFallback;
+  while (droppable(grade).length === 0 && GRADE_RANK.indexOf(grade) > 0) grade = GRADE_RANK[GRADE_RANK.indexOf(grade) - 1]!;
+  const def = rng.pick(droppable(grade));
   const count = groups.grades.find((g) => g.id === grade)?.randomOptions ?? 0;
   return { defId: def.id, grade, options: rollOptions(rng, def, count, options) };
 }

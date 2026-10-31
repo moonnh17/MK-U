@@ -524,48 +524,6 @@ weapon('weapon_avior_staff', 0.3, [
   'KKKKKKKKKKKKKKKgKpPK',
   '................KKK.',
 ]);
-weapon('weapon_piercing_rifle', 0.25, [
-  '.......KKKKK...........',
-  '.......KcCCK...........',
-  'KKKKKKKKKKKKKKKKKKKKKK.',
-  'KddmmmmlllllllllllcccwK',
-  'KKddmmmmmmmmmCCCCCCCcK.',
-  '..KNNKKKKKKKKKKKKKKKK..',
-  '..KNNK..KnK............',
-  '..KKKK..KnK............',
-  '........KKK............',
-]);
-weapon('weapon_beam_smg', 0.35, [
-  '....KKKKKKKKKKK..',
-  '...KmmlllPPPPPwK.',
-  'KKKKddmmmpppppPK.',
-  'KddKKKnNKKKKKKK..',
-  'KKK..KnNKKnK.....',
-  '.....KnNKKnK.....',
-  '.....KKKKKKK.....',
-]);
-weapon('weapon_thunder_dagger', 0.2, [
-  '......KKKKK......',
-  '..KKKKKccCKKKK...',
-  'KKKNNKKcwlllcwKK.',
-  'KNNNNKKcwlllllcwK',
-  'KKKNNKKcCmmmmcKK.',
-  '..KKKKKcCKKKKK...',
-  '......KKKKK......',
-]);
-weapon('weapon_crusher_hammer', 0.25, [
-  '............KKKKKKK',
-  '...........KeyyeeEK',
-  '...........KeeeeEEK',
-  '...........KmllmddK',
-  'KKKKKKKKKKKKmllmddK',
-  'KbBBBBBBBBBBmllmddK',
-  'KKKKKKKKKKKKmllmddK',
-  '...........KmllmddK',
-  '...........KeeeeEEK',
-  '...........KeyyeeEK',
-  '............KKKKKKK',
-]);
 weapon('weapon_fist', 0.5, [
   '.KKKKK..',
   'KsssssK.',
@@ -587,6 +545,32 @@ bigWeapon('weapon_rasalhague_sword', 'warrior/p-sword-single.png', 90, 26, 0.15)
 bigWeapon('weapon_broken_blade', 'items/broken-blade.png', 45, 14, 0.3);
 bigWeapon('weapon_al_gul_blade', 'items/al-ghul.png', -90, 28, 0.2);
 bigWeapon('weapon_hanabi', 'items/hanabi.png', 135, 28, 0.2);
+// 사용자 제공 유니크 무기 (검은 배경을 지운다)
+function userWeapon(key, file, { rotate = 0, flip = false, fit, gripX, black = 40, dim }) {
+  let im = k.read(path.join(__dirname, 'art-src/weapons', file));
+  const seen = new Uint8Array(im.w * im.h);
+  const stack = [];
+  const dark = (p) => Math.max(im.px[p * 4], im.px[p * 4 + 1], im.px[p * 4 + 2]) < black;
+  for (let x = 0; x < im.w; x++) stack.push(x, (im.h - 1) * im.w + x);
+  for (let y = 0; y < im.h; y++) stack.push(y * im.w, y * im.w + im.w - 1);
+  while (stack.length) {
+    const p = stack.pop();
+    if (seen[p] || !dark(p)) continue;
+    seen[p] = 1;
+    im.px[p * 4 + 3] = 0;
+    const x = p % im.w;
+    if (x > 0) stack.push(p - 1);
+    if (x < im.w - 1) stack.push(p + 1);
+    if (p >= im.w) stack.push(p - im.w);
+    if (p < im.w * (im.h - 1)) stack.push(p + im.w);
+  }
+  if (flip) im = k.flipX(im);
+  if (rotate) im = k.rotate(im, rotate);
+  sprites[key] = { ...sheet(key, [im], fit, { alphaCut: 0.25, dim }), gripX };
+}
+userWeapon('weapon_nekkar_cleaver', 'nekkar.png', { rotate: 45, fit: 28, gripX: 0.22, dim: 1.5 });
+userWeapon('weapon_algieba_sling', 'algieba.png', { flip: true, rotate: -32, fit: 28, gripX: 0.3, black: 46 });
+userWeapon('weapon_argo_banner', 'argo.png', { fit: 40, gripX: 0.2 });
 bigWeapon('weapon_gihwan_arm', 'rewards/arm.png', -90, 26, 0.2);
 bigWeapon('weapon_ancient_core', 'golem/vfx-core.png', 0, 16, 0.5);
 bigWeapon('weapon_eclipse_core', 'eclipse/totality-sun.png', 0, 16, 0.5);
@@ -786,6 +770,31 @@ hFx('skill_antimatter_shellA', '05', AW, '비행', 22);
 hFx('skill_antimatter_trailA', '05', AW, '궤적', 24);
 hFx('skill_antimatter_impactA', '05', AW, '충격', 40);
 hFx('skill_antimatter_blastA', '05', AW, '폭발', 60);
+// 근접 이펙트: 흑백으로 바꿔 게임에서 무기 색을 입힌다
+{
+  const fw = (f, cw, ids) => { const im = load(f); return ids.map((i) => k.crop(im, i * cw, 0, cw, im.h)); };
+  const gray = (frames) => {
+    // 크기를 맞추고(아래 가운데) 여백을 함께 잘라 프레임이 흔들리지 않게
+    const W_ = Math.max(...frames.map((f) => f.w)), H_ = Math.max(...frames.map((f) => f.h));
+    const cells_ = frames.map((f) => { const c = k.blank(W_, H_); k.paste(c, f, Math.round((W_ - f.w) / 2), H_ - f.h); return c; });
+    const bs = cells_.map((c) => k.bbox(c, 24)).filter(Boolean);
+    const x0 = Math.min(...bs.map((b) => b.x)), y0 = Math.min(...bs.map((b) => b.y));
+    const x1 = Math.max(...bs.map((b) => b.x + b.w)), y1 = Math.max(...bs.map((b) => b.y + b.h));
+    return cells_.map((c) => {
+      const o = k.crop(c, x0, y0, x1 - x0, y1 - y0);
+      for (let i = 0; i < o.w * o.h; i++) {
+        const v = Math.max(o.px[i * 4], o.px[i * 4 + 1], o.px[i * 4 + 2]);
+        o.px[i * 4] = v; o.px[i * 4 + 1] = v; o.px[i * 4 + 2] = v;
+      }
+      return o;
+    });
+  };
+  fxArt('fx_melee_slash', gray(fw('warrior/b-slash.png', 370, [0, 1, 2, 3, 4, 5])), 44, { fps: 24, loop: false });
+  fxArt('fx_melee_slam', gray(fw('warrior/b-slam.png', 370, [0, 1, 2, 3, 4, 5, 6, 7])), 48, { fps: 26, loop: false });
+  fxArt('fx_melee_slash_big', gray(fw('barbarian-awakening-v120/ba-slash.png', 256, [8, 10, 12, 14, 15, 16, 18, 20, 22, 24])), 60, { fps: 26, loop: false });
+  fxArt('fx_melee_slam_big', gray([1, 2, 3, 4, 5].map((n) => load(`new-skills/mk-shockwave-${n}.png`))), 64, { fps: 18, loop: false });
+  fxArt('fx_buff_aura', gray(fw('warrior/p-aura.png', 370, [0, 1, 2, 3, 4, 5, 6, 7])), 44, { fps: 10, loop: true });
+}
 // 역장
 [['1', 'Lv1'], ['2', 'Lv3'], ['3', 'Lv5']].forEach(([n, lv]) => hFx(`skill_field${n}`, '06', lv, '보호막', 48));
 hFx('skill_fieldA_spawn', '06', AW, '생성', 56);

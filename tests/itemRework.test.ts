@@ -39,7 +39,7 @@ describe('아이템에서 무기로', () => {
     for (let s = 0; s < 100; s++) {
       expect(rollWeapon(new Rng(s), 'unique', W.weapons, W.options, gameData.groupMultipliers, 'legendary').grade).toBe('unique');
       const common = rollWeapon(new Rng(s), 'common', W.weapons, W.options, gameData.groupMultipliers, 'legendary').defId;
-      expect(['alGulBlade', 'hanabi', 'piercingRifle', 'beamSmg', 'thunderDagger', 'crusherHammer']).not.toContain(common);
+      expect(W.weapons.find((x) => x.id === common)!.grade).toBe('common');
     }
   });
 });

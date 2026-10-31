@@ -103,6 +103,7 @@ export function collectAssets(d: GameData): AssetRef[] {
     if (w.signature?.kind === 'laser' && w.signature.beam) add('projectile', w.signature.beam, w.nameKey, '#fx');
   }
   add('projectile', d.weapons.projectile, 'asset.playerBullet');
+  for (const k of ['slash', 'slam', 'slashBig', 'slamBig', 'buffAura'] as const) add('projectile', d.weapons.meleeFx[k], 'asset.meleeFx', '#fx');
   add('projectile', d.enemies.projectile, 'asset.enemyBullet');
   for (const e of d.enemies.enemies) add(e.rank === 'boss' || e.rank === 'hiddenBoss' ? 'boss' : 'enemy', e, e.nameKey);
   // 보스 단계별 모습 (단계가 있는 보스만)

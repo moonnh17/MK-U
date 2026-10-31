@@ -1,11 +1,12 @@
-/** 무기 공격과 피해: 사격·근접·레이저·운석·번개, 탄 적중, 피해 계산. */
-import { loopArt } from '../../skills/skillFx';
+/** 무기 공격과 피해: 사격·근접(참격·타격 이펙트)·바람과 버프·레이저·운석·번개, 탄 적중·튕김, 피해 계산. */
+import { loopArt, playFx } from '../../skills/skillFx';
 import { segmentClear } from '../../systems/pathField';
 import { zigzag } from '../../systems/dodge';
 import Phaser from 'phaser';
 import type { Vec2 } from '../../core/actions';
 import { Rng } from '../../core/rng';
 import { hexColor } from '../../core/scale';
+import { animKey } from '../../systems/art';
 import { Enemy } from '../../entities/enemy';
 import { lowSanityBonus } from '../../systems/sanity';
 import { fitArt } from '../../entities/art';
@@ -38,12 +39,22 @@ export class WeaponCombat {
   chargeT = 0;
   chargeFx: Phaser.GameObjects.Graphics | null = null;
   fireCooldown = 0;
+  /** 공격력 버프 (아르고 원정대의 깃발) */
+  buffLeft = 0;
+  buffTotal = 0;
+  buffDamage = 0;
+  buffColor = '#ffffff';
+  buffAura: Phaser.GameObjects.Sprite | null = null;
+  private buffSparkIn = 0;
+  /** 휘두를 때마다 참격 방향을 뒤집는다 */
+  private swingFlip = false;
 
   constructor(private readonly run: RunScene) {}
 
   /** Space를 누르고 있으면 연사. 차지 무기(대검)는 누르는 동안 모았다가 놓을 때 휘두른다 */
   updateAttack(dt: number, held: boolean, aimAngle: number): void {
     this.fireCooldown -= dt;
+    this.updateBuff(dt);
     const charge = this.run.weaponDef().charge;
     if (!charge) {
       if (held && this.fireCooldown <= 0) this.attack(aimAngle, 0);
@@ -149,7 +160,7 @@ export class WeaponCombat {
       return;
     }
     for (const shot of gunShots(w, shotAngle, this.run.rng)) {
-      this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance });
+      this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, ricochet: w.ricochet, tint: w.ricochet ? w.color : undefined });
     }
   }
 
@@ -226,7 +237,7 @@ export class WeaponCombat {
     base: number,
     tags: readonly TagId[],
     source: string | null = null,
-    opts: { pierce: number; crit: number; homing?: number; tint?: string; sprite?: SpriteRef } = { pierce: 0, crit: 0 },
+    opts: { pierce: number; crit: number; homing?: number; tint?: string; sprite?: SpriteRef; ricochet?: { bounces: number; range: number } } = { pierce: 0, crit: 0 },
   ): void {
     const proj = this.run.ctx.data.weapons.projectile;
     const b = this.run.bullets.create(from.x, from.y, opts.sprite?.spriteKey ?? proj.spriteKey) as Phaser.Physics.Arcade.Sprite;
@@ -237,7 +248,7 @@ export class WeaponCombat {
     }
     fitArt(this.run.ctx.data, b, proj.size, proj.height ?? proj.size);
     b.setDepth(5);
-    b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>() });
+    b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>(), bounces: opts.ricochet?.bounces ?? 0, bounceRange: opts.ricochet?.range ?? 0 });
     if (opts.tint) b.setTint(hexColor(opts.tint));
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
   }
@@ -271,7 +282,9 @@ export class WeaponCombat {
 
   /**
    * 칼: 베기(arc) · 찌르기(line, 관통) · 내려찍기(smash, 넉백).
+   * gust: 몸 둘레 바람(넉백), 자기 버프.
    * sig: 이번 공격에 발동한 유니크 고유 효과(네메아의 종말 = 피해·범위 증가, 공간 가르기 = 공간격) / emp: 피해 배율(특무 인장)
+   * 강화 평타(고유 효과 발동·완전 차지)는 다른 이펙트를 쓴다.
    */
   melee(w: WeaponDef, st: WeaponStats, aimAngle: number, chargeRatio: number, sig: WeaponSignature | null, emp: number): void {
     const origin = { x: this.run.player.x, y: this.run.player.y };
@@ -286,15 +299,16 @@ export class WeaponCombat {
     }
     const p = w.pattern;
     const enemies = [...this.run.enemies];
-    const g = this.run.add.graphics().setDepth(6);
-    g.fillStyle(0xffffff, 0.35);
+    const strong = sig !== null || chargeRatio >= 1;
+    const color = w.fxColor ?? w.color;
+    const fx = this.run.ctx.data.weapons.meleeFx;
     let targets: Enemy[] = [];
     if (p.kind === 'arc') {
       const radius = p.radius * radMul;
       targets = enemies.filter((e) => inArc(origin, aimAngle, p.arcDeg, radius, e.sprite, e.radius));
       this.run.roomProps.meleeProps(st.damage * dmgMul, (b) => inArc(origin, aimAngle, p.arcDeg, radius, b, 6));
-      const half = (p.arcDeg * Math.PI) / 360;
-      g.slice(origin.x, origin.y, radius, aimAngle - half, aimAngle + half, false).fillPath();
+      this.swingFlip = !this.swingFlip;
+      this.meleeFx(strong ? fx.slashBig : fx.slash, color, st.fireIntervalSec, origin.x + dir.x * radius * 0.5, origin.y + dir.y * radius * 0.5, { w: radius * (strong ? 1.5 : 1.2), rotation: aimAngle, flipY: this.swingFlip });
     } else if (p.kind === 'line') {
       const len = p.length * radMul;
       const idx = lineHits(origin, dir, len, p.width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
@@ -302,17 +316,25 @@ export class WeaponCombat {
       const propIdx = lineHits(origin, dir, len, p.width / 2, this.run.roomProps.breakables.map((b) => ({ x: b.x, y: b.y, radius: 6 })));
       const lined = new Set(propIdx.map((i) => this.run.roomProps.breakables[i]!));
       this.run.roomProps.meleeProps(st.damage * dmgMul, (b) => lined.has(b));
-      g.lineStyle(p.width, 0xffffff, 0.45).lineBetween(origin.x, origin.y, origin.x + dir.x * len, origin.y + dir.y * len);
+      // 찌르기: 참격을 찌른 방향으로 길게 늘인다
+      this.meleeFx(strong ? fx.slashBig : fx.slash, color, st.fireIntervalSec, origin.x + dir.x * len * 0.5, origin.y + dir.y * len * 0.5, { w: len, h: p.width * (strong ? 4 : 3), rotation: aimAngle });
     } else if (p.kind === 'smash') {
       const c = { x: origin.x + dir.x * p.reach, y: origin.y + dir.y * p.reach };
       const r = p.radius * radMul;
       targets = enemies.filter((e) => Math.hypot(e.sprite.x - c.x, e.sprite.y - c.y) <= r + e.radius);
       this.run.roomProps.meleeProps(st.damage * dmgMul, (b) => Math.hypot(b.x - c.x, b.y - c.y) <= r + 6);
-      g.fillCircle(c.x, c.y, r);
+      this.meleeFx(strong ? fx.slamBig : fx.slam, color, st.fireIntervalSec, c.x, c.y, this.fitWidth(strong ? fx.slamBig : fx.slam, r * 2.3));
+    } else if (p.kind === 'gust') {
+      const r = p.radius * radMul;
+      targets = enemies.filter((e) => Math.hypot(e.sprite.x - origin.x, e.sprite.y - origin.y) <= r + e.radius);
+      this.run.roomProps.meleeProps(st.damage * dmgMul, (b) => Math.hypot(b.x - origin.x, b.y - origin.y) <= r + 6);
+      this.gustFx(origin, r, color);
     }
+    if (w.selfBuff) this.applyBuff(w.selfBuff);
     for (const e of targets) {
       const at = { x: e.sprite.x, y: e.sprite.y };
       this.hit(e, this.critRoll(st.damage * dmgMul, st.critChance, at), tags);
+      if (w.bleed) this.run.skillRt.hostFor('weapon').bleed(e, w.bleed.base, w.bleed.stacks, w.tags);
       if (w.knockback && !e.dead) {
         const d = Math.hypot(at.x - origin.x, at.y - origin.y) || 1;
         e.knockback({ x: (at.x - origin.x) / d, y: (at.y - origin.y) / d }, w.knockback.distance, w.knockback.sec);
@@ -340,7 +362,75 @@ export class WeaponCombat {
         b.destroy();
       }
     }
-    this.run.time.delayedCall(this.run.ctx.data.ui.slashFxSec * 1000, () => g.destroy());
+  }
+
+  /** 근접 이펙트 한 번: 무기 색을 입히고 밝은 심을 겹친다. 공격이 빠른 무기는 그만큼 빨리 돈다 */
+  private meleeFx(ref: SpriteRef, color: string, intervalSec: number, x: number, y: number, o: { w: number; h?: number; rotation?: number; flipY?: boolean }): void {
+    const glow = this.run.ctx.data.weapons.meleeFx.glowAlpha;
+    const anim = this.run.anims.get(animKey(ref.spriteKey, 'play'));
+    const speed = anim ? Math.max(1, anim.duration / 1000 / Math.max(0.05, intervalSec)) : 1;
+    for (const core of [false, true]) {
+      const sp = playFx(this.run, ref, x, y, { w: o.w, h: o.h, rotation: o.rotation, depth: 6 }).setFlipY(o.flipY ?? false);
+      sp.anims.timeScale = speed;
+      if (core) sp.setBlendMode(Phaser.BlendModes.ADD).setAlpha(glow);
+      else sp.setTint(hexColor(color));
+    }
+  }
+
+  /** 세로로 긴 그림도 긴 쪽이 size에 맞게 (타격 이펙트) */
+  private fitWidth(ref: SpriteRef, size: number): { w: number } {
+    const art = this.run.ctx.data.art.sprites[ref.spriteKey];
+    return { w: art ? size * Math.min(1, art.frameWidth / art.frameHeight) : size };
+  }
+
+  /** 바람: 충격파 + 사방으로 뻗는 바람 줄기 */
+  private gustFx(at: Vec2, radius: number, color: string): void {
+    const fx = this.run.ctx.data.weapons.meleeFx;
+    this.meleeFx(fx.slamBig, color, 0.5, at.x, at.y, this.fitWidth(fx.slamBig, radius * 2.2));
+    const col = hexColor(color);
+    const n = 18;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + this.run.rng.range(-0.12, 0.12);
+      const from = radius * 0.2;
+      const to = radius * this.run.rng.range(0.75, 1.1);
+      const streak = this.run.add.rectangle(at.x + Math.cos(a) * from, at.y + Math.sin(a) * from, this.run.rng.range(8, 16), 1.5, col, 0.85).setRotation(a).setDepth(6);
+      this.run.tweens.add({ targets: streak, x: at.x + Math.cos(a) * to, y: at.y + Math.sin(a) * to, alpha: 0, scaleX: 0.3, duration: 340, delay: i % 3 * 25, ease: 'Quad.easeOut', onComplete: () => streak.destroy() });
+    }
+    shake(this.run, 'light');
+  }
+
+  /** 공격력 버프를 걸거나 새로 시작한다 */
+  private applyBuff(b: NonNullable<WeaponDef['selfBuff']>): void {
+    if (this.buffLeft <= 0) this.run.juice.colorBurst({ x: this.run.player.x, y: this.run.player.y }, b.color, this.run.ctx.data.juice.shieldSpawn);
+    this.buffLeft = b.sec;
+    this.buffTotal = b.sec;
+    this.buffDamage = b.damage;
+    this.buffColor = b.color;
+    this.run.floatLabel({ x: this.run.player.x, y: this.run.player.y - 14 }, this.run.ctx.t('buff.warBanner'), b.color);
+  }
+
+  /** 버프 동안 발밑 문양이 따라오고 불티가 피어오른다 */
+  private updateBuff(dt: number): void {
+    if (this.buffLeft <= 0) return;
+    this.buffLeft -= dt;
+    const fx = this.run.ctx.data.weapons.meleeFx;
+    if (this.buffLeft <= 0) {
+      this.buffAura?.destroy();
+      this.buffAura = null;
+      return;
+    }
+    const { x, y } = this.run.player;
+    if (!this.buffAura) {
+      this.buffAura = this.run.add.sprite(x, y, fx.buffAura.spriteKey).setDepth(2.5).setTint(hexColor(this.buffColor));
+      loopArt(this.buffAura, fx.buffAura);
+    }
+    // 끝나 갈 때 깜빡여 알린다
+    this.buffAura.setPosition(x, y + 4).setAlpha(this.buffLeft < 1 ? 0.2 + 0.4 * Math.abs(Math.sin(this.buffLeft * 10)) : 0.6);
+    this.buffSparkIn -= dt;
+    if (this.buffSparkIn > 0) return;
+    this.buffSparkIn = fx.buffSparkSec;
+    const ember = this.run.add.rectangle(x + this.run.rng.range(-9, 9), y + this.run.rng.range(-4, 6), 2, 2, hexColor(this.buffColor), 1).setDepth(6);
+    this.run.tweens.add({ targets: ember, y: ember.y - this.run.rng.range(16, 28), alpha: 0, duration: 480, ease: 'Quad.easeOut', onComplete: () => ember.destroy() });
   }
 
   onBulletHit(b: Phaser.Physics.Arcade.Image, sprite: Phaser.Physics.Arcade.Image): void {
@@ -353,13 +443,33 @@ export class WeaponCombat {
     const source = (b.getData('source') as string | null | undefined) ?? null;
     const base = this.critRoll(b.getData('base') as number, (b.getData('crit') as number | undefined) ?? 0, enemy.sprite);
     const pierce = (b.getData('pierce') as number | undefined) ?? 0;
-    if (pierce > 0) {
+    const bounces = (b.getData('bounces') as number | undefined) ?? 0;
+    if (bounces > 0) this.ricochet(b, enemy, bounces);
+    else if (pierce > 0) {
       b.setData('pierce', pierce - 1);
       hitSet?.add(enemy);
     } else {
       b.destroy();
     }
     this.hit(enemy, base, tags, source);
+  }
+
+  /** 튕김: 아직 안 맞힌 가까운 적으로 방향을 바꾼다. 없으면 사라진다 */
+  private ricochet(b: Phaser.Physics.Arcade.Image, enemy: Enemy, bounces: number): void {
+    const hitSet = b.getData('hitSet') as Set<Enemy>;
+    hitSet.add(enemy);
+    const list = this.run.enemies.filter((e) => !e.dead);
+    const exclude = new Set(list.flatMap((e, i) => (hitSet.has(e) ? [i] : [])));
+    const at = { x: enemy.sprite.x, y: enemy.sprite.y };
+    const next = list[chainTargets(at, list.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })), 1, b.getData('bounceRange') as number, exclude)[0] ?? -1];
+    if (!next) {
+      b.destroy();
+      return;
+    }
+    const body = b.body as Phaser.Physics.Arcade.Body;
+    const a = Math.atan2(next.sprite.y - b.y, next.sprite.x - b.x);
+    b.setVelocity(Math.cos(a) * body.speed, Math.sin(a) * body.speed);
+    b.setData({ bounces: bounces - 1, ox: b.x, oy: b.y });
   }
 
   /** 피해 한 번. 태그 보정은 이 공격(source)의 태그로 계산한다 */
@@ -379,6 +489,7 @@ export class WeaponCombat {
     if (school && eb?.jobDamage?.[school]) dmg *= 1 + eb.jobDamage[school]!;
     // 어느 전사의 기억 · 아트로스 비석 필사본
     const sp = this.run.session.player;
+    if (this.buffLeft > 0) dmg *= 1 + this.buffDamage;
     const stance = this.run.itemRt.first('hpStance');
     if (stance) dmg *= 1 + hpStance(sp.hp, sp.maxHp, stance).damage;
     const low = this.run.itemRt.first('lowSanityDamage');

@@ -197,7 +197,9 @@ export type WeaponPattern =
   /** 지팡이: 가까운 적을 따라 휘는 탄 (turnRate rad/s) */
   | { kind: 'homing'; turnRate: number }
   /** 가까운 적 자리에 delaySec 뒤 운석이 떨어져 터진다 */
-  | { kind: 'meteor'; radius: number; delaySec: number; fallPx: number; color: string; sprite: SpriteRef };
+  | { kind: 'meteor'; radius: number; delaySec: number; fallPx: number; color: string; sprite: SpriteRef }
+  /** 몸 둘레로 바람을 일으킨다 (knockback으로 밀어낸다) */
+  | { kind: 'gust'; radius: number };
 
 /** 무기 무작위 옵션 (레어 1개·전설 2개) */
 export interface WeaponOptionDef {
@@ -240,6 +242,16 @@ export interface WeaponDef extends SpriteRef {
   charge?: { maxSec: number; damageMul: number; radiusMul: number };
   /** 맞은 적을 밀어낸다(해머). 거대 엘리트·보스는 면역 */
   knockback?: { distance: number; sec: number };
+  /** 총: 맞힌 뒤 가까운 다른 적으로 튕긴다 */
+  ricochet?: { bounces: number; range: number };
+  /** 칼: 맞은 적에게 출혈을 쌓는다 (중첩 상한은 출혈 태그 규칙) */
+  bleed?: { base: number; stacks: number };
+  /** 칼: 공격할 때마다 자신에게 공격력 버프 */
+  selfBuff?: { sec: number; damage: number; color: string };
+  /** 든 그림을 조준에 따라 돌리지 않고 세워 둔다 (깃발) */
+  upright?: boolean;
+  /** 칼: 참격·타격 이펙트 색 */
+  fxColor?: string;
   /** 들고 있는 동안 효과 (신궁 환디) */
   /** bossDamage: 이 무기로 보스에게 주는 피해 증가 / jobDamage: 전직별 피해 증가 */
   equipBonus?: { stats?: Partial<Record<StatId, number>>; rangedDamage?: number; meleeDamage?: number; bossDamage?: number; jobDamage?: Partial<Record<string, number>> };
@@ -259,6 +271,8 @@ export interface WeaponsData {
   projectile: SpriteRef;
   /** 치명타 피해 배율 */
   critMultiplier: number;
+  /** 근접 이펙트: 흑백 그림에 무기 색을 입힌다. glowAlpha: 밝은 심을 더하는 겹 / buffSparkSec: 버프 불티 간격 */
+  meleeFx: { slash: SpriteRef; slam: SpriteRef; slashBig: SpriteRef; slamBig: SpriteRef; buffAura: SpriteRef; glowAlpha: number; buffSparkSec: number };
   options: WeaponOptionDef[];
   weapons: WeaponDef[];
 }

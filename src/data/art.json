@@ -1372,34 +1372,6 @@
       "frames": 1,
       "gripX": 0.3
     },
-    "weapon_piercing_rifle": {
-      "file": "mku/weapon_piercing_rifle.png",
-      "frameWidth": 23,
-      "frameHeight": 9,
-      "frames": 1,
-      "gripX": 0.25
-    },
-    "weapon_beam_smg": {
-      "file": "mku/weapon_beam_smg.png",
-      "frameWidth": 17,
-      "frameHeight": 7,
-      "frames": 1,
-      "gripX": 0.35
-    },
-    "weapon_thunder_dagger": {
-      "file": "mku/weapon_thunder_dagger.png",
-      "frameWidth": 17,
-      "frameHeight": 7,
-      "frames": 1,
-      "gripX": 0.2
-    },
-    "weapon_crusher_hammer": {
-      "file": "mku/weapon_crusher_hammer.png",
-      "frameWidth": 19,
-      "frameHeight": 11,
-      "frames": 1,
-      "gripX": 0.25
-    },
     "weapon_fist": {
       "file": "mku/weapon_fist.png",
       "frameWidth": 8,
@@ -1451,6 +1423,30 @@
       "file": "mku/weapon_hanabi.png",
       "frameWidth": 56,
       "frameHeight": 12,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.2
+    },
+    "weapon_nekkar_cleaver": {
+      "file": "mku/weapon_nekkar_cleaver.png",
+      "frameWidth": 56,
+      "frameHeight": 18,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.22
+    },
+    "weapon_algieba_sling": {
+      "file": "mku/weapon_algieba_sling.png",
+      "frameWidth": 56,
+      "frameHeight": 36,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.3
+    },
+    "weapon_argo_banner": {
+      "file": "mku/weapon_argo_banner.png",
+      "frameWidth": 48,
+      "frameHeight": 80,
       "frames": 1,
       "density": 2,
       "gripX": 0.2
@@ -2314,6 +2310,81 @@
           "to": 5,
           "fps": 20,
           "loop": false
+        }
+      }
+    },
+    "fx_melee_slash": {
+      "file": "mku/fx_melee_slash.png",
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 24,
+          "loop": false
+        }
+      }
+    },
+    "fx_melee_slam": {
+      "file": "mku/fx_melee_slam.png",
+      "frameWidth": 64,
+      "frameHeight": 96,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 7,
+          "fps": 26,
+          "loop": false
+        }
+      }
+    },
+    "fx_melee_slash_big": {
+      "file": "mku/fx_melee_slash_big.png",
+      "frameWidth": 120,
+      "frameHeight": 86,
+      "frames": 10,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 9,
+          "fps": 26,
+          "loop": false
+        }
+      }
+    },
+    "fx_melee_slam_big": {
+      "file": "mku/fx_melee_slam_big.png",
+      "frameWidth": 128,
+      "frameHeight": 62,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_buff_aura": {
+      "file": "mku/fx_buff_aura.png",
+      "frameWidth": 58,
+      "frameHeight": 88,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 7,
+          "fps": 10,
+          "loop": true
         }
       }
     },
