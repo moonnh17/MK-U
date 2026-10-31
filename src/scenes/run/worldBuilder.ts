@@ -1,4 +1,5 @@
 /** 스테이지 세우기: 방·복도·문·장애물·장식·포털. */
+import { artDensity } from '../../systems/art';
 import { stampGrid } from '../../systems/roomShapes';
 import Phaser from 'phaser';
 import type { Vec2 } from '../../core/actions';
@@ -123,7 +124,7 @@ export class WorldBuilder {
 
   /** 방 바닥·벽: 타일 그림(key)이 있으면 반복해서 깔고, 없으면 색 사각형 */
   addRect(r: Rect, color: number, depth: number, key?: string): Phaser.GameObjects.Rectangle | Phaser.GameObjects.TileSprite {
-    if (key && this.run.textures.exists(key)) return this.run.add.tileSprite(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, key).setDepth(depth);
+    if (key && this.run.textures.exists(key)) return this.run.add.tileSprite(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, key).setTileScale(1 / artDensity(this.run.ctx.data.art, key)).setDepth(depth);
     return this.run.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, color).setDepth(depth);
   }
 

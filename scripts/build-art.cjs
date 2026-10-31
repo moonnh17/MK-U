@@ -53,6 +53,9 @@ function gaps(f, cut = 40, minGap = 3) {
 }
 const single = (f) => [load(f)];
 
+/** 게임 1px에 넣는 그림 픽셀 수. 원본 도트를 뭉개지 않고 도트만 작아진다 (크게 올리면 그림처럼 보이니 조금만) */
+const ART_DENSITY = 2;
+const even = (v) => Math.max(ART_DENSITY, Math.round(v / ART_DENSITY) * ART_DENSITY);
 const ENEMY_OUTLINE = [255, 36, 36];
 /** 프레임마다 1칸씩 넓혀 그림 둘레에 테두리를 두른다 */
 function outlined(img, fw, fh, n, color) {
@@ -79,9 +82,9 @@ function sheet(key, frames, fit, opts = {}) {
   const cut = opts.cut ?? 40;
   const boxes = frames.map((f) => k.bbox(f, cut) ?? { x: 0, y: 0, w: f.w, h: f.h });
   const cw = Math.max(...boxes.map((b) => b.w)), ch = Math.max(...boxes.map((b) => b.h));
-  const s = fit / Math.max(cw, ch);
+  const s = (fit * ART_DENSITY) / Math.max(cw, ch);
   // independent: 원본마다 그린 배율이 달라(보스 단일 자세) 프레임마다 따로 fit에 맞춘다
-  const fw = Math.max(1, Math.round(cw * s)), fh = Math.max(1, Math.round(ch * s));
+  const fw = even(cw * s), fh = even(ch * s);
   const outImg = k.blank(fw * frames.length, fh);
   frames.forEach((f, i) => {
     const b = boxes[i];
@@ -102,10 +105,10 @@ function sheet(key, frames, fit, opts = {}) {
   if (opts.outline) {
     const framed = outlined(outImg, fw, fh, frames.length, opts.outline);
     k.write(path.join(REPO, 'public/assets', file), framed);
-    return { file, frameWidth: fw + 2, frameHeight: fh + 2, frames: frames.length };
+    return { file, frameWidth: fw + 2, frameHeight: fh + 2, frames: frames.length, density: ART_DENSITY };
   }
   k.write(path.join(REPO, 'public/assets', file), outImg);
-  return { file, frameWidth: fw, frameHeight: fh, frames: frames.length };
+  return { file, frameWidth: fw, frameHeight: fh, frames: frames.length, density: ART_DENSITY };
 }
 /** 불투명 정사각형 그림(아이콘): 정사각형으로 채운 뒤 size로 */
 function icon(key, f, size, crop) {
@@ -124,11 +127,12 @@ function tile(key, col, row, size, dim = 1) {
   const cw = im.w / 4;
   // 칸 경계선이 들어가지 않게 안쪽을 조금 잘라낸다
   const t = k.crop(im, Math.round(col * cw) + 3, Math.round(row * cw) + 3, Math.round(cw) - 6, Math.round(cw) - 6);
-  const small = k.resize(t, size, size, 0.5);
+  const px = size * ART_DENSITY;
+  const small = k.resize(t, px, px, 0.5);
   if (dim !== 1) for (let p = 0; p < small.px.length; p += 4) for (let c = 0; c < 3; c++) small.px[p + c] = Math.round(small.px[p + c] * dim);
   const file = `${OUT_DIR}/${key}.png`;
   k.write(path.join(REPO, 'public/assets', file), small);
-  return { file, frameWidth: size, frameHeight: size, frames: 1 };
+  return { file, frameWidth: px, frameHeight: px, frames: 1, density: ART_DENSITY };
 }
 
 const sprites = {};

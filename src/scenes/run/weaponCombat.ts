@@ -248,7 +248,7 @@ export class WeaponCombat {
     const rid = this.run.session.currentRoomId;
     if (rid === null) return body;
     const art = this.run.ctx.data.art.sprites[this.run.weaponDef().spriteKey];
-    const at = muzzlePoint(this.handPos(), this.run.aimDir, art ? art.frameWidth * (1 - (art.gripX ?? 0.5)) : 0);
+    const at = muzzlePoint(this.handPos(), this.run.aimDir, art ? (art.frameWidth / (art.density ?? 1)) * (1 - (art.gripX ?? 0.5)) : 0);
     const node = this.run.session.map.rooms[rid]!;
     const inside = contains(interiorRect(node, this.run.m), at.x, at.y);
     return inside && segmentClear(body, at, this.run.obstacles.get(rid) ?? []) ? at : body;

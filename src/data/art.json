@@ -3,9 +3,10 @@
   "sprites": {
     "player_human": {
       "file": "mku/player_human.png",
-      "frameWidth": 22,
-      "frameHeight": 26,
+      "frameWidth": 44,
+      "frameHeight": 52,
       "frames": 5,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -21,9 +22,10 @@
     },
     "player_hectar": {
       "file": "mku/player_hectar.png",
-      "frameWidth": 19,
-      "frameHeight": 26,
+      "frameWidth": 38,
+      "frameHeight": 52,
       "frames": 5,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -39,9 +41,10 @@
     },
     "player_acro": {
       "file": "mku/player_acro.png",
-      "frameWidth": 26,
-      "frameHeight": 25,
+      "frameWidth": 52,
+      "frameHeight": 50,
       "frames": 5,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -57,9 +60,10 @@
     },
     "enemy_tomakki": {
       "file": "mku/enemy_tomakki.png",
-      "frameWidth": 16,
-      "frameHeight": 14,
+      "frameWidth": 30,
+      "frameHeight": 26,
       "frames": 4,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -76,9 +80,10 @@
     },
     "enemy_gaedeulgae": {
       "file": "mku/enemy_gaedeulgae.png",
-      "frameWidth": 21,
-      "frameHeight": 20,
+      "frameWidth": 40,
+      "frameHeight": 38,
       "frames": 5,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -94,9 +99,10 @@
     },
     "enemy_akgwi": {
       "file": "mku/enemy_akgwi.png",
-      "frameWidth": 25,
-      "frameHeight": 26,
+      "frameWidth": 48,
+      "frameHeight": 50,
       "frames": 6,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -112,9 +118,10 @@
     },
     "enemy_ghost_shooter": {
       "file": "mku/enemy_ghost_shooter.png",
-      "frameWidth": 28,
-      "frameHeight": 25,
+      "frameWidth": 54,
+      "frameHeight": 48,
       "frames": 4,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -130,9 +137,10 @@
     },
     "enemy_hectar_trooper": {
       "file": "mku/enemy_hectar_trooper.png",
-      "frameWidth": 13,
-      "frameHeight": 24,
+      "frameWidth": 24,
+      "frameHeight": 46,
       "frames": 5,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -148,9 +156,10 @@
     },
     "enemy_hectar_chief": {
       "file": "mku/enemy_hectar_chief.png",
-      "frameWidth": 29,
-      "frameHeight": 56,
+      "frameWidth": 56,
+      "frameHeight": 110,
       "frames": 5,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -166,9 +175,10 @@
     },
     "enemy_magi_beetle": {
       "file": "mku/enemy_magi_beetle.png",
-      "frameWidth": 26,
-      "frameHeight": 22,
+      "frameWidth": 50,
+      "frameHeight": 42,
       "frames": 10,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -184,9 +194,10 @@
     },
     "enemy_a_memory": {
       "file": "mku/enemy_a_memory.png",
-      "frameWidth": 23,
-      "frameHeight": 26,
+      "frameWidth": 44,
+      "frameHeight": 50,
       "frames": 14,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -202,9 +213,10 @@
     },
     "enemy_ancient_one": {
       "file": "mku/enemy_ancient_one.png",
-      "frameWidth": 28,
-      "frameHeight": 28,
+      "frameWidth": 54,
+      "frameHeight": 54,
       "frames": 12,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -220,9 +232,10 @@
     },
     "enemy_hatred_shard": {
       "file": "mku/enemy_hatred_shard.png",
-      "frameWidth": 24,
-      "frameHeight": 14,
+      "frameWidth": 46,
+      "frameHeight": 26,
       "frames": 10,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -238,9 +251,10 @@
     },
     "enemy_executor": {
       "file": "mku/enemy_executor.png",
-      "frameWidth": 40,
-      "frameHeight": 37,
+      "frameWidth": 78,
+      "frameHeight": 72,
       "frames": 13,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -256,9 +270,10 @@
     },
     "enemy_archon": {
       "file": "mku/enemy_archon.png",
-      "frameWidth": 24,
-      "frameHeight": 32,
+      "frameWidth": 46,
+      "frameHeight": 62,
       "frames": 13,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -274,9 +289,10 @@
     },
     "enemy_fusion_akgwi": {
       "file": "mku/enemy_fusion_akgwi.png",
-      "frameWidth": 74,
-      "frameHeight": 71,
+      "frameWidth": 146,
+      "frameHeight": 140,
       "frames": 2,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -292,9 +308,10 @@
     },
     "enemy_fusion_akgwi_phase2": {
       "file": "mku/enemy_fusion_akgwi_phase2.png",
-      "frameWidth": 80,
-      "frameHeight": 57,
+      "frameWidth": 158,
+      "frameHeight": 112,
       "frames": 2,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -310,9 +327,10 @@
     },
     "enemy_electric_ring": {
       "file": "mku/enemy_electric_ring.png",
-      "frameWidth": 59,
-      "frameHeight": 77,
+      "frameWidth": 116,
+      "frameHeight": 152,
       "frames": 2,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -328,9 +346,10 @@
     },
     "enemy_magi_golem": {
       "file": "mku/enemy_magi_golem.png",
-      "frameWidth": 86,
-      "frameHeight": 82,
+      "frameWidth": 170,
+      "frameHeight": 162,
       "frames": 2,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -346,9 +365,10 @@
     },
     "enemy_magi_golem_phase2": {
       "file": "mku/enemy_magi_golem_phase2.png",
-      "frameWidth": 92,
-      "frameHeight": 78,
+      "frameWidth": 182,
+      "frameHeight": 154,
       "frames": 2,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -364,9 +384,10 @@
     },
     "enemy_eclipse": {
       "file": "mku/enemy_eclipse.png",
-      "frameWidth": 77,
-      "frameHeight": 77,
+      "frameWidth": 152,
+      "frameHeight": 152,
       "frames": 10,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -382,9 +403,10 @@
     },
     "enemy_eclipse_phase2": {
       "file": "mku/enemy_eclipse_phase2.png",
-      "frameWidth": 86,
-      "frameHeight": 86,
+      "frameWidth": 170,
+      "frameHeight": 170,
       "frames": 10,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -400,9 +422,10 @@
     },
     "enemy_magi_kaiser": {
       "file": "mku/enemy_magi_kaiser.png",
-      "frameWidth": 101,
-      "frameHeight": 81,
+      "frameWidth": 200,
+      "frameHeight": 160,
       "frames": 10,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -418,9 +441,10 @@
     },
     "enemy_magi_kaiser_phase1": {
       "file": "mku/enemy_magi_kaiser_phase1.png",
-      "frameWidth": 101,
-      "frameHeight": 80,
+      "frameWidth": 200,
+      "frameHeight": 158,
       "frames": 4,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -431,9 +455,10 @@
     },
     "enemy_magi_kaiser_phase2": {
       "file": "mku/enemy_magi_kaiser_phase2.png",
-      "frameWidth": 101,
-      "frameHeight": 81,
+      "frameWidth": 200,
+      "frameHeight": 160,
       "frames": 10,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -449,9 +474,10 @@
     },
     "enemy_magi_kaiser_phase3": {
       "file": "mku/enemy_magi_kaiser_phase3.png",
-      "frameWidth": 107,
-      "frameHeight": 69,
+      "frameWidth": 212,
+      "frameHeight": 136,
       "frames": 10,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -467,9 +493,10 @@
     },
     "enemy_ancestor_echo": {
       "file": "mku/enemy_ancestor_echo.png",
-      "frameWidth": 49,
-      "frameHeight": 68,
+      "frameWidth": 96,
+      "frameHeight": 134,
       "frames": 3,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -485,27 +512,31 @@
     },
     "spire_small": {
       "file": "mku/spire_small.png",
-      "frameWidth": 14,
-      "frameHeight": 44,
-      "frames": 1
+      "frameWidth": 28,
+      "frameHeight": 88,
+      "frames": 1,
+      "density": 2
     },
     "spire_medium": {
       "file": "mku/spire_medium.png",
-      "frameWidth": 12,
-      "frameHeight": 52,
-      "frames": 1
+      "frameWidth": 24,
+      "frameHeight": 104,
+      "frames": 1,
+      "density": 2
     },
     "skill_turret": {
       "file": "mku/skill_turret.png",
-      "frameWidth": 20,
-      "frameHeight": 12,
-      "frames": 1
+      "frameWidth": 40,
+      "frameHeight": 24,
+      "frames": 1,
+      "density": 2
     },
     "skill_turret_head": {
       "file": "mku/skill_turret_head.png",
-      "frameWidth": 18,
-      "frameHeight": 7,
+      "frameWidth": 36,
+      "frameHeight": 14,
       "frames": 1,
+      "density": 2,
       "aim": {
         "pivotX": 0.16,
         "pivotY": 0.65,
@@ -516,15 +547,17 @@
     },
     "skill_turret_big": {
       "file": "mku/skill_turret_big.png",
-      "frameWidth": 26,
-      "frameHeight": 15,
-      "frames": 1
+      "frameWidth": 52,
+      "frameHeight": 30,
+      "frames": 1,
+      "density": 2
     },
     "skill_turret_big_head": {
       "file": "mku/skill_turret_big_head.png",
-      "frameWidth": 32,
-      "frameHeight": 17,
+      "frameWidth": 64,
+      "frameHeight": 34,
       "frames": 1,
+      "density": 2,
       "aim": {
         "pivotX": 0.36,
         "pivotY": 0.74,
@@ -535,51 +568,59 @@
     },
     "skill_mine": {
       "file": "mku/skill_mine.png",
-      "frameWidth": 9,
-      "frameHeight": 6,
-      "frames": 1
+      "frameWidth": 18,
+      "frameHeight": 12,
+      "frames": 1,
+      "density": 2
     },
     "skill_drone": {
       "file": "mku/skill_drone.png",
-      "frameWidth": 11,
-      "frameHeight": 11,
-      "frames": 1
+      "frameWidth": 22,
+      "frameHeight": 22,
+      "frames": 1,
+      "density": 2
     },
     "fx_hit_tech": {
       "file": "mku/fx_hit_tech.png",
-      "frameWidth": 16,
-      "frameHeight": 11,
-      "frames": 1
+      "frameWidth": 32,
+      "frameHeight": 22,
+      "frames": 1,
+      "density": 2
     },
     "fx_hit_magic": {
       "file": "mku/fx_hit_magic.png",
-      "frameWidth": 16,
-      "frameHeight": 14,
-      "frames": 1
+      "frameWidth": 32,
+      "frameHeight": 28,
+      "frames": 1,
+      "density": 2
     },
     "fx_hit_physical": {
       "file": "mku/fx_hit_physical.png",
-      "frameWidth": 11,
-      "frameHeight": 14,
-      "frames": 1
+      "frameWidth": 22,
+      "frameHeight": 28,
+      "frames": 1,
+      "density": 2
     },
     "fx_explosion": {
       "file": "mku/fx_explosion.png",
-      "frameWidth": 38,
-      "frameHeight": 40,
-      "frames": 5
+      "frameWidth": 76,
+      "frameHeight": 80,
+      "frames": 5,
+      "density": 2
     },
     "fx_elite_burst": {
       "file": "mku/fx_elite_burst.png",
-      "frameWidth": 44,
-      "frameHeight": 27,
-      "frames": 1
+      "frameWidth": 88,
+      "frameHeight": 54,
+      "frames": 1,
+      "density": 2
     },
     "fx_spawn": {
       "file": "mku/fx_spawn.png",
-      "frameWidth": 26,
-      "frameHeight": 26,
-      "frames": 1
+      "frameWidth": 52,
+      "frameHeight": 52,
+      "frames": 1,
+      "density": 2
     },
     "icon_stat_strength": {
       "file": "mku/icon_stat_strength.png",
@@ -859,375 +900,437 @@
     },
     "tile_floor_c1": {
       "file": "mku/tile_floor_c1.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1,
+      "density": 2
     },
     "tile_corridor_c1": {
       "file": "mku/tile_corridor_c1.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1,
+      "density": 2
     },
     "tile_wall_c1": {
       "file": "mku/tile_wall_c1.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
-      "frames": 1
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c2": {
       "file": "mku/tile_floor_c2.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1,
+      "density": 2
     },
     "tile_corridor_c2": {
       "file": "mku/tile_corridor_c2.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1,
+      "density": 2
     },
     "tile_wall_c2": {
       "file": "mku/tile_wall_c2.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
-      "frames": 1
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c3": {
       "file": "mku/tile_floor_c3.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1,
+      "density": 2
     },
     "tile_corridor_c3": {
       "file": "mku/tile_corridor_c3.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1,
+      "density": 2
     },
     "tile_wall_c3": {
       "file": "mku/tile_wall_c3.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
-      "frames": 1
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c1_v0": {
       "file": "mku/tile_floor_c1_v0.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c1_v1": {
       "file": "mku/tile_floor_c1_v1.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c1_v2": {
       "file": "mku/tile_floor_c1_v2.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c1_v3": {
       "file": "mku/tile_floor_c1_v3.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c1_v4": {
       "file": "mku/tile_floor_c1_v4.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c1_v5": {
       "file": "mku/tile_floor_c1_v5.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c2_v0": {
       "file": "mku/tile_floor_c2_v0.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c2_v1": {
       "file": "mku/tile_floor_c2_v1.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c2_v2": {
       "file": "mku/tile_floor_c2_v2.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c2_v3": {
       "file": "mku/tile_floor_c2_v3.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c3_v0": {
       "file": "mku/tile_floor_c3_v0.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c3_v1": {
       "file": "mku/tile_floor_c3_v1.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "tile_floor_c3_v2": {
       "file": "mku/tile_floor_c3_v2.png",
-      "frameWidth": 128,
-      "frameHeight": 128,
-      "frames": 1
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c1_0": {
       "file": "mku/obstacle_c1_0.png",
-      "frameWidth": 28,
-      "frameHeight": 22,
-      "frames": 1
+      "frameWidth": 56,
+      "frameHeight": 44,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c1_1": {
       "file": "mku/obstacle_c1_1.png",
-      "frameWidth": 27,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 54,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c1_2": {
       "file": "mku/obstacle_c1_2.png",
-      "frameWidth": 28,
-      "frameHeight": 23,
-      "frames": 1
+      "frameWidth": 56,
+      "frameHeight": 46,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c1_3": {
       "file": "mku/obstacle_c1_3.png",
-      "frameWidth": 28,
-      "frameHeight": 23,
-      "frames": 1
+      "frameWidth": 56,
+      "frameHeight": 46,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c1_4": {
       "file": "mku/obstacle_c1_4.png",
-      "frameWidth": 28,
-      "frameHeight": 26,
-      "frames": 1
+      "frameWidth": 56,
+      "frameHeight": 52,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c1_5": {
       "file": "mku/obstacle_c1_5.png",
-      "frameWidth": 21,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 42,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c2_0": {
       "file": "mku/obstacle_c2_0.png",
-      "frameWidth": 17,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 34,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c2_1": {
       "file": "mku/obstacle_c2_1.png",
-      "frameWidth": 25,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 50,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c2_2": {
       "file": "mku/obstacle_c2_2.png",
-      "frameWidth": 28,
-      "frameHeight": 26,
-      "frames": 1
+      "frameWidth": 56,
+      "frameHeight": 52,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c2_3": {
       "file": "mku/obstacle_c2_3.png",
-      "frameWidth": 16,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c2_4": {
       "file": "mku/obstacle_c2_4.png",
-      "frameWidth": 16,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c2_5": {
       "file": "mku/obstacle_c2_5.png",
-      "frameWidth": 18,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 36,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c3_0": {
       "file": "mku/obstacle_c3_0.png",
-      "frameWidth": 20,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c3_1": {
       "file": "mku/obstacle_c3_1.png",
-      "frameWidth": 20,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c3_2": {
       "file": "mku/obstacle_c3_2.png",
-      "frameWidth": 20,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 40,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c3_3": {
       "file": "mku/obstacle_c3_3.png",
-      "frameWidth": 28,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 56,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c3_4": {
       "file": "mku/obstacle_c3_4.png",
-      "frameWidth": 19,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 38,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "obstacle_c3_5": {
       "file": "mku/obstacle_c3_5.png",
-      "frameWidth": 23,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 46,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "decal_c1_0": {
       "file": "mku/decal_c1_0.png",
-      "frameWidth": 28,
-      "frameHeight": 22,
-      "frames": 1
+      "frameWidth": 56,
+      "frameHeight": 44,
+      "frames": 1,
+      "density": 2
     },
     "decal_c1_1": {
       "file": "mku/decal_c1_1.png",
-      "frameWidth": 26,
-      "frameHeight": 18,
-      "frames": 1
+      "frameWidth": 52,
+      "frameHeight": 36,
+      "frames": 1,
+      "density": 2
     },
     "decal_c1_2": {
       "file": "mku/decal_c1_2.png",
-      "frameWidth": 26,
-      "frameHeight": 21,
-      "frames": 1
+      "frameWidth": 52,
+      "frameHeight": 42,
+      "frames": 1,
+      "density": 2
     },
     "decal_c1_3": {
       "file": "mku/decal_c1_3.png",
-      "frameWidth": 25,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 50,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "decal_c1_4": {
       "file": "mku/decal_c1_4.png",
-      "frameWidth": 26,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 52,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "decal_c1_5": {
       "file": "mku/decal_c1_5.png",
-      "frameWidth": 30,
-      "frameHeight": 18,
-      "frames": 1
+      "frameWidth": 60,
+      "frameHeight": 36,
+      "frames": 1,
+      "density": 2
     },
     "decal_c1_6": {
       "file": "mku/decal_c1_6.png",
-      "frameWidth": 34,
-      "frameHeight": 22,
-      "frames": 1
+      "frameWidth": 68,
+      "frameHeight": 44,
+      "frames": 1,
+      "density": 2
     },
     "decal_c2_0": {
       "file": "mku/decal_c2_0.png",
-      "frameWidth": 56,
-      "frameHeight": 55,
-      "frames": 1
+      "frameWidth": 112,
+      "frameHeight": 110,
+      "frames": 1,
+      "density": 2
     },
     "decal_c2_1": {
       "file": "mku/decal_c2_1.png",
-      "frameWidth": 54,
-      "frameHeight": 56,
-      "frames": 1
+      "frameWidth": 108,
+      "frameHeight": 112,
+      "frames": 1,
+      "density": 2
     },
     "decal_c2_2": {
       "file": "mku/decal_c2_2.png",
-      "frameWidth": 56,
-      "frameHeight": 53,
-      "frames": 1
+      "frameWidth": 112,
+      "frameHeight": 106,
+      "frames": 1,
+      "density": 2
     },
     "decal_c2_3": {
       "file": "mku/decal_c2_3.png",
-      "frameWidth": 28,
-      "frameHeight": 22,
-      "frames": 1
+      "frameWidth": 56,
+      "frameHeight": 44,
+      "frames": 1,
+      "density": 2
     },
     "decal_c2_4": {
       "file": "mku/decal_c2_4.png",
-      "frameWidth": 26,
-      "frameHeight": 18,
-      "frames": 1
+      "frameWidth": 52,
+      "frameHeight": 36,
+      "frames": 1,
+      "density": 2
     },
     "decal_c2_5": {
       "file": "mku/decal_c2_5.png",
-      "frameWidth": 26,
-      "frameHeight": 21,
-      "frames": 1
+      "frameWidth": 52,
+      "frameHeight": 42,
+      "frames": 1,
+      "density": 2
     },
     "decal_c2_6": {
       "file": "mku/decal_c2_6.png",
-      "frameWidth": 34,
-      "frameHeight": 22,
-      "frames": 1
+      "frameWidth": 68,
+      "frameHeight": 44,
+      "frames": 1,
+      "density": 2
     },
     "decal_c3_0": {
       "file": "mku/decal_c3_0.png",
-      "frameWidth": 28,
-      "frameHeight": 24,
-      "frames": 1
+      "frameWidth": 56,
+      "frameHeight": 48,
+      "frames": 1,
+      "density": 2
     },
     "decal_c3_1": {
       "file": "mku/decal_c3_1.png",
-      "frameWidth": 23,
-      "frameHeight": 26,
-      "frames": 1
+      "frameWidth": 46,
+      "frameHeight": 52,
+      "frames": 1,
+      "density": 2
     },
     "decal_c3_2": {
       "file": "mku/decal_c3_2.png",
-      "frameWidth": 22,
-      "frameHeight": 19,
-      "frames": 1
+      "frameWidth": 44,
+      "frameHeight": 38,
+      "frames": 1,
+      "density": 2
     },
     "decal_c3_3": {
       "file": "mku/decal_c3_3.png",
-      "frameWidth": 36,
-      "frameHeight": 34,
-      "frames": 1
+      "frameWidth": 72,
+      "frameHeight": 68,
+      "frames": 1,
+      "density": 2
     },
     "decal_c3_4": {
       "file": "mku/decal_c3_4.png",
-      "frameWidth": 54,
-      "frameHeight": 56,
-      "frames": 1
+      "frameWidth": 108,
+      "frameHeight": 112,
+      "frames": 1,
+      "density": 2
     },
     "decal_c3_5": {
       "file": "mku/decal_c3_5.png",
-      "frameWidth": 56,
-      "frameHeight": 55,
-      "frames": 1
+      "frameWidth": 112,
+      "frameHeight": 110,
+      "frames": 1,
+      "density": 2
     },
     "decal_c3_6": {
       "file": "mku/decal_c3_6.png",
-      "frameWidth": 24,
-      "frameHeight": 24,
-      "frames": 1
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 1,
+      "density": 2
     },
     "prop_vending": {
       "file": "mku/prop_vending.png",
-      "frameWidth": 24,
-      "frameHeight": 32,
-      "frames": 1
+      "frameWidth": 48,
+      "frameHeight": 64,
+      "frames": 1,
+      "density": 2
     },
     "pickup_potion": {
       "file": "mku/pickup_potion.png",
@@ -1328,78 +1431,89 @@
     },
     "weapon_handi": {
       "file": "mku/weapon_handi.png",
-      "frameWidth": 9,
-      "frameHeight": 26,
+      "frameWidth": 18,
+      "frameHeight": 52,
       "frames": 1,
+      "density": 2,
       "gripX": 0.5
     },
     "weapon_rasalgethi_club": {
       "file": "mku/weapon_rasalgethi_club.png",
-      "frameWidth": 22,
-      "frameHeight": 9,
+      "frameWidth": 44,
+      "frameHeight": 18,
       "frames": 1,
+      "density": 2,
       "gripX": 0.2
     },
     "weapon_rasalhague_sword": {
       "file": "mku/weapon_rasalhague_sword.png",
-      "frameWidth": 26,
-      "frameHeight": 4,
+      "frameWidth": 52,
+      "frameHeight": 8,
       "frames": 1,
+      "density": 2,
       "gripX": 0.15
     },
     "weapon_broken_blade": {
       "file": "mku/weapon_broken_blade.png",
-      "frameWidth": 14,
-      "frameHeight": 10,
+      "frameWidth": 28,
+      "frameHeight": 20,
       "frames": 1,
+      "density": 2,
       "gripX": 0.3
     },
     "weapon_al_gul_blade": {
       "file": "mku/weapon_al_gul_blade.png",
-      "frameWidth": 28,
-      "frameHeight": 19,
+      "frameWidth": 56,
+      "frameHeight": 38,
       "frames": 1,
+      "density": 2,
       "gripX": 0.2
     },
     "weapon_hanabi": {
       "file": "mku/weapon_hanabi.png",
-      "frameWidth": 28,
-      "frameHeight": 6,
+      "frameWidth": 56,
+      "frameHeight": 12,
       "frames": 1,
+      "density": 2,
       "gripX": 0.2
     },
     "weapon_gihwan_arm": {
       "file": "mku/weapon_gihwan_arm.png",
-      "frameWidth": 26,
-      "frameHeight": 14,
+      "frameWidth": 52,
+      "frameHeight": 28,
       "frames": 1,
+      "density": 2,
       "gripX": 0.2
     },
     "weapon_ancient_core": {
       "file": "mku/weapon_ancient_core.png",
-      "frameWidth": 15,
-      "frameHeight": 16,
+      "frameWidth": 30,
+      "frameHeight": 32,
       "frames": 1,
+      "density": 2,
       "gripX": 0.5
     },
     "weapon_eclipse_core": {
       "file": "mku/weapon_eclipse_core.png",
-      "frameWidth": 16,
-      "frameHeight": 16,
+      "frameWidth": 32,
+      "frameHeight": 32,
       "frames": 1,
+      "density": 2,
       "gripX": 0.5
     },
     "fx_golem_laser": {
       "file": "mku/fx_golem_laser.png",
-      "frameWidth": 96,
-      "frameHeight": 43,
-      "frames": 1
+      "frameWidth": 192,
+      "frameHeight": 86,
+      "frames": 1,
+      "density": 2
     },
     "fx_eclipse_meteor": {
       "file": "mku/fx_eclipse_meteor.png",
-      "frameWidth": 10,
-      "frameHeight": 20,
-      "frames": 1
+      "frameWidth": 20,
+      "frameHeight": 40,
+      "frames": 1,
+      "density": 2
     },
     "projectile_player": {
       "file": "mku/projectile_player.png",
@@ -1481,51 +1595,59 @@
     },
     "prop_exit_portal": {
       "file": "mku/prop_exit_portal.png",
-      "frameWidth": 36,
-      "frameHeight": 35,
-      "frames": 1
+      "frameWidth": 72,
+      "frameHeight": 70,
+      "frames": 1,
+      "density": 2
     },
     "prop_encounter_core": {
       "file": "mku/prop_encounter_core.png",
-      "frameWidth": 14,
-      "frameHeight": 24,
-      "frames": 1
+      "frameWidth": 28,
+      "frameHeight": 48,
+      "frames": 1,
+      "density": 2
     },
     "skill_turret_shell": {
       "file": "mku/skill_turret_shell.png",
-      "frameWidth": 9,
-      "frameHeight": 7,
-      "frames": 1
+      "frameWidth": 18,
+      "frameHeight": 14,
+      "frames": 1,
+      "density": 2
     },
     "skill_mine_chain": {
       "file": "mku/skill_mine_chain.png",
-      "frameWidth": 7,
-      "frameHeight": 8,
-      "frames": 1
+      "frameWidth": 14,
+      "frameHeight": 16,
+      "frames": 1,
+      "density": 2
     },
     "skill_antimatter_charge": {
       "file": "mku/skill_antimatter_charge.png",
-      "frameWidth": 7,
-      "frameHeight": 7,
-      "frames": 1
+      "frameWidth": 14,
+      "frameHeight": 14,
+      "frames": 1,
+      "density": 2
     },
     "skill_antimatter_shell": {
       "file": "mku/skill_antimatter_shell.png",
-      "frameWidth": 16,
-      "frameHeight": 8,
-      "frames": 1
+      "frameWidth": 32,
+      "frameHeight": 16,
+      "frames": 1,
+      "density": 2
     },
     "skill_subject": {
       "file": "mku/skill_subject.png",
-      "frameWidth": 15,
-      "frameHeight": 16,
-      "frames": 1
+      "frameWidth": 30,
+      "frameHeight": 32,
+      "frames": 1,
+      "density": 2
     },
     "skill_experiment_shell": {
       "file": "mku/skill_experiment_shell.png",
-      "frameWidth": 13,
-      "frameHeight": 6,
-      "frames": 1
+      "frameWidth": 26,
+      "frameHeight": 12,
+      "frames": 1,
+      "density": 2
     },
     "ult_first_law": {
       "file": "mku/ult_first_law.png",
@@ -1535,15 +1657,17 @@
     },
     "ult_singularity": {
       "file": "mku/ult_singularity.png",
-      "frameWidth": 12,
-      "frameHeight": 14,
-      "frames": 1
+      "frameWidth": 24,
+      "frameHeight": 28,
+      "frames": 1,
+      "density": 2
     },
     "enemy_orion_crusader": {
       "file": "mku/enemy_orion_crusader.png",
-      "frameWidth": 54,
-      "frameHeight": 58,
+      "frameWidth": 106,
+      "frameHeight": 114,
       "frames": 9,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -1559,9 +1683,10 @@
     },
     "enemy_royal_mage": {
       "file": "mku/enemy_royal_mage.png",
-      "frameWidth": 28,
-      "frameHeight": 48,
+      "frameWidth": 54,
+      "frameHeight": 94,
       "frames": 5,
+      "density": 2,
       "anims": {
         "idle": {
           "from": 0,
@@ -1601,39 +1726,45 @@
     },
     "lab_capsule": {
       "file": "mku/lab_capsule.png",
-      "frameWidth": 18,
-      "frameHeight": 32,
-      "frames": 1
+      "frameWidth": 36,
+      "frameHeight": 64,
+      "frames": 1,
+      "density": 2
     },
     "lab_codex": {
       "file": "mku/lab_codex.png",
-      "frameWidth": 28,
-      "frameHeight": 19,
-      "frames": 1
+      "frameWidth": 56,
+      "frameHeight": 38,
+      "frames": 1,
+      "density": 2
     },
     "lab_job_device": {
       "file": "mku/lab_job_device.png",
-      "frameWidth": 32,
-      "frameHeight": 20,
-      "frames": 1
+      "frameWidth": 64,
+      "frameHeight": 40,
+      "frames": 1,
+      "density": 2
     },
     "lab_portal": {
       "file": "mku/lab_portal.png",
-      "frameWidth": 34,
-      "frameHeight": 30,
-      "frames": 1
+      "frameWidth": 68,
+      "frameHeight": 60,
+      "frames": 1,
+      "density": 2
     },
     "lab_archive": {
       "file": "mku/lab_archive.png",
-      "frameWidth": 16,
-      "frameHeight": 28,
-      "frames": 1
+      "frameWidth": 32,
+      "frameHeight": 56,
+      "frames": 1,
+      "density": 2
     },
     "lab_gemini": {
       "file": "mku/lab_gemini.png",
-      "frameWidth": 20,
-      "frameHeight": 32,
-      "frames": 1
+      "frameWidth": 40,
+      "frameHeight": 64,
+      "frames": 1,
+      "density": 2
     },
     "lab_window": {
       "file": "mku/lab_window.png",

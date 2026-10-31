@@ -1228,6 +1228,8 @@ export interface ArtSpriteDef {
   frames?: number;
   /** 돌아가는 머리(포탑): 회전 중심, 받침 위 높이, 그림의 기울기, 총구까지 거리 */
   aim?: { pivotX: number; pivotY: number; mountY: number; tiltDeg: number; muzzlePx: number };
+  /** 게임 1px에 들어간 그림 픽셀 수 (없으면 1). 크면 도트가 작게 보인다 */
+  density?: number;
   /** 무기: 손에 쥐는 가로 위치 0~1 (없으면 가운데) */
   gripX?: number;
   /** 없으면 그림 종류별 기본값 (캐릭터·오브젝트는 feet, 탄·픽업·스킬·무기는 center) */

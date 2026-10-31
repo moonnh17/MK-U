@@ -183,6 +183,11 @@ export function anchorOf(key: string, group: AssetGroup | undefined, art: ArtDat
   return art.sprites[key]?.anchor ?? (group ? DEFAULT_ANCHOR[group] : 'center');
 }
 
+/** 게임 1px에 들어간 그림 픽셀 수 */
+export function artDensity(art: ArtData, key: string): number {
+  return art.sprites[key]?.density ?? 1;
+}
+
 /**
  * 그림 프레임(fw×fh) 안에서 판정(hw×hh)이 놓일 자리.
  * origin: 게임 오브젝트 좌표(= 판정 가운데)가 프레임의 어디인지(0~1)

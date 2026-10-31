@@ -33,6 +33,10 @@ const SIDESTEP_SEC = 0.45;
 /** 거리 유지 적이 멈추는 폭 */
 const KEEP_BAND = 30;
 
+/** 변이(엘리트) 테두리: 게임 1px 두께 */
+const RIM_OFFSETS: readonly [number, number][] = [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]];
+const RIM_COLOR = 0xff2424;
+
 /** 예고 표시 색 */
 const TELEGRAPH_COLOR = 0xff4040;
 
@@ -51,6 +55,7 @@ export class Enemy {
   /** 마지막 접촉 피해 시각(ms) */
   lastContactAt = -Infinity;
   dead = false;
+  private readonly rim: { ox: number; oy: number; img: Phaser.GameObjects.Image }[] = [];
   /** 남은 무적(초). 보스 강화 단계 진입 연출 중 */
   invuln = 0;
   /** 넉백 남은 시간·속도 */
@@ -72,7 +77,6 @@ export class Enemy {
   private actHit = false;
   private telegraph: Phaser.GameObjects.Graphics | null = null;
   private readonly icon: Phaser.GameObjects.Text | null = null;
-  private readonly outline: Phaser.GameObjects.Graphics | null = null;
   private ghostTimer = 0;
   private blinkT = 0;
   /** 마기갑충: 벽에 부딪혀 기절한 남은 시간과 그동안 받는 피해 배율 */
@@ -145,11 +149,11 @@ export class Enemy {
       this.sprite.setAlpha(0.4);
     }
     if (elite) {
+      for (const [ox, oy] of RIM_OFFSETS) this.rim.push({ ox, oy, img: scene.add.image(x, y, def.spriteKey).setOrigin(this.sprite.originX, this.sprite.originY).setDepth(2.9).setTintFill(RIM_COLOR) });
       this.icon = scene.add
         .text(x, y, iconText, { fontFamily: 'sans-serif', fontSize: '8px', color: elite.color })
         .setOrigin(0.5, 1)
         .setDepth(7);
-      if (this.elites.some((x) => x.look === 'outline')) this.outline = scene.add.graphics().setDepth(4);
     }
   }
 
@@ -526,12 +530,10 @@ export class Enemy {
     this.halo?.setPosition(this.sprite.x, this.sprite.y);
     if (!this.elite) return;
     const { x, y } = this.sprite;
-    this.icon?.setPosition(x, y - this.radius - 1);
-    if (this.outline) {
-      const s = this.radius * 2 + 4;
-      const ol = this.elites.find((e) => e.look === 'outline')!;
-      this.outline.clear().lineStyle(2, hexColor(ol.color), 1).strokeRect(x - s / 2, y - s / 2, s, s);
+    for (const r of this.rim) {
+      r.img.setPosition(x + r.ox, y + r.oy).setTexture(this.sprite.texture.key, this.sprite.frame.name).setOrigin(this.sprite.originX, this.sprite.originY).setFlipX(this.sprite.flipX).setScale(this.sprite.scaleX, this.sprite.scaleY).setAlpha(this.sprite.alpha).setVisible(this.sprite.visible);
     }
+    this.icon?.setPosition(x, y - this.radius - 1);
     const ghost = this.elites.find((e) => e.look === 'afterimage');
     if (ghost) {
       this.ghostTimer -= dt;
@@ -624,7 +626,7 @@ export class Enemy {
     this.clearSpawn();
     this.halo?.destroy();
     this.icon?.destroy();
-    this.outline?.destroy();
+    for (const r of this.rim) r.img.destroy();
     this.sprite.destroy();
   }
 }
