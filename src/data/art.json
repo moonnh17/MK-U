@@ -3,7 +3,7 @@
   "sprites": {
     "player_human": {
       "file": "mku/player_human.png",
-      "frameWidth": 44,
+      "frameWidth": 42,
       "frameHeight": 52,
       "frames": 5,
       "density": 2,
@@ -22,7 +22,7 @@
     },
     "player_hectar": {
       "file": "mku/player_hectar.png",
-      "frameWidth": 38,
+      "frameWidth": 40,
       "frameHeight": 52,
       "frames": 5,
       "density": 2,
@@ -41,8 +41,8 @@
     },
     "player_acro": {
       "file": "mku/player_acro.png",
-      "frameWidth": 52,
-      "frameHeight": 50,
+      "frameWidth": 46,
+      "frameHeight": 52,
       "frames": 5,
       "density": 2,
       "anims": {
@@ -81,7 +81,7 @@
     "enemy_gaedeulgae": {
       "file": "mku/enemy_gaedeulgae.png",
       "frameWidth": 40,
-      "frameHeight": 38,
+      "frameHeight": 30,
       "frames": 5,
       "density": 2,
       "anims": {
@@ -99,7 +99,7 @@
     },
     "enemy_akgwi": {
       "file": "mku/enemy_akgwi.png",
-      "frameWidth": 48,
+      "frameWidth": 50,
       "frameHeight": 50,
       "frames": 6,
       "density": 2,
@@ -118,8 +118,8 @@
     },
     "enemy_ghost_shooter": {
       "file": "mku/enemy_ghost_shooter.png",
-      "frameWidth": 54,
-      "frameHeight": 48,
+      "frameWidth": 50,
+      "frameHeight": 54,
       "frames": 4,
       "density": 2,
       "anims": {
@@ -327,7 +327,7 @@
     },
     "enemy_electric_ring": {
       "file": "mku/enemy_electric_ring.png",
-      "frameWidth": 116,
+      "frameWidth": 112,
       "frameHeight": 152,
       "frames": 2,
       "density": 2,
@@ -1616,8 +1616,8 @@
     },
     "skill_mine_chain": {
       "file": "mku/skill_mine_chain.png",
-      "frameWidth": 14,
-      "frameHeight": 16,
+      "frameWidth": 16,
+      "frameHeight": 12,
       "frames": 1,
       "density": 2
     },
@@ -1683,9 +1683,9 @@
     },
     "enemy_royal_mage": {
       "file": "mku/enemy_royal_mage.png",
-      "frameWidth": 54,
+      "frameWidth": 50,
       "frameHeight": 94,
-      "frames": 5,
+      "frames": 4,
       "density": 2,
       "anims": {
         "idle": {
@@ -1695,7 +1695,7 @@
         },
         "move": {
           "from": 1,
-          "to": 4,
+          "to": 3,
           "fps": 8
         }
       }

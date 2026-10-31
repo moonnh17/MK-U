@@ -179,4 +179,33 @@ function component(img, x, y, cut = 40, search = 40) {
   return out;
 }
 
-module.exports = { read, write, blank, crop, resize, bbox, paste, flipX, rotate, component };
+/** 이어진 덩어리들: 알파 > cut인 픽셀을 8방향으로 묶는다. [{ area, x0, y0, x1, y1, pts(y*w+x 목록) }] */
+function components(img, cut = 40) {
+  const { w, h, px } = img;
+  const seen = new Uint8Array(w * h);
+  const out = [];
+  const stack = [];
+  for (let start = 0; start < w * h; start++) {
+    if (seen[start] || px[start * 4 + 3] <= cut) continue;
+    seen[start] = 1;
+    stack.push(start);
+    const pts = [];
+    let x0 = w, y0 = h, x1 = 0, y1 = 0;
+    while (stack.length) {
+      const p = stack.pop();
+      pts.push(p);
+      const x = p % w, y = (p - x) / w;
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        const a = x + dx, b = y + dy;
+        if (a < 0 || b < 0 || a >= w || b >= h) continue;
+        const q = b * w + a;
+        if (!seen[q] && px[q * 4 + 3] > cut) { seen[q] = 1; stack.push(q); }
+      }
+    }
+    out.push({ area: pts.length, x0, y0, x1, y1, pts });
+  }
+  return out;
+}
+
+module.exports = { components, read, write, blank, crop, resize, bbox, paste, flipX, rotate, component };

@@ -78,7 +78,7 @@
 | `enemy_electric_ring` | 전기환띠 | 42×42 | feet | #3a9ad9 | mku/enemy_electric_ring.png (2프레임) |
 | `enemy_training_dummy` | 보스 자리(임시 표적) | 24×24 | feet | #8a5ad9 | mku/enemy_training_dummy.png (1프레임) |
 | `enemy_ancestor_echo` | 선조의 잔상 | 42×42 | feet | #b0583a | mku/enemy_ancestor_echo.png (3프레임) |
-| `enemy_royal_mage` | 왕실특무마기법사 외 1곳 | 33×33 | feet | #6a4ad9 | mku/enemy_royal_mage.png (5프레임) |
+| `enemy_royal_mage` | 왕실특무마기법사 외 1곳 | 33×33 | feet | #6a4ad9 | mku/enemy_royal_mage.png (4프레임) |
 | `enemy_orion_crusader` | 오리온의 성전사 | 42×42 | feet | #d9c25a | mku/enemy_orion_crusader.png (9프레임) |
 | `enemy_hectar_chief` | 헥타르 수석 연구원 | 36×36 | feet | #3a9aff | mku/enemy_hectar_chief.png (5프레임) |
 | `enemy_magi_golem` | 마기골렘 | 48×48 | feet | #8a6a4a | mku/enemy_magi_golem.png (2프레임) |

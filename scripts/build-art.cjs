@@ -25,8 +25,32 @@ const load = (f) => {
 function cells(f, cw, ch, picks) {
   const im = load(f);
   const cols = Math.round(im.w / cw), rows = Math.round(im.h / ch);
-  const all = [];
-  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) all.push(k.crop(im, Math.round(c * cw), Math.round(r * ch), Math.round(cw), Math.round(ch)));
+  // 칸 경계로 자르면 경계를 넘은 부분이 잘리고 옆 칸 조각이 묻어 온다.
+  // 이어진 덩어리를 통째로 무게중심이 있는 칸에 넣는다 (여러 칸에 걸친 큰 덩어리만 칸 경계로 나눈다)
+  const padX = Math.round(cw / 2), padY = Math.round(ch / 2);
+  const all = Array.from({ length: cols * rows }, () => k.blank(Math.round(cw) + padX * 2, Math.round(ch) + padY * 2));
+  const put = (cell, c, r, p) => {
+    if (c < 0 || r < 0 || c >= cols || r >= rows) return;
+    const x = p % im.w, y = (p - x) / im.w;
+    const dx = x - Math.round(c * cw) + padX, dy = y - Math.round(r * ch) + padY;
+    const t = all[cell];
+    if (dx < 0 || dy < 0 || dx >= t.w || dy >= t.h) return;
+    im.px.copy(t.px, (dy * t.w + dx) * 4, p * 4, p * 4 + 4);
+  };
+  for (const comp of k.components(im)) {
+    if (comp.x1 - comp.x0 > cw * 1.5 || comp.y1 - comp.y0 > ch * 1.5) {
+      for (const p of comp.pts) {
+        const x = p % im.w, y = (p - x) / im.w;
+        const c = Math.min(cols - 1, Math.floor(x / cw)), r = Math.min(rows - 1, Math.floor(y / ch));
+        put(r * cols + c, c, r, p);
+      }
+      continue;
+    }
+    let sx = 0, sy = 0;
+    for (const p of comp.pts) { sx += p % im.w; sy += Math.floor(p / im.w); }
+    const c = Math.min(cols - 1, Math.floor(sx / comp.area / cw)), r = Math.min(rows - 1, Math.floor(sy / comp.area / ch));
+    for (const p of comp.pts) put(r * cols + c, c, r, p);
+  }
   return picks ? picks.map((i) => all[i]) : all;
 }
 /** 가로 스트립을 프레임 수로 균등 분할 */
@@ -49,7 +73,13 @@ function gaps(f, cut = 40, minGap = 3) {
   }
   // 작은 파편(입자)은 프레임이 아니다: 가장 넓은 것의 40% 미만은 버린다
   const maxW = Math.max(...segs.map(([a, b]) => b - a));
-  return segs.filter(([a, b]) => b - a >= maxW * 0.4).map(([a, b]) => k.crop(im, a, 0, b - a, im.h));
+  return segs.filter(([a, b]) => b - a >= maxW * 0.4).map(([a, b]) => {
+    const f2 = k.crop(im, a, 0, b - a, im.h);
+    const comps = k.components(f2, cut);
+    const biggest = Math.max(...comps.map((c) => c.area));
+    for (const c of comps) if (c.area < biggest * 0.05 && (c.x0 === 0 || c.x1 === f2.w - 1)) for (const p of c.pts) f2.px[p * 4 + 3] = 0;
+    return f2;
+  });
 }
 const single = (f) => [load(f)];
 
@@ -57,10 +87,13 @@ const single = (f) => [load(f)];
 const ART_DENSITY = 2;
 const even = (v) => Math.max(ART_DENSITY, Math.round(v / ART_DENSITY) * ART_DENSITY);
 const ENEMY_OUTLINE = [255, 36, 36];
+const SPECK_PX = 7;
 /** 프레임마다 1칸씩 넓혀 그림 둘레에 테두리를 두른다 */
 function outlined(img, fw, fh, n, color) {
   const out = k.blank((fw + 2) * n, fh + 2);
   for (let i = 0; i < n; i++) k.paste(out, k.crop(img, i * fw, 0, fw, fh), i * (fw + 2) + 1, 1);
+  // 줄이면서 생긴 몇 픽셀짜리 부스러기는 테두리가 붙으면 지저분하다
+  for (const c of k.components(out, 0)) if (c.area < SPECK_PX) for (const p of c.pts) out.px[p * 4 + 3] = 0;
   const on = (x, y) => x >= 0 && y >= 0 && x < out.w && y < out.h && out.px[(y * out.w + x) * 4 + 3] > 0;
   const marks = [];
   for (let y = 0; y < out.h; y++) for (let x = 0; x < out.w; x++) {
@@ -137,11 +170,39 @@ function tile(key, col, row, size, dim = 1) {
 
 const sprites = {};
 const anim = (n0, n1, fps) => ({ from: n0, to: n1, fps });
+/** 프레임 맨 위 띠에 있는 작은 글자 조각을 지운다 (원본 시트에 남은 잔재) */
+function dropTopGlyphs(f) {
+  const comps = k.components(f);
+  const top = Math.min(...comps.map((c) => c.y0));
+  const out = k.crop(f, 0, 0, f.w, f.h);
+  const biggest = Math.max(...comps.map((c) => c.area));
+  const band = (f.h / 2) * 0.09;
+  for (const c of comps) if (c.area < biggest * 0.01 && c.y1 <= top + band) for (const p of c.pts) out.px[p * 4 + 3] = 0;
+  return out;
+}
+
+/** 몸에서 멀리 떨어진 작은 조각(옆 프레임 부스러기, 글자 잔재)을 지운다. 몸 둘레의 불꽃·파편은 남긴다 */
+function cleanFrame(f) {
+  const comps = k.components(f);
+  if (comps.length < 2) return f;
+  const main = comps.reduce((a, b) => (b.area > a.area ? b : a));
+  const reach = Math.max(main.x1 - main.x0, main.y1 - main.y0) * 0.18;
+  const out = k.crop(f, 0, 0, f.w, f.h);
+  for (const c of comps) {
+    if (c === main || c.area >= main.area * 0.03) continue;
+    const near = c.x1 >= main.x0 - reach && c.x0 <= main.x1 + reach && c.y1 >= main.y0 - reach && c.y0 <= main.y1 + reach;
+    const inside = c.x0 >= main.x0 && c.x1 <= main.x1 && c.y0 >= main.y0 && c.y1 <= main.y1;
+    if (inside || (near && c.area >= main.area * 0.002)) continue;
+    for (const p of c.pts) out.px[p * 4 + 3] = 0;
+  }
+  return out;
+}
+
 /** idle 프레임 + move 프레임을 한 시트로 */
 function actor(key, idle, move, fit, opts = {}) {
   // 적은 빨간 테두리로 배경과 확실히 구분한다
   if (key.startsWith('enemy_')) opts = { ...opts, outline: ENEMY_OUTLINE };
-  const s = sheet(key, [...idle, ...move], fit, opts);
+  const s = sheet(key, [...idle, ...move].map((f) => (key.startsWith('enemy_') ? cleanFrame(f) : f)), fit, opts);
   const anims = {};
   if (idle.length) anims.idle = anim(0, idle.length - 1, opts.idleFps ?? 4);
   if (move.length) anims.move = anim(idle.length, idle.length + move.length - 1, opts.moveFps ?? 8);
@@ -183,7 +244,7 @@ actor('enemy_electric_ring', single('electric/body-idle.png'), single('electric/
 actor('enemy_magi_golem', single('golem/body-idle.png'), single('golem/body-walk.png'), 84, { independent: true });
 actor('enemy_magi_golem_phase2', single('golem/body-rage.png'), single('golem/body-walk.png'), 90, { independent: true });
 actor('enemy_eclipse', strip('eclipse/p1-idle.png', 4), strip('eclipse/p1-move.png', 6), 75);
-actor('enemy_eclipse_phase2', strip('eclipse/p2-idle.png', 4), strip('eclipse/p2-move.png', 6), 84);
+actor('enemy_eclipse_phase2', strip('eclipse/p2-idle.png', 4).map(dropTopGlyphs), strip('eclipse/p2-move.png', 6), 84);
 // 마기카이저: 구속(1단계) → 2 → 3단계
 actor('enemy_magi_kaiser', strip('kaiser/idle.png', 4), strip('kaiser/move.png', 6), 99);
 actor('enemy_magi_kaiser_phase1', strip('kaiser/p1-idle.png', 4), [], 99);
@@ -565,12 +626,15 @@ sprites.ult_singularity = sheet('ult_singularity', single('acro/well-2.png'), 14
 // 히든보스: 오리온의 성전사 = 성기사 몸체. 왕실특무마기법사는 원본에 없어 연구원을 보라색으로 물들여 쓴다 (임시)
 actor('enemy_orion_crusader', gaps('warrior/paladin-idle.png'), gaps('warrior/paladin-move.png'), 56);
 {
-  const fr = cells('spires/researcher-v141.png', 96, 192).slice(0, 4).map((f) => {
+  const solid = (f) => (k.components(f).reduce((a, c) => Math.max(a, c.area), 0));
+  const allFr = cells('spires/researcher-v141.png', 96, 192);
+  const biggest = Math.max(...allFr.map(solid));
+  const fr = allFr.filter((f) => solid(f) > biggest * 0.5).slice(0, 4).map((f) => {
     const t = k.crop(f, 0, 0, f.w, f.h);
     for (let p = 0; p < t.px.length; p += 4) { t.px[p] = Math.round(t.px[p] * 0.62); t.px[p + 1] = Math.round(t.px[p + 1] * 0.45); }
     return t;
   });
-  actor('enemy_royal_mage', [fr[0]], fr, 46);
+  actor('enemy_royal_mage', [fr[0]], fr.slice(0, 3), 46);
 }
 
 // 아이템 아이콘 (원본에 맞는 것이 없는 둘은 직접 찍는다)

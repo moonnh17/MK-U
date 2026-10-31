@@ -73,7 +73,7 @@
       "chapter": 1,
       "rank": "boss",
       "ai": "boss",
-      "maxHp": 1350,
+      "maxHp": 900,
       "moveSpeed": 40,
       "contactDamage": 10,
       "contactIntervalSec": 1.0,
