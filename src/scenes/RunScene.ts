@@ -2,6 +2,7 @@ import { buildPathField, pathDir, segmentClear, type PathField } from '../system
 import { IDLE_DODGE } from '../systems/dodge';
 import { stampGrid } from '../systems/roomShapes';
 import Phaser from 'phaser';
+import { Encounters } from './run/encounters';
 import { Progression } from './run/progression';
 import { WeaponCombat } from './run/weaponCombat';
 import { StageFx } from './run/stageFx';
@@ -20,7 +21,6 @@ import type { BossHost } from '../bosses/host';
 import { Door } from '../entities/door';
 import { Enemy, type EnemyHost } from '../entities/enemy';
 import { Chest, MerchantStand, type ChestKind } from '../entities/chest';
-import { Spire } from '../entities/spire';
 import { Darkness } from '../entities/darkness';
 import { BreakableProp } from '../entities/roomProp';
 import { applyMental } from '../systems/sanity';
@@ -37,18 +37,17 @@ import { passiveImpl, skillImpl, ultimateImpl } from '../skills/registry';
 import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { calcDamage, gradeMultiplier, spaceDamage, type Stats } from '../systems/damage';
 import { gaugeFromGreatSuccess } from '../systems/advancement';
-import { assignElites, eliteCount, pickTwoElites } from '../systems/elites';
+import { assignElites, eliteCount } from '../systems/elites';
 import { championWaves, raidChampions } from '../systems/champions';
-import { IMPLEMENTED_ENCOUNTERS } from '../systems/encounter';
 import { effectiveWeights, readySet, rollItem, transferWeight } from '../systems/items';
-import { canBuy, merchantStock, rollEncounter, rollGrade, rollOptions, rollWeapon } from '../systems/loot';
+import { canBuy, rollGrade, rollOptions, rollWeapon } from '../systems/loot';
 import { generateStage, type RoomNode } from '../systems/mapgen';
-import { encounterKinds, hiddenChapterMul, pickHiddenBoss } from '../systems/hiddenBoss';
+import { hiddenChapterMul } from '../systems/hiddenBoss';
 import { steerToward } from '../systems/motion';
 import { crystalBreakdown, rollShard } from '../systems/runRecord';
 import { MiniQueue } from '../systems/gemini';
-import { inSpireCircle, spireEliteCount, spireItemChoices, spireSize, type SpireEvent } from '../systems/spire';
-import { planCombatWaves, RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
+import { inSpireCircle } from '../systems/spire';
+import { RoomState, wavesForRoom, type RoomEvent, type Wave } from '../systems/roomState';
 import { advanceStage, playableChapters, firstStage } from '../systems/run';
 import { absorbHit, refracts, tickShield, type ShieldState } from '../systems/shield';
 import { applyCorruption, corruptedDamage, skillChance, tickCorruption } from '../systems/acro';
@@ -58,7 +57,7 @@ import { damageTaken, maxHpFor, setStat, statEffect } from '../systems/stats';
 import { applyBleed, buffDuration, canAutoCast, chargeTime, skillTags, tickBleed } from '../systems/tags';
 import { activeWeapon, dropWeaponAt, autoAim, gainEnergy, normalize, pickUpWeapon, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, corridors, doorRect, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, obstacleRects, wallRects, type Rect, type WorldMetrics } from '../systems/worldLayout';
-import type { BleedRule, EncounterKindId, GradeId, HiddenBossDef, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
+import type { BleedRule, GradeId, SkillDef, SpaceRule, StatId, TagId, UltimateDef, WeaponDef } from '../types/data';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -69,6 +68,7 @@ export class RunScene extends Phaser.Scene {
   stageFx!: StageFx;
   combat!: WeaponCombat;
   progression!: Progression;
+  encounters!: Encounters;
   ctx!: GameContext;
   session!: RunSession;
   m!: WorldMetrics;
@@ -102,14 +102,6 @@ export class RunScene extends Phaser.Scene {
   cores: Prop[] = [];
   chests: Chest[] = [];
   stands: MerchantStand[] = [];
-  /** 대규모 습격이 벌어진 조우 칸 */
-  raidRooms = new Set<number>();
-  /** 히든보스가 나온 조우 칸 → 그 히든보스 */
-  hiddenBossRooms = new Map<number, HiddenBossDef>();
-  /** 디버그: 다음 히든보스 지정 */
-  forcedHiddenBoss: string | null = null;
-  /** 마기수집첨탑 (조우 칸 하나에 하나) */
-  spires: Spire[] = [];
   /** 타격감 연출·히트스톱 (멈춘 동안은 물리와 적이 멈춘다), 다음 피해가 치명타인지 */
   juice!: Juice;
   hitStop!: HitStop;
@@ -123,12 +115,6 @@ export class RunScene extends Phaser.Scene {
   /** 일식 어둠과 그 보스 (식광) */
   darkness: Darkness | null = null;
   darknessBoss: Enemy | null = null;
-  /** 강적이 나올 중형 첨탑 (첫 무리 때 소환) */
-  spireStrong = new Set<Spire>();
-  /** 처치 중에 생긴 첨탑 이벤트 (다음 updateSpires에서 처리) */
-  spireEvents: { sp: Spire; e: SpireEvent }[] = [];
-  /** 디버그: 다음 조우 칸 유형 강제 */
-  forcedEncounter: EncounterKindId | null = null;
   skillObjects: SkillObject[] = [];
   /** 적 쪽 위험 지대(폭발 엘리트 지연 폭발 등) */
   hazards: Hazard[] = [];
@@ -173,6 +159,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.encounters = new Encounters(this);
     this.progression = new Progression(this);
     this.combat = new WeaponCombat(this);
     this.stageFx = new StageFx(this);
@@ -363,15 +350,15 @@ export class RunScene extends Phaser.Scene {
       }),
       bus.on('cardReroll', () => this.progression.rerollCards()),
       bus.on('debugForceEncounter', ({ kind }) => {
-        this.forcedEncounter = kind;
+        this.encounters.forcedEncounter = kind;
       }),
       bus.on('debugGoStage', ({ chapter, stage }) => {
         if (this.modal || this.session.outcome) return;
         this.scene.restart({ stage: { chapter, stage }, player: this.session.player, offers: [] } satisfies RunSceneData);
       }),
       bus.on('debugHiddenBoss', ({ id }) => {
-        this.forcedEncounter = 'hiddenBoss';
-        this.forcedHiddenBoss = id;
+        this.encounters.forcedEncounter = 'hiddenBoss';
+        this.encounters.forcedHiddenBoss = id;
       }),
       bus.on('debugGiveWeapon', ({ defId, grade }) => {
         const d = this.ctx.data;
@@ -426,13 +413,13 @@ export class RunScene extends Phaser.Scene {
     this.cores = [];
     this.chests = [];
     this.stands = [];
-    this.raidRooms = new Set();
-    this.hiddenBossRooms = new Map();
-    this.spires = [];
-    this.spireStrong = new Set();
+    this.encounters.raidRooms = new Set();
+    this.encounters.hiddenBossRooms = new Map();
+    this.encounters.spires = [];
+    this.encounters.spireStrong = new Set();
     this.darkness = null;
     this.darknessBoss = null;
-    this.spireEvents = [];
+    this.encounters.spireEvents = [];
     this.combat.charging = false;
     this.combat.chargeT = 0;
     this.combat.chargeFx = null;
@@ -746,7 +733,7 @@ export class RunScene extends Phaser.Scene {
     const moving = frame.move.x !== 0 || frame.move.y !== 0;
 
     this.updateRooms(dt);
-    this.updateSpires(dt);
+    this.encounters.updateSpires(dt);
 
     for (const e of this.enemies) {
       // 집정관: 플레이어가 그 방을 나가면 흡수 초기화
@@ -830,7 +817,7 @@ export class RunScene extends Phaser.Scene {
       const inner = interiorRect(map.rooms[rid]!, this.m, this.ctx.data.mapgen.lockInsetPx);
       // 조우 칸: 안쪽에 들어서면 유형이 정해진다
       if (map.rooms[rid]!.kind === 'encounterRoom' && !this.session.encounters.has(rid) && contains(inner, this.player.x, this.player.y)) {
-        this.resolveEncounter(rid);
+        this.encounters.resolveEncounter(rid);
       }
       if (this.rooms.get(rid)!.phase === 'idle' && contains(inner, this.player.x, this.player.y)) {
         // 보스방: 경고 배너를 띄우고 그동안 보스 소환을 미룬다
@@ -852,7 +839,7 @@ export class RunScene extends Phaser.Scene {
       if (e.type === 'lock') {
         this.setRoomLocked(roomId, true);
         // 보스는 등장 연출이 따로 있다
-        if (this.rooms.get(roomId)?.kind !== 'bossRoom' && !this.hiddenBossRooms.has(roomId)) {
+        if (this.rooms.get(roomId)?.kind !== 'bossRoom' && !this.encounters.hiddenBossRooms.has(roomId)) {
           bus.emit('combatBanner', { kind: 'start' });
           sfx('combatStart');
           shake(this, 'light');
@@ -869,9 +856,9 @@ export class RunScene extends Phaser.Scene {
         const cam = this.cameras.main;
         const base = this.ctx.data.ui.camera.zoom * this.ctx.renderScale;
         this.tweens.add({ targets: cam, zoom: base * rc.zoom, duration: (rc.zoomSec * 1000) / 2, yoyo: true, onComplete: () => cam.setZoom(base) });
-        if (node.kind === 'combatRoom') this.combatRoomDrop(roomId);
-        if (this.raidRooms.has(roomId)) this.raidReward(roomId);
-        if (this.hiddenBossRooms.has(roomId)) this.hiddenBossReward(roomId);
+        if (node.kind === 'combatRoom') this.encounters.combatRoomDrop(roomId);
+        if (this.encounters.raidRooms.has(roomId)) this.encounters.raidReward(roomId);
+        if (this.encounters.hiddenBossRooms.has(roomId)) this.encounters.hiddenBossReward(roomId);
         // 보스 스테이지: 보스방에서 스킬 카드를 1회 더 고른 뒤 포털이 생긴다(보스방이 출구를 겸함)
         if (node.kind === 'bossRoom') {
           const end = stageEndOffers(this.session.stage, this.ctx.data.mapgen, this.ctx.data.cards);
@@ -901,11 +888,11 @@ export class RunScene extends Phaser.Scene {
     const node = map.rooms[roomId]!;
     const d = this.ctx.data;
     const elites =
-      node.kind === 'combatRoom' || this.raidRooms.has(roomId)
+      node.kind === 'combatRoom' || this.encounters.raidRooms.has(roomId)
         ? assignElites(
             Rng.derive(this.ctx.config.seed, `elite-${map.chapter}-${map.stage}-${roomId}-${index}`),
             wave,
-            this.raidRooms.has(roomId)
+            this.encounters.raidRooms.has(roomId)
               ? d.loot.raid.elitesPerWave
               : eliteCount(Rng.derive(this.ctx.config.seed, `elite-count-${map.chapter}-${map.stage}-${roomId}-${index}`), map.chapter, map.stage, d.elites),
             (id) => d.enemies.enemies.find((e) => e.id === id)!.rank,
@@ -916,7 +903,7 @@ export class RunScene extends Phaser.Scene {
     // 정예(집행자·집정관): 3장 일부 전투 칸 웨이브에 1마리, 습격은 한 웨이브에 하나 또는 둘 (엘리트 없음)
     const total = this.rooms.get(roomId)?.waves.length ?? 0;
     const champLabel = `champion-${map.chapter}-${map.stage}-${roomId}`;
-    const champs = this.raidRooms.has(roomId)
+    const champs = this.encounters.raidRooms.has(roomId)
       ? (raidChampions(Rng.derive(this.ctx.config.seed, champLabel), map.chapter, total, d.waves.champions)[index] ?? [])
       : node.kind === 'combatRoom'
         ? [championWaves(Rng.derive(this.ctx.config.seed, champLabel), map.chapter, map.stage, total, d.waves.champions)[index] ?? null].filter((x): x is string => x !== null)
@@ -1173,9 +1160,9 @@ export class RunScene extends Phaser.Scene {
     const ult = this.session.player.ultimate;
     if (this.ultimateDef().gauge.kind === 'kill') ult.gauge = gainGauge(ult.gauge, this.ultimateDef().gaugeMax, d.ultimates.gaugePerKill[e.rank]);
     // 첨탑: 원 안에서 잡으면 충전 (결과는 다음 프레임에 처리)
-    const sp = roomId === undefined ? undefined : this.spires.find((x) => x.roomId === roomId);
+    const sp = roomId === undefined ? undefined : this.encounters.spires.find((x) => x.roomId === roomId);
     if (sp) {
-      for (const ev of sp.state.onKill(e.rank, inSpireCircle(x - sp.x, y - sp.y, sp.radius, e.radius))) this.spireEvents.push({ sp, e: ev });
+      for (const ev of sp.state.onKill(e.rank, inSpireCircle(x - sp.x, y - sp.y, sp.radius, e.radius))) this.encounters.spireEvents.push({ sp, e: ev });
     }
     this.removeEnemy(e);
     if (roomId !== undefined) this.rooms.get(roomId)?.enemyKilled();
@@ -1916,181 +1903,7 @@ export class RunScene extends Phaser.Scene {
 
   // ---------- 조우 칸 ----------
 
-  /** 조우 칸 안쪽에 들어선 순간 코어가 열리며 유형이 정해진다 */
-  resolveEncounter(roomId: number): void {
-    const d = this.ctx.data;
-    const { map, stage } = this.session;
-    const node = map.rooms[roomId]!;
-    const rng = Rng.derive(this.ctx.config.seed, `encounter-${stage.chapter}-${stage.stage}-${roomId}`);
-    const met = this.session.player.hiddenBossesMet;
-    const kind = this.forcedEncounter ?? rollEncounter(rng, d.loot.encounter.weights, encounterKinds(IMPLEMENTED_ENCOUNTERS, d.bosses.hiddenBosses, met));
-    this.forcedEncounter = null;
-    this.session.encounters.set(roomId, kind);
-    const c = roomCenter(node, this.m);
-    for (const core of this.cores.filter((x) => x.roomId === roomId)) {
-      this.tweens.add({ targets: core.sprite, alpha: 0, scale: 1.6, duration: 300, onComplete: () => core.sprite.destroy() });
-    }
-    this.cores = this.cores.filter((x) => x.roomId !== roomId);
-    bus.emit('toast', { text: this.ctx.t(`encounter.${kind}`) });
-
-    if (kind === 'treasure') {
-      this.addChest('item', c.x, c.y, d.items.treasureWeights);
-    } else if (kind === 'merchant') {
-      const stock = merchantStock(rng, d.loot, d.weapons.weapons, d.weapons.options, d.groupMultipliers);
-      stock.forEach((s, i) => {
-        const x = c.x + (i - (stock.length - 1) / 2) * d.loot.standSpacing;
-        const def = this.weaponDefOf(s.weapon.defId);
-        const label = `${this.weaponName(s.weapon)}\n${this.ctx.t('merchant.price', { price: s.price })}`;
-        this.stands.push(new MerchantStand(this, s, d.loot.merchantStand, def.spriteKey, x, c.y, label, this.gradeColor(s.weapon.grade)));
-      });
-    } else if (kind === 'raid') {
-      // 전투 칸보다 웨이브·적 수가 많고, 웨이브마다 엘리트 2마리
-      const r = d.loot.raid;
-      const waves = planCombatWaves(rng, map.chapter, r.waves, d.waves).map((w) => {
-        const n = Math.round(w.length * r.sizeMul);
-        return Array.from({ length: n }, (_, i) => w[i % w.length]!);
-      });
-      const state = new RoomState('encounterRoom', waves, d.waves.waveDelaySec);
-      this.rooms.set(roomId, state);
-      this.raidRooms.add(roomId);
-      this.handleRoomEvents(roomId, state.enter());
-    } else if (kind === 'hiddenBoss') {
-      // 경고 없이 바로 보스전: 아직 안 나온 히든보스 중 하나 (디버그 지정이면 그것)
-      const p = this.session.player;
-      const forced = d.bosses.hiddenBosses.find((h) => h.id === this.forcedHiddenBoss);
-      this.forcedHiddenBoss = null;
-      const hb = forced ?? pickHiddenBoss(rng, d.bosses.hiddenBosses, p.hiddenBossesMet) ?? rng.pick(d.bosses.hiddenBosses);
-      if (!p.hiddenBossesMet.includes(hb.id)) p.hiddenBossesMet = [...p.hiddenBossesMet, hb.id];
-      this.progression.say('hiddenBoss', hb.id);
-      const state = new RoomState('encounterRoom', [[hb.id]], d.waves.waveDelaySec);
-      this.rooms.set(roomId, state);
-      this.hiddenBossRooms.set(roomId, hb);
-      this.handleRoomEvents(roomId, state.enter());
-    } else if (kind === 'magiSpire') {
-      // 첨탑이 방 가운데로 떨어지고 문이 잠긴다
-      this.setRoomLocked(roomId, true);
-      const size = spireSize(rng, stage.chapter, stage.stage, d.loot.spire.medium);
-      const spire = new Spire(this, roomId, c.x, c.y, d.loot.spire, size);
-      // 중형: 75% 확률로 강적 1마리 (첫 무리와 함께)
-      if (size === 'medium' && rng.chance(d.loot.spire.medium.strongChance)) this.spireStrong.add(spire);
-      this.spires.push(spire);
-    }
-  }
-
   // ---------- 마기수집첨탑 ----------
-
-  updateSpires(dt: number): void {
-    for (const { sp, e } of this.spireEvents.splice(0)) this.handleSpireEvents(sp, [e]);
-    for (const sp of this.spires) {
-      if (sp.state.phase === 'done') continue;
-      const alive = this.enemies.filter((e) => !e.dead && this.enemyRoom.get(e) === sp.roomId).length;
-      this.handleSpireEvents(sp, sp.state.update(dt, alive));
-      sp.draw();
-    }
-  }
-
-  handleSpireEvents(sp: Spire, events: SpireEvent[]): void {
-    const t = this.ctx.t;
-    for (const e of events) {
-      if (e.type === 'landed') {
-        sp.land();
-        bus.emit('toast', { text: t('spire.landed') });
-      } else if (e.type === 'spawn') {
-        this.spawnSpireBatch(sp, e.index);
-      } else if (e.type === 'charged') {
-        // 상승: 남은 적은 보상 없이 사라진다
-        bus.emit('toast', { text: t('spire.charged') });
-        for (const en of this.enemies.filter((x) => this.enemyRoom.get(x) === sp.roomId)) this.removeEnemy(en);
-        sp.rise();
-      } else {
-        this.setRoomLocked(sp.roomId, false);
-        this.session.player.record.spires++;
-        this.offerSpireItems(sp);
-      }
-    }
-  }
-
-  /** 방해 무리: 현재 챕터 웨이브 하나, 엘리트는 평소의 eliteMul배 (헥타르 전투원은 M6) */
-  spawnSpireBatch(sp: Spire, index: number): void {
-    const d = this.ctx.data;
-    const { map } = this.session;
-    const seed = this.ctx.config.seed;
-    const label = `spire-${map.chapter}-${map.stage}-${sp.roomId}-${index}`;
-    const wave = planCombatWaves(Rng.derive(seed, `${label}-wave`), map.chapter, [1, 1], d.waves)[0]!;
-    const normal = eliteCount(Rng.derive(seed, `${label}-elite-count`), map.chapter, map.stage, d.elites);
-    const elites = assignElites(
-      Rng.derive(seed, `${label}-elite`),
-      wave,
-      spireEliteCount(normal, d.loot.spire.eliteMul),
-      (id) => d.enemies.enemies.find((e) => e.id === id)!.rank,
-      d.elites,
-    );
-    const rng = Rng.derive(seed, label);
-    wave.forEach((id, i) => this.spawnEnemy(id, sp.roomId, rng, true, elites[i] ?? null));
-    if (this.spireStrong.delete(sp)) this.spawnSpireStrong(sp, rng);
-    // 원본 첨탑 규칙: 헥타르 전투원이 항상 섞여 나온다
-    const tr = d.loot.spire.troopers;
-    const n = rng.int(tr.count[0], tr.count[1]);
-    for (let i = 0; i < n; i++) this.spawnEnemy(tr.enemy, sp.roomId, rng, true);
-  }
-
-  /** 중형 첨탑 강적: 정예가 나오는 챕터(3장)는 집행자 또는 집정관, 그 전에는 엘리트 2종이 겹친 지금 챕터 일반 적 */
-  spawnSpireStrong(sp: Spire, rng: Rng): void {
-    const d = this.ctx.data;
-    if (d.waves.champions.stages[String(this.session.stage.chapter)]) {
-      this.spawnEnemy(rng.pick(d.waves.champions.ids), sp.roomId, rng, true);
-      this.progression.say('championMet');
-      return;
-    }
-    const roster = this.chapterRoster();
-    if (roster.length === 0) return;
-    const [a, b] = pickTwoElites(rng, d.elites);
-    this.spawnEnemy(rng.pick(roster), sp.roomId, rng, true, a, b);
-  }
-
-  /** 충전 완료 보상: 아이템 카드 3장 중 1장 (확률 이전 반영, 신화는 따로) */
-  offerSpireItems(sp: Spire): void {
-    const d = this.ctx.data;
-    const p = this.session.player;
-    const { stage } = this.session;
-    const rng = Rng.derive(this.ctx.config.seed, `spire-items-${stage.chapter}-${stage.stage}-${sp.roomId}`);
-    const weights = effectiveWeights(d.loot.spire[sp.size].weights, stage.chapter, d.items.chapterCommonShift, p.lootShift);
-    const items = spireItemChoices(rng, weights, d.loot.mythicChance, d.items, new Set(p.itemsObtained), d.loot.spire.cards);
-    if (items.length > 0) this.progression.queueOffers([{ kind: 'item', boss: false, items }]);
-  }
-
-  /** 히든보스 처치: 보스 스킬 카드 1장 → 전용 무기 상자(왼쪽)·전용 아이템 상자(오른쪽) */
-  hiddenBossReward(roomId: number): void {
-    const hb = this.hiddenBossRooms.get(roomId)!;
-    const c = roomCenter(this.session.map.rooms[roomId]!, this.m);
-    this.progression.queueOffers([{ kind: this.ctx.data.cards.bossBonus, boss: true }], () => {
-      this.addChest('weapon', c.x - 40, c.y, {}, hb.weaponId);
-      if (!this.session.player.itemsObtained.includes(hb.itemId)) this.addChest('item', c.x + 40, c.y, {}, hb.itemId);
-    });
-  }
-
-  /** 전투 칸을 깼을 때 낮은 확률로 무기 */
-  combatRoomDrop(roomId: number): void {
-    const d = this.ctx.data;
-    const { stage } = this.session;
-    const rng = Rng.derive(this.ctx.config.seed, `drop-${stage.chapter}-${stage.stage}-${roomId}`);
-    if (!rng.chance(d.loot.combatDrop.chance)) return;
-    // 방 가운데는 장애물일 수 있어 플레이어 발밑에 떨어뜨린다
-    this.dropWeapon(this.rollWeaponItem(d.loot.combatDrop.weights, 'drop'), this.player.x, this.player.y);
-  }
-
-  /** 대규모 습격 보상: 아이템 상자(레어 이상, M4-B) + 코인 다량 */
-  raidReward(roomId: number): void {
-    const d = this.ctx.data;
-    const c = roomCenter(this.session.map.rooms[roomId]!, this.m);
-    this.addChest('item', c.x, c.y, d.items.raidWeights);
-    const n = this.rng.int(d.loot.raid.coins[0], d.loot.raid.coins[1]);
-    for (let i = 0; i < n; i++) {
-      const a = this.rng.range(0, Math.PI * 2);
-      const r = this.rng.range(8, 30);
-      this.pickups.push(new Pickup(this, 'coin', c.x + Math.cos(a) * r, c.y + Math.sin(a) * r, d.pickups));
-    }
-  }
 
   updateInteractHint(): void {
     const vending = this.nearVending();
@@ -2206,8 +2019,8 @@ export class RunScene extends Phaser.Scene {
     for (const e of this.enemies.filter((x) => this.enemyRoom.get(x) === rid)) this.removeEnemy(e);
     const state = this.rooms.get(rid);
     if (state) this.handleRoomEvents(rid, state.forceClear());
-    const sp = this.spires.find((x) => x.roomId === rid);
-    if (sp) for (const e of sp.state.forceCharge()) this.spireEvents.push({ sp, e });
+    const sp = this.encounters.spires.find((x) => x.roomId === rid);
+    if (sp) for (const e of sp.state.forceCharge()) this.encounters.spireEvents.push({ sp, e });
   }
 
   /** 디버그: 계열 집계를 정하고 바로 전직 (한 런에 한 번) */
