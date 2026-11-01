@@ -112,6 +112,13 @@ export function canBuy(coins: number, item: StockItem): boolean {
   return !item.sold && coins >= item.price;
 }
 
+/** 떨어질 입자 수: 하나하나 dropRate 확률로 나온다 */
+export function rollCoinDrops(rng: Rng, n: number, dropRate: number): number {
+  let out = 0;
+  for (let i = 0; i < n; i++) if (rng.chance(dropRate)) out++;
+  return out;
+}
+
 /** 마기 입자는 정수로만 늘어난다: 소수 부분은 carry로 넘겨 다음 획득에 더한다 */
 export function collectCoins(carry: number, amount: number): { whole: number; carry: number } {
   const total = carry + amount;

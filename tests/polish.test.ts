@@ -4,7 +4,7 @@ import { gameData } from '../src/data/index';
 import { generateStage } from '../src/systems/mapgen';
 import { availablePatterns, initialBoss } from '../src/systems/bossBrain';
 import { bossHalfOrbs } from '../src/systems/bossEnergy';
-import { cardPrice, cardStock, collectCoins, encounterPool, rollWeapon } from '../src/systems/loot';
+import { cardPrice, cardStock, collectCoins, encounterPool, rollCoinDrops, rollWeapon } from '../src/systems/loot';
 import { muzzleAngle, shotOrigin } from '../src/systems/targeting';
 import { cardStillValid } from '../src/systems/cards';
 import { enemyStageScale } from '../src/systems/champions';
@@ -283,7 +283,7 @@ describe('마기 입자 정수', () => {
     let coins = 0;
     let carry = 0;
     for (let i = 0; i < 7; i++) {
-      const g = collectCoins(carry, D.pickups.coin.value);
+      const g = collectCoins(carry, 0.5);
       coins += g.whole;
       carry = g.carry;
       expect(Number.isInteger(coins)).toBe(true);
@@ -367,7 +367,13 @@ describe('회복·재화', () => {
     expect(cd('hanwooSteak')).toBe(60);
   });
   it('마기 입자 획득 절반', () => {
-    expect(D.pickups.coin.value).toBe(0.5);
+    expect(D.pickups.coin.value).toBe(1);
+    expect(D.pickups.coin.dropRate).toBe(0.5);
+    let n = 0;
+    const rng = new Rng(3);
+    for (let i = 0; i < 4000; i++) n += rollCoinDrops(rng, 1, D.pickups.coin.dropRate);
+    expect(n / 4000).toBeCloseTo(0.5, 1);
+    expect(rollCoinDrops(new Rng(1), 5, 1)).toBe(5);
   });
   it('토마끼는 변이 공격을 쓰지 않는다', () => {
     expect(D.enemies.enemies.find((e) => e.id === 'tomakki')!.noEliteAttacks).toBe(true);

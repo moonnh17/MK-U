@@ -7,7 +7,7 @@ import { Pickup } from '../../entities/pickup';
 import { assignElites, eliteCount, pickTwoElites } from '../../systems/elites';
 import { IMPLEMENTED_ENCOUNTERS } from '../../systems/encounter';
 import { effectiveWeights } from '../../systems/items';
-import { encounterPool, merchantStock, rollEncounter } from '../../systems/loot';
+import { encounterPool, merchantStock, rollCoinDrops, rollEncounter } from '../../systems/loot';
 import { encounterKinds, pickHiddenBoss } from '../../systems/hiddenBoss';
 import { spireEliteCount, spireItemChoices, spireSize, type SpireEvent } from '../../systems/spire';
 import { planCombatWaves, RoomState } from '../../systems/roomState';
@@ -201,7 +201,7 @@ export class Encounters {
     const d = this.run.ctx.data;
     const c = roomCenter(this.run.session.map.rooms[roomId]!, this.run.m);
     this.run.loot.addChest('item', c.x, c.y, d.items.raidWeights);
-    const n = this.run.rng.int(d.loot.raid.coins[0], d.loot.raid.coins[1]);
+    const n = rollCoinDrops(this.run.rng, this.run.rng.int(d.loot.raid.coins[0], d.loot.raid.coins[1]), d.pickups.coin.dropRate);
     for (let i = 0; i < n; i++) {
       const a = this.run.rng.range(0, Math.PI * 2);
       const r = this.run.rng.range(8, 30);

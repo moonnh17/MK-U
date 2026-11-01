@@ -618,7 +618,8 @@ export interface PickupsData {
   /** 드롭 시 흩어지는 반지름(px) */
   scatterRadius: number;
   energyOrb: SpriteRef;
-  coin: SpriteRef & { value: number };
+  /** value: 입자 하나의 값 / dropRate: 떨어질 입자 하나하나가 실제로 나올 확률 */
+  coin: SpriteRef & { value: number; dropRate: number };
   /** 바닥 무기와 상호작용 가능한 거리(px) */
   interactRadius: number;
 }

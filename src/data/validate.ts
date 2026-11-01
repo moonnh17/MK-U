@@ -533,6 +533,7 @@ export function validateGameData(d: GameData): Errors {
   checkSprite(errors, 'pickups.energyOrb', pk.energyOrb);
   checkSprite(errors, 'pickups.coin', pk.coin);
   checkPositive(errors, 'pickups.coin.value', pk.coin.value);
+  if (!(pk.coin.dropRate > 0 && pk.coin.dropRate <= 1)) errors.push('pickups.coin.dropRate: 0 초과 1 이하');
   for (const k of ['magnetRadius', 'magnetSpeed', 'collectRadius', 'interactRadius'] as const) {
     checkPositive(errors, `pickups.${k}`, pk[k]);
   }

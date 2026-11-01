@@ -1,4 +1,5 @@
 /** 방 소품: 부서지는 상자, 폭발 통, 일회용 석상, 문의 다음 방 표시. */
+import { rollCoinDrops } from '../../systems/loot';
 import type { Dir } from '../../systems/mapgen';
 import Phaser from 'phaser';
 import type { Vec2 } from '../../core/actions';
@@ -83,7 +84,7 @@ export class RoomProps {
       sfx('kill');
       this.run.juice.death(p.sprite as unknown as Phaser.GameObjects.Sprite, rp.crate.color, false);
       p.destroy();
-      this.popPickups('coin', at, crateDrops(this.run.rng, rp.crate.coins));
+      this.popPickups('coin', at, rollCoinDrops(this.run.rng, crateDrops(this.run.rng, rp.crate.coins), this.run.ctx.data.pickups.coin.dropRate));
       this.popPickups('energy', at, crateDrops(this.run.rng, rp.crate.energy));
       return;
     }

@@ -40,7 +40,7 @@ import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { gradeEnergyMultiplier, gradeMultiplier, type Stats } from '../systems/damage';
 import { assignElites, eliteCount } from '../systems/elites';
 import { championWaves, enemyStageScale, raidChampions } from '../systems/champions';
-import { collectCoins, rollOptions } from '../systems/loot';
+import { collectCoins, rollCoinDrops, rollOptions } from '../systems/loot';
 import { generateStage } from '../systems/mapgen';
 import { hiddenChapterMul } from '../systems/hiddenBoss';
 import { steerToward } from '../systems/motion';
@@ -927,7 +927,8 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     const roomId = this.enemyRoom.get(e);
     const { x, y } = e.sprite;
-    const drop = (kind: 'energy' | 'coin', n: number) => {
+    const drop = (kind: 'energy' | 'coin', count: number) => {
+      const n = kind === 'coin' ? rollCoinDrops(this.rng, count, d.pickups.coin.dropRate) : count;
       // 보스가 부른 적은 보상이 없다
       if (e.noReward) return;
       const pop = d.juice.death;
