@@ -1,18 +1,19 @@
 {
   "mythicChance": 0.001,
   "uniqueWeaponFallback": "legendary",
+  "startChest": { "common": 80, "rare": 20 },
   "weaponChest": {
-    "2": { "rare": 72, "legendary": 25, "unique": 3 },
-    "5": { "rare": 25, "legendary": 55, "unique": 20 }
+    "2": { "rare": 84, "legendary": 15, "unique": 1 },
+    "5": { "rare": 50, "legendary": 42, "unique": 8 }
   },
   "combatDrop": { "chance": 0.03, "weights": { "common": 80, "rare": 20 } },
   "merchant": {
     "count": 3,
-    "weights": { "common": 56, "rare": 38, "legendary": 6 },
+    "weights": { "common": 62, "rare": 35, "legendary": 3 },
     "prices": { "common": 15, "rare": 30, "legendary": 60, "unique": 120, "mythic": 300 }
   },
-  "skillShop": { "count": 3, "prices": { "skillNew": 30, "skillLevelUp": 30, "awakening": 50 } },
-  "statShop": { "count": 3, "prices": { "low": 12, "mid": 20, "high": 32 } },
+  "skillShop": { "count": 3, "prices": { "skillNew": 50, "skillLevelUp": 50, "awakening": 80 } },
+  "statShop": { "count": 3, "prices": { "low": 25, "mid": 40, "high": 60 } },
   "encounter": { "weights": { "treasure": 20, "merchant": 16, "skillShop": 10, "statShop": 10, "raid": 25, "magiSpire": 18.5, "hiddenBoss": 0.5 } },
   "raid": { "waves": [3, 4], "sizeMul": 1.5, "elitesPerWave": 2, "coins": [15, 20] },
   "chest": {

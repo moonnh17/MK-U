@@ -40,7 +40,7 @@ import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { gradeEnergyMultiplier, gradeMultiplier, type Stats } from '../systems/damage';
 import { assignElites, eliteCount } from '../systems/elites';
 import { championWaves, enemyStageScale, raidChampions } from '../systems/champions';
-import { rollOptions } from '../systems/loot';
+import { collectCoins, rollOptions } from '../systems/loot';
 import { generateStage } from '../systems/mapgen';
 import { hiddenChapterMul } from '../systems/hiddenBoss';
 import { steerToward } from '../systems/motion';
@@ -276,6 +276,8 @@ export class RunScene extends Phaser.Scene {
       cam.setScroll(t0.x - cam.width / 2, t0.y - cam.height / 2);
     }
     if (stage.chapter === 1 && stage.stage === 1 && this.ctx.config.testWeapons) this.world.placeTestWeapons();
+    // 런 시작: 무기 대신 무기 상자
+    if (newRun) this.loot.addChest('weapon', start.x, start.y + d.mapgen.startChestOffsetPx, d.loot.startChest);
 
     this.physics.add.collider(this.player, this.walls);
     this.physics.add.collider(this.player, this.doorGroup);
@@ -1173,8 +1175,10 @@ export class RunScene extends Phaser.Scene {
       sfx(pk.kind === 'energy' ? 'energy' : 'coin');
       if (pk.kind === 'energy') p.energy = gainEnergy(p.energy, orb, p.energyMax);
       else {
-        p.coins += coin;
-        this.itemRt.onCoins(coin);
+        const got = collectCoins(p.coinCarry, coin);
+        p.coinCarry = got.carry;
+        p.coins += got.whole;
+        if (got.whole > 0) this.itemRt.onCoins(got.whole);
       }
     }
     this.pickups = this.pickups.filter((pk) => !pk.collected);

@@ -183,7 +183,7 @@ export class Hud {
     setBar(this.energy, p.energy, p.energyMax, empty ? hexColor(this.ctx.data.ui.hud.bars.hpColor) : this.energy.color);
 
     this.stageText.setText(this.ctx.t('hud.stage', { chapter: s.stage.chapter, stage: s.stage.stage }));
-    this.coinText.setText(this.ctx.t('hud.coins', { coins: Math.floor(p.coins) }));
+    this.coinText.setText(this.ctx.t('hud.coins', { coins: p.coins }));
 
     const weapons = this.ctx.data.weapons.weapons;
     // 맨손이면 주먹

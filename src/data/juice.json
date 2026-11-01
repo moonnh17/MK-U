@@ -179,9 +179,7 @@
     "growSec": 0.32,
     "startScale": 0.15,
     "stacks": [
-      { "bodyAlpha": 0.55, "rings": 1, "lineWidth": 1, "lineAlpha": 0.55, "color": "#8aa4c8" },
-      { "bodyAlpha": 0.8, "rings": 2, "lineWidth": 1.5, "lineAlpha": 0.85, "color": "#6ad0ff" },
-      { "bodyAlpha": 1, "rings": 3, "lineWidth": 2, "lineAlpha": 1, "color": "#d8f4ff" }
+      { "bodyAlpha": 0.9, "rings": 1, "lineWidth": 1.5, "lineAlpha": 0.9, "color": "#6ad0ff" }
     ],
     "ringGapPx": 2.5
   },

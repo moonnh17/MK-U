@@ -19,9 +19,9 @@
         "shell": ["tech", "ranged"]
       },
       "levels": [
-        { "cooldownSec": 8, "values": { "maxCount": 1, "damage": 3, "fireIntervalSec": 0.6, "range": 140, "projectileSpeed": 420 } },
-        { "cooldownSec": 7, "values": { "maxCount": 2, "damage": 4, "fireIntervalSec": 0.55, "range": 140, "projectileSpeed": 420 } },
-        { "cooldownSec": 6, "values": { "maxCount": 3, "damage": 5.5, "fireIntervalSec": 0.5, "range": 150, "projectileSpeed": 420 } }
+        { "cooldownSec": 8, "values": { "lifeSec": 9, "damage": 3, "fireIntervalSec": 0.6, "range": 140, "projectileSpeed": 420 } },
+        { "cooldownSec": 7, "values": { "lifeSec": 16, "damage": 4, "fireIntervalSec": 0.55, "range": 140, "projectileSpeed": 420 } },
+        { "cooldownSec": 6, "values": { "lifeSec": 24, "damage": 5.5, "fireIntervalSec": 0.5, "range": 150, "projectileSpeed": 420 } }
       ],
       "awakening": {
         "nameKey": "skill.magiTurret.awakened",
@@ -31,7 +31,7 @@
         "tags": ["physical", "tech", "ranged"],
         "cooldownSec": 6,
         "values": {
-          "maxCount": 1,
+          "lifeSec": 14,
           "range": 170,
           "projectileSpeed": 480,
           "bulletDamage": 4,
@@ -157,9 +157,9 @@
       "tags": ["buff"],
       "sources": {},
       "levels": [
-        { "cooldownSec": 12, "values": { "hits": 1, "maxHits": 3, "blockInvulnSec": 0.5, "fxRadius": 18 } },
-        { "cooldownSec": 10, "values": { "hits": 1, "maxHits": 3, "blockInvulnSec": 0.5, "fxRadius": 18 } },
-        { "cooldownSec": 8, "values": { "hits": 1, "maxHits": 3, "blockInvulnSec": 0.5, "fxRadius": 18 } }
+        { "cooldownSec": 12, "values": { "hits": 1, "maxHits": 1, "blockInvulnSec": 0.5, "fxRadius": 18 } },
+        { "cooldownSec": 10, "values": { "hits": 1, "maxHits": 1, "blockInvulnSec": 0.5, "fxRadius": 18 } },
+        { "cooldownSec": 8, "values": { "hits": 1, "maxHits": 1, "blockInvulnSec": 0.5, "fxRadius": 18 } }
       ],
       "awakening": {
         "nameKey": "skill.magiField.awakened",
@@ -168,7 +168,7 @@
         "requiredValue": 20,
         "tags": [],
         "cooldownSec": 8,
-        "values": { "hits": 1, "maxHits": 3, "durationSec": 8, "refractRadius": 30, "fxRadius": 30 }
+        "values": { "hits": 1, "maxHits": 1, "durationSec": 8, "refractRadius": 30, "fxRadius": 30 }
       },
       "color": "#8aa4c8",
       "sprites": {

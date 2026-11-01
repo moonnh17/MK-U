@@ -1,5 +1,4 @@
 {
-  "startWeapon": "pistol",
   "fistWeapon": "fist",
   "projectile": { "spriteKey": "projectile_player", "color": "#fff3a0", "size": 3 },
   "critMultiplier": 1.5,

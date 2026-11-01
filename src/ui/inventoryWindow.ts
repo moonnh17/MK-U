@@ -158,7 +158,7 @@ export class InventoryWindow {
     applyArtIcon(face, this.ctx, schoolKey && this.ctx.artLoaded.has(schoolKey) ? schoolKey : d.player.spriteKey, d.player.color);
     const who = document.createElement('div');
     who.className = 'iw-who';
-    who.append(this.line('iw-job', job ? t(job.nameKey) : p.job), this.line('iw-adv', adv ? t(adv.nameKey) : t('settlement.noAdv'), adv?.color), this.line('iw-coins', t('inventory.coins', { coins: Math.floor(p.coins) })));
+    who.append(this.line('iw-job', job ? t(job.nameKey) : p.job), this.line('iw-adv', adv ? t(adv.nameKey) : t('settlement.noAdv'), adv?.color), this.line('iw-coins', t('inventory.coins', { coins: p.coins })));
     hero.append(face, who);
     const bars = d.ui.hud.bars;
     el.append(hero, this.meter(t('inventory.hp'), p.hp, p.maxHp, bars.hpColor), this.meter(t('inventory.sanity'), p.sanity, p.sanityMax, bars.sanityColor), this.meter(t('inventory.energy'), p.energy, p.energyMax, bars.energyColor));

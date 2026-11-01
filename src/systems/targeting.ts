@@ -9,6 +9,19 @@ export function muzzlePoint(hand: Vec2, dir: Vec2, length: number): Vec2 {
   return { x: hand.x + dir.x * length, y: hand.y + dir.y * length };
 }
 
+/** 탄이 나갈 자리: 몸과 총구 사이에 적이 끼어 있으면 총구가 적을 지나쳐 있으므로 몸 가운데서 쏜다 */
+export function shotOrigin(body: Vec2, muzzle: Vec2, targets: readonly (Vec2 & { radius: number })[], padPx = 2): Vec2 {
+  const dx = muzzle.x - body.x;
+  const dy = muzzle.y - body.y;
+  const len2 = dx * dx + dy * dy;
+  if (len2 === 0) return muzzle;
+  const blocked = targets.some((t) => {
+    const k = Math.max(0, Math.min(1, ((t.x - body.x) * dx + (t.y - body.y) * dy) / len2));
+    return Math.hypot(body.x + dx * k - t.x, body.y + dy * k - t.y) <= t.radius + padPx;
+  });
+  return blocked ? body : muzzle;
+}
+
 /** 총구에서 목표로 가는 각도. 목표가 없거나 minDist보다 가까우면 fallback (몸 기준 조준) */
 export function muzzleAngle(muzzle: Vec2, target: Vec2 | null, fallback: number, minDist: number): number {
   if (!target || Math.hypot(target.x - muzzle.x, target.y - muzzle.y) < minDist) return fallback;

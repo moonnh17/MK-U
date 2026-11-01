@@ -6,7 +6,7 @@ export interface LaunchConfig {
   seedFromUrl: boolean;
   debug: boolean;
   ui: UiModeSetting;
-  /** 1-1 시작방에 테스트 무기를 놓는다 (`?testWeapons=0`으로 끔) */
+  /** 1-1 시작방에 테스트 무기를 놓는다 (`?testWeapons=1`일 때만) */
   testWeapons: boolean;
 }
 
@@ -28,7 +28,7 @@ export function parseLaunchConfig(search: string, fallbackSeed: number): LaunchC
   const uiRaw = params.get('ui');
   const ui: UiModeSetting = uiRaw === 'pc' || uiRaw === 'mobile' ? uiRaw : 'auto';
 
-  const testWeapons = params.get('testWeapons') !== '0';
+  const testWeapons = params.get('testWeapons') === '1';
 
   return { seed, seedFromUrl, debug, ui, testWeapons };
 }

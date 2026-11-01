@@ -29,12 +29,6 @@ describe('데이터 검증', () => {
     }
   });
 
-  it('시작 무기는 탄당 에너지 1인 권총이다', () => {
-    const w = gameData.weapons.weapons.find((x) => x.id === gameData.weapons.startWeapon)!;
-    expect(w.id).toBe('pistol');
-    expect(w.energyCost).toBe(1);
-  });
-
   it('챕터1 일반 적 4종이 있다', () => {
     const ids = gameData.enemies.enemies.filter((e) => e.chapter === 1 && e.rank === 'normal' && !e.summon).map((e) => e.id);
     expect(ids.sort()).toEqual(['akgwi', 'gaedeulgae', 'ghostShooter', 'tomakki']);
@@ -205,11 +199,6 @@ describe('데이터 검증', () => {
       expect(validateGameData(d).join('\n')).toMatch(/KeyE/);
     });
 
-    it('시작 무기가 없음', () => {
-      const d = clone();
-      d.weapons.startWeapon = 'bfg';
-      expect(validateGameData(d).join('\n')).toMatch(/startWeapon/);
-    });
 
     it('방이 화면보다 큼', () => {
       const d = clone();

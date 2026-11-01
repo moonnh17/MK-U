@@ -138,9 +138,9 @@ describe('레벨·각성', () => {
   it('수치: 레벨별 값, 각성하면 각성 값과 쿨타임', () => {
     const t = def('magiTurret');
     let lo = withActives(1);
-    expect(skillValues(t, lo.owned.magiTurret!).values.maxCount).toBe(1);
+    expect(skillValues(t, lo.owned.magiTurret!).values.lifeSec).toBe(9);
     lo = setSkillLevel(lo, t, 3, false);
-    expect(skillValues(t, lo.owned.magiTurret!).values.maxCount).toBe(3);
+    expect(skillValues(t, lo.owned.magiTurret!).values.lifeSec).toBe(24);
     lo = setSkillLevel(lo, t, 3, true);
     const v = skillValues(t, lo.owned.magiTurret!);
     expect(v.cooldownSec).toBe(t.awakening.cooldownSec);

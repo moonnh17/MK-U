@@ -285,7 +285,6 @@ export interface WeaponDef extends SpriteRef {
 }
 
 export interface WeaponsData {
-  startWeapon: string;
   /** 맨손일 때 나가는 공격 (슬롯에 들지 않고 버릴 수 없다) */
   fistWeapon: string;
   /** 총알 모양 (공통) */
@@ -566,6 +565,8 @@ export interface MapgenData {
   /** 방 하나의 크기(타일). 화면 한 칸에 들어가게 잡는다 */
   roomTiles: { width: number; height: number };
   corridor: { lengthTiles: number; widthTiles: number };
+  /** 런 시작 무기 상자의 플레이어 아래 거리(px) */
+  startChestOffsetPx: number;
   /** 스테이지에 조우 칸이 하나 더 생길 확률 */
   extraEncounterChance: number;
   stageRules: Record<StageKind, StageRoomRule>;
@@ -1034,6 +1035,8 @@ export interface LootData {
   /** 전투 칸을 깼을 때 무기가 떨어질 확률과 등급 */
   combatDrop: { chance: number; weights: Partial<Record<GradeId, number>> };
   merchant: { count: number; weights: Partial<Record<GradeId, number>>; prices: Record<GradeId, number> };
+  /** 런 시작 방의 무기 상자 등급 가중치 */
+  startChest: Partial<Record<GradeId, number>>;
   /** 상점 진열대 위 아이콘 크기(px) */
   cardStandIconPx: number;
   /** 스킬 상점: 카드 종류별 가격 */
@@ -1100,7 +1103,6 @@ export interface JobDef {
   enabled: boolean;
   /** 기본 스탯 보정 */
   statBonus: Partial<Record<StatId, number>>;
-  startWeapon: string;
   startUltimate: string;
   advancements: AdvancementDef[];
 }

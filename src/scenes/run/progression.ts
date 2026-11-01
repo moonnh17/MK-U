@@ -100,7 +100,7 @@ export class Progression {
     bus.emit('cardsShow', {
       titleKey: next.boss ? 'card.title.boss' : `card.title.${next.kind}`,
       cards,
-      reroll: { cost, enabled: !this.rerolled && Math.floor(p.coins) >= cost, used: this.rerolled },
+      reroll: { cost, enabled: !this.rerolled && p.coins >= cost, used: this.rerolled },
     });
   }
 
@@ -149,7 +149,7 @@ export class Progression {
   rerollCards(): void {
     const p = this.run.session.player;
     const cost = this.run.ctx.data.cards.rerollCost;
-    if (this.run.modal !== 'cards' || this.rerolled || !this.currentOffer || this.currentOffer.kind === 'item' || this.currentOffer.kind === 'school' || Math.floor(p.coins) < cost) return;
+    if (this.run.modal !== 'cards' || this.rerolled || !this.currentOffer || this.currentOffer.kind === 'item' || this.currentOffer.kind === 'school' || p.coins < cost) return;
     p.coins -= cost;
     this.rerolled = true;
     this.showCards();

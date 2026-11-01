@@ -4,7 +4,7 @@
   "hurtInvulnSec": 0.5,
   "blinkIntervalSec": 0.08,
   "weaponOffset": 1,
-  "muzzleMinTargetPx": 12,
+  "muzzleMinTargetPx": 2,
   "weaponHand": {
     "x": 0,
     "y": -6

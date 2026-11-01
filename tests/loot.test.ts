@@ -55,7 +55,6 @@ describe('등급·신화', () => {
         expect(def(w.defId).droppable).toBe(true);
       }
     }
-    expect(W.weapons.find((x) => x.id === W.startWeapon)!.grade).toBe('common');
   });
   it('유니크는 드롭 유니크 무기 3종 중 하나, 옵션 없음', () => {
     const seen = new Set<string>();

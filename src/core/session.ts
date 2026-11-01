@@ -4,7 +4,7 @@ import { startingStats, type Stats } from '../systems/damage';
 import type { StageMap } from '../systems/mapgen';
 import type { StageRef } from '../systems/run';
 import { emptyLoadout, type Cooldowns, type SkillLoadout } from '../systems/skills';
-import { initialSlots, plainWeapon, type WeaponSlots } from '../systems/weapons';
+import type { WeaponSlots } from '../systems/weapons';
 import type { ItemState } from '../items/runtime';
 import type { ConversionLog } from '../systems/advancement';
 import { newRunRecord, type CrystalResult, type RunRecord } from '../systems/runRecord';
@@ -23,6 +23,8 @@ export interface PlayerState {
   energy: number;
   energyMax: number;
   coins: number;
+  /** 아직 1개가 되지 않은 마기 입자 (화면에 보이지 않는다) */
+  coinCarry: number;
   stats: Stats;
   weapons: WeaponSlots;
   loadout: SkillLoadout;
@@ -154,8 +156,10 @@ export function newPlayerState(data: GameData, jobId: string = data.jobs.startJo
     energy: data.player.energy.start,
     energyMax: data.player.energy.max,
     coins: 0,
+    coinCarry: 0,
     stats,
-    weapons: initialSlots(plainWeapon(data.weapons.weapons.find((w) => w.id === job.startWeapon)!)),
+    // 빈손으로 시작해 시작방의 무기 상자를 연다
+    weapons: { slots: [null, null], active: 0 },
     loadout: emptyLoadout(data.skills.activeSlots),
     cooldowns: {},
     ultimate: { id: job.startUltimate, gauge: 0, awakened: false },

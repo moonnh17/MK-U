@@ -1,8 +1,8 @@
 /**
  * 마기 자동포탑 (헥타르, 기술·원거리).
- * 누르면 플레이어 자리에 포탑을 설치한다. 레벨마다 최대 설치 수 증가, 넘치면 가장 오래된 포탑이 사라진다.
+ * 누르면 플레이어 자리에 포탑을 설치한다. 개수 제한은 없고 유지시간이 지나면 사라진다. 레벨이 오를수록 오래 남아 더 많이 깔린다.
  * 다리는 고정이고 머리만 적을 향해 돈다. 쏠 때마다 포신이 뒤로 밀렸다 돌아온다.
- * 각성 '대형권역사수주포': 대형 포탑 1기가 일반 탄환(물리)·레이저(기술)·폭발탄(기술)을 각자 쏜다.
+ * 각성 '대형권역사수주포': 대형 포탑이 일반 탄환(물리)·레이저(기술)·폭발탄(기술)을 각자 쏜다.
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
@@ -12,12 +12,14 @@ import { skillTags } from '../systems/tags';
 import { Explosive } from './explosive';
 import { animKey } from '../systems/art';
 import { levelRef, loopArt, playFx, poseThen, stretchFx } from './skillFx';
-import { nearestEnemy, trimOldest, type SkillCast, type SkillHost, type SkillImpl, type SkillObject } from './host';
+import { nearestEnemy, type SkillCast, type SkillHost, type SkillImpl, type SkillObject } from './host';
 
 const ID = 'magiTurret';
 /** 각성 포탑의 총구 거리·광선 굵기 (그림 기준) */
 const BIG_MUZZLE_PX = 16;
 const BEAM_PX = 8;
+/** 사라지기 전 깜빡이는 시간(초) */
+const BLINK_SEC = 1.5;
 
 class Turret implements SkillObject {
   readonly owner = ID;
@@ -35,6 +37,7 @@ class Turret implements SkillObject {
   private restY = 0;
   private angle = 0;
   private recoil = 0;
+  private life: number;
 
   constructor(
     host: SkillHost,
@@ -42,6 +45,7 @@ class Turret implements SkillObject {
     private readonly s: SkillCast,
   ) {
     this.createdAt = host.scene.time.now;
+    this.life = s.values.lifeSec!;
     this.restX = pos.x;
     this.restY = pos.y;
     const sp = s.def.sprites;
@@ -64,6 +68,12 @@ class Turret implements SkillObject {
   update(dt: number, host: SkillHost): boolean {
     const v = this.s.values;
     const sp = this.s.def.sprites;
+    this.life -= dt;
+    if (this.life <= 0) return false;
+    if (this.life < BLINK_SEC) {
+      const a = 0.35 + 0.65 * Math.abs(Math.sin(this.life * 9));
+      for (const part of [this.legs, this.head, this.big]) part?.setAlpha(a);
+    }
     for (const k of Object.keys(this.timers) as (keyof typeof this.timers)[]) this.timers[k] -= dt;
     this.stepRecoil(dt, host);
     const target = nearestEnemy(host, this.pos, v.range!);
@@ -150,8 +160,6 @@ class Turret implements SkillObject {
 
 export const magiTurret: SkillImpl = {
   cast(host, s) {
-    // 최대 설치 수를 넘으면 오래된 것부터 치운다
-    trimOldest(host, ID, s.values.maxCount! - 1);
     host.addObject(new Turret(host, host.playerPos(), s));
     return true;
   },

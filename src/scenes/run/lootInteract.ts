@@ -91,7 +91,7 @@ export class LootInteract {
       this.run.toastThrottled(t('shop.stale'));
       return;
     }
-    if (Math.floor(p.coins) < price) {
+    if (p.coins < price) {
       this.run.toastThrottled(t('merchant.noCoins'));
       return;
     }

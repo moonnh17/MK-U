@@ -24,9 +24,9 @@ describe('parseLaunchConfig', () => {
     expect(parseLaunchConfig('', 1).debug).toBe(false);
   });
 
-  it('테스트 무기는 기본 켜짐, ?testWeapons=0이면 끔', () => {
-    expect(parseLaunchConfig('', 1).testWeapons).toBe(true);
-    expect(parseLaunchConfig('?testWeapons=0', 1).testWeapons).toBe(false);
+  it('테스트 무기는 기본 꺼짐, ?testWeapons=1이면 켬', () => {
+    expect(parseLaunchConfig('', 1).testWeapons).toBe(false);
+    expect(parseLaunchConfig('?testWeapons=1', 1).testWeapons).toBe(true);
   });
 });
 

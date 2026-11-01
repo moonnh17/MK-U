@@ -18,7 +18,7 @@ import { nearestEnemy } from '../../skills/host';
 import { calcDamage, spaceDamage, type RangeBonus } from '../../systems/damage';
 import { gaugeFromDamage, gaugeFromEnergy } from '../../systems/advancement';
 import { itemDamageMultiplier } from '../../systems/items';
-import { chainTargets, lineHits, muzzleAngle, muzzlePoint } from '../../systems/targeting';
+import { chainTargets, lineHits, muzzleAngle, muzzlePoint, shotOrigin } from '../../systems/targeting';
 import { signatureFires, weaponPose, type WeaponMotionKind, type WeaponMotionParams } from '../../systems/motion';
 import { corruptedDamage, skillChance } from '../../systems/acro';
 import { hpStance } from '../../systems/vitals';
@@ -228,7 +228,7 @@ export class WeaponCombat {
       this.dropMeteor(w, st, w.pattern, st.damage * emp);
       return;
     }
-    const muzzle = this.muzzle();
+    const muzzle = this.firePoint();
     const shotAngle = muzzleAngle(muzzle, this.run.aimTarget, aimAngle, this.run.ctx.data.player.muzzleMinTargetPx);
     if (w.pattern.kind === 'homing') {
       this.fireBullet(muzzle, shotAngle, st.projectileSpeed, w.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, homing: w.pattern.turnRate });
@@ -445,6 +445,12 @@ export class WeaponCombat {
     return inside && segmentClear(body, at, this.run.obstacles.get(rid) ?? []) ? at : body;
   }
 
+  /** 실제로 탄이 나가는 자리: 총구까지의 사이에 적이 끼어 있으면 몸 가운데 (가까운 적을 지나쳐 쏘지 않게) */
+  firePoint(): Vec2 {
+    const body = { x: this.run.player.x, y: this.run.player.y };
+    return shotOrigin(body, this.muzzle(), this.run.enemies.filter((e) => !e.dead).map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
+  }
+
   /** 무기 치명 판정 */
   critRoll(base: number, chance: number, at: Vec2): number {
     const r = rollCrit(this.run.rng, base, chance, this.run.ctx.data.weapons.critMultiplier);
@@ -546,7 +552,8 @@ export class WeaponCombat {
     const cost = s.energyCost * gradeEnergyMultiplier(w.grade, this.run.ctx.data.groupMultipliers);
     if (p.energy < cost) return;
     p.energy -= cost;
-    this.fireBullet(this.muzzle(), aimAngle, s.speed, s.range, st.damage * s.damageMul, ['physical', 'ranged'], null, { pierce: 0, crit: st.critChance, tint: s.color, trail: s.color });
+    const from = this.firePoint();
+    this.fireBullet(from, muzzleAngle(from, this.run.aimTarget, aimAngle, this.run.ctx.data.player.muzzleMinTargetPx), s.speed, s.range, st.damage * s.damageMul, ['physical', 'ranged'], null, { pierce: 0, crit: st.critChance, tint: s.color, trail: s.color });
   }
 
   /** 근접 이펙트 한 번: 무기 색을 입히고 밝은 심을 겹친다. 공격이 빠른 무기는 그만큼 빨리 돈다 */

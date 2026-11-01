@@ -8,7 +8,6 @@
       "nameKey": "job.magiScholar",
       "enabled": true,
       "statBonus": {},
-      "startWeapon": "pistol",
       "startUltimate": "firstLaw",
       "advancements": [
         { "id": "hectar", "nameKey": "job.adv.hectar", "color": "#3a7bff", "ultimate": "thunderbolt", "passive": "combatDrone" },
@@ -20,7 +19,6 @@
       "nameKey": "job.magiMage",
       "enabled": false,
       "statBonus": {},
-      "startWeapon": "pistol",
       "startUltimate": "firstLaw",
       "advancements": [
         { "id": "hwigang", "nameKey": "job.adv.hwigang", "color": "#9a9aff", "ultimate": null, "passive": null },
@@ -32,7 +30,6 @@
       "nameKey": "job.warrior",
       "enabled": false,
       "statBonus": {},
-      "startWeapon": "pistol",
       "startUltimate": "firstLaw",
       "advancements": [
         { "id": "barbarian", "nameKey": "job.adv.barbarian", "color": "#c86a3a", "ultimate": null, "passive": null },

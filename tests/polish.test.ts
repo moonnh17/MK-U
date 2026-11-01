@@ -4,7 +4,8 @@ import { gameData } from '../src/data/index';
 import { generateStage } from '../src/systems/mapgen';
 import { availablePatterns, initialBoss } from '../src/systems/bossBrain';
 import { bossHalfOrbs } from '../src/systems/bossEnergy';
-import { cardPrice, cardStock, encounterPool, rollWeapon } from '../src/systems/loot';
+import { cardPrice, cardStock, collectCoins, encounterPool, rollWeapon } from '../src/systems/loot';
+import { muzzleAngle, shotOrigin } from '../src/systems/targeting';
 import { cardStillValid } from '../src/systems/cards';
 import { enemyStageScale } from '../src/systems/champions';
 import { readyWeaponSet } from '../src/systems/items';
@@ -252,6 +253,60 @@ describe('힘과 에너지', () => {
   });
   it('에너지 구슬 하나가 6', () => {
     expect(D.player.energy.orbValue).toBe(6);
+  });
+});
+
+describe('가까운 적 사격', () => {
+  const body = { x: 0, y: 0 };
+  const muzzle = { x: 20, y: -6 };
+  it('몸과 총구 사이에 적이 있으면 몸에서 쏜다', () => {
+    expect(shotOrigin(body, muzzle, [{ x: 10, y: -3, radius: 4 }])).toEqual(body);
+    expect(shotOrigin(body, muzzle, [{ x: 2, y: 0, radius: 4 }])).toEqual(body);
+  });
+  it('적이 총구 너머나 다른 쪽에 있으면 총구에서 쏜다', () => {
+    expect(shotOrigin(body, muzzle, [{ x: 60, y: 0, radius: 4 }])).toEqual(muzzle);
+    expect(shotOrigin(body, muzzle, [{ x: -30, y: 0, radius: 4 }])).toEqual(muzzle);
+  });
+  it('가까운 적도 총구 높이 차이를 보정해 겨눈다', () => {
+    expect(D.player.muzzleMinTargetPx).toBeLessThan(8);
+    expect(muzzleAngle(muzzle, { x: 30, y: 0 }, 0, D.player.muzzleMinTargetPx)).toBeCloseTo(Math.atan2(6, 10));
+  });
+});
+
+describe('마기 입자 정수', () => {
+  it('소수 부분은 넘겨 두었다가 1이 되면 더한다', () => {
+    expect(collectCoins(0, 0.5)).toEqual({ whole: 0, carry: 0.5 });
+    expect(collectCoins(0.5, 0.5)).toEqual({ whole: 1, carry: 0 });
+    const r = collectCoins(0.5, 1.75);
+    expect(r.whole).toBe(2);
+    expect(r.carry).toBeCloseTo(0.25);
+    let coins = 0;
+    let carry = 0;
+    for (let i = 0; i < 7; i++) {
+      const g = collectCoins(carry, D.pickups.coin.value);
+      coins += g.whole;
+      carry = g.carry;
+      expect(Number.isInteger(coins)).toBe(true);
+    }
+    expect(coins).toBe(3);
+  });
+});
+
+describe('포탑·역장', () => {
+  const sk = (id: string) => D.skills.skills.find((x) => x.id === id)!;
+  it('포탑은 개수 제한 대신 유지시간, 레벨마다 늘어 재사용보다 길어진다', () => {
+    const lv = sk('magiTurret').levels;
+    expect(lv.some((l) => l.values.maxCount !== undefined)).toBe(false);
+    expect(lv[1]!.values.lifeSec!).toBeGreaterThan(lv[0]!.values.lifeSec!);
+    expect(lv[2]!.values.lifeSec!).toBeGreaterThan(lv[1]!.values.lifeSec!);
+    expect(lv[2]!.values.lifeSec! / lv[2]!.cooldownSec).toBeGreaterThan(lv[0]!.values.lifeSec! / lv[0]!.cooldownSec);
+  });
+  it('마기역장은 겹치지 않는다', () => {
+    for (const l of sk('magiField').levels) expect(l.values.maxHits).toBe(1);
+    expect(sk('magiField').awakening.values.maxHits).toBe(1);
+  });
+  it('런 시작은 빈손, 시작 상자는 낮은 등급만', () => {
+    expect(Object.keys(D.loot.startChest).sort()).toEqual(['common', 'rare']);
   });
 });
 

@@ -146,9 +146,6 @@ export function validateGameData(d: GameData): Errors {
   const fist = d.weapons.weapons.find((x) => x.id === d.weapons.fistWeapon);
   if (!fist) errors.push(`weapons.fistWeapon: '${d.weapons.fistWeapon}' 무기 없음`);
   else if (fist.droppable || fist.category !== 'blade' || fist.energyCost !== 0) errors.push('weapons.fistWeapon: 에너지 없는 칼, droppable false');
-  if (!weaponIds.includes(d.weapons.startWeapon)) {
-    errors.push(`weapons.startWeapon: '${d.weapons.startWeapon}' 무기 없음`);
-  }
   checkSprite(errors, 'weapons.projectile', d.weapons.projectile);
   for (const k of ['slash', 'slam', 'slashBig', 'slamBig', 'buffAura'] as const) checkSprite(errors, `weapons.meleeFx.${k}`, d.weapons.meleeFx[k]);
   for (const wpn of d.weapons.weapons) {
@@ -262,6 +259,7 @@ export function validateGameData(d: GameData): Errors {
   for (const s of d.mapgen.bossStages) if (!lt.weaponChest[String(s)]) errors.push(`loot.weaponChest: ${s} 스테이지 가중치 없음`);
   if (!(lt.combatDrop.chance >= 0 && lt.combatDrop.chance <= 1)) errors.push('loot.combatDrop.chance: 0~1');
   checkWeights('loot.combatDrop.weights', lt.combatDrop.weights);
+  checkWeights('loot.startChest', lt.startChest);
   checkPositive(errors, 'loot.merchant.count', lt.merchant.count);
   checkWeights('loot.merchant.weights', lt.merchant.weights);
   for (const g of GRADE_IDS) checkPositive(errors, `loot.merchant.prices.${g}`, lt.merchant.prices[g]);
@@ -665,7 +663,6 @@ export function validateGameData(d: GameData): Errors {
   for (const x of jb.jobs) {
     const w = `jobs.${x.id}`;
     needText(w, x.nameKey);
-    if (!weaponIds.includes(x.startWeapon)) errors.push(`${w}.startWeapon: '${x.startWeapon}' 무기 없음`);
     if (!u.ultimates.some((y) => y.id === x.startUltimate)) errors.push(`${w}.startUltimate: '${x.startUltimate}' 없음`);
     for (const [k, v] of Object.entries(x.statBonus)) {
       if (!statIds.has(k)) errors.push(`${w}.statBonus: 알 수 없는 스탯 '${k}'`);

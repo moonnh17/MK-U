@@ -107,7 +107,14 @@ export function cardStock(cards: readonly Card[], loot: LootData): CardStock[] {
   return cards.map((card) => ({ card, price: cardPrice(card, loot), sold: false }));
 }
 
-/** 살 수 있는지 (코인은 소수로 들고 있어 내림해서 비교) */
+/** 살 수 있는지 */
 export function canBuy(coins: number, item: StockItem): boolean {
-  return !item.sold && Math.floor(coins) >= item.price;
+  return !item.sold && coins >= item.price;
+}
+
+/** 마기 입자는 정수로만 늘어난다: 소수 부분은 carry로 넘겨 다음 획득에 더한다 */
+export function collectCoins(carry: number, amount: number): { whole: number; carry: number } {
+  const total = carry + amount;
+  const whole = Math.floor(total + 1e-9);
+  return { whole, carry: Math.max(0, total - whole) };
 }
