@@ -76,7 +76,7 @@
       "chapter": 1,
       "rank": "boss",
       "ai": "boss",
-      "maxHp": 900,
+      "maxHp": 1080,
       "moveSpeed": 40,
       "contactDamage": 10,
       "contactIntervalSec": 1.0,
@@ -92,7 +92,7 @@
       "chapter": 1,
       "rank": "boss",
       "ai": "boss",
-      "maxHp": 2100,
+      "maxHp": 2520,
       "moveSpeed": 30,
       "contactDamage": 10,
       "contactIntervalSec": 1.0,
@@ -119,13 +119,13 @@
     },
     {
       "id": "ancestorEcho", "nameKey": "enemy.ancestorEcho", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
-      "maxHp": 1600, "moveSpeed": 45, "contactDamage": 12, "contactIntervalSec": 1.0,
+      "maxHp": 1920, "moveSpeed": 45, "contactDamage": 12, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
       "spriteKey": "enemy_ancestor_echo", "color": "#b0583a", "size": 42
     },
     {
       "id": "royalMage", "nameKey": "enemy.royalMage", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
-      "maxHp": 1400, "moveSpeed": 35, "contactDamage": 10, "contactIntervalSec": 1.0,
+      "maxHp": 1680, "moveSpeed": 35, "contactDamage": 10, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
       "spriteKey": "enemy_royal_mage", "color": "#6a4ad9", "size": 33
     },
@@ -137,7 +137,7 @@
     },
     {
       "id": "orionCrusader", "nameKey": "enemy.orionCrusader", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
-      "maxHp": 1800, "moveSpeed": 32, "contactDamage": 12, "contactIntervalSec": 1.0,
+      "maxHp": 2160, "moveSpeed": 32, "contactDamage": 12, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
       "spriteKey": "enemy_orion_crusader", "color": "#d9c25a", "size": 42
     },
@@ -174,13 +174,13 @@
     },
     {
       "id": "hectarChief", "nameKey": "enemy.hectarChief", "chapter": 2, "rank": "boss", "ai": "boss",
-      "maxHp": 4500, "moveSpeed": 34, "contactDamage": 12, "contactIntervalSec": 1.0,
+      "maxHp": 5400, "moveSpeed": 34, "contactDamage": 12, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
       "spriteKey": "enemy_hectar_chief", "color": "#3a9aff", "size": 36
     },
     {
       "id": "magiGolem", "nameKey": "enemy.magiGolem", "chapter": 2, "rank": "boss", "ai": "boss",
-      "maxHp": 7500, "moveSpeed": 26, "contactDamage": 14, "contactIntervalSec": 1.0,
+      "maxHp": 9000, "moveSpeed": 26, "contactDamage": 14, "contactIntervalSec": 1.0,
       "energyOrbs": [12, 14], "coins": [14, 18],
       "spriteKey": "enemy_magi_golem", "color": "#8a6a4a", "size": 48
     },
@@ -237,13 +237,13 @@
     },
     {
       "id": "eclipse", "nameKey": "enemy.eclipse", "chapter": 3, "rank": "boss", "ai": "boss",
-      "maxHp": 11000, "moveSpeed": 32, "contactDamage": 14, "contactIntervalSec": 1.0,
+      "maxHp": 13200, "moveSpeed": 32, "contactDamage": 14, "contactIntervalSec": 1.0,
       "energyOrbs": [12, 14], "coins": [14, 18],
       "spriteKey": "enemy_eclipse", "color": "#c8a8ff", "size": 42
     },
     {
       "id": "magiKaiser", "nameKey": "enemy.magiKaiser", "chapter": 3, "rank": "boss", "ai": "boss",
-      "maxHp": 26000, "moveSpeed": 40, "contactDamage": 16, "contactIntervalSec": 1.0,
+      "maxHp": 31200, "moveSpeed": 40, "contactDamage": 16, "contactIntervalSec": 1.0,
       "energyOrbs": [14, 16], "coins": [16, 20],
       "spriteKey": "enemy_magi_kaiser", "color": "#d02828", "size": 51
     }

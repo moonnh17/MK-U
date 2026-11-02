@@ -242,6 +242,8 @@ export interface WeaponsData {
   projectile: SpriteRef;
   /** 치명타 피해 배율 */
   critMultiplier: number;
+  /** 무기를 바꾼 뒤 공격할 수 없는 시간(초) */
+  swapDelaySec: number;
   /** 근접 이펙트: 흑백 그림에 무기 색을 입힌다. glowAlpha: 밝은 심을 더하는 겹 / buffSparkSec: 버프 불티 간격 */
   meleeFx: { slash: SpriteRef; slam: SpriteRef; slashBig: SpriteRef; slamBig: SpriteRef; buffAura: SpriteRef; glowAlpha: number; buffSparkSec: number };
   options: WeaponOptionDef[];
@@ -604,6 +606,8 @@ export interface ChampionRules {
 export interface WavesData {
   /** 다음 웨이브까지 대기(초) */
   waveDelaySec: number;
+  /** 웨이브 적 수 배율 */
+  countMul: number;
   champions: ChampionRules;
   /** 적이 나타난 뒤 공격·접촉 피해가 없는 시간(초) */
   spawnWarnSec: number;
@@ -1313,7 +1317,7 @@ export interface JuiceData {
   /** 포탑이 쏠 때 포신이 뒤로 밀렸다 돌아온다 */
   turretRecoil: { sec: number; px: number; bigPx: number; squash: number };
   /** 마기역장이 생길 때: 입자가 뿜어져 나오며 막이 작게 시작해 몸을 덮는다 */
-  shieldSpawn: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; growSec: number; startScale: number; stacks: { bodyAlpha: number; rings: number; lineWidth: number; lineAlpha: number; color: string }[]; ringGapPx: number };
+  shieldSpawn: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; growSec: number; startScale: number; stacks: { bodyAlpha: number }[] };
   bossPhase: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; flashMs: number; zoom: number; zoomSec: number; bannerSec: number; bannerSize: number };
   /** 보스 처치: slowSec 동안 slowScale 배속에서 점점 원래대로, 연쇄 폭발 */
   bossKill: { slowSec: number; slowScale: number; explosions: number; spreadPx: number; stepSec: number; flashMs: number };

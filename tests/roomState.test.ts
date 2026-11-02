@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Rng } from '../src/core/rng';
 import { gameData } from '../src/data/index';
 import { advanceStage, playableChapters, firstStage } from '../src/systems/run';
-import { RoomState, planCombatWaves, wavesForRoom } from '../src/systems/roomState';
+import { RoomState, planCombatWaves, scaledCount, wavesForRoom } from '../src/systems/roomState';
 
 const DELAY = 0.5;
 
@@ -69,6 +69,18 @@ describe('RoomState', () => {
 describe('웨이브 계획', () => {
   const wd = gameData.waves;
   const range = gameData.mapgen.combatWaves;
+
+  it('적 수 배율: 소수 부분은 확률로, 평균이 배율과 맞는다', () => {
+    const rng = new Rng(4);
+    let sum = 0;
+    for (let i = 0; i < 4000; i++) {
+      const n = scaledCount(rng, 2, 1.2);
+      expect([2, 3]).toContain(n);
+      sum += n;
+    }
+    expect(sum / 4000).toBeCloseTo(2.4, 1);
+    expect(scaledCount(new Rng(1), 5, 1)).toBe(5);
+  });
 
   it('전투 칸 웨이브는 2~3번, 챕터1 적만 나온다', () => {
     const ch1 = new Set(gameData.enemies.enemies.filter((e) => e.chapter === 1 && e.rank === 'normal').map((e) => e.id));

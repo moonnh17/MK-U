@@ -2,6 +2,7 @@
   "fistWeapon": "fist",
   "projectile": { "spriteKey": "projectile_player", "color": "#fff3a0", "size": 3 },
   "critMultiplier": 1.5,
+  "swapDelaySec": 0.35,
   "meleeFx": {
     "slash": { "spriteKey": "fx_melee_slash", "color": "#ffffff", "size": 20 },
     "slam": { "spriteKey": "fx_melee_slam", "color": "#ffffff", "size": 20 },

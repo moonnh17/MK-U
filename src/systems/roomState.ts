@@ -78,6 +78,13 @@ export class RoomState {
   }
 }
 
+/** 적 수 × 배율. 소수 부분은 확률로 한 마리 더 (적은 무리도 배율이 평균으로 반영된다) */
+export function scaledCount(rng: Rng, n: number, mul: number): number {
+  const v = n * mul;
+  const whole = Math.floor(v);
+  return whole + (rng.chance(v - whole) ? 1 : 0);
+}
+
 /** 전투 칸 웨이브 계획 (시드 재현). 웨이브 수와 구성은 데이터에서 뽑는다. */
 export function planCombatWaves(rng: Rng, chapter: number, waveCount: readonly [number, number], data: WavesData): Wave[] {
   const pool = data.waves.filter((w) => w.chapter === chapter);
@@ -88,7 +95,7 @@ export function planCombatWaves(rng: Rng, chapter: number, waveCount: readonly [
     const tpl = rng.weighted(pool.map((w) => ({ item: w, weight: w.weight })));
     const wave: Wave = [];
     for (const s of tpl.spawns) {
-      const count = rng.int(s.count[0], s.count[1]);
+      const count = scaledCount(rng, rng.int(s.count[0], s.count[1]), data.countMul);
       for (let k = 0; k < count; k++) wave.push(s.enemy);
     }
     waves.push(wave);

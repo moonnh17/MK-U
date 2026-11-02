@@ -23,9 +23,8 @@ export class SkillRuntime {
   /** 마기역장 보호막 */
   shield: ShieldState | null = null;
   shieldOpts: ShieldOpts | null = null;
-  shieldFx: Phaser.GameObjects.Arc | Phaser.GameObjects.Sprite | null = null;
+  shieldFx: Phaser.GameObjects.Sprite | null = null;
   /** 겹 수만큼 그리는 테두리 */
-  shieldRim: Phaser.GameObjects.Graphics | null = null;
   /** 끝날 때 종료 이펙트를 내기 위해 기억한다 */
   private lastShieldOpts: ShieldOpts | null = null;
   /** 지금 깔려 있는 패시브 (id:레벨:각성). 바뀌면 오브젝트를 다시 깐다 */
@@ -164,8 +163,6 @@ export class SkillRuntime {
       if (this.shieldFx) this.run.tweens.killTweensOf(this.shieldFx);
       this.shieldFx?.destroy();
       this.shieldFx = null;
-      this.shieldRim?.destroy();
-      this.shieldRim = null;
       this.lastShieldOpts = null;
       return;
     }
@@ -189,19 +186,11 @@ export class SkillRuntime {
       // 겹이 쌓일수록 진해진다 (다 쓰고 굴절만 남으면 가장 흐리게)
       const look = this.run.ctx.data.juice.shieldSpawn;
       this.shieldFx.setPosition(at.x, at.y).setAlpha(look.stacks[Math.max(0, s.hits - 1)]!.bodyAlpha);
-      this.drawShieldRim(at, opts.fxRadius, s.hits);
-    } else {
-      if (!this.shieldFx) this.shieldFx = this.run.add.circle(0, 0, opts.fxRadius).setDepth(5);
-      (this.shieldFx as Phaser.GameObjects.Arc)
-        .setRadius(opts.fxRadius)
-        .setPosition(at.x, at.y)
-        .setStrokeStyle(s.hits > 0 ? 2 : 1, color, 0.9)
-        .setFillStyle(color, s.refractLeftSec > 0 ? 0.15 : 0.08);
     }
-    if (fresh) {
+    if (fresh && this.shieldFx) {
       // 작게 시작해 온몸을 덮을 때까지 커진다
       const sp = this.run.ctx.data.juice.shieldSpawn;
-      const fx = this.shieldFx!;
+      const fx = this.shieldFx;
       const { scaleX, scaleY } = fx;
       fx.setScale(scaleX * sp.startScale, scaleY * sp.startScale);
       this.run.tweens.add({ targets: fx, scaleX, scaleY, duration: sp.growSec * 1000, ease: 'Back.easeOut' });
@@ -215,17 +204,6 @@ export class SkillRuntime {
       if (!opts.look?.contact) this.run.fxAt(this.run.add.circle(b.x, b.y, 3, color, 0.8).setDepth(6));
       b.destroy();
     }
-  }
-
-  /** 겹 수를 테두리 줄 수·굵기·밝기로 보여 준다 */
-  private drawShieldRim(at: { x: number; y: number }, radius: number, hits: number): void {
-    const sp = this.run.ctx.data.juice.shieldSpawn;
-    this.shieldRim ??= this.run.add.graphics().setDepth(5);
-    this.shieldRim.clear();
-    if (hits <= 0) return;
-    const c = sp.stacks[hits - 1]!;
-    this.shieldRim.lineStyle(c.lineWidth, hexColor(c.color), c.lineAlpha);
-    for (let i = 0; i < c.rings; i++) this.shieldRim.strokeCircle(at.x, at.y, radius + i * sp.ringGapPx);
   }
 
   /** HUD '현재 버프': 보호막 + 스킬 오브젝트가 알리는 상태(충전 등) */

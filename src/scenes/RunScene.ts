@@ -422,7 +422,6 @@ export class RunScene extends Phaser.Scene {
     this.skillRt.shield = null;
     this.skillRt.shieldOpts = null;
     this.skillRt.shieldFx = null;
-    this.skillRt.shieldRim = null;
     this.skillRt.passiveKey = '';
     this.skillRt.passiveId = null;
     this.dashLeft = 0;
@@ -592,7 +591,8 @@ export class RunScene extends Phaser.Scene {
 
     if (frame.pressed.has('swapWeapon')) {
       p.weapons = swapWeapon(p.weapons);
-      this.combat.fireCooldown = 0;
+      // 바꿔 가며 연사하지 못하게: 남은 쿨타임은 유지하고 교체 딜레이를 건다
+      this.combat.fireCooldown = Math.max(this.combat.fireCooldown, this.ctx.data.weapons.swapDelaySec);
       this.combat.resetCharge();
     }
     if (frame.pressed.has('interact')) this.loot.interact();

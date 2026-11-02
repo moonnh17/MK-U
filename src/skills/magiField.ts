@@ -5,7 +5,6 @@
  * (근접·장판·보스 대형 레이저 제외 — 그런 공격은 refractable=false로 만든다).
  */
 import { stackShield } from '../systems/shield';
-import { levelRef } from './skillFx';
 import type { SkillImpl } from './host';
 
 export const magiField: SkillImpl = {
@@ -20,9 +19,8 @@ export const magiField: SkillImpl = {
       blockInvulnSec: v.blockInvulnSec!,
       color: s.def.color,
       fxRadius: awakened ? refract : v.fxRadius!,
-      look: awakened
-        ? { body: s.def.sprites.loopA!, spawn: s.def.sprites.spawnA, end: s.def.sprites.endA, block: s.def.sprites.hexA, contact: s.def.sprites.contactA, deflect: s.def.sprites.deflectA }
-        : { body: levelRef(s, 'shield') },
+      // 기본 보호막은 몸에 원을 그리지 않는다 (HUD 버프 칸으로 알린다)
+      look: awakened ? { body: s.def.sprites.loopA!, spawn: s.def.sprites.spawnA, end: s.def.sprites.endA, block: s.def.sprites.hexA, contact: s.def.sprites.contactA, deflect: s.def.sprites.deflectA } : undefined,
     });
     return true;
   },

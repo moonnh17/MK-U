@@ -179,9 +179,8 @@
     "growSec": 0.32,
     "startScale": 0.15,
     "stacks": [
-      { "bodyAlpha": 0.9, "rings": 1, "lineWidth": 1.5, "lineAlpha": 0.9, "color": "#6ad0ff" }
-    ],
-    "ringGapPx": 2.5
+      { "bodyAlpha": 0.9 }
+    ]
   },
   "bossPhase": {
     "flashMs": 250,

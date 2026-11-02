@@ -1,5 +1,6 @@
 {
   "waveDelaySec": 0.8,
+  "countMul": 1.2,
   "spawnWarnSec": 0.5,
   "spawnMinPlayerDistance": 90,
   "champions": {

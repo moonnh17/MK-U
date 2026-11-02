@@ -189,6 +189,7 @@ export function validateGameData(d: GameData): Errors {
   }
 
   checkPositive(errors, 'weapons.critMultiplier', d.weapons.critMultiplier);
+  checkPositive(errors, 'weapons.swapDelaySec', d.weapons.swapDelaySec, true);
   checkUnique(errors, 'weapons.options', d.weapons.options.map((o) => o.id));
   for (const o of d.weapons.options) {
     needText(`weapons.options.${o.id}`, o.nameKey);
@@ -497,6 +498,7 @@ export function validateGameData(d: GameData): Errors {
 
   // --- 웨이브 ---
   checkPositive(errors, 'waves.waveDelaySec', d.waves.waveDelaySec, true);
+  checkPositive(errors, 'waves.countMul', d.waves.countMul);
   checkPositive(errors, 'waves.spawnWarnSec', d.waves.spawnWarnSec, true);
   checkPositive(errors, 'waves.spawnMinPlayerDistance', d.waves.spawnMinPlayerDistance, true);
   checkUnique(errors, 'waves', d.waves.waves.map((x) => x.id));

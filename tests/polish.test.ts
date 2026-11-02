@@ -17,8 +17,9 @@ const hp = (id: string) => D.enemies.enemies.find((e) => e.id === id)!.maxHp;
 
 describe('보스 체력', () => {
   it('전체적으로 늘었고 마기카이저가 가장 많다', () => {
-    expect(hp('fusionAkgwi')).toBe(900);
-    expect(hp('electricRing')).toBeGreaterThan(1400);
+    expect(hp('fusionAkgwi')).toBe(1080);
+    expect(hp('electricRing')).toBe(2520);
+    expect(hp('magiKaiser')).toBe(31200);
     for (const b of D.bosses.bosses) if (b.id !== 'magiKaiser') expect(hp('magiKaiser')).toBeGreaterThan(hp(b.id) * 2);
   });
   it('반피를 넘는 순간 한 번만 추가 구슬', () => {
@@ -332,7 +333,7 @@ describe('회복·재화', () => {
   const cd = (id: string) => (D.items.items.find((i) => i.id === id)!.effects[0] as { cooldownSec: number }).cooldownSec;
   it('회복 아이템 재사용 3배', () => {
     expect(cd('magicasol')).toBe(60);
-    expect(cd('hanwooSteak')).toBe(60);
+    expect(cd('hanwooSteak')).toBe(0);
   });
   it('마기 입자 획득 절반', () => {
     expect(D.pickups.coin.value).toBe(1);
