@@ -1,5 +1,4 @@
 {
-  "awakeningNeed": 2,
   "gaugePerKill": { "normal": 5, "elite": 15, "champion": 20, "boss": 30, "hiddenBoss": 30 },
   "ultimates": [
     {
@@ -35,6 +34,7 @@
       "gauge": { "kind": "damage", "skills": ["magiTurret", "magiMine", "combatDrone"], "perDamage": 0.15 },
       "values": { "damage": 60, "length": 480, "width": 10, "telegraphSec": 0.25, "bossMaxHpRatio": 0.1 },
       "awakening": {
+        "requiredItem": "regulusShard",
         "nameKey": "ultimate.thunderbolt.awakened",
         "shortKey": "ultimate.thunderbolt.awakened.short",
         "descKey": "ultimate.thunderbolt.awakened.desc",
@@ -78,6 +78,7 @@
         "failureRadius": 70, "failureDamage": 35, "failureSelfDamage": 8
       },
       "awakening": {
+        "requiredItem": "atrosCodex",
         "nameKey": "ultimate.singularity.awakened",
         "shortKey": "ultimate.singularity.awakened.short",
         "descKey": "ultimate.singularity.awakened.desc",

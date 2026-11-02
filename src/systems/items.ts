@@ -1,10 +1,10 @@
 /**
- * 아이템 (순수 함수): 그룹 배율, 효과 합산, 등급 가중치(챕터·확률 이전), 아이템 뽑기, 회복 우선순위, 세트 합성, LSD-R.
+ * 아이템 (순수 함수): 그룹 배율, 효과 합산, 등급 가중치(챕터·확률 이전), 아이템 뽑기, 회복 우선순위, 세트 합성.
  * - 실제 값 = 기준값 × 그룹 배율. 같은 종류의 +%는 모두 더한 뒤 한 번 곱한다.
  * - 같은 아이템은 한 런에 한 번만(합성으로 사라진 재료도 다시 나오지 않음).
  */
 import type { Rng } from '../core/rng';
-import { STAT_IDS, type GradeId, type GroupMultipliersData, type ItemDef, type ItemEffect, type ItemsData, type SchoolId, type StatId } from '../types/data';
+import type { GradeId, GroupMultipliersData, ItemDef, ItemEffect, ItemsData, SchoolId } from '../types/data';
 import { rollGrade } from './loot';
 
 export interface ItemContext {
@@ -19,8 +19,8 @@ export function scaleEffect(e: ItemEffect, groups: GroupMultipliersData): ItemEf
   const g = groups.itemGroups;
   const out = { ...e } as Record<string, unknown>;
   if ('group' in e) out.value = e.value * g[e.group];
-  // 함성의 damage는 피해 %라 발동 피해 배율을 받지 않는다
-  if ('damage' in e && e.kind !== 'tempRoar' && e.kind !== 'roomRoar') out.damage = (e.damage as number) * g.procDamage;
+  // 함성·패닉 각성의 damage는 피해 %라 발동 피해 배율을 받지 않는다
+  if ('damage' in e && e.kind !== 'tempRoar' && e.kind !== 'roomRoar' && e.kind !== 'panicAwaken') out.damage = (e.damage as number) * g.procDamage;
   if ('radius' in e) out.radius = (e.radius as number) * g.area;
   if ('everySec' in e) out.everySec = (e.everySec as number) * g.cooldown;
   if ('cooldownSec' in e) out.cooldownSec = (e.cooldownSec as number) * g.cooldown;
@@ -41,9 +41,12 @@ export function activeEffects(def: ItemDef, ctx: ItemContext, groups: GroupMulti
 }
 
 export interface ItemTotals {
-  stats: Record<StatId, number>;
   maxHp: number;
-  damage: { all: number; melee: number; ranged: number; boss: number };
+  maxSanity: number;
+  moveSpeed: number;
+  skillCooldown: number;
+  pellets: number;
+  damage: { all: number; melee: number; ranged: number; boss: number; physical: number; magic: number; tech: number };
   enemyTaken: number;
   damageTaken: number;
   coinGain: number;
@@ -52,25 +55,27 @@ export interface ItemTotals {
   skillDamage: Record<string, number>;
 }
 
-function zeroStats(): Record<StatId, number> {
-  return Object.fromEntries(STAT_IDS.map((s) => [s, 0])) as Record<StatId, number>;
-}
-
 /**
- * LSD-R: 기본 스탯(시작값)을 base로, 정신력을 willpower로 재편하고 줄어든 양을 가장 많이 투자한 스탯에 옮긴다.
- * '투자' = 스탯 카드로 올린 양. 동점이면 스탯 순서가 앞선 쪽.
+ * 아이템 선택 카드: 서로 다른 아이템 count장. 장마다 등급 가중치(+확률 이전)로 뽑고,
+ * 신화는 가중치 밖에서 고정 확률로 따로 판정한다. 이미 가진 아이템은 나오지 않는다.
  */
-export function reshuffleDelta(startValue: number, invest: Readonly<Record<StatId, number>>, base: number, willpower: number): Record<StatId, number> {
-  const delta = zeroStats();
-  let moved = 0;
-  for (const s of STAT_IDS) {
-    const target = s === 'willpower' ? willpower : base;
-    delta[s] = target - startValue;
-    moved += startValue - target;
+export function itemChoices(
+  rng: Rng,
+  weights: Partial<Record<GradeId, number>>,
+  mythicChance: number,
+  data: ItemsData,
+  obtained: ReadonlySet<string>,
+  count: number,
+): string[] {
+  const taken = new Set(obtained);
+  const out: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const id = rollItem(rng, weights, mythicChance, data, taken);
+    if (!id) break;
+    out.push(id);
+    taken.add(id);
   }
-  const top = [...STAT_IDS].sort((a, b) => (invest[b] ?? 0) - (invest[a] ?? 0))[0]!;
-  delta[top] += moved;
-  return delta;
+  return out;
 }
 
 /** 늘 켜져 있는 효과의 합 (발동형·조건부 회복은 런타임) */
@@ -79,12 +84,14 @@ export function itemTotals(
   data: ItemsData,
   ctx: ItemContext,
   groups: GroupMultipliersData,
-  reshuffle: { startValue: number; invest: Readonly<Record<StatId, number>> },
 ): ItemTotals {
   const t: ItemTotals = {
-    stats: zeroStats(),
     maxHp: 0,
-    damage: { all: 0, melee: 0, ranged: 0, boss: 0 },
+    maxSanity: 0,
+    moveSpeed: 0,
+    skillCooldown: 0,
+    pellets: 0,
+    damage: { all: 0, melee: 0, ranged: 0, boss: 0, physical: 0, magic: 0, tech: 0 },
     enemyTaken: 0,
     damageTaken: 0,
     coinGain: 0,
@@ -97,9 +104,17 @@ export function itemTotals(
     if (!def) continue;
     for (const e of activeEffects(def, ctx, groups)) {
       switch (e.kind) {
-        case 'stat':
-          if (e.stat === 'all') for (const s of STAT_IDS) t.stats[s] += e.value;
-          else t.stats[e.stat] += e.value;
+        case 'maxSanity':
+          t.maxSanity += e.value;
+          break;
+        case 'moveSpeed':
+          t.moveSpeed += e.value;
+          break;
+        case 'skillCooldown':
+          t.skillCooldown += e.value;
+          break;
+        case 'pellets':
+          t.pellets += e.value;
           break;
         case 'maxHp':
           t.maxHp += e.value;
@@ -125,11 +140,6 @@ export function itemTotals(
         case 'skillDamage':
           t.skillDamage[e.skillId] = (t.skillDamage[e.skillId] ?? 0) + e.value;
           break;
-        case 'statReshuffle': {
-          const d = reshuffleDelta(reshuffle.startValue, reshuffle.invest, e.base, e.willpower);
-          for (const s of STAT_IDS) t.stats[s] += d[s];
-          break;
-        }
         default:
           break;
       }

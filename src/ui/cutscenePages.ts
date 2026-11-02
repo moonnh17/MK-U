@@ -45,7 +45,12 @@ export function schoolColor(ctx: GameContext, school: SchoolId): string {
   return '#ffffff';
 }
 
-export function skillAwakeningCut(ctx: GameContext, skillId: string, stats: Record<string, number>): Cutscene {
+/** 각성에 쓰인 아이템 이름 */
+function itemName(ctx: GameContext, itemId: string): string {
+  return ctx.t(ctx.data.items.items.find((x) => x.id === itemId)!.nameKey);
+}
+
+export function skillAwakeningCut(ctx: GameContext, skillId: string): Cutscene {
   const t = ctx.t;
   const d = ctx.data;
   const def = findSkill(d.skills, skillId);
@@ -62,7 +67,7 @@ export function skillAwakeningCut(ctx: GameContext, skillId: string, stats: Reco
         lines: [
           `${t('cut.before')}: ${t(def.descKey, fmt(before.values))}`,
           `${t('cut.after')}: ${t(a.descKey, fmt(after.values))}`,
-          t('cut.condition', { stat: t(`stat.${a.requiredStat}`), value: stats[a.requiredStat] ?? 0, need: a.requiredValue }),
+          t('cut.condition', { item: itemName(ctx, a.requiredItem) }),
         ],
         accent: color,
       },
@@ -70,13 +75,11 @@ export function skillAwakeningCut(ctx: GameContext, skillId: string, stats: Reco
   };
 }
 
-export function ultimateAwakeningCut(ctx: GameContext, ult: UltimateDef, awakenedSkills: string[], need: number): Cutscene {
+export function ultimateAwakeningCut(ctx: GameContext, ult: UltimateDef): Cutscene {
   const t = ctx.t;
   const a = ult.awakening!;
-  const icons = awakenedSkills.slice(0, need).map((id) => {
-    const def = findSkill(ctx.data.skills, id);
-    return { label: t(def.shortKey), color: def.color, key: artKeys.skillIcon(def.id) };
-  });
+  const item = ctx.data.items.items.find((x) => x.id === a.requiredItem)!;
+  const icons = [{ label: t(item.nameKey), color: item.color, key: item.spriteKey }];
   const values = fmt({ ...ult.values, ...a.values });
   return {
     id: `ultimate.${ult.id}`,
@@ -84,7 +87,7 @@ export function ultimateAwakeningCut(ctx: GameContext, ult: UltimateDef, awakene
     pages: [
       {
         title: `${t('cut.ultimateAwakening')} — ${t(ult.nameKey)} → ${t(a.nameKey)}`,
-        lines: [t(a.descKey, values), t('cut.ultimateCount', { count: Math.min(awakenedSkills.length, need), need })],
+        lines: [t(a.descKey, values), t('cut.condition', { item: t(item.nameKey) })],
         accent: ult.color,
       },
     ],
@@ -98,7 +101,6 @@ export function conversionLines(log: ConversionLog, ctx: GameContext): string[] 
   const lines = [
     ...log.removed.map((r) => t('cut.conversion.removed', { skill: name(r.skillId), level: r.level })),
     ...log.gains.map((g) => t('cut.conversion.gain', { skill: name(g.skillId), level: g.level })),
-    ...log.stats.map((s) => t('cut.conversion.stat', { stat: t(`stat.${s.stat}`), amount: s.amount })),
   ];
   return lines.length > 0 ? lines : [t('cut.conversion.none')];
 }

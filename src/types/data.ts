@@ -24,9 +24,6 @@ export const TAG_IDS = [
 ] as const;
 export type TagId = (typeof TAG_IDS)[number];
 
-export const STAT_IDS = ['strength', 'toughness', 'agility', 'intelligence', 'magiPower', 'willpower'] as const;
-export type StatId = (typeof STAT_IDS)[number];
-
 export const GRADE_IDS = ['common', 'rare', 'legendary', 'unique', 'mythic'] as const;
 export type GradeId = (typeof GRADE_IDS)[number];
 
@@ -41,57 +38,11 @@ export interface SpriteRef {
   height?: number;
 }
 
-// ---------- 스탯 ----------
-
-export interface StatDef {
-  id: StatId;
-  nameKey: string;
-  descKey: string;
-  /** 이 스탯이 보정하는 태그 */
-  linkedTags: TagId[];
-}
-
-/** 스탯 하나로 정하는 효과: 기준점을 넘는 1포인트당 perPoint, 최대 cap */
-export interface StatRule {
-  stat: StatId;
-  pivot: number;
-  perPoint: number;
-  cap: number;
-}
-
-/** 스탯 표의 태그 외 효과 */
-export const STAT_EFFECT_IDS = ['maxHp', 'maxEnergy', 'moveSpeed', 'skillArea', 'energyGain', 'coinGain', 'mentalResist', 'dodgeCooldown'] as const;
-export type StatEffectId = (typeof STAT_EFFECT_IDS)[number];
-
-export interface StatsData {
-  /** 시작 스탯 (기획서: 전부 10) */
-  startValue: number;
-  stats: StatDef[];
-  /** maxHp는 더하는 값, 나머지는 비율(0.01 = 1%) */
-  effects: Record<StatEffectId, StatRule>;
-}
-
 // ---------- 태그 ----------
 
-/** 스탯이 기준점을 넘는 1포인트당 percentPerPoint씩, 최대 cap까지 더한다. */
-export interface LinearStatScaling {
-  kind: 'linearStat';
-  stat: StatId;
-  /** 이 값을 넘는 만큼만 보정 (기획서: 10) */
-  pivot: number;
-  /** 1포인트당 증가율 (0.04 = +4%) */
-  perPoint: number;
-  /** 증가율 상한 (1.5 = +150%) */
-  cap: number;
-}
-
-/** min(상한, 기본 × base^(스탯 − pivot)) */
-export interface ExponentialChanceScaling {
-  kind: 'exponentialChance';
-  stat: StatId;
-  pivot: number;
-  base: number;
-  /** 결과별 상한 (예: success 0.98, greatSuccess 0.6) */
+/** 확률 태그: 결과별 상한 (예: success 0.98, greatSuccess 0.6) */
+export interface ChanceRule {
+  kind: 'chance';
   caps: Record<string, number>;
 }
 
@@ -119,7 +70,7 @@ export interface NoScaling {
   kind: 'none';
 }
 
-export type TagRule = LinearStatScaling | ExponentialChanceScaling | SpaceRule | BleedRule | NoScaling;
+export type TagRule = ChanceRule | SpaceRule | BleedRule | NoScaling;
 
 /** 피해 계산에서 태그가 속하는 단계 */
 export type TagDamageGroup =
@@ -159,7 +110,7 @@ export interface GradeDef {
 }
 
 /** 아이템 효과 그룹. 실제 값 = 기준값 × 그룹 배율 */
-export type ItemGroupId = 'statFlat' | 'hpFlat' | 'damagePct' | 'procDamage' | 'area' | 'cooldown';
+export type ItemGroupId = 'hpFlat' | 'damagePct' | 'procDamage' | 'area' | 'cooldown';
 
 export interface GroupMultipliersData {
   /** 초기값은 임시. 밸런스 조정 시 이 표만 바꾼다. */
@@ -275,7 +226,7 @@ export interface WeaponDef extends SpriteRef {
   fxColor?: string;
   /** 들고 있는 동안 효과 (신궁 환디) */
   /** bossDamage: 이 무기로 보스에게 주는 피해 증가 / jobDamage: 전직별 피해 증가 */
-  equipBonus?: { stats?: Partial<Record<StatId, number>>; rangedDamage?: number; meleeDamage?: number; bossDamage?: number; jobDamage?: Partial<Record<string, number>> };
+  equipBonus?: { physicalDamage?: number; rangedDamage?: number; meleeDamage?: number; bossDamage?: number; jobDamage?: Partial<Record<string, number>> };
   /** 기본 치명타 확률 */
   critChance?: number;
   /** 이 보스를 잡으면 나오는 무기 */
@@ -671,7 +622,6 @@ export type DodgeSchoolDef = { nameKey: string; descKey: string } & (
 
 export interface SanityConfig {
   base: number;
-  perWillpower: number;
   regenPerSec: number;
   /** 보스와 마주한 동안 초당 감소 (이때는 회복하지 않는다) */
   bossDrainPerSec: number;
@@ -838,9 +788,8 @@ export interface SkillLevelDef {
 export interface SkillAwakeningDef {
   nameKey: string;
   descKey: string;
-  /** 각성 조건: Lv3 + 이 스탯이 requiredValue 이상 */
-  requiredStat: StatId;
-  requiredValue: number;
+  /** 각성 조건: Lv3 + 이 아이템 보유 */
+  requiredItem: string;
   /** 각성 후 카드·인벤토리에 보이는 태그 */
   tags: TagId[];
   cooldownSec: number;
@@ -895,14 +844,12 @@ export interface UltimateDef {
   school?: SchoolId;
   values: Record<string, number>;
   /** 궁극기 각성. 없으면 각성판 없음 */
-  awakening?: { nameKey: string; shortKey: string; descKey: string; tags: TagId[]; values: Record<string, number> };
+  awakening?: { requiredItem: string; nameKey: string; shortKey: string; descKey: string; tags: TagId[]; values: Record<string, number> };
   color: string;
   sprites: Record<string, SpriteRef>;
 }
 
 export interface UltimatesData {
-  /** 궁극기 각성에 필요한 자기 학파 각성 스킬 수 */
-  awakeningNeed: number;
   /** 적 처치 시 게이지 충전량 (적 등급별) */
   gaugePerKill: Record<EnemyRank, number>;
   ultimates: UltimateDef[];
@@ -915,10 +862,14 @@ export interface UltimatesData {
  * value → group, damage → procDamage, radius·range → area, everySec·cooldownSec → cooldown.
  */
 export type ItemEffect =
-  | { kind: 'stat'; stat: StatId | 'all'; value: number; group: 'statFlat' }
   | { kind: 'maxHp'; value: number; group: 'hpFlat' }
   /** 피해 증가. all·melee·ranged·boss(보스에게) */
-  | { kind: 'damage'; scope: 'all' | 'melee' | 'ranged' | 'boss'; value: number; group: 'damagePct' }
+  | { kind: 'damage'; scope: 'all' | 'melee' | 'ranged' | 'boss' | 'physical' | 'magic' | 'tech'; value: number; group: 'damagePct' }
+  | { kind: 'maxSanity'; value: number; group: 'hpFlat' }
+  | { kind: 'moveSpeed'; value: number; group: 'damagePct' }
+  | { kind: 'skillCooldown'; value: number; group: 'damagePct' }
+  /** 산탄 무기 발사 탄수 + */
+  | { kind: 'pellets'; value: number }
   /** 모든 적이 받는 피해 증가 (피해 증가와 따로 곱한다) */
   | { kind: 'enemyTaken'; value: number; group: 'damagePct' }
   /** 받는 피해 감소 */
@@ -979,12 +930,10 @@ export type ItemEffect =
   | { kind: 'lowSanityDamage'; maxDamage: number }
   /** 패닉에도 방향이 뒤집히지 않고, 시야 방해가 visionMul배로 준다 */
   | { kind: 'panicCalm'; visionMul: number }
-  /** 패닉 중 각성: 체력이 초당 hpPerSec 닳고(1 아래로는 안 내려감) 모든 스탯 +allStats */
-  | { kind: 'panicAwaken'; hpPerSec: number; allStats: number }
+  /** 패닉 중 각성: 체력이 초당 hpPerSec 닳고(1 아래로는 안 내려감) 모든 피해 +damage */
+  | { kind: 'panicAwaken'; hpPerSec: number; damage: number }
   /** 궁극기를 쓸 때 관통 탄환 shots발 전방위 (고대병기의 코어) */
-  | { kind: 'ultimateBurst'; shots: number; damage: number; speed: number; range: number; tags: TagId[] }
-  /** 기본 스탯을 base로, 정신력을 willpower로 재편하고 줄어든 양을 가장 많이 투자한 스탯에 옮김 */
-  | { kind: 'statReshuffle'; base: number; willpower: number };
+  | { kind: 'ultimateBurst'; shots: number; damage: number; speed: number; range: number; tags: TagId[] };
 
 export type ItemPool = 'normal' | 'boss' | 'hiddenBoss' | 'set';
 
@@ -1024,7 +973,7 @@ export interface ItemsData {
 
 // ---------- 전리품·조우 ----------
 
-export type EncounterKindId = 'treasure' | 'merchant' | 'skillShop' | 'statShop' | 'raid' | 'magiSpire' | 'hiddenBoss';
+export type EncounterKindId = 'treasure' | 'merchant' | 'skillShop' | 'raid' | 'magiSpire' | 'hiddenBoss';
 
 export interface LootData {
   /** 아이템·무기를 얻을 때마다 신화로 바뀌는 고정 확률 */
@@ -1041,9 +990,7 @@ export interface LootData {
   /** 상점 진열대 위 아이콘 크기(px) */
   cardStandIconPx: number;
   /** 스킬 상점: 카드 종류별 가격 */
-  skillShop: { count: number; prices: { skillNew: number; skillLevelUp: number; awakening: number } };
-  /** 스탯 상점: 스탯 카드 등급별 가격 */
-  statShop: { count: number; prices: Record<string, number> };
+  skillShop: { count: number; prices: { skillNew: number; skillLevelUp: number } };
   encounter: { weights: Record<EncounterKindId, number> };
   raid: { waves: IntRange; sizeMul: number; elitesPerWave: number; coins: IntRange };
   chest: { weapon: SpriteRef; item: SpriteRef; openRadius: number };
@@ -1055,17 +1002,20 @@ export interface LootData {
 
 /** 마기수집첨탑. 처치 충전·방해 무리 규칙은 첨탑 크기와 무관하게 같다 (중형은 M6) */
 export interface SpireData {
-  small: { sprite: SpriteRef; weights: Partial<Record<GradeId, number>> };
+  /** picks: 충전 완료 보상으로 고르는 스킬 수 */
+  small: { sprite: SpriteRef; picks: number };
   /**
    * 중형 첨탑: 챕터별 등장(그 스테이지부터 확률), 75% 확률로 강적 1마리
    * (1~2장: 엘리트 2종이 겹친 개체 / 3장: 집행자 또는 집정관)
    */
   medium: {
     sprite: SpriteRef;
-    weights: Partial<Record<GradeId, number>>;
+    picks: number;
     chance: Record<string, { fromStage: number; chance: number }>;
     strongChance: number;
   };
+  /** 대형 첨탑: 중형 그림을 scale배로. 중형보다 먼저 판정하고, 강적 규칙은 중형과 같다 */
+  large: { sprite: SpriteRef; scale: number; picks: number; chance: Record<string, { fromStage: number; chance: number }> };
   /** 충전 원 반지름(px) */
   radius: number;
   ringColor: string;
@@ -1080,8 +1030,6 @@ export interface SpireData {
   eliteMul: number;
   /** 무리마다 항상 섞이는 헥타르 전투원 (원본 첨탑 규칙) */
   troopers: { enemy: string; count: IntRange };
-  /** 아이템 선택 카드 수 */
-  cards: number;
 }
 
 // ---------- 직업·전직 ----------
@@ -1102,8 +1050,6 @@ export interface JobDef {
   id: JobId;
   nameKey: string;
   enabled: boolean;
-  /** 기본 스탯 보정 */
-  statBonus: Partial<Record<StatId, number>>;
   startUltimate: string;
   advancements: AdvancementDef[];
 }
@@ -1113,22 +1059,12 @@ export interface JobsData {
   startJob: JobId;
   /** 이 챕터의 마지막 보스를 잡으면 전직 */
   advanceAfterChapter: number;
-  /** 전직 스킬 변환에서 받을 스킬이 없을 때 포인트 1개당 무작위 스탯 증가량 */
-  conversionStatAmount: number;
   jobs: JobDef[];
 }
 
 // ---------- 카드 ----------
 
-export type CardOfferKind = 'skill' | 'stat';
-
-export interface StatCardGrade {
-  id: string;
-  amount: number;
-  /** 등장 가중치 */
-  weight: number;
-  color: string;
-}
+export type CardOfferKind = 'skill' | 'item';
 
 export interface CardsData {
   /** 한 번에 보여주는 카드 수 */
@@ -1141,11 +1077,8 @@ export interface CardsData {
   afterStageCycle: CardOfferKind[];
   /** 보스(X-2, X-5)를 잡으면 보스방에서 한 번 더 */
   bossBonus: CardOfferKind;
-  /** 각성 카드는 조건을 채운 만큼 넣되 이 수까지 */
-  maxAwakeningCards: number;
   /** 스킬 카드 종류별 뽑기 가중치 */
   skillWeights: { new: number; levelUp: number; passiveNew: number; passiveLevelUp: number };
-  statGrades: StatCardGrade[];
 }
 
 // ---------- 텍스트 ----------
@@ -1181,11 +1114,12 @@ export interface MetaData {
   settlement: { lineStepSec: number; countSec: number };
   /** 실험체의 기억: 직업별 영구 강화 (최대 레벨 = 비용 표 길이) */
   upgrades: UpgradeDef[];
+  /** 삭제된 스탯 강화: 예전 저장의 레벨을 결정으로 돌려줄 때 쓴다 */
+  removedUpgrades: { ids: string[]; costs: number[] };
 }
 
 /** stat: 시작 스탯 +perLevel / maxHp: 기본 체력 +perLevel / sanity: 최대 정신력 +perLevel */
 export type UpgradeDef =
-  | { id: string; kind: 'stat'; stat: StatId; perLevel: number; costs: number[] }
   | { id: string; kind: 'maxHp' | 'sanity'; perLevel: number; costs: number[] };
 
 // ---------- 실험장 (시작 방) ----------

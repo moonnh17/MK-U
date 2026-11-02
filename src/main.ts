@@ -10,6 +10,7 @@ import { computeZoom, hexColor, renderScale } from './core/scale';
 import { formatText } from './core/text';
 import { gameData } from './data/index';
 import { validateGameData } from './data/validate';
+import { refundRemovedUpgrades } from './systems/upgrades';
 import { InputManager } from './input/inputManager';
 import { KeyboardSource } from './input/keyboard';
 import { TouchSource } from './input/touch';
@@ -83,6 +84,8 @@ const ctx = setContext({
   debug: config.debug,
   save: new SaveStore(browserStore()),
 });
+
+if (refundRemovedUpgrades(ctx.save.data, data.meta.removedUpgrades) > 0) ctx.save.write();
 
 // --- Phaser ---
 // 캔버스는 기준 해상도의 renderScale배로 그리고, 창에 맞춘 배율의 나머지만 CSS로 줄이거나 늘린다

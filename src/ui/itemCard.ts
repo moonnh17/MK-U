@@ -10,7 +10,7 @@ import { plainWeapon } from '../systems/weapons';
 import type { GroupMultipliersData, ItemDef } from '../types/data';
 import { weaponInfoLines } from './weaponInfo';
 
-const PCT = new Set(['damage', 'enemyTaken', 'damageTaken', 'coinGain', 'area', 'buffDuration', 'skillDamage']);
+const PCT = new Set(['damage', 'enemyTaken', 'damageTaken', 'coinGain', 'area', 'buffDuration', 'skillDamage', 'moveSpeed', 'skillCooldown']);
 
 function num(v: number): string {
   return String(Math.round(v * 10) / 10);
@@ -21,7 +21,11 @@ export function itemDescParams(def: ItemDef, groups: GroupMultipliersData): Reco
   const out: Record<string, string> = {};
   def.effects.forEach((raw, i) => {
     const e = scaleEffect(raw, groups) as Record<string, unknown> & { kind: string };
-    if (typeof e.value === 'number') out[`v${i}`] = num(PCT.has(e.kind) ? e.value * 100 : e.value);
+    if (typeof e.value === 'number') {
+      out[`v${i}`] = num(PCT.has(e.kind) ? e.value * 100 : e.value);
+      // 음수 효과를 "+n%"로 쓸 때 (받는 피해 증가)
+      out[`m${i}`] = num(Math.abs(PCT.has(e.kind) ? e.value * 100 : e.value));
+    }
     if (typeof e.damage === 'number') out[`d${i}`] = num(e.damage);
     if (typeof e.radius === 'number') out[`r${i}`] = num(e.radius);
     const sec = typeof e.everySec === 'number' ? e.everySec : e.cooldownSec;
@@ -47,7 +51,7 @@ export function itemDescParams(def: ItemDef, groups: GroupMultipliersData): Reco
       out[`st${i}`] = num((e.takenDown as number) * 100);
     }
     if (typeof e.hpPerSec === 'number') out[`hp${i}`] = num(e.hpPerSec);
-    if (typeof e.allStats === 'number') out[`st${i}`] = num(e.allStats);
+    if (e.kind === 'panicAwaken') out[`pd${i}`] = num((e.damage as number) * 100);
     if (typeof e.bonus === 'number') out[`b${i}`] = num(e.bonus * 100);
     if (typeof e.bounces === 'number') out[`c${i}`] = num(e.bounces);
     if (typeof e.guard === 'number') out[`g${i}`] = num(e.guard * 100);

@@ -1,6 +1,5 @@
 import { sanityMaxFor } from '../systems/sanity';
 import type { GameData } from '../data/index';
-import { startingStats, type Stats } from '../systems/damage';
 import type { StageMap } from '../systems/mapgen';
 import type { StageRef } from '../systems/run';
 import { emptyLoadout, type Cooldowns, type SkillLoadout } from '../systems/skills';
@@ -9,7 +8,7 @@ import type { ItemState } from '../items/runtime';
 import type { ConversionLog } from '../systems/advancement';
 import { newRunRecord, type CrystalResult, type RunRecord } from '../systems/runRecord';
 import { upgradeBonus, type UpgradeLevels } from '../systems/upgrades';
-import { STAT_IDS, type EncounterKindId, type GradeId, type JobId, type SchoolId, type StatId } from '../types/data';
+import type { EncounterKindId, GradeId, JobId, SchoolId } from '../types/data';
 
 /** 스테이지를 넘어가도 유지되는 플레이어 상태 */
 export interface PlayerState {
@@ -25,7 +24,6 @@ export interface PlayerState {
   coins: number;
   /** 아직 1개가 되지 않은 마기 입자 (화면에 보이지 않는다) */
   coinCarry: number;
-  stats: Stats;
   weapons: WeaponSlots;
   loadout: SkillLoadout;
   /** 스킬 id → 남은 쿨타임(초) */
@@ -49,7 +47,6 @@ export interface PlayerState {
   /** 확률 이전으로 옮겨진 등급 가중치 */
   lootShift: Partial<Record<GradeId, number>>;
   /** 스탯 카드로 올린 양 (LSD-R '가장 많이 투자한 스탯') */
-  statInvest: Record<StatId, number>;
   /** 이번 런에 나온 히든보스 (다시 나오지 않는다) */
   hiddenBossesMet: string[];
   /** 이번 런에 띄운 제미니 미니 대사 (이벤트·대사 키, 같은 런에 반복하지 않는다) */
@@ -110,7 +107,6 @@ export interface RunSession {
   /** HUD '현재 버프' (RunScene이 매 프레임 채운다) */
   buffs: BuffView[];
   /** 실제로 쓰는 스탯 (무기·아이템 보정 포함, 인벤토리 표시용. RunScene이 매 프레임 채운다) */
-  effStats: Stats;
   /** 런이 끝났을 때의 결산 (결정은 이미 저장에 더해져 있다) */
   settlement: Settlement | null;
   /** 지금 싸우는 보스 (보스 체력바, RunScene이 매 프레임 채운다) */
@@ -142,22 +138,18 @@ export interface Settlement {
  */
 export function newPlayerState(data: GameData, jobId: string = data.jobs.startJob, upgrades?: UpgradeLevels): PlayerState {
   const job = data.jobs.jobs.find((j) => j.id === jobId) ?? data.jobs.jobs.find((j) => j.id === data.jobs.startJob)!;
-  const stats = startingStats(data.stats.startValue);
-  for (const [k, v] of Object.entries(job.statBonus)) stats[k as keyof typeof stats] += v ?? 0;
   const bonus = upgradeBonus(upgrades, data.meta.upgrades);
-  for (const [k, v] of Object.entries(bonus.stats)) stats[k as keyof typeof stats] += v ?? 0;
   return {
     hp: data.player.maxHp + bonus.maxHp,
     maxHp: data.player.maxHp + bonus.maxHp,
-    sanity: sanityMaxFor(stats.willpower, data.player.sanity) + bonus.sanity,
-    sanityMax: sanityMaxFor(stats.willpower, data.player.sanity) + bonus.sanity,
+    sanity: sanityMaxFor(bonus.sanity, data.player.sanity),
+    sanityMax: sanityMaxFor(bonus.sanity, data.player.sanity),
     panic: false,
     meta: { maxHp: bonus.maxHp, sanity: bonus.sanity },
     energy: data.player.energy.start,
     energyMax: data.player.energy.max,
     coins: 0,
     coinCarry: 0,
-    stats,
     // 빈손으로 시작해 시작방의 무기 상자를 연다
     weapons: { slots: [null, null], active: 0 },
     loadout: emptyLoadout(data.skills.activeSlots),
@@ -175,7 +167,6 @@ export function newPlayerState(data: GameData, jobId: string = data.jobs.startJo
     hiddenBossesMet: [],
     geminiSaid: [],
     record: newRunRecord(),
-    statInvest: Object.fromEntries(STAT_IDS.map((s) => [s, 0])) as Record<StatId, number>,
   };
 }
 

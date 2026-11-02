@@ -69,14 +69,14 @@ export class LootInteract {
     );
   }
 
-  /** 스킬·스탯 상점: 뽑아 둔 카드를 진열한다 */
+  /** 스킬 상점: 뽑아 둔 카드를 진열한다 */
   openCardShop(cards: readonly Card[], c: { x: number; y: number }): void {
     const d = this.run.ctx.data;
     const stock = cardStock(cards, d.loot);
     stock.forEach((s, i) => {
       const x = c.x + (i - (stock.length - 1) / 2) * d.loot.standSpacing;
       const view = describeCard(s.card, this.run.session.player, this.run.ctx);
-      const icon = s.card.kind === 'stat' ? artKeys.statIcon(s.card.stat) : artKeys.skillIcon(s.card.skillId);
+      const icon = artKeys.skillIcon(s.card.skillId);
       const label = `${view.name}\n${this.run.ctx.t('merchant.price', { price: s.price })}`;
       this.cardStands.push(new CardStand(this.run, s, d.loot.merchantStand, icon, d.loot.cardStandIconPx, x, c.y, label, view.accent));
     });
@@ -244,7 +244,10 @@ export class LootInteract {
       const weights = effectiveWeights(chest.weights, stage.chapter, d.items.chapterCommonShift, p.lootShift);
       id = rollItem(rng, weights, d.loot.mythicChance, d.items, new Set(p.itemsObtained)) ?? undefined;
     }
-    if (id) this.giveItem(id);
+    if (id) {
+      this.giveItem(id);
+      this.run.progression.checkAwakenings();
+    }
   }
 
   /** 아이템 획득: 확률 이전 → 세트 합성 → 획득 카드 */

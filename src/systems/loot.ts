@@ -55,7 +55,7 @@ export function rollWeapon(
 }
 
 /** 전투 없는 유형 */
-const PEACEFUL: ReadonlySet<EncounterKindId> = new Set(['treasure', 'merchant', 'skillShop', 'statShop']);
+const PEACEFUL: ReadonlySet<EncounterKindId> = new Set(['treasure', 'merchant', 'skillShop']);
 
 /** 이 조우 칸에서 나올 수 있는 유형: 작은 평화로운 방이면 보물·상점, 아니면 전투 유형 */
 export function encounterPool(kinds: ReadonlySet<EncounterKindId>, peaceful: boolean): Set<EncounterKindId> {
@@ -100,7 +100,7 @@ export interface CardStock {
 
 /** 카드 가격. 스킬 상점에 스킬이 모자라면 스탯 카드가 섞이므로 종류로 고른다 */
 export function cardPrice(card: Card, loot: LootData): number {
-  return card.kind === 'stat' ? loot.statShop.prices[card.grade]! : loot.skillShop.prices[card.kind];
+  return loot.skillShop.prices[card.kind];
 }
 
 export function cardStock(cards: readonly Card[], loot: LootData): CardStock[] {

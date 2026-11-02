@@ -48,21 +48,22 @@ describe('챕터2 보스 전용 아이템', () => {
 
 describe('중형 첨탑', () => {
   const M = gameData.loot.spire.medium;
-  it('가중치 레어 30 · 전설 45 · 유니크 25, 강적 75%', () => {
-    expect(M.weights).toEqual({ rare: 42, legendary: 40, unique: 18 });
+  it('스킬 2개 선택, 강적 75%', () => {
+    expect(M.picks).toBe(2);
     expect(M.strongChance).toBe(0.75);
   });
-  it('1장·2장 초반은 소형만, 2-3부터 50%, 3장은 늘 중형', () => {
+  it('1장·2장 초반은 소형만, 2-3부터 50%, 3장은 대형 50%·아니면 중형', () => {
     const count = (c: number, s: number) => {
       let n = 0;
-      for (let i = 0; i < 1000; i++) if (spireSize(new Rng(i), c, s, M) === 'medium') n++;
+      for (let i = 0; i < 1000; i++) if (spireSize(new Rng(i), c, s, gameData.loot.spire) === 'medium') n++;
       return n / 1000;
     };
     expect(count(1, 5)).toBe(0);
     expect(count(2, 2)).toBe(0);
     expect(count(2, 3)).toBeGreaterThan(0.45);
     expect(count(2, 3)).toBeLessThan(0.55);
-    expect(count(3, 1)).toBe(1);
+    expect(count(3, 1)).toBeGreaterThan(0.45);
+    expect(count(3, 1)).toBeLessThan(0.55);
   });
 });
 

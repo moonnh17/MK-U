@@ -57,8 +57,8 @@ export interface ItemHost {
   setInvuln(sec: number, translucent: boolean): void;
   /** 버프 지속시간 (버프 태그, 정신력·아이템) */
   buffDuration(sec: number): number;
+  area(radius: number): number;
   /** 피격 사방 공격 범위 보정 (힘·마기력) */
-  burstArea(radius: number): number;
   toast(text: string): void;
   /** 플레이어가 있는 방 안쪽 (방패 튕김) */
   arena(): Rect;
@@ -200,15 +200,15 @@ export class ItemRuntime {
     return p.itemState[id]!;
   }
 
-  /** 아이템·학파·투자 스탯이 바뀌었으면 다시 계산 */
+  /** 아이템·학파가 바뀌었으면 다시 계산 */
   refresh(): void {
     const p = this.host.player();
-    const key = `${p.items.join(',')}|${p.advancement}|${Object.values(p.statInvest).join(',')}`;
+    const key = `${p.items.join(',')}|${p.advancement}`;
     if (key === this.key) return;
     this.key = key;
     const d = this.host.ctx.data;
     const ctx = { school: p.advancement, job: p.job };
-    this.totals = itemTotals(p.items, d.items, ctx, d.groupMultipliers, { startValue: d.stats.startValue, invest: p.statInvest });
+    this.totals = itemTotals(p.items, d.items, ctx, d.groupMultipliers);
     this.effects = p.items.flatMap((id) => {
       const def = d.items.items.find((x) => x.id === id);
       return def ? activeEffects(def, ctx, d.groupMultipliers).map((e) => ({ id, e })) : [];
@@ -252,11 +252,13 @@ export class ItemRuntime {
     for (const { id } of this.each('killStacks')) v += this.state(id).stacks;
     for (const { id, e } of this.each('tempRoar')) if (this.state(id).roarLeft > 0) v += e.damage;
     if (this.roar && this.state(this.roar.id).roarLeft > 0) v += this.roar.e.damage;
+    const awaken = this.host.player().panic ? this.panicAwaken() : null;
+    if (awaken) v += awaken.damage;
     return v;
   }
 
   moveSpeedBonus(): number {
-    let v = 0;
+    let v = this.sums.moveSpeed;
     for (const { id, e } of this.each('tempRoar')) if (this.state(id).roarLeft > 0) v += e.moveSpeed;
     if (this.roar && this.state(this.roar.id).roarLeft > 0) v += this.roar.e.moveSpeed;
     return v;
@@ -437,7 +439,7 @@ export class ItemRuntime {
     }
     for (const { e } of this.each('hurtBurst')) {
       const p = host.playerPos();
-      const r = this.host.burstArea(e.radius);
+      const r = this.host.area(e.radius);
       host.fx(host.scene.add.circle(p.x, p.y, r, 0x3a9ad9, 0.3).setDepth(6), 0.25);
       for (const en of [...host.enemies()]) if (Math.hypot(en.sprite.x - p.x, en.sprite.y - p.y) <= r + en.radius) host.hit(en, e.damage, e.tags);
     }

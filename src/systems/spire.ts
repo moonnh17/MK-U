@@ -3,11 +3,10 @@
  *  falling ──착지──▶ charging ──충전 100%──▶ rising ──▶ done
  * 충전: 첨탑 주변 원 안에서 처치한 적만 충전율을 올린다(원 밖 처치는 0).
  * 방해: 충전이 끝날 때까지 남은 적이 적으면 다음 무리가 나온다.
- * 크기(소형·중형)는 spireSize. 진행 규칙은 같고 등급 가중치·모습·강적만 다르다.
+ * 크기(소형·중형·대형)는 spireSize. 진행 규칙은 같고 고르는 스킬 수·모습·강적만 다르다.
  */
 import type { Rng } from '../core/rng';
-import type { EnemyRank, GradeId, ItemsData, SpireData } from '../types/data';
-import { rollItem } from './items';
+import type { EnemyRank, SpireData } from '../types/data';
 
 export type SpirePhase = 'falling' | 'charging' | 'rising' | 'done';
 
@@ -94,34 +93,13 @@ export function spireEliteCount(normal: number, mul: number): number {
   return Math.round(normal * mul);
 }
 
-/**
- * 아이템 선택 카드: 서로 다른 아이템 count장. 장마다 등급 가중치(+확률 이전)로 뽑고,
- * 신화는 가중치 밖에서 고정 확률로 따로 판정한다. 이미 가진 아이템은 나오지 않는다.
- */
-export function spireItemChoices(
-  rng: Rng,
-  weights: Partial<Record<GradeId, number>>,
-  mythicChance: number,
-  data: ItemsData,
-  obtained: ReadonlySet<string>,
-  count: number,
-): string[] {
-  const taken = new Set(obtained);
-  const out: string[] = [];
-  for (let i = 0; i < count; i++) {
-    const id = rollItem(rng, weights, mythicChance, data, taken);
-    if (!id) break;
-    out.push(id);
-    taken.add(id);
+export type SpireSize = 'small' | 'medium' | 'large';
+
+/** 첨탑 크기: 대형 → 중형 순으로 챕터별 등장 판정(그 스테이지부터 확률), 아니면 소형 */
+export function spireSize(rng: Rng, chapter: number, stage: number, spire: Pick<SpireData, 'medium' | 'large'>): SpireSize {
+  for (const size of ['large', 'medium'] as const) {
+    const rule = spire[size].chance[String(chapter)];
+    if (rule && stage >= rule.fromStage && rng.chance(rule.chance)) return size;
   }
-  return out;
-}
-
-export type SpireSize = 'small' | 'medium';
-
-/** 첨탑 크기: 중형은 챕터별로 그 스테이지부터 확률 (2장 후반 50%, 3장 100%), 아니면 소형 */
-export function spireSize(rng: Rng, chapter: number, stage: number, medium: SpireData['medium']): SpireSize {
-  const rule = medium.chance[String(chapter)];
-  if (!rule || stage < rule.fromStage) return 'small';
-  return rng.chance(rule.chance) ? 'medium' : 'small';
+  return 'small';
 }

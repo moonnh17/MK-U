@@ -1693,7 +1693,7 @@ body {
 .iw-sheet {
   width: min(1180px, 100%);
   display: grid;
-  grid-template-columns: minmax(250px, 1fr) minmax(280px, 1.15fr) minmax(320px, 1.35fr);
+  grid-template-columns: minmax(250px, 1fr) minmax(320px, 1.5fr);
   gap: 10px;
   align-items: start;
 }
@@ -1802,67 +1802,6 @@ body {
   height: 44px;
   background-color: #05080d;
   border-radius: 4px;
-}
-.iw-statrow {
-  display: flex;
-  gap: 8px;
-  padding: 6px 0;
-  border-bottom: 1px solid #1e2a3a;
-}
-.iw-statrow:last-child {
-  border-bottom: none;
-}
-.iw-staticon {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
-}
-.iw-statmain {
-  flex: 1;
-  min-width: 0;
-}
-.iw-stattop {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 6px;
-}
-.iw-statname {
-  font-size: 15px;
-  font-weight: bold;
-}
-.iw-stattop > b {
-  font-size: 17px;
-  color: #fff;
-}
-.iw-stattop small {
-  font-size: 11px;
-  font-weight: normal;
-}
-.iw-stattop small.up {
-  color: #7fe08a;
-}
-.iw-stattop small.down {
-  color: #ff8a8a;
-}
-.iw-statdesc {
-  font-size: 12px;
-  color: #aeb8c6;
-  line-height: 1.35;
-}
-.iw-statfx {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 3px;
-}
-.iw-statfx span {
-  font-size: 11px;
-  padding: 1px 6px;
-  border-radius: 9px;
-  background: #1c2a3c;
-  color: #cfe0f4;
 }
 #inventory-window .iw-skills .iw-row {
   display: flex;

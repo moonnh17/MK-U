@@ -4,12 +4,11 @@
  */
 import type { Rng } from '../core/rng';
 import type { EnemyRank, TagId, TagsData } from '../types/data';
-import type { Stats } from './damage';
 import { hasTag, taggedChance } from './tags';
 
-/** 확률 태그가 있으면 지능 보정·상한을 적용한 확률, 없으면 기본 확률 */
-export function skillChance(base: number, capKey: string, tags: readonly TagId[], stats: Stats, data: TagsData): number {
-  return hasTag(tags, 'chance') ? taggedChance(base, capKey, stats, data) : base;
+/** 확률 태그가 있으면 상한을 적용한 확률, 없으면 기본 확률 */
+export function skillChance(base: number, capKey: string, tags: readonly TagId[], data: TagsData): number {
+  return hasTag(tags, 'chance') ? taggedChance(base, capKey, data) : base;
 }
 
 export function rollChance(rng: Rng, p: number): boolean {

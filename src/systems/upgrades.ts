@@ -4,7 +4,7 @@
  * 초기화하면 그 직업에 쓴 결정을 전부 돌려준다.
  */
 import type { SaveData } from '../core/save';
-import type { StatId, UpgradeDef } from '../types/data';
+import type { UpgradeDef } from '../types/data';
 
 export type UpgradeLevels = Readonly<Record<string, number>>;
 
@@ -46,8 +46,20 @@ export function resetUpgrades(save: SaveData, jobId: string, defs: readonly Upgr
   return refund;
 }
 
+/** 삭제된 스탯 강화: 레벨을 지우고 쓴 결정을 돌려준다. 돌려준 양을 반환 */
+export function refundRemovedUpgrades(save: SaveData, removed: { ids: readonly string[]; costs: readonly number[] }): number {
+  let refund = 0;
+  for (const levels of Object.values(save.upgrades)) {
+    for (const id of removed.ids) {
+      for (let i = 0; i < Math.min(levels[id] ?? 0, removed.costs.length); i++) refund += removed.costs[i]!;
+      delete levels[id];
+    }
+  }
+  save.crystals += refund;
+  return refund;
+}
+
 export interface UpgradeBonus {
-  stats: Partial<Record<StatId, number>>;
   /** 기본 체력 증가 */
   maxHp: number;
   /** 최대 정신력 증가 */
@@ -56,12 +68,10 @@ export interface UpgradeBonus {
 
 /** 런 시작에 더할 값 */
 export function upgradeBonus(levels: UpgradeLevels | undefined, defs: readonly UpgradeDef[]): UpgradeBonus {
-  const out: UpgradeBonus = { stats: {}, maxHp: 0, sanity: 0 };
+  const out: UpgradeBonus = { maxHp: 0, sanity: 0 };
   for (const d of defs) {
     const v = Math.min(upgradeLevel(levels, d.id), d.costs.length) * d.perLevel;
-    if (v === 0) continue;
-    if (d.kind === 'stat') out.stats[d.stat] = (out.stats[d.stat] ?? 0) + v;
-    else out[d.kind] += v;
+    out[d.kind] += v;
   }
   return out;
 }

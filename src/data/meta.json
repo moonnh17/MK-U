@@ -21,58 +21,43 @@
   },
   "upgrades": [
     {
-      "id": "strength",
-      "kind": "stat",
-      "stat": "strength",
-      "perLevel": 1,
-      "costs": [30, 60, 120, 200, 300]
-    },
-    {
-      "id": "toughness",
-      "kind": "stat",
-      "stat": "toughness",
-      "perLevel": 1,
-      "costs": [30, 60, 120, 200, 300]
-    },
-    {
-      "id": "agility",
-      "kind": "stat",
-      "stat": "agility",
-      "perLevel": 1,
-      "costs": [30, 60, 120, 200, 300]
-    },
-    {
-      "id": "intelligence",
-      "kind": "stat",
-      "stat": "intelligence",
-      "perLevel": 1,
-      "costs": [30, 60, 120, 200, 300]
-    },
-    {
-      "id": "magiPower",
-      "kind": "stat",
-      "stat": "magiPower",
-      "perLevel": 1,
-      "costs": [30, 60, 120, 200, 300]
-    },
-    {
-      "id": "willpower",
-      "kind": "stat",
-      "stat": "willpower",
-      "perLevel": 1,
-      "costs": [30, 60, 120, 200, 300]
-    },
-    {
       "id": "maxHp",
       "kind": "maxHp",
       "perLevel": 5,
-      "costs": [40, 80, 150, 250, 400]
+      "costs": [
+        40,
+        80,
+        150,
+        250,
+        400
+      ]
     },
     {
       "id": "sanity",
       "kind": "sanity",
       "perLevel": 10,
-      "costs": [100, 250, 500]
+      "costs": [
+        100,
+        250,
+        500
+      ]
     }
-  ]
+  ],
+  "removedUpgrades": {
+    "ids": [
+      "strength",
+      "toughness",
+      "agility",
+      "intelligence",
+      "magiPower",
+      "willpower"
+    ],
+    "costs": [
+      30,
+      60,
+      120,
+      200,
+      300
+    ]
+  }
 }

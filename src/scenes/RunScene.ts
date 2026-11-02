@@ -37,7 +37,7 @@ import { DelayedBlast, type Hazard } from '../entities/hazard';
 import { Pickup } from '../entities/pickup';
 import { nearestEnemy, type SkillHost } from '../skills/host';
 import { runStartOffers, stageEndOffers } from '../systems/cards';
-import { gradeEnergyMultiplier, gradeMultiplier, type Stats } from '../systems/damage';
+import { gradeEnergyMultiplier, gradeMultiplier } from '../systems/damage';
 import { assignElites, eliteCount } from '../systems/elites';
 import { championWaves, enemyStageScale, raidChampions } from '../systems/champions';
 import { collectCoins, rollCoinDrops, rollOptions } from '../systems/loot';
@@ -53,11 +53,10 @@ import { absorbHit } from '../systems/shield';
 import { corruptedDamage, tickCorruption } from '../systems/acro';
 import { hpStance, takeDamage } from '../systems/vitals';
 import { gainGauge, tickCooldowns } from '../systems/skills';
-import { maxEnergyFor, maxHpFor, setStat, statEffect } from '../systems/stats';
-import { buffDuration, tickBleed } from '../systems/tags';
+import { tickBleed } from '../systems/tags';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
-import type { BleedRule, StatId, TagId, WeaponDef } from '../types/data';
+import type { BleedRule, TagId, WeaponDef } from '../types/data';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -174,7 +173,6 @@ export class RunScene extends Phaser.Scene {
       dodgeView: { nameKey: d.player.dodge.nameKey, left: 0, total: d.player.dodge.cooldownSec },
       buffs: [],
       encounters: new Map(),
-      effStats: { ...(this.initData.player?.stats ?? newPlayerState(d).stats) },
       settlement: null,
       boss: null,
     };
@@ -211,7 +209,7 @@ export class RunScene extends Phaser.Scene {
         this.invuln = Math.max(this.invuln, sec);
       },
       buffDuration: (sec) => this.skillRt.hostFor('item').buffDuration(sec, ['buff']),
-      burstArea: (r) => this.skillRt.burstArea(r),
+      area: (r) => this.skillRt.area(r),
       toast: (text) => bus.emit('toast', { text }),
       arena: () => this.currentArena(),
       blink: (distance) => this.blinkPlayer(distance),
@@ -319,11 +317,6 @@ export class RunScene extends Phaser.Scene {
       bus.on('inventoryOpenRequest', () => this.progression.openInventory()),
       bus.on('inventoryCloseRequest', () => this.progression.closeInventory()),
       bus.on('debugSetSkill', (e) => this.debugTools.debugSetSkill(e.skillId, e.level, e.awakened)),
-      bus.on('debugSetStat', ({ stat, value }) => {
-        const before = { hp: this.session.player.hp, maxHp: this.session.player.maxHp };
-        this.session.player = { ...setStat(this.session.player, stat, value, d.player.maxHp, d.stats), ...before };
-        this.syncMaxHp();
-      }),
       bus.on('debugOpenCards', ({ kind }) => this.progression.queueOffers([{ kind, boss: false }])),
       bus.on('debugFillUltimate', () => {
         this.session.player.ultimate.gauge = this.skillRt.ultimateDef().gaugeMax;
@@ -359,7 +352,10 @@ export class RunScene extends Phaser.Scene {
         const options = rollOptions(rng, def, count, d.weapons.options);
         this.loot.dropWeapon({ defId, grade, options }, this.player.x + 16, this.player.y);
       }),
-      bus.on('debugGiveItem', ({ itemId }) => this.loot.giveItem(itemId)),
+      bus.on('debugGiveItem', ({ itemId }) => {
+        this.loot.giveItem(itemId);
+        this.progression.checkAwakenings();
+      }),
       bus.on('debugCoins', ({ amount }) => {
         this.session.player.coins += amount;
       }),
@@ -550,13 +546,12 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     const mods = this.skillRt.playerMods();
     this.syncMaxHp();
-    this.syncMaxEnergy();
     this.condition.updateSanity(dt);
     // 패닉: 방향이 뒤집힌다
     if (p.panic && !this.itemRt.first('panicCalm')) frame = { ...frame, move: { x: -frame.move.x, y: -frame.move.y } };
     this.itemRt.update(dt);
     this.condition.updateDodge(dt, frame);
-    const speed = d.player.moveSpeed * (1 + statEffect('moveSpeed', this.effStats(), d.stats)) * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus()) * (1 + this.combat.chargeMoveBonus());
+    const speed = d.player.moveSpeed * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus()) * (1 + this.combat.chargeMoveBonus());
     if (this.dashLeft > 0) {
       // MK 돌진: 입력 대신 돌진 방향으로
       this.dashLeft -= dt;
@@ -890,20 +885,6 @@ export class RunScene extends Phaser.Scene {
     return weaponStats(this.weaponDefOf(item.defId), item, gradeMultiplier(item.grade, g), gradeEnergyMultiplier(item.grade, g));
   }
 
-  /** 실제로 쓰는 스탯: 기본 스탯 + 들고 있는 무기의 보너스(신궁 환디 힘 +30) */
-  /** awaken=false: 패닉 각성 보너스를 뺀 값 (최대 체력·정신력은 각성으로 늘지 않는다) */
-  effStats(awaken = true): Stats {
-    const out = { ...this.session.player.stats };
-    for (const [k, v] of Object.entries(this.weaponDef().equipBonus?.stats ?? {})) out[k as StatId] += v ?? 0;
-    // 패닉 각성
-    const bonus = awaken && this.session.player.panic ? this.itemRt?.panicAwaken() : null;
-    if (bonus) for (const k of Object.keys(out) as StatId[]) out[k] += bonus.allStats;
-    // 아이템 스탯 (LSD-R 재편 포함)
-    const items = this.itemRt?.sums.stats;
-    if (items) for (const k of Object.keys(out) as StatId[]) out[k] += items[k];
-    return out;
-  }
-
   tagRule<T>(id: TagId): T {
     return this.ctx.data.tags.tags.find((t) => t.id === id)!.rule as T;
   }
@@ -1078,7 +1059,7 @@ export class RunScene extends Phaser.Scene {
     const stance = this.itemRt.first('hpStance');
     const taken = amount * (1 - this.skillRt.playerMods().damageReduction) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard()) * (stance ? 1 - hpStance(p.hp, p.maxHp, stance).taken : 1);
     // 정신 피해: 패닉 중이면 체력 피해로 바뀐다
-    const mental = (mentalRaw ?? amount * (attacker?.def.mentalRatio ?? 0)) * (1 - statEffect('mentalResist', this.effStats(), this.ctx.data.stats));
+    const mental = (mentalRaw ?? amount * (attacker?.def.mentalRatio ?? 0)) ;
     const m = applyMental(p, mental);
     this.condition.setSanity(m);
     const v = takeDamage(p, taken + m.hpDamage);
@@ -1169,8 +1150,8 @@ export class RunScene extends Phaser.Scene {
   updatePickups(dt: number): void {
     const d = this.ctx.data;
     const p = this.session.player;
-    const orb = d.player.energy.orbValue * (1 + statEffect('energyGain', this.effStats(), d.stats));
-    const coin = d.pickups.coin.value * (1 + statEffect('coinGain', this.effStats(), d.stats) + this.itemRt.sums.coinGain);
+    const orb = d.player.energy.orbValue;
+    const coin = d.pickups.coin.value * (1 + this.itemRt.sums.coinGain);
     for (const pk of this.pickups) {
       if (!pk.update(dt, this.player, d.pickups)) continue;
       sfx(pk.kind === 'energy' ? 'energy' : 'coin');
@@ -1210,26 +1191,15 @@ export class RunScene extends Phaser.Scene {
     this.hurtPlayer(damage, null, mental);
   }
 
-  /** 최대 체력 = 기본 + 견고(아이템 스탯 포함) + 아이템. 늘면 그만큼 현재 체력도 채운다 */
+  /** 최대 체력 = 기본(+영구 강화) + 아이템. 늘면 그만큼 현재 체력도 채운다 */
   syncMaxHp(): void {
     const d = this.ctx.data;
     const p = this.session.player;
-    // 기본 체력(+영구 강화) + 견고 + 아이템
-    const target = maxHpFor(d.player.maxHp + p.meta.maxHp, this.effStats(false), d.stats) + this.itemRt.sums.maxHp;
+    const target = d.player.maxHp + p.meta.maxHp + this.itemRt.sums.maxHp;
     if (target === p.maxHp) return;
     if (target > p.maxHp) p.hp += target - p.maxHp;
     p.maxHp = target;
     p.hp = Math.min(p.hp, p.maxHp);
-  }
-
-  /** 최대 에너지 = 기본 + 힘(아이템 스탯 포함). 늘면 그만큼 현재 에너지도 채운다 */
-  syncMaxEnergy(): void {
-    const p = this.session.player;
-    const target = maxEnergyFor(this.ctx.data.player.energy.max, this.effStats(false), this.ctx.data.stats);
-    if (target === p.energyMax) return;
-    if (target > p.energyMax) p.energy += target - p.energyMax;
-    p.energyMax = target;
-    p.energy = Math.min(p.energy, p.energyMax);
   }
 
   // ---------- 카드·인벤토리 ----------

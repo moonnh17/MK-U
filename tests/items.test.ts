@@ -10,24 +10,22 @@ import {
   pickHeal,
   pickItem,
   readySet,
-  reshuffleDelta,
+  itemChoices,
   rollItem,
   scaleEffect,
   transferWeight,
 } from '../src/systems/items';
-import { STAT_IDS, type StatId } from '../src/types/data';
 
 const I = gameData.items;
 const G = gameData.groupMultipliers;
 const item = (id: string) => I.items.find((x) => x.id === id)!;
-const noInvest = Object.fromEntries(STAT_IDS.map((s) => [s, 0])) as Record<StatId, number>;
 const totals = (ids: string[], school: 'hectar' | 'acro' | null = null) =>
-  itemTotals(ids, I, { school, job: 'magiScholar' }, G, { startValue: 10, invest: noInvest });
+  itemTotals(ids, I, { school, job: 'magiScholar' }, G);
 
 describe('아이템 목록 (기획서 표)', () => {
-  it('일반 5·레어 4·전설 5·유니크 6·신화 1 + 세트 1 + 보스 전용', () => {
+  it('일반 5·레어 10·전설 7·유니크 6·신화 1 + 세트 1 + 보스 전용', () => {
     const by = (g: string) => I.items.filter((x) => x.pool === 'normal' && x.grade === g).length;
-    expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([5, 4, 5, 6, 1]);
+    expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([5, 10, 7, 6, 1]);
     expect(I.items.filter((x) => x.pool === 'set').map((x) => x.id)).toEqual(['warriorMemory']);
     expect(I.items.filter((x) => x.pool === 'boss').map((x) => [x.id, x.bossId])).toEqual([
       ['wonhonLump', 'fusionAkgwi'],
@@ -46,10 +44,9 @@ describe('그룹 배율', () => {
   });
   it('그룹 배율 하나를 바꾸면 그 그룹 아이템이 같이 바뀐다', () => {
     const g2 = structuredClone(G);
-    g2.itemGroups.statFlat = 2;
-    const t = itemTotals(['elegantMagi', 'afroBelt'], I, { school: null, job: 'magiScholar' }, g2, { startValue: 10, invest: noInvest });
-    expect(t.stats.intelligence).toBe(12);
-    expect(t.stats.agility).toBe(40);
+    g2.itemGroups.hpFlat = 2;
+    const t = itemTotals(['brokenHilt', 'afroBelt'], I, { school: null, job: 'magiScholar' }, g2);
+    expect(t.maxHp).toBe(48);
   });
 });
 
@@ -64,11 +61,23 @@ describe('효과 합산', () => {
   });
   it('모든 적이 받는 피해·보스 피해는 따로 곱한다', () => {
     const t = totals(['magowikiCodex']);
-    expect(itemDamageMultiplier(t, 0, false, null)).toBeCloseTo(1.05);
+    expect(itemDamageMultiplier(t, 0, false, null)).toBeCloseTo(1.1 * 1.05);
   });
-  it('모든 스탯 +5', () => {
-    const t = totals(['magowikiCodex']);
-    for (const s of STAT_IDS) expect(t.stats[s]).toBe(5);
+  it('각성 아이템 효과: 태그 피해·쿨타임·정신력·탄수·받는 피해', () => {
+    expect(totals(['magnetResonator']).damage).toMatchObject({ tech: 0.1, magic: 0.1 });
+    expect(totals(['lk99', 'warDiary', 'helaCell']).skillCooldown).toBeCloseTo(0.2);
+    expect(totals(['helaCell']).maxSanity).toBe(10);
+    expect(totals(['extraArms']).pellets).toBe(1);
+    expect(totals(['forbiddenVirus']).damage.magic).toBeCloseTo(0.05);
+    expect(totals(['forbiddenGift']).damageTaken).toBeCloseTo(-0.1);
+    expect(totals(['steelCastleFigure'])).toMatchObject({ maxHp: 20, damageTaken: 0.05 });
+  });
+  it('각성 아이템은 모두 일반 풀 또는 보스 드롭에 있다', () => {
+    const skills = gameData.skills.skills.map((s) => s.awakening.requiredItem);
+    expect(new Set(skills).size).toBe(skills.length);
+    for (const id of skills) expect(['normal', 'boss']).toContain(item(id).pool);
+    const ult = gameData.ultimates.ultimates.filter((u) => u.awakening).map((u) => u.awakening!.requiredItem);
+    expect(ult.sort()).toEqual(['atrosCodex', 'regulusShard']);
   });
   it('실험용 반물질: 헥타르 외에는 자동 발사, 헥타르는 반물질포 피해 +50%', () => {
     const kinds = (school: 'hectar' | 'acro' | null) => activeEffects(item('antimatterSample'), { school, job: 'magiScholar' }, G).map((e) => e.kind);
@@ -87,17 +96,6 @@ describe('효과 합산', () => {
     expect(kinds('acruxCross', 'acro')).toContain('greatSuccess');
     expect(kinds('acruxCross', null)).not.toContain('greatSuccess');
     expect(kinds('acruxCross', null)).toContain('revive');
-  });
-});
-
-describe('LSD-R', () => {
-  it('기본 스탯 5, 정신력 1로 재편하고 감소분을 가장 많이 투자한 스탯으로', () => {
-    const invest = { ...noInvest, agility: 8, magiPower: 3 };
-    const d = reshuffleDelta(10, invest, 5, 1);
-    expect(d.strength).toBe(-5);
-    expect(d.willpower).toBe(-9);
-    expect(d.agility).toBe(-5 + 5 * 5 + 9);
-    expect(STAT_IDS.reduce((s, k) => s + d[k], 0)).toBe(0);
   });
 });
 
@@ -161,15 +159,21 @@ describe('회복·세트', () => {
   });
 });
 
-describe('스탯 투자 기록 (LSD-R)', () => {
-  it('스탯 카드로 올린 양을 스탯별로 쌓는다', async () => {
-    const { applyCard } = await import('../src/systems/cards');
-    const { newPlayerState } = await import('../src/core/session');
-    const p = newPlayerState(gameData);
-    const ctx = { skills: gameData.skills, stats: gameData.stats, baseMaxHp: gameData.player.maxHp };
-    const a = applyCard(p, { kind: 'stat', stat: 'agility', amount: 5, grade: 'mid' }, ctx).holder;
-    const b = applyCard(a, { kind: 'stat', stat: 'agility', amount: 3, grade: 'low' }, ctx).holder;
-    expect(b.statInvest.agility).toBe(8);
-    expect(b.statInvest.strength).toBe(0);
+describe('아이템 카드', () => {
+  it('서로 다른 아이템 3장, 가진 아이템·보스 전용·세트 결과는 나오지 않는다', () => {
+    const owned = new Set(['elegantMagi', 'leeSeal']);
+    for (let seed = 0; seed < 100; seed++) {
+      const ids = itemChoices(new Rng(seed), I.treasureWeights, 0.001, I, owned, 3);
+      expect(new Set(ids).size).toBe(3);
+      for (const id of ids) {
+        expect(owned.has(id)).toBe(false);
+        expect(item(id).pool).toBe('normal');
+      }
+    }
+  });
+  it('남은 아이템이 모자라면 있는 만큼만', () => {
+    const got = new Set(I.items.filter((x) => x.pool === 'normal').map((x) => x.id));
+    got.delete('magicasol');
+    expect(itemChoices(new Rng(3), I.treasureWeights, 0.001, I, got, 3)).toEqual(['magicasol']);
   });
 });

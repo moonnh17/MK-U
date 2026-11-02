@@ -22,19 +22,19 @@ export class Spire {
     readonly x: number,
     readonly y: number,
     private readonly data: SpireData,
-    /** 소형: 검고 얇은 비석 / 중형: 검은 구조물 + 붉은 아크로식 기계 */
+    /** 소형: 검고 얇은 비석 / 중형: 검은 구조물 + 붉은 아크로식 기계 / 대형: 중형을 더 크게 */
     readonly size: SpireSize = 'small',
   ) {
     this.state = new SpireState(data);
     this.color = hexColor(data.ringColor);
     const s = data[size].sprite;
     // 바닥이 착지점에 오도록 아래쪽 기준
-    this.body = scene.add.image(x, y - data.fallHeight, s.spriteKey).setOrigin(0.5, 1).setDepth(4);
+    this.body = scene.add.image(x, y - data.fallHeight, s.spriteKey).setOrigin(0.5, 1).setDepth(4).setScale(size === 'large' ? data.large.scale : 1);
     scene.tweens.add({ targets: this.body, y, duration: data.fallSec * 1000, ease: 'Quad.easeIn' });
     this.ring = scene.add.circle(x, y, data.radius).setStrokeStyle(1, this.color, 0.7).setFillStyle(this.color, 0.06).setDepth(1).setVisible(false);
     this.bar = scene.add.graphics().setDepth(5);
     this.label = scene.add
-      .text(x, y - (s.height ?? s.size) - 10, '', { fontFamily: 'monospace', fontSize: '8px', color: data.ringColor, resolution: 4 })
+      .text(x, y - (s.height ?? s.size) * (size === 'large' ? data.large.scale : 1) - 10, '', { fontFamily: 'monospace', fontSize: '8px', color: data.ringColor, resolution: 4 })
       .setOrigin(0.5)
       .setDepth(5);
   }

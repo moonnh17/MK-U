@@ -1,6 +1,6 @@
 /**
  * 피해 계산 (순수 함수).
- * 1단계: 물리·마기·기술(attribute 그룹)의 스탯 보정은 더한 뒤 한 번만 곱한다.
+ * 1단계: 물리·마기·기술(attribute 그룹)의 피해 증가는 더한 뒤 한 번만 곱한다.
  * 2단계: 근접·원거리 증가(range 그룹)를 따로 곱한다. 증가량은 아이템(M4)이 채운다.
  * 피해 계산은 부모 스킬이 아니라 실제 공격(source)의 태그로 한다.
  */
@@ -9,46 +9,29 @@ import type {
   GradeId,
   GroupMultipliersData,
   SpaceRule,
-  StatId,
   TagDef,
   TagId,
   TagsData,
 } from '../types/data';
 
-export type Stats = Record<StatId, number>;
+/** 태그별 피해 증가 (0.2 = +20%). 아이템과 무기가 채운다 */
+export type TagBonus = Partial<Record<TagId, number>>;
 
 export interface DamageSource {
   baseDamage: number;
   tags: readonly TagId[];
 }
 
-export function startingStats(startValue: number): Stats {
-  return {
-    strength: startValue,
-    toughness: startValue,
-    agility: startValue,
-    intelligence: startValue,
-    magiPower: startValue,
-    willpower: startValue,
-  };
-}
-
-/** 선형 스탯 보정 (기준점 아래는 0, 상한까지) */
-export function linearBonus(rule: { stat: StatId; pivot: number; perPoint: number; cap: number }, stats: Stats): number {
-  const over = Math.max(0, stats[rule.stat] - rule.pivot);
-  return Math.min(rule.cap, over * rule.perPoint);
-}
-
-/** 이 source의 attribute 태그 보정 합 → 배율 (예: +48% +40% → ×1.88) */
-export function tagMultiplier(tags: readonly TagId[], stats: Stats, tagData: TagsData): number {
+/** 이 source의 attribute 태그 증가 합 → 배율 (예: +48% +40% → ×1.88) */
+export function tagMultiplier(tags: readonly TagId[], bonus: TagBonus, tagData: TagsData): number {
   let sum = 0;
   const seen = new Set<TagId>();
   for (const id of tags) {
     if (seen.has(id)) continue;
     seen.add(id);
     const def: TagDef | undefined = tagData.tags.find((t) => t.id === id);
-    if (!def || def.damageGroup !== 'attribute' || def.rule.kind !== 'linearStat') continue;
-    sum += linearBonus(def.rule, stats);
+    if (!def || def.damageGroup !== 'attribute') continue;
+    sum += bonus[id] ?? 0;
   }
   return 1 + sum;
 }
@@ -68,8 +51,8 @@ export function rangeMultiplier(tags: readonly TagId[], bonus: RangeBonus = NO_R
   return m;
 }
 
-export function calcDamage(source: DamageSource, stats: Stats, tagData: TagsData, bonus: RangeBonus = NO_RANGE_BONUS): number {
-  return source.baseDamage * tagMultiplier(source.tags, stats, tagData) * rangeMultiplier(source.tags, bonus);
+export function calcDamage(source: DamageSource, tagBonus: TagBonus, tagData: TagsData, bonus: RangeBonus = NO_RANGE_BONUS): number {
+  return source.baseDamage * tagMultiplier(source.tags, tagBonus, tagData) * rangeMultiplier(source.tags, bonus);
 }
 
 /**

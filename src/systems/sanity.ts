@@ -10,8 +10,9 @@ export interface SanityState {
   panic: boolean;
 }
 
-export function sanityMaxFor(willpower: number, c: Pick<SanityConfig, 'base' | 'perWillpower'>): number {
-  return Math.max(1, c.base + c.perWillpower * willpower);
+/** bonus: 아이템·영구 강화로 늘어난 양 */
+export function sanityMaxFor(bonus: number, c: Pick<SanityConfig, 'base'>): number {
+  return Math.max(1, c.base + bonus);
 }
 
 /** 아트로스 비석 필사본: 정신력이 낮을수록 피해 증가 */

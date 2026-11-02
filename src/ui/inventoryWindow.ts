@@ -9,12 +9,11 @@ import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { conversionLines } from './cutscenePages';
 import { artKeys } from '../systems/art';
-import { statSheetLines } from '../systems/statSheet';
 import { weaponInfoLines } from './weaponInfo';
 import { findSkill, skillValues, storedSkills } from '../systems/skills';
 import { skillTags, tagBadges } from '../systems/tags';
 import { emptyHanded, type WeaponItem } from '../systems/weapons';
-import { STAT_IDS, type TagId } from '../types/data';
+import type { TagId } from '../types/data';
 import { itemDescParams } from './itemCard';
 
 type Target = number | 'passive';
@@ -100,14 +99,14 @@ export class InventoryWindow {
     const body = document.createElement('div');
     body.className = 'iw-sheet';
     if (mobile) {
-      if (this.tab === 'character') body.append(this.characterPanel(), this.statsPanel());
+      if (this.tab === 'character') body.append(this.characterPanel());
       else if (this.tab === 'skill') body.append(this.skillPanel());
       else body.append(this.itemPanel());
     } else {
       const right = document.createElement('div');
       right.className = 'iw-col iw-col-right';
       right.append(this.skillPanel(), this.itemPanel());
-      body.append(this.characterPanel(), this.statsPanel(), right);
+      body.append(this.characterPanel(), right);
     }
     this.root.append(head, body);
     this.refreshDetail();
@@ -172,48 +171,6 @@ export class InventoryWindow {
       el.appendChild(this.line('iw-hint', t('inventory.emptyHands', { fist: t(fist.nameKey) })));
     }
     el.append(this.line('iw-sub', t('inventory.buffs')), this.line('iw-desc', s.buffs.length ? s.buffs.map((b) => `${b.label} ${Math.ceil(b.leftSec)}`).join(' · ') : t('inventory.noBuffs')));
-    return el;
-  }
-
-  /** 가운데: 능력치 — 값, 무슨 뜻인지, 지금 얼마나 효과를 주는지 */
-  private statsPanel(): HTMLDivElement {
-    const t = this.ctx.t;
-    const d = this.ctx.data;
-    const s = this.ctx.session!;
-    const el = this.panel(t('inventory.statsTitle'), 'iw-statsheet');
-    for (const id of STAT_IDS) {
-      const row = document.createElement('div');
-      row.className = 'iw-statrow';
-      const icon = document.createElement('span');
-      icon.className = 'iw-staticon';
-      applyArtIcon(icon, this.ctx, artKeys.statIcon(id));
-      const main = document.createElement('div');
-      main.className = 'iw-statmain';
-      const top = document.createElement('div');
-      top.className = 'iw-stattop';
-      const value = Math.round(s.effStats[id] * 10) / 10;
-      const bonus = Math.round((value - s.player.stats[id]) * 10) / 10;
-      const num = document.createElement('b');
-      num.textContent = String(value);
-      if (bonus !== 0) {
-        const extra = document.createElement('small');
-        extra.textContent = ` (${s.player.stats[id]} ${bonus > 0 ? '+' : ''}${bonus})`;
-        extra.className = bonus > 0 ? 'up' : 'down';
-        num.appendChild(extra);
-      }
-      top.append(this.line('iw-statname', t(`stat.${id}`)), num);
-      main.append(top, this.line('iw-statdesc', t(`stat.${id}.desc`)));
-      const fx = document.createElement('div');
-      fx.className = 'iw-statfx';
-      for (const l of statSheetLines(id, s.effStats, d.stats, d.tags, d.player.sanity)) {
-        const chip = document.createElement('span');
-        chip.textContent = t(l.key, { v: l.value });
-        fx.appendChild(chip);
-      }
-      main.appendChild(fx);
-      row.append(icon, main);
-      el.appendChild(row);
-    }
     return el;
   }
 
@@ -378,8 +335,8 @@ export class InventoryWindow {
     const req = document.createElement('div');
     req.className = 'iw-req';
     const a = def.awakening;
-    req.textContent = t('inventory.requirement', { stat: t(`stat.${a.requiredStat}`), value: p.stats[a.requiredStat], need: a.requiredValue });
-    req.classList.toggle('met', p.stats[a.requiredStat] >= a.requiredValue);
+    req.textContent = t('inventory.requirement', { item: this.itemName(a.requiredItem) });
+    req.classList.toggle('met', p.items.includes(a.requiredItem));
     el.append(icon, name, lv, req);
     el.addEventListener('pointerdown', (e) => {
       e.stopPropagation();
@@ -445,12 +402,16 @@ export class InventoryWindow {
     }
     if (!owned.awakened) {
       const a = def.awakening;
-      const met = p.stats[a.requiredStat] >= a.requiredValue && owned.level >= d.skills.maxLevel;
-      const req = this.line('iw-dsub', t('inventory.detailAwaken', { stat: t(`stat.${a.requiredStat}`), value: p.stats[a.requiredStat], need: a.requiredValue, level: d.skills.maxLevel }));
+      const met = p.items.includes(a.requiredItem) && owned.level >= d.skills.maxLevel;
+      const req = this.line('iw-dsub', t('inventory.detailAwaken', { item: this.itemName(a.requiredItem), level: d.skills.maxLevel }));
       req.classList.toggle('met', met);
       const after = skillValues(def, { level: d.skills.maxLevel, awakened: true });
       box.append(req, this.line('iw-desc dim', `${t(a.nameKey)} — ${t(a.descKey, fmt(after.values))}`));
     }
+  }
+
+  private itemName(id: string): string {
+    return this.ctx.t(this.ctx.data.items.items.find((x) => x.id === id)!.nameKey);
   }
 
   private line(cls: string, text: string, color?: string): HTMLDivElement {

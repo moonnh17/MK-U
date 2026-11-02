@@ -4,7 +4,6 @@
  * - 장착하지 않은 스킬도 레벨업·각성된다.
  */
 import type { SkillDef, SkillsData } from '../types/data';
-import type { Stats } from './damage';
 
 export interface OwnedSkill {
   level: number;
@@ -135,19 +134,19 @@ export function equipSkill(
   return { loadout: next, restarted: [id] };
 }
 
-/** 각성 조건: 최대 레벨 + 요구 스탯, 아직 각성하지 않음 */
-export function canAwaken(lo: SkillLoadout, def: SkillDef, stats: Stats, maxLevel: number): boolean {
+/** 각성 조건: 최대 레벨 + 요구 아이템 보유, 아직 각성하지 않음 */
+export function canAwaken(lo: SkillLoadout, def: SkillDef, items: readonly string[], maxLevel: number): boolean {
   const o = lo.owned[def.id];
   if (!o || o.awakened || o.level < maxLevel) return false;
-  return stats[def.awakening.requiredStat] >= def.awakening.requiredValue;
+  return items.includes(def.awakening.requiredItem);
 }
 
 /** 지금 각성할 수 있는 스킬 (오래 가진 순) */
-export function awakeningReady(lo: SkillLoadout, data: SkillsData, stats: Stats): string[] {
+export function awakeningReady(lo: SkillLoadout, data: SkillsData, items: readonly string[]): string[] {
   return Object.entries(lo.owned)
     .sort((a, b) => a[1].order - b[1].order)
     .map(([id]) => id)
-    .filter((id) => canAwaken(lo, findSkill(data, id), stats, data.maxLevel));
+    .filter((id) => canAwaken(lo, findSkill(data, id), items, data.maxLevel));
 }
 
 /** 현재 레벨의 쿨타임·수치. 각성하면 마지막 레벨 수치 위에 각성 수치를 덮는다 */

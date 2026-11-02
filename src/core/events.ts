@@ -4,7 +4,7 @@ import type { SfxId } from '../systems/sound';
 import type { ButtonAction } from './actions';
 import type { UiMode } from '../input/uiMode';
 import type { AnyCard, Card } from '../systems/cards';
-import type { CardOfferKind, EncounterKindId, GradeId, StatId } from '../types/data';
+import type { CardOfferKind, EncounterKindId, GradeId } from '../types/data';
 
 /** 이벤트 이름 → 페이로드 */
 export interface GameEvents {
@@ -101,7 +101,6 @@ export interface GameEvents {
 
   /** 디버그 패널 */
   debugSetSkill: { skillId: string; level: number; awakened: boolean };
-  debugSetStat: { stat: StatId; value: number };
   debugOpenCards: { kind: CardOfferKind };
   debugFillUltimate: Record<string, never>;
   debugSpawn: { enemyId: string; count: number; elite?: string | null };

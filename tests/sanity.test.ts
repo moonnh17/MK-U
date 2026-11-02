@@ -3,12 +3,13 @@ import { gameData } from '../src/data/index';
 import { applyMental, lowSanityBonus, sanityMaxFor, stepSanity } from '../src/systems/sanity';
 
 const c = gameData.player.sanity;
-const max = sanityMaxFor(gameData.stats.startValue, c);
+const max = sanityMaxFor(0, c);
 const def = (id: string) => gameData.enemies.enemies.find((e) => e.id === id)!;
 
 describe('정신력', () => {
-  it('정신력 스탯을 올리면 최대치가 는다', () => {
-    expect(sanityMaxFor(20, c)).toBeGreaterThan(sanityMaxFor(10, c));
+  it('시작 100, 아이템·강화만큼 는다', () => {
+    expect(max).toBe(100);
+    expect(sanityMaxFor(20, c)).toBe(120);
   });
   it('정신 피해로 줄고 0이 되면 패닉', () => {
     expect(applyMental({ sanity: 50, sanityMax: max, panic: false }, 20)).toEqual({ sanity: 30, panic: false, hpDamage: 0 });

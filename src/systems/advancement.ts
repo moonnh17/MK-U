@@ -2,13 +2,12 @@
  * 전직과 학파 궁극기 (순수 함수).
  * - 판정: 챕터1에서 고른 스킬 카드의 계열 수가 많은 쪽. 동점이면 마지막으로 고른 카드의 계열.
  * - 스킬 변환: 반대 학파 스킬(패시브 포함) 제거 → 레벨 합만큼 포인트 → 자기 학파 스킬 무작위 +1(Lv3 제외)
- *   → 받을 스킬이 없으면 무작위 스탯 +N → 빈 칸은 보관함의 자기 학파 스킬로 채운다. 각성은 옮겨가지 않는다.
+ *   → 받을 스킬이 없으면 남은 포인트는 사라진다 → 빈 칸은 보관함의 자기 학파 스킬로 채운다. 각성은 옮겨가지 않는다.
  * - 전직 후 카드에는 자기 학파 스킬만.
- * - 궁극기 각성: 자기 학파 스킬(패시브 포함) 각성 2개.
+ * - 궁극기 각성: 요구 아이템 보유.
  */
 import type { Rng } from '../core/rng';
-import { STAT_IDS, type SchoolId, type SkillDef, type SkillsData, type StatId, type UltimateDef } from '../types/data';
-import type { Stats } from './damage';
+import type { SchoolId, SkillDef, SkillsData, UltimateDef } from '../types/data';
 import { findSkill, type SkillLoadout } from './skills';
 
 /** 계열 집계가 가장 많은 학파들 (2개 이상이면 동점 → 플레이어가 직접 고른다, 원본 규칙) */
@@ -29,20 +28,16 @@ export interface ConversionLog {
   removed: { skillId: string; level: number }[];
   /** 포인트로 오른 스킬 (같은 스킬이 여러 번이면 여러 줄) */
   gains: { skillId: string; level: number }[];
-  /** 받을 스킬이 없어 스탯으로 바뀐 포인트 */
-  stats: { stat: StatId; amount: number }[];
 }
 
 export function convertSkills(
   rng: Rng,
   lo: SkillLoadout,
-  stats: Stats,
   data: SkillsData,
   school: SchoolId,
-  statAmount: number,
-): { loadout: SkillLoadout; stats: Stats; log: ConversionLog } {
+): { loadout: SkillLoadout; log: ConversionLog } {
   const owned = { ...lo.owned };
-  const log: ConversionLog = { school, removed: [], gains: [], stats: [] };
+  const log: ConversionLog = { school, removed: [], gains: [] };
   let points = 0;
   for (const [id, o] of Object.entries(lo.owned).sort((a, b) => a[1].order - b[1].order)) {
     if (findSkill(data, id).school === school) continue;
@@ -51,21 +46,15 @@ export function convertSkills(
     log.removed.push({ skillId: id, level: o.level });
     delete owned[id];
   }
-  const nextStats = { ...stats };
   for (let i = 0; i < points; i++) {
     const candidates = Object.entries(owned)
       .filter(([, o]) => o.level < data.maxLevel)
       .sort((a, b) => a[1].order - b[1].order)
       .map(([id]) => id);
-    if (candidates.length > 0) {
-      const id = rng.pick(candidates);
-      owned[id] = { ...owned[id]!, level: owned[id]!.level + 1 };
-      log.gains.push({ skillId: id, level: owned[id]!.level });
-    } else {
-      const stat = rng.pick(STAT_IDS);
-      nextStats[stat] += statAmount;
-      log.stats.push({ stat, amount: statAmount });
-    }
+    if (candidates.length === 0) break;
+    const id = rng.pick(candidates);
+    owned[id] = { ...owned[id]!, level: owned[id]!.level + 1 };
+    log.gains.push({ skillId: id, level: owned[id]!.level });
   }
   let active = lo.active.map((id) => (id && owned[id] ? id : null));
   let passive = lo.passive && owned[lo.passive] ? lo.passive : null;
@@ -82,21 +71,12 @@ export function convertSkills(
       if (empty !== -1) active = active.map((x, i) => (i === empty ? def.id : x));
     }
   }
-  return { loadout: { ...lo, owned, active, passive }, stats: nextStats, log };
+  return { loadout: { ...lo, owned, active, passive }, log };
 }
 
 /** 카드로 내도 되는 스킬: 전직 전에는 전부, 전직 후에는 자기 학파만 */
 export function skillAllowed(def: SkillDef, school: SchoolId | null): boolean {
   return school === null || def.school === school;
-}
-
-/** 자기 학파 각성 스킬 수 */
-export function awakenedCount(lo: SkillLoadout, data: SkillsData, school: SchoolId): number {
-  return Object.entries(lo.owned).filter(([id, o]) => o.awakened && findSkill(data, id).school === school).length;
-}
-
-export function ultimateAwakeningReady(lo: SkillLoadout, data: SkillsData, school: SchoolId | null, need: number): boolean {
-  return school !== null && awakenedCount(lo, data, school) >= need;
 }
 
 /**

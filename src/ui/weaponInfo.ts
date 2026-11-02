@@ -45,7 +45,7 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
     out.push({ text: t(sig.kind === 'laser' && sig.every === 1 ? 'weapon.sigDesc.beam' : `weapon.sigDesc.${sig.kind}`, params), sig: true });
   }
   const bonus = def.equipBonus;
-  for (const [k, v] of Object.entries(bonus?.stats ?? {})) out.push({ text: t('weapon.bonus.stat', { stat: t(`stat.${k}`), value: v ?? 0 }), sig: true });
+  if (bonus?.physicalDamage) out.push({ text: t('weapon.bonus.physical', { value: Math.round(bonus.physicalDamage * 100) }), sig: true });
   if (bonus?.rangedDamage) out.push({ text: t('weapon.bonus.ranged', { value: Math.round(bonus.rangedDamage * 100) }), sig: true });
   if (bonus?.meleeDamage) out.push({ text: t('weapon.bonus.melee', { value: Math.round(bonus.meleeDamage * 100) }), sig: true });
   if (bonus?.bossDamage) out.push({ text: t('weapon.bonus.boss', { value: Math.round(bonus.bossDamage * 100) }), sig: true });

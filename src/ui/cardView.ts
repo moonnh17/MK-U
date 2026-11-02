@@ -68,45 +68,11 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
       icon: { color: def.color, key: def.spriteKey },
     };
   }
-  if (card.kind === 'stat') {
-    const grade = d.cards.statGrades.find((g) => g.id === card.grade);
-    const now = player.stats[card.stat];
-    return {
-      kindLabel: t('card.title.stat'),
-      name: t('card.statAmount', { stat: t(`stat.${card.stat}`), amount: card.amount }),
-      subName: '',
-      levelText: t('card.statNow', { value: now, next: now + card.amount }),
-      desc: t(`stat.${card.stat}.desc`),
-      badges: [],
-      accent: grade?.color ?? '#ffffff',
-      school: '',
-      icon: { color: grade?.color ?? '#ffffff', key: artKeys.statIcon(card.stat), artOnly: true },
-    };
-  }
-
   const def = findSkill(d.skills, card.skillId);
   const owned = player.loadout.owned[def.id];
   const sb = d.ui.hud.skillbar;
   const slotKind = t(def.kind === 'passive' ? 'card.passive' : 'card.active');
   const school = t(`school.${def.school}`);
-  if (card.kind === 'awakening') {
-    const v = skillValues(def, { level: d.skills.maxLevel, awakened: true });
-    return {
-      kindLabel: `${t('card.awakening')} · ${slotKind}`,
-      name: t(def.awakening.nameKey),
-      subName: t(def.nameKey),
-      levelText: t('inventory.requirement', {
-        stat: t(`stat.${def.awakening.requiredStat}`),
-        value: player.stats[def.awakening.requiredStat],
-        need: def.awakening.requiredValue,
-      }),
-      desc: t(def.awakening.descKey, fmtValues(v.values)),
-      badges: tagBadges(skillTags(def, true), d.tags),
-      accent: sb.awakenedColor,
-      school,
-      icon: { color: def.color, key: artKeys.skillIcon(def.id), artOnly: true },
-    };
-  }
   const from = owned?.level ?? 0;
   const to = from + 1;
   const v = skillValues(def, { level: to, awakened: false });

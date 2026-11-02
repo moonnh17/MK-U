@@ -4,7 +4,7 @@
  */
 import { collectAssets, validateArt } from '../systems/art';
 import { BUTTON_ACTIONS } from '../core/actions';
-import { GRADE_IDS, SCHOOL_IDS, STAT_EFFECT_IDS, STAT_IDS, TAG_IDS } from '../types/data';
+import { GRADE_IDS, SCHOOL_IDS, TAG_IDS } from '../types/data';
 import type { EnemyAttackDef, IntRange, SpriteRef } from '../types/data';
 import type { GameData } from './index';
 
@@ -47,41 +47,10 @@ function checkUnique(errors: Errors, where: string, ids: string[]): void {
 export function validateGameData(d: GameData): Errors {
   const errors: Errors = [];
   const tagIds = new Set<string>(TAG_IDS);
-  const statIds = new Set<string>(STAT_IDS);
   const textKeys: { where: string; key: string }[] = [];
   const needText = (where: string, key: string) => textKeys.push({ where, key });
 
-  // --- 스탯 ---
-  checkPositive(errors, 'stats.startValue', d.stats.startValue);
-  checkUnique(errors, 'stats', d.stats.stats.map((s) => s.id));
-  for (const id of STAT_IDS) {
-    if (!d.stats.stats.some((s) => s.id === id)) errors.push(`stats: '${id}' 없음`);
-  }
-  for (const s of d.stats.stats) {
-    if (!statIds.has(s.id)) errors.push(`stats: 알 수 없는 스탯 '${s.id}'`);
-    for (const t of s.linkedTags) if (!tagIds.has(t)) errors.push(`stats.${s.id}: 알 수 없는 태그 '${t}'`);
-    needText(`stats.${s.id}`, s.nameKey);
-    needText(`stats.${s.id}`, s.descKey);
-  }
-
-  for (const id of STAT_EFFECT_IDS) {
-    const r = d.stats.effects?.[id];
-    const w = `stats.effects.${id}`;
-    if (!r) {
-      errors.push(`${w}: 없음`);
-      continue;
-    }
-    if (!statIds.has(r.stat)) errors.push(`${w}: 알 수 없는 스탯 '${r.stat}'`);
-    checkPositive(errors, `${w}.pivot`, r.pivot, true);
-    checkPositive(errors, `${w}.perPoint`, r.perPoint);
-    checkPositive(errors, `${w}.cap`, r.cap);
-  }
-
   // --- 태그 ---
-  checkUnique(errors, 'tags', d.tags.tags.map((t) => t.id));
-  if (d.tags.tags.length !== TAG_IDS.length) {
-    errors.push(`tags: ${TAG_IDS.length}종이어야 함 (현재 ${d.tags.tags.length})`);
-  }
   for (const t of d.tags.tags) {
     const w = `tags.${t.id}`;
     if (!tagIds.has(t.id)) errors.push(`${w}: 알 수 없는 태그`);
@@ -91,15 +60,7 @@ export function validateGameData(d: GameData): Errors {
     needText(w, t.descKey);
     const r = t.rule;
     switch (r.kind) {
-      case 'linearStat':
-        if (!statIds.has(r.stat)) errors.push(`${w}: 알 수 없는 스탯 '${r.stat}'`);
-        checkPositive(errors, `${w}.pivot`, r.pivot, true);
-        checkPositive(errors, `${w}.perPoint`, r.perPoint);
-        checkPositive(errors, `${w}.cap`, r.cap);
-        break;
-      case 'exponentialChance':
-        if (!statIds.has(r.stat)) errors.push(`${w}: 알 수 없는 스탯 '${r.stat}'`);
-        checkPositive(errors, `${w}.base`, r.base);
+      case 'chance':
         for (const [k, cap] of Object.entries(r.caps)) {
           if (!isNum(cap) || cap <= 0 || cap > 1) errors.push(`${w}.caps.${k}: 0~1 사이여야 함`);
         }
@@ -118,9 +79,6 @@ export function validateGameData(d: GameData): Errors {
         break;
       default:
         errors.push(`${w}: 알 수 없는 rule.kind`);
-    }
-    if (t.damageGroup === 'attribute' && r.kind !== 'linearStat') {
-      errors.push(`${w}: attribute 그룹은 linearStat 규칙이어야 함`);
     }
   }
 
@@ -228,7 +186,6 @@ export function validateGameData(d: GameData): Errors {
     if (p.kind === 'homing' && wpn.category !== 'staff') errors.push(`${w}: homing은 지팡이 패턴`);
     if (wpn.charge) for (const k of ['maxSec', 'damageMul', 'radiusMul'] as const) checkPositive(errors, `${w}.charge.${k}`, wpn.charge[k]);
     if (wpn.knockback) for (const k of ['distance', 'sec'] as const) checkPositive(errors, `${w}.knockback.${k}`, wpn.knockback[k]);
-    for (const [k, v] of Object.entries(wpn.equipBonus?.stats ?? {})) if (!statIds.has(k) || !isNum(v)) errors.push(`${w}.equipBonus.stats.${k}: 잘못됨`);
   }
 
   checkPositive(errors, 'weapons.critMultiplier', d.weapons.critMultiplier);
@@ -265,9 +222,7 @@ export function validateGameData(d: GameData): Errors {
   for (const g of GRADE_IDS) checkPositive(errors, `loot.merchant.prices.${g}`, lt.merchant.prices[g]);
   checkPositive(errors, 'loot.skillShop.count', lt.skillShop.count);
   for (const [k, v] of Object.entries(lt.skillShop.prices)) checkPositive(errors, `loot.skillShop.prices.${k}`, v);
-  checkPositive(errors, 'loot.statShop.count', lt.statShop.count);
-  for (const g of d.cards.statGrades) checkPositive(errors, `loot.statShop.prices.${g.id}`, lt.statShop.prices[g.id]);
-  for (const k of ['treasure', 'merchant', 'skillShop', 'statShop', 'raid', 'magiSpire', 'hiddenBoss'] as const) {
+  for (const k of ['treasure', 'merchant', 'skillShop', 'raid', 'magiSpire', 'hiddenBoss'] as const) {
     checkPositive(errors, `loot.encounter.weights.${k}`, lt.encounter.weights[k], true);
     needText(`loot.encounter.${k}`, `encounter.${k}`);
   }
@@ -283,15 +238,17 @@ export function validateGameData(d: GameData): Errors {
   const sp = lt.spire;
   checkSprite(errors, 'loot.spire.small.sprite', sp.small.sprite);
   checkSprite(errors, 'loot.spire.medium.sprite', sp.medium.sprite);
-  checkWeights('loot.spire.medium.weights', sp.medium.weights);
   if (!(sp.medium.strongChance >= 0 && sp.medium.strongChance <= 1)) errors.push('loot.spire.medium.strongChance: 0~1');
-  for (const [c, r] of Object.entries(sp.medium.chance)) {
-    if (!(r.chance >= 0 && r.chance <= 1)) errors.push(`loot.spire.medium.chance.${c}: 0~1`);
-    if (!(r.fromStage >= 1 && r.fromStage <= d.mapgen.stagesPerChapter)) errors.push(`loot.spire.medium.chance.${c}.fromStage: 1~${d.mapgen.stagesPerChapter}`);
+  for (const [name, table] of [['medium', sp.medium.chance], ['large', sp.large.chance]] as const) {
+    for (const [c, r] of Object.entries(table)) {
+      if (!(r.chance >= 0 && r.chance <= 1)) errors.push(`loot.spire.${name}.chance.${c}: 0~1`);
+      if (!(r.fromStage >= 1 && r.fromStage <= d.mapgen.stagesPerChapter)) errors.push(`loot.spire.${name}.chance.${c}.fromStage: 1~${d.mapgen.stagesPerChapter}`);
+    }
   }
-  checkWeights('loot.spire.small.weights', sp.small.weights);
-  if ((sp.small.weights.common ?? 0) > 0 || (sp.small.weights.mythic ?? 0) > 0) errors.push('loot.spire.small.weights: 레어·전설·유니크만 (신화는 따로 판정)');
-  for (const k of ['radius', 'fallSec', 'fallHeight', 'riseSec', 'spawnGapSec', 'eliteMul', 'cards'] as const) checkPositive(errors, `loot.spire.${k}`, sp[k]);
+  checkSprite(errors, 'loot.spire.large.sprite', sp.large.sprite);
+  checkPositive(errors, 'loot.spire.large.scale', sp.large.scale);
+  for (const k of ['small', 'medium', 'large'] as const) checkPositive(errors, `loot.spire.${k}.picks`, sp[k].picks);
+  for (const k of ['radius', 'fallSec', 'fallHeight', 'riseSec', 'spawnGapSec', 'eliteMul'] as const) checkPositive(errors, `loot.spire.${k}`, sp[k]);
   checkPositive(errors, 'loot.spire.minAlive', sp.minAlive, true);
   for (const [k, v] of Object.entries(sp.chargePerKill)) {
     if (!(typeof v === 'number' && v >= 0 && v <= 1)) errors.push(`loot.spire.chargePerKill.${k}: 0~1`);
@@ -299,7 +256,7 @@ export function validateGameData(d: GameData): Errors {
   if (!((sp.chargePerKill.normal ?? 0) > 0)) errors.push('loot.spire.chargePerKill.normal: 0보다 커야 충전된다');
   // --- 아이템 ---
   const it = d.items;
-  for (const k of ['statFlat', 'hpFlat', 'damagePct', 'procDamage', 'area', 'cooldown'] as const) checkPositive(errors, `groupMultipliers.itemGroups.${k}`, d.groupMultipliers.itemGroups?.[k]);
+  for (const k of ['hpFlat', 'damagePct', 'procDamage', 'area', 'cooldown'] as const) checkPositive(errors, `groupMultipliers.itemGroups.${k}`, d.groupMultipliers.itemGroups?.[k]);
   checkUnique(errors, 'items', it.items.map((x) => x.id));
   checkPositive(errors, 'items.transferPerPickup', it.transferPerPickup, true);
   checkPositive(errors, 'items.chapterCommonShift', it.chapterCommonShift, true);
@@ -332,7 +289,6 @@ export function validateGameData(d: GameData): Errors {
     if (x.pool === 'hiddenBoss' && !d.bosses.hiddenBosses.some((b) => b.id === x.bossId)) errors.push(`${w}: bossId '${String(x.bossId)}' 히든보스 없음`);
     if (x.effects.length === 0) errors.push(`${w}: 효과 없음`);
     for (const e of [...x.effects, ...(x.variants ?? []).flatMap((v) => v.effects)]) {
-      if (e.kind === 'stat' && e.stat !== 'all' && !statIds.has(e.stat)) errors.push(`${w}: 알 수 없는 스탯 '${e.stat}'`);
       if ((e.kind === 'autoCast' || e.kind === 'skillDamage') && !d.skills.skills.some((s) => s.id === e.skillId)) errors.push(`${w}: 없는 스킬 '${e.skillId}'`);
       if ((e.kind === 'hurtBurst' || e.kind === 'gravityShot' || e.kind === 'coinShots' || e.kind === 'absorbCore') && e.tags.some((t) => !tagIds.has(t))) errors.push(`${w}: 알 수 없는 태그`);
       if (e.kind === 'absorbCore' && e.absorbSec >= e.everySec) errors.push(`${w}: absorbSec는 everySec보다 짧아야 함`);
@@ -604,8 +560,7 @@ export function validateGameData(d: GameData): Errors {
     if (!a) {
       errors.push(`${w}: awakening 없음`);
     } else {
-      if (!statIds.has(a.requiredStat)) errors.push(`${w}.awakening: 요구 스탯 없음 또는 잘못됨 '${String(a.requiredStat)}'`);
-      checkPositive(errors, `${w}.awakening.requiredValue`, a.requiredValue);
+      if (!d.items.items.some((x) => x.id === a.requiredItem)) errors.push(`${w}.awakening: 없는 요구 아이템 '${String(a.requiredItem)}'`);
       if (s.kind === 'active') checkPositive(errors, `${w}.awakening.cooldownSec`, a.cooldownSec);
       checkTags(`${w}.awakening`, a.tags);
       needText(`${w}.awakening`, a.nameKey);
@@ -623,7 +578,6 @@ export function validateGameData(d: GameData): Errors {
   // --- 궁극기 ---
   const u = d.ultimates;
   checkUnique(errors, 'ultimates', u.ultimates.map((x) => x.id));
-  checkPositive(errors, 'ultimates.awakeningNeed', u.awakeningNeed);
   for (const rank of ['normal', 'elite', 'champion', 'boss', 'hiddenBoss'] as const) {
     checkPositive(errors, `ultimates.gaugePerKill.${rank}`, u.gaugePerKill[rank], true);
   }
@@ -660,15 +614,10 @@ export function validateGameData(d: GameData): Errors {
   if (!startJob) errors.push(`jobs.startJob: '${jb.startJob}' 없음`);
   else if (!startJob.enabled) errors.push('jobs.startJob: 잠긴 직업');
   checkPositive(errors, 'jobs.advanceAfterChapter', jb.advanceAfterChapter);
-  checkPositive(errors, 'jobs.conversionStatAmount', jb.conversionStatAmount);
   for (const x of jb.jobs) {
     const w = `jobs.${x.id}`;
     needText(w, x.nameKey);
     if (!u.ultimates.some((y) => y.id === x.startUltimate)) errors.push(`${w}.startUltimate: '${x.startUltimate}' 없음`);
-    for (const [k, v] of Object.entries(x.statBonus)) {
-      if (!statIds.has(k)) errors.push(`${w}.statBonus: 알 수 없는 스탯 '${k}'`);
-      if (!isNum(v)) errors.push(`${w}.statBonus.${k}: 숫자여야 함`);
-    }
     if (x.advancements.length !== 2) errors.push(`${w}: 전직 분기는 2개`);
     for (const a of x.advancements) {
       needText(`${w}.advancements.${a.id}`, a.nameKey);
@@ -686,22 +635,13 @@ export function validateGameData(d: GameData): Errors {
   const c = d.cards;
   checkPositive(errors, 'cards.cardCount', c.cardCount);
   checkPositive(errors, 'cards.rerollCost', c.rerollCost, true);
-  checkPositive(errors, 'cards.maxAwakeningCards', c.maxAwakeningCards, true);
-  if (c.maxAwakeningCards > c.cardCount) errors.push('cards.maxAwakeningCards: cardCount보다 클 수 없음');
-  const offerKinds = ['skill', 'stat'];
+  const offerKinds = ['skill', 'item'];
   if (c.afterStageCycle.length === 0) errors.push('cards.afterStageCycle: 비어 있음');
   for (const k of [c.runStart, c.bossBonus, ...c.afterStageCycle]) {
     if (!offerKinds.includes(k)) errors.push(`cards: 알 수 없는 카드 종류 '${k}'`);
   }
   for (const [k, v] of Object.entries(c.skillWeights)) checkPositive(errors, `cards.skillWeights.${k}`, v, true);
-  if (c.statGrades.length === 0) errors.push('cards.statGrades: 비어 있음');
-  checkUnique(errors, 'cards.statGrades', c.statGrades.map((g) => g.id));
-  for (const g of c.statGrades) {
-    checkPositive(errors, `cards.statGrades.${g.id}.amount`, g.amount);
-    checkPositive(errors, `cards.statGrades.${g.id}.weight`, g.weight);
-    if (!HEX_COLOR.test(g.color)) errors.push(`cards.statGrades.${g.id}: color는 #RRGGBB`);
-  }
-  if (c.cardCount > STAT_IDS.length) errors.push('cards.cardCount: 스탯 수보다 클 수 없음(스탯 카드는 서로 다른 스탯)');
+
 
   // --- UI ---
   checkPositive(errors, 'ui.baseWidth', d.ui.baseWidth);
@@ -751,8 +691,7 @@ export function validateGameData(d: GameData): Errors {
   checkUnique(errors, 'meta.upgrades', d.meta.upgrades.map((u) => u.id));
   for (const u of d.meta.upgrades) {
     const w = `meta.upgrades.${u.id}`;
-    if (u.kind === 'stat' && !statIds.has(u.stat)) errors.push(`${w}.stat: 알 수 없는 스탯`);
-    if (u.kind !== 'stat') needText(w, `upgrade.${u.kind}`);
+    needText(w, `upgrade.${u.kind}`);
     checkPositive(errors, `${w}.perLevel`, u.perLevel);
     if (u.costs.length === 0) errors.push(`${w}.costs: 비어 있음`);
     u.costs.forEach((c, i) => {

@@ -5,7 +5,7 @@
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { isSkillImplemented } from '../skills/registry';
-import { STAT_IDS, type EncounterKindId, type GradeId, type StatId } from '../types/data';
+import type { EncounterKindId, GradeId } from '../types/data';
 
 function select(options: [string, string][]): HTMLSelectElement {
   const s = document.createElement('select');
@@ -59,32 +59,11 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
     ),
   );
 
-  // 스탯
-  const statSel = select(STAT_IDS.map((id) => [id, t(`stat.${id}`)]));
-  const statInput = document.createElement('input');
-  statInput.type = 'number';
-  statInput.value = '20';
-  statInput.style.width = '48px';
-  statSel.addEventListener('change', () => {
-    const cur = ctx.session?.player.stats[statSel.value as StatId];
-    if (cur !== undefined) statInput.value = String(cur);
-  });
-  body.appendChild(
-    row(
-      statSel,
-      statInput,
-      button(t('debug.setStat'), () => {
-        const value = Number(statInput.value);
-        if (Number.isFinite(value)) bus.emit('debugSetStat', { stat: statSel.value as StatId, value });
-      }),
-    ),
-  );
-
   // 카드창·궁극기
   body.appendChild(
     row(
       button(t('debug.skillCard'), () => bus.emit('debugOpenCards', { kind: 'skill' })),
-      button(t('debug.statCard'), () => bus.emit('debugOpenCards', { kind: 'stat' })),
+      button(t('debug.itemCard'), () => bus.emit('debugOpenCards', { kind: 'item' })),
       button(t('debug.fillUltimate'), () => bus.emit('debugFillUltimate', {})),
     ),
   );
@@ -122,7 +101,7 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
     ),
   );
   // 다음 조우 칸 유형 강제, 무기 지급, 코인
-  const encSel = select([['', t('debug.encounterRandom')], ...(['treasure', 'merchant', 'skillShop', 'statShop', 'raid', 'magiSpire', 'hiddenBoss'] as const).map((k): [string, string] => [k, t(`encounter.${k}`)])]);
+  const encSel = select([['', t('debug.encounterRandom')], ...(['treasure', 'merchant', 'skillShop', 'raid', 'magiSpire', 'hiddenBoss'] as const).map((k): [string, string] => [k, t(`encounter.${k}`)])]);
   // 스테이지 이동 (지금 빌드 그대로)
   const stageSel = select(
     Array.from({ length: d.mapgen.chapters * d.mapgen.stagesPerChapter }, (_, i): [string, string] => {

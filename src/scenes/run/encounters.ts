@@ -6,10 +6,9 @@ import { Spire } from '../../entities/spire';
 import { Pickup } from '../../entities/pickup';
 import { assignElites, eliteCount, pickTwoElites } from '../../systems/elites';
 import { IMPLEMENTED_ENCOUNTERS } from '../../systems/encounter';
-import { effectiveWeights } from '../../systems/items';
 import { encounterPool, merchantStock, rollCoinDrops, rollEncounter } from '../../systems/loot';
 import { encounterKinds, pickHiddenBoss } from '../../systems/hiddenBoss';
-import { spireEliteCount, spireItemChoices, spireSize, type SpireEvent } from '../../systems/spire';
+import { spireEliteCount, spireSize, type SpireEvent } from '../../systems/spire';
 import { planCombatWaves, RoomState } from '../../systems/roomState';
 import { roomCenter } from '../../systems/worldLayout';
 import type { EncounterKindId, HiddenBossDef } from '../../types/data';
@@ -18,7 +17,7 @@ import type { RunScene } from '../RunScene';
 export class Encounters {
   /** 마기수집첨탑 (조우 칸 하나에 하나) */
   spires: Spire[] = [];
-  /** 강적이 나올 중형 첨탑 (첫 무리 때 소환) */
+  /** 강적이 나올 중형·대형 첨탑 (첫 무리 때 소환) */
   spireStrong = new Set<Spire>();
   /** 처치 중에 생긴 첨탑 이벤트 (다음 updateSpires에서 처리) */
   spireEvents: { sp: Spire; e: SpireEvent }[] = [];
@@ -60,8 +59,8 @@ export class Encounters {
         const label = `${this.run.loot.weaponName(s.weapon)}\n${this.run.ctx.t('merchant.price', { price: s.price })}`;
         this.run.loot.stands.push(new MerchantStand(this.run, s, d.loot.merchantStand, def.spriteKey, x, c.y, label, this.run.loot.gradeColor(s.weapon.grade)));
       });
-    } else if (kind === 'skillShop' || kind === 'statShop') {
-      this.run.loot.openCardShop(this.run.progression.drawShopCards(kind, rng), c);
+    } else if (kind === 'skillShop') {
+      this.run.loot.openCardShop(this.run.progression.drawShopCards(rng), c);
     } else if (kind === 'raid') {
       // 전투 칸보다 웨이브·적 수가 많고, 웨이브마다 엘리트 2마리
       const r = d.loot.raid;
@@ -88,10 +87,10 @@ export class Encounters {
     } else if (kind === 'magiSpire') {
       // 첨탑이 방 가운데로 떨어지고 문이 잠긴다
       this.run.setRoomLocked(roomId, true);
-      const size = spireSize(rng, stage.chapter, stage.stage, d.loot.spire.medium);
+      const size = spireSize(rng, stage.chapter, stage.stage, d.loot.spire);
       const spire = new Spire(this.run, roomId, c.x, c.y, d.loot.spire, size);
-      // 중형: 75% 확률로 강적 1마리 (첫 무리와 함께)
-      if (size === 'medium' && rng.chance(d.loot.spire.medium.strongChance)) this.spireStrong.add(spire);
+      // 중형·대형: 75% 확률로 강적 1마리 (첫 무리와 함께)
+      if (size !== 'small' && rng.chance(d.loot.spire.medium.strongChance)) this.spireStrong.add(spire);
       this.spires.push(spire);
     }
   }
@@ -122,7 +121,7 @@ export class Encounters {
       } else {
         this.run.setRoomLocked(sp.roomId, false);
         this.run.session.player.record.spires++;
-        this.offerSpireItems(sp);
+        this.offerSpireSkills(sp);
       }
     }
   }
@@ -165,15 +164,10 @@ export class Encounters {
     this.run.spawnEnemy(rng.pick(roster), sp.roomId, rng, true, a, b);
   }
 
-  /** 충전 완료 보상: 아이템 카드 3장 중 1장 (확률 이전 반영, 신화는 따로) */
-  offerSpireItems(sp: Spire): void {
-    const d = this.run.ctx.data;
-    const p = this.run.session.player;
-    const { stage } = this.run.session;
-    const rng = Rng.derive(this.run.ctx.config.seed, `spire-items-${stage.chapter}-${stage.stage}-${sp.roomId}`);
-    const weights = effectiveWeights(d.loot.spire[sp.size].weights, stage.chapter, d.items.chapterCommonShift, p.lootShift);
-    const items = spireItemChoices(rng, weights, d.loot.mythicChance, d.items, new Set(p.itemsObtained), d.loot.spire.cards);
-    if (items.length > 0) this.run.progression.queueOffers([{ kind: 'item', boss: false, items }]);
+  /** 충전 완료 보상: 크기별 횟수만큼 스킬 카드 3장 중 1장 */
+  offerSpireSkills(sp: Spire): void {
+    const n = this.run.ctx.data.loot.spire[sp.size].picks;
+    this.run.progression.queueOffers(Array.from({ length: n }, () => ({ kind: 'skill' as const, boss: false, spire: true })));
   }
 
   /** 히든보스 처치: 보스 스킬 카드 1장 → 전용 무기 상자(왼쪽)·전용 아이템 상자(오른쪽) */

@@ -21,7 +21,6 @@ import type {
   PlayerData,
   CardsData,
   SkillsData,
-  StatsData,
   TagsData,
   UltimatesData,
   TextTable,
@@ -31,7 +30,6 @@ import type {
 } from '../types/data';
 import type { KeybindingsData } from '../input/keyboard';
 
-import statsJson from './stats.json';
 import tagsJson from './tags.json';
 import groupMultipliersJson from './groupMultipliers.json';
 import weaponsJson from './weapons.json';
@@ -59,7 +57,6 @@ import soundsJson from './sounds.json';
 import koJson from './text/ko.json';
 
 export interface GameData {
-  stats: StatsData;
   tags: TagsData;
   groupMultipliers: GroupMultipliersData;
   weapons: WeaponsData;
@@ -89,7 +86,6 @@ export interface GameData {
 
 // JSON 리터럴 타입(문자열 등)을 유니온 타입으로 좁히기 위해 unknown을 거친다.
 export const gameData: GameData = {
-  stats: statsJson as unknown as StatsData,
   tags: tagsJson as unknown as TagsData,
   groupMultipliers: groupMultipliersJson as unknown as GroupMultipliersData,
   weapons: weaponsJson as unknown as WeaponsData,

@@ -15,7 +15,7 @@ import { damageKind } from '../../systems/juice';
 import { weaponSfx } from '../../systems/sound';
 import { Explosive } from '../../skills/explosive';
 import { nearestEnemy } from '../../skills/host';
-import { calcDamage, spaceDamage, type RangeBonus } from '../../systems/damage';
+import { calcDamage, spaceDamage, type RangeBonus, type TagBonus } from '../../systems/damage';
 import { gaugeFromDamage, gaugeFromEnergy } from '../../systems/advancement';
 import { itemDamageMultiplier } from '../../systems/items';
 import { chainTargets, lineHits, muzzleAngle, muzzlePoint, shotOrigin } from '../../systems/targeting';
@@ -254,7 +254,7 @@ export class WeaponCombat {
       );
       return;
     }
-    for (const shot of gunShots(w, shotAngle, this.run.rng)) {
+    for (const shot of gunShots(w, shotAngle, this.run.rng, this.run.itemRt.sums.pellets)) {
       this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: chargedCrit(st.critChance, chargeRatio, w.charge?.critAtMax), ricochet: w.ricochet, tint: w.ricochet || w.flame ? w.color : undefined, sprite: w.shot, flame: w.flame?.scaleTo, trail: w.attackParticles?.color });
     }
   }
@@ -668,11 +668,10 @@ export class WeaponCombat {
   hit(enemy: Enemy, base: number, tags: readonly TagId[], source: string | null = null): boolean {
     if (enemy.dead) return false;
     const d = this.run.ctx.data;
-    const stats = this.run.effStats();
-    let dmg = calcDamage({ baseDamage: base, tags }, stats, d.tags, this.rangeBonus());
+    let dmg = calcDamage({ baseDamage: base, tags }, this.tagBonus(), d.tags, this.rangeBonus());
     // 아이템: 피해 %(더한 뒤 한 번), 보스·적이 받는 피해·스킬 피해, 적중 효과(신검 공간격·참마검)
     const boss = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss';
-    const hm = this.run.itemRt.hitMods(this.run.rng, (c) => skillChance(c, 'success', ['chance'], stats, d.tags));
+    const hm = this.run.itemRt.hitMods(this.run.rng, (c) => skillChance(c, 'success', ['chance'], d.tags));
     dmg *= itemDamageMultiplier(this.run.itemRt.sums, this.run.itemRt.extraDamageAll(), boss, source) * hm.mult;
     // 무기 고유 피해 (무기 공격만)
     const eb = source === null ? this.run.weaponDef().equipBonus : undefined;
@@ -722,6 +721,12 @@ export class WeaponCombat {
     if (gain > 0) ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gain);
     if (killed) this.run.onEnemyKilled(enemy);
     return killed;
+  }
+
+  /** 태그별 피해 증가: 아이템 + 들고 있는 무기 */
+  tagBonus(): TagBonus {
+    const it = this.run.itemRt.sums.damage;
+    return { physical: it.physical + (this.run.weaponDef().equipBonus?.physicalDamage ?? 0), magic: it.magic, tech: it.tech };
   }
 
   /** 근접·원거리 피해 증가: 들고 있는 무기 + 아이템 (같은 종류라 더한다) */

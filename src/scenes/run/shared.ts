@@ -28,10 +28,10 @@ export interface Prop {
 }
 
 export interface Offer {
-  kind: CardOfferKind | 'item' | 'school';
+  kind: CardOfferKind | 'school';
   boss: boolean;
-  /** 아이템 선택 카드(첨탑): 미리 뽑아 둔 아이템 */
-  items?: string[];
+  /** 마기수집첨탑 보상 */
+  spire?: boolean;
   /** 학파 선택 카드(전직 동점): 동점인 학파 */
   schools?: SchoolId[];
 }

@@ -107,7 +107,7 @@
     {
       "id": "handi", "nameKey": "weapon.handi", "category": "gun", "grade": "mythic", "tags": ["physical", "ranged"],
       "baseDamage": 10, "fireIntervalSec": 0.35, "energyCost": 1, "pattern": { "kind": "single" }, "pierce": 99,
-      "equipBonus": { "stats": { "strength": 30 }, "rangedDamage": 3 },
+      "equipBonus": { "physicalDamage": 0.6, "rangedDamage": 3 },
       "projectileSpeed": 400, "range": 360, "cutsProjectiles": false, "droppable": false,
       "spriteKey": "weapon_handi", "color": "#ff3b3b", "size": 12
     },

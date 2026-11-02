@@ -179,14 +179,14 @@ export interface ShotSpec {
 }
 
 /** 총: 이번 발사에서 나갈 탄들. 산탄은 부채꼴로 고르게 펼친다. */
-export function gunShots(weapon: WeaponDef, aimAngle: number, rng: Rng): ShotSpec[] {
+export function gunShots(weapon: WeaponDef, aimAngle: number, rng: Rng, extraPellets = 0): ShotSpec[] {
   const p = weapon.pattern;
   if (p.kind === 'single') {
     const jitter = p.jitterDeg ? rng.range(-p.jitterDeg / 2, p.jitterDeg / 2) * (Math.PI / 180) : 0;
     return [{ angle: aimAngle + jitter, speed: weapon.projectileSpeed, range: weapon.range }];
   }
   if (p.kind === 'spread') {
-    const n = rng.int(p.pellets[0], p.pellets[1]);
+    const n = rng.int(p.pellets[0], p.pellets[1]) + extraPellets;
     const spread = (p.spreadDeg * Math.PI) / 180;
     if (n === 1) return [{ angle: aimAngle, speed: weapon.projectileSpeed, range: weapon.range }];
     return Array.from({ length: n }, (_, i) => ({

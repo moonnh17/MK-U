@@ -12,9 +12,8 @@
     "weights": { "common": 62, "rare": 35, "legendary": 3 },
     "prices": { "common": 15, "rare": 30, "legendary": 60, "unique": 120, "mythic": 300 }
   },
-  "skillShop": { "count": 3, "prices": { "skillNew": 50, "skillLevelUp": 50, "awakening": 80 } },
-  "statShop": { "count": 3, "prices": { "low": 25, "mid": 40, "high": 60 } },
-  "encounter": { "weights": { "treasure": 20, "merchant": 16, "skillShop": 10, "statShop": 10, "raid": 25, "magiSpire": 18.5, "hiddenBoss": 0.5 } },
+  "skillShop": { "count": 3, "prices": { "skillNew": 100, "skillLevelUp": 100 } },
+  "encounter": { "weights": { "treasure": 25, "merchant": 21, "skillShop": 10, "raid": 25, "magiSpire": 18.5, "hiddenBoss": 0.5 } },
   "raid": { "waves": [3, 4], "sizeMul": 1.5, "elitesPerWave": 2, "coins": [15, 20] },
   "chest": {
     "weapon": { "spriteKey": "chest_weapon", "color": "#a07a3a", "size": 14 },
@@ -27,24 +26,29 @@
   "spire": {
     "small": {
       "sprite": { "spriteKey": "spire_small", "color": "#15151c", "size": 10, "height": 44 },
-      "weights": { "rare": 62, "legendary": 28, "unique": 10 }
+      "picks": 1
     },
     "medium": {
       "sprite": { "spriteKey": "spire_medium", "color": "#3a0e12", "size": 16, "height": 48 },
-      "weights": { "rare": 42, "legendary": 40, "unique": 18 },
+      "picks": 2,
       "chance": { "2": { "fromStage": 3, "chance": 0.5 }, "3": { "fromStage": 1, "chance": 1 } },
       "strongChance": 0.75
+    },
+    "large": {
+      "sprite": { "spriteKey": "spire_medium", "color": "#3a0e12", "size": 16, "height": 48 },
+      "scale": 1.3,
+      "picks": 3,
+      "chance": { "3": { "fromStage": 1, "chance": 0.5 } }
     },
     "radius": 72,
     "ringColor": "#b04aff",
     "fallSec": 0.7,
     "fallHeight": 220,
     "riseSec": 1.2,
-    "chargePerKill": { "normal": 0.08, "elite": 0.2, "champion": 0.2 },
+    "chargePerKill": { "normal": 0.12, "elite": 0.3, "champion": 0.3 },
     "minAlive": 2,
     "spawnGapSec": 1.5,
     "eliteMul": 2,
-    "troopers": { "enemy": "hectarTrooper", "count": [1, 2] },
-    "cards": 3
+    "troopers": { "enemy": "hectarTrooper", "count": [1, 2] }
   }
 }

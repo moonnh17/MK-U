@@ -204,9 +204,10 @@ describe('식광의 핵', () => {
   });
 });
 
-describe('3장 중형 첨탑', () => {
-  it('3장은 항상 중형', () => {
-    for (let seed = 1; seed < 30; seed++) for (const st of [1, 2, 3, 4, 5]) expect(spireSize(new Rng(seed), 3, st, gameData.loot.spire.medium)).toBe('medium');
+describe('3장 첨탑', () => {
+  it('3장은 대형 아니면 중형, 대형은 스킬 3개', () => {
+    expect(gameData.loot.spire.large.picks).toBe(3);
+    for (let seed = 1; seed < 30; seed++) for (const st of [1, 2, 3, 4, 5]) expect(['medium', 'large']).toContain(spireSize(new Rng(seed), 3, st, gameData.loot.spire));
   });
 });
 

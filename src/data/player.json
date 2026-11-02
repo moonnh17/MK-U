@@ -48,8 +48,7 @@
     "barColor": "#7ad8ff"
   },
   "sanity": {
-    "base": 50,
-    "perWillpower": 5,
+    "base": 100,
     "regenPerSec": 1,
     "bossDrainPerSec": 1,
     "panic": {

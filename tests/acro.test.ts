@@ -10,31 +10,17 @@ import {
   tickCorruption,
   type CorruptionState,
 } from '../src/systems/acro';
-import { startingStats } from '../src/systems/damage';
-import { setStat } from '../src/systems/stats';
 import { combineMods, heal, payHp, takeDamage } from '../src/systems/vitals';
-
-const stats = (int: number) => {
-  const s = startingStats(10);
-  return { ...s, intelligence: int };
-};
 
 describe('대성공·실험 성공 확률', () => {
   const tags = gameData.tags;
-  it('확률 태그가 있으면 지능 보정 (1.03^(지능−10))', () => {
-    expect(skillChance(0.1, 'greatSuccess', ['tech', 'chance'], stats(10), tags)).toBeCloseTo(0.1);
-    expect(skillChance(0.1, 'greatSuccess', ['tech', 'chance'], stats(20), tags)).toBeCloseTo(0.1 * 1.03 ** 10);
-  });
-  it('대성공 상한 60%, 실험 성공 상한 98%', () => {
-    expect(skillChance(0.5, 'greatSuccess', ['chance'], stats(45), tags)).toBe(0.6);
-    expect(skillChance(0.9, 'success', ['chance'], stats(45), tags)).toBe(0.98);
+  it('확률 태그가 있으면 상한을 적용한다: 대성공 60%, 실험 성공 98%', () => {
+    expect(skillChance(0.1, 'greatSuccess', ['tech', 'chance'], tags)).toBeCloseTo(0.1);
+    expect(skillChance(0.7, 'greatSuccess', ['chance'], tags)).toBe(0.6);
+    expect(skillChance(0.99, 'success', ['chance'], tags)).toBe(0.98);
   });
   it('확률 태그가 없으면 기본값 그대로', () => {
-    expect(skillChance(0.1, 'greatSuccess', ['tech'], stats(30), tags)).toBe(0.1);
-  });
-  it('setStat과 함께 써도 같은 값', () => {
-    const p = setStat({ stats: startingStats(10), hp: 100, maxHp: 100 }, 'intelligence', 20, 100, gameData.stats);
-    expect(skillChance(0.2, 'success', ['chance'], p.stats, tags)).toBeCloseTo(0.2 * 1.03 ** 10);
+    expect(skillChance(0.7, 'greatSuccess', ['tech'], tags)).toBe(0.7);
   });
 });
 

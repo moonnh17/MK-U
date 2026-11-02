@@ -1,5 +1,4 @@
 /** 플레이어 상태: 회피(점멸·진격), 정신력·패닉, 보스전 에너지 구슬, 피격 깜빡임. */
-import { statEffect } from '../../systems/stats';
 import { bossHalfOrbs, bossOrbDrops } from '../../systems/bossEnergy';
 import { IDLE_DODGE, blinkTarget, dodgeConfig, startDodge, stepDodge, zigzag, type DodgeState } from '../../systems/dodge';
 import Phaser from 'phaser';
@@ -30,7 +29,7 @@ export class PlayerCondition {
   /** 민첩이 재사용을 줄인다 */
   dodgeCooldownSec(): number {
     const d = this.run.ctx.data;
-    return d.player.dodge.cooldownSec * (1 - statEffect('dodgeCooldown', this.run.effStats(), d.stats));
+    return d.player.dodge.cooldownSec;
   }
 
   updateDodge(dt: number, frame: ActionFrame): void {
@@ -128,7 +127,7 @@ export class PlayerCondition {
     const d = this.run.ctx.data;
     const p = this.run.session.player;
     const cfg = d.player.sanity;
-    const max = sanityMaxFor(this.run.effStats(false).willpower, cfg) + p.meta.sanity;
+    const max = sanityMaxFor(p.meta.sanity + this.run.itemRt.sums.maxSanity, cfg);
     if (max !== p.sanityMax) {
       if (max > p.sanityMax) p.sanity += max - p.sanityMax;
       p.sanityMax = max;

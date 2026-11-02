@@ -12,8 +12,7 @@ import { refracts, tickShield, type ShieldState } from '../../systems/shield';
 import { applyCorruption, skillChance } from '../../systems/acro';
 import { combineMods, heal, payHp, type PlayerMods } from '../../systems/vitals';
 import { cooldownLeft, findSkill, gainGauge, refundCooldown, skillValues } from '../../systems/skills';
-import { statEffect } from '../../systems/stats';
-import { applyBleed, buffDuration, canAutoCast, skillTags } from '../../systems/tags';
+import { applyBleed, canAutoCast, skillTags } from '../../systems/tags';
 import type { BleedRule, SkillDef, SpaceRule, UltimateDef } from '../../types/data';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
@@ -57,7 +56,6 @@ export class SkillRuntime {
       playerPos: () => ({ x: this.run.player.x, y: this.run.player.y }),
       aimDir: () => this.run.aimDir,
       enemies: () => this.run.enemies.filter((e) => !e.dead),
-      stats: () => this.run.effStats(),
       area: (r) => this.area(r),
       hit: (e, base, tags) => this.run.combat.hit(e, base, tags, source),
       hitTrue: (e, amount, space) => {
@@ -73,7 +71,7 @@ export class SkillRuntime {
         const udef = this.ultimateDef();
         ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gaugeFromGreatSuccess(udef));
       },
-      buffDuration: (sec, tags) => buffDuration(sec, tags, this.run.effStats(), ctx.data.tags) * (tags.includes('buff') ? 1 + this.run.itemRt.sums.buffDuration : 1),
+      buffDuration: (sec, tags) => sec * (tags.includes('buff') ? 1 + this.run.itemRt.sums.buffDuration : 1),
       shield: () => this.shield,
       setShield: (shield, opts) => {
         this.shield = shield;
@@ -81,7 +79,7 @@ export class SkillRuntime {
       },
       // 아크룩스(아크로): 대성공 +20%p, 상한 무시
       chance: (base, capKey, tags) =>
-        Math.min(1, skillChance(base, capKey, tags, this.run.effStats(), ctx.data.tags) + (capKey === 'greatSuccess' ? this.run.itemRt.greatSuccess().bonus : 0)),
+        Math.min(1, skillChance(base, capKey, tags, ctx.data.tags) + (capKey === 'greatSuccess' ? this.run.itemRt.greatSuccess().bonus : 0)),
       noGreatFailure: () => this.run.itemRt.greatSuccess().noFailure,
       corrupt: (e, state) => {
         if (!e.dead) e.corruption = applyCorruption(e.corruption, state);
@@ -113,12 +111,12 @@ export class SkillRuntime {
         const p = this.run.session.player;
         const owned = p.loadout.owned[id];
         if (!owned) return;
-        const total = skillValues(findSkill(ctx.data.skills, id), owned).cooldownSec;
+        const total = this.cooldownOf(skillValues(findSkill(ctx.data.skills, id), owned).cooldownSec);
         p.cooldowns = refundCooldown(p.cooldowns, id, total * ratio);
       },
       bleed: (e, base, stacks, tags) => {
         if (e.dead) return;
-        const perStack = calcDamage({ baseDamage: base, tags }, this.run.effStats(), ctx.data.tags, this.run.combat.rangeBonus());
+        const perStack = calcDamage({ baseDamage: base, tags }, this.run.combat.tagBonus(), ctx.data.tags, this.run.combat.rangeBonus());
         e.bleed = applyBleed(e.bleed, perStack, stacks, this.run.tagRule<BleedRule>('bleed'));
       },
       fireBullet: (from, angle, speed, range, base, tags, sprite) => this.run.combat.fireBullet(from, angle, speed, range, base, tags, source, { pierce: 0, crit: 0, sprite }),
@@ -249,18 +247,14 @@ export class SkillRuntime {
     return out;
   }
 
-  /** 스킬 범위 보정 (마기력) */
+  /** 스킬 범위 보정 (아이템) */
   area(radius: number): number {
-    const d = this.run.ctx.data;
-    return radius * (1 + statEffect('skillArea', this.run.effStats(), d.stats)) * (1 + this.run.itemRt.sums.area);
+    return radius * (1 + this.run.itemRt.sums.area);
   }
 
-  /** 기환의 팔: 힘·마기력 범위 보정 (마기력 범위 규칙을 힘에도 같은 식으로) */
-  burstArea(radius: number): number {
-    const d = this.run.ctx.data;
-    const st = this.run.effStats();
-    const byStr = statEffect('skillArea', { ...st, magiPower: st.strength }, d.stats);
-    return radius * (1 + statEffect('skillArea', st, d.stats) + byStr) * (1 + this.run.itemRt.sums.area);
+  /** 아이템의 스킬 쿨타임 감소를 반영한 쿨타임 */
+  cooldownOf(sec: number): number {
+    return sec * (1 - this.run.itemRt.sums.skillCooldown);
   }
 
   /** 근접 스킬은 사거리 안에 적이 있어야 발동한다 */
@@ -283,7 +277,7 @@ export class SkillRuntime {
       return;
     }
     if (impl.cast(this.hostFor(id), { def, owned, values: sv.values })) {
-      p.cooldowns = { ...p.cooldowns, [id]: sv.cooldownSec };
+      p.cooldowns = { ...p.cooldowns, [id]: this.cooldownOf(sv.cooldownSec) };
       sfx('skill');
     }
   }
@@ -332,7 +326,7 @@ export class SkillRuntime {
         level: owned.level,
         awakened: owned.awakened,
         cooldownLeft: active ? cooldownLeft(p.cooldowns, id) : 0,
-        cooldownTotal: sv.cooldownSec,
+        cooldownTotal: this.cooldownOf(sv.cooldownSec),
         gauge: 0,
         usable: !active || this.skillUsable(def, owned.awakened, sv.values),
         color: def.color,
@@ -341,7 +335,6 @@ export class SkillRuntime {
     };
     const ult = this.ultimateDef();
     this.run.session.buffs = this.buffViews();
-    this.run.session.effStats = this.run.effStats();
     this.run.session.skillView = [
       ...p.loadout.active.map((id) => slot(id, true)),
       {

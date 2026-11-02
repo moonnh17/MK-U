@@ -11,9 +11,6 @@ import { enemyStageScale } from '../src/systems/champions';
 import { readyWeaponSet } from '../src/systems/items';
 import { weaponPose } from '../src/systems/motion';
 import { chargedCrit, spinUpMul, weaponStats } from '../src/systems/weapons';
-import { statSheetLines } from '../src/systems/statSheet';
-import { maxEnergyFor, statEffect } from '../src/systems/stats';
-import { startingStats } from '../src/systems/damage';
 
 const D = gameData;
 const hp = (id: string) => D.enemies.enemies.find((e) => e.id === id)!.maxHp;
@@ -76,11 +73,11 @@ describe('전투 없는 방', () => {
   it('평화로운 칸 확률은 보물·상인 가중치와 맞는다', () => {
     const w = D.loot.encounter.weights;
     const sum = Object.values(w).reduce((a, b) => a + b, 0);
-    expect(D.mapgen.encounterPeaceful.chance).toBeCloseTo((w.treasure + w.merchant + w.skillShop + w.statShop) / sum, 2);
+    expect(D.mapgen.encounterPeaceful.chance).toBeCloseTo((w.treasure + w.merchant + w.skillShop) / sum, 2);
   });
   it('평화로운 칸은 보물·상점만, 아니면 전투 유형만', () => {
     const all = new Set(Object.keys(D.loot.encounter.weights) as (keyof typeof D.loot.encounter.weights)[]);
-    expect([...encounterPool(all, true)].sort()).toEqual(['merchant', 'skillShop', 'statShop', 'treasure']);
+    expect([...encounterPool(all, true)].sort()).toEqual(['merchant', 'skillShop', 'treasure']);
     expect(encounterPool(all, false).has('merchant')).toBe(false);
     expect(encounterPool(all, false).has('raid')).toBe(true);
   });
@@ -90,25 +87,7 @@ describe('전투 없는 방', () => {
   });
 });
 
-describe('스탯', () => {
-  const base = startingStats(D.stats.startValue);
-  it('민첩이 회피 재사용을 줄인다', () => {
-    expect(statEffect('dodgeCooldown', base, D.stats)).toBe(0);
-    expect(statEffect('dodgeCooldown', { ...base, agility: 30 }, D.stats)).toBeGreaterThan(0);
-    expect(D.stats.effects.dodgeCooldown.cap).toBeLessThan(0.5);
-  });
-  it('정보창 줄: 스탯별로 효과가 있고 문구가 있다', () => {
-    for (const s of D.stats.stats) {
-      const lines = statSheetLines(s.id, base, D.stats, D.tags, D.player.sanity);
-      expect(lines.length, s.id).toBeGreaterThan(0);
-      for (const l of lines) expect(D.text[l.key], l.key).toBeTypeOf('string');
-    }
-  });
-  it('정보창 줄: 값이 스탯을 따라 오른다', () => {
-    const v = (st: typeof base) => statSheetLines('strength', st, D.stats, D.tags, D.player.sanity).find((l) => l.key === 'sheet.tag.physical')!.value;
-    expect(v({ ...base, strength: 20 })).toBeCloseTo(40);
-    expect(statSheetLines('willpower', base, D.stats, D.tags, D.player.sanity).at(-1)).toEqual({ key: 'sheet.sanityMax', value: 100 });
-  });
+describe('정신력', () => {
   it('정신력 회복이 느려졌다', () => {
     expect(D.player.sanity.regenPerSec).toBeLessThan(2);
   });
@@ -123,13 +102,12 @@ describe('화면 수치', () => {
   });
 });
 
-describe('스킬·스탯 상점', () => {
+describe('스킬 상점', () => {
   const owned = { level: 1, awakened: false, order: 0 };
   const lo = (o: Record<string, typeof owned>) => ({ active: [null, null, null, null], passive: null, owned: o }) as never;
-  it('카드 종류·등급별 가격', () => {
+  it('카드 종류별 가격: 스킬 상점 100', () => {
     expect(cardPrice({ kind: 'skillNew', skillId: 'x' }, D.loot)).toBe(D.loot.skillShop.prices.skillNew);
-    expect(cardPrice({ kind: 'awakening', skillId: 'x' }, D.loot)).toBe(D.loot.skillShop.prices.awakening);
-    for (const g of D.cards.statGrades) expect(cardPrice({ kind: 'stat', stat: 'strength', amount: g.amount, grade: g.id }, D.loot)).toBeGreaterThan(0);
+    expect(D.loot.skillShop.prices).toEqual({ skillNew: 100, skillLevelUp: 100 });
   });
   it('진열 카드는 아직 안 팔렸다', () => {
     expect(cardStock([{ kind: 'skillNew', skillId: 'x' }], D.loot)[0]).toMatchObject({ sold: false, price: D.loot.skillShop.prices.skillNew });
@@ -138,8 +116,6 @@ describe('스킬·스탯 상점', () => {
     expect(cardStillValid({ kind: 'skillNew', skillId: 'magiField' }, lo({}), D.skills)).toBe(true);
     expect(cardStillValid({ kind: 'skillNew', skillId: 'magiField' }, lo({ magiField: owned }), D.skills)).toBe(false);
     expect(cardStillValid({ kind: 'skillLevelUp', skillId: 'magiField' }, lo({ magiField: { ...owned, level: D.skills.maxLevel } }), D.skills)).toBe(false);
-    expect(cardStillValid({ kind: 'awakening', skillId: 'magiField' }, lo({ magiField: { ...owned, awakened: true } }), D.skills)).toBe(false);
-    expect(cardStillValid({ kind: 'stat', stat: 'strength', amount: 3, grade: 'low' }, lo({}), D.skills)).toBe(true);
   });
 });
 
@@ -242,15 +218,7 @@ describe('무기 옵션·치명타', () => {
   });
 });
 
-describe('힘과 에너지', () => {
-  const base = startingStats(D.stats.startValue);
-  it('힘 1당 최대 에너지 +5, 상한이 있고 정보창에 숫자 그대로 보인다', () => {
-    const max = D.player.energy.max;
-    expect(maxEnergyFor(max, base, D.stats)).toBe(max);
-    expect(maxEnergyFor(max, { ...base, strength: 20 }, D.stats)).toBe(max + 50);
-    expect(maxEnergyFor(max, { ...base, strength: 999 }, D.stats)).toBe(max + D.stats.effects.maxEnergy.cap);
-    expect(statSheetLines('strength', { ...base, strength: 20 }, D.stats, D.tags, D.player.sanity)).toContainEqual({ key: 'sheet.effect.maxEnergy', value: 50 });
-  });
+describe('에너지', () => {
   it('에너지 구슬 하나가 6', () => {
     expect(D.player.energy.orbValue).toBe(6);
   });

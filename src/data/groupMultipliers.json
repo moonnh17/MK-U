@@ -6,5 +6,5 @@
     { "id": "unique", "nameKey": "grade.unique", "color": "#a45cff", "damageMultiplier": 2.5, "energyMultiplier": 2.5, "randomOptions": 0 },
     { "id": "mythic", "nameKey": "grade.mythic", "color": "#ff3b3b", "damageMultiplier": 3, "energyMultiplier": 3, "randomOptions": 0 }
   ],
-  "itemGroups": { "statFlat": 1, "hpFlat": 1, "damagePct": 1, "procDamage": 0.05, "area": 0.3, "cooldown": 1 }
+  "itemGroups": { "hpFlat": 1, "damagePct": 1, "procDamage": 0.05, "area": 0.3, "cooldown": 1 }
 }

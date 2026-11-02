@@ -572,42 +572,6 @@
       "frames": 1,
       "density": 2
     },
-    "icon_stat_strength": {
-      "file": "mku/icon_stat_strength.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
-    },
-    "icon_stat_toughness": {
-      "file": "mku/icon_stat_toughness.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
-    },
-    "icon_stat_agility": {
-      "file": "mku/icon_stat_agility.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
-    },
-    "icon_stat_intelligence": {
-      "file": "mku/icon_stat_intelligence.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
-    },
-    "icon_stat_magiPower": {
-      "file": "mku/icon_stat_magiPower.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
-    },
-    "icon_stat_willpower": {
-      "file": "mku/icon_stat_willpower.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
-    },
     "icon_skill_magiTurret": {
       "file": "mku/icon_skill_magiTurret.png",
       "frameWidth": 64,
@@ -778,12 +742,6 @@
     },
     "item_magowiki_codex": {
       "file": "mku/item_magowiki_codex.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
-    },
-    "item_lsd_r": {
-      "file": "mku/item_lsd_r.png",
       "frameWidth": 64,
       "frameHeight": 64,
       "frames": 1

@@ -9,7 +9,6 @@ import type { BuffView } from '../core/session';
 import type { Rng } from '../core/rng';
 import type { Enemy } from '../entities/enemy';
 import type { CorruptionState } from '../systems/acro';
-import type { Stats } from '../systems/damage';
 import type { ShieldState } from '../systems/shield';
 import type { OwnedSkill } from '../systems/skills';
 import type { PlayerMods } from '../systems/vitals';
@@ -24,7 +23,6 @@ export interface SkillHost {
   aimDir(): Vec2;
   /** 살아 있는 적 */
   enemies(): readonly Enemy[];
-  stats(): Stats;
   /** 스킬 범위(반지름) 보정: 마기력 */
   area(radius: number): number;
   /** 피해 한 번. base는 태그 보정 전 값, tags는 이 공격(source)의 태그. 이번에 죽였으면 true */

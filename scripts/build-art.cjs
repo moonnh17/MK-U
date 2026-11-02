@@ -294,8 +294,6 @@ sprites.fx_spawn = sheet('fx_spawn', single('fusion/vfx-smoke.png'), 26);
 // ---------- 스킬·궁극기 아이콘 ----------
 // 카드 창에서 크게 보여 주므로 넉넉하게 만든다
 const CARD_ICON = 64;
-const STAT_ICON = { strength: 'strength', toughness: 'fortitude', agility: 'agility', intelligence: 'intellect', magiPower: 'magic', willpower: 'spirit' };
-for (const [id, f] of Object.entries(STAT_ICON)) sprites[`icon_stat_${id}`] = icon(`icon_stat_${id}`, `icons/${f}.png`, CARD_ICON);
 const SKILL_ICON = {
   magiTurret: 'turret', magiMine: 'mine', antimatterCannon: 'antimatter', magiField: 'field', railgun: 'rail', combatDrone: 'drone',
   unstableSubject: 'specimen', magiCorruption: 'mutate', experimentalWeapon: 'laser', purifyingWings: 'purify', mkPrototype: 'mk', reductionist: 'reduction',
@@ -319,7 +317,6 @@ const ITEM = {
   item_slime_stew: 'items/stew.png', item_magicasol: 'items/magi-casol.png', item_nameless_sword: 'items/nameless-sword.png', item_nameless_helm: 'items/nameless-helm.png',
   item_broken_hilt: 'items/broken-sheath.png', item_elegant_magi: 'items/elegant-magi.png', item_antimatter_sample: 'items/experimental-antimatter.png',
   item_combat_theory: 'items/combat-application.png', item_oak_heart: 'items/oak-heart.png', item_hanwoo_steak: 'items/raw-beef.png', item_lee_seal: 'items/lee-seal.png',
-  item_magowiki_codex: 'items/magowiki.png', item_lsd_r: 'items/lsd-r.png', item_afro_belt: 'items/afro-belt.png',
   item_regulus_shard: 'items/regulus.png', item_caesar_crown: 'items/caesar.png', item_acrux_cross: 'items/acrux.png', item_orion_belt: 'items/betelgeuse.png',
   item_warrior_memory: 'warrior/icon-mastery-weapon.png', item_atros_codex: 'codex/simple-paper.png',
   item_divine_sword: 'items/sword-youngdi.png', item_hectar_ram: 'items/hectar-ram.png',

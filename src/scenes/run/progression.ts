@@ -3,14 +3,14 @@ import type { ActionFrame } from '../../core/actions';
 import { bus } from '../../core/events';
 import { Rng } from '../../core/rng';
 import { isSkillImplemented } from '../../skills/registry';
-import { applyCard, drawSkillCards, drawStatCards, type AnyCard, type Card } from '../../systems/cards';
-import { convertSkills, judgeSchool, skillAllowed, topSchools, ultimateAwakeningReady } from '../../systems/advancement';
+import { applyCard, drawSkillCards, type AnyCard, type Card } from '../../systems/cards';
+import { convertSkills, judgeSchool, skillAllowed, topSchools } from '../../systems/advancement';
 import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type Cutscene } from '../../ui/cutscenePages';
 import { type RoomNode } from '../../systems/mapgen';
 import { registerCutscene, registerGemini } from '../../core/save';
 import { hasLines, MiniQueue, pickMini, saidKeys, storyFor } from '../../systems/gemini';
-import { equipSkill, findSkill, skillValues } from '../../systems/skills';
-import { addStat } from '../../systems/stats';
+import { effectiveWeights, itemChoices } from '../../systems/items';
+import { awakenSkill, awakeningReady, equipSkill, findSkill, skillValues } from '../../systems/skills';
 import { roomCenter } from '../../systems/worldLayout';
 import type { GeminiEventId, SchoolId } from '../../types/data';
 import type { RunScene } from '../RunScene';
@@ -85,20 +85,17 @@ export class Progression {
       bus.emit('cardsShow', { titleKey: 'card.title.school', cards, reroll: null });
       return;
     }
-    if (next.kind === 'item') {
-      // 아이템 선택 카드(첨탑): 미리 뽑아 둔 아이템, 리롤 없음
-      const cards = (next.items ?? []).map((itemId) => ({ kind: 'item' as const, itemId }));
-      this.currentCards = cards;
-      this.run.setModal('cards');
-      bus.emit('cardsShow', { titleKey: 'card.title.spire', cards, reroll: null });
+    const cards: AnyCard[] = next.kind === 'skill' ? this.drawSkills(rng) : this.drawItems(rng);
+    // 고를 것이 없으면(스킬 만렙·아이템 소진) 건너뛴다
+    if (cards.length === 0) {
+      this.openNextCards();
       return;
     }
-    const cards = next.kind === 'skill' ? this.drawSkills(rng) : drawStatCards(rng, d.cards.cardCount, d.cards);
     this.currentCards = cards;
     this.run.setModal('cards');
     const cost = d.cards.rerollCost;
     bus.emit('cardsShow', {
-      titleKey: next.boss ? 'card.title.boss' : `card.title.${next.kind}`,
+      titleKey: next.boss ? 'card.title.boss' : next.spire ? 'card.title.spire' : `card.title.${next.kind}`,
       cards,
       reroll: { cost, enabled: !this.rerolled && p.coins >= cost, used: this.rerolled },
     });
@@ -107,49 +104,65 @@ export class Progression {
   private drawSkills(rng: Rng): Card[] {
     const d = this.run.ctx.data;
     const p = this.run.session.player;
-    return drawSkillCards(rng, p.loadout, p.stats, d.skills, d.cards, (id) => isSkillImplemented(id) && skillAllowed(findSkill(d.skills, id), p.advancement));
+    return drawSkillCards(rng, p.loadout, d.skills, d.cards, (id) => isSkillImplemented(id) && skillAllowed(findSkill(d.skills, id), p.advancement));
+  }
+
+  /** 아이템 카드: 보물 상자와 같은 가중치 */
+  private drawItems(rng: Rng): AnyCard[] {
+    const d = this.run.ctx.data;
+    const p = this.run.session.player;
+    const weights = effectiveWeights(d.items.treasureWeights, this.run.session.stage.chapter, d.items.chapterCommonShift, p.lootShift);
+    return itemChoices(rng, weights, d.loot.mythicChance, d.items, new Set(p.itemsObtained), d.cards.cardCount).map((itemId) => ({ kind: 'item', itemId }));
   }
 
   /** 상점 진열: 카드 보상과 같은 규칙으로 뽑는다 */
-  drawShopCards(kind: 'skillShop' | 'statShop', rng: Rng): Card[] {
-    const d = this.run.ctx.data;
-    return kind === 'skillShop' ? this.drawSkills(rng).slice(0, d.loot.skillShop.count) : drawStatCards(rng, d.loot.statShop.count, d.cards);
+  drawShopCards(rng: Rng): Card[] {
+    return this.drawSkills(rng).slice(0, this.run.ctx.data.loot.skillShop.count);
   }
 
-  /** 카드 보상을 받는다 (상점 구매도 같다). 각성이면 연출을 다 본 뒤 then */
+  /** 각성 조건(Lv3 + 아이템)을 채운 스킬·궁극기를 각성시키고 연출을 돌려준다 */
+  private collectAwakenings(): Cutscene[] {
+    const d = this.run.ctx.data;
+    const p = this.run.session.player;
+    const cuts: Cutscene[] = [];
+    for (const id of awakeningReady(p.loadout, d.skills, p.items)) {
+      p.loadout = awakenSkill(p.loadout, id);
+      cuts.push(skillAwakeningCut(this.run.ctx, id));
+    }
+    const u = this.checkUltimateAwakening();
+    if (u) cuts.push(u);
+    if (cuts.length > 0) {
+      this.run.skillRt.refreshSkillView();
+      bus.emit('inventoryChanged', {});
+    }
+    return cuts;
+  }
+
+  /** 스킬 레벨이나 아이템이 바뀐 뒤: 각성할 것이 있으면 연출을 보여 주고 then */
+  checkAwakenings(then: () => void = () => {}): void {
+    this.playCutscenes(this.collectAwakenings(), then);
+  }
+
+  /** 카드 보상을 받는다 (상점 구매도 같다). 각성하면 연출을 다 본 뒤 then */
   grantCard(card: Card, then: () => void): void {
     const d = this.run.ctx.data;
     const t = this.run.ctx.t;
-    const before = { hp: this.run.session.player.hp, maxHp: this.run.session.player.maxHp };
-    const r = applyCard(this.run.session.player, card, { skills: d.skills, stats: d.stats, baseMaxHp: d.player.maxHp });
-    this.run.session.player = { ...r.holder, ...before };
-    this.run.syncMaxHp();
-    if (card.kind === 'stat') {
-      bus.emit('toast', { text: t('skillMsg.statUp', { stat: t(`stat.${card.stat}`), amount: card.amount }) });
-    } else {
-      const def = findSkill(d.skills, card.skillId);
-      const owned = r.holder.loadout.owned[card.skillId]!;
-      const skill = t(def.nameKey);
-      if (card.kind === 'skillNew') bus.emit('toast', { text: t('skillMsg.acquired', { skill }) });
-      else if (card.kind === 'skillLevelUp') bus.emit('toast', { text: t('skillMsg.levelUp', { skill, level: owned.level }) });
-      if (r.stored) bus.emit('storedNotice', { skillId: card.skillId });
-      if (card.kind === 'awakening') {
-        // 각성: 컷인 → 설명창, 궁극기 각성 조건을 채웠으면 이어서
-        const cuts = [skillAwakeningCut(this.run.ctx, card.skillId, r.holder.stats)];
-        const u = this.checkUltimateAwakening();
-        if (u) cuts.push(u);
-        this.playCutscenes(cuts, then);
-        return;
-      }
-    }
-    then();
+    const r = applyCard(this.run.session.player, card, { skills: d.skills });
+    this.run.session.player = r.holder;
+    const def = findSkill(d.skills, card.skillId);
+    const owned = r.holder.loadout.owned[card.skillId]!;
+    const skill = t(def.nameKey);
+    if (card.kind === 'skillNew') bus.emit('toast', { text: t('skillMsg.acquired', { skill }) });
+    else bus.emit('toast', { text: t('skillMsg.levelUp', { skill, level: owned.level }) });
+    if (r.stored) bus.emit('storedNotice', { skillId: card.skillId });
+    this.checkAwakenings(then);
   }
 
   /** 카드창마다 1회, 코인으로 다시 뽑기 */
   rerollCards(): void {
     const p = this.run.session.player;
     const cost = this.run.ctx.data.cards.rerollCost;
-    if (this.run.modal !== 'cards' || this.rerolled || !this.currentOffer || this.currentOffer.kind === 'item' || this.currentOffer.kind === 'school' || p.coins < cost) return;
+    if (this.run.modal !== 'cards' || this.rerolled || !this.currentOffer || this.currentOffer.kind === 'school' || p.coins < cost) return;
     p.coins -= cost;
     this.rerolled = true;
     this.showCards();
@@ -161,7 +174,7 @@ export class Progression {
     sfx('cardPick');
     if (card.kind === 'item') {
       this.run.loot.giveItem(card.itemId);
-      this.openNextCards();
+      this.checkAwakenings(() => this.openNextCards());
       return;
     }
     if (card.kind === 'school') {
@@ -244,19 +257,14 @@ export class Progression {
     f?.();
   }
 
-  /** 자기 학파 각성 2개면 궁극기를 자동 각성한다. 이번에 각성했으면 연출을 돌려준다 */
+  /** 요구 아이템이 있으면 학파 궁극기를 자동 각성한다. 이번에 각성했으면 연출을 돌려준다 */
   checkUltimateAwakening(): Cutscene | null {
-    const d = this.run.ctx.data;
     const p = this.run.session.player;
     const def = this.run.skillRt.ultimateDef();
     if (p.ultimate.awakened || !def.awakening || !def.school || p.advancement !== def.school) return null;
-    if (!ultimateAwakeningReady(p.loadout, d.skills, def.school, d.ultimates.awakeningNeed)) return null;
+    if (!p.items.includes(def.awakening.requiredItem)) return null;
     p.ultimate.awakened = true;
-    const ids = Object.entries(p.loadout.owned)
-      .filter(([id, o]) => o.awakened && findSkill(d.skills, id).school === def.school)
-      .sort((a, b) => a[1].order - b[1].order)
-      .map(([id]) => id);
-    return ultimateAwakeningCut(this.run.ctx, def, ids, d.ultimates.awakeningNeed);
+    return ultimateAwakeningCut(this.run.ctx, def);
   }
 
   /** 보스방 카드 뒤: 챕터1 마지막 보스면 전직, 그다음 포털 */
@@ -301,15 +309,11 @@ export class Progression {
   /** 스킬 변환 → 궁극기 교체 → 연출 */
   advanceTo(school: SchoolId, then: () => void): void {
     const d = this.run.ctx.data;
-    let p = this.run.session.player;
+    const p = this.run.session.player;
     const job = d.jobs.jobs.find((j) => j.id === p.job)!;
     const adv = job.advancements.find((a) => a.id === school)!;
-    const r = convertSkills(Rng.derive(this.run.ctx.config.seed, 'advancement'), p.loadout, p.stats, d.skills, school, d.jobs.conversionStatAmount);
-    p = { ...p, loadout: r.loadout };
-    // 스탯 포인트는 견고(최대 체력)까지 반영되게 하나씩 더한다
-    const before = { hp: p.hp, maxHp: p.maxHp };
-    for (const s of r.log.stats) p = addStat(p, s.stat, s.amount, d.player.maxHp, d.stats);
-    p = { ...p, ...before };
+    const r = convertSkills(Rng.derive(this.run.ctx.config.seed, 'advancement'), p.loadout, d.skills, school);
+    p.loadout = r.loadout;
     const removed = new Set(r.log.removed.map((x) => x.skillId));
     p.cooldowns = Object.fromEntries(Object.entries(p.cooldowns).filter(([id]) => !removed.has(id)));
     for (const o of this.run.skillRt.skillObjects.filter((x) => removed.has(x.owner.split('.')[0]!))) this.run.skillRt.removeObject(o);
@@ -317,11 +321,8 @@ export class Progression {
     p.ultimate = { id: adv.ultimate!, gauge: 0, awakened: false };
     p.advancement = school;
     p.advancementLog = r.log;
-    this.run.session.player = p;
     this.run.applyPlayerArt();
-    const cuts = [advancementCut(this.run.ctx, { jobNameKey: job.nameKey, adv, picks: p.schoolPicks, fromUlt, toUlt: this.run.skillRt.ultimateDef(), log: r.log })];
-    const u = this.checkUltimateAwakening();
-    if (u) cuts.push(u);
+    const cuts = [advancementCut(this.run.ctx, { jobNameKey: job.nameKey, adv, picks: p.schoolPicks, fromUlt, toUlt: this.run.skillRt.ultimateDef(), log: r.log }), ...this.collectAwakenings()];
     this.run.skillRt.refreshSkillView();
     bus.emit('inventoryChanged', {});
     this.playCutscenes(cuts, () => {
@@ -347,7 +348,7 @@ export class Progression {
     // 보관함에서 꺼낸 스킬은 쿨타임이 처음부터 돈다
     for (const id of r.restarted) {
       const sv = skillValues(findSkill(d.skills, id), p.loadout.owned[id]!);
-      if (sv.cooldownSec > 0) p.cooldowns = { ...p.cooldowns, [id]: sv.cooldownSec };
+      if (sv.cooldownSec > 0) p.cooldowns = { ...p.cooldowns, [id]: this.run.skillRt.cooldownOf(sv.cooldownSec) };
     }
     this.run.skillRt.refreshSkillView();
     bus.emit('inventoryChanged', {});

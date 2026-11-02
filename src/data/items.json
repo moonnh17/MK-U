@@ -19,11 +19,11 @@
       "effects": [{ "kind": "maxHp", "value": 10, "group": "hpFlat" }],
       "spriteKey": "item_nameless_helm", "color": "#9aa4b0", "size": 8 },
     { "id": "brokenHilt", "nameKey": "item.brokenHilt", "descKey": "item.brokenHilt.desc", "grade": "common", "pool": "normal", "tags": [],
-      "effects": [{ "kind": "stat", "stat": "toughness", "value": 2, "group": "statFlat" }],
+      "effects": [{ "kind": "maxHp", "value": 4, "group": "hpFlat" }],
       "spriteKey": "item_broken_hilt", "color": "#8a7a5a", "size": 8 },
 
     { "id": "elegantMagi", "nameKey": "item.elegantMagi", "descKey": "item.elegantMagi.desc", "grade": "rare", "pool": "normal", "tags": [],
-      "effects": [{ "kind": "stat", "stat": "intelligence", "value": 6, "group": "statFlat" }],
+      "effects": [{ "kind": "damage", "scope": "tech", "value": 0.15, "group": "damagePct" }],
       "spriteKey": "item_elegant_magi", "color": "#4a8cff", "size": 8 },
     { "id": "antimatterSample", "nameKey": "item.antimatterSample", "descKey": "item.antimatterSample.desc", "grade": "legendary", "pool": "normal", "tags": ["tech", "ranged", "charging"],
       "effects": [
@@ -41,7 +41,7 @@
     { "id": "oakHeart", "nameKey": "item.oakHeart", "descKey": "item.oakHeart.desc", "grade": "rare", "pool": "normal", "tags": ["buff"],
       "effects": [
         { "kind": "buffDuration", "value": 0.2, "group": "damagePct" },
-        { "kind": "stat", "stat": "agility", "value": 5, "group": "statFlat" },
+        { "kind": "moveSpeed", "value": 0.08, "group": "damagePct" },
         { "kind": "tempRoar", "everySec": 10, "durationSec": 5, "damage": 0.1, "moveSpeed": 0.1 }
       ],
       "variants": [{ "job": "barbarian", "effects": [] }],
@@ -58,32 +58,30 @@
       "spriteKey": "item_lee_seal", "color": "#ffd23f", "size": 8 },
     { "id": "magowikiCodex", "nameKey": "item.magowikiCodex", "descKey": "item.magowikiCodex.desc", "grade": "legendary", "pool": "normal", "tags": [],
       "effects": [
-        { "kind": "stat", "stat": "all", "value": 5, "group": "statFlat" },
+        { "kind": "damage", "scope": "all", "value": 0.1, "group": "damagePct" },
+        { "kind": "maxHp", "value": 10, "group": "hpFlat" },
         { "kind": "enemyTaken", "value": 0.05, "group": "damagePct" }
       ],
       "spriteKey": "item_magowiki_codex", "color": "#e0c060", "size": 8 },
-    { "id": "lsdR", "nameKey": "item.lsdR", "descKey": "item.lsdR.desc", "grade": "legendary", "pool": "normal", "tags": [],
-      "effects": [{ "kind": "statReshuffle", "base": 5, "willpower": 1 }],
-      "spriteKey": "item_lsd_r", "color": "#e070c0", "size": 8 },
     { "id": "gisupStone", "nameKey": "item.gisupStone", "descKey": "item.gisupStone.desc", "grade": "legendary", "pool": "normal", "tags": [],
       "effects": [
-        { "kind": "stat", "stat": "magiPower", "value": 10, "group": "statFlat" },
-        { "kind": "stat", "stat": "willpower", "value": -5, "group": "statFlat" },
+        { "kind": "damage", "scope": "magic", "value": 0.2, "group": "damagePct" },
+        { "kind": "maxSanity", "value": -5, "group": "hpFlat" },
         { "kind": "damage", "scope": "all", "value": 0.15, "group": "damagePct" },
-        { "kind": "panicAwaken", "hpPerSec": 2, "allStats": 15 }
+        { "kind": "panicAwaken", "hpPerSec": 2, "damage": 0.3 }
       ],
-      "variants": [{ "job": "paladin", "effects": [{ "kind": "stat", "stat": "toughness", "value": 10, "group": "statFlat" }] }],
+      "variants": [{ "job": "paladin", "effects": [{ "kind": "maxHp", "value": 20, "group": "hpFlat" }] }],
       "spriteKey": "item_gisup_stone", "color": "#7a8a9a", "size": 8 },
 
     { "id": "afroBelt", "nameKey": "item.afroBelt", "descKey": "item.afroBelt.desc", "grade": "unique", "pool": "normal", "tags": [],
       "effects": [
-        { "kind": "stat", "stat": "toughness", "value": 10, "group": "statFlat" },
-        { "kind": "stat", "stat": "agility", "value": 20, "group": "statFlat" }
+        { "kind": "maxHp", "value": 20, "group": "hpFlat" },
+        { "kind": "moveSpeed", "value": 0.3, "group": "damagePct" }
       ],
       "spriteKey": "item_afro_belt", "color": "#a45cff", "size": 8 },
     { "id": "regulusShard", "nameKey": "item.regulusShard", "descKey": "item.regulusShard.desc", "grade": "unique", "pool": "normal", "tags": ["tech", "ranged"],
       "effects": [
-        { "kind": "stat", "stat": "intelligence", "value": 10, "group": "statFlat" },
+        { "kind": "damage", "scope": "tech", "value": 0.2, "group": "damagePct" },
         { "kind": "coinGain", "value": 0.2, "group": "damagePct" },
         { "kind": "coinShots", "perCoins": 30, "shots": 5, "damage": 700, "range": 300, "tags": ["tech", "ranged"] },
         { "kind": "revive", "invulnSec": 3, "school": "hectar" }
@@ -92,13 +90,13 @@
     { "id": "caesarCrown", "nameKey": "item.caesarCrown", "descKey": "item.caesarCrown.desc", "grade": "unique", "pool": "normal", "tags": [],
       "effects": [
         { "kind": "damage", "scope": "all", "value": 0.2, "group": "damagePct" },
-        { "kind": "stat", "stat": "strength", "value": 10, "group": "statFlat" },
+        { "kind": "damage", "scope": "physical", "value": 0.2, "group": "damagePct" },
         { "kind": "killStacks", "perKills": 5, "value": 0.01, "max": 2.0, "hurtKeep": 0.5 }
       ],
       "spriteKey": "item_caesar_crown", "color": "#ffd23f", "size": 8 },
     { "id": "acruxCross", "nameKey": "item.acruxCross", "descKey": "item.acruxCross.desc", "grade": "unique", "pool": "normal", "tags": [],
       "effects": [
-        { "kind": "stat", "stat": "willpower", "value": 20, "group": "statFlat" },
+        { "kind": "maxSanity", "value": 20, "group": "hpFlat" },
         { "kind": "damage", "scope": "all", "value": 0.1, "group": "damagePct" },
         { "kind": "revive", "invulnSec": 3 },
         { "kind": "reflect", "ratio": 1.0 },
@@ -107,7 +105,7 @@
       "spriteKey": "item_acrux_cross", "color": "#e0e0ff", "size": 8 },
     { "id": "orionBelt", "nameKey": "item.orionBelt", "descKey": "item.orionBelt.desc", "grade": "unique", "pool": "normal", "tags": ["magic", "ranged"],
       "effects": [
-        { "kind": "stat", "stat": "magiPower", "value": 15, "group": "statFlat" },
+        { "kind": "damage", "scope": "magic", "value": 0.3, "group": "damagePct" },
         { "kind": "damage", "scope": "ranged", "value": 0.2, "group": "damagePct" },
         { "kind": "gravityShot", "everySec": 5, "damage": 500, "radius": 150, "pull": 30, "range": 260, "tags": ["magic", "ranged"] }
       ],
@@ -121,6 +119,33 @@
       "spriteKey": "item_divine_sword", "color": "#ff3b3b", "size": 8 },
 
 
+    { "id": "extraArms", "nameKey": "item.extraArms", "descKey": "item.extraArms.desc", "grade": "rare", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "pellets", "value": 1 }],
+      "spriteKey": "icon_skill_magiTurret", "color": "#5a8ad9", "size": 8 },
+    { "id": "magnetResonator", "nameKey": "item.magnetResonator", "descKey": "item.magnetResonator.desc", "grade": "rare", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "damage", "scope": "tech", "value": 0.1, "group": "damagePct" }, { "kind": "damage", "scope": "magic", "value": 0.1, "group": "damagePct" }],
+      "spriteKey": "icon_skill_magiMine", "color": "#5a8ad9", "size": 8 },
+    { "id": "snellLaw", "nameKey": "item.snellLaw", "descKey": "item.snellLaw.desc", "grade": "rare", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "damage", "scope": "tech", "value": 0.1, "group": "damagePct" }, { "kind": "coinGain", "value": 0.1, "group": "damagePct" }],
+      "spriteKey": "icon_skill_magiField", "color": "#5a8ad9", "size": 8 },
+    { "id": "lk99", "nameKey": "item.lk99", "descKey": "item.lk99.desc", "grade": "legendary", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "damage", "scope": "all", "value": 0.2, "group": "damagePct" }, { "kind": "coinGain", "value": 0.1, "group": "damagePct" }, { "kind": "skillCooldown", "value": 0.1, "group": "damagePct" }],
+      "spriteKey": "icon_skill_railgun", "color": "#ffd23f", "size": 8 },
+    { "id": "helaCell", "nameKey": "item.helaCell", "descKey": "item.helaCell.desc", "grade": "rare", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "maxSanity", "value": 10, "group": "hpFlat" }, { "kind": "skillCooldown", "value": 0.05, "group": "damagePct" }],
+      "spriteKey": "icon_skill_unstableSubject", "color": "#5a8ad9", "size": 8 },
+    { "id": "forbiddenVirus", "nameKey": "item.forbiddenVirus", "descKey": "item.forbiddenVirus.desc", "grade": "rare", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "damage", "scope": "magic", "value": 0.05, "group": "damagePct" }, { "kind": "enemyTaken", "value": 0.03, "group": "damagePct" }],
+      "spriteKey": "icon_skill_magiCorruption", "color": "#5a8ad9", "size": 8 },
+    { "id": "forbiddenGift", "nameKey": "item.forbiddenGift", "descKey": "item.forbiddenGift.desc", "grade": "legendary", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "damage", "scope": "all", "value": 0.3, "group": "damagePct" }, { "kind": "damageTaken", "value": -0.1, "group": "damagePct" }],
+      "spriteKey": "icon_skill_experimentalWeapon", "color": "#ffd23f", "size": 8 },
+    { "id": "warDiary", "nameKey": "item.warDiary", "descKey": "item.warDiary.desc", "grade": "legendary", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "skillCooldown", "value": 0.05, "group": "damagePct" }, { "kind": "damage", "scope": "magic", "value": 0.15, "group": "damagePct" }, { "kind": "damage", "scope": "tech", "value": 0.15, "group": "damagePct" }],
+      "spriteKey": "icon_skill_purifyingWings", "color": "#ffd23f", "size": 8 },
+    { "id": "steelCastleFigure", "nameKey": "item.steelCastleFigure", "descKey": "item.steelCastleFigure.desc", "grade": "rare", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "maxHp", "value": 20, "group": "hpFlat" }, { "kind": "damageTaken", "value": 0.05, "group": "damagePct" }],
+      "spriteKey": "icon_skill_mkPrototype", "color": "#5a8ad9", "size": 8 },
     { "id": "atrosCodex", "nameKey": "item.atrosCodex", "descKey": "item.atrosCodex.desc", "grade": "unique", "pool": "normal", "tags": [],
       "effects": [{ "kind": "lowSanityDamage", "maxDamage": 0.4 }, { "kind": "panicCalm", "visionMul": 0.7 }],
       "spriteKey": "item_atros_codex", "color": "#d8c090", "size": 8 },
@@ -144,7 +169,7 @@
       "spriteKey": "item_orion_shield", "color": "#d9c25a", "size": 8 },
     { "id": "hectarRam", "nameKey": "item.hectarRam", "descKey": "item.hectarRam.desc", "grade": "rare", "pool": "boss", "bossId": "hectarChief", "dropChance": 0.2, "tags": [],
       "effects": [
-        { "kind": "stat", "stat": "magiPower", "value": 4, "group": "statFlat" },
+        { "kind": "damage", "scope": "magic", "value": 0.08, "group": "damagePct" },
         { "kind": "coinGain", "value": 0.1, "group": "damagePct" }, { "kind": "grazeEnergy", "value": 3 }
       ],
       "spriteKey": "item_hectar_ram", "color": "#3a9aff", "size": 8 }

@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { gameData } from '../src/data/index';
-import { startingStats } from '../src/systems/damage';
 import {
   acquireSkill,
   awakenSkill,
@@ -24,7 +23,6 @@ import {
 const sd = gameData.skills;
 const def = (id: string) => findSkill(sd, id);
 const ACTIVES = ['magiTurret', 'magiMine', 'antimatterCannon', 'magiField', 'railgun', 'purifyingWings'];
-const base = () => startingStats(gameData.stats.startValue);
 
 function withActives(n: number): SkillLoadout {
   let lo = emptyLoadout(sd.activeSlots);
@@ -107,32 +105,30 @@ describe('레벨·각성', () => {
     expect(() => levelUpSkill(lo, 'magiTurret', sd.maxLevel)).toThrow();
   });
 
-  it('각성 조건: Lv3 + 요구 스탯, 중복 각성 불가', () => {
+  it('각성 조건: Lv3 + 요구 아이템, 중복 각성 불가', () => {
     let lo = withActives(1);
     const turret = def('magiTurret');
-    const strong = { ...base(), strength: 20 };
-    expect(canAwaken(lo, turret, strong, sd.maxLevel)).toBe(false);
+    expect(canAwaken(lo, turret, ['extraArms'], sd.maxLevel)).toBe(false);
     lo = setSkillLevel(lo, turret, 3, false);
-    expect(canAwaken(lo, turret, base(), sd.maxLevel)).toBe(false);
-    expect(canAwaken(lo, turret, { ...base(), strength: 19 }, sd.maxLevel)).toBe(false);
-    expect(canAwaken(lo, turret, strong, sd.maxLevel)).toBe(true);
+    expect(canAwaken(lo, turret, [], sd.maxLevel)).toBe(false);
+    expect(canAwaken(lo, turret, ['lk99'], sd.maxLevel)).toBe(false);
+    expect(canAwaken(lo, turret, ['extraArms'], sd.maxLevel)).toBe(true);
     lo = awakenSkill(lo, 'magiTurret');
     expect(lo.owned.magiTurret!.awakened).toBe(true);
-    expect(canAwaken(lo, turret, strong, sd.maxLevel)).toBe(false);
+    expect(canAwaken(lo, turret, ['extraArms'], sd.maxLevel)).toBe(false);
     expect(() => awakenSkill(lo, 'magiTurret')).toThrow();
   });
 
   it('장착하지 않은 스킬도 각성 대상', () => {
     let lo = withActives(5);
     lo = setSkillLevel(lo, def('railgun'), 3, false);
-    expect(awakeningReady(lo, sd, { ...base(), intelligence: 20 })).toEqual(['railgun']);
+    expect(awakeningReady(lo, sd, ['lk99'])).toEqual(['railgun']);
   });
 
   it('각성 가능 목록은 오래 가진 순', () => {
     let lo = withActives(3);
     for (const id of ['antimatterCannon', 'magiTurret']) lo = setSkillLevel(lo, def(id), 3, false);
-    const s = { ...base(), strength: 20, magiPower: 20 };
-    expect(awakeningReady(lo, sd, s)).toEqual(['magiTurret', 'antimatterCannon']);
+    expect(awakeningReady(lo, sd, ['antimatterSample', 'extraArms'])).toEqual(['magiTurret', 'antimatterCannon']);
   });
 
   it('수치: 레벨별 값, 각성하면 각성 값과 쿨타임', () => {

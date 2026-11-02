@@ -17,18 +17,6 @@ describe('데이터 검증', () => {
     expect(TAG_IDS).toHaveLength(11);
   });
 
-  it('시작 스탯은 10, 6종이다', () => {
-    expect(gameData.stats.startValue).toBe(10);
-    expect(gameData.stats.stats).toHaveLength(6);
-  });
-
-  it('물리·마기·기술은 10 초과 1당 +4%, 상한 +150%', () => {
-    for (const id of ['physical', 'magic', 'tech']) {
-      const rule = gameData.tags.tags.find((t) => t.id === id)!.rule;
-      expect(rule).toMatchObject({ kind: 'linearStat', pivot: 10, perPoint: 0.04, cap: 1.5 });
-    }
-  });
-
   it('챕터1 일반 적 4종이 있다', () => {
     const ids = gameData.enemies.enemies.filter((e) => e.chapter === 1 && e.rank === 'normal' && !e.summon).map((e) => e.id);
     expect(ids.sort()).toEqual(['akgwi', 'gaedeulgae', 'ghostShooter', 'tomakki']);
@@ -57,27 +45,26 @@ describe('데이터 검증', () => {
       ]);
     });
 
-    it('이름·각성 이름·요구 스탯이 표와 같다', () => {
-      const table: [string, string, string, string, number][] = [
-        ['magiTurret', '마기 자동포탑', '대형권역사수주포', 'strength', 20],
-        ['magiMine', '마기 지뢰', '무한연쇄기폭', 'magiPower', 20],
-        ['antimatterCannon', '반물질포', '다연장반입자포', 'magiPower', 20],
-        ['magiField', '마기역장', '벡터굴절역장', 'willpower', 20],
-        ['railgun', '레일건', '초전도 레일건', 'intelligence', 20],
-        ['combatDrone', '전투 드론', '군집지성', 'agility', 20],
-        ['unstableSubject', '불안정 실험체', '증식하는 실패작', 'agility', 20],
-        ['magiCorruption', '마기 변질', '적색 반역', 'magiPower', 20],
-        ['experimentalWeapon', '실험 병기', '판도라 장치', 'intelligence', 20],
-        ['purifyingWings', '정화의 날개', '첫 사람의 날개', 'strength', 20],
-        ['mkPrototype', 'MK : 프로토타입', 'MK : 오버드라이브', 'toughness', 20],
-        ['reductionist', '환원주의자', '제1원리', 'willpower', 20],
+    it('이름·각성 이름·요구 아이템이 표와 같다', () => {
+      const table: [string, string, string, string][] = [
+        ['magiTurret', '마기 자동포탑', '대형권역사수주포', 'extraArms'],
+        ['magiMine', '마기 지뢰', '무한연쇄기폭', 'magnetResonator'],
+        ['antimatterCannon', '반물질포', '다연장반입자포', 'antimatterSample'],
+        ['magiField', '마기역장', '벡터굴절역장', 'snellLaw'],
+        ['railgun', '레일건', '초전도 레일건', 'lk99'],
+        ['combatDrone', '전투 드론', '군집지성', 'hectarRam'],
+        ['unstableSubject', '불안정 실험체', '증식하는 실패작', 'helaCell'],
+        ['magiCorruption', '마기 변질', '적색 반역', 'forbiddenVirus'],
+        ['experimentalWeapon', '실험 병기', '판도라 장치', 'forbiddenGift'],
+        ['purifyingWings', '정화의 날개', '첫 사람의 날개', 'warDiary'],
+        ['mkPrototype', 'MK : 프로토타입', 'MK : 오버드라이브', 'steelCastleFigure'],
+        ['reductionist', '환원주의자', '제1원리', 'elegantMagi'],
       ];
-      for (const [id, n, an, stat, value] of table) {
+      for (const [id, n, an, item] of table) {
         const s = skill(id);
         expect(name(s.nameKey)).toBe(n);
         expect(name(s.awakening.nameKey)).toBe(an);
-        expect(s.awakening.requiredStat).toBe(stat);
-        expect(s.awakening.requiredValue).toBe(value);
+        expect(s.awakening.requiredItem).toBe(item);
       }
     });
 
@@ -143,10 +130,10 @@ describe('데이터 검증', () => {
       expect(u.tags).toEqual(['tech', 'ranged']);
     });
 
-    it('요구 스탯이 빠진 스킬을 잡아낸다', () => {
+    it('요구 아이템이 빠진 스킬을 잡아낸다', () => {
       const d = clone();
-      (d.skills.skills[0]!.awakening as { requiredStat?: string }).requiredStat = undefined;
-      expect(validateGameData(d).join('\n')).toMatch(/요구 스탯/);
+      (d.skills.skills[0]!.awakening as { requiredItem?: string }).requiredItem = undefined;
+      expect(validateGameData(d).join('\n')).toMatch(/요구 아이템/);
     });
 
     it('계열 태그가 빠진 스킬을 잡아낸다', () => {

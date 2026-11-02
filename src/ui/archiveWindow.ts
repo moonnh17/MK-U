@@ -173,9 +173,9 @@ export class ArchiveWindow {
     const t = this.ctx.t;
     const save = this.ctx.save.data;
     const max = u.costs.length;
-    const name = u.kind === 'stat' ? t(`stat.${u.stat}`) : t(`upgrade.${u.kind}`);
+    const name = t(`upgrade.${u.kind}`);
     const row = this.el('div', 'ar-row');
-    const effect = u.kind === 'stat' ? t('upgrade.effect.stat', { name, v: u.perLevel }) : t(`upgrade.effect.${u.kind}`, { v: u.perLevel });
+    const effect = t(`upgrade.effect.${u.kind}`, { v: u.perLevel });
     const info = this.el('div', 'ar-info');
     info.append(this.el('b', '', name), this.el('small', '', `${effect} · ${t('upgrade.level', { lv, max })}`));
     const dots = this.el('span', 'ar-dots', '●'.repeat(lv) + '○'.repeat(max - lv));

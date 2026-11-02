@@ -26,8 +26,7 @@
       "awakening": {
         "nameKey": "skill.magiTurret.awakened",
         "descKey": "skill.magiTurret.awakened.desc",
-        "requiredStat": "strength",
-        "requiredValue": 20,
+        "requiredItem": "extraArms",
         "tags": ["physical", "tech", "ranged"],
         "cooldownSec": 6,
         "values": {
@@ -81,8 +80,7 @@
       "awakening": {
         "nameKey": "skill.magiMine.awakened",
         "descKey": "skill.magiMine.awakened.desc",
-        "requiredStat": "magiPower",
-        "requiredValue": 20,
+        "requiredItem": "magnetResonator",
         "tags": ["tech", "magic", "ranged"],
         "cooldownSec": 6,
         "values": { "count": 6, "damage": 23, "radius": 26, "scatterRadius": 42, "chainArmSec": 0.2, "maxMines": 24 }
@@ -121,8 +119,7 @@
       "awakening": {
         "nameKey": "skill.antimatterCannon.awakened",
         "descKey": "skill.antimatterCannon.awakened.desc",
-        "requiredStat": "magiPower",
-        "requiredValue": 20,
+        "requiredItem": "antimatterSample",
         "tags": ["tech", "ranged", "charging"],
         "cooldownSec": 8,
         "values": { "chargeSec": 1.0, "barrels": 4, "barrelIntervalSec": 0.2, "damage": 52, "radius": 34, "projectileSpeed": 240, "range": 280, "clusterRadius": 40 }
@@ -164,8 +161,7 @@
       "awakening": {
         "nameKey": "skill.magiField.awakened",
         "descKey": "skill.magiField.awakened.desc",
-        "requiredStat": "willpower",
-        "requiredValue": 20,
+        "requiredItem": "snellLaw",
         "tags": [],
         "cooldownSec": 8,
         "values": { "hits": 1, "maxHits": 1, "durationSec": 8, "refractRadius": 30, "fxRadius": 30 }
@@ -201,8 +197,7 @@
       "awakening": {
         "nameKey": "skill.railgun.awakened",
         "descKey": "skill.railgun.awakened.desc",
-        "requiredStat": "intelligence",
-        "requiredValue": 20,
+        "requiredItem": "lk99",
         "tags": ["tech", "ranged"],
         "cooldownSec": 5,
         "values": { "damage": 52, "length": 340, "halfWidth": 6, "waveDamage": 13, "waveRadius": 20, "chainCount": 2, "chainRange": 90, "chainDamage": 31 }
@@ -242,8 +237,7 @@
       "awakening": {
         "nameKey": "skill.combatDrone.awakened",
         "descKey": "skill.combatDrone.awakened.desc",
-        "requiredStat": "agility",
-        "requiredValue": 20,
+        "requiredItem": "hectarRam",
         "tags": ["tech", "ranged"],
         "cooldownSec": 0,
         "values": { "count": 4, "damage": 5, "fireIntervalSec": 0.5, "range": 140, "moveSpeed": 130, "standoff": 36, "searchRange": 220 }
@@ -278,8 +272,7 @@
       "awakening": {
         "nameKey": "skill.unstableSubject.awakened",
         "descKey": "skill.unstableSubject.awakened.desc",
-        "requiredStat": "agility",
-        "requiredValue": 20,
+        "requiredItem": "helaCell",
         "tags": ["tech", "chance", "ranged"],
         "cooldownSec": 7,
         "values": { "count": 3, "lifeSec": 8, "moveSpeed": 140, "blastDamage": 31, "blastRadius": 26, "multiplyChance": 0.4, "maxSubjects": 12 }
@@ -307,8 +300,7 @@
       "awakening": {
         "nameKey": "skill.magiCorruption.awakened",
         "descKey": "skill.magiCorruption.awakened.desc",
-        "requiredStat": "magiPower",
-        "requiredValue": 20,
+        "requiredItem": "forbiddenVirus",
         "tags": ["magic", "chance", "ranged"],
         "cooldownSec": 6,
         "values": { "damage": 16, "range": 85, "arcDeg": 110, "rebelChance": 0.35, "rebelSec": 8, "rebelDamage": 8, "rebelIntervalSec": 0.6, "dominateSec": 14, "dominateDamageMultiplier": 2 }
@@ -339,8 +331,7 @@
       "awakening": {
         "nameKey": "skill.experimentalWeapon.awakened",
         "descKey": "skill.experimentalWeapon.awakened.desc",
-        "requiredStat": "intelligence",
-        "requiredValue": 20,
+        "requiredItem": "forbiddenGift",
         "tags": ["tech", "chance", "ranged"],
         "cooldownSec": 7,
         "values": { "results": 2, "greatResults": 3, "greatMultiplier": 1 }
@@ -372,8 +363,7 @@
       "awakening": {
         "nameKey": "skill.purifyingWings.awakened",
         "descKey": "skill.purifyingWings.awakened.desc",
-        "requiredStat": "strength",
-        "requiredValue": 20,
+        "requiredItem": "warDiary",
         "tags": ["physical", "melee", "bleed"],
         "cooldownSec": 4,
         "values": {
@@ -408,8 +398,7 @@
       "awakening": {
         "nameKey": "skill.mkPrototype.awakened",
         "descKey": "skill.mkPrototype.awakened.desc",
-        "requiredStat": "toughness",
-        "requiredValue": 20,
+        "requiredItem": "steelCastleFigure",
         "tags": ["buff", "melee"],
         "cooldownSec": 12,
         "values": { "hpCost": 0.15, "durationSec": 8, "moveSpeed": 0.35, "damageReduction": 0.3, "punchDamage": 21, "blastRadius": 24, "dashRange": 100, "dashSpeed": 360, "dashSec": 0.18, "dashDamage": 13, "dashCooldownSec": 1.5, "fxRadius": 11 }
@@ -435,8 +424,7 @@
       "awakening": {
         "nameKey": "skill.reductionist.awakened",
         "descKey": "skill.reductionist.awakened.desc",
-        "requiredStat": "willpower",
-        "requiredValue": 20,
+        "requiredItem": "elegantMagi",
         "tags": ["buff"],
         "cooldownSec": 0,
         "values": { "lifesteal": 0.05, "basicUnit": 6 }

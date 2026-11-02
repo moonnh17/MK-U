@@ -6,25 +6,17 @@
 import type { Vec2 } from '../core/actions';
 import type {
   BleedRule,
-  ExponentialChanceScaling,
-  LinearStatScaling,
+  ChanceRule,
   SkillDef,
   TagDef,
   TagId,
   TagsData,
 } from '../types/data';
-import { linearBonus, type Stats } from './damage';
 
 function tagDef(id: TagId, data: TagsData): TagDef {
   const def = data.tags.find((t) => t.id === id);
   if (!def) throw new Error(`태그 '${id}' 없음`);
   return def;
-}
-
-function linearRule(id: TagId, data: TagsData): LinearStatScaling {
-  const r = tagDef(id, data).rule;
-  if (r.kind !== 'linearStat') throw new Error(`태그 '${id}'는 linearStat 규칙이 아님`);
-  return r;
 }
 
 /**
@@ -44,17 +36,12 @@ export function hasTag(tags: readonly TagId[], id: TagId): boolean {
   return tags.includes(id);
 }
 
-/** 확률 태그: min(상한, 기본 × base^(지능 − pivot)). capKey는 결과 종류(success / greatSuccess) */
-export function taggedChance(baseChance: number, capKey: string, stats: Stats, data: TagsData): number {
-  const r = tagDef('chance', data).rule as ExponentialChanceScaling;
+/** 확률 태그: 결과 종류(success / greatSuccess)별 상한 */
+export function taggedChance(baseChance: number, capKey: string, data: TagsData): number {
+  const r = tagDef('chance', data).rule as ChanceRule;
   const cap = r.caps[capKey];
   if (cap === undefined) throw new Error(`확률 상한 '${capKey}' 없음`);
-  return Math.min(cap, baseChance * r.base ** (stats[r.stat] - r.pivot));
-}
-
-/** 시간제 버프 지속시간. 버프 태그가 있을 때만 늘어난다(영구 효과·회복량·쿨타임은 그대로) */
-export function buffDuration(baseSec: number, tags: readonly TagId[], stats: Stats, data: TagsData): number {
-  return hasTag(tags, 'buff') ? baseSec * (1 + linearBonus(linearRule('buff', data), stats)) : baseSec;
+  return Math.min(cap, baseChance);
 }
 
 export interface RangeTarget extends Vec2 {

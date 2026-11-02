@@ -5,7 +5,7 @@
       "nameKey": "tag.physical",
       "descKey": "tag.physical.desc",
       "damageGroup": "attribute",
-      "rule": { "kind": "linearStat", "stat": "strength", "pivot": 10, "perPoint": 0.04, "cap": 1.5 },
+      "rule": { "kind": "none" },
       "badgeColor": "#d9663b"
     },
     {
@@ -13,7 +13,7 @@
       "nameKey": "tag.magic",
       "descKey": "tag.magic.desc",
       "damageGroup": "attribute",
-      "rule": { "kind": "linearStat", "stat": "magiPower", "pivot": 10, "perPoint": 0.04, "cap": 1.5 },
+      "rule": { "kind": "none" },
       "badgeColor": "#8c5ad9"
     },
     {
@@ -21,7 +21,7 @@
       "nameKey": "tag.tech",
       "descKey": "tag.tech.desc",
       "damageGroup": "attribute",
-      "rule": { "kind": "linearStat", "stat": "intelligence", "pivot": 10, "perPoint": 0.04, "cap": 1.5 },
+      "rule": { "kind": "none" },
       "badgeColor": "#3ba7d9"
     },
     {
@@ -30,10 +30,7 @@
       "descKey": "tag.chance.desc",
       "damageGroup": "none",
       "rule": {
-        "kind": "exponentialChance",
-        "stat": "intelligence",
-        "pivot": 10,
-        "base": 1.03,
+        "kind": "chance",
         "caps": { "success": 0.98, "greatSuccess": 0.6 }
       },
       "badgeColor": "#d9c23b"
@@ -75,7 +72,7 @@
       "nameKey": "tag.buff",
       "descKey": "tag.buff.desc",
       "damageGroup": "none",
-      "rule": { "kind": "linearStat", "stat": "willpower", "pivot": 10, "perPoint": 0.03, "cap": 0.9 },
+      "rule": { "kind": "none" },
       "badgeColor": "#e0e0e0"
     },
     {

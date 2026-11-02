@@ -3,7 +3,6 @@ import { Rng } from '../src/core/rng';
 import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
 import {
-  awakenedCount,
   convertSkills,
   gaugeFromDamage,
   gaugeFromEnergy,
@@ -12,12 +11,9 @@ import {
   topSchools,
   paradoxRatio,
   skillAllowed,
-  ultimateAwakeningReady,
 } from '../src/systems/advancement';
 import { drawSkillCards } from '../src/systems/cards';
-import { startingStats } from '../src/systems/damage';
 import { emptyLoadout, findSkill, setSkillLevel, type SkillLoadout } from '../src/systems/skills';
-import { STAT_IDS } from '../src/types/data';
 
 const S = gameData.skills;
 const ORDER = ['hectar', 'acro'] as const;
@@ -50,7 +46,7 @@ describe('전직 스킬 변환 (기획서 예시)', () => {
     ]);
     // 포탑이 Lv3이 되면 대상에서 빠지므로 어떤 시드든 결과는 포탑 Lv3·레일건 Lv2 아니면 레일건 Lv3·포탑 Lv2
     for (let seed = 0; seed < 20; seed++) {
-      const r = convertSkills(new Rng(seed), lo, startingStats(10), S, 'hectar', 3);
+      const r = convertSkills(new Rng(seed), lo, S, 'hectar');
       expect(r.loadout.owned.magiCorruption).toBeUndefined();
       expect(r.log.removed).toEqual([{ skillId: 'magiCorruption', level: 2 }]);
       expect(r.log.gains).toHaveLength(2);
@@ -61,17 +57,15 @@ describe('전직 스킬 변환 (기획서 예시)', () => {
     }
   });
 
-  it('Lv3 스킬은 대상에서 빠지고, 받을 스킬이 없으면 스탯 +3', () => {
+  it('Lv3 스킬은 대상에서 빠지고, 받을 스킬이 없으면 남은 포인트는 사라진다', () => {
     const lo = loadout([
       ['magiTurret', 3],
       ['magiCorruption', 2],
     ]);
-    const r = convertSkills(new Rng(1), lo, startingStats(10), S, 'hectar', 3);
+    const r = convertSkills(new Rng(1), lo, S, 'hectar');
     expect(r.loadout.owned.magiTurret!.level).toBe(3);
     expect(r.log.gains).toEqual([]);
-    expect(r.log.stats).toHaveLength(2);
-    const total = STAT_IDS.reduce((s, id) => s + r.stats[id], 0);
-    expect(total).toBe(6 * 10 + 6);
+    expect(r.log.removed).toHaveLength(1);
   });
 
   it('각성은 옮겨가지 않고 레벨(3)로만 센다', () => {
@@ -80,7 +74,7 @@ describe('전직 스킬 변환 (기획서 예시)', () => {
       ['railgun', 1],
       ['purifyingWings', 3, true],
     ]);
-    const r = convertSkills(new Rng(2), lo, startingStats(10), S, 'hectar', 3);
+    const r = convertSkills(new Rng(2), lo, S, 'hectar');
     expect(r.log.removed).toEqual([{ skillId: 'purifyingWings', level: 3 }]);
     expect(r.log.gains).toHaveLength(3);
     expect(Object.values(r.loadout.owned).every((o) => !o.awakened)).toBe(true);
@@ -100,7 +94,7 @@ describe('전직 스킬 변환 (기획서 예시)', () => {
     // 액티브 4칸은 아크로가 차지, 헥타르 액티브 2개는 보관, 패시브 칸은 환원주의자
     expect(lo.active).toEqual(['unstableSubject', 'magiCorruption', 'experimentalWeapon', 'mkPrototype']);
     expect(lo.passive).toBe('reductionist');
-    const r = convertSkills(new Rng(3), lo, startingStats(10), S, 'hectar', 3);
+    const r = convertSkills(new Rng(3), lo, S, 'hectar');
     lo = r.loadout;
     expect(lo.active).toEqual(['magiTurret', 'railgun', null, null]);
     expect(lo.passive).toBe('combatDrone');
@@ -109,7 +103,7 @@ describe('전직 스킬 변환 (기획서 예시)', () => {
 
   it('반대 학파 스킬이 없으면 아무것도 바뀌지 않는다', () => {
     const lo = loadout([['magiTurret', 2]]);
-    const r = convertSkills(new Rng(1), lo, startingStats(10), S, 'hectar', 3);
+    const r = convertSkills(new Rng(1), lo, S, 'hectar');
     expect(r.log.removed).toEqual([]);
     expect(r.loadout.owned.magiTurret!.level).toBe(2);
   });
@@ -119,8 +113,8 @@ describe('전직 후 카드 풀', () => {
   it('자기 학파 스킬만 나온다', () => {
     const allowed = (id: string) => skillAllowed(findSkill(S, id), 'acro');
     for (let seed = 0; seed < 30; seed++) {
-      const cards = drawSkillCards(new Rng(seed), emptyLoadout(4), startingStats(10), S, gameData.cards, allowed);
-      for (const c of cards) if (c.kind !== 'stat') expect(findSkill(S, c.skillId).school).toBe('acro');
+      const cards = drawSkillCards(new Rng(seed), emptyLoadout(4), S, gameData.cards, allowed);
+      for (const c of cards) expect(findSkill(S, c.skillId).school).toBe('acro');
     }
     expect(skillAllowed(findSkill(S, 'magiTurret'), null)).toBe(true);
   });
@@ -150,21 +144,6 @@ describe('학파 궁극기', () => {
 
   it('열역학 제1법칙은 처치로만', () => {
     expect(gaugeFromDamage(ult('firstLaw'), 'magiTurret', 100)).toBe(0);
-  });
-
-  it('궁극기 각성: 자기 학파 각성 2개 (패시브 포함, 반대 학파는 세지 않음)', () => {
-    const one = loadout([
-      ['magiTurret', 3, true],
-      ['purifyingWings', 3, true],
-    ]);
-    expect(awakenedCount(one, S, 'hectar')).toBe(1);
-    expect(ultimateAwakeningReady(one, S, 'hectar', 2)).toBe(false);
-    const two = loadout([
-      ['magiTurret', 3, true],
-      ['combatDrone', 3, true],
-    ]);
-    expect(ultimateAwakeningReady(two, S, 'hectar', 2)).toBe(true);
-    expect(ultimateAwakeningReady(two, S, null, 2)).toBe(false);
   });
 
   it('역설 재현 비율: 일부 / 실험 성공 상당 부분 / 대성공 전부', () => {

@@ -2,13 +2,7 @@
   "cardCount": 3,
   "rerollCost": 10,
   "runStart": "skill",
-  "afterStageCycle": ["stat", "skill"],
+  "afterStageCycle": ["item", "skill"],
   "bossBonus": "skill",
-  "maxAwakeningCards": 3,
-  "skillWeights": { "new": 1, "levelUp": 1, "passiveNew": 1, "passiveLevelUp": 1 },
-  "statGrades": [
-    { "id": "low", "amount": 3, "weight": 60, "color": "#9aa4b0" },
-    { "id": "mid", "amount": 5, "weight": 30, "color": "#5ab0ff" },
-    { "id": "high", "amount": 8, "weight": 10, "color": "#ffc94a" }
-  ]
+  "skillWeights": { "new": 1, "levelUp": 1, "passiveNew": 1, "passiveLevelUp": 1 }
 }

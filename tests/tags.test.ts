@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { gameData } from '../src/data/index';
-import { calcDamage, rangeMultiplier, spaceDamage, startingStats } from '../src/systems/damage';
-import { addStat, maxHpFor, statEffect } from '../src/systems/stats';
+import { calcDamage, rangeMultiplier, spaceDamage } from '../src/systems/damage';
 import {
   applyBleed,
-  buffDuration,
   canAutoCast,
   skillTags,
   tagBadges,
@@ -14,21 +12,18 @@ import {
 import type { BleedRule, SpaceRule } from '../src/types/data';
 
 const tags = gameData.tags;
-const base = () => startingStats(gameData.stats.startValue);
 const rule = <T>(id: string) => tags.tags.find((t) => t.id === id)!.rule as T;
 
 describe('피해: 물리·마기·기술 합산 후 근접·원거리 별도 단계', () => {
   it('기술 +50%, 마기 +40% → ×1.90 (더한 뒤 한 번 곱함)', () => {
-    const s = { ...base(), intelligence: 22.5, magiPower: 20 };
-    expect(calcDamage({ baseDamage: 10, tags: ['tech', 'magic', 'ranged'] }, s, tags)).toBeCloseTo(19);
+    expect(calcDamage({ baseDamage: 10, tags: ['tech', 'magic', 'ranged'] }, { tech: 0.5, magic: 0.4 }, tags)).toBeCloseTo(19);
   });
 
   it('근접·원거리 증가는 별도로 곱한다', () => {
     expect(rangeMultiplier(['melee'], { melee: 0.2, ranged: 0.5 })).toBeCloseTo(1.2);
     expect(rangeMultiplier(['ranged'], { melee: 0.2, ranged: 0.5 })).toBeCloseTo(1.5);
     expect(rangeMultiplier(['physical'], { melee: 0.2, ranged: 0.5 })).toBe(1);
-    const s = { ...base(), strength: 20 };
-    expect(calcDamage({ baseDamage: 10, tags: ['physical', 'melee'] }, s, tags, { melee: 0.5, ranged: 0 })).toBeCloseTo(21);
+    expect(calcDamage({ baseDamage: 10, tags: ['physical', 'melee'] }, { physical: 0.4 }, tags, { melee: 0.5, ranged: 0 })).toBeCloseTo(21);
   });
 
   it('부모 스킬이 아니라 실제 공격(source)의 태그를 본다', () => {
@@ -40,39 +35,26 @@ describe('피해: 물리·마기·기술 합산 후 근접·원거리 별도 단
     expect(skillTags(wings, false)).toEqual(['physical', 'melee']);
     expect(skillTags(wings, true)).toEqual(['physical', 'melee', 'bleed']);
     const turret = gameData.skills.skills.find((x) => x.id === 'magiTurret')!;
-    const s = { ...base(), strength: 20, intelligence: 10 };
-    // 각성 포탑의 일반 탄환은 물리 → 힘 보정, 레이저는 기술 → 지능 보정
+    const s = { physical: 0.4 };
+    // 각성 포탑의 일반 탄환은 물리, 레이저는 기술
     expect(calcDamage({ baseDamage: 10, tags: skillTags(turret, true, 'bigBullet') }, s, tags)).toBeCloseTo(14);
     expect(calcDamage({ baseDamage: 10, tags: skillTags(turret, true, 'laser') }, s, tags)).toBeCloseTo(10);
   });
 });
 
-describe('확률: min(상한, 기본 × 1.03^(지능−10))', () => {
-  it('지능 10이면 기본값 그대로', () => {
-    expect(taggedChance(0.3, 'greatSuccess', base(), tags)).toBeCloseTo(0.3);
-  });
-
-  it('지능 20이면 × 1.03^10', () => {
-    expect(taggedChance(0.3, 'greatSuccess', { ...base(), intelligence: 20 }, tags)).toBeCloseTo(0.3 * 1.03 ** 10);
-  });
-
+describe('확률: min(상한, 기본)', () => {
   it('상한: 대성공 60%, 실험 성공 98%', () => {
-    const s = { ...base(), intelligence: 80 };
-    expect(taggedChance(0.3, 'greatSuccess', s, tags)).toBe(0.6);
-    expect(taggedChance(0.5, 'success', s, tags)).toBe(0.98);
+    expect(taggedChance(0.3, 'greatSuccess', tags)).toBeCloseTo(0.3);
+    expect(taggedChance(0.7, 'greatSuccess', tags)).toBe(0.6);
+    expect(taggedChance(0.99, 'success', tags)).toBe(0.98);
   });
 });
 
-describe('차징·버프 지속', () => {
-  it('차징은 스탯 보정이 없다', () => {
+describe('차징', () => {
+  it('차징은 보정이 없다', () => {
     expect(tags.tags.find((t) => t.id === 'charging')!.rule.kind).toBe('none');
   });
 
-  it('버프: 정신력 10 초과 1당 +3%, 상한 +90%, 버프 태그가 있을 때만', () => {
-    expect(buffDuration(10, ['buff'], { ...base(), willpower: 20 }, tags)).toBeCloseTo(13);
-    expect(buffDuration(10, ['buff'], { ...base(), willpower: 99 }, tags)).toBeCloseTo(19);
-    expect(buffDuration(10, ['tech'], { ...base(), willpower: 20 }, tags)).toBe(10);
-  });
 });
 
 describe('근접 발동 조건', () => {
@@ -130,32 +112,5 @@ describe('태그 배지', () => {
       { id: 'physical', nameKey: 'tag.physical', color: '#d9663b' },
       { id: 'melee', nameKey: 'tag.melee', color: '#c88f7f' },
     ]);
-  });
-});
-
-describe('스탯 효과 (임시 수치)', () => {
-  const sd = gameData.stats;
-  it('시작 스탯 10이면 효과 0', () => {
-    for (const id of ['maxHp', 'moveSpeed', 'skillArea', 'energyGain'] as const) {
-      expect(statEffect(id, base(), sd)).toBe(0);
-    }
-  });
-  it('견고: 최대 체력만 늘린다', () => {
-    expect(maxHpFor(100, { ...base(), toughness: 20 }, sd)).toBe(120);
-    expect(Object.keys(sd.effects).filter((k) => sd.effects[k as keyof typeof sd.effects].stat === 'toughness')).toEqual(['maxHp']);
-  });
-  it('민첩: 이동속도, 마기력: 스킬 범위·에너지 획득량', () => {
-    expect(statEffect('moveSpeed', { ...base(), agility: 20 }, sd)).toBeCloseTo(0.15);
-    expect(statEffect('skillArea', { ...base(), magiPower: 20 }, sd)).toBeCloseTo(0.2);
-    expect(statEffect('energyGain', { ...base(), magiPower: 20 }, sd)).toBeCloseTo(0.3);
-  });
-  it('견고가 오르면 늘어난 최대 체력만큼 체력도 오른다', () => {
-    const p = { stats: base(), hp: 50, maxHp: 100 };
-    const out = addStat(p, 'toughness', 5, 100, sd);
-    expect(out.stats.toughness).toBe(15);
-    expect(out.maxHp).toBe(110);
-    expect(out.hp).toBe(60);
-    // 다른 스탯은 체력에 영향 없음
-    expect(addStat(p, 'strength', 5, 100, sd)).toMatchObject({ hp: 50, maxHp: 100 });
   });
 });
