@@ -2008,13 +2008,55 @@ body {
 }
 
 /* ---------- 도감 단말 ---------- */
+/* 남색 틀 + 금테, 안쪽은 양피지 기록지. 창 크기는 고정이고 긴 설명은 기록 칸만 스크롤한다. */
 #codex-window {
-  justify-content: safe center;
-  overflow-y: auto;
+  overflow: hidden;
 }
-#codex-window .cx-head {
-  width: min(1180px, 100%);
+.cx-frame {
+  width: min(1100px, 100%);
+  height: min(660px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  background: #121a2a;
+  border: 2px solid #b8975a;
+  box-shadow: 0 0 0 4px #0a0f18, 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+.cx-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 4px 8px;
+  border-bottom: 1px solid #b8975a;
   flex-shrink: 0;
+}
+.cx-heading {
+  font-size: 24px;
+  color: #f3e6c4;
+  letter-spacing: 1px;
+  margin-right: 6px;
+}
+.cx-tabs {
+  display: flex;
+  gap: 4px;
+}
+.cx-btn {
+  padding: 5px 12px;
+  background: #0f1522;
+  border: 2px solid #9c8150;
+  color: #f3e6c4;
+  font: bold 13px sans-serif;
+  cursor: pointer;
+}
+.cx-btn:hover {
+  background: #1d2740;
+}
+.cx-btn.on {
+  background: #26314d;
+  border-color: #ffd23f;
+  color: #ffd23f;
 }
 .cx-progress {
   color: #7ae0ff;
@@ -2022,166 +2064,126 @@ body {
   margin-left: auto;
 }
 .cx-body {
-  width: min(1180px, 100%);
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 1fr);
-  gap: 12px;
-  align-items: start;
+  flex: 1;
   min-height: 0;
-}
-.cx-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px;
-  background: #101722;
-  border: 1px solid #3a4a60;
-  border-radius: 8px;
-  max-height: 74vh;
-  overflow-y: auto;
-}
-.cx-section {
-  color: #9fb4cc;
-  font-size: 12px;
-  font-weight: bold;
-  border-bottom: 1px solid #2a3a50;
-  padding: 4px 2px 3px;
-  margin-top: 4px;
-}
-.cx-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
-  gap: 6px;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 10px;
 }
-.cx-cell {
-  --ring: #3a4a60;
+.cx-detail,
+.cx-list {
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 6px 4px 5px;
-  background: #0b111a;
-  border: 1px solid var(--ring);
-  border-radius: 6px;
-  color: #dfe8f2;
-  cursor: pointer;
-  font: 11px sans-serif;
-  min-width: 0;
-}
-.cx-cell small {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.cx-cell:hover {
-  background: #16212f;
-}
-.cx-cell.on {
-  outline: 2px solid #ffd23f;
-  background: #1c2a3b;
-}
-.cx-cell.unknown small,
-.cx-cell.locked small {
-  color: #6a7a8c;
-}
-.cx-icon {
-  width: 44px;
-  height: 44px;
-  image-rendering: pixelated;
-}
-.cx-cell.unknown .cx-icon,
-.cx-big.unknown {
-  filter: brightness(0) opacity(0.55);
-}
-.cx-cell.locked .cx-icon {
-  opacity: 0.4;
+  background: #f1e2bf;
+  border: 2px solid #c9a86a;
+  color: #2b2418;
+  box-sizing: border-box;
 }
 .cx-detail {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  background: #101722;
-  border: 1px solid #3a4a60;
-  border-radius: 8px;
-  max-height: 74vh;
-  overflow-y: auto;
-}
-.cx-hero {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-.cx-big {
-  --ring: #3a4a60;
-  width: 96px;
-  height: 96px;
-  flex-shrink: 0;
-  border: 1px solid var(--ring);
-  border-radius: 8px;
-  background-color: #0b111a;
-  image-rendering: pixelated;
-}
-.cx-title {
-  display: flex;
-  flex-direction: column;
   gap: 6px;
-  min-width: 0;
-}
-.cx-title b {
-  font-size: 18px;
+  padding: 10px 12px;
 }
 .cx-chips {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 4px;
 }
+.cx-no {
+  font-size: 12px;
+  color: #6a5a40;
+  margin-right: 2px;
+}
 .cx-chip {
-  --chip: #3a4a60;
+  --chip: #9c8150;
   font-size: 11px;
-  padding: 2px 7px;
-  border-radius: 10px;
+  padding: 1px 7px;
   border: 1px solid var(--chip);
-  color: #e8eef5;
-  background: color-mix(in srgb, var(--chip) 22%, transparent);
+  color: #2b2418;
+  background: color-mix(in srgb, var(--chip) 28%, #f1e2bf);
 }
-.cx-desc {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.55;
-  color: #e3eaf2;
+.cx-name {
+  font-size: 22px;
+  color: #1f1a12;
 }
-.cx-desc.dim {
-  color: #8a9aac;
+.cx-hero {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.cx-big {
+  width: 104px;
+  height: 104px;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+.cx-big.unknown {
+  filter: brightness(0) opacity(0.55);
+}
+.cx-side {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 .cx-stats {
   display: grid;
-  grid-template-columns: repeat(3, auto 1fr);
-  gap: 3px 8px;
-  font-size: 12px;
-  padding: 6px 8px;
-  background: #0b111a;
-  border-radius: 6px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
 }
-.cx-stats span {
-  color: #8fa2b8;
+.cx-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 8px;
+  background: #ecd3a0;
+  border: 1px solid #b8975a;
+  font-size: 13px;
+}
+.cx-stat span {
+  color: #5a4a30;
+}
+.cx-stat b {
+  font-size: 15px;
+}
+.cx-record {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: #f8eed6;
+  border: 1px solid #b8975a;
+  scrollbar-color: #9c8150 #ecd3a0;
+}
+.cx-desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.cx-desc.dim {
+  color: #7a6a50;
 }
 .cx-sub {
-  color: #ffd23f;
-  font-size: 12px;
+  color: #8a5a10;
+  font-size: 13px;
   font-weight: bold;
   margin-top: 2px;
 }
 .cx-lines {
   margin: 0;
-  padding-left: 16px;
+  padding-left: 18px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 12px;
-  line-height: 1.45;
-  color: #d8e2ec;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #3a3020;
 }
 .cx-skill {
   display: flex;
@@ -2194,7 +2196,7 @@ body {
   gap: 1px;
 }
 .cx-skill small {
-  color: #9fb4cc;
+  color: #6a5a40;
 }
 .cx-mini {
   width: 28px;
@@ -2202,13 +2204,142 @@ body {
   flex-shrink: 0;
   image-rendering: pixelated;
 }
-#codex-window.mobile .cx-body {
-  grid-template-columns: 1fr;
+.cx-list {
+  padding: 8px 6px 8px 10px;
+  gap: 6px;
 }
-#codex-window.mobile .cx-list,
-#codex-window.mobile .cx-detail {
-  max-height: none;
+.cx-list-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #5a4a30;
 }
-#codex-window.mobile .cx-detail {
-  order: -1;
+.cx-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-color: #9c8150 #ecd3a0;
+}
+.cx-section {
+  color: #8a5a10;
+  font-size: 12px;
+  font-weight: bold;
+  border-bottom: 1px solid #c9a86a;
+  padding: 6px 2px 3px;
+  margin-bottom: 6px;
+}
+.cx-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+  gap: 6px;
+}
+.cx-cell {
+  --ring: #9c8150;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 4px 5px;
+  background: #1b2333;
+  border: 2px solid var(--ring);
+  color: #f3e6c4;
+  cursor: pointer;
+  font: bold 12px sans-serif;
+  min-width: 0;
+}
+.cx-cell i {
+  font: normal 10px sans-serif;
+  color: #c9b48a;
+}
+.cx-cell small {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.cx-cell:hover {
+  background: #26314d;
+}
+.cx-cell.on {
+  border-color: #ffd23f;
+  background: #2c3756;
+  box-shadow: 0 0 8px rgba(255, 210, 63, 0.6);
+}
+.cx-cell.unknown small,
+.cx-cell.locked small {
+  color: #7a8090;
+}
+.cx-icon {
+  width: 44px;
+  height: 44px;
+  image-rendering: pixelated;
+}
+.cx-cell.unknown .cx-icon {
+  filter: brightness(0) invert(0.3);
+}
+.cx-cell.locked .cx-icon {
+  opacity: 0.4;
+}
+.cx-foot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-shrink: 0;
+  position: relative;
+}
+.cx-arrow {
+  padding: 4px 16px;
+  font-size: 14px;
+}
+.cx-page {
+  min-width: 64px;
+  text-align: center;
+  color: #f3e6c4;
+  font-size: 13px;
+}
+.cx-hint {
+  position: absolute;
+  right: 4px;
+  color: #8a96a8;
+  font-size: 11px;
+}
+/* 낮은 화면(휴대폰 가로 등): 두 칸은 유지하고 크기만 줄인다 */
+@media (max-height: 500px) {
+  #codex-window {
+    padding: 6px;
+  }
+  #codex-window .cx-frame {
+    height: 100%;
+    padding: 6px 8px;
+    gap: 5px;
+  }
+  #codex-window .cx-head {
+    padding-bottom: 5px;
+  }
+  #codex-window .cx-heading {
+    font-size: 17px;
+  }
+  #codex-window .cx-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  #codex-window .cx-big {
+    width: 64px;
+    height: 64px;
+  }
+  #codex-window .cx-name {
+    font-size: 17px;
+  }
+  #codex-window .cx-grid {
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  }
+  #codex-window .cx-icon {
+    width: 32px;
+    height: 32px;
+  }
+  #codex-window .cx-hint {
+    display: none;
+  }
 }
