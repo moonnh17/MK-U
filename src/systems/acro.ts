@@ -3,7 +3,7 @@
  * 대성공은 아크로 공통 특성이 아니라 스킬마다 따로 굴린다.
  */
 import type { Rng } from '../core/rng';
-import type { EnemyRank, TagId, TagsData } from '../types/data';
+import type { EnemyRank, SpriteRef, TagId, TagsData } from '../types/data';
 import { hasTag, taggedChance } from './tags';
 
 /** 확률 태그가 있으면 상한을 적용한 확률, 없으면 기본 확률 */
@@ -38,6 +38,8 @@ export interface CorruptionState {
   burstRadius: number;
   /** 폭발 공격의 source 태그 */
   burstTags: readonly TagId[];
+  /** 표식(유지) · 폭발 · 파편 · 풀릴 때 그림 */
+  fx?: { mark: SpriteRef; burst: SpriteRef; shards?: SpriteRef; end?: SpriteRef };
 }
 
 export function tickCorruption(s: CorruptionState, dt: number): CorruptionState | null {
@@ -59,6 +61,7 @@ export function applyCorruption(prev: CorruptionState | null, next: CorruptionSt
     burstDamage: Math.max(prev.burstDamage, next.burstDamage),
     burstRadius: Math.max(prev.burstRadius, next.burstRadius),
     burstTags: next.burstTags,
+    fx: next.fx ?? prev.fx,
   };
 }
 

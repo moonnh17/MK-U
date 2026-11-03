@@ -6,21 +6,32 @@
  * 펀치 사거리 밖 적에게는 짧게 돌진한다(돌진에 닿은 적도 피해, 물리·근접).
  */
 import type Phaser from 'phaser';
-import { hexColor } from '../core/scale';
 import type { Enemy } from '../entities/enemy';
 import { skillTags } from '../systems/tags';
 import type { PlayerMods } from '../systems/vitals';
+import { animKey } from '../systems/art';
+import { levelRef, playFx } from './skillFx';
+import type { SpriteRef } from '../types/data';
 import { nearestEnemy, trimOldest, type BuffView, type SkillCast, type SkillHost, type SkillImpl, type SkillObject } from './host';
 
 const ID = 'mkPrototype';
+/** 이만큼 빠르면 걷는 그림 */
+const MOVING_SPEED = 5;
+const FIST_SEC = 0.1;
+const MORPH_SEC = 0.35;
+const POSE_SEC = 0.25;
 
 class Suit implements SkillObject {
   readonly owner = ID;
   readonly createdAt: number;
-  private readonly ring: Phaser.GameObjects.Arc;
+  private readonly body: Phaser.GameObjects.Sprite;
+  /** 변신·펀치 자세가 끝나기 전에는 대기·이동으로 돌아가지 않는다 */
+  private poseLeft = 0;
+  private shown: SpriteRef | null = null;
   private left: number;
   private punchTimer = 0;
   private dashTimer = 0;
+  private readonly player: Phaser.Physics.Arcade.Sprite;
   private dashing = 0;
   private readonly dashHit = new Set<Enemy>();
 
@@ -29,13 +40,47 @@ class Suit implements SkillObject {
     private readonly s: SkillCast,
     private readonly total: number,
   ) {
+    this.player = host.playerSprite();
     this.createdAt = host.scene.time.now;
     this.left = total;
-    const p = host.playerPos();
-    this.ring = host.scene.add
-      .circle(p.x, p.y, s.values.fxRadius!)
-      .setStrokeStyle(s.owned.awakened ? 3 : 2, hexColor(s.def.color), 0.9)
-      .setDepth(5);
+    const pl = host.playerSprite();
+    this.body = host.sprite(pl.x, pl.y, this.art('idle')).setDepth(pl.depth);
+    pl.setVisible(false);
+    if (s.owned.awakened) playFx(host.scene, s.def.sprites.drainA!, pl.x, pl.y, { depth: pl.depth + 1 });
+    this.pose(host, this.art('morph'), MORPH_SEC);
+  }
+
+  /** 각성이면 A 그림, 아니면 레벨 그림 */
+  private art(name: string): SpriteRef {
+    return this.s.owned.awakened ? this.s.def.sprites[`${name}A`]! : levelRef(this.s, name);
+  }
+
+  private show(ref: SpriteRef): void {
+    if (this.shown === ref) return;
+    this.shown = ref;
+    const key = animKey(ref.spriteKey, 'play');
+    if (this.body.scene.anims.exists(key)) this.body.play(key);
+    else {
+      this.body.anims.stop();
+      this.body.setTexture(ref.spriteKey, 0);
+    }
+  }
+
+  private pose(_host: SkillHost, ref: SpriteRef, sec: number): void {
+    this.shown = null;
+    this.show(ref);
+    this.poseLeft = sec;
+  }
+
+  /** 슈트 그림: 플레이어를 따라가고, 자세가 끝나면 대기·이동 */
+  private follow(host: SkillHost, dt: number): void {
+    const pl = host.playerSprite();
+    const c = pl.getCenter();
+    this.body.setPosition(c.x, c.y).setFlipX(host.aimDir().x < 0).setAlpha(pl.alpha);
+    this.poseLeft -= dt;
+    if (this.poseLeft > 0) return;
+    const moving = Math.hypot(pl.body!.velocity.x, pl.body!.velocity.y) > MOVING_SPEED;
+    this.show(this.art(moving ? 'move' : 'idle'));
   }
 
   playerMods(): Partial<PlayerMods> {
@@ -44,10 +89,14 @@ class Suit implements SkillObject {
 
   update(dt: number, host: SkillHost): boolean {
     this.left -= dt;
-    if (this.left <= 0) return false;
+    if (this.left <= 0) {
+      const c = host.playerSprite().getCenter();
+      playFx(host.scene, this.s.owned.awakened ? this.s.def.sprites.releaseA! : this.art('morph'), c.x, c.y, { depth: this.body.depth + 1 });
+      return false;
+    }
     const v = this.s.values;
     const p = host.playerPos();
-    this.ring.setPosition(p.x, p.y);
+    this.follow(host, dt);
     this.punchTimer -= dt;
     this.dashTimer -= dt;
 
@@ -74,6 +123,7 @@ class Suit implements SkillObject {
         const d = Math.hypot(dx, dy) || 1;
         host.dash({ x: dx / d, y: dy / d }, v.dashSpeed!, v.dashSec!);
         this.dashing = v.dashSec!;
+        this.pose(host, this.s.def.sprites.moveA!, v.dashSec!);
         this.dashHit.clear();
         this.dashTimer = v.dashCooldownSec!;
       }
@@ -85,17 +135,30 @@ class Suit implements SkillObject {
     const v = this.s.values;
     const tags = skillTags(this.s.def, this.s.owned.awakened, 'punch');
     const c = { x: target.sprite.x, y: target.sprite.y };
+    const sp = this.s.def.sprites;
     if (!this.s.owned.awakened) {
-      host.fx(host.scene.add.circle(c.x, c.y, target.radius + 2, hexColor(this.s.def.color), 0.6).setDepth(6));
+      this.pose(host, this.art('punch'), POSE_SEC);
+      this.throwFist(host, c);
+      playFx(host.scene, sp.flash!, c.x, c.y);
       host.hit(target, v.punchDamage!, tags);
       return;
     }
     // 폭발 펀치: 맞은 적 둘레까지
     const r = host.area(v.blastRadius!);
-    host.fx(host.scene.add.circle(c.x, c.y, r, hexColor(this.s.def.color), 0.45).setDepth(6), 0.15);
+    this.pose(host, sp.blastPunchA!, POSE_SEC);
+    this.throwFist(host, c);
+    playFx(host.scene, sp.blast!, c.x, c.y, { w: r * 2.2 });
     for (const e of [...host.enemies()]) {
       if (Math.hypot(e.sprite.x - c.x, e.sprite.y - c.y) <= r + e.radius) host.hit(e, v.punchDamage!, tags);
     }
+  }
+
+  /** 주먹이 슈트에서 적까지 날아간다 */
+  private throwFist(host: SkillHost, to: { x: number; y: number }): void {
+    const from = this.body;
+    const fist = host.sprite(from.x, from.y, this.s.owned.awakened ? this.s.def.sprites.fist3! : levelRef(this.s, 'fist'));
+    fist.setDepth(6).setRotation(Math.atan2(to.y - from.y, to.x - from.x));
+    host.scene.tweens.add({ targets: fist, x: to.x, y: to.y, duration: FIST_SEC * 1000, onComplete: () => fist.destroy() });
   }
 
   buff(host: SkillHost): BuffView {
@@ -104,7 +167,8 @@ class Suit implements SkillObject {
   }
 
   destroy(): void {
-    this.ring.destroy();
+    this.body.destroy();
+    this.player.setVisible(true);
   }
 }
 

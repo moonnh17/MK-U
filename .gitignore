@@ -1,4 +1,6 @@
 node_modules/
+# 아크로 스프라이트 원본 (빌드 입력, public/assets/mku로 줄여서 쓴다)
+MKU-Acro-Skills-Lv1-3-5-Awakened/
 dist/
 *.log
 .vite/

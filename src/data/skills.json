@@ -279,7 +279,23 @@
       },
       "color": "#9ad94a",
       "sprites": {
-        "subject": { "spriteKey": "skill_subject", "color": "#9ad94a", "size": 7 }
+        "subject1": { "spriteKey": "skill_subject1", "color": "#9ad94a", "size": 7 },
+        "subject2": { "spriteKey": "skill_subject2", "color": "#9ad94a", "size": 7 },
+        "subject3": { "spriteKey": "skill_subject3", "color": "#9ad94a", "size": 7 },
+        "aura2": { "spriteKey": "skill_corrupt_mark2", "color": "#9ad94a", "size": 12 },
+        "aura3": { "spriteKey": "skill_corrupt_mark3", "color": "#9ad94a", "size": 12 },
+        "spawn": { "spriteKey": "skill_acro_spawn", "color": "#9ad94a", "size": 13 },
+        "bullet": { "spriteKey": "skill_acro_bullet", "color": "#9ad94a", "size": 7 },
+        "shard": { "spriteKey": "skill_acro_shard", "color": "#9ad94a", "size": 15 },
+        "blast": { "spriteKey": "skill_acro_blast", "color": "#9ad94a", "size": 20 },
+        "flash": { "spriteKey": "skill_acro_flash", "color": "#9ad94a", "size": 8 },
+        "spawnA": { "spriteKey": "skill_specimen_spawn", "color": "#9ad94a", "size": 14 },
+        "idleA": { "spriteKey": "skill_specimen_idle", "color": "#9ad94a", "size": 7 },
+        "moveA": { "spriteKey": "skill_specimen_move", "color": "#9ad94a", "size": 7 },
+        "attackA": { "spriteKey": "skill_specimen_attack", "color": "#9ad94a", "size": 12 },
+        "powerA": { "spriteKey": "skill_specimen_power", "color": "#9ad94a", "size": 11 },
+        "variantA": { "spriteKey": "skill_specimen_variant", "color": "#9ad94a", "size": 14 },
+        "deathA": { "spriteKey": "skill_specimen_death", "color": "#9ad94a", "size": 14 }
       }
     },
     {
@@ -306,7 +322,22 @@
         "values": { "damage": 16, "range": 85, "arcDeg": 110, "rebelChance": 0.35, "rebelSec": 8, "rebelDamage": 8, "rebelIntervalSec": 0.6, "dominateSec": 14, "dominateDamageMultiplier": 2 }
       },
       "color": "#c83a5a",
-      "sprites": {}
+      "sprites": {
+        "mark1": { "spriteKey": "skill_corrupt_mark1", "color": "#c83a5a", "size": 12 },
+        "mark2": { "spriteKey": "skill_corrupt_mark2", "color": "#c83a5a", "size": 12 },
+        "mark3": { "spriteKey": "skill_corrupt_mark3", "color": "#c83a5a", "size": 12 },
+        "smoke": { "spriteKey": "skill_corrupt_smoke", "color": "#c83a5a", "size": 20 },
+        "pull": { "spriteKey": "skill_acro_pull", "color": "#c83a5a", "size": 18 },
+        "end": { "spriteKey": "skill_acro_dispel", "color": "#c83a5a", "size": 17 },
+        "shard": { "spriteKey": "skill_acro_shard", "color": "#c83a5a", "size": 15 },
+        "blast": { "spriteKey": "skill_acro_blast", "color": "#c83a5a", "size": 20 },
+        "flash": { "spriteKey": "skill_acro_flash", "color": "#c83a5a", "size": 8 },
+        "shotA": { "spriteKey": "skill_corruptA_shot", "color": "#c83a5a", "size": 20 },
+        "markA": { "spriteKey": "skill_corruptA_mark", "color": "#c83a5a", "size": 12 },
+        "auraA": { "spriteKey": "skill_corruptA_aura", "color": "#c83a5a", "size": 14 },
+        "attackA": { "spriteKey": "skill_corruptA_attack", "color": "#c83a5a", "size": 14 },
+        "endA": { "spriteKey": "skill_corruptA_end", "color": "#c83a5a", "size": 14 }
+      }
     },
     {
       "id": "experimentalWeapon",
@@ -338,7 +369,21 @@
       },
       "color": "#d9d03b",
       "sprites": {
-        "shell": { "spriteKey": "skill_experiment_shell", "color": "#d9d03b", "size": 6 }
+        "shell": { "spriteKey": "skill_acro_bullet", "color": "#d9d03b", "size": 6 },
+        "burst": { "spriteKey": "skill_acro_shard", "color": "#d9d03b", "size": 15 },
+        "laser": { "spriteKey": "skill_experiment_laser", "color": "#d9d03b", "size": 20 },
+        "shock": { "spriteKey": "skill_acro_dispel", "color": "#d9d03b", "size": 17 },
+        "slice": { "spriteKey": "skill_acro_slice", "color": "#d9d03b", "size": 18 },
+        "pull": { "spriteKey": "skill_acro_pull", "color": "#d9d03b", "size": 18 },
+        "blast": { "spriteKey": "skill_acro_blast", "color": "#d9d03b", "size": 20 },
+        "flash": { "spriteKey": "skill_acro_flash", "color": "#d9d03b", "size": 8 },
+        "shellA": { "spriteKey": "skill_pandora_shell", "color": "#d9d03b", "size": 6 },
+        "blastA": { "spriteKey": "skill_pandora_blast", "color": "#d9d03b", "size": 22 },
+        "burstA": { "spriteKey": "skill_pandora_burst", "color": "#d9d03b", "size": 20 },
+        "laserA": { "spriteKey": "skill_pandora_laser", "color": "#d9d03b", "size": 20 },
+        "shockA": { "spriteKey": "skill_pandora_shock", "color": "#d9d03b", "size": 20 },
+        "sliceA": { "spriteKey": "skill_pandora_slice", "color": "#d9d03b", "size": 20 },
+        "pullA": { "spriteKey": "skill_pandora_pull", "color": "#d9d03b", "size": 22 }
       }
     },
     {
@@ -378,7 +423,17 @@
         }
       },
       "color": "#d93a3a",
-      "sprites": {}
+      "sprites": {
+        "slash1": { "spriteKey": "skill_wings_slash1", "color": "#d93a3a", "size": 30 },
+        "slash2": { "spriteKey": "skill_wings_slash2", "color": "#d93a3a", "size": 30 },
+        "slash3": { "spriteKey": "skill_wings_slash3", "color": "#d93a3a", "size": 30 },
+        "flash": { "spriteKey": "skill_acro_flash", "color": "#d93a3a", "size": 8 },
+        "hit1A": { "spriteKey": "skill_wingsA_hit1", "color": "#d93a3a", "size": 30 },
+        "hit2A": { "spriteKey": "skill_wingsA_hit2", "color": "#d93a3a", "size": 30 },
+        "hit3A": { "spriteKey": "skill_wingsA_hit3", "color": "#d93a3a", "size": 35 },
+        "bleedA": { "spriteKey": "skill_wingsA_bleed", "color": "#d93a3a", "size": 10 },
+        "markA": { "spriteKey": "skill_wingsA_mark", "color": "#d93a3a", "size": 8 }
+      }
     },
     {
       "id": "mkPrototype",
@@ -404,7 +459,32 @@
         "values": { "hpCost": 0.15, "durationSec": 8, "moveSpeed": 0.35, "damageReduction": 0.3, "punchDamage": 21, "blastRadius": 24, "dashRange": 100, "dashSpeed": 360, "dashSec": 0.18, "dashDamage": 13, "dashCooldownSec": 1.5, "fxRadius": 11 }
       },
       "color": "#d9783b",
-      "sprites": {}
+      "sprites": {
+        "morph1": { "spriteKey": "skill_mk_morph1", "color": "#d9783b", "size": 19 },
+        "idle1": { "spriteKey": "skill_mk_idle1", "color": "#d9783b", "size": 19 },
+        "move1": { "spriteKey": "skill_mk_move1", "color": "#d9783b", "size": 19 },
+        "punch1": { "spriteKey": "skill_mk_punch1", "color": "#d9783b", "size": 19 },
+        "fist1": { "spriteKey": "skill_mk_fist1", "color": "#d9783b", "size": 7 },
+        "morph2": { "spriteKey": "skill_mk_morph2", "color": "#d9783b", "size": 19 },
+        "idle2": { "spriteKey": "skill_mk_idle2", "color": "#d9783b", "size": 19 },
+        "move2": { "spriteKey": "skill_mk_move2", "color": "#d9783b", "size": 19 },
+        "punch2": { "spriteKey": "skill_mk_punch2", "color": "#d9783b", "size": 19 },
+        "fist2": { "spriteKey": "skill_mk_fist2", "color": "#d9783b", "size": 7 },
+        "morph3": { "spriteKey": "skill_mk_morph3", "color": "#d9783b", "size": 19 },
+        "idle3": { "spriteKey": "skill_mk_idle3", "color": "#d9783b", "size": 19 },
+        "move3": { "spriteKey": "skill_mk_move3", "color": "#d9783b", "size": 19 },
+        "punch3": { "spriteKey": "skill_mk_punch3", "color": "#d9783b", "size": 19 },
+        "fist3": { "spriteKey": "skill_mk_fist3", "color": "#d9783b", "size": 7 },
+        "blast": { "spriteKey": "skill_acro_blast", "color": "#d9783b", "size": 20 },
+        "flash": { "spriteKey": "skill_acro_flash", "color": "#d9783b", "size": 8 },
+        "morphA": { "spriteKey": "skill_mkA_morph", "color": "#d9783b", "size": 20 },
+        "idleA": { "spriteKey": "skill_mkA_idle", "color": "#d9783b", "size": 20 },
+        "moveA": { "spriteKey": "skill_mkA_move", "color": "#d9783b", "size": 20 },
+        "punchA": { "spriteKey": "skill_mkA_punch", "color": "#d9783b", "size": 20 },
+        "blastPunchA": { "spriteKey": "skill_mkA_blast", "color": "#d9783b", "size": 20 },
+        "drainA": { "spriteKey": "skill_mkA_drain", "color": "#d9783b", "size": 20 },
+        "releaseA": { "spriteKey": "skill_mkA_release", "color": "#d9783b", "size": 20 }
+      }
     },
     {
       "id": "reductionist",
@@ -430,7 +510,10 @@
         "values": { "lifesteal": 0.05, "basicUnit": 6 }
       },
       "color": "#5ad95a",
-      "sprites": {}
+      "sprites": {
+        "smoke": { "spriteKey": "skill_reduction_smoke", "color": "#5ad95a", "size": 12 },
+        "unit": { "spriteKey": "skill_reduction_unit", "color": "#5ad95a", "size": 14 }
+      }
     }
   ]
 }

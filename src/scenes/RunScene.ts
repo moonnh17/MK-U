@@ -1,4 +1,4 @@
-import { playFx } from '../skills/skillFx';
+import { loopArt, playFx } from '../skills/skillFx';
 import { buildPathField, pathDir, segmentClear, type PathField } from '../systems/pathField';
 import { IDLE_DODGE } from '../systems/dodge';
 import Phaser from 'phaser';
@@ -81,6 +81,8 @@ export class RunScene extends Phaser.Scene {
   host!: SkillHost;
 
   player!: Phaser.Physics.Arcade.Sprite;
+  /** 변질된 적 위 표식 */
+  corruptMarks = new Map<Enemy, Phaser.GameObjects.Sprite>();
   weaponSprite!: Phaser.GameObjects.Image;
   walls!: Phaser.Physics.Arcade.StaticGroup;
   doorGroup!: Phaser.Physics.Arcade.StaticGroup;
@@ -419,6 +421,7 @@ export class RunScene extends Phaser.Scene {
     this.skillRt.skillObjects = [];
     this.hazards = [];
     this.bossControllers = new Map();
+    this.corruptMarks.clear();
     this.skillRt.shield = null;
     this.skillRt.shieldOpts = null;
     this.skillRt.shieldFx = null;
@@ -967,7 +970,10 @@ export class RunScene extends Phaser.Scene {
     const c = e.corruption;
     if (c) {
       e.corruption = null;
-      this.fxAt(this.add.circle(x, y, c.burstRadius, hexColor(d.ui.corruptionColor), 0.4).setDepth(6));
+      if (c.fx) {
+        playFx(this, c.fx.burst, x, y, { w: c.burstRadius * 2.2 });
+        if (c.fx.shards) playFx(this, c.fx.shards, x, y, { w: c.burstRadius * 2.6 });
+      } else this.fxAt(this.add.circle(x, y, c.burstRadius, hexColor(d.ui.corruptionColor), 0.4).setDepth(6));
       for (const o of [...this.enemies]) {
         if (Math.hypot(o.sprite.x - x, o.sprite.y - y) <= c.burstRadius + o.radius) this.combat.hit(o, c.burstDamage, c.burstTags);
       }
@@ -988,14 +994,37 @@ export class RunScene extends Phaser.Scene {
     return true;
   }
 
-  /** 변질 시간, 변질된 적 색 */
+  /** MK 슈트를 벗긴다: 사망·포탈 연출은 플레이어 그림으로 한다 */
+  private dropSuit(): void {
+    for (const o of this.skillRt.skillObjects.filter((x) => x.owner === 'mkPrototype')) this.skillRt.removeObject(o);
+  }
+
+  /** 변질 시간, 변질된 적 색·표식 */
   updateCorruption(dt: number): void {
     const color = hexColor(this.ctx.data.ui.corruptionColor);
     for (const e of this.enemies) {
       if (!e.corruption || e.dead) continue;
+      const fx = e.corruption.fx;
       e.corruption = tickCorruption(e.corruption, dt);
-      if (!e.corruption) e.sprite.clearTint();
-      else if (!e.sprite.tintFill) e.sprite.setTint(color);
+      if (!e.corruption) {
+        e.sprite.clearTint();
+        if (fx?.end) playFx(this, fx.end, e.sprite.x, e.sprite.y, { w: e.radius * 3 });
+        continue;
+      }
+      if (!e.sprite.tintFill) e.sprite.setTint(color);
+      if (fx && !this.corruptMarks.has(e)) {
+        const m = this.add.sprite(e.sprite.x, e.sprite.y, fx.mark.spriteKey).setDepth(5).setAlpha(0.85);
+        m.setDisplaySize(Math.max(e.radius * 2.6, 14), Math.max(e.radius * 2.6, 14));
+        loopArt(m, fx.mark);
+        this.corruptMarks.set(e, m);
+      }
+    }
+    for (const [e, m] of this.corruptMarks) {
+      if (e.corruption && !e.dead && e.sprite.active) m.setPosition(e.sprite.x, e.sprite.y);
+      else {
+        m.destroy();
+        this.corruptMarks.delete(e);
+      }
     }
   }
 
@@ -1297,6 +1326,7 @@ export class RunScene extends Phaser.Scene {
     this.session.player.record.stagesCleared++;
     if (adv.type === 'stage' || adv.type === 'chapter') {
       // 포탈에 빨려 들어가 이동 화면에서 스테이지 끝 카드를 고른 뒤 다음 스테이지로
+      this.dropSuit();
       this.stageFx.warpOut(() =>
         this.progression.queueOffers([{ kind: afterStage, boss: false }], () => {
           const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [], warpIn: true };
@@ -1320,6 +1350,7 @@ export class RunScene extends Phaser.Scene {
     bus.emit('weaponTip', { item: null });
     bus.emit('cardTip', { card: null });
     this.physics.pause();
+    this.dropSuit();
     this.stageFx.playDeath(() => this.endRun({ type: 'dead' }));
   }
 

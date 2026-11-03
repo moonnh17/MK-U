@@ -7,10 +7,10 @@
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
-import { hexColor } from '../core/scale';
 import { rollChance } from '../systems/acro';
 import { skillTags } from '../systems/tags';
 import type { TagId } from '../types/data';
+import { levelRef, loopArt, playFx, poseThen } from './skillFx';
 import { floatText, nearestEnemy, stepToward, type SkillCast, type SkillHost, type SkillImpl, type SkillObject } from './host';
 
 const ID = 'unstableSubject';
@@ -21,7 +21,8 @@ const BEHAVIORS: Behavior[] = ['rush', 'blast', 'shot'];
 class Subject implements SkillObject {
   readonly owner = ID;
   readonly createdAt: number;
-  private readonly img: Phaser.GameObjects.Image;
+  private readonly img: Phaser.GameObjects.Sprite;
+  private readonly aura: Phaser.GameObjects.Sprite | null = null;
   private life: number;
   private timer = 0;
 
@@ -33,14 +34,28 @@ class Subject implements SkillObject {
   ) {
     this.createdAt = host.scene.time.now;
     this.life = s.values.lifeSec!;
-    this.img = host.sprite(pos.x, pos.y, s.def.sprites.subject!).setDepth(4);
+    const sp = s.def.sprites;
+    const body = s.owned.awakened ? sp.moveA! : levelRef(s, 'subject');
+    this.img = host.sprite(pos.x, pos.y, body).setDepth(4);
+    if (s.owned.awakened) poseThen(this.img, sp.spawnA!, body);
+    else {
+      playFx(host.scene, sp.spawn!, pos.x, pos.y, { w: 22, depth: 3 });
+      // Lv3(게임 Lv2)부터 변질 오라
+      const aura = sp[`aura${s.owned.level}`];
+      if (aura) this.aura = host.sprite(pos.x, pos.y, aura).setDepth(3).setAlpha(0.6).setDisplaySize(24, 24);
+    }
     // 행동 구분: 자폭은 주황빛, 사격은 조금 작게
     if (behavior === 'blast') this.img.setTint(0xffb070);
     if (behavior === 'shot') this.img.setScale(0.8);
   }
 
   private get size(): number {
-    return this.s.def.sprites.subject!.size;
+    return levelRef(this.s, 'subject').size;
+  }
+
+  private place(toward: Vec2): void {
+    this.img.setPosition(this.pos.x, this.pos.y).setFlipX(toward.x < this.pos.x);
+    this.aura?.setPosition(this.pos.x, this.pos.y).setRotation(this.life * 1.5);
   }
 
   private tags(): readonly TagId[] {
@@ -56,12 +71,12 @@ class Subject implements SkillObject {
     if (this.behavior === 'shot' || !target) {
       // 사격형·목표 없음: 플레이어 곁을 따라다닌다
       this.pos = stepToward(this.pos, host.playerPos(), v.moveSpeed!, dt, 14);
-      this.img.setPosition(this.pos.x, this.pos.y);
+      this.place(target ? { x: target.sprite.x, y: target.sprite.y } : host.playerPos());
       if (this.behavior === 'shot' && target && this.timer <= 0) {
         const d = Math.hypot(target.sprite.x - this.pos.x, target.sprite.y - this.pos.y);
         if (d <= v.range! + target.radius) {
           const angle = Math.atan2(target.sprite.y - this.pos.y, target.sprite.x - this.pos.x);
-          host.fireBullet(this.pos, angle, v.projectileSpeed!, v.range!, v.shotDamage!, this.tags());
+          host.fireBullet(this.pos, angle, v.projectileSpeed!, v.range!, v.shotDamage!, this.tags(), this.s.def.sprites.bullet);
           this.timer = v.shotIntervalSec!;
         }
       }
@@ -70,13 +85,16 @@ class Subject implements SkillObject {
     const tp = { x: target.sprite.x, y: target.sprite.y };
     const touch = target.radius + this.size / 2;
     this.pos = stepToward(this.pos, tp, v.moveSpeed!, dt, touch * 0.8);
-    this.img.setPosition(this.pos.x, this.pos.y);
+    this.place(tp);
     if (Math.hypot(tp.x - this.pos.x, tp.y - this.pos.y) > touch + 1) return true;
     if (this.behavior === 'blast') {
       this.blast(host);
       return false;
     }
     if (this.timer <= 0) {
+      const sp = this.s.def.sprites;
+      playFx(host.scene, sp.flash!, tp.x, tp.y);
+      playFx(host.scene, sp.shard!, tp.x, tp.y, { w: 20 });
       if (host.hit(target, v.rushDamage!, this.tags())) this.onKilled(host, tp);
       this.timer = v.rushIntervalSec!;
     }
@@ -86,7 +104,12 @@ class Subject implements SkillObject {
   private blast(host: SkillHost): void {
     const v = this.s.values;
     const r = host.area(v.blastRadius!);
-    host.fx(host.scene.add.circle(this.pos.x, this.pos.y, r, hexColor(this.s.def.color), 0.4).setDepth(6), 0.2);
+    const sp = this.s.def.sprites;
+    playFx(host.scene, sp.blast!, this.pos.x, this.pos.y, { w: r * 2.2 });
+    if (this.s.owned.awakened) {
+      playFx(host.scene, sp.attackA!, this.pos.x, this.pos.y, { w: r * 1.2 });
+      playFx(host.scene, sp.deathA!, this.pos.x, this.pos.y, { w: r * 1.4, depth: 5 });
+    }
     for (const e of [...host.enemies()]) {
       const p = { x: e.sprite.x, y: e.sprite.y };
       if (Math.hypot(p.x - this.pos.x, p.y - this.pos.y) > r + e.radius) continue;
@@ -100,11 +123,13 @@ class Subject implements SkillObject {
     if (!this.s.owned.awakened) return;
     if (host.objects().filter((o) => o.owner === ID).length >= v.maxSubjects!) return;
     if (!rollChance(host.rng, host.chance(v.multiplyChance!, 'success', this.tags()))) return;
+    playFx(host.scene, this.s.def.sprites.variantA!, at.x, at.y);
     host.addObject(new Subject(host, this.s, at, 'blast'));
   }
 
   destroy(): void {
     this.img.destroy();
+    this.aura?.destroy();
   }
 }
 
@@ -126,6 +151,7 @@ export const unstableSubject: SkillImpl = {
     if (great) {
       floatText(host, at.x, at.y - 10, host.ctx.t('skillMsg.greatSuccess'), '#ffd23f');
       host.greatSuccess();
+      if (s.owned.awakened) playFx(host.scene, s.def.sprites.powerA!, at.x, at.y);
     }
     for (let i = 0; i < n; i++) {
       const behavior: Behavior = s.owned.awakened

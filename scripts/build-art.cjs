@@ -705,10 +705,7 @@ sprites.prop_exit_portal = sheet('prop_exit_portal', single('rift/frame-1.png'),
 sprites.prop_encounter_core = sheet('prop_encounter_core', single('mimosa/frames/crystal.png'), 24);
 
 // 스킬 오브젝트 (탄은 오른쪽을 본다)
-sprites.skill_subject = sheet('skill_subject', [gaps('acro-awakening/specimen-idle.png')[0]], 16);
-sprites.skill_experiment_shell = sheet('skill_experiment_shell', single('acro/shot-0.png'), 13);
 dots('ult_first_law', ['...EEE...', '.EEeeeEE.', '.EeeyyeE.', 'EeeywyyeE', 'EeywwwyeE', 'EeeywyyeE', '.EeeyyeE.', '.EEeeeEE.', '...EEE...']);
-sprites.ult_singularity = sheet('ult_singularity', single('acro/well-2.png'), 14);
 
 // 히든보스: 오리온의 성전사 = 성기사 몸체. 왕실특무마기법사는 원본에 없어 연구원을 보라색으로 물들여 쓴다 (임시)
 actor('enemy_orion_crusader', gaps('warrior/paladin-idle.png'), gaps('warrior/paladin-move.png'), 56);
@@ -884,6 +881,114 @@ hFx('skill_railA_chain', '07', AW, '연쇄전격', 34);
 // 벼락
 [1, 2, 3, 4].forEach((i) => hFx(`ult_cut${i}`, '08', '기본', `공간절단_단계${i}`, i === 1 ? 60 : 260));
 hFx('ult_kera_slash', '08', AW, '참격', 40);
+
+// ---------- 아크로 스킬 팩 (Lv1·3·5 = 게임 Lv1·2·3) ----------
+const ACRO_DIR = process.argv[4] ?? path.join(REPO, 'MKU-Acro-Skills-Lv1-3-5-Awakened');
+const ACRO = JSON.parse(fs.readFileSync(path.join(ACRO_DIR, '파일목록.json'), 'utf8')).files;
+const aList = (skill, level, label) => {
+  const l = ACRO.filter((x) => x.skill.startsWith(skill) && x.level.startsWith(level) && x.label.startsWith(label));
+  if (l.length === 0) throw new Error(`아크로 그림 없음 ${skill} ${level} ${label}`);
+  return l;
+};
+/** 한 장·원본 시트 (시트 칸·fps는 파일목록 그대로). loop를 주면 원본 설정을 덮는다 */
+function aFx(key, skill, level, label, fit, loop) {
+  const f = aList(skill, level, label)[0];
+  const im = k.read(path.join(ACRO_DIR, f.file));
+  const a = f.animation;
+  if (!a) return fxArt(key, [im], fit);
+  const frames = Array.from({ length: a.frames }, (_, i) => k.crop(im, i * a.frameWidth, 0, a.frameWidth, a.frameHeight));
+  fxArt(key, frames, fit, { fps: a.fps, loop: loop ?? a.loop });
+}
+/** 낱장 프레임 묶음: 크기가 달라 가장 큰 칸 가운데에 맞춰 놓는다 */
+function aFrames(key, skill, level, label, fit, fps, loop = false) {
+  const ims = aList(skill, level, label).map((f) => k.read(path.join(ACRO_DIR, f.file)));
+  const w = Math.max(...ims.map((m) => m.w)), h = Math.max(...ims.map((m) => m.h));
+  const frames = ims.map((m) => {
+    const c = k.blank(w, h);
+    k.paste(c, m, Math.floor((w - m.w) / 2), Math.floor((h - m.h) / 2));
+    return c;
+  });
+  fxArt(key, frames, fit, { fps, loop });
+}
+// 공용 효과
+aFrames('skill_acro_blast', '01', 'Lv1', '폭발_명중', 40, 20);
+aFrames('skill_acro_flash', '04', 'Lv1', '명중섬광', 16, 20);
+aFrames('skill_acro_spawn', '01', 'Lv1', '생성', 26, 12);
+aFrames('skill_acro_shard', '01', 'Lv1', '근접공격_탄환', 30, 16);
+aFrames('skill_acro_bullet', '01', 'Lv1', '보조사격', 14, 12, true);
+aFrames('skill_acro_pull', '02', 'Lv1', '특이점', 36, 14);
+aFrames('skill_acro_dispel', '02', 'Lv1', '강화해제', 34, 12);
+aFrames('skill_acro_slice', '03', 'Lv1', '공간격', 36, 16);
+// 불안정 실험체
+[['1', 'Lv1', 16], ['2', 'Lv3', 18], ['3', 'Lv5', 20]].forEach(([n, lv, fit]) => aFx(`skill_subject${n}`, '01', lv, '본체', fit));
+aFx('skill_specimen_spawn', '01', AW, '생성', 28);
+aFx('skill_specimen_idle', '01', AW, '대기', 20);
+aFx('skill_specimen_move', '01', AW, '이동', 20);
+aFx('skill_specimen_attack', '01', AW, '공격', 24);
+aFx('skill_specimen_power', '01', AW, '강화', 22);
+aFx('skill_specimen_variant', '01', AW, '변칙강화', 28);
+aFx('skill_specimen_death', '01', AW, '소멸', 28);
+// 마기 변질
+[['1', 'Lv1'], ['2', 'Lv3'], ['3', 'Lv5']].forEach(([n, lv]) => aFx(`skill_corrupt_mark${n}`, '02', lv, '변질표식', 24));
+aFrames('skill_corrupt_smoke', '02', 'Lv1', '전염연기', 40, 14);
+aFx('skill_corruptA_shot', '02', AW, '탄체', 40);
+aFx('skill_corruptA_mark', '02', AW, '표식', 24);
+aFx('skill_corruptA_aura', '02', AW, '오라', 28);
+aFx('skill_corruptA_attack', '02', AW, '공격', 28);
+aFx('skill_corruptA_end', '02', AW, '종료', 28);
+// 실험 병기
+aFx('skill_experiment_laser', '03', 'Lv1', '레이저', 120);
+aFx('skill_pandora_laser', '03', AW, '레이저', 60);
+aFx('skill_pandora_blast', '03', AW, '폭발', 44);
+aFx('skill_pandora_burst', '03', AW, '탄막', 40);
+aFx('skill_pandora_shell', '03', AW, '관통탄', 18, true);
+aFx('skill_pandora_slice', '03', AW, '공간격', 40);
+aFx('skill_pandora_pull', '03', AW, '흡인', 44);
+aFx('skill_pandora_shock', '03', AW, '충격파', 40);
+// 정화의 날개
+[['1', 'Lv1'], ['2', 'Lv3'], ['3', 'Lv5']].forEach(([n, lv]) => aFrames(`skill_wings_slash${n}`, '04', lv, '참격', 60, 40));
+aFx('skill_wingsA_hit1', '04', AW, '1타', 60);
+aFx('skill_wingsA_hit2', '04', AW, '2타', 60);
+aFx('skill_wingsA_hit3', '04', AW, '3타', 70);
+aFx('skill_wingsA_bleed', '04', AW, '출혈_', 20);
+aFx('skill_wingsA_mark', '04', AW, '출혈표식', 16);
+// MK : 프로토타입
+[['1', 'Lv1'], ['2', 'Lv3'], ['3', 'Lv5']].forEach(([n, lv]) => {
+  aFrames(`skill_mk_morph${n}`, '05', lv, '변신', 38, 12);
+  aFx(`skill_mk_idle${n}`, '05', lv, '대기', 38);
+  aFx(`skill_mk_move${n}`, '05', lv, '이동', 38);
+  aFx(`skill_mk_punch${n}`, '05', lv, '펀치', 38);
+  aFx(`skill_mk_fist${n}`, '05', lv, '자동펀치', 14);
+});
+aFx('skill_mkA_morph', '05', AW, '조립변신', 40);
+aFx('skill_mkA_idle', '05', AW, '대기', 40);
+aFx('skill_mkA_move', '05', AW, '이동', 40);
+aFx('skill_mkA_punch', '05', AW, '펀치', 40);
+aFx('skill_mkA_blast', '05', AW, '폭발펀치', 40);
+aFx('skill_mkA_drain', '05', AW, '마기소모', 40, false);
+aFx('skill_mkA_release', '05', AW, '변신해제', 40);
+// 환원주의자
+aFx('skill_reduction_smoke', '06', 'Lv1', '흡수연기', 24);
+aFx('skill_reduction_unit', '06', AW, '기초단위', 28);
+// 특이점 실험
+aFrames('ult_singularity', '08', '기본', '특이점핵', 40, 4);
+aFx('ult_sing_collapse', '08', '기본', '결과_collapse', 100);
+aFx('ult_sing_flash', '08', '기본', '결과_collapse-flash', 40);
+aFx('ult_sing_rift', '08', '기본', '결과_collapse-rift', 40);
+aFx('ult_sing_warning', '08', '기본', '결과_warning', 24);
+aFrames('ult_sing_convert', '08', '기본', '결과_convert', 90, 12);
+aFrames('ult_sing_overload', '08', '기본', '결과_overload', 100, 12);
+aFrames('ult_sing_failure', '08', '기본', '결과_failure', 90, 12);
+aFx('ult_paradox_start', '08', AW, '관측시작', 100);
+aFx('ult_paradox_record', '08', AW, '기록_', 40);
+aFx('ult_paradox_mark', '08', AW, '표식', 24);
+aFx('ult_paradox_pull', '08', AW, '흡인', 100);
+aFx('ult_paradox_replay1', '08', AW, '기록재현25', 30);
+aFx('ult_paradox_replay2', '08', AW, '기록재현60', 34);
+aFx('ult_paradox_replay3', '08', AW, '기록재현100', 38);
+aFx('ult_paradox_crumble', '08', AW, '공간붕괴', 44);
+aFx('ult_paradox_send', '08', AW, '기록전송', 34);
+aFx('ult_paradox_end', '08', AW, '관측종료', 60);
 
 const artPath = path.join(REPO, 'src/data/art.json');
 const json = { basePath: 'assets/', sprites };

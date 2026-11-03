@@ -4,9 +4,13 @@
  * 각성 '제1원리': 준 피해의 일부를 흡혈하고, 처치하면 기초 단위만큼 회복한다.
  * 기초 단위로 최대 체력을 넘는 양은 보호막이 된다(보호막 최대치는 장착 중에만 늘어남).
  */
+import type { SpriteRef } from '../types/data';
+import { playFx } from './skillFx';
 import type { PassiveImpl, SkillCast, SkillHost, SkillObject } from './host';
 
 const ID = 'reductionist';
+/** 각성(흡혈)은 매 타격 회복이라 연기만 이 간격으로 */
+const HIT_FX_SEC = 0.5;
 
 class Reductionist implements SkillObject {
   readonly owner = ID;
@@ -28,19 +32,27 @@ class Reductionist implements SkillObject {
   onDamageDealt(host: SkillHost, amount: number): void {
     const v = this.s.values;
     if (amount <= 0) return;
-    if (this.s.owned.awakened) {
-      host.heal(amount * v.lifesteal!, false);
-      return;
-    }
+    if (this.s.owned.awakened) host.heal(amount * v.lifesteal!, false);
+    else if (this.hitTimer <= 0) host.heal(v.hitHeal!, false);
     if (this.hitTimer > 0) return;
-    host.heal(v.hitHeal!, false);
-    this.hitTimer = v.hitHealIntervalSec!;
+    this.smoke(host, this.s.def.sprites.smoke!);
+    this.hitTimer = v.hitHealIntervalSec ?? HIT_FX_SEC;
   }
 
   onKill(host: SkillHost): void {
     const v = this.s.values;
-    if (this.s.owned.awakened) host.heal(v.basicUnit!, true);
-    else host.heal(v.killHeal!, false);
+    if (this.s.owned.awakened) {
+      host.heal(v.basicUnit!, true);
+      this.smoke(host, this.s.def.sprites.unit!);
+    } else {
+      host.heal(v.killHeal!, false);
+      this.smoke(host, this.s.def.sprites.smoke!);
+    }
+  }
+
+  private smoke(host: SkillHost, ref: SpriteRef): void {
+    const p = host.playerPos();
+    playFx(host.scene, ref, p.x, p.y - 4, { fadeSec: 0.5, depth: 5 });
   }
 
   destroy(): void {}

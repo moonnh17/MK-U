@@ -5,14 +5,16 @@
  * 각성 전 대성공: 결과 위력 ×greatMultiplier. 각성 '판도라 장치': 2종 동시, 대성공이면 3종.
  */
 import type { Vec2 } from '../core/actions';
-import { hexColor } from '../core/scale';
 import { pickResults, rollChance } from '../systems/acro';
 import { skillTags } from '../systems/tags';
 import { chainTargets } from '../systems/targeting';
+import type { SpriteRef } from '../types/data';
 import { Explosive } from './explosive';
+import { playFx, stretchFx } from './skillFx';
 import { floatText, nearestEnemy, type SkillCast, type SkillHost, type SkillImpl } from './host';
 
 const ID = 'experimentalWeapon';
+const DISCHARGE_THICK = 12;
 
 /** 목표 지점: 사거리 안 가장 가까운 적, 없으면 조준 방향 */
 function aimPoint(host: SkillHost, range: number): Vec2 {
@@ -21,6 +23,11 @@ function aimPoint(host: SkillHost, range: number): Vec2 {
   if (e) return { x: e.sprite.x, y: e.sprite.y };
   const aim = host.aimDir();
   return { x: from.x + aim.x * range * 0.5, y: from.y + aim.y * range * 0.5 };
+}
+
+/** 각성(판도라 장치)이면 전용 그림 */
+function art(s: SkillCast, name: string): SpriteRef {
+  return (s.owned.awakened ? s.def.sprites[`${name}A`] : undefined) ?? s.def.sprites[name]!;
 }
 
 const RESULTS: Record<string, (host: SkillHost, s: SkillCast, mult: number) => void> = {
@@ -35,7 +42,8 @@ const RESULTS: Record<string, (host: SkillHost, s: SkillCast, mult: number) => v
         radius: host.area(v.explosionRadius!),
         base: v.explosionDamage! * mult,
         tags: skillTags(s.def, s.owned.awakened, 'explosion'),
-        sprite: s.def.sprites.shell!,
+        sprite: art(s, 'shell'),
+        blasts: [art(s, 'blast'), art(s, 'shock')],
       }),
     );
   },
@@ -44,7 +52,8 @@ const RESULTS: Record<string, (host: SkillHost, s: SkillCast, mult: number) => v
     const from = host.playerPos();
     const n = v.barrageCount!;
     const tags = skillTags(s.def, s.owned.awakened, 'barrage');
-    for (let i = 0; i < n; i++) host.fireBullet(from, (i * Math.PI * 2) / n, v.barrageSpeed!, v.range!, v.barrageDamage! * mult, tags);
+    playFx(host.scene, art(s, 'burst'), from.x, from.y, { w: 44 });
+    for (let i = 0; i < n; i++) host.fireBullet(from, (i * Math.PI * 2) / n, v.barrageSpeed!, v.range!, v.barrageDamage! * mult, tags, s.def.sprites.shell);
   },
   discharge(host, s, mult) {
     const v = s.values;
@@ -54,10 +63,8 @@ const RESULTS: Record<string, (host: SkillHost, s: SkillCast, mult: number) => v
     const tags = skillTags(s.def, s.owned.awakened, 'discharge');
     let at: Vec2 = from;
     for (const i of chainTargets(from, pos, v.dischargeCount!, v.dischargeRange!, new Set())) {
-      const g = host.scene.add.graphics().setDepth(6);
-      g.lineStyle(2, hexColor(s.def.color), 0.9);
-      g.lineBetween(at.x, at.y, pos[i]!.x, pos[i]!.y);
-      host.fx(g, 0.15);
+      stretchFx(host.scene, art(s, 'laser'), at, pos[i]!, DISCHARGE_THICK);
+      playFx(host.scene, s.def.sprites.flash!, pos[i]!.x, pos[i]!.y);
       host.hit(enemies[i]!, v.dischargeDamage! * mult, tags);
       at = pos[i]!;
     }
@@ -66,7 +73,8 @@ const RESULTS: Record<string, (host: SkillHost, s: SkillCast, mult: number) => v
     const v = s.values;
     const c = aimPoint(host, v.range!);
     const r = host.area(v.collapseRadius!);
-    host.fx(host.scene.add.circle(c.x, c.y, r, 0x000000, 0.7).setStrokeStyle(1, hexColor(s.def.color)).setDepth(6), 0.3);
+    playFx(host.scene, art(s, 'pull'), c.x, c.y, { w: r * 3, depth: 5 });
+    playFx(host.scene, art(s, 'slice'), c.x, c.y, { w: r * 2.6 });
     const tags = skillTags(s.def, s.owned.awakened, 'collapse');
     for (const e of [...host.enemies()]) {
       if (Math.hypot(e.sprite.x - c.x, e.sprite.y - c.y) <= r + e.radius) host.hit(e, v.collapseDamage! * mult, tags);

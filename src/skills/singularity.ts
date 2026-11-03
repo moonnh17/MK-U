@@ -8,11 +8,11 @@
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
-import { hexColor } from '../core/scale';
 import type { Enemy } from '../entities/enemy';
 import { pickResults, rollChance } from '../systems/acro';
 import { paradoxRatio } from '../systems/advancement';
 import { findSkill, skillValues } from '../systems/skills';
+import { loopArt, playFx, stretchFx } from './skillFx';
 import { floatText, nearestEnemy, type BuffView, type SkillHost, type SkillObject, type UltimateCast, type UltimateImpl } from './host';
 import { spawnSubjects } from './unstableSubject';
 
@@ -24,7 +24,7 @@ function isBoss(e: Enemy): boolean {
 }
 
 function blast(host: SkillHost, u: UltimateCast, at: Vec2, radius: number, damage: number, source: string): void {
-  host.fx(host.scene.add.circle(at.x, at.y, radius, hexColor(u.def.color), 0.45).setDepth(6), 0.25);
+  playFx(host.scene, u.def.sprites.blast!, at.x, at.y, { w: radius * 2.2 });
   for (const e of [...host.enemies()]) {
     if (Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= radius + e.radius) host.hit(e, damage, u.def.sources[source]!);
   }
@@ -33,7 +33,7 @@ function blast(host: SkillHost, u: UltimateCast, at: Vec2, radius: number, damag
 class Singularity implements SkillObject {
   readonly owner = ID;
   readonly createdAt: number;
-  private readonly core: Phaser.GameObjects.Image;
+  private readonly core: Phaser.GameObjects.Sprite;
   private t = 0;
 
   constructor(
@@ -43,12 +43,15 @@ class Singularity implements SkillObject {
   ) {
     this.createdAt = host.scene.time.now;
     this.core = host.sprite(at.x, at.y, u.def.sprites.core!).setDepth(5);
+    // 네 단계가 끌어당기는 동안 한 번 자란다
+    loopArt(this.core, u.def.sprites.core!);
+    this.core.anims.timeScale = 1 / u.values.pullSec!;
   }
 
   update(dt: number, host: SkillHost): boolean {
     const v = this.u.values;
     this.t += dt;
-    this.core.setScale(1 + this.t * 1.5).setRotation(this.t * 6);
+    this.core.setRotation(this.t * 3);
     const r = host.area(v.pullRadius!);
     if (this.t < v.pullSec!) {
       for (const e of host.enemies()) {
@@ -76,16 +79,26 @@ class Singularity implements SkillObject {
     if (great) floatText(host, this.at.x, this.at.y - 18, host.ctx.t('skillMsg.greatSuccess'), '#ffd23f');
     floatText(host, this.at.x, this.at.y - 8, host.ctx.t(`ultimate.singularity.result.${result}`), u.def.color);
 
+    const sp = u.def.sprites;
     if (result === 'collapse') {
-      blast(host, u, this.at, host.area(v.collapseRadius!), v.collapseDamage! * mult, 'collapse');
+      const r = host.area(v.collapseRadius!);
+      blast(host, u, this.at, r, v.collapseDamage! * mult, 'collapse');
+      playFx(host.scene, sp.collapse!, this.at.x, this.at.y, { w: r * 2.4, fadeSec: 0.5 });
+      playFx(host.scene, sp.collapseFlash!, this.at.x, this.at.y, { w: r * 1.4 });
+      playFx(host.scene, sp.collapseRift!, this.at.x, this.at.y, { w: r * 1.4, fadeSec: 0.6 });
     } else if (result === 'overload') {
-      blast(host, u, this.at, host.area(v.overloadRadius!), v.overloadDamage! * mult, 'overload');
+      const r = host.area(v.overloadRadius!);
+      blast(host, u, this.at, r, v.overloadDamage! * mult, 'overload');
+      playFx(host.scene, sp.overload!, this.at.x, this.at.y, { w: r * 2.2 });
     } else if (result === 'failure') {
-      blast(host, u, this.at, host.area(v.failureRadius!), v.failureDamage!, 'failure');
+      const r = host.area(v.failureRadius!);
+      blast(host, u, this.at, r, v.failureDamage!, 'failure');
+      playFx(host.scene, sp.failure!, this.at.x, this.at.y, { w: r * 2.2 });
+      playFx(host.scene, sp.warning!, this.at.x, this.at.y - 16, { fadeSec: 0.7 });
       host.hurtSelf(v.failureSelfDamage!);
     } else if (result === 'corrupt') {
       const r = host.area(v.pullRadius!);
-      host.fx(host.scene.add.circle(this.at.x, this.at.y, r, hexColor(host.ctx.data.ui.corruptionColor), 0.3).setDepth(6), 0.3);
+      playFx(host.scene, sp.convert!, this.at.x, this.at.y, { w: r * 2.2 });
       for (const e of host.enemies()) {
         if (Math.hypot(e.sprite.x - this.at.x, e.sprite.y - this.at.y) > r + e.radius) continue;
         host.corrupt(e, {
@@ -94,10 +107,12 @@ class Singularity implements SkillObject {
           burstDamage: v.corruptBurstDamage!,
           burstRadius: host.area(v.corruptBurstRadius!),
           burstTags: u.def.sources.corrupt!,
+          fx: { mark: findSkill(host.ctx.data.skills, 'magiCorruption').sprites.mark1!, burst: sp.blast! },
         });
       }
     } else {
       // 증식: 자폭 실험체 (가진 불안정 실험체 레벨, 없으면 Lv1 수치)
+      playFx(host.scene, sp.spawn!, this.at.x, this.at.y, { w: 40 });
       const def = findSkill(host.ctx.data.skills, 'unstableSubject');
       const owned = host.ctx.session?.player.loadout.owned.unstableSubject ?? { level: 1, awakened: false, order: 0 };
       const cast = { def, owned: { ...owned, awakened: false }, values: skillValues(def, { level: owned.level, awakened: false }).values };
@@ -116,22 +131,34 @@ class Paradox implements SkillObject {
   readonly createdAt: number;
   private left: number;
   private readonly recorded = new Map<Enemy, number>();
-  private readonly marks = new Map<Enemy, Phaser.GameObjects.Arc>();
+  private readonly marks = new Map<Enemy, Phaser.GameObjects.Sprite>();
+  private readonly field: Phaser.GameObjects.Sprite[];
 
   constructor(
     host: SkillHost,
     private readonly u: UltimateCast,
-    at: Vec2,
+    private readonly at: Vec2,
   ) {
     this.createdAt = host.scene.time.now;
     const v = u.values;
     this.left = v.observeSec!;
     const r = host.area(v.observeRadius!);
-    host.fx(host.scene.add.circle(at.x, at.y, r, hexColor(u.def.color), 0.2).setDepth(6), 0.4);
+    const sp = u.def.sprites;
+    playFx(host.scene, sp.observeStart!, at.x, at.y, { w: r * 2.2 });
+    // 관측 동안 도는 흡인·기록
+    this.field = [sp.pull!, sp.record!].map((ref, i) => {
+      const f = host.sprite(at.x, at.y, ref).setDepth(3 + i).setAlpha(0.7);
+      if (i === 0) f.setDisplaySize(r * 2, (r * 2 * f.height) / Math.max(1, f.width));
+      loopArt(f, ref);
+      return f;
+    });
     for (const e of host.enemies()) {
       if (Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) > r + e.radius) continue;
       this.recorded.set(e, 0);
-      this.marks.set(e, host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius + 3).setStrokeStyle(1, hexColor(u.def.color), 0.9).setDepth(5));
+      const m = host.sprite(e.sprite.x, e.sprite.y, sp.mark!).setDepth(5);
+      m.setDisplaySize(Math.max(e.radius * 2.6, 14), Math.max(e.radius * 2.6, 14));
+      loopArt(m, sp.mark!);
+      this.marks.set(e, m);
     }
     floatText(host, at.x, at.y - 8, host.ctx.t('ultimate.singularity.observe'), u.def.color);
   }
@@ -161,9 +188,15 @@ class Paradox implements SkillObject {
     const key = great ? 'full' : success ? 'major' : 'partial';
     const p = host.playerPos();
     floatText(host, p.x, p.y - 14, host.ctx.t(`ultimate.singularity.replay.${key}`), great ? '#ffd23f' : this.u.def.color, 1);
+    const sp = this.u.def.sprites;
+    playFx(host.scene, sp.observeEnd!, this.at.x, this.at.y);
+    const replay = great ? sp.replay3! : success ? sp.replay2! : sp.replay1!;
     for (const [e, dmg] of this.recorded) {
       if (e.dead || dmg <= 0) continue;
-      host.fx(host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius + 4, hexColor(this.u.def.color), 0.6).setDepth(6), 0.25);
+      const to = { x: e.sprite.x, y: e.sprite.y };
+      stretchFx(host.scene, sp.send!, this.at, to, 14);
+      playFx(host.scene, replay, to.x, to.y);
+      if (great) playFx(host.scene, sp.crumble!, to.x, to.y, { w: e.radius * 3 + 16 });
       // 대성공만 공간격
       host.hitTrue(e, dmg * ratio, great);
     }
@@ -176,6 +209,7 @@ class Paradox implements SkillObject {
 
   destroy(): void {
     for (const m of this.marks.values()) m.destroy();
+    for (const f of this.field) f.destroy();
   }
 }
 

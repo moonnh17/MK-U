@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 302개 · 그림 있음 287개
+전체 384개 · 그림 있음 367개
 
 ## player (3)
 
@@ -189,7 +189,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (79)
+## skill (161)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -263,15 +263,97 @@
 | `skill_swarm_charge` | 전투 드론 (swarmCharge) | 8×8 | center | #5ad9c0 | mku/skill_swarm_charge.png (8프레임) |
 | `skill_swarm_laser` | 전투 드론 (swarmLaser) | 8×8 | center | #5ad9c0 | mku/skill_swarm_laser.png (5프레임) |
 | `skill_swarm_shot` | 전투 드론 (shot) | 3×3 | center | #5ad9c0 | mku/skill_swarm_shot.png (3프레임) |
-| `skill_subject` | 불안정 실험체 (subject) | 7×7 | center | #9ad94a | mku/skill_subject.png (1프레임) |
-| `skill_experiment_shell` | 실험 병기 (shell) | 6×6 | center | #d9d03b | mku/skill_experiment_shell.png (1프레임) |
+| `skill_subject1` | 불안정 실험체 (subject1) | 7×7 | center | #9ad94a | mku/skill_subject1.png (1프레임) |
+| `skill_subject2` | 불안정 실험체 (subject2) | 7×7 | center | #9ad94a | mku/skill_subject2.png (1프레임) |
+| `skill_subject3` | 불안정 실험체 (subject3) | 7×7 | center | #9ad94a | mku/skill_subject3.png (1프레임) |
+| `skill_corrupt_mark2` | 불안정 실험체 (aura2) 외 1곳 | 12×12 | center | #9ad94a | mku/skill_corrupt_mark2.png (1프레임) |
+| `skill_corrupt_mark3` | 불안정 실험체 (aura3) 외 1곳 | 12×12 | center | #9ad94a | mku/skill_corrupt_mark3.png (1프레임) |
+| `skill_acro_spawn` | 불안정 실험체 (spawn) 외 1곳 | 13×13 | center | #9ad94a | mku/skill_acro_spawn.png (4프레임) |
+| `skill_acro_bullet` | 불안정 실험체 (bullet) 외 1곳 | 7×7 | center | #9ad94a | mku/skill_acro_bullet.png (3프레임) |
+| `skill_acro_shard` | 불안정 실험체 (shard) 외 2곳 | 15×15 | center | #9ad94a | mku/skill_acro_shard.png (4프레임) |
+| `skill_acro_blast` | 불안정 실험체 (blast) 외 4곳 | 20×20 | center | #9ad94a | mku/skill_acro_blast.png (7프레임) |
+| `skill_acro_flash` | 불안정 실험체 (flash) 외 4곳 | 8×8 | center | #9ad94a | mku/skill_acro_flash.png (3프레임) |
+| `skill_specimen_spawn` | 불안정 실험체 (spawnA) | 14×14 | center | #9ad94a | mku/skill_specimen_spawn.png (7프레임) |
+| `skill_specimen_idle` | 불안정 실험체 (idleA) | 7×7 | center | #9ad94a | mku/skill_specimen_idle.png (7프레임) |
+| `skill_specimen_move` | 불안정 실험체 (moveA) | 7×7 | center | #9ad94a | mku/skill_specimen_move.png (6프레임) |
+| `skill_specimen_attack` | 불안정 실험체 (attackA) | 12×12 | center | #9ad94a | mku/skill_specimen_attack.png (4프레임) |
+| `skill_specimen_power` | 불안정 실험체 (powerA) | 11×11 | center | #9ad94a | mku/skill_specimen_power.png (1프레임) |
+| `skill_specimen_variant` | 불안정 실험체 (variantA) | 14×14 | center | #9ad94a | mku/skill_specimen_variant.png (3프레임) |
+| `skill_specimen_death` | 불안정 실험체 (deathA) | 14×14 | center | #9ad94a | mku/skill_specimen_death.png (6프레임) |
+| `skill_corrupt_mark1` | 마기 변질 (mark1) | 12×12 | center | #c83a5a | mku/skill_corrupt_mark1.png (1프레임) |
+| `skill_corrupt_smoke` | 마기 변질 (smoke) | 20×20 | center | #c83a5a | mku/skill_corrupt_smoke.png (6프레임) |
+| `skill_acro_pull` | 마기 변질 (pull) 외 1곳 | 18×18 | center | #c83a5a | mku/skill_acro_pull.png (5프레임) |
+| `skill_acro_dispel` | 마기 변질 (end) 외 1곳 | 17×17 | center | #c83a5a | mku/skill_acro_dispel.png (4프레임) |
+| `skill_corruptA_shot` | 마기 변질 (shotA) | 20×20 | center | #c83a5a | mku/skill_corruptA_shot.png (9프레임) |
+| `skill_corruptA_mark` | 마기 변질 (markA) | 12×12 | center | #c83a5a | mku/skill_corruptA_mark.png (8프레임) |
+| `skill_corruptA_aura` | 마기 변질 (auraA) | 14×14 | center | #c83a5a | mku/skill_corruptA_aura.png (9프레임) |
+| `skill_corruptA_attack` | 마기 변질 (attackA) | 14×14 | center | #c83a5a | mku/skill_corruptA_attack.png (6프레임) |
+| `skill_corruptA_end` | 마기 변질 (endA) | 14×14 | center | #c83a5a | mku/skill_corruptA_end.png (9프레임) |
+| `skill_experiment_laser` | 실험 병기 (laser) | 20×20 | center | #d9d03b | mku/skill_experiment_laser.png (1프레임) |
+| `skill_acro_slice` | 실험 병기 (slice) | 18×18 | center | #d9d03b | mku/skill_acro_slice.png (4프레임) |
+| `skill_pandora_shell` | 실험 병기 (shellA) | 6×6 | center | #d9d03b | mku/skill_pandora_shell.png (8프레임) |
+| `skill_pandora_blast` | 실험 병기 (blastA) | 22×22 | center | #d9d03b | mku/skill_pandora_blast.png (6프레임) |
+| `skill_pandora_burst` | 실험 병기 (burstA) | 20×20 | center | #d9d03b | mku/skill_pandora_burst.png (8프레임) |
+| `skill_pandora_laser` | 실험 병기 (laserA) | 20×20 | center | #d9d03b | mku/skill_pandora_laser.png (8프레임) |
+| `skill_pandora_shock` | 실험 병기 (shockA) | 20×20 | center | #d9d03b | mku/skill_pandora_shock.png (4프레임) |
+| `skill_pandora_slice` | 실험 병기 (sliceA) | 20×20 | center | #d9d03b | mku/skill_pandora_slice.png (6프레임) |
+| `skill_pandora_pull` | 실험 병기 (pullA) | 22×22 | center | #d9d03b | mku/skill_pandora_pull.png (6프레임) |
+| `skill_wings_slash1` | 정화의 날개 (slash1) | 30×30 | center | #d93a3a | mku/skill_wings_slash1.png (16프레임) |
+| `skill_wings_slash2` | 정화의 날개 (slash2) | 30×30 | center | #d93a3a | mku/skill_wings_slash2.png (16프레임) |
+| `skill_wings_slash3` | 정화의 날개 (slash3) | 30×30 | center | #d93a3a | mku/skill_wings_slash3.png (16프레임) |
+| `skill_wingsA_hit1` | 정화의 날개 (hit1A) | 30×30 | center | #d93a3a | mku/skill_wingsA_hit1.png (4프레임) |
+| `skill_wingsA_hit2` | 정화의 날개 (hit2A) | 30×30 | center | #d93a3a | mku/skill_wingsA_hit2.png (4프레임) |
+| `skill_wingsA_hit3` | 정화의 날개 (hit3A) | 35×35 | center | #d93a3a | mku/skill_wingsA_hit3.png (4프레임) |
+| `skill_wingsA_bleed` | 정화의 날개 (bleedA) | 10×10 | center | #d93a3a | mku/skill_wingsA_bleed.png (6프레임) |
+| `skill_wingsA_mark` | 정화의 날개 (markA) | 8×8 | center | #d93a3a | mku/skill_wingsA_mark.png (1프레임) |
+| `skill_mk_morph1` | MK : 프로토타입 (morph1) | 19×19 | center | #d9783b | mku/skill_mk_morph1.png (4프레임) |
+| `skill_mk_idle1` | MK : 프로토타입 (idle1) | 19×19 | center | #d9783b | mku/skill_mk_idle1.png (1프레임) |
+| `skill_mk_move1` | MK : 프로토타입 (move1) | 19×19 | center | #d9783b | mku/skill_mk_move1.png (1프레임) |
+| `skill_mk_punch1` | MK : 프로토타입 (punch1) | 19×19 | center | #d9783b | mku/skill_mk_punch1.png (1프레임) |
+| `skill_mk_fist1` | MK : 프로토타입 (fist1) | 7×7 | center | #d9783b | mku/skill_mk_fist1.png (1프레임) |
+| `skill_mk_morph2` | MK : 프로토타입 (morph2) | 19×19 | center | #d9783b | mku/skill_mk_morph2.png (4프레임) |
+| `skill_mk_idle2` | MK : 프로토타입 (idle2) | 19×19 | center | #d9783b | mku/skill_mk_idle2.png (1프레임) |
+| `skill_mk_move2` | MK : 프로토타입 (move2) | 19×19 | center | #d9783b | mku/skill_mk_move2.png (1프레임) |
+| `skill_mk_punch2` | MK : 프로토타입 (punch2) | 19×19 | center | #d9783b | mku/skill_mk_punch2.png (1프레임) |
+| `skill_mk_fist2` | MK : 프로토타입 (fist2) | 7×7 | center | #d9783b | mku/skill_mk_fist2.png (1프레임) |
+| `skill_mk_morph3` | MK : 프로토타입 (morph3) | 19×19 | center | #d9783b | mku/skill_mk_morph3.png (4프레임) |
+| `skill_mk_idle3` | MK : 프로토타입 (idle3) | 19×19 | center | #d9783b | mku/skill_mk_idle3.png (1프레임) |
+| `skill_mk_move3` | MK : 프로토타입 (move3) | 19×19 | center | #d9783b | mku/skill_mk_move3.png (1프레임) |
+| `skill_mk_punch3` | MK : 프로토타입 (punch3) | 19×19 | center | #d9783b | mku/skill_mk_punch3.png (1프레임) |
+| `skill_mk_fist3` | MK : 프로토타입 (fist3) | 7×7 | center | #d9783b | mku/skill_mk_fist3.png (1프레임) |
+| `skill_mkA_morph` | MK : 프로토타입 (morphA) | 20×20 | center | #d9783b | mku/skill_mkA_morph.png (6프레임) |
+| `skill_mkA_idle` | MK : 프로토타입 (idleA) | 20×20 | center | #d9783b | mku/skill_mkA_idle.png (6프레임) |
+| `skill_mkA_move` | MK : 프로토타입 (moveA) | 20×20 | center | #d9783b | mku/skill_mkA_move.png (6프레임) |
+| `skill_mkA_punch` | MK : 프로토타입 (punchA) | 20×20 | center | #d9783b | mku/skill_mkA_punch.png (6프레임) |
+| `skill_mkA_blast` | MK : 프로토타입 (blastPunchA) | 20×20 | center | #d9783b | mku/skill_mkA_blast.png (6프레임) |
+| `skill_mkA_drain` | MK : 프로토타입 (drainA) | 20×20 | center | #d9783b | mku/skill_mkA_drain.png (6프레임) |
+| `skill_mkA_release` | MK : 프로토타입 (releaseA) | 20×20 | center | #d9783b | mku/skill_mkA_release.png (6프레임) |
+| `skill_reduction_smoke` | 환원주의자 (smoke) | 12×12 | center | #5ad95a | mku/skill_reduction_smoke.png (1프레임) |
+| `skill_reduction_unit` | 환원주의자 (unit) | 14×14 | center | #5ad95a | mku/skill_reduction_unit.png (1프레임) |
 | `ult_first_law` | 열역학 제1법칙 (particle) | 8×8 | center | #ff9a3c | mku/ult_first_law.png (1프레임) |
 | `ult_cut1` | 벼락 (cut1) | 20×20 | center | #6a9cff | mku/ult_cut1.png (1프레임) |
 | `ult_cut2` | 벼락 (cut2) | 20×20 | center | #6a9cff | mku/ult_cut2.png (1프레임) |
 | `ult_cut3` | 벼락 (cut3) | 20×20 | center | #6a9cff | mku/ult_cut3.png (1프레임) |
 | `ult_cut4` | 벼락 (cut4) | 20×20 | center | #6a9cff | mku/ult_cut4.png (1프레임) |
 | `ult_kera_slash` | 벼락 (slash) | 20×20 | center | #6a9cff | mku/ult_kera_slash.png (12프레임) |
-| `ult_singularity` | 특이점 실험 (core) | 10×10 | center | #ff3a4a | mku/ult_singularity.png (1프레임) |
+| `ult_singularity` | 특이점 실험 (core) | 10×10 | center | #ff3a4a | mku/ult_singularity.png (4프레임) |
+| `ult_sing_collapse` | 특이점 실험 (collapse) | 30×30 | center | #ff3a4a | mku/ult_sing_collapse.png (1프레임) |
+| `ult_sing_flash` | 특이점 실험 (collapseFlash) | 20×20 | center | #ff3a4a | mku/ult_sing_flash.png (1프레임) |
+| `ult_sing_rift` | 특이점 실험 (collapseRift) | 20×20 | center | #ff3a4a | mku/ult_sing_rift.png (1프레임) |
+| `ult_sing_warning` | 특이점 실험 (warning) | 12×12 | center | #ff3a4a | mku/ult_sing_warning.png (1프레임) |
+| `ult_sing_convert` | 특이점 실험 (convert) | 25×25 | center | #ff3a4a | mku/ult_sing_convert.png (4프레임) |
+| `ult_sing_overload` | 특이점 실험 (overload) | 30×30 | center | #ff3a4a | mku/ult_sing_overload.png (4프레임) |
+| `ult_sing_failure` | 특이점 실험 (failure) | 25×25 | center | #ff3a4a | mku/ult_sing_failure.png (4프레임) |
+| `ult_paradox_start` | 특이점 실험 (observeStart) | 25×25 | center | #ff3a4a | mku/ult_paradox_start.png (4프레임) |
+| `ult_paradox_record` | 특이점 실험 (record) | 20×20 | center | #ff3a4a | mku/ult_paradox_record.png (5프레임) |
+| `ult_paradox_mark` | 특이점 실험 (mark) | 12×12 | center | #ff3a4a | mku/ult_paradox_mark.png (4프레임) |
+| `ult_paradox_pull` | 특이점 실험 (pull) | 30×30 | center | #ff3a4a | mku/ult_paradox_pull.png (4프레임) |
+| `ult_paradox_replay1` | 특이점 실험 (replay1) | 15×15 | center | #ff3a4a | mku/ult_paradox_replay1.png (3프레임) |
+| `ult_paradox_replay2` | 특이점 실험 (replay2) | 17×17 | center | #ff3a4a | mku/ult_paradox_replay2.png (3프레임) |
+| `ult_paradox_replay3` | 특이점 실험 (replay3) | 19×19 | center | #ff3a4a | mku/ult_paradox_replay3.png (4프레임) |
+| `ult_paradox_crumble` | 특이점 실험 (crumble) | 22×22 | center | #ff3a4a | mku/ult_paradox_crumble.png (4프레임) |
+| `ult_paradox_send` | 특이점 실험 (send) | 17×17 | center | #ff3a4a | mku/ult_paradox_send.png (3프레임) |
+| `ult_paradox_end` | 특이점 실험 (observeEnd) | 30×30 | center | #ff3a4a | mku/ult_paradox_end.png (4프레임) |
 
 ## lab (7)
 
@@ -300,9 +382,9 @@
 | `item_oak_heart` | 참나무의 심장 | 8×8 | center | #6a9a3a | mku/item_oak_heart.png (1프레임) |
 | `item_hanwoo_steak` | 한우촌의 생등심 | 8×8 | center | #c85a5a | mku/item_hanwoo_steak.png (1프레임) |
 | `item_lee_seal` | 이씨 가문의 증표 | 8×8 | center | #ffd23f | mku/item_lee_seal.png (1프레임) |
-| `item_magowiki_codex` | 마고위키 필사본 | 8×8 | center | #e0c060 | mku/item_magowiki_codex.png (1프레임) |
+| `item_magowiki_codex` | 마고위키 필사본 | 8×8 | center | #e0c060 | — |
 | `item_gisup_stone` | 기숲 비석의 조각 | 8×8 | center | #7a8a9a | mku/item_gisup_stone.png (1프레임) |
-| `item_afro_belt` | 아프로 씨의 벨트 | 8×8 | center | #a45cff | mku/item_afro_belt.png (1프레임) |
+| `item_afro_belt` | 아프로 씨의 벨트 | 8×8 | center | #a45cff | — |
 | `item_regulus_shard` | 레굴루스의 의식조각 | 8×8 | center | #8a6aff | mku/item_regulus_shard.png (1프레임) |
 | `item_caesar_crown` | 카이사르의 왕관 | 8×8 | center | #ffd23f | mku/item_caesar_crown.png (1프레임) |
 | `item_acrux_cross` | 아크룩스의 십자가 | 8×8 | center | #e0e0ff | mku/item_acrux_cross.png (1프레임) |

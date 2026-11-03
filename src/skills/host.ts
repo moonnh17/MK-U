@@ -19,6 +19,8 @@ export interface SkillHost {
   readonly ctx: GameContext;
   readonly rng: Rng;
   playerPos(): Vec2;
+  /** 플레이어 그림 (MK 슈트가 잠시 가린다) */
+  playerSprite(): Phaser.Physics.Arcade.Sprite;
   /** 마지막 조준 방향 (단위 벡터) */
   aimDir(): Vec2;
   /** 살아 있는 적 */

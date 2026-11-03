@@ -53,6 +53,7 @@ export class SkillRuntime {
       ctx,
       rng: this.run.rng,
       playerPos: () => ({ x: this.run.player.x, y: this.run.player.y }),
+      playerSprite: () => this.run.player,
       aimDir: () => this.run.aimDir,
       enemies: () => this.run.enemies.filter((e) => !e.dead),
       area: (r) => this.area(r),
