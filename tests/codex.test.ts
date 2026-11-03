@@ -25,6 +25,11 @@ describe('도감', () => {
     for (const e of withFlavor) expect(D.text[e.flavor!], e.id).toBeTypeOf('string');
     expect(D.enemies.enemies.find((e) => e.id === 'royalMage')?.flavor).toBeUndefined();
   });
+  it('아이템·무기 플레이버 문구 29종이 모두 ko.json에 있다', () => {
+    const withFlavor = [...D.items.items, ...D.weapons.weapons].filter((x) => x.flavor);
+    expect(withFlavor).toHaveLength(29);
+    for (const x of withFlavor) expect(D.text[x.flavor!], x.id).toBeTypeOf('string');
+  });
   it('모든 일반 적 공격과 보스 패턴에 도감 설명이 있다', () => {
     for (const e of D.enemies.enemies)
       for (const a of e.attacks ?? []) {

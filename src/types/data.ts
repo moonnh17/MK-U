@@ -169,6 +169,8 @@ export interface WeaponOptionDef {
 export interface WeaponDef extends SpriteRef {
   id: string;
   nameKey: string;
+  /** 도감 성능 아래 플레이버 문구 (ko.json 키) */
+  flavor?: string;
   category: WeaponCategory;
   grade: GradeId;
   tags: TagId[];
@@ -972,6 +974,8 @@ export interface ItemDef extends SpriteRef {
   id: string;
   nameKey: string;
   descKey: string;
+  /** 도감 효과 아래 플레이버 문구 (ko.json 키) */
+  flavor?: string;
   grade: GradeId;
   /** normal: 상자·첨탑 / boss: 그 보스 처치로만 / hiddenBoss: 히든보스 처치로만 / set: 세트 합성으로만 */
   pool: ItemPool;

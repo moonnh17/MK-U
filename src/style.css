@@ -2621,3 +2621,10 @@ body {
   white-space: normal;
   overflow-wrap: break-word;
 }
+/* 아이템·무기 플레이버: 본문(14px)보다 조금 작게, 받은 줄바꿈은 그대로 */
+.cx-flavor {
+  white-space: pre-line;
+}
+.cx-flavor.small {
+  font-size: 13px;
+}

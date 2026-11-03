@@ -277,9 +277,7 @@ export class CodexWindow {
       [t('codex.stat.speed'), String(def.moveSpeed)],
       [t('codex.stat.contact'), String(def.contactDamage)],
     ]);
-    const flavor = () => {
-      if (def.flavor) box.appendChild(this.el('p', 'cx-flavor', `“${t(def.flavor)}”`));
-    };
+    const flavor = () => this.flavor(box, def.flavor, 'cx-flavor');
     if (!boss) {
       box.appendChild(this.el('p', 'cx-desc', t(`codex.enemy.${id}`)));
       flavor();
@@ -376,6 +374,13 @@ export class CodexWindow {
     this.render();
   }
 
+  /** 플레이버 문구 문단. 문구가 이미 따옴표로 시작하면(인용 + 출처) 더 붙이지 않는다 */
+  private flavor(box: HTMLElement, key: string | undefined, cls: string): void {
+    if (!key) return;
+    const text = this.ctx.t(key);
+    box.appendChild(this.el('p', cls, /^["“]/.test(text) ? text : `“${text}”`));
+  }
+
   /** 패턴 한 칸: 이름 + 꼬리표, 아래 설명 */
   private card(name: string, desc: string, tags: string[]): HTMLElement {
     const c = this.el('div', 'cx-card');
@@ -467,6 +472,7 @@ export class CodexWindow {
           : t(`codex.source.${def.pool}`);
     this.chip(chips, source);
     box.appendChild(this.el('p', 'cx-desc', t(def.descKey, itemDescParams(def, d.groupMultipliers))));
+    this.flavor(box, def.flavor, 'cx-flavor small');
     this.badges(def.tags);
     const links: string[] = [];
     for (const s of d.skills.skills.filter((x) => x.awakening.requiredItem === id)) links.push(t('codex.link.skill', { skill: t(s.nameKey), name: t(s.awakening.nameKey) }));
@@ -502,5 +508,6 @@ export class CodexWindow {
     // 무기는 설명 문구가 없어 '기록' 머리말 없이 성능만 보인다
     box.querySelector('.cx-sub')?.remove();
     this.block(box, 'codex.sub.weapon', weaponInfoLines(this.ctx, plainWeapon(w)).map((l) => l.text));
+    this.flavor(box, w.flavor, 'cx-flavor small');
   }
 }
