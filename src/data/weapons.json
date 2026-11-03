@@ -129,8 +129,9 @@
     },
     {
       "id": "rasalhagueSword", "nameKey": "weapon.rasalhagueSword", "category": "blade", "fxColor": "#ffe85a", "critChance": 0.3, "grade": "unique", "tags": ["physical", "melee"],
-      "baseDamage": 13, "fireIntervalSec": 0.55, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 150, "radius": 45 },
-      "signature": { "every": 3, "kind": "space" },
+      "baseDamage": 39, "fireIntervalSec": 1.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 150, "radius": 45 },
+      "lunge": { "distance": 70, "sec": 0.12 },
+      "signature": { "every": 3, "kind": "space", "nameKey": "weapon.sig.rasalhagueSword" },
       "projectileSpeed": 0, "range": 45, "cutsProjectiles": true, "droppable": false,
       "spriteKey": "weapon_rasalhague_sword", "color": "#e8d24a", "size": 11
     },
@@ -144,7 +145,7 @@
       "id": "hanabi", "flavor": "codex.itemFlavor.hanabi", "nameKey": "weapon.hanabi", "category": "blade", "fxColor": "#ff9a4a", "critChance": 0.3, "grade": "legendary", "tags": ["physical", "melee"],
       "baseDamage": 14, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 140, "radius": 42 },
       "equipBonus": { "jobDamage": { "barbarian": 0.3 } },
-      "signature": { "every": 3, "kind": "bigSmash", "damageMul": 2, "radiusMul": 1.3 },
+      "signature": { "every": 3, "kind": "bigSmash", "damageMul": 2, "radiusMul": 1.3, "nameKey": "weapon.sig.bigSmash" },
       "projectileSpeed": 0, "range": 42, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_hanabi", "color": "#ffb04a", "size": 11
     },
@@ -153,14 +154,14 @@
       "baseDamage": 18, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 120, "radius": 42 },
       "critChance": 0.3,
       "equipBonus": { "bossDamage": 0.2 },
-      "signature": { "every": 3, "kind": "bigSmash", "damageMul": 1.5, "radiusMul": 1.9 },
+      "signature": { "every": 3, "kind": "bigSmash", "damageMul": 3, "radiusMul": 2.3, "nameKey": "weapon.sig.alGulBlade", "burst": { "count": 8, "damageMul": 1, "speed": 260, "range": 120, "color": "#d8f0ff" } },
       "projectileSpeed": 0, "range": 42, "cutsProjectiles": true, "droppable": false,
       "spriteKey": "weapon_al_gul_blade", "color": "#c8ccd8", "size": 11
     },
     {
       "id": "gihwanArm", "flavor": "codex.itemFlavor.gihwanArm", "nameKey": "weapon.gihwanArm", "category": "blade", "fxColor": "#7ac8ff", "grade": "unique", "tags": ["physical", "melee"], "bossId": "electricRing",
       "baseDamage": 11, "fireIntervalSec": 0.45, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 120, "radius": 39 },
-      "signature": { "every": 3, "kind": "chainBolt", "damageMul": 1.5, "jumps": 5, "range": 140, "color": "#7ac8ff" },
+      "signature": { "every": 3, "kind": "chainBolt", "damageMul": 1.5, "jumps": 5, "range": 140, "color": "#7ac8ff", "anyDistance": true, "nameKey": "weapon.sig.gihwanArm" },
       "projectileSpeed": 0, "range": 39, "cutsProjectiles": true, "droppable": false,
       "spriteKey": "weapon_gihwan_arm", "color": "#3a7bff", "size": 11
     },

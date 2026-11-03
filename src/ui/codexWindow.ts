@@ -671,7 +671,10 @@ export class CodexWindow {
     }
     // 무기는 설명 문구가 없어 '기록' 머리말 없이 성능만 보인다
     box.querySelector('.cx-sub')?.remove();
-    this.block(box, 'codex.sub.weapon', weaponInfoLines(this.ctx, plainWeapon(w)).map((l) => l.text));
+    const lines = weaponInfoLines(this.ctx, plainWeapon(w));
+    this.block(box, 'codex.sub.weapon', lines.filter((l) => !l.title).map((l) => l.text));
+    // 이름 있는 특수공격은 따로: 굵은 제목 + 설명 (아이템 버프 이름과 같은 모양)
+    for (const l of lines.filter((x) => x.title)) box.append(this.el('b', 'cx-buff-name', l.title), this.el('p', 'cx-desc', l.desc));
     this.flavor(box, w.flavor, 'cx-flavor small');
   }
 }

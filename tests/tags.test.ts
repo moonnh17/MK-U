@@ -74,14 +74,7 @@ describe('공간격', () => {
   it('일반 몬스터는 즉사 (최대 체력만큼)', () => {
     expect(spaceDamage('normal', 300, 10, r)).toBeGreaterThanOrEqual(300);
   });
-  it('엘리트 최대 HP 25%, 집행자·집정관 10%', () => {
-    expect(spaceDamage('elite', 400, 10, r)).toBeCloseTo(100);
-    expect(spaceDamage('champion', 400, 10, r)).toBeCloseTo(40);
-  });
-  it('보스·히든보스는 즉사 없이 피해 ×2.4', () => {
-    expect(spaceDamage('boss', 1000, 10, r)).toBeCloseTo(24);
-    expect(spaceDamage('hiddenBoss', 1000, 10, r)).toBeCloseTo(24);
-  });
+it('엘리트도 즉사 (최대 HP만큼), 집행자·집정관 10%', () => {    expect(spaceDamage('elite', 400, 10, r)).toBeGreaterThanOrEqual(400);    expect(spaceDamage('champion', 400, 10, r)).toBeCloseTo(40);  });  it('보스·히든보스는 즉사 없이 피해 ×1.8', () => {    expect(spaceDamage('boss', 1000, 10, r)).toBeCloseTo(18);    expect(spaceDamage('hiddenBoss', 1000, 10, r)).toBeCloseTo(18);  });
 });
 
 describe('출혈: 4초 / 1초 간격 / 최대 3중첩 / 재적용 시 갱신', () => {

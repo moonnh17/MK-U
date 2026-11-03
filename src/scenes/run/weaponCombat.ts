@@ -196,7 +196,13 @@ export class WeaponCombat {
     if (w.category === 'blade') {
       sfx(weaponSfx(w));
       // 특무 인장: 순간 회피 직후 기본공격 피해 증가
-      this.melee(w, st, aimAngle, chargeRatio, sig, this.run.itemRt.consumeEmpowered());
+      const emp = this.run.itemRt.consumeEmpowered();
+      if (w.lunge && this.lunge(w, w.lunge, aimAngle)) {
+        // 돌진이 끝난 자리에서 벤다
+        this.run.time.delayedCall(w.lunge.sec * 1000, () => this.melee(w, st, aimAngle, chargeRatio, sig, emp));
+        return;
+      }
+      this.melee(w, st, aimAngle, chargeRatio, sig, emp);
       return;
     }
 
@@ -338,10 +344,25 @@ export class WeaponCombat {
     }
   }
 
-  /** 기환의 팔: 가까운 적에서 적으로 튕기는 번개 */
+  /** 라스알히게의 검: 조준한 적 쪽으로 돌진 (적 앞에서 멈춘다). 돌진할 거리가 없으면 false */
+  private lunge(w: WeaponDef, l: NonNullable<WeaponDef['lunge']>, aimAngle: number): boolean {
+    const p = this.run.player;
+    const t = this.run.aimTarget;
+    const reach = w.pattern.kind === 'arc' ? w.pattern.radius * 0.5 : 0;
+    const dist = Math.min(l.distance, t ? Math.max(0, Math.hypot(t.x - p.x, t.y - p.y) - reach) : l.distance);
+    if (dist < 1) return false;
+    const speed = dist / l.sec;
+    this.run.dashVel = { x: Math.cos(aimAngle) * speed, y: Math.sin(aimAngle) * speed };
+    this.run.dashLeft = l.sec;
+    return true;
+  }
+
+  /** 기환의 팔: 가까운 적에서 적으로 튕기는 번개 (anyDistance면 첫 적은 아무리 멀어도) */
   chainBolt(w: WeaponDef, st: WeaponStats, sig: Extract<WeaponSignature, { kind: 'chainBolt' }>, origin: Vec2): void {
     const enemies = this.run.enemies.filter((e) => !e.dead);
-    const idx = chainTargets(origin, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })), sig.jumps, sig.range, new Set());
+    const pts = enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius }));
+    const first = chainTargets(origin, pts, 1, sig.anyDistance ? Infinity : sig.range, new Set());
+    const idx = first.length ? [...first, ...chainTargets(pts[first[0]!]!, pts, sig.jumps - 1, sig.range, new Set(first))] : [];
     if (idx.length === 0) return;
     sfx('blink');
     const rng = (this.run.condition.dodgeFxRng ??= Rng.derive(this.run.ctx.config.seed, 'dodge-fx'));
@@ -476,7 +497,14 @@ export class WeaponCombat {
     const tags: readonly TagId[] = sig?.kind === 'space' ? [...w.tags, 'space'] : w.tags;
     if (big) {
       shake(this.run, 'light');
-      this.run.floatLabel(origin, this.run.ctx.t('weapon.sig.bigSmash'), w.color);
+      this.run.floatLabel(origin, this.run.ctx.t(big.nameKey ?? 'weapon.sig.bigSmash'), w.color);
+      // 알 굴 참마검 '참수': 사방으로 참격
+      const b = big.burst;
+      if (b) {
+        for (let i = 0; i < b.count; i++) {
+          this.fireBullet(origin, aimAngle + (i * Math.PI * 2) / b.count, b.speed, b.range, st.damage * b.damageMul * emp, w.tags, null, { pierce: 99, crit: st.critChance, tint: b.color, trail: b.color });
+        }
+      }
     }
     const p = w.pattern;
     const enemies = [...this.run.enemies];

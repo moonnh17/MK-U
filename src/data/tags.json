@@ -83,9 +83,9 @@
       "rule": {
         "kind": "space",
         "normal": "instakill",
-        "eliteMaxHpRatio": 0.25,
+        "eliteMaxHpRatio": 1,
         "championMaxHpRatio": 0.1,
-        "bossDamageMultiplier": 2.4
+        "bossDamageMultiplier": 1.8
       },
       "badgeColor": "#2a2a6a"
     },

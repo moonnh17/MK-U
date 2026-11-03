@@ -128,13 +128,16 @@ export type WeaponCategory = 'gun' | 'blade' | 'staff' | 'bow';
  * 유니크 무기의 고유 효과: every번째 공격마다 발동.
  * bigSmash: 내려찍기 피해·범위 증가(네메아의 종말) / laser: 탄 대신 직선 레이저 / space: 그 공격이 공간격
  */
-export type WeaponSignature =
-  | { every: number; kind: 'bigSmash'; damageMul: number; radiusMul: number }
+/** nameKey: 특수공격 이름 (설명 제목·발동 글씨) */
+export type WeaponSignature = { nameKey?: string } & (
+  /** burst: 함께 사방으로 날리는 참격(관통탄) */
+  | { every: number; kind: 'bigSmash'; damageMul: number; radiusMul: number; burst?: { count: number; damageMul: number; speed: number; range: number; color: string } }
   /** beam: 레이저 그림 (없으면 선) */
   | { every: number; kind: 'laser'; damageMul: number; length: number; width: number; beam?: SpriteRef }
-  /** 튕기는 번개: 가까운 적에서 적으로 jumps번 */
-  | { every: number; kind: 'chainBolt'; damageMul: number; jumps: number; range: number; color: string }
-  | { every: number; kind: 'space' };
+  /** 튕기는 번개: 가까운 적에서 적으로 jumps번. anyDistance면 첫 적은 거리 제한 없이 가장 가까운 적 */
+  | { every: number; kind: 'chainBolt'; damageMul: number; jumps: number; range: number; color: string; anyDistance?: boolean }
+  | { every: number; kind: 'space' }
+);
 
 /**
  * single: 한 발(jitterDeg면 매번 조금씩 흩어짐) / spread: 부채꼴 여러 발 / arc: 부채꼴 베기
@@ -206,6 +209,8 @@ export interface WeaponDef extends SpriteRef {
   flame?: { scaleTo: number };
   /** 근접 공격과 함께 탄을 쏜다. 에너지가 모자라면 탄만 나가지 않는다 */
   meleeShot?: { damageMul: number; speed: number; range: number; energyCost: number; color: string };
+  /** 칼: 공격할 때 조준한 적 쪽으로 돌진한 뒤 벤다 (최대 distance, sec초) */
+  lunge?: { distance: number; sec: number };
   /** 공격할 때 흘리는 파티클 */
   attackParticles?: { color: string };
   /** 그림 안 마력 중심(가로·세로 0~1). onCharge면 차징 중, 아니면 발사 때 번쩍인다 */

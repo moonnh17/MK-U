@@ -7,6 +7,9 @@ export interface WeaponInfoLine {
   text: string;
   /** 고유 효과·보너스 줄 */
   sig?: boolean;
+  /** 이름이 있는 특수공격: 제목과 설명 (도감은 따로 굵은 제목으로 보여 준다) */
+  title?: string;
+  desc?: string;
 }
 
 export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoLine[] {
@@ -37,12 +40,26 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
   if (def.bleed) out.push({ text: t('weapon.sigDesc.bleed'), sig: true });
   if (def.selfBuff) out.push({ text: t('weapon.sigDesc.gust', { dmg: Math.round(def.selfBuff.damage * 100), sec: def.selfBuff.sec }), sig: true });
   const sig = def.signature;
+  if (def.lunge) out.push({ text: t('weapon.sigDesc.lunge'), sig: true });
   if (sig) {
     const params: Record<string, string | number> = { every: sig.every };
+    let key: string = sig.kind === 'laser' && sig.every === 1 ? 'weapon.sigDesc.beam' : `weapon.sigDesc.${sig.kind}`;
     if (sig.kind !== 'space') params.dmg = sig.damageMul;
-    if (sig.kind === 'bigSmash') params.rad = sig.radiusMul;
-    if (sig.kind === 'chainBolt') params.jumps = sig.jumps;
-    out.push({ text: t(sig.kind === 'laser' && sig.every === 1 ? 'weapon.sigDesc.beam' : `weapon.sigDesc.${sig.kind}`, params), sig: true });
+    if (sig.kind === 'bigSmash') {
+      params.rad = sig.radiusMul;
+      if (sig.burst) {
+        key = 'weapon.sigDesc.bigSmash.burst';
+        params.n = sig.burst.count;
+        params.bdmg = sig.burst.damageMul;
+      }
+    }
+    if (sig.kind === 'chainBolt') {
+      params.jumps = sig.jumps;
+      if (sig.anyDistance) key = 'weapon.sigDesc.chainBolt.far';
+    }
+    const desc = t(key, params);
+    const title = sig.nameKey ? t(sig.nameKey) : undefined;
+    out.push({ text: title ? t('weapon.sigLine', { title, desc }) : desc, sig: true, title, desc });
   }
   const bonus = def.equipBonus;
   if (bonus?.physicalDamage) out.push({ text: t('weapon.bonus.physical', { value: Math.round(bonus.physicalDamage * 100) }), sig: true });
