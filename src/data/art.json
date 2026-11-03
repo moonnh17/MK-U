@@ -584,6 +584,12 @@
       "frameHeight": 64,
       "frames": 1
     },
+    "item_chantforet_spirit": {
+      "file": "mku/item_chantforet_spirit.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
     "item_divine_sword": {
       "file": "mku/item_divine_sword.png",
       "frameWidth": 64,

@@ -983,6 +983,8 @@ export type ItemEffect =
   | { kind: 'energyGain'; value: number; group: 'damagePct' }
   /** 무기 레이저가 벽에 닿으면 bounces번 튕긴다 (스넬의 법칙) */
   | { kind: 'laserBounce'; bounces: number }
+  /** 자연 치유: everySec마다 체력 value 회복 (최대 체력까지) */
+  | { kind: 'regen'; value: number; everySec: number }
   /** 차징 시간 감소 (무기 차징·차징 스킬) */
   | { kind: 'chargeTime'; value: number; group: 'damagePct' }
   /** 공격 범위(스킬 범위·근접 무기 범위·폭발 반지름) */

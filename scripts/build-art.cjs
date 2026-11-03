@@ -308,7 +308,7 @@ const ITEM = {
   item_combat_theory: 'items/combat-application.png', item_oak_heart: 'items/oak-heart.png', item_hanwoo_steak: 'items/raw-beef.png', item_lee_seal: 'items/lee-seal.png',
   item_regulus_shard: 'items/regulus.png', item_caesar_crown: 'items/caesar.png', item_acrux_cross: 'items/acrux.png', item_orion_belt: 'items/betelgeuse.png',
   item_warrior_memory: 'warrior/icon-mastery-weapon.png', item_atros_codex: 'items/atros-codex.png',
-  item_lk99: 'items/lk99.png', item_gisup_stone: 'items/gisup-stone.png',
+  item_lk99: 'items/lk99.png', item_gisup_stone: 'items/gisup-stone.png', item_chantforet_spirit: 'items/chantforet-spirit.png',
   item_divine_sword: 'items/sword-youngdi.png', item_hectar_ram: 'items/hectar-ram.png',
   item_wonhon_lump: 'items/wonhon-lump.png', item_afro_belt: 'items/afro-belt.png', item_magowiki_codex: 'items/magowiki.png',
   item_death_whistle: 'items/death-whistle.png', item_royal_seal: 'items/royal-seal.png',

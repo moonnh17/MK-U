@@ -350,7 +350,7 @@ export class ItemRuntime {
     this.updateCore(dt);
     // 주기 발동
     for (const { id, e } of this.effects) {
-      if (e.kind !== 'autoCast' && e.kind !== 'tempRoar' && e.kind !== 'gravityShot' && e.kind !== 'shieldThrow') continue;
+      if (e.kind !== 'autoCast' && e.kind !== 'tempRoar' && e.kind !== 'gravityShot' && e.kind !== 'shieldThrow' && e.kind !== 'regen') continue;
       const s = this.state(id);
       s.timer += dt;
       if (s.timer < e.everySec) continue;
@@ -360,6 +360,9 @@ export class ItemRuntime {
         s.roarLeft = this.host.buffDuration(e.durationSec);
       } else if (e.kind === 'shieldThrow') {
         if (!this.throwShield()) continue;
+      } else if (e.kind === 'regen') {
+        const pl = this.host.player();
+        pl.hp = Math.min(pl.maxHp, pl.hp + e.value);
       } else if (!this.gravityShot(e)) {
         continue;
       }

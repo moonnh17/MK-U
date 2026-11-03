@@ -25,9 +25,9 @@ const totals = (ids: string[], school: 'hectar' | 'acro' | null = null) =>
   itemTotals(ids, I, { school, job: 'magiScholar' }, G);
 
 describe('아이템 목록 (기획서 표)', () => {
-  it('일반 5·레어 10·전설 7·유니크 6·신화 1 + 세트 1 + 보스 전용', () => {
+  it('일반 5·레어 11·전설 7·유니크 6·신화 1 + 세트 1 + 보스 전용', () => {
     const by = (g: string) => I.items.filter((x) => x.pool === 'normal' && x.grade === g).length;
-    expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([5, 10, 7, 6, 1]);
+    expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([5, 11, 7, 6, 1]);
     expect(I.items.filter((x) => x.pool === 'set').map((x) => x.id)).toEqual(['warriorMemory']);
     expect(I.items.filter((x) => x.pool === 'boss').map((x) => [x.id, x.bossId])).toEqual([
       ['wonhonLump', 'fusionAkgwi'],
@@ -190,5 +190,13 @@ describe('아이템 카드', () => {
     const got = new Set(I.items.filter((x) => x.pool === 'normal').map((x) => x.id));
     got.delete('magicasol');
     expect(itemChoices(new Rng(3), I.treasureWeights['1']!, 0.001, I, got, 3)).toEqual(['magicasol']);
+  });
+});
+
+describe('샹트포레의 기운', () => {
+  it('레어, 최대 체력 +10, 자연 치유 2초마다 체력 1', () => {
+    const def = I.items.find((x) => x.id === 'chantforetSpirit')!;
+    expect(def.grade).toBe('rare');
+    expect(def.effects).toEqual([{ kind: 'maxHp', value: 10, group: 'hpFlat' }, { kind: 'regen', value: 1, everySec: 2 }]);
   });
 });

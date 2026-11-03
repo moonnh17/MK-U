@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 473개 · 그림 있음 460개
+전체 474개 · 그림 있음 461개
 
 ## player (3)
 
@@ -375,7 +375,7 @@
 | `lab_gemini` | 미모사 제미니 | 14×22 | feet | #7ae0e0 | mku/lab_gemini.png (1프레임) |
 | `lab_window` | 관측창 | 100×12 | feet | #06090c | mku/lab_window.png (1프레임) |
 
-## item (35)
+## item (36)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -402,6 +402,7 @@
 | `item_magnet_resonator` | 자기 공명 장치 | 8×8 | center | #5a8ad9 | mku/item_magnet_resonator.png (1프레임) |
 | `item_snell_law` | 스넬의 법칙 | 8×8 | center | #5a8ad9 | mku/item_snell_law.png (1프레임) |
 | `item_lk99` | LK-99 | 8×8 | center | #ffd23f | mku/item_lk99.png (1프레임) |
+| `item_chantforet_spirit` | 샹트포레의 기운 | 8×8 | center | #5ad94a | mku/item_chantforet_spirit.png (1프레임) |
 | `item_hela_cell` | 헬라 세포 | 8×8 | center | #5a8ad9 | mku/item_hela_cell.png (1프레임) |
 | `item_forbidden_virus` | 금지된 바이러스 | 8×8 | center | #5a8ad9 | mku/item_forbidden_virus.png (1프레임) |
 | `item_forbidden_gift` | 열어선 안되는 선물 | 8×8 | center | #ffd23f | mku/item_forbidden_gift.png (1프레임) |
