@@ -2550,3 +2550,58 @@ body {
     display: none;
   }
 }
+/* 도감: 스킬 단계 단추 · 테스트용 모두 해금 */
+.cx-skill {
+  padding: 8px 10px;
+  background: #fffaf0;
+  border: 1px solid var(--cx-line);
+  border-radius: 8px;
+}
+.cx-skill.awakened {
+  border-color: #d6a94e;
+  background: linear-gradient(180deg, #fff6dc, #fdeec4);
+  box-shadow: 0 0 0 1px rgba(214, 169, 78, 0.35);
+}
+.cx-skill > div > span {
+  font-size: 13px;
+  line-height: 1.55;
+}
+.cx-lv {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+.cx-lv button {
+  padding: 2px 10px;
+  border: 1px solid var(--cx-line);
+  border-radius: 999px;
+  background: #f1e2bf;
+  color: #6a4a1a;
+  font: bold 11px sans-serif;
+  cursor: pointer;
+}
+.cx-lv button:hover {
+  background: #ead39f;
+}
+.cx-lv button.on {
+  background: #26314d;
+  border-color: #26314d;
+  color: var(--cx-gold-hi);
+}
+.cx-lv button:last-child:not(:first-child) {
+  border-color: #d6a94e;
+}
+.cx-head > .cx-unlock {
+  margin-left: auto;
+  border: 1px dashed rgba(122, 224, 255, 0.6);
+  color: #9fe6ff;
+  font-size: 12px;
+}
+.cx-unlock + .cx-progress {
+  margin-left: 0;
+}
+.cx-lines li:has(> .cx-skill) {
+  list-style: none;
+  margin-left: -18px;
+}

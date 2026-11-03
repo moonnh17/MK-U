@@ -7,7 +7,7 @@ import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { artKeys } from '../systems/art';
 import { codexProgress, codexSections, isKnown, type CodexEntry, type CodexTab } from '../systems/codex';
-import { findSkill } from '../systems/skills';
+import { findSkill, skillValues } from '../systems/skills';
 import { tagBadges } from '../systems/tags';
 import { plainWeapon } from '../systems/weapons';
 import type { BossCore, TagId } from '../types/data';
@@ -16,6 +16,15 @@ import { itemDescParams } from './itemCard';
 import { weaponInfoLines } from './weaponInfo';
 
 const TABS: CodexTab[] = ['monsters', 'characters', 'items', 'weapons'];
+
+/** 스킬 설명 한 단계 (Lv1~3, 각성) */
+interface SkillVariant {
+  label: string;
+  title: string;
+  desc: string;
+  note: string;
+  awakened?: boolean;
+}
 
 function fmt(values: Record<string, number>): Record<string, string> {
   return Object.fromEntries(Object.entries(values).map(([k, v]) => [k, String(Math.round(v * 10) / 10)]));
@@ -92,7 +101,9 @@ export class CodexWindow {
     const bar = this.el('i', '');
     bar.style.setProperty('--p', `${p.total ? (p.known / p.total) * 100 : 0}%`);
     progress.append(this.el('span', '', t('codex.progress', { known: p.known, total: p.total })), bar);
-    head.append(this.el('b', 'cx-heading', t('codex.title')), tabs, progress, close);
+    const unlock = this.el('button', 'cx-btn cx-unlock', t('codex.unlockAll'));
+    unlock.addEventListener('click', () => this.unlockAll());
+    head.append(this.el('b', 'cx-heading', t('codex.title')), tabs, unlock, progress, close);
 
     const list = this.el('div', 'cx-list');
     const scroll = this.el('div', 'cx-scroll');
@@ -318,6 +329,48 @@ export class CodexWindow {
     }
   }
 
+  /** 스킬 한 줄: 아이콘 + 설명, 아래 Lv1~3·각성 단추로 그 자리에서 설명만 바꾼다 (기록 스크롤은 그대로) */
+  private skillRow(iconKey: string, color: string, variants: SkillVariant[]): HTMLElement {
+    const line = this.el('div', 'cx-skill');
+    const icon = this.el('span', 'cx-mini');
+    applyArtIcon(icon, this.ctx, iconKey, color);
+    const text = this.el('div', '');
+    const title = this.el('b', '');
+    const desc = this.el('span', '');
+    const note = this.el('small', '');
+    const tabs = this.el('div', 'cx-lv');
+    const show = (i: number) => {
+      const v = variants[i]!;
+      title.textContent = v.title;
+      desc.textContent = v.desc;
+      note.textContent = v.note;
+      tabs.querySelectorAll('button').forEach((b, k) => b.classList.toggle('on', k === i));
+      line.classList.toggle('awakened', !!v.awakened);
+    };
+    variants.forEach((v, i) => {
+      const b = this.el('button', '', v.label);
+      b.addEventListener('click', () => show(i));
+      tabs.appendChild(b);
+    });
+    text.append(title, desc, note, tabs);
+    line.append(icon, text);
+    show(0);
+    return line;
+  }
+
+  /** 테스트 버전: 모든 몬스터·아이템·무기를 기록하고 저장한다 */
+  private unlockAll(): void {
+    const d = this.ctx.data;
+    const save = this.ctx.save.data;
+    save.codex = {
+      enemies: d.enemies.enemies.map((e) => e.id),
+      items: d.items.items.map((x) => x.id),
+      weapons: d.weapons.weapons.map((w) => w.id),
+    };
+    this.ctx.save.write();
+    this.render();
+  }
+
   /** 패턴 한 칸: 이름 + 꼬리표, 아래 설명 */
   private card(name: string, desc: string, tags: string[]): HTMLElement {
     const c = this.el('div', 'cx-card');
@@ -354,29 +407,41 @@ export class CodexWindow {
     const adv = d.jobs.jobs.flatMap((j) => j.advancements).find((a) => a.id === id)!;
     this.chip(chips, t('codex.school.chip'), adv.color);
     box.appendChild(this.el('p', 'cx-desc', t(`codex.school.${id}`)));
-    const skills = d.skills.skills.filter((s) => s.school === id);
-    const row = (sid: string) => {
-      const s = findSkill(d.skills, sid);
-      const line = this.el('div', 'cx-skill');
-      const icon = this.el('span', 'cx-mini');
-      applyArtIcon(icon, this.ctx, artKeys.skillIcon(sid), s.color);
-      const text = this.el('div', '');
-      const item = d.items.items.find((x) => x.id === s.awakening.requiredItem);
-      text.append(
-        this.el('b', '', `${t(s.nameKey)}${s.kind === 'passive' ? ` (${t('card.passive')})` : ''}`),
-        this.el('span', '', t(s.descKey, fmt(s.levels[0]!.values))),
-        this.el('small', '', t('codex.awaken', { name: t(s.awakening.nameKey), item: item ? t(item.nameKey) : '-' })),
-      );
-      line.append(icon, text);
-      return line;
-    };
-    this.block(box, 'codex.sub.skills', skills.map((s) => row(s.id)));
+    const itemName = (iid?: string) => t(d.items.items.find((x) => x.id === iid)?.nameKey ?? '-');
+    const skills = d.skills.skills.filter((s) => s.school === id).map((s) => findSkill(d.skills, s.id));
+    this.block(
+      box,
+      'codex.sub.skills',
+      skills.map((s) => {
+        const passive = s.kind === 'passive';
+        const cd = (sec: number) => (passive ? '' : t('inventory.detailCooldown', { sec: Math.round(sec * 10) / 10 }));
+        const levels = s.levels.map((_, i): SkillVariant => {
+          const v = skillValues(s, { level: i + 1, awakened: false });
+          return { label: `Lv${i + 1}`, title: `${t(s.nameKey)}${passive ? ` (${t('card.passive')})` : ''}`, desc: t(s.descKey, fmt(v.values)), note: cd(v.cooldownSec) };
+        });
+        const aw = skillValues(s, { level: s.levels.length, awakened: true });
+        const awakened: SkillVariant = {
+          label: t('codex.lv.awakened'),
+          awakened: true,
+          title: `★ ${t(s.awakening.nameKey)}`,
+          desc: t(s.awakening.descKey, fmt(aw.values)),
+          note: [cd(aw.cooldownSec), t('codex.needItem', { item: itemName(s.awakening.requiredItem) })].filter(Boolean).join(' · '),
+        };
+        return this.skillRow(artKeys.skillIcon(s.id), s.color, [...levels, awakened]);
+      }),
+    );
     const ult = d.ultimates.ultimates.find((u) => u.id === adv.ultimate);
     if (ult) {
-      const item = d.items.items.find((x) => x.id === ult.awakening?.requiredItem);
-      const lines = [`${t(ult.nameKey)} — ${t(ult.descKey, fmt(ult.values))}`];
-      if (ult.awakening) lines.push(t('codex.awaken', { name: t(ult.awakening.nameKey), item: item ? t(item.nameKey) : '-' }));
-      this.block(box, 'codex.sub.ultimate', lines);
+      const variants: SkillVariant[] = [{ label: t('codex.lv.base'), title: t(ult.nameKey), desc: t(ult.descKey, fmt(ult.values)), note: '' }];
+      if (ult.awakening)
+        variants.push({
+          label: t('codex.lv.awakened'),
+          awakened: true,
+          title: `★ ${t(ult.awakening.nameKey)}`,
+          desc: t(ult.awakening.descKey, fmt({ ...ult.values, ...ult.awakening.values })),
+          note: t('codex.needItem', { item: itemName(ult.awakening.requiredItem) }),
+        });
+      this.block(box, 'codex.sub.ultimate', [this.skillRow(artKeys.ultimateIcon(ult.id), ult.color, variants)]);
     }
     const dodge = d.player.dodge.schools[id];
     if (dodge) this.block(box, 'codex.sub.dodge', [`${t(dodge.nameKey)} — ${t(dodge.descKey)}`]);
