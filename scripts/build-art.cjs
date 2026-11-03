@@ -307,7 +307,8 @@ const ITEM = {
   item_broken_hilt: 'items/broken-sheath.png', item_elegant_magi: 'items/elegant-magi.png', item_antimatter_sample: 'items/experimental-antimatter.png',
   item_combat_theory: 'items/combat-application.png', item_oak_heart: 'items/oak-heart.png', item_hanwoo_steak: 'items/raw-beef.png', item_lee_seal: 'items/lee-seal.png',
   item_regulus_shard: 'items/regulus.png', item_caesar_crown: 'items/caesar.png', item_acrux_cross: 'items/acrux.png', item_orion_belt: 'items/betelgeuse.png',
-  item_atros_codex: 'items/atros-codex.png',
+  item_warrior_memory: 'warrior/icon-mastery-weapon.png', item_atros_codex: 'items/atros-codex.png',
+  item_lk99: 'items/lk99.png', item_gisup_stone: 'items/gisup-stone.png',
   item_divine_sword: 'items/sword-youngdi.png', item_hectar_ram: 'items/hectar-ram.png',
   item_wonhon_lump: 'items/wonhon-lump.png', item_afro_belt: 'items/afro-belt.png', item_magowiki_codex: 'items/magowiki.png',
   item_death_whistle: 'items/death-whistle.png', item_royal_seal: 'items/royal-seal.png',
@@ -316,20 +317,6 @@ const ITEM = {
   item_extra_arms: 'items/extra-arms.png', item_forbidden_gift: 'items/forbidden-gift.png',
 };
 for (const [key, f] of Object.entries(ITEM)) sprites[key] = icon(key, f, CARD_ICON);
-// 어느 전사의 기억: 원본 아이콘이 잘려 있어 세트 재료(이름 없는 검 뒤에 이름 없는 투구)를 겹친다
-{
-  const sword = load('items/nameless-sword.png');
-  const c = k.crop(sword, 0, 0, sword.w, sword.h);
-  const helm = k.resize(load('items/nameless-helm.png'), Math.round(c.w * 0.68), Math.round(c.h * 0.68), 0.5);
-  const ox = Math.round((c.w - helm.w) / 2), oy = c.h - helm.h;
-  for (let y = 0; y < helm.h; y++) for (let x = 0; x < helm.w; x++) {
-    const s = (y * helm.w + x) * 4;
-    if (helm.px[s + 3] > 127) helm.px.copy(c.px, ((oy + y) * c.w + ox + x) * 4, s, s + 4);
-  }
-  const file = `${OUT_DIR}/item_warrior_memory.png`;
-  k.write(path.join(REPO, 'public/assets', file), k.resize(c, CARD_ICON, CARD_ICON, 0.5));
-  sprites.item_warrior_memory = { file, frameWidth: CARD_ICON, frameHeight: CARD_ICON, frames: 1 };
-}
 
 // ---------- 방 타일 (terrain.png: 1행 돌, 2행 푸른 기술, 3행 붉은 균열) ----------
 // 3장은 붉은 적이 묻히지 않게 붉은 점이 드문 칸을 더 어둡게
@@ -641,7 +628,8 @@ function userWeapon(key, file, { rotate = 0, flip = false, fit, gripX, black = 4
   if (rotate) im = k.rotate(im, rotate);
   sprites[key] = { ...sheet(key, [im], fit, { alphaCut: 0.25, dim }), gripX };
 }
-userWeapon('weapon_nekkar_cleaver', 'nekkar.png', { rotate: 45, fit: 28, gripX: 0.22, dim: 1.5 });
+// 배경이 완전한 검정이라 문턱을 낮춘다 (40이면 어두운 칼날까지 배경으로 지워져 가운데가 뚫린다)
+userWeapon('weapon_nekkar_cleaver', 'nekkar.png', { rotate: 45, fit: 28, gripX: 0.22, dim: 1.5, black: 8 });
 userWeapon('weapon_algieba_sling', 'algieba.png', { flip: true, rotate: -32, fit: 28, gripX: 0.3, black: 46 });
 userWeapon('weapon_argo_banner', 'argo.png', { fit: 40, gripX: 0.2 });
 bigWeapon('weapon_gihwan_arm', 'rewards/arm.png', -90, 26, 0.2);
@@ -730,10 +718,6 @@ actor('enemy_orion_crusader', gaps('warrior/paladin-idle.png'), gaps('warrior/pa
 
 // 아이템 아이콘 (원본에 맞는 것이 없는 것은 직접 찍는다)
 sprites.item_orion_shield = icon('item_orion_shield', 'warrior/icon-p-shield.png', CARD_ICON);
-dots('item_gisup_stone', [
-  '................', '....KKKKKK......', '...KmmmmlKK.....', '..KmlllmmmlK....', '..KmldmmdmlKK...', '..KmmmmmmmmmK...', '..KmddmmdmmlK...', '..KmmmmmmmmlK...',
-  '..KmdmmddmmmK...', '..KmmmmmmmmmK...', '..KmddmmmdmlK...', '..KmmmmmmmmmK...', '..KdmmmdmmmdK...', '..KddKmmmKddK...', '...KK.KdK.KK....', '......KK........',
-], { scale: 4 });
 
 // 실험장
 const labProp = (key, x, y, fit) => { sprites[key] = sheet(key, [k.component(load('environment/ruins-atlas.png'), x, y)], fit); };

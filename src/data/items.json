@@ -135,7 +135,7 @@
       "spriteKey": "item_snell_law", "color": "#5a8ad9", "size": 8 },
     { "id": "lk99", "nameKey": "item.lk99", "descKey": "item.lk99.desc", "grade": "legendary", "pool": "normal", "tags": [],
       "effects": [{ "kind": "damage", "scope": "all", "value": 0.2, "group": "damagePct" }, { "kind": "moveSpeed", "value": 0.1, "group": "damagePct" }, { "kind": "skillCooldown", "value": 0.1, "group": "damagePct" }],
-      "spriteKey": "icon_skill_railgun", "color": "#ffd23f", "size": 8 },
+      "spriteKey": "item_lk99", "color": "#ffd23f", "size": 8 },
     { "id": "helaCell", "nameKey": "item.helaCell", "descKey": "item.helaCell.desc", "grade": "rare", "pool": "normal", "tags": [],
       "effects": [{ "kind": "maxSanity", "value": 15, "group": "hpFlat" }, { "kind": "skillCooldown", "value": 0.08, "group": "damagePct" }],
       "spriteKey": "item_hela_cell", "color": "#5a8ad9", "size": 8 },
