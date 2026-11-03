@@ -2628,3 +2628,61 @@ body {
 .cx-flavor.small {
   font-size: 13px;
 }
+/* 도감: 획득 확률 보기 */
+.cx-rates {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cx-rate {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 10px;
+  background: #fffaf0;
+  border: 1px solid var(--cx-line);
+  border-left: 3px solid var(--cx-gold);
+  border-radius: 6px;
+  font-size: 13px;
+}
+.cx-rate b {
+  font-variant-numeric: tabular-nums;
+}
+.cx-table-wrap {
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+.cx-grade-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  background: #fffaf0;
+  border: 1px solid var(--cx-line);
+  border-radius: 6px;
+}
+.cx-grade-table th,
+.cx-grade-table td {
+  padding: 4px 6px;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(150, 110, 50, 0.18);
+  font-variant-numeric: tabular-nums;
+}
+.cx-grade-table th:first-child,
+.cx-grade-table td:first-child {
+  text-align: left;
+  white-space: normal;
+  color: var(--cx-ink-soft);
+}
+.cx-grade-table th {
+  --grade: #888;
+  color: var(--cx-ink);
+  border-bottom: 2px solid var(--grade);
+}
+.cx-grade-table td.zero {
+  color: #b5a587;
+}
+.cx-note {
+  font-size: 12px;
+  line-height: 1.6;
+}

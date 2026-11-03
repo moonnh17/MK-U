@@ -7,6 +7,7 @@ import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { artKeys } from '../systems/art';
 import { codexProgress, codexSections, isKnown, type CodexEntry, type CodexTab } from '../systems/codex';
+import { itemChance, itemSources, pct, weaponChance, weaponSources, type DropSource, type GradeRates } from '../systems/dropRates';
 import { findSkill, skillValues } from '../systems/skills';
 import { tagBadges } from '../systems/tags';
 import { plainWeapon } from '../systems/weapons';
@@ -46,8 +47,8 @@ export class CodexWindow {
   private selected: CodexEntry | null = null;
   /** 지금 그리는 기록의 그림 옆 칸 */
   private side!: HTMLElement;
-  /** 보스 기록을 패턴 보기로 바꿨는지 (다른 칸을 고르면 기록 보기로 돌아간다) */
-  private patternView = false;
+  /** 기록 대신 다른 보기(보스 패턴·획득 확률)를 펼쳤는지 (다른 칸을 고르면 기록 보기로 돌아간다) */
+  private altView = false;
   private shownKey = '';
 
   constructor(private readonly ctx: GameContext) {
@@ -80,7 +81,7 @@ export class CodexWindow {
     this.selected ??= flat[0] ?? null;
     const index = flat.findIndex((e) => e.kind === this.selected?.kind && e.id === this.selected.id);
     const key = `${this.selected?.kind}:${this.selected?.id}`;
-    if (key !== this.shownKey) this.patternView = false;
+    if (key !== this.shownKey) this.altView = false;
     this.shownKey = key;
 
     const head = this.el('div', 'cx-head');
@@ -288,14 +289,9 @@ export class CodexWindow {
       }
       return;
     }
-    const toggle = this.el('button', `cx-toggle${this.patternView ? ' on' : ''}`, t(this.patternView ? 'codex.showRecord' : 'codex.showPatterns'));
-    toggle.addEventListener('click', () => {
-      this.patternView = !this.patternView;
-      this.render();
-    });
-    this.side.appendChild(toggle);
+    this.altToggle('codex.showPatterns');
     const phaseName = (i: number) => (i === 0 ? t(`boss.enraged.${id}`) : t(`boss.unlock.${id}.${i}`));
-    if (!this.patternView) {
+    if (!this.altView) {
       box.appendChild(this.el('p', 'cx-desc', t(`codex.enemy.${id}`)));
       flavor();
       const flow = [t('codex.phase.start')];
@@ -372,6 +368,56 @@ export class CodexWindow {
     };
     this.ctx.save.write();
     this.render();
+  }
+
+  /** 그림 옆 '기록 보기 ↔ 다른 보기' 단추 */
+  private altToggle(showKey: string): void {
+    const b = this.el('button', `cx-toggle${this.altView ? ' on' : ''}`, this.ctx.t(this.altView ? 'codex.showRecord' : showKey));
+    b.addEventListener('click', () => {
+      this.altView = !this.altView;
+      this.render();
+    });
+    this.side.appendChild(b);
+  }
+
+  /**
+   * 획득 확률 보기: 이 칸이 한 번 뽑을 때 나올 확률(출처별) + 출처별 등급 확률표.
+   * fixed: 상자에서 나오지 않고 정해진 곳에서만 얻는 경우 그 출처 문구
+   */
+  private rateView(box: HTMLElement, fixed: string | null, sources: DropSource[], chanceOf: (r: GradeRates) => number, noteKey: string): void {
+    const t = this.ctx.t;
+    const d = this.ctx.data;
+    box.querySelector('.cx-sub')!.textContent = t('codex.showRates');
+    const src = (s: DropSource) => t(s.key, s.vars);
+    if (fixed) box.appendChild(this.el('p', 'cx-desc', t('codex.rate.fixed', { source: fixed })));
+    else {
+      const list = this.el('div', 'cx-rates');
+      for (const s of sources) {
+        const row = this.el('div', 'cx-rate');
+        row.append(this.el('span', '', src(s)), this.el('b', '', pct(chanceOf(s.rates))));
+        list.appendChild(row);
+      }
+      box.append(this.el('div', 'cx-group', t('codex.rate.this')), list);
+    }
+    box.appendChild(this.el('div', 'cx-group', t('codex.rate.grades')));
+    const table = this.el('table', 'cx-grade-table');
+    const head = this.el('tr', '');
+    head.appendChild(this.el('th', '', ''));
+    for (const g of d.groupMultipliers.grades) {
+      const th = this.el('th', '', t(g.nameKey));
+      th.style.setProperty('--grade', g.color);
+      head.appendChild(th);
+    }
+    table.appendChild(head);
+    for (const s of sources) {
+      const tr = this.el('tr', '');
+      tr.appendChild(this.el('td', '', src(s)));
+      for (const g of d.groupMultipliers.grades) tr.appendChild(this.el('td', s.rates[g.id] > 0 ? '' : 'zero', pct(s.rates[g.id])));
+      table.appendChild(tr);
+    }
+    const wrap = this.el('div', 'cx-table-wrap');
+    wrap.appendChild(table);
+    box.append(wrap, this.el('p', 'cx-desc dim cx-note', t(noteKey, { n: d.items.transferPerPickup, chest: Math.round(d.waves.champions.itemChestChance * 100) })));
   }
 
   /** 플레이버 문구 문단. 문구가 이미 따옴표로 시작하면(인용 + 출처) 더 붙이지 않는다 */
@@ -473,9 +519,14 @@ export class CodexWindow {
           ? t('codex.source.hiddenBoss', { name: bossName(def.bossId) })
           : t(`codex.source.${def.pool}`);
     this.chip(chips, source);
+    this.badges(def.tags);
+    this.altToggle('codex.showRates');
+    if (this.altView) {
+      this.rateView(box, def.pool === 'normal' ? null : source, itemSources(d), (r) => itemChance(d, id, r), 'codex.rate.noteItem');
+      return;
+    }
     box.appendChild(this.el('p', 'cx-desc', t(def.descKey, itemDescParams(def, d.groupMultipliers))));
     this.flavor(box, def.flavor, 'cx-flavor small');
-    this.badges(def.tags);
     const links: string[] = [];
     for (const s of d.skills.skills.filter((x) => x.awakening.requiredItem === id)) links.push(t('codex.link.skill', { skill: t(s.nameKey), name: t(s.awakening.nameKey) }));
     for (const u of d.ultimates.ultimates.filter((x) => x.awakening?.requiredItem === id)) links.push(t('codex.link.skill', { skill: t(u.nameKey), name: t(u.awakening!.nameKey) }));
@@ -507,6 +558,13 @@ export class CodexWindow {
             : t('codex.source.special');
     this.chip(chips, source);
     this.badges(w.tags);
+    this.altToggle('codex.showRates');
+    if (this.altView) {
+      // 상자·상인에서 나오지 않는 무기(보스·히든보스·합성 전용)는 얻는 곳만 보인다. 신화 무기는 신화 판정으로 나온다
+      const fixed = !w.droppable && w.grade !== 'mythic' ? source : null;
+      this.rateView(box, fixed, weaponSources(d), (r) => weaponChance(d, id, r), 'codex.rate.noteWeapon');
+      return;
+    }
     // 무기는 설명 문구가 없어 '기록' 머리말 없이 성능만 보인다
     box.querySelector('.cx-sub')?.remove();
     this.block(box, 'codex.sub.weapon', weaponInfoLines(this.ctx, plainWeapon(w)).map((l) => l.text));
