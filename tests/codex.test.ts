@@ -23,7 +23,7 @@ describe('도감', () => {
     const withFlavor = D.enemies.enemies.filter((e) => e.flavor);
     expect(withFlavor.length).toBeGreaterThan(0);
     for (const e of withFlavor) expect(D.text[e.flavor!], e.id).toBeTypeOf('string');
-    expect(D.enemies.enemies.find((e) => e.id === 'executor')?.flavor).toBeUndefined();
+    expect(D.enemies.enemies.find((e) => e.id === 'royalMage')?.flavor).toBeUndefined();
   });
   it('모든 일반 적 공격과 보스 패턴에 도감 설명이 있다', () => {
     for (const e of D.enemies.enemies)

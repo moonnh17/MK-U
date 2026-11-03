@@ -84,7 +84,7 @@
 | `enemy_hectar_trooper` | 헥타르 전투원 | 12×12 | feet | #3a7bff | mku/enemy_hectar_trooper.png (5프레임) |
 | `enemy_magi_beetle` | 마기갑충 | 15×15 | feet | #5a8a3a | mku/enemy_magi_beetle.png (10프레임) |
 | `enemy_a_memory` | 어느 기억 | 13×13 | feet | #8a7ab0 | mku/enemy_a_memory.png (14프레임) |
-| `enemy_ancient_one` | ██ 이름을 빼앗긴 고대인 | 13×13 | feet | #c8b8a0 | mku/enemy_ancient_one.png (12프레임) |
+| `enemy_ancient_one` | ██ | 13×13 | feet | #c8b8a0 | mku/enemy_ancient_one.png (12프레임) |
 | `enemy_hatred_shard` | 증오의 파편 | 8×8 | feet | #ff3a4a | mku/enemy_hatred_shard.png (10프레임) |
 | `enemy_executor` | 집행자 | 18×18 | feet | #a0a8b8 | mku/enemy_executor.png (13프레임) |
 | `enemy_archon` | 집정관 | 16×16 | feet | #e8c860 | mku/enemy_archon.png (13프레임) |

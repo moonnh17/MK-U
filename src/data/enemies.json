@@ -148,7 +148,7 @@
       "spriteKey": "enemy_orion_crusader", "color": "#d9c25a", "size": 42
     },
     {
-      "id": "hectarTrooper", "nameKey": "enemy.hectarTrooper", "chapter": 2, "rank": "normal", "ai": "chase",
+      "id": "hectarTrooper", "flavor": "codex.flavor.hectarTrooper", "nameKey": "enemy.hectarTrooper", "chapter": 2, "rank": "normal", "ai": "chase",
       "maxHp": 30, "moveSpeed": 45, "contactDamage": 6, "contactIntervalSec": 1.0,
       "energyOrbs": [1, 2], "coins": [1, 3], "keepDistance": 90,
       "attacks": [
@@ -179,7 +179,7 @@
       "spriteKey": "enemy_a_memory", "color": "#8a7ab0", "size": 13
     },
     {
-      "id": "hectarChief", "nameKey": "enemy.hectarChief", "chapter": 2, "rank": "boss", "ai": "boss",
+      "id": "hectarChief", "flavor": "codex.flavor.hectarChief", "nameKey": "enemy.hectarChief", "chapter": 2, "rank": "boss", "ai": "boss",
       "maxHp": 5400, "moveSpeed": 34, "contactDamage": 12, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
       "spriteKey": "enemy_hectar_chief", "color": "#3a9aff", "size": 36
@@ -211,7 +211,7 @@
       "spriteKey": "enemy_hatred_shard", "color": "#ff3a4a", "size": 8
     },
     {
-      "id": "executor", "nameKey": "enemy.executor", "chapter": 3, "rank": "champion", "ai": "chase",
+      "id": "executor", "flavor": "codex.flavor.executor", "nameKey": "enemy.executor", "chapter": 3, "rank": "champion", "ai": "chase",
       "maxHp": 260, "moveSpeed": 38, "contactDamage": 10, "contactIntervalSec": 1.0,
       "energyOrbs": [5, 7], "coins": [5, 8],
       "attacks": [
@@ -223,7 +223,7 @@
       "spriteKey": "enemy_executor", "color": "#a0a8b8", "size": 18
     },
     {
-      "id": "archon", "nameKey": "enemy.archon", "chapter": 3, "rank": "champion", "ai": "chase", "mentalRatio": 1,
+      "id": "archon", "flavor": "codex.flavor.archon", "nameKey": "enemy.archon", "chapter": 3, "rank": "champion", "ai": "chase", "mentalRatio": 1,
       "maxHp": 200, "moveSpeed": 28, "contactDamage": 8, "contactIntervalSec": 1.0,
       "energyOrbs": [5, 7], "coins": [5, 8], "keepDistance": 150,
       "attacks": [
