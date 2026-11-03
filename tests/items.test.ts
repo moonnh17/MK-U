@@ -46,7 +46,7 @@ describe('그룹 배율', () => {
     const g2 = structuredClone(G);
     g2.itemGroups.hpFlat = 2;
     const t = itemTotals(['brokenHilt', 'afroBelt'], I, { school: null, job: 'magiScholar' }, g2);
-    expect(t.maxHp).toBe(48);
+    expect(t.maxHp).toBe(60);
   });
 });
 
@@ -61,12 +61,12 @@ describe('효과 합산', () => {
   });
   it('모든 적이 받는 피해·보스 피해는 따로 곱한다', () => {
     const t = totals(['magowikiCodex']);
-    expect(itemDamageMultiplier(t, 0, false, null)).toBeCloseTo(1.1 * 1.05);
+    expect(itemDamageMultiplier(t, 0, false, null)).toBeCloseTo(1.15 * 1.05);
   });
   it('각성 아이템 효과: 태그 피해·쿨타임·정신력·탄수·받는 피해', () => {
     expect(totals(['magnetResonator']).damage).toMatchObject({ tech: 0.1, magic: 0.1 });
-    expect(totals(['lk99', 'warDiary', 'helaCell']).skillCooldown).toBeCloseTo(0.2);
-    expect(totals(['helaCell']).maxSanity).toBe(10);
+    expect(totals(['lk99', 'warDiary', 'helaCell']).skillCooldown).toBeCloseTo(0.28);
+    expect(totals(['helaCell']).maxSanity).toBe(15);
     expect(totals(['extraArms']).pellets).toBe(1);
     expect(totals(['forbiddenVirus']).damage.magic).toBeCloseTo(0.05);
     expect(totals(['forbiddenGift']).damageTaken).toBeCloseTo(-0.1);
@@ -79,11 +79,12 @@ describe('효과 합산', () => {
     const ult = gameData.ultimates.ultimates.filter((u) => u.awakening).map((u) => u.awakening!.requiredItem);
     expect(ult.sort()).toEqual(['atrosCodex', 'regulusShard']);
   });
-  it('실험용 반물질: 헥타르 외에는 자동 발사, 헥타르는 반물질포 피해 +50%', () => {
+  it('실험용 반물질: 모두 기술 피해 +10%, 헥타르 외에는 자동 발사, 헥타르는 반물질포 피해 +50%', () => {
     const kinds = (school: 'hectar' | 'acro' | null) => activeEffects(item('antimatterSample'), { school, job: 'magiScholar' }, G).map((e) => e.kind);
-    expect(kinds(null)).toEqual(['autoCast']);
-    expect(kinds('acro')).toEqual(['autoCast']);
-    expect(kinds('hectar')).toEqual(['skillDamage']);
+    expect(kinds(null)).toEqual(['autoCast', 'damage']);
+    expect(kinds('acro')).toEqual(['autoCast', 'damage']);
+    expect(kinds('hectar')).toEqual(['skillDamage', 'damage']);
+    expect(totals(['antimatterSample']).damage.tech).toBeCloseTo(0.1);
     expect(itemDamageMultiplier(totals(['antimatterSample'], 'hectar'), 0, false, 'antimatterCannon')).toBeCloseTo(1.5);
   });
   it('직업 변형은 그 직업일 때만 (마기학자에게는 없음)', () => {

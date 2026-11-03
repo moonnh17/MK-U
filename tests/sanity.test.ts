@@ -56,7 +56,7 @@ describe('패닉 아이템', () => {
     expect(gameData.items.items.some((i) => i.id === 'panicBrand')).toBe(false);
   });
   it('아트로스 비석 필사본: 방향 유지·시야 방해 감소, 정신력이 낮을수록 피해', () => {
-    expect(kinds('atrosCodex')).toEqual(['lowSanityDamage', 'panicCalm']);
+    expect(kinds('atrosCodex')).toEqual(['lowSanityDamage', 'panicCalm', 'damage']);
     expect(lowSanityBonus(0, 100, 0.4)).toBeCloseTo(0.4);
     expect(lowSanityBonus(50, 100, 0.4)).toBeCloseTo(0.2);
     expect(lowSanityBonus(100, 100, 0.4)).toBe(0);

@@ -466,7 +466,9 @@ export class CodexWindow {
     const bossName = (bid?: string) => t(d.enemies.enemies.find((x) => x.id === bid)?.nameKey ?? '');
     const source =
       def.pool === 'boss'
-        ? t('codex.source.boss', { name: bossName(def.bossId), chance: Math.round((def.dropChance ?? 1) * 100) })
+        ? def.dropChance === undefined
+          ? t('codex.source.bossSure', { name: bossName(def.bossId) })
+          : t('codex.source.boss', { name: bossName(def.bossId), chance: Math.round(def.dropChance * 100) })
         : def.pool === 'hiddenBoss'
           ? t('codex.source.hiddenBoss', { name: bossName(def.bossId) })
           : t(`codex.source.${def.pool}`);

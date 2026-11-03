@@ -114,20 +114,20 @@ describe('움직임', () => {
 
 describe('전용 아이템 효과', () => {
   const eff = (id: string, job = 'magiScholar', school: 'hectar' | 'acro' | null = null) => activeEffects(item(id), { job, school }, G);
-  it('바바리안 데스 휘슬: 함성 5초 피해 +15%·이동 +10%, 야만용사는 함성 효과 +20%', () => {
-    expect(roarValues(eff('deathWhistle'))).toMatchObject({ durationSec: 5, damage: 0.15, moveSpeed: 0.1 });
+  it('바바리안 데스 휘슬: 함성 10초 피해 +20%·이동 +10%, 야만용사는 함성 효과 +20%', () => {
+    expect(roarValues(eff('deathWhistle'))).toMatchObject({ durationSec: 10, damage: 0.2, moveSpeed: 0.1 });
     const b = roarValues(activeEffects(item('deathWhistle'), { job: 'warrior', school: 'barbarian' as never }, G))!;
-    expect(b.damage).toBeCloseTo(0.18);
+    expect(b.damage).toBeCloseTo(0.24);
     expect(b.moveSpeed).toBeCloseTo(0.12);
   });
-  it('특무 인장: 재사용 12초, 마기법사 9초', () => {
-    expect(dodgeValues(eff('royalSeal'))).toMatchObject({ cooldownSec: 12, attacks: 3, bonus: 0.3 });
-    expect(dodgeValues(eff('royalSeal', 'magiMage'))!.cooldownSec).toBe(9);
+  it('특무 인장: 재사용 8초, 마기법사 6초', () => {
+    expect(dodgeValues(eff('royalSeal'))).toMatchObject({ cooldownSec: 8, attacks: 3, bonus: 0.5 });
+    expect(dodgeValues(eff('royalSeal', 'magiMage'))!.cooldownSec).toBe(6);
   });
-  it('오리온의 방패: 6초마다, 기준 피해 300 × 발동 피해 배율, 튕김 3 (성기사 +2), 받는 피해 -10%', () => {
+  it('오리온의 방패: 6초마다, 기준 피해 800 × 발동 피해 배율, 튕김 3 (성기사 +2), 받는 피해 -15%', () => {
     const s = shieldValues(eff('orionShield'))!;
-    expect(s).toMatchObject({ everySec: 6, bounces: 3, guard: 0.1 });
-    expect(s.damage).toBeCloseTo(300 * G.itemGroups.procDamage);
+    expect(s).toMatchObject({ everySec: 6, bounces: 3, guard: 0.15 });
+    expect(s.damage).toBeCloseTo(800 * G.itemGroups.procDamage);
     expect(shieldValues(activeEffects(item('orionShield'), { job: 'warrior', school: 'paladin' as never }, G))!.bounces).toBe(5);
   });
 });
