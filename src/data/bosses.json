@@ -77,7 +77,7 @@
             "damage": 18,
             "count": 1,
             "countEnraged": 2,
-            "maxSummon": 4
+            "maxSummon": 3
           },
           "summon": "akgwi"
         },
@@ -109,9 +109,10 @@
           "akgwi"
         ],
         "count": 1,
-        "countEnraged": 2,
-        "maxAlive": 4
+        "countEnraged": 1,
+        "maxAlive": 2
       },
+      "summonHpMul": 0.9,
       "art": {
         "sectorHit": {
           "spriteKey": "fx_fusion_slash",

@@ -119,7 +119,8 @@ describe('챕터1 보스 데이터 (기획서 보스 패턴 표)', () => {
     expect([v('eruption').count, v('eruption').countEnraged]).toEqual([1, 2]);
     expect(v('eruption').count).toBe(1);
     expect(f.patterns.find((p) => p.id === 'eruption')!.summon).toBe('akgwi');
-    expect(f.companions).toMatchObject({ enemies: ['akgwi'], enemiesEnraged: ['akgwi'], count: 1, countEnraged: 2, maxAlive: 4 });
+    expect(f.companions).toMatchObject({ enemies: ['akgwi'], enemiesEnraged: ['akgwi'], count: 1, countEnraged: 1, maxAlive: 2 });
+    expect(f.summonHpMul).toBe(0.9);
     expect([v('spiritBlast').bullets, v('spiritBlast').bulletsEnraged, v('spiritBlast').gap]).toEqual([12, 16, 2]);
     expect(boss('electricRing').enraged.scale).toBeGreaterThan(1);
   });

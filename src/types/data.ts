@@ -488,6 +488,8 @@ export interface BossCore {
   unlocks?: number[];
   /** 패턴마다 따라 나오는 소환수 (융합악귀) */
   companions?: { enemies: string[]; enemiesEnraged: string[]; count: number; countEnraged: number; maxAlive: number };
+  /** 이 보스가 부르는 소환수(동행·패턴 소환)의 체력 배율. 없으면 1 */
+  summonHpMul?: number;
   /** 저체력 추가 공격: 체력 at 이하면 패턴 시작 afterSec 뒤 플레이어 발밑 폭발 */
   lowHpStrike?: { at: number; afterSec: number; radius: number; delaySec: number; damage: number };
   /** 독립 계승 주기 (마기카이저): 마지막 단계에서 rollSec마다 chance로 시도, 끝난 뒤 minGapSec */

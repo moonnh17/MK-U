@@ -341,7 +341,10 @@ export class BossController {
         x: Math.min(a.x + a.w - 12, Math.max(a.x + 12, e.sprite.x + Math.cos(ang) * r)),
         y: Math.min(a.y + a.h - 12, Math.max(a.y + 12, e.sprite.y + Math.sin(ang) * r)),
       };
-      this.minions.push({ e: host.spawnMinion(id, at), pattern, left: null, shot: null });
+      const m = host.spawnMinion(id, at);
+      // 보스가 부른 소환수만 체력 배율 (방에 원래 나오는 같은 적은 그대로)
+      if (this.def.summonHpMul) m.setMaxHp(Math.max(1, Math.round(m.maxHp * this.def.summonHpMul)));
+      this.minions.push({ e: m, pattern, left: null, shot: null });
       const fx = this.def.art?.summon;
       if (fx) playFx(host.scene, fx, at.x, at.y);
     });
