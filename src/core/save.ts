@@ -28,6 +28,8 @@ export interface SaveData {
   firstRunDone: boolean;
   /** 현재의 기억에 남은 미모사 제미니 대사: 칸 id → 본 문장(텍스트 키)·처음 본 순서 */
   gemini: Record<string, { lines: string[]; order: number }>;
+  /** 도감: 처음 만난 적·얻은 아이템·주운 무기 id */
+  codex: { enemies: string[]; items: string[]; weapons: string[] };
   /** 소리 꺼 둠 */
   muted: boolean;
   /** 음악·효과음 음량 0~1 */
@@ -38,7 +40,7 @@ export interface SaveData {
 }
 
 export function defaultSave(): SaveData {
-  return { version: SAVE_VERSION, crystals: 0, upgrades: {}, cutscenes: {}, pastShards: 0, firstRunDone: false, gemini: {}, muted: false, musicVolume: 1, sfxVolume: 1, tutorialDone: false };
+  return { version: SAVE_VERSION, crystals: 0, upgrades: {}, cutscenes: {}, pastShards: 0, firstRunDone: false, gemini: {}, codex: { enemies: [], items: [], weapons: [] }, muted: false, musicVolume: 1, sfxVolume: 1, tutorialDone: false };
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -75,9 +77,12 @@ export function parseSave(raw: string | null): SaveData {
       if (isObj(g) && Array.isArray(g.lines) && g.lines.every((x) => typeof x === 'string')) gemini[id] = { lines: g.lines as string[], order: nonNeg(g.order, 0) };
     }
   }
+  const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
+  const cx = isObj(o.codex) ? o.codex : {};
   return {
     version: SAVE_VERSION,
     gemini,
+    codex: { enemies: strings(cx.enemies), items: strings(cx.items), weapons: strings(cx.weapons) },
     crystals: nonNeg(o.crystals, 0),
     upgrades,
     cutscenes,

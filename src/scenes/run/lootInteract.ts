@@ -140,6 +140,7 @@ export class LootInteract {
     const p = this.run.session.player;
     const { slots, dropped } = pickUpWeapon(p.weapons, item);
     p.weapons = slots;
+    this.run.discover('weapons', item.defId);
     if (dropped) this.dropWeapon(dropped, x, y);
     this.run.combat.fireCooldown = 0;
     this.run.combat.resetCharge();
@@ -155,6 +156,7 @@ export class LootInteract {
     const { set, slot } = ready;
     const slots: typeof p.weapons.slots = [...p.weapons.slots];
     slots[slot] = plainWeapon(this.run.weaponDefOf(set.result));
+    this.run.discover('weapons', set.result);
     p.weapons = { ...p.weapons, slots };
     p.items = p.items.filter((x) => x !== set.item);
     this.run.combat.fireCooldown = 0;
@@ -258,6 +260,7 @@ export class LootInteract {
     if (!def || p.itemsObtained.includes(id)) return;
     p.items = [...p.items, id];
     p.itemsObtained = [...p.itemsObtained, id];
+    this.run.discover('items', id);
     if (def.pool === 'normal') p.lootShift = transferWeight(p.lootShift, def.grade, d.items.transferPerPickup);
     this.itemGets.push({ itemId: id, set: false });
     // 세트: 재료가 모이면 자동 합성, 재료 효과는 사라지고 다시 나오지 않는다
@@ -265,6 +268,7 @@ export class LootInteract {
     if (set) {
       p.items = [...p.items.filter((x) => !set.materials.includes(x)), set.result];
       p.itemsObtained = [...p.itemsObtained, set.result];
+      this.run.discover('items', set.result);
       const from = set.materials.map((m) => d.items.items.find((x) => x.id === m)!).map((m) => ({ key: m.spriteKey, color: m.color }));
       this.itemGets.push({ itemId: set.result, set: true, from });
     }

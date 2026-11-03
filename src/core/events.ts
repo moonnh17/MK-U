@@ -28,7 +28,7 @@ export interface GameEvents {
   restartRequested: Record<string, never>;
 
   /** 게임을 멈추는 창(카드 선택·인벤토리)이 열리거나 닫힘 */
-  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | 'archive' | 'story' | 'intro' | 'pause' | 'portal' | 'itemGet' | null };
+  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | 'archive' | 'codex' | 'story' | 'intro' | 'pause' | 'portal' | 'itemGet' | null };
   /** 포탈 이동 화면을 덮거나(on) 걷는다 */
   warp: { on: boolean };
   /** 효과음 하나 */
@@ -86,6 +86,8 @@ export interface GameEvents {
   jobWindowClose: Record<string, never>;
   /** 실험장: 기억조각 보관대 */
   archiveShow: Record<string, never>;
+  codexShow: Record<string, never>;
+  codexClose: Record<string, never>;
   archiveClose: Record<string, never>;
   /** 저장이 바뀌었다 (결정 표시 갱신) */
   saveChanged: Record<string, never>;

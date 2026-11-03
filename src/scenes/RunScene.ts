@@ -1,4 +1,5 @@
 import { loopArt, playFx } from '../skills/skillFx';
+import { recordCodex, type CodexKind } from '../systems/codex';
 import { buildPathField, pathDir, segmentClear, type PathField } from '../systems/pathField';
 import { IDLE_DODGE } from '../systems/dodge';
 import Phaser from 'phaser';
@@ -796,6 +797,7 @@ export class RunScene extends Phaser.Scene {
     const extra = extraEliteId ? (d.elites.elites.find((x) => x.id === extraEliteId) ?? null) : null;
     const icon = [elite, extra].filter((x) => x !== null).map((x) => this.ctx.t(x!.iconKey)).join('');
     const enemy = new Enemy(this, def, pos.x, pos.y, d.waves.spawnWarnSec, elite, d.elites, icon, extra);
+    if (!def.summon) this.discover('enemies', def.id);
     if (def.ai !== 'boss' && !def.summon) enemy.scaleHp(enemyStageScale(this.session.stage.chapter, this.session.stage.stage, d.enemies.hpScale));
     enemy.jitterFirstAttack(rng);
     this.enemyGroup.add(enemy.sprite);
@@ -1024,6 +1026,11 @@ export class RunScene extends Phaser.Scene {
     this.fxAt(line);
     if (stage !== null) this.floatLabel({ x: a.sprite.x, y: a.sprite.y - a.radius - 6 }, this.ctx.t('enemy.archon.stage', { n: stage }), a.def.absorb!.haloColor);
     return true;
+  }
+
+  /** 도감: 처음 만난 것을 기록하고 저장한다 */
+  discover(kind: CodexKind, id: string): void {
+    if (recordCodex(this.ctx.save.data, kind, id)) this.ctx.save.write();
   }
 
   /** MK 슈트를 벗긴다: 사망·포탈 연출은 플레이어 그림으로 한다 */

@@ -33,6 +33,7 @@ export class LabScene extends Phaser.Scene {
   private waking = false;
   private jobOpen = false;
   private archiveOpen = false;
+  private codexOpen = false;
   /** 첫 만남 스토리 대화가 떠 있다 */
   private storyOpen = false;
   private unsubs: (() => void)[] = [];
@@ -53,6 +54,7 @@ export class LabScene extends Phaser.Scene {
     this.hintOn = false;
     this.jobOpen = false;
     this.archiveOpen = false;
+    this.codexOpen = false;
     const d = this.ctx.data;
     const L = d.lab;
     const c = L.colors;
@@ -102,6 +104,7 @@ export class LabScene extends Phaser.Scene {
       bus.on('labJobPicked', ({ jobId }) => this.pickJob(jobId)),
       bus.on('jobWindowClose', () => this.closeJobWindow()),
       bus.on('archiveClose', () => this.closeArchive()),
+      bus.on('codexClose', () => this.closeCodex()),
       bus.on('storyDone', () => {
         if (!this.storyOpen) return;
         this.storyOpen = false;
@@ -227,6 +230,10 @@ export class LabScene extends Phaser.Scene {
       if (frame.pressed.has('pause') || frame.pressed.has('interact')) this.closeJobWindow();
       return;
     }
+    if (this.codexOpen) {
+      if (frame.pressed.has('pause') || frame.pressed.has('interact')) this.closeCodex();
+      return;
+    }
     if (this.archiveOpen) {
       if (frame.pressed.has('pause') || frame.pressed.has('interact')) this.closeArchive();
       return;
@@ -279,10 +286,21 @@ export class LabScene extends Phaser.Scene {
       this.player.setVelocity(0, 0);
       bus.emit('modal', { kind: 'archive' });
       bus.emit('archiveShow', {});
+    } else if (o.kind === 'codex') {
+      this.codexOpen = true;
+      this.player.setVelocity(0, 0);
+      bus.emit('modal', { kind: 'codex' });
+      bus.emit('codexShow', {});
     } else {
-      // 도감 단말·제미니 홀로그램
+      // 제미니 홀로그램
       bus.emit('toast', { text: t('lab.notReady', { name }) });
     }
+  }
+
+  private closeCodex(): void {
+    if (!this.codexOpen) return;
+    this.codexOpen = false;
+    bus.emit('modal', { kind: null });
   }
 
   private closeArchive(): void {
