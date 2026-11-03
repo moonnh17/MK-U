@@ -943,7 +943,7 @@ aFx('skill_wingsA_bleed', '04', AW, '출혈_', 20);
 aFx('skill_wingsA_mark', '04', AW, '출혈표식', 16);
 // MK : 프로토타입
 [['1', 'Lv1'], ['2', 'Lv3'], ['3', 'Lv5']].forEach(([n, lv]) => {
-  aFrames(`skill_mk_morph${n}`, '05', lv, '변신', 38, 12);
+  aFrames(`skill_mk_morph${n}`, '05', lv, '변신', 38, 8);
   aFx(`skill_mk_idle${n}`, '05', lv, '대기', 38);
   aFx(`skill_mk_move${n}`, '05', lv, '이동', 38);
   aFx(`skill_mk_punch${n}`, '05', lv, '펀치', 38);

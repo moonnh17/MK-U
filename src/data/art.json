@@ -3036,7 +3036,7 @@
         "play": {
           "from": 0,
           "to": 3,
-          "fps": 12,
+          "fps": 8,
           "loop": false
         }
       }
@@ -3079,7 +3079,7 @@
         "play": {
           "from": 0,
           "to": 3,
-          "fps": 12,
+          "fps": 8,
           "loop": false
         }
       }
@@ -3122,7 +3122,7 @@
         "play": {
           "from": 0,
           "to": 3,
-          "fps": 12,
+          "fps": 8,
           "loop": false
         }
       }

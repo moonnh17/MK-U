@@ -600,7 +600,10 @@ class Eruption extends Timed {
     super(c);
     blast(c, c.boss.pos(), c.v('radius'), c.v('delaySec'), c.v('damage'));
     this.at(c.v('delaySec'), () => {
-      if (c.summonId) c.summon(Array.from({ length: c.v('count') }, () => c.summonId!), true);
+      if (!c.summonId) return;
+      // 따라 나오는 소환수와 합쳐 상한을 넘지 않는다
+      const n = Math.min(c.v('count'), c.v('maxSummon') - c.minionCount(c.summonId));
+      if (n > 0) c.summon(Array.from({ length: n }, () => c.summonId!), true);
     });
   }
 }

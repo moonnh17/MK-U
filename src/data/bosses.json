@@ -75,10 +75,11 @@
             "delaySec": 0.7,
             "radius": 72,
             "damage": 18,
-            "count": 3,
-            "countEnraged": 5
+            "count": 1,
+            "countEnraged": 2,
+            "maxSummon": 4
           },
-          "summon": "tomakki"
+          "summon": "akgwi"
         },
         {
           "id": "spiritBlast",
@@ -102,18 +103,14 @@
       "gapSecEnraged": 0.55,
       "companions": {
         "enemies": [
-          "tomakki",
-          "tomakki",
-          "gaedeulgae"
-        ],
-        "enemiesEnraged": [
-          "tomakki",
-          "gaedeulgae",
           "akgwi"
         ],
-        "count": 2,
-        "countEnraged": 3,
-        "maxAlive": 8
+        "enemiesEnraged": [
+          "akgwi"
+        ],
+        "count": 1,
+        "countEnraged": 2,
+        "maxAlive": 4
       },
       "art": {
         "sectorHit": {

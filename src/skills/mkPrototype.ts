@@ -1,6 +1,6 @@
 /**
- * MK : 프로토타입 (아크로, 버프·근접). 사거리 안에 적이 있어야 쓸 수 있다.
- * 지속시간(버프 태그: 정신력) 동안 슈트를 입는다: 이동속도 증가, 받는 피해 감소,
+ * MK : 프로토타입 (아크로, 버프). 적이 없어도 쓸 수 있다. 입을 때 변신하고, 시간이 다 되면 해제 동작 뒤 벗는다.
+ * 지속시간(버프 태그) 동안 슈트를 입는다: 이동속도 증가, 받는 피해 감소,
  * 사거리 안 가장 가까운 적을 자동 펀치(물리·근접).
  * 각성 'MK : 오버드라이브': 쓸 때 현재 체력 일부를 소모(죽지 않음). 펀치가 주변까지 터지는 폭발 펀치가 되고,
  * 펀치 사거리 밖 적에게는 짧게 돌진한다(돌진에 닿은 적도 피해, 물리·근접).
@@ -18,8 +18,9 @@ const ID = 'mkPrototype';
 /** 이만큼 빠르면 걷는 그림 */
 const MOVING_SPEED = 5;
 const FIST_SEC = 0.1;
-const MORPH_SEC = 0.35;
 const POSE_SEC = 0.25;
+/** 입을 때 작게 시작해 커진다 */
+const MORPH_START_SCALE = 0.7;
 
 class Suit implements SkillObject {
   readonly owner = ID;
@@ -29,6 +30,8 @@ class Suit implements SkillObject {
   private poseLeft = 0;
   private shown: SpriteRef | null = null;
   private left: number;
+  /** 해제 동작 남은 시간 (이때는 효과가 없다) */
+  private releasing = 0;
   private punchTimer = 0;
   private dashTimer = 0;
   private readonly player: Phaser.Physics.Arcade.Sprite;
@@ -47,7 +50,29 @@ class Suit implements SkillObject {
     this.body = host.sprite(pl.x, pl.y, this.art('idle')).setDepth(pl.depth);
     pl.setVisible(false);
     if (s.owned.awakened) playFx(host.scene, s.def.sprites.drainA!, pl.x, pl.y, { depth: pl.depth + 1 });
-    this.pose(host, this.art('morph'), MORPH_SEC);
+    const morph = this.art('morph');
+    this.pose(host, morph, this.animSec(morph));
+    playFx(host.scene, s.def.sprites.flash!, pl.x, pl.y, { w: 44, depth: pl.depth + 1 });
+    this.body.setScale(MORPH_START_SCALE);
+    host.scene.tweens.add({ targets: this.body, scale: 1, duration: this.animSec(morph) * 1000, ease: 'Back.easeOut' });
+  }
+
+  /** 그림의 애니메이션 한 바퀴 시간 */
+  private animSec(ref: SpriteRef): number {
+    const a = this.body.scene.anims.get(animKey(ref.spriteKey, 'play'));
+    return a ? a.duration / 1000 : POSE_SEC;
+  }
+
+  /** 해제: 각성은 전용 동작, 아니면 변신을 거꾸로 되감는다 */
+  private startRelease(host: SkillHost): void {
+    const ref = this.s.owned.awakened ? this.s.def.sprites.releaseA! : this.art('morph');
+    const key = animKey(ref.spriteKey, 'play');
+    this.shown = null;
+    if (this.s.owned.awakened) this.body.play(key);
+    else this.body.playReverse(key);
+    this.releasing = this.animSec(ref);
+    const c = host.playerSprite().getCenter();
+    playFx(host.scene, this.s.def.sprites.flash!, c.x, c.y, { w: 30, depth: this.body.depth + 1 });
   }
 
   /** 각성이면 A 그림, 아니면 레벨 그림 */
@@ -72,11 +97,16 @@ class Suit implements SkillObject {
     this.poseLeft = sec;
   }
 
-  /** 슈트 그림: 플레이어를 따라가고, 자세가 끝나면 대기·이동 */
-  private follow(host: SkillHost, dt: number): void {
+  private place(host: SkillHost): void {
     const pl = host.playerSprite();
     const c = pl.getCenter();
     this.body.setPosition(c.x, c.y).setFlipX(host.aimDir().x < 0).setAlpha(pl.alpha);
+  }
+
+  /** 슈트 그림: 플레이어를 따라가고, 자세가 끝나면 대기·이동 */
+  private follow(host: SkillHost, dt: number): void {
+    const pl = host.playerSprite();
+    this.place(host);
     this.poseLeft -= dt;
     if (this.poseLeft > 0) return;
     const moving = Math.hypot(pl.body!.velocity.x, pl.body!.velocity.y) > MOVING_SPEED;
@@ -84,15 +114,20 @@ class Suit implements SkillObject {
   }
 
   playerMods(): Partial<PlayerMods> {
+    if (this.releasing > 0) return {};
     return { moveSpeed: this.s.values.moveSpeed!, damageReduction: this.s.values.damageReduction! };
   }
 
   update(dt: number, host: SkillHost): boolean {
+    if (this.releasing > 0) {
+      this.place(host);
+      this.releasing -= dt;
+      return this.releasing > 0;
+    }
     this.left -= dt;
     if (this.left <= 0) {
-      const c = host.playerSprite().getCenter();
-      playFx(host.scene, this.s.owned.awakened ? this.s.def.sprites.releaseA! : this.art('morph'), c.x, c.y, { depth: this.body.depth + 1 });
-      return false;
+      this.startRelease(host);
+      return true;
     }
     const v = this.s.values;
     const p = host.playerPos();
@@ -161,12 +196,14 @@ class Suit implements SkillObject {
     host.scene.tweens.add({ targets: fist, x: to.x, y: to.y, duration: FIST_SEC * 1000, onComplete: () => fist.destroy() });
   }
 
-  buff(host: SkillHost): BuffView {
+  buff(host: SkillHost): BuffView | null {
+    if (this.releasing > 0) return null;
     const key = this.s.owned.awakened ? 'buff.mkPrototype.overdrive' : 'buff.mkPrototype';
     return { id: ID, label: host.ctx.t(key), color: this.s.def.color, leftSec: this.left, totalSec: this.total };
   }
 
   destroy(): void {
+    this.body.scene.tweens.killTweensOf(this.body);
     this.body.destroy();
     this.player.setVisible(true);
   }

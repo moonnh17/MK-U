@@ -443,7 +443,7 @@
       "nameKey": "skill.mkPrototype",
       "shortKey": "skill.mkPrototype.short",
       "descKey": "skill.mkPrototype.desc",
-      "tags": ["buff", "melee"],
+      "tags": ["buff"],
       "sources": { "punch": ["physical", "melee"], "dash": ["physical", "melee"] },
       "levels": [
         { "cooldownSec": 14, "values": { "range": 40, "durationSec": 6, "moveSpeed": 0.2, "damageReduction": 0.2, "punchDamage": 8, "punchIntervalSec": 0.5, "fxRadius": 9 } },
@@ -454,7 +454,7 @@
         "nameKey": "skill.mkPrototype.awakened",
         "descKey": "skill.mkPrototype.awakened.desc",
         "requiredItem": "steelCastleFigure",
-        "tags": ["buff", "melee"],
+        "tags": ["buff"],
         "cooldownSec": 12,
         "values": { "hpCost": 0.15, "durationSec": 8, "moveSpeed": 0.35, "damageReduction": 0.3, "punchDamage": 21, "blastRadius": 24, "dashRange": 100, "dashSpeed": 360, "dashSec": 0.18, "dashDamage": 13, "dashCooldownSec": 1.5, "fxRadius": 11 }
       },
