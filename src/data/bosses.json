@@ -1,130 +1,787 @@
 {
   "bannerSec": 1.5,
-  "energyDrops": { "everyHpRatio": 0.1, "orbs": 4, "halfHpOrbs": 12 },
+  "energyDrops": {
+    "everyHpRatio": 0.1,
+    "orbs": 4,
+    "halfHpOrbs": 12
+  },
   "bosses": [
     {
       "id": "fusionAkgwi",
       "chapter": 1,
       "stage": 2,
-      "enrageAt": 0.5,
-      "gapSec": 0.7,
+      "enrageAt": 0.35,
+      "gapSec": 0.9,
       "enrageSec": 1.2,
       "firstDelaySec": 1,
       "keepDistance": 30,
-      "enraged": { "moveSpeedMul": 1.5, "scale": 1, "auraColor": "#ff3a3a" },
+      "enraged": {
+        "moveSpeedMul": 1.5,
+        "scale": 1,
+        "auraColor": "#ff3a3a"
+      },
       "patterns": [
-        { "id": "claw", "reach": "melee", "maxRange": 62, "weight": 3, "cooldownSec": 2.5, "durationSec": 1.5, "phase": 1,
-          "values": { "windupSec": 0.5, "secondDelaySec": 0.45, "radius": 46, "arcDeg": 100, "damage": 14 } },
-        { "id": "spiritDash", "reach": "ranged", "weight": 2, "cooldownSec": 5, "durationSec": 1.7, "phase": 1,
-          "values": { "windupSec": 0.6, "length": 220, "speed": 300, "speedEnraged": 400, "damage": 14, "trailEvery": 14, "trailRadius": 10, "trailSec": 3, "trailDamage": 6, "trailTickSec": 0.5 } },
-        { "id": "eruption", "reach": "ranged", "weight": 2, "cooldownSec": 4, "durationSec": 1.6, "phase": 1,
-          "values": { "volleys": 3, "volleysEnraged": 4, "intervalSec": 0.4, "bullets": 7, "bulletsEnraged": 11, "spreadDeg": 70, "speed": 120, "damage": 8, "range": 260 } },
-        { "id": "spiritBlast", "reach": "melee", "maxRange": 75, "weight": 1, "cooldownSec": 6, "durationSec": 1.4, "phase": 1,
-          "values": { "delaySec": 0.9, "radius": 60, "damage": 20 } }
-      ]
+        {
+          "id": "claw",
+          "reach": "melee",
+          "weight": 3,
+          "cooldownSec": 2,
+          "durationSec": 1,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.72,
+            "radius": 82,
+            "arcDeg": 94,
+            "damage": 14
+          },
+          "maxRange": 110
+        },
+        {
+          "id": "spiritDash",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 5,
+          "durationSec": 2.5,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.72,
+            "length": 255,
+            "speed": 300,
+            "damage": 14,
+            "trailEvery": 18,
+            "trailRadius": 11,
+            "trailSec": 3,
+            "trailDamage": 5,
+            "trailTickSec": 0.5,
+            "trailDelaySec": 0.35,
+            "shotEverySec": 0.14,
+            "shotEverySecEnraged": 0.09,
+            "shotSpeed": 100,
+            "shotSpeedEnraged": 140,
+            "shotRange": 200,
+            "shotDamage": 7,
+            "exposeSec": 0.8,
+            "exposeMul": 2.2
+          }
+        },
+        {
+          "id": "eruption",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 6,
+          "durationSec": 1.1,
+          "phase": 1,
+          "values": {
+            "delaySec": 0.7,
+            "radius": 72,
+            "damage": 18,
+            "count": 3,
+            "countEnraged": 5
+          },
+          "summon": "tomakki"
+        },
+        {
+          "id": "spiritBlast",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 4,
+          "durationSec": 1,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.4,
+            "bullets": 12,
+            "bulletsEnraged": 16,
+            "gap": 2,
+            "speed": 105,
+            "speedEnraged": 140,
+            "range": 340,
+            "damage": 9
+          }
+        }
+      ],
+      "gapSecEnraged": 0.55,
+      "companions": {
+        "enemies": [
+          "tomakki",
+          "tomakki",
+          "gaedeulgae"
+        ],
+        "enemiesEnraged": [
+          "tomakki",
+          "gaedeulgae",
+          "akgwi"
+        ],
+        "count": 2,
+        "countEnraged": 3,
+        "maxAlive": 8
+      }
     },
     {
       "id": "electricRing",
       "chapter": 1,
       "stage": 5,
       "enrageAt": 0.5,
-      "gapSec": 0.8,
+      "gapSec": 0.75,
       "enrageSec": 1.5,
       "firstDelaySec": 1,
       "keepDistance": 60,
-      "enraged": { "moveSpeedMul": 1.2, "scale": 1.3, "auraColor": "#4ab0ff" },
+      "enraged": {
+        "moveSpeedMul": 1.2,
+        "scale": 1.3,
+        "auraColor": "#4ab0ff"
+      },
       "patterns": [
-        { "id": "lightningChase", "reach": "ranged", "weight": 3, "cooldownSec": 4, "durationSec": 2.2, "phase": 1,
-          "values": { "strikes": 5, "strikesEnraged": 7, "intervalSec": 0.35, "delaySec": 0.7, "radius": 16, "damage": 12 } },
-        { "id": "shockRipple", "reach": "ranged", "weight": 2, "cooldownSec": 5, "durationSec": 1.8, "phase": 1,
-          "values": { "rings": 2, "ringsEnraged": 3, "ringGapSec": 0.5, "speed": 90, "maxRadius": 200, "thickness": 8, "damage": 12 } },
-        { "id": "spinLightning", "reach": "ranged", "weight": 2, "cooldownSec": 7, "durationSec": 3.8, "phase": 1,
-          "values": { "beams": 3, "beamsEnraged": 4, "length": 180, "width": 6, "spinSpeed": 1.2, "telegraphSec": 0.6, "liveSec": 3, "damage": 10, "tickSec": 0.5 } },
-        { "id": "prison", "reach": "ranged", "weight": 1, "cooldownSec": 8, "durationSec": 1.2, "phase": 1,
-          "values": { "radius": 40, "thickness": 6, "telegraphSec": 0.6, "liveSec": 3, "damage": 10, "tickSec": 0.5 } },
-        { "id": "blueDash", "reach": "ranged", "weight": 2, "cooldownSec": 4, "durationSec": 1.3, "phase": 2,
-          "values": { "windupSec": 0.5, "length": 260, "speed": 420, "damage": 16 } },
-        { "id": "edgeLock", "reach": "ranged", "weight": 1, "cooldownSec": 10, "durationSec": 1.5, "phase": 2,
-          "values": { "growSec": 1.5, "width": 40, "liveSec": 4, "damage": 10, "tickSec": 0.5 } },
-        { "id": "shrinkCurrent", "reach": "ranged", "weight": 1, "cooldownSec": 8, "durationSec": 2.6, "phase": 2,
-          "values": { "startRadius": 200, "shrinkSec": 2.5, "thickness": 8, "damage": 12 } }
-      ]
+        {
+          "id": "lightningChase",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 4,
+          "durationSec": 2.2,
+          "phase": 1,
+          "values": {
+            "strikes": 6,
+            "intervalSec": 0.24,
+            "delaySec": 0.7,
+            "radius": 17,
+            "damage": 12
+          },
+          "maxPhase": 1
+        },
+        {
+          "id": "shockRipple",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 4,
+          "durationSec": 1.8,
+          "phase": 1,
+          "values": {
+            "rings": 2,
+            "ringsEnraged": 3,
+            "ringGapSec": 0.6,
+            "bullets": 16,
+            "gap": 2,
+            "speed": 85,
+            "speedStep": 30,
+            "range": 360,
+            "damage": 11
+          }
+        },
+        {
+          "id": "spinLightning",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 7,
+          "durationSec": 3.2,
+          "phase": 1,
+          "values": {
+            "beams": 1,
+            "beamsEnraged": 2,
+            "width": 8,
+            "spinSpeed": 0.9,
+            "telegraphSec": 0.7,
+            "liveSec": 2.4,
+            "damage": 11,
+            "tickSec": 0.5
+          }
+        },
+        {
+          "id": "prison",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 8,
+          "durationSec": 2.6,
+          "phase": 1,
+          "values": {
+            "radius": 58,
+            "thickness": 6,
+            "telegraphSec": 0.5,
+            "liveSec": 2.8,
+            "damage": 11,
+            "tickSec": 0.5,
+            "gapDeg": 56,
+            "strikes": 3,
+            "strikeGapSec": 0.55,
+            "strikeRadius": 16,
+            "strikeDelaySec": 0.6,
+            "strikeDamage": 10
+          }
+        },
+        {
+          "id": "edgeLock",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 7,
+          "durationSec": 2,
+          "phase": 1,
+          "values": {
+            "offset": 46,
+            "width": 14,
+            "delaySec": 0.8,
+            "lagSec": 0.55,
+            "damage": 13
+          },
+          "maxPhase": 1
+        },
+        {
+          "id": "shrinkCurrent",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 7,
+          "durationSec": 2.8,
+          "phase": 1,
+          "values": {
+            "startRadius": 300,
+            "shrinkSec": 2.6,
+            "thickness": 8,
+            "gapDeg": 60,
+            "damage": 12,
+            "extraBeam": 0,
+            "extraBeamEnraged": 1,
+            "beamTelegraphSec": 1,
+            "beamLiveSec": 0.35,
+            "beamWidth": 8
+          }
+        },
+        {
+          "id": "crossCut",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 7,
+          "durationSec": 2,
+          "phase": 1,
+          "values": {
+            "telegraphSec": 0.7,
+            "liveSec": 0.4,
+            "lagSec": 0.95,
+            "width": 10,
+            "damage": 13
+          }
+        },
+        {
+          "id": "chaseField",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 8,
+          "durationSec": 2.8,
+          "phase": 1,
+          "values": {
+            "strikes": 4,
+            "intervalSec": 0.24,
+            "delaySec": 0.65,
+            "radius": 17,
+            "damage": 12,
+            "ringRadius": 95,
+            "ringEndRadius": 12,
+            "ringSec": 1.2,
+            "thickness": 6,
+            "gapDeg": 58
+          }
+        },
+        {
+          "id": "blueDash",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 4,
+          "durationSec": 2.1,
+          "phase": 2,
+          "values": {
+            "windupSec": 0.7,
+            "length": 280,
+            "speed": 420,
+            "damage": 16,
+            "radius": 46,
+            "delaySec": 0.7
+          }
+        }
+      ],
+      "gapSecEnraged": 0.45,
+      "lowHpStrike": {
+        "at": 0.25,
+        "afterSec": 1.4,
+        "radius": 18,
+        "delaySec": 0.65,
+        "damage": 12
+      }
     },
     {
       "id": "hectarChief",
       "chapter": 2,
       "stage": 2,
       "enrageAt": 0.5,
-      "gapSec": 0.7,
+      "gapSec": 0.8,
       "enrageSec": 1.5,
       "firstDelaySec": 1,
       "keepDistance": 100,
-      "enraged": { "moveSpeedMul": 1.2, "scale": 1, "auraColor": "#7ac0ff" },
+      "enraged": {
+        "moveSpeedMul": 1.2,
+        "scale": 1,
+        "auraColor": "#7ac0ff"
+      },
       "patterns": [
-        { "id": "repulse", "reach": "ranged", "weight": 2, "cooldownSec": 4, "durationSec": 1.4, "phase": 1,
-          "values": { "windupSec": 0.4, "speed": 220, "maxRadius": 190, "thickness": 10, "damage": 12 } },
-        { "id": "spiralBarrage", "reach": "ranged", "weight": 3, "cooldownSec": 4, "durationSec": 2.2, "phase": 1,
-          "values": { "volleys": 20, "intervalSec": 0.09, "arms": 3, "stepRad": 0.22, "speed": 110, "range": 280, "damage": 7 } },
-        { "id": "antimatter", "reach": "ranged", "weight": 2, "cooldownSec": 6, "durationSec": 1.6, "phase": 1,
-          "values": { "count": 1, "countEnraged": 2, "gapSec": 0.6, "radius": 50, "delaySec": 1.2, "damage": 26 } },
-        { "id": "callTroopers", "reach": "ranged", "weight": 1, "cooldownSec": 12, "durationSec": 1.0, "phase": 1, "summon": "hectarTrooper",
-          "values": { "windupSec": 0.4, "count": 2 } }
-      ]
+        {
+          "id": "repulse",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 5,
+          "durationSec": 1.2,
+          "phase": 1,
+          "values": {
+            "delaySec": 0.9,
+            "radius": 62,
+            "radiusEnraged": 72,
+            "damage": 18
+          }
+        },
+        {
+          "id": "droneFire",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 5,
+          "durationSec": 1.8,
+          "phase": 1,
+          "values": {
+            "drones": 3,
+            "offset": 56,
+            "windupSec": 0.5,
+            "rounds": 1,
+            "roundsEnraged": 2,
+            "roundGapSec": 0.5,
+            "bullets": 3,
+            "bulletsEnraged": 5,
+            "spreadDeg": 32,
+            "speed": 125,
+            "range": 340,
+            "damage": 9
+          }
+        },
+        {
+          "id": "antimatter",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 5,
+          "durationSec": 1.8,
+          "phase": 1,
+          "values": {
+            "count": 3,
+            "countEnraged": 5,
+            "gap": 56,
+            "radius": 38,
+            "delaySec": 1.15,
+            "stepSec": 0.22,
+            "damage": 22
+          }
+        },
+        {
+          "id": "railCross",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 6,
+          "durationSec": 1.8,
+          "phase": 1,
+          "values": {
+            "lines": 3,
+            "linesEnraged": 5,
+            "spreadDeg": 70,
+            "telegraphSec": 1.1,
+            "stepSec": 0.12,
+            "liveSec": 0.25,
+            "width": 9,
+            "damage": 20
+          }
+        },
+        {
+          "id": "mineSiege",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 7,
+          "durationSec": 2.2,
+          "phase": 1,
+          "values": {
+            "mines": 6,
+            "minesEnraged": 8,
+            "circle": 66,
+            "radius": 24,
+            "delaySec": 1.5,
+            "stepSec": 0.1,
+            "damage": 20
+          }
+        },
+        {
+          "id": "vectorField",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 5,
+          "durationSec": 1.6,
+          "phase": 1,
+          "values": {
+            "telegraphSec": 1,
+            "maxRadius": 340,
+            "speed": 150,
+            "speedEnraged": 210,
+            "thickness": 9,
+            "gapDeg": 60,
+            "damage": 16
+          }
+        },
+        {
+          "id": "boltProof",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 5,
+          "durationSec": 2,
+          "phase": 2,
+          "values": {
+            "strikes": 5,
+            "spread": 70,
+            "radius": 20,
+            "delaySec": 1.2,
+            "stepSec": 0.18,
+            "damage": 18
+          }
+        },
+        {
+          "id": "callTroopers",
+          "reach": "ranged",
+          "weight": 1,
+          "cooldownSec": 14,
+          "durationSec": 1,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.4,
+            "count": 2
+          },
+          "summon": "hectarTrooper"
+        }
+      ],
+      "gapSecEnraged": 0.64
     },
     {
       "id": "magiGolem",
       "chapter": 2,
       "stage": 5,
-      "enrageAt": 0.5,
-      "gapSec": 0.8,
+      "enrageAt": 0.65,
+      "gapSec": 0.9,
       "enrageSec": 1.6,
       "firstDelaySec": 1,
       "keepDistance": 40,
-      "enraged": { "moveSpeedMul": 1.25, "scale": 1.1, "auraColor": "#ff7a3a" },
+      "enraged": {
+        "moveSpeedMul": 1.25,
+        "scale": 1.1,
+        "auraColor": "#ff7a3a"
+      },
       "patterns": [
-        { "id": "earthCrush", "reach": "melee", "maxRange": 85, "weight": 3, "cooldownSec": 3, "durationSec": 1.3, "phase": 1,
-          "values": { "radius": 70, "arcDeg": 120, "windupSec": 0.8, "damage": 24 } },
-        { "id": "bombard", "reach": "ranged", "weight": 2, "cooldownSec": 5, "durationSec": 1.8, "phase": 1,
-          "values": { "shells": 6, "shellsEnraged": 9, "stepSec": 0.12, "spread": 80, "radius": 20, "delaySec": 0.9, "damage": 16 } },
-        { "id": "ruinBeam", "reach": "ranged", "weight": 2, "cooldownSec": 8, "durationSec": 4.2, "phase": 1,
-          "values": { "length": 500, "width": 16, "spinSpeed": 0.5, "telegraphSec": 1.0, "liveSec": 3, "damage": 12, "tickSec": 0.4 } },
-        { "id": "breakerDash", "reach": "ranged", "weight": 2, "cooldownSec": 6, "durationSec": 3.6, "phase": 1,
-          "values": { "windupSec": 0.7, "length": 340, "speed": 360, "damage": 20, "exposeSec": 2, "exposeMul": 2 } },
-        { "id": "ruinLegion", "reach": "ranged", "weight": 1, "cooldownSec": 14, "durationSec": 1.2, "phase": 1,
-          "values": { "windupSec": 0.6, "count": 3 } },
-        { "id": "crustCrack", "reach": "ranged", "weight": 2, "cooldownSec": 6, "durationSec": 3.0, "phase": 2,
-          "values": { "lines": 3, "spreadDeg": 40, "length": 420, "width": 12, "telegraphSec": 0.8, "liveSec": 2, "damage": 10, "tickSec": 0.5 } },
-        { "id": "collapseZone", "reach": "ranged", "weight": 2, "cooldownSec": 7, "durationSec": 2.0, "phase": 2,
-          "values": { "rocks": 10, "stepSec": 0.08, "radius": 18, "delaySec": 1.0, "damage": 18 } },
-        { "id": "doomFault", "reach": "ranged", "weight": 1, "cooldownSec": 9, "durationSec": 1.8, "phase": 2,
-          "values": { "width": 40, "delaySec": 1.2, "damage": 30 } }
-      ]
+        {
+          "id": "earthCrush",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 5,
+          "durationSec": 2.9,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.6,
+            "waves": 4,
+            "wavesEnraged": 5,
+            "intervalSec": 0.5,
+            "maxRadius": 300,
+            "speed": 135,
+            "thickness": 10,
+            "gapDeg": 58,
+            "gapStepDeg": 40,
+            "damage": 20
+          }
+        },
+        {
+          "id": "bombard",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 5,
+          "durationSec": 2,
+          "phase": 1,
+          "values": {
+            "shells": 8,
+            "shellsEnraged": 12,
+            "stepSec": 0.1,
+            "spread": 52,
+            "radius": 22,
+            "delaySec": 0.85,
+            "damage": 18
+          }
+        },
+        {
+          "id": "ruinBeam",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 7,
+          "durationSec": 2.4,
+          "phase": 1,
+          "values": {
+            "telegraphSec": 0.9,
+            "liveSec": 0.35,
+            "lagSec": 0.5,
+            "sideDeg": 26,
+            "width": 18,
+            "damage": 24
+          }
+        },
+        {
+          "id": "ruinLegion",
+          "reach": "ranged",
+          "weight": 1,
+          "cooldownSec": 14,
+          "durationSec": 1.2,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.6,
+            "count": 4,
+            "countEnraged": 6,
+            "maxRadius": 300,
+            "speed": 120,
+            "thickness": 10,
+            "gapDeg": 60,
+            "damage": 16
+          }
+        },
+        {
+          "id": "breakerDash",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 9,
+          "durationSec": 4.2,
+          "phase": 1,
+          "values": {
+            "windupSec": 1.1,
+            "length": 340,
+            "speed": 360,
+            "damage": 24,
+            "sideOffset": 40,
+            "sideLiveSec": 0.5,
+            "sideWidth": 10,
+            "sideDamage": 16,
+            "radius": 52,
+            "delaySec": 0.6,
+            "blastDamage": 22,
+            "exposeSec": 2.1,
+            "exposeMul": 2.2
+          }
+        },
+        {
+          "id": "golemIntimidate",
+          "reach": "ranged",
+          "weight": 1,
+          "cooldownSec": 12,
+          "durationSec": 1,
+          "phase": 1,
+          "values": {
+            "telegraphSec": 0.5,
+            "liveSec": 0.25,
+            "width": 22,
+            "damage": 18,
+            "sanityBelow": 40,
+            "rootSec": 2.5
+          }
+        },
+        {
+          "id": "crustCrack",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 7,
+          "durationSec": 2.2,
+          "phase": 2,
+          "values": {
+            "telegraphSec": 0.8,
+            "lagSec": 0.45,
+            "liveSec": 0.3,
+            "gap": 46,
+            "width": 16,
+            "damage": 20,
+            "footRadius": 26,
+            "footDelaySec": 0.65
+          }
+        },
+        {
+          "id": "collapseZone",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 8,
+          "durationSec": 2.4,
+          "phase": 2,
+          "values": {
+            "rocks": 8,
+            "circle": 72,
+            "radius": 26,
+            "delaySec": 1,
+            "lagSec": 0.5,
+            "damage": 20,
+            "waveAtSec": 0.8,
+            "maxRadius": 300,
+            "speed": 130,
+            "thickness": 10,
+            "gapDeg": 60
+          }
+        },
+        {
+          "id": "doomFault",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 10,
+          "durationSec": 3,
+          "phase": 2,
+          "values": {
+            "columns": 5,
+            "gap": 62,
+            "width": 26,
+            "delaySec": 0.8,
+            "stepSec": 0.22,
+            "rows": 1,
+            "rowGap": 0,
+            "damage": 24
+          }
+        }
+      ],
+      "gapSecEnraged": 0.6,
+      "lowHpStrike": {
+        "at": 0.25,
+        "afterSec": 1.6,
+        "radius": 26,
+        "delaySec": 0.7,
+        "damage": 18
+      }
     },
     {
       "id": "eclipse",
       "chapter": 3,
       "stage": 2,
       "enrageAt": 0.5,
-      "gapSec": 0.7,
+      "gapSec": 0.8,
       "enrageSec": 1.5,
       "firstDelaySec": 1,
       "keepDistance": 90,
-      "enraged": { "moveSpeedMul": 1.2, "scale": 1.15, "auraColor": "#ffffff" },
-      "darkness": { "lightRadius": 80, "alpha": 0.9, "color": "#000000" },
+      "enraged": {
+        "moveSpeedMul": 1.2,
+        "scale": 1.15,
+        "auraColor": "#ffffff"
+      },
+      "darkness": {
+        "lightRadius": 80,
+        "alpha": 0.9,
+        "color": "#000000"
+      },
       "patterns": [
-        { "id": "sunspotFall", "reach": "ranged", "weight": 3, "cooldownSec": 4, "durationSec": 1.8, "phase": 1,
-          "values": { "shells": 6, "shellsEnraged": 9, "stepSec": 0.15, "spread": 90, "radius": 22, "delaySec": 1.0, "damage": 18 } },
-        { "id": "shadowChase", "reach": "ranged", "weight": 2, "cooldownSec": 6, "durationSec": 1.0, "phase": 1,
-          "values": { "radius": 26, "speed": 75, "followSec": 3, "damage": 26 } },
-        { "id": "eclipseShards", "reach": "ranged", "weight": 3, "cooldownSec": 4, "durationSec": 2.0, "phase": 1,
-          "values": { "volleys": 4, "intervalSec": 0.45, "bullets": 14, "rotRad": 0.22, "speed": 90, "range": 320, "damage": 9, "refractable": 1 } },
-        { "id": "gravityCollapse", "reach": "ranged", "weight": 1, "cooldownSec": 9, "durationSec": 2.3, "phase": 1,
-          "values": { "pullSec": 2, "pullSpeed": 55, "radius": 70, "damage": 30 } },
-        { "id": "orbitCut", "reach": "ranged", "weight": 2, "cooldownSec": 7, "durationSec": 1.0, "phase": 2,
-          "values": { "blades": 4, "minRadius": 40, "maxRadius": 120, "breathSec": 2, "spinSpeed": 2.2, "bladeRadius": 7, "telegraphSec": 0.6, "liveSec": 4.5, "damage": 14 } },
-        { "id": "wideErosion", "reach": "ranged", "weight": 1, "cooldownSec": 12, "durationSec": 1.0, "phase": 2,
-          "values": { "growSec": 2.5, "width": 70, "liveSec": 4, "damage": 10, "tickSec": 0.5 } }
-      ]
+        {
+          "id": "sunspotFall",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 4,
+          "durationSec": 1.8,
+          "phase": 1,
+          "values": {
+            "shells": 3,
+            "shellsEnraged": 5,
+            "stepSec": 0.28,
+            "spread": 40,
+            "radius": 30,
+            "delaySec": 1.1,
+            "damage": 22
+          }
+        },
+        {
+          "id": "orbitCut",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 3.5,
+          "durationSec": 0.9,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.35,
+            "bullets": 6,
+            "bulletsEnraged": 8,
+            "spreadDeg": 46,
+            "speed": 210,
+            "range": 360,
+            "damage": 12,
+            "refractable": 1
+          }
+        },
+        {
+          "id": "shadowChase",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 6,
+          "durationSec": 1.9,
+          "phase": 1,
+          "values": {
+            "radius": 32,
+            "speed": 170,
+            "followSec": 0.8,
+            "lockSec": 1,
+            "damage": 28
+          }
+        },
+        {
+          "id": "eclipseShards",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 4,
+          "durationSec": 0.9,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.3,
+            "bullets": 11,
+            "bulletsEnraged": 15,
+            "spreadDeg": 120,
+            "speed": 85,
+            "range": 400,
+            "damage": 11,
+            "refractable": 1
+          }
+        },
+        {
+          "id": "wideErosion",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 10,
+          "durationSec": 2.1,
+          "phase": 1,
+          "values": {
+            "safeZones": 1,
+            "safeRadius": 44,
+            "safeReach": 170,
+            "delaySec": 2,
+            "damage": 36
+          }
+        },
+        {
+          "id": "gravityCollapse",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 9,
+          "durationSec": 2.4,
+          "phase": 1,
+          "values": {
+            "pullSec": 2.3,
+            "pullSpeed": 55,
+            "radius": 90,
+            "damage": 32
+          }
+        },
+        {
+          "id": "totalEclipse",
+          "reach": "ranged",
+          "weight": 6,
+          "cooldownSec": 16,
+          "durationSec": 3.1,
+          "phase": 1,
+          "values": {
+            "safeZones": 1,
+            "safeRadius": 38,
+            "safeReach": 210,
+            "delaySec": 3,
+            "damage": 60
+          },
+          "hpBelow": 0.2
+        }
+      ],
+      "gapSecEnraged": 0.55
     },
     {
       "id": "magiKaiser",
@@ -135,33 +792,321 @@
       "enrageSec": 1.5,
       "firstDelaySec": 1,
       "keepDistance": 50,
-      "enraged": { "moveSpeedMul": 1, "scale": 1, "auraColor": "#ff2a2a" },
-      "unlocks": [25, 50, 75],
+      "enraged": {
+        "moveSpeedMul": 1,
+        "scale": 1,
+        "auraColor": "#ff2a2a"
+      },
+      "unlocks": [
+        0.7,
+        0.4
+      ],
       "patterns": [
-        { "id": "kaiserBarrage", "reach": "ranged", "weight": 3, "cooldownSec": 3.5, "durationSec": 1.6, "phase": 1,
-          "values": { "volleys": 3, "intervalSec": 0.4, "bullets": 9, "spreadDeg": 80, "speed": 120, "damage": 9, "range": 320 } },
-        { "id": "homingMissiles", "reach": "ranged", "weight": 2, "cooldownSec": 5, "durationSec": 1.4, "phase": 1,
-          "values": { "count": 4, "intervalSec": 0.2, "speed": 85, "turnRate": 2.0, "range": 420, "damage": 12 } },
-        { "id": "lineLaser", "reach": "ranged", "weight": 2, "cooldownSec": 4, "durationSec": 1.6, "phase": 1,
-          "values": { "length": 520, "width": 10, "telegraphSec": 0.8, "liveSec": 0.5, "damage": 24, "tickSec": 0.3 } },
-        { "id": "kaiserPunch", "reach": "melee", "maxRange": 80, "weight": 3, "cooldownSec": 2.5, "durationSec": 1.2, "phase": 1, "unlock": 1,
-          "values": { "radius": 64, "arcDeg": 100, "windupSec": 0.55, "damage": 26 } },
-        { "id": "groundShock", "reach": "ranged", "weight": 2, "cooldownSec": 5, "durationSec": 1.5, "phase": 1, "unlock": 1,
-          "values": { "windupSec": 0.5, "speed": 170, "maxRadius": 230, "thickness": 10, "damage": 16 } },
-        { "id": "kaiserDash", "reach": "ranged", "weight": 2, "cooldownSec": 5, "durationSec": 1.6, "phase": 1, "unlock": 1,
-          "values": { "windupSec": 0.6, "length": 300, "speed": 430, "damage": 22 } },
-        { "id": "spinLaser", "reach": "ranged", "weight": 2, "cooldownSec": 8, "durationSec": 3.8, "phase": 1, "unlock": 1,
-          "values": { "beams": 2, "length": 320, "width": 10, "spinSpeed": 0.9, "telegraphSec": 0.8, "liveSec": 3, "damage": 12, "tickSec": 0.4 } },
-        { "id": "crossLaser", "reach": "ranged", "weight": 2, "cooldownSec": 8, "durationSec": 3.4, "phase": 1, "unlock": 2,
-          "values": { "offsetDeg": 55, "spinSpeed": 0.45, "length": 520, "width": 12, "telegraphSec": 0.8, "liveSec": 2.4, "damage": 14, "tickSec": 0.4 } },
-        { "id": "redBarrage", "reach": "ranged", "weight": 2, "cooldownSec": 6, "durationSec": 1.8, "phase": 1, "unlock": 2,
-          "values": { "volleys": 5, "intervalSec": 0.3, "bullets": 16, "rotRad": 0.2, "speed": 100, "range": 340, "damage": 10, "refractable": 0 } },
-        { "id": "doomCommand", "reach": "ranged", "weight": 2, "cooldownSec": 14, "durationSec": 2.6, "phase": 1, "unlock": 3,
-          "values": { "safeZones": 3, "safeRadius": 30, "delaySec": 2.2, "damage": 60 } }
-      ]
+        {
+          "id": "lineLaser",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 4,
+          "durationSec": 1.5,
+          "phase": 1,
+          "values": {
+            "telegraphSec": 0.9,
+            "liveSec": 0.4,
+            "width": 12,
+            "damage": 26
+          }
+        },
+        {
+          "id": "groundShock",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 5,
+          "durationSec": 1.6,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.5,
+            "maxRadius": 340,
+            "speed": 170,
+            "thickness": 10,
+            "gapDeg": 70,
+            "damage": 18
+          }
+        },
+        {
+          "id": "homingMissiles",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 6,
+          "durationSec": 1.8,
+          "phase": 1,
+          "values": {
+            "count": 7,
+            "countEnraged": 10,
+            "intervalSec": 0.16,
+            "spreadDeg": 40,
+            "speed": 95,
+            "turnRate": 1.8,
+            "range": 460,
+            "damage": 12
+          }
+        },
+        {
+          "id": "redBarrage",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 4.5,
+          "durationSec": 0.9,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.3,
+            "bullets": 13,
+            "bulletsEnraged": 19,
+            "spreadDeg": 130,
+            "speed": 105,
+            "range": 400,
+            "damage": 11,
+            "refractable": 0
+          }
+        },
+        {
+          "id": "geyser",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 5,
+          "durationSec": 1.8,
+          "phase": 1,
+          "values": {
+            "count": 3,
+            "stepSec": 0.28,
+            "delaySec": 0.85,
+            "spread": 48,
+            "radius": 30,
+            "damage": 24
+          },
+          "maxUnlock": 0
+        },
+        {
+          "id": "kaiserPunch",
+          "reach": "melee",
+          "weight": 3,
+          "cooldownSec": 2.5,
+          "durationSec": 1,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.55,
+            "radius": 90,
+            "arcDeg": 110,
+            "damage": 26
+          },
+          "maxRange": 115,
+          "unlock": 1
+        },
+        {
+          "id": "kaiserDash",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 6,
+          "durationSec": 2.6,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.5,
+            "length": 420,
+            "speed": 430,
+            "damage": 24,
+            "exposeSec": 1.1,
+            "exposeMul": 2.2,
+            "missileEverySec": 0.18,
+            "missileSpeed": 85,
+            "missileRange": 340,
+            "missileDamage": 10,
+            "turnRate": 1.6
+          },
+          "unlock": 1
+        },
+        {
+          "id": "spinLaser",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 8,
+          "durationSec": 3.6,
+          "phase": 1,
+          "values": {
+            "beams": 1,
+            "beamsEnraged": 2,
+            "width": 10,
+            "spinSpeed": 0.8,
+            "telegraphSec": 0.8,
+            "liveSec": 2.7,
+            "damage": 14,
+            "tickSec": 0.45
+          },
+          "unlock": 1
+        },
+        {
+          "id": "unstableLaser",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 8,
+          "durationSec": 3.6,
+          "phase": 1,
+          "values": {
+            "beams": 5,
+            "width": 9,
+            "spinChance": 0.5,
+            "spinSpeed": 0.7,
+            "spinDelaySec": 1,
+            "telegraphSec": 0.9,
+            "liveSec": 2.6,
+            "damage": 14,
+            "tickSec": 0.45
+          },
+          "unlock": 1
+        },
+        {
+          "id": "kaiserIntimidate",
+          "reach": "ranged",
+          "weight": 1,
+          "cooldownSec": 12,
+          "durationSec": 1,
+          "phase": 1,
+          "values": {
+            "telegraphSec": 0.5,
+            "liveSec": 0.25,
+            "width": 24,
+            "damage": 22,
+            "sanityBelow": 60,
+            "rootSec": 2.5
+          },
+          "unlock": 1
+        },
+        {
+          "id": "doomCommand",
+          "reach": "ranged",
+          "weight": 4,
+          "cooldownSec": 30,
+          "durationSec": 11,
+          "phase": 1,
+          "values": {
+            "moveSec": 1.2,
+            "moveSpeed": 170,
+            "pullSec": 5,
+            "pullSpeed": 32,
+            "lineAtSec": 1,
+            "crossAtSec": 2.6,
+            "beamTelegraphSec": 0.8,
+            "beamLiveSec": 0.4,
+            "beamWidth": 14,
+            "beamDamage": 22,
+            "waveAtSec": 4.2,
+            "maxRadius": 340,
+            "speed": 170,
+            "thickness": 10,
+            "gapDeg": 70,
+            "blastAtSec": 5.8,
+            "safeZones": 2,
+            "safeRadius": 36,
+            "safeReach": 190,
+            "delaySec": 2.2,
+            "damage": 60,
+            "exposeSec": 3,
+            "exposeMul": 2.2
+          },
+          "unlock": 2
+        },
+        {
+          "id": "redChase",
+          "reach": "ranged",
+          "weight": 1,
+          "cooldownSec": 0,
+          "durationSec": 3.6,
+          "phase": 1,
+          "values": {
+            "strikes": 7,
+            "intervalSec": 0.22,
+            "delaySec": 0.7,
+            "radius": 18,
+            "damage": 16,
+            "ringRadius": 100,
+            "ringEndRadius": 12,
+            "ringSec": 1.2,
+            "thickness": 7,
+            "gapDeg": 56
+          },
+          "inherit": true,
+          "unlock": 2
+        },
+        {
+          "id": "redFault",
+          "reach": "ranged",
+          "weight": 1,
+          "cooldownSec": 0,
+          "durationSec": 4,
+          "phase": 1,
+          "values": {
+            "columns": 7,
+            "gap": 52,
+            "stepSec": 0.2,
+            "rows": 2,
+            "rowGap": 70,
+            "width": 24,
+            "delaySec": 0.75,
+            "damage": 24
+          },
+          "inherit": true,
+          "unlock": 2
+        },
+        {
+          "id": "redSunspots",
+          "reach": "ranged",
+          "weight": 1,
+          "cooldownSec": 0,
+          "durationSec": 2.2,
+          "phase": 1,
+          "values": {
+            "shells": 21,
+            "stepSec": 0.07,
+            "spread": 150,
+            "radius": 24,
+            "delaySec": 0.9,
+            "damage": 20
+          },
+          "inherit": true,
+          "unlock": 2
+        },
+        {
+          "id": "redEruption",
+          "reach": "ranged",
+          "weight": 1,
+          "cooldownSec": 0,
+          "durationSec": 1.8,
+          "phase": 1,
+          "values": {
+            "radius": 78,
+            "delaySec": 0.8,
+            "damage": 24,
+            "blasts": 6,
+            "circle": 96,
+            "blastRadius": 30,
+            "stepSec": 0.12,
+            "maxSummon": 2
+          },
+          "inherit": true,
+          "unlock": 2,
+          "summon": "executor"
+        }
+      ],
+      "inherit": {
+        "rollSec": 0.75,
+        "chance": 0.35,
+        "minGapSec": 8
+      }
     }
   ],
-  "hiddenChapterMul": { "1": 1, "2": 1.5, "3": 2 },
+  "hiddenChapterMul": {
+    "1": 1,
+    "2": 1.5,
+    "3": 2
+  },
   "rubbleColor": "#5a4a3a",
   "hiddenBosses": [
     {
@@ -173,18 +1118,93 @@
       "enrageSec": 1.2,
       "firstDelaySec": 0.8,
       "keepDistance": 24,
-      "enraged": { "moveSpeedMul": 1.3, "scale": 1.15, "auraColor": "#ff5a2a" },
+      "enraged": {
+        "moveSpeedMul": 1.3,
+        "scale": 1.15,
+        "auraColor": "#ff5a2a"
+      },
       "patterns": [
-        { "id": "warCry", "reach": "ranged", "weight": 1, "cooldownSec": 12, "durationSec": 1.0, "phase": 1,
-          "values": { "windupSec": 0.8, "buffSec": 6, "buffSecEnraged": 8, "damageMul": 1.3, "speedMul": 1.4 } },
-        { "id": "whirlDash", "reach": "ranged", "weight": 3, "cooldownSec": 4, "durationSec": 3.8, "phase": 1,
-          "values": { "dashes": 3, "dashesEnraged": 4, "windupSec": 0.4, "length": 200, "speed": 380, "damage": 14 } },
-        { "id": "bleedField", "reach": "ranged", "weight": 2, "cooldownSec": 6, "durationSec": 1.2, "phase": 1,
-          "values": { "fields": 3, "fieldsEnraged": 5, "spread": 50, "delaySec": 0.5, "radius": 22, "liveSec": 4, "damage": 6, "tickSec": 0.5 } },
-        { "id": "groundBreak", "reach": "ranged", "weight": 2, "cooldownSec": 7, "durationSec": 1.4, "phase": 1,
-          "values": { "delaySec": 0.8, "radius": 28, "damage": 20, "rubbleRadius": 14, "maxRubble": 4, "doorClear": 40 } },
-        { "id": "earthShatter", "reach": "ranged", "weight": 2, "cooldownSec": 6, "durationSec": 1.6, "phase": 2,
-          "values": { "count": 4, "gap": 36, "stepSec": 0.18, "delaySec": 0.6, "radius": 22, "damage": 18 } }
+        {
+          "id": "warCry",
+          "reach": "ranged",
+          "weight": 1,
+          "cooldownSec": 12,
+          "durationSec": 1,
+          "phase": 1,
+          "values": {
+            "windupSec": 0.8,
+            "buffSec": 6,
+            "buffSecEnraged": 8,
+            "damageMul": 1.3,
+            "speedMul": 1.4
+          }
+        },
+        {
+          "id": "whirlDash",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 4,
+          "durationSec": 3.8,
+          "phase": 1,
+          "values": {
+            "dashes": 3,
+            "dashesEnraged": 4,
+            "windupSec": 0.4,
+            "length": 200,
+            "speed": 380,
+            "damage": 14
+          }
+        },
+        {
+          "id": "bleedField",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 6,
+          "durationSec": 1.2,
+          "phase": 1,
+          "values": {
+            "fields": 3,
+            "fieldsEnraged": 5,
+            "spread": 50,
+            "delaySec": 0.5,
+            "radius": 22,
+            "liveSec": 4,
+            "damage": 6,
+            "tickSec": 0.5
+          }
+        },
+        {
+          "id": "groundBreak",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 7,
+          "durationSec": 1.4,
+          "phase": 1,
+          "values": {
+            "delaySec": 0.8,
+            "radius": 28,
+            "damage": 20,
+            "rubbleRadius": 14,
+            "maxRubble": 4,
+            "doorClear": 40
+          }
+        },
+        {
+          "id": "earthShatter",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 6,
+          "durationSec": 1.6,
+          "phase": 2,
+          "values": {
+            "count": 4,
+            "gap": 36,
+            "stepSec": 0.18,
+            "delaySec": 0.6,
+            "radius": 22,
+            "damage": 18
+          }
+        }
       ]
     },
     {
@@ -196,16 +1216,86 @@
       "enrageSec": 1.5,
       "firstDelaySec": 0.8,
       "keepDistance": 110,
-      "enraged": { "moveSpeedMul": 1.5, "scale": 1, "auraColor": "#b05aff" },
+      "enraged": {
+        "moveSpeedMul": 1.5,
+        "scale": 1,
+        "auraColor": "#b05aff"
+      },
       "patterns": [
-        { "id": "blinkBarrage", "reach": "ranged", "weight": 3, "cooldownSec": 4, "durationSec": 1.6, "phase": 1,
-          "values": { "fadeSec": 0.3, "minDist": 120, "rings": 2, "ringsEnraged": 3, "ringGapSec": 0.35, "bullets": 16, "speed": 110, "range": 260, "damage": 8 } },
-        { "id": "greatLaser", "reach": "ranged", "weight": 2, "cooldownSec": 6, "durationSec": 1.8, "phase": 1,
-          "values": { "telegraphSec": 1.0, "liveSec": 0.6, "length": 420, "width": 14, "damage": 22, "tickSec": 1 } },
-        { "id": "clones", "reach": "ranged", "weight": 1, "cooldownSec": 14, "durationSec": 1.0, "phase": 1,
-          "values": { "count": 2, "hpRatio": 0.15, "lifeSec": 8, "shotSec": 1.5, "shotSpeed": 130, "shotDamage": 6, "shotRange": 260, "offset": 60 } },
-        { "id": "magiStrike", "reach": "ranged", "weight": 3, "cooldownSec": 4, "durationSec": 2.0, "phase": 2,
-          "values": { "windupSec": 0.4, "length": 240, "speed": 420, "damage": 14, "stopDist": 26, "swipes": 3, "swipeGapSec": 0.25, "radius": 42, "arcDeg": 120, "swipeWindupSec": 0.3, "swipeDamage": 14 } }
+        {
+          "id": "blinkBarrage",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 4,
+          "durationSec": 1.6,
+          "phase": 1,
+          "values": {
+            "fadeSec": 0.3,
+            "minDist": 120,
+            "rings": 2,
+            "ringsEnraged": 3,
+            "ringGapSec": 0.35,
+            "bullets": 16,
+            "speed": 110,
+            "range": 260,
+            "damage": 8
+          }
+        },
+        {
+          "id": "greatLaser",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 6,
+          "durationSec": 1.8,
+          "phase": 1,
+          "values": {
+            "telegraphSec": 1,
+            "liveSec": 0.6,
+            "length": 420,
+            "width": 14,
+            "damage": 22,
+            "tickSec": 1
+          }
+        },
+        {
+          "id": "clones",
+          "reach": "ranged",
+          "weight": 1,
+          "cooldownSec": 14,
+          "durationSec": 1,
+          "phase": 1,
+          "values": {
+            "count": 2,
+            "hpRatio": 0.15,
+            "lifeSec": 8,
+            "shotSec": 1.5,
+            "shotSpeed": 130,
+            "shotDamage": 6,
+            "shotRange": 260,
+            "offset": 60
+          }
+        },
+        {
+          "id": "magiStrike",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 4,
+          "durationSec": 2,
+          "phase": 2,
+          "values": {
+            "windupSec": 0.4,
+            "length": 240,
+            "speed": 420,
+            "damage": 14,
+            "stopDist": 26,
+            "swipes": 3,
+            "swipeGapSec": 0.25,
+            "radius": 42,
+            "arcDeg": 120,
+            "swipeWindupSec": 0.3,
+            "swipeDamage": 14
+          }
+        }
       ]
     },
     {
@@ -217,16 +1307,75 @@
       "enrageSec": 1.5,
       "firstDelaySec": 0.8,
       "keepDistance": 40,
-      "enraged": { "moveSpeedMul": 1.2, "scale": 1.1, "auraColor": "#fff2a0" },
+      "enraged": {
+        "moveSpeedMul": 1.2,
+        "scale": 1.1,
+        "auraColor": "#fff2a0"
+      },
       "patterns": [
-        { "id": "holySwords", "reach": "ranged", "weight": 3, "cooldownSec": 5, "durationSec": 1.8, "phase": 1,
-          "values": { "swords": 6, "swordsEnraged": 10, "spread": 70, "stepSec": 0.15, "delaySec": 0.8, "radius": 14, "damage": 16 } },
-        { "id": "maceSmash", "reach": "melee", "maxRange": 90, "weight": 3, "cooldownSec": 3, "durationSec": 1.2, "phase": 1,
-          "values": { "radius": 40, "arcDeg": 120, "windupSec": 0.6, "damage": 22 } },
-        { "id": "shieldThrow", "reach": "ranged", "weight": 2, "cooldownSec": 6, "durationSec": 1.0, "phase": 1,
-          "values": { "speed": 200, "bounces": 3, "bouncesEnraged": 5, "radius": 7, "damage": 14, "maxSec": 8 } },
-        { "id": "judgment", "reach": "ranged", "weight": 2, "cooldownSec": 9, "durationSec": 2.2, "phase": 2,
-          "values": { "gap": 32, "delaySec": 1.0, "radius": 13, "damage": 18, "stepSec": 0.04 } }
+        {
+          "id": "holySwords",
+          "reach": "ranged",
+          "weight": 3,
+          "cooldownSec": 5,
+          "durationSec": 1.8,
+          "phase": 1,
+          "values": {
+            "swords": 6,
+            "swordsEnraged": 10,
+            "spread": 70,
+            "stepSec": 0.15,
+            "delaySec": 0.8,
+            "radius": 14,
+            "damage": 16
+          }
+        },
+        {
+          "id": "maceSmash",
+          "reach": "melee",
+          "maxRange": 90,
+          "weight": 3,
+          "cooldownSec": 3,
+          "durationSec": 1.2,
+          "phase": 1,
+          "values": {
+            "radius": 40,
+            "arcDeg": 120,
+            "windupSec": 0.6,
+            "damage": 22
+          }
+        },
+        {
+          "id": "shieldThrow",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 6,
+          "durationSec": 1,
+          "phase": 1,
+          "values": {
+            "speed": 200,
+            "bounces": 3,
+            "bouncesEnraged": 5,
+            "radius": 7,
+            "damage": 14,
+            "maxSec": 8
+          }
+        },
+        {
+          "id": "judgment",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 9,
+          "durationSec": 2.2,
+          "phase": 2,
+          "values": {
+            "gap": 32,
+            "delaySec": 1,
+            "radius": 13,
+            "damage": 18,
+            "stepSec": 0.04
+          }
+        }
       ]
     }
   ]

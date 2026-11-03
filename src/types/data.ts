@@ -404,8 +404,16 @@ export interface BossPatternDef {
   values: Record<string, number>;
   /** 소환 패턴이 부를 적 id (헥타르 전투원 호출) */
   summon?: string;
-  /** 시간 단계(BossCore.unlocks)가 이 값 이상일 때부터 (마기카이저) */
+  /** 체력 단계(BossCore.unlocks)가 이 값 이상일 때부터 (마기카이저) */
   unlock?: number;
+  /** 강화 단계에서 교체돼 나오지 않는다 */
+  maxPhase?: 1;
+  /** 체력 단계가 이 값 이하일 때까지만 */
+  maxUnlock?: number;
+  /** 체력 비율이 이 값 이하일 때만 (식광 일식) */
+  hpBelow?: number;
+  /** 일반 순환이 아니라 독립 계승 주기로만 쓴다 */
+  inherit?: boolean;
 }
 
 /** 보스 행동 (스테이지 보스·히든보스 공통) */
@@ -421,8 +429,16 @@ export interface BossCore {
   keepDistance: number;
   enraged: { moveSpeedMul: number; scale: number; auraColor: string };
   patterns: BossPatternDef[];
-  /** 전투 시작 후 이 초마다 다음 단계가 열린다 (마기카이저: 25·50·75). 첫 단계 전에는 움직이지 않는다(구속) */
+  /** 강화 단계의 패턴 사이 쉬는 시간 (없으면 gapSec) */
+  gapSecEnraged?: number;
+  /** 체력이 이 비율 이하가 될 때마다 다음 단계가 열린다 (마기카이저 0.7·0.4, 내림차순). 첫 단계 전에는 움직이지 않는다(구속) */
   unlocks?: number[];
+  /** 패턴마다 따라 나오는 소환수 (융합악귀) */
+  companions?: { enemies: string[]; enemiesEnraged: string[]; count: number; countEnraged: number; maxAlive: number };
+  /** 저체력 추가 공격: 체력 at 이하면 패턴 시작 afterSec 뒤 플레이어 발밑 폭발 */
+  lowHpStrike?: { at: number; afterSec: number; radius: number; delaySec: number; damage: number };
+  /** 독립 계승 주기 (마기카이저): 마지막 단계에서 rollSec마다 chance로 시도, 끝난 뒤 minGapSec */
+  inherit?: { rollSec: number; chance: number; minGapSec: number };
   /** 일식 어둠 (식광): 방을 어둡게, 플레이어 둘레만 밝게. 보스가 죽으면 걷힌다 */
   darkness?: { lightRadius: number; alpha: number; color: string };
 }

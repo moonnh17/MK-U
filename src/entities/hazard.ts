@@ -6,6 +6,7 @@ import { bus } from '../core/events';
 import { shake } from './juice';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
+import { inGap } from '../systems/bossGeometry';
 import { bounceStep } from '../systems/motion';
 import type { Enemy } from './enemy';
 
@@ -22,11 +23,13 @@ export interface HazardHost {
 class Ticker {
   private timer = 0;
   constructor(private readonly tickSec: number) {}
-  /** 플레이어가 안에 있으면 간격마다 피해. 맞힐 수 있는 순간이면 true */
-  tick(dt: number, inside: boolean, host: HazardHost, damage: number, mental?: number): void {
+  /** 플레이어가 안에 있으면 간격마다 피해. 맞혔으면 true */
+  tick(dt: number, inside: boolean, host: HazardHost, damage: number, mental?: number): boolean {
     this.timer -= dt;
-    if (!inside || this.timer > 0) return;
-    if (host.hurtPlayer(damage, undefined, mental)) this.timer = this.tickSec;
+    if (!inside || this.timer > 0) return false;
+    if (!host.hurtPlayer(damage, undefined, mental)) return false;
+    this.timer = this.tickSec;
+    return true;
   }
 }
 
@@ -92,6 +95,8 @@ export class Zone implements Hazard {
     tickSec: number,
     color: number,
     private readonly mental = 0,
+    /** 이 시간 동안은 흐린 예고만 (피해 없음) */
+    private delaySec = 0,
   ) {
     this.left = liveSec;
     this.ticker = new Ticker(tickSec);
@@ -99,6 +104,11 @@ export class Zone implements Hazard {
   }
 
   update(dt: number, host: HazardHost): boolean {
+    if (this.delaySec > 0) {
+      this.delaySec -= dt;
+      this.c.setAlpha(0.35);
+      return true;
+    }
     this.left -= dt;
     if (this.left <= 0) return false;
     this.c.setAlpha(Math.min(1, this.left));
@@ -127,9 +137,12 @@ export interface RingSpec {
   /** 0이면 한 번만 맞힌다 */
   tickSec: number;
   color: number;
+  /** 통과할 수 있는 틈: 중심 각도와 벌어진 정도 */
+  gapAngle?: number;
+  gapDeg?: number;
 }
 
-/** 고리: 퍼지는 고리(전격 파문) · 줄어드는 고리(수축 전류) · 고정 고리(전격 감옥) */
+/** 고리: 퍼지는 고리(충격파) · 줄어드는 고리(수축 전류) · 고정 고리(전격 감옥). 틈이 있으면 그 각도는 지나갈 수 있다 */
 export class Ring implements Hazard {
   private readonly g: Phaser.GameObjects.Graphics;
   private t = 0;
@@ -157,10 +170,17 @@ export class Ring implements Hazard {
     if (this.t > s.telegraphSec + s.moveSec + s.holdSec) return false;
     const r = this.radius();
     const live = this.t >= s.telegraphSec;
-    this.g.clear().lineStyle(live ? s.thickness : 1, s.color, live ? 0.75 : 0.5).strokeCircle(s.center.x, s.center.y, Math.max(1, r));
+    this.g.clear().lineStyle(live ? s.thickness : 1, s.color, live ? 0.75 : 0.5);
+    const gapHalf = ((s.gapDeg ?? 0) * Math.PI) / 360;
+    if (gapHalf > 0) {
+      this.g.beginPath();
+      this.g.arc(s.center.x, s.center.y, Math.max(1, r), s.gapAngle! + gapHalf, s.gapAngle! - gapHalf + Math.PI * 2, false);
+      this.g.strokePath();
+    } else this.g.strokeCircle(s.center.x, s.center.y, Math.max(1, r));
     if (!live) return true;
     const p = host.playerPos();
-    const inside = Math.abs(Math.hypot(p.x - s.center.x, p.y - s.center.y) - r) <= s.thickness / 2 + host.playerRadius;
+    const onLine = Math.abs(Math.hypot(p.x - s.center.x, p.y - s.center.y) - r) <= s.thickness / 2 + host.playerRadius;
+    const inside = onLine && !(gapHalf > 0 && inGap(Math.atan2(p.y - s.center.y, p.x - s.center.x), s.gapAngle!, s.gapDeg!));
     if (s.tickSec > 0) this.ticker.tick(dt, inside, host, s.damage);
     else if (inside && !this.hitOnce && host.hurtPlayer(s.damage)) this.hitOnce = true;
     return true;
@@ -187,6 +207,8 @@ export interface BeamsSpec {
   width: number;
   /** 회전 속도(rad/s) */
   spin: number;
+  /** 켜진 뒤 이 시간이 지나야 돌기 시작한다 */
+  spinDelaySec?: number;
   startAngle: number;
   telegraphSec: number;
   liveSec: number;
@@ -195,6 +217,8 @@ export interface BeamsSpec {
   mental?: number;
   tickSec: number;
   color: number;
+  /** 플레이어를 맞혔을 때 (위압) */
+  onHit?: () => void;
 }
 
 /** 중심에서 뻗은 줄기들이 회전 (회전 번개). 대형 레이저라 굴절·탄 베기 불가 */
@@ -216,7 +240,7 @@ export class Beams implements Hazard {
     this.t += dt;
     if (this.t > s.telegraphSec + s.liveSec) return false;
     const live = this.t >= s.telegraphSec;
-    const base = s.startAngle + (live ? s.spin * (this.t - s.telegraphSec) : 0);
+    const base = s.startAngle + s.spin * Math.max(0, this.t - s.telegraphSec - (s.spinDelaySec ?? 0));
     const c = s.center();
     const p = host.playerPos();
     let inside = false;
@@ -227,7 +251,7 @@ export class Beams implements Hazard {
       this.g.lineBetween(c.x, c.y, end.x, end.y);
       if (segDist(p, c, end) <= s.width / 2 + host.playerRadius) inside = true;
     }
-    if (live) this.ticker.tick(dt, inside, host, s.damage, s.mental);
+    if (live && this.ticker.tick(dt, inside, host, s.damage, s.mental)) s.onHit?.();
     return true;
   }
 
@@ -241,47 +265,6 @@ export interface Rect {
   y: number;
   w: number;
   h: number;
-}
-
-/** 방 가장자리에서 안쪽으로 자라는 띠 (뇌전 봉쇄). 다 자란 뒤부터 피해 */
-export class EdgeBand implements Hazard {
-  private readonly g: Phaser.GameObjects.Graphics;
-  private t = 0;
-  private readonly ticker: Ticker;
-
-  constructor(
-    scene: Phaser.Scene,
-    private readonly arena: Rect,
-    private readonly width: number,
-    private readonly growSec: number,
-    private readonly liveSec: number,
-    private readonly damage: number,
-    tickSec: number,
-    private readonly color: number,
-  ) {
-    this.g = scene.add.graphics().setDepth(1);
-    this.ticker = new Ticker(tickSec);
-  }
-
-  update(dt: number, host: HazardHost): boolean {
-    this.t += dt;
-    if (this.t > this.growSec + this.liveSec) return false;
-    const live = this.t >= this.growSec;
-    const w = this.width * Math.min(1, this.t / this.growSec);
-    const a = this.arena;
-    this.g.clear().fillStyle(this.color, live ? 0.4 : 0.15);
-    this.g.fillRect(a.x, a.y, a.w, w).fillRect(a.x, a.y + a.h - w, a.w, w);
-    this.g.fillRect(a.x, a.y, w, a.h).fillRect(a.x + a.w - w, a.y, w, a.h);
-    const p = host.playerPos();
-    const r = host.playerRadius;
-    const inside = p.x - r < a.x + w || p.x + r > a.x + a.w - w || p.y - r < a.y + w || p.y + r > a.y + a.h - w;
-    if (live) this.ticker.tick(dt, inside, host, this.damage);
-    return true;
-  }
-
-  destroy(): void {
-    this.g.destroy();
-  }
 }
 
 export interface Hazard {
@@ -407,7 +390,7 @@ export class RectBlast implements Hazard {
   }
 }
 
-/** 플레이어를 따라오는 그림자 원이 followSec 뒤 그 자리에서 터진다 (식광 그림자 추적) */
+/** 플레이어를 따라오는 그림자 원이 멈춘 뒤 그 자리에서 터진다 (식광 그림자 추적). followSec은 전체 시간 */
 export class FollowBlast implements Hazard {
   private readonly ring: Phaser.GameObjects.Arc;
   private readonly fill: Phaser.GameObjects.Arc;
@@ -422,6 +405,8 @@ export class FollowBlast implements Hazard {
     private readonly followSec: number,
     private readonly damage: number,
     private readonly color: number,
+    /** 터지기 전 이 시간은 자리에 고정된다 */
+    private readonly lockSec = 0,
   ) {
     this.pos = { ...from };
     this.left = followSec;
@@ -436,7 +421,7 @@ export class FollowBlast implements Hazard {
     const dy = p.y - this.pos.y;
     const d = Math.hypot(dx, dy);
     const step = Math.min(d, this.speed * dt);
-    if (d > 0) this.pos = { x: this.pos.x + (dx / d) * step, y: this.pos.y + (dy / d) * step };
+    if (d > 0 && this.left > this.lockSec) this.pos = { x: this.pos.x + (dx / d) * step, y: this.pos.y + (dy / d) * step };
     this.ring.setPosition(this.pos.x, this.pos.y);
     this.fill.setPosition(this.pos.x, this.pos.y).setAlpha(0.15 + 0.45 * (1 - Math.max(0, this.left) / this.followSec));
     if (this.left > 0) return true;
@@ -450,64 +435,6 @@ export class FollowBlast implements Hazard {
   destroy(): void {
     this.ring.destroy();
     this.fill.destroy();
-  }
-}
-
-export interface OrbitSpec {
-  center: () => Vec2;
-  blades: number;
-  /** 궤도 반지름이 min ↔ max를 breathSec 주기로 오간다 */
-  minRadius: number;
-  maxRadius: number;
-  breathSec: number;
-  spin: number;
-  bladeRadius: number;
-  telegraphSec: number;
-  liveSec: number;
-  damage: number;
-  color: number;
-}
-
-/** 보스 둘레를 도는 칼날 (식광 궤도 절단). 예고 중에는 궤도만 보인다 */
-export class OrbitBlades implements Hazard {
-  private readonly g: Phaser.GameObjects.Graphics;
-  private t = 0;
-
-  constructor(
-    scene: Phaser.Scene,
-    private readonly s: OrbitSpec,
-  ) {
-    this.g = scene.add.graphics().setDepth(5);
-  }
-
-  update(dt: number, host: HazardHost): boolean {
-    const s = this.s;
-    this.t += dt;
-    if (this.t > s.telegraphSec + s.liveSec) return false;
-    const live = this.t >= s.telegraphSec;
-    const lt = Math.max(0, this.t - s.telegraphSec);
-    const r = s.minRadius + (s.maxRadius - s.minRadius) * (0.5 - 0.5 * Math.cos((lt * Math.PI * 2) / s.breathSec));
-    const c = s.center();
-    const p = host.playerPos();
-    this.g.clear();
-    if (!live) {
-      this.g.lineStyle(1, s.color, 0.5).strokeCircle(c.x, c.y, s.minRadius).strokeCircle(c.x, c.y, s.maxRadius);
-      return true;
-    }
-    this.g.lineStyle(1, s.color, 0.25).strokeCircle(c.x, c.y, r);
-    let hit = false;
-    for (let i = 0; i < s.blades; i++) {
-      const a = s.spin * lt + (i * Math.PI * 2) / s.blades;
-      const b = { x: c.x + Math.cos(a) * r, y: c.y + Math.sin(a) * r };
-      this.g.fillStyle(s.color, 0.95).fillCircle(b.x, b.y, s.bladeRadius);
-      if (Math.hypot(p.x - b.x, p.y - b.y) <= s.bladeRadius + host.playerRadius) hit = true;
-    }
-    if (hit) host.hurtPlayer(s.damage);
-    return true;
-  }
-
-  destroy(): void {
-    this.g.destroy();
   }
 }
 

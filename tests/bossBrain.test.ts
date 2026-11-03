@@ -105,19 +105,30 @@ describe('챕터1 보스 데이터 (기획서 보스 패턴 표)', () => {
 
   it('패턴 이름이 표와 같다', () => {
     expect(names('fusionAkgwi', 1)).toEqual(['악귀 할퀴기', '원혼 돌진', '악귀 분출', '원혼 폭발']);
-    expect(names('electricRing', 1)).toEqual(['낙뢰 추적', '전격 파문', '회전 번개', '전격 감옥']);
-    expect(names('electricRing', 2)).toEqual(['청뢰 돌진', '뇌전 봉쇄', '수축 전류']);
+    expect(names('electricRing', 1)).toEqual(['낙뢰 추적', '전격 파문', '회전 번개', '전격 감옥', '뇌전 봉쇄', '수축 전류', '교차 절단', '뇌전 추격진']);
+    expect(names('electricRing', 2)).toEqual(['청뢰 돌진']);
   });
 
-  it('강화 단계는 체력 50% 이하', () => {
-    // 시간 단계 보스(마기카이저)는 체력 강화 단계가 없다
-    for (const b of gameData.bosses.bosses) expect(b.enrageAt).toBe(b.unlocks ? 0 : 0.5);
-    // 폭주: 이동·돌진 가속, 분출 증가 / 거대화
+  it('강화 단계 체력: 융합악귀 35%, 골렘 65%, 나머지 50%, 카이저는 체력 단계', () => {
+    const at = Object.fromEntries(gameData.bosses.bosses.map((b) => [b.id, b.enrageAt]));
+    expect(at).toEqual({ fusionAkgwi: 0.35, electricRing: 0.5, hectarChief: 0.5, magiGolem: 0.65, eclipse: 0.5, magiKaiser: 0 });
     const f = boss('fusionAkgwi');
     expect(f.enraged.moveSpeedMul).toBeGreaterThan(1);
-    expect(f.patterns.find((p) => p.id === 'spiritDash')!.values.speedEnraged).toBeGreaterThan(f.patterns.find((p) => p.id === 'spiritDash')!.values.speed!);
-    expect(f.patterns.find((p) => p.id === 'eruption')!.values.bulletsEnraged).toBeGreaterThan(f.patterns.find((p) => p.id === 'eruption')!.values.bullets!);
+    const v = (id: string) => f.patterns.find((p) => p.id === id)!.values;
+    expect(v('spiritDash').shotSpeedEnraged).toBeGreaterThan(v('spiritDash').shotSpeed!);
+    expect([v('eruption').count, v('eruption').countEnraged]).toEqual([3, 5]);
+    expect([v('spiritBlast').bullets, v('spiritBlast').bulletsEnraged, v('spiritBlast').gap]).toEqual([12, 16, 2]);
     expect(boss('electricRing').enraged.scale).toBeGreaterThan(1);
+  });
+
+  it('전기환띠 2페이즈: 낙뢰 추적·뇌전 봉쇄는 청뢰 돌진으로 교체', () => {
+    const b = boss('electricRing');
+    const s2 = { ...initialBoss(0), phase: 2 as const };
+    const ids = availablePatterns(s2, b.patterns, 200).map((p) => p.id);
+    expect(ids).toContain('blueDash');
+    expect(ids).not.toContain('lightningChase');
+    expect(ids).not.toContain('edgeLock');
+    expect(availablePatterns(initialBoss(0), b.patterns, 200).map((p) => p.id)).toContain('lightningChase');
   });
 
   it('모든 패턴에 실행 코드가 있다', () => {

@@ -3,7 +3,8 @@ import { Rng } from '../src/core/rng';
 import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
 import { BOSS_PATTERN_IDS } from '../src/bosses/patterns';
-import { availablePatterns, initialBoss, stepBoss, timeStage, type BossBrainState } from '../src/systems/bossBrain';
+import { hpStage } from '../src/systems/bossGeometry';
+import { availablePatterns, initialBoss, stepBoss, type BossBrainState } from '../src/systems/bossBrain';
 import { archonMods, archonStage, championStage, championWaves, raidChampions, rescaleHp } from '../src/systems/champions';
 import { canBeElite } from '../src/systems/elites';
 import { aimLocked, chainWindup, initialAi, stepAi, type AiAttack } from '../src/systems/enemyAi';
@@ -136,22 +137,22 @@ describe('챕터3 보스 (기획서 표)', () => {
     expect([boss('eclipse').chapter, boss('eclipse').stage]).toEqual([3, 2]);
     expect([boss('magiKaiser').chapter, boss('magiKaiser').stage]).toEqual([3, 5]);
   });
-  it('식광: 흑점 낙하·그림자 추적·일식의 파편·중력 붕괴, 강화에 궤도 절단·광역 잠식, 일식 어둠 80px', () => {
+  it('식광: 7패턴, 일식은 체력 20% 이하, 일식 어둠 80px', () => {
     const b = boss('eclipse');
-    expect(b.patterns.filter((p) => p.phase === 1).map((p) => p.id)).toEqual(['sunspotFall', 'shadowChase', 'eclipseShards', 'gravityCollapse']);
-    expect(b.patterns.filter((p) => p.phase === 2).map((p) => p.id)).toEqual(['orbitCut', 'wideErosion']);
+    expect(b.patterns.map((p) => p.id)).toEqual(['sunspotFall', 'orbitCut', 'shadowChase', 'eclipseShards', 'wideErosion', 'gravityCollapse', 'totalEclipse']);
+    expect(b.patterns.find((p) => p.id === 'totalEclipse')!.hpBelow).toBe(0.2);
     expect(b.darkness?.lightRadius).toBe(80);
   });
-  it('마기카이저: 25·50·75초에 단계 개방, 체력 강화 단계 없음', () => {
+  it('마기카이저: 체력 70·40%에 단계, 마지막 단계에 종말 명령과 독립 계승 4종', () => {
     const b = boss('magiKaiser');
-    expect(b.unlocks).toEqual([25, 50, 75]);
+    expect(b.unlocks).toEqual([0.7, 0.4]);
     expect(b.enrageAt).toBe(0);
-    const at = (u: number) => b.patterns.filter((p) => (p.unlock ?? 0) === u).map((p) => p.id);
-    // 1단계(구속): 탄막·유도 미사일·직선 레이저만
-    expect(at(0)).toEqual(['kaiserBarrage', 'homingMissiles', 'lineLaser']);
-    expect(at(1)).toEqual(['kaiserPunch', 'groundShock', 'kaiserDash', 'spinLaser']);
-    expect(at(2)).toEqual(['crossLaser', 'redBarrage']);
-    expect(at(3)).toEqual(['doomCommand']);
+    const at = (u: number) => b.patterns.filter((p) => !p.inherit && (p.unlock ?? 0) === u).map((p) => p.id);
+    expect(at(0)).toEqual(['lineLaser', 'groundShock', 'homingMissiles', 'redBarrage', 'geyser']);
+    expect(at(1)).toEqual(['kaiserPunch', 'kaiserDash', 'spinLaser', 'unstableLaser', 'kaiserIntimidate']);
+    expect(at(2)).toEqual(['doomCommand']);
+    expect(b.patterns.filter((p) => p.inherit).map((p) => p.id)).toEqual(['redChase', 'redFault', 'redSunspots', 'redEruption']);
+    expect(b.inherit).toEqual({ rollSec: 0.75, chance: 0.35, minGapSec: 8 });
   });
   it('모든 패턴에 실행 객체가 있다', () => {
     for (const b of B) for (const p of b.patterns) expect(BOSS_PATTERN_IDS).toContain(p.id);
@@ -161,37 +162,43 @@ describe('챕터3 보스 (기획서 표)', () => {
   });
 });
 
-describe('시간 단계 (마기카이저)', () => {
+describe('체력 단계 (마기카이저)', () => {
   const b = boss('magiKaiser');
+  const rules = b.patterns.filter((p) => !p.inherit);
   const cfg = { enrageAt: b.enrageAt, gapSec: b.gapSec, enrageSec: b.enrageSec, unlocks: b.unlocks };
-  it('전투 시간 → 단계', () => {
-    expect([0, 24.9, 25, 49, 50, 75, 200].map((t) => timeStage(t, b.unlocks))).toEqual([0, 0, 1, 1, 2, 3, 3]);
-    expect(timeStage(100)).toBe(0);
+  it('체력 → 단계', () => {
+    expect([1, 0.71, 0.7, 0.41, 0.4, 0.01].map((h) => hpStage(h, b.unlocks))).toEqual([0, 0, 1, 1, 2, 2]);
+    expect(hpStage(0.1)).toBe(0);
   });
-  it('열리기 전 패턴은 고르지 않고, 단계가 열리면 unlock 이벤트가 한 번씩', () => {
+  it('열리기 전 패턴은 고르지 않고, 단계가 열리면 하던 패턴을 끝내고 unlock 한 번씩', () => {
     let s: BossBrainState = initialBoss(0);
     const rng = new Rng(3);
     const unlocks: number[] = [];
-    const startsBefore = new Set<string>();
-    for (let t = 0; t < 80; t += 0.05) {
-      const r = stepBoss(s, 0.05, 1, 50, b.patterns, cfg, rng);
+    const before = new Set<string>();
+    for (let t = 0; t < 30; t += 0.05) {
+      const r = stepBoss(s, 0.05, t < 15 ? 1 : t < 22 ? 0.6 : 0.3, 50, rules, cfg, rng);
       s = r.state;
       for (const e of r.events) {
         if (e.type === 'unlock') unlocks.push(e.stage);
-        if (e.type === 'start' && s.time < 25) startsBefore.add(e.id);
+        if (e.type === 'start' && t < 15) before.add(e.id);
       }
     }
-    expect(unlocks).toEqual([1, 2, 3]);
-    expect([...startsBefore].every((id) => ['kaiserBarrage', 'homingMissiles', 'lineLaser'].includes(id))).toBe(true);
+    expect(unlocks).toEqual([1, 2]);
+    expect([...before].every((id) => ['lineLaser', 'groundShock', 'homingMissiles', 'redBarrage', 'geyser'].includes(id))).toBe(true);
     expect(s.phase).toBe(1);
   });
-  it('3단계면 종말 명령까지 쓸 수 있다', () => {
-    const s: BossBrainState = { ...initialBoss(0), time: 80, unlocked: 3 };
-    expect(availablePatterns(s, b.patterns, 50).map((p) => p.id)).toContain('doomCommand');
-    expect(availablePatterns({ ...s, unlocked: 2 }, b.patterns, 50).map((p) => p.id)).not.toContain('doomCommand');
+  it('체력이 회복돼도 단계는 내려가지 않고, 마지막 단계면 종말 명령까지 쓴다', () => {
+    const s = stepBoss({ ...initialBoss(5), unlocked: 2 }, 0.05, 1, 50, rules, cfg, new Rng(1)).state;
+    expect(s.unlocked).toBe(2);
+    expect(availablePatterns(s, rules, 50).map((p) => p.id)).toContain('doomCommand');
+    expect(availablePatterns({ ...s, unlocked: 1 }, rules, 50).map((p) => p.id)).not.toContain('doomCommand');
+  });
+  it('지열 분출은 구속 단계 전용', () => {
+    expect(availablePatterns({ ...initialBoss(0), unlocked: 0 }, rules, 50).map((p) => p.id)).toContain('geyser');
+    expect(availablePatterns({ ...initialBoss(0), unlocked: 1 }, rules, 50).map((p) => p.id)).not.toContain('geyser');
   });
   it('enrageAt 0이면 체력이 낮아도 강화 단계로 가지 않는다', () => {
-    const r = stepBoss(initialBoss(0), 0.05, 0.01, 50, b.patterns, cfg, new Rng(1));
+    const r = stepBoss(initialBoss(0), 0.05, 0.01, 50, rules, cfg, new Rng(1));
     expect(r.events.some((e) => e.type === 'enrage')).toBe(false);
   });
 });

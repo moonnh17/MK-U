@@ -44,7 +44,7 @@ describe('보스 패턴 근접·원거리', () => {
     const boss = D.bosses.bosses.find((b) => b.id === 'fusionAkgwi')!;
     const far = availablePatterns(initialBoss(0), boss.patterns, 500).map((p) => p.id);
     expect(far).not.toContain('claw');
-    expect(far).not.toContain('spiritBlast');
+    expect(far).toContain('spiritBlast');
     expect(far).toContain('eruption');
     expect(availablePatterns(initialBoss(0), boss.patterns, 30).map((p) => p.id)).toContain('claw');
   });

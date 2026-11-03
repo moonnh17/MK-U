@@ -404,8 +404,8 @@ export function validateGameData(d: GameData): Errors {
     if (b.enrageAt === 0 && b.patterns.some((p) => p.phase === 2)) errors.push(`${w}: enrageAt 0이면 강화 단계 패턴을 둘 수 없음`);
     const unlocks = b.unlocks ?? [];
     unlocks.forEach((t, i) => {
-      checkPositive(errors, `${w}.unlocks[${i}]`, t);
-      if (i > 0 && t <= unlocks[i - 1]!) errors.push(`${w}.unlocks: 오름차순이어야 함`);
+      if (!(t > 0 && t < 1)) errors.push(`${w}.unlocks[${i}]: 0~1 체력 비율`);
+      if (i > 0 && t >= unlocks[i - 1]!) errors.push(`${w}.unlocks: 내림차순이어야 함`);
       needText(w, `boss.unlock.${b.id}.${i + 1}`);
     });
     if (b.darkness) {
@@ -414,6 +414,8 @@ export function validateGameData(d: GameData): Errors {
       if (!HEX_COLOR.test(b.darkness.color)) errors.push(`${w}.darkness.color: #RRGGBB`);
     }
     if (b.enrageAt > 0) needText(w, `boss.enraged.${b.id}`);
+    for (const id of [...(b.companions?.enemies ?? []), ...(b.companions?.enemiesEnraged ?? [])]) if (!d.enemies.enemies.some((x) => x.id === id)) errors.push(`${w}.companions: 없는 적 '${id}'`);
+    if (b.patterns.some((p) => p.inherit) && !b.inherit) errors.push(`${w}: 계승 패턴에는 inherit 주기가 필요`);
     for (const k of ['gapSec', 'enrageSec', 'firstDelaySec', 'keepDistance'] as const) checkPositive(errors, `${w}.${k}`, b[k], true);
     checkPositive(errors, `${w}.enraged.moveSpeedMul`, b.enraged.moveSpeedMul);
     checkPositive(errors, `${w}.enraged.scale`, b.enraged.scale);
@@ -428,6 +430,7 @@ export function validateGameData(d: GameData): Errors {
       if (p.phase !== 1 && p.phase !== 2) errors.push(`${pw}.phase: 1 또는 2`);
       if (p.unlock !== undefined && !(Number.isInteger(p.unlock) && p.unlock >= 0 && p.unlock <= unlocks.length)) errors.push(`${pw}.unlock: 0~${unlocks.length} 정수`);
       for (const [k, v] of Object.entries(p.values)) if (!isNum(v)) errors.push(`${pw}.values.${k}: 숫자여야 함`);
+      if (p.summon && !d.enemies.enemies.some((x) => x.id === p.summon)) errors.push(`${pw}.summon: 없는 적 '${p.summon}'`);
       needText(pw, `boss.pattern.${p.id}`);
     }
   }

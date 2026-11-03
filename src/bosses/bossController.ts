@@ -2,7 +2,8 @@
  * 보스 한 마리를 움직인다: 패턴 선택기(systems/bossBrain.ts) → 패턴 실행(patterns.ts).
  * 패턴이 없을 때는 keepDistance까지 다가간다. 체력 50% 이하에서 강화 단계(잠깐 무적 + 연출).
  * 히든보스: 피해에 챕터 배율, 자기 강화(전장의 함성), 분신, 지면 파괴 잔해를 여기서 관리한다.
- * 시간 단계(마기카이저): 첫 단계가 열리기 전에는 구속구에 갇혀 움직이지 않고, 단계가 열릴 때마다 연출한다.
+ * 체력 단계(마기카이저): 첫 단계가 열리기 전에는 구속구에 갇혀 움직이지 않고, 단계가 열릴 때마다 연출한다.
+ * 마지막 단계에서는 일반 패턴과 별개로 독립 계승 패턴이 겹쳐 돈다.
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
@@ -13,9 +14,10 @@ import { shake } from '../entities/juice';
 import { artKeys, bossArtPhase } from '../systems/art';
 import type { Enemy } from '../entities/enemy';
 import { initialBoss, stepBoss, type BossBrainState } from '../systems/bossBrain';
+import { DelayedBlast } from '../entities/hazard';
 import type { BossCore } from '../types/data';
 import type { BossHost, PatternRun } from './host';
-import { makePattern, type BossBody } from './patterns';
+import { makePattern, type BossBody, type PatternCtx } from './patterns';
 
 /**
  * 보스가 부른 적. pattern: 부른 패턴(살아 있는 동안 그 패턴은 다시 쓰지 않는다)
@@ -27,6 +29,9 @@ interface Minion {
   left: number | null;
   shot: number | null;
 }
+
+/** 부른 패턴을 막지 않는 소환수 */
+const FREE_MINION = '';
 
 export class BossController {
   private brain: BossBrainState;
@@ -47,6 +52,13 @@ export class BossController {
   private restraint: Phaser.GameObjects.Graphics | null = null;
   /** 지금 입은 단계 그림 (0 = 기본 그림) */
   private artPhase = 0;
+  /** 독립 계승 패턴 (일반 패턴과 겹쳐 돈다) */
+  private inheritRun: PatternRun | null = null;
+  private inheritLeft = 0;
+  private inheritRoll = 0;
+  private inheritGap = 0;
+  /** 저체력 추가 공격까지 남은 시간 */
+  private lowStrike: number | null = null;
 
   constructor(
     readonly enemy: Enemy,
@@ -79,10 +91,11 @@ export class BossController {
   }
 
   get enraged(): boolean {
-    return this.brain.phase === 2;
+    const u = this.def.unlocks?.length ?? 0;
+    return this.brain.phase === 2 || (u > 0 && this.brain.unlocked >= u);
   }
 
-  /** 시간 단계 보스가 아직 구속돼 있다 */
+  /** 체력 단계 보스가 아직 구속돼 있다 */
   get restrained(): boolean {
     return (this.def.unlocks?.length ?? 0) > 0 && this.brain.unlocked === 0;
   }
@@ -95,8 +108,10 @@ export class BossController {
     this.updateBuff(dt);
     const p = host.playerPos();
     const dist = Math.hypot(p.x - e.sprite.x, p.y - e.sprite.y);
+    const hp = e.hp / e.maxHp;
     const blocked = new Set(this.minions.map((m) => m.pattern));
-    const r = stepBoss(this.brain, dt, e.hp / e.maxHp, dist, this.def.patterns, this.def, host.rng, blocked);
+    for (const x of this.def.patterns) if (x.hpBelow !== undefined && hp > x.hpBelow) blocked.add(x.id);
+    const r = stepBoss(this.brain, dt, hp, dist, this.rules, this.def, host.rng, blocked);
     this.brain = r.state;
     for (const ev of r.events) {
       if (ev.type === 'end') {
@@ -105,22 +120,16 @@ export class BossController {
       } else if (ev.type === 'unlock') {
         this.unlock(host, ev.stage);
       } else if (ev.type === 'start') {
-        this.run = makePattern(ev.id, {
-          boss: this.body,
-          host,
-          v: (k) => this.value(ev.id, k),
-          summonId: this.def.patterns.find((x) => x.id === ev.id)?.summon,
-          buff: (sec, dmg, speed) => this.startBuff(host, sec, dmg, speed),
-          summonClones: () => this.summonClones(host),
-          summon: (ids) => this.summonGroup(host, ev.id, ids),
-          expose: (sec, mul) => this.expose(host, sec, mul),
-          rubble: (at, radius) => this.addRubble(host, at, radius),
-        });
+        this.run = makePattern(ev.id, this.patternCtx(host, ev.id, this.body));
         this.label(host, host.t(`boss.pattern.${ev.id}`));
+        this.spawnCompanions(host);
+        if (this.def.lowHpStrike && hp <= this.def.lowHpStrike.at) this.lowStrike = this.def.lowHpStrike.afterSec;
       } else {
         this.enrage(host);
       }
     }
+    this.updateLowStrike(dt, host);
+    this.updateInherit(dt, host);
     if (this.run) this.run.update(dt);
     else if (this.restrained) e.sprite.setVelocity(0, 0);
     else this.approach(dist, p);
@@ -128,6 +137,70 @@ export class BossController {
     this.aura?.setPosition(e.sprite.x, e.sprite.y).setRadius(e.radius + 4);
     this.coreFx?.setPosition(e.sprite.x, e.sprite.y);
     this.buffFx?.setPosition(e.sprite.x, e.sprite.y).setRadius(e.radius + 7);
+  }
+
+  private get rules(): BossCore['patterns'] {
+    return this.def.patterns.filter((x) => !x.inherit);
+  }
+
+  private patternCtx(host: BossHost, id: string, boss: BossBody): PatternCtx {
+    return {
+      boss,
+      host,
+      v: (k) => this.value(id, k),
+      summonId: this.def.patterns.find((x) => x.id === id)?.summon,
+      buff: (sec, dmg, speed) => this.startBuff(host, sec, dmg, speed),
+      summonClones: () => this.summonClones(host),
+      summon: (ids, free) => this.summonGroup(host, free ? FREE_MINION : id, ids),
+      minionCount: (enemyId) => this.minions.filter((m) => m.e.def.id === enemyId).length,
+      expose: (sec, mul) => this.expose(host, sec, mul),
+      rubble: (at, radius) => this.addRubble(host, at, radius),
+    };
+  }
+
+  /** 패턴에 따라 나오는 소환수 (상한까지만) */
+  private spawnCompanions(host: BossHost): void {
+    const c = this.def.companions;
+    if (!c) return;
+    const pool = this.enraged ? c.enemiesEnraged : c.enemies;
+    const room = c.maxAlive - this.minions.length;
+    const n = Math.min(room, this.enraged ? c.countEnraged : c.count);
+    if (n > 0) this.summonGroup(host, FREE_MINION, Array.from({ length: n }, () => host.rng.pick(pool)));
+  }
+
+  /** 저체력 추가 공격: 피한 뒤 멈추는 습관을 노린다 */
+  private updateLowStrike(dt: number, host: BossHost): void {
+    const s = this.def.lowHpStrike;
+    if (this.lowStrike === null || !s) return;
+    this.lowStrike -= dt;
+    if (this.lowStrike > 0) return;
+    this.lowStrike = null;
+    host.addHazard(new DelayedBlast(host.scene, host.playerPos(), s.radius, s.delaySec, s.damage * this.damageMul, this.body.color));
+  }
+
+  /** 독립 계승: 마지막 단계에서 일반 패턴과 겹쳐 돈다. 이동은 일반 패턴 몫이라 건드리지 않는다 */
+  private updateInherit(dt: number, host: BossHost): void {
+    const cfg = this.def.inherit;
+    if (!cfg || !this.enraged) return;
+    if (this.inheritRun) {
+      this.inheritRun.update(dt);
+      this.inheritLeft -= dt;
+      if (this.inheritLeft > 0) return;
+      this.inheritRun.destroy();
+      this.inheritRun = null;
+      this.inheritGap = cfg.minGapSec;
+      return;
+    }
+    this.inheritGap -= dt;
+    this.inheritRoll -= dt;
+    if (this.inheritGap > 0 || this.inheritRoll > 0) return;
+    this.inheritRoll = cfg.rollSec;
+    if (!host.rng.chance(cfg.chance)) return;
+    const pool = this.def.patterns.filter((x) => x.inherit);
+    const p = host.rng.pick(pool);
+    this.inheritRun = makePattern(p.id, this.patternCtx(host, p.id, { ...this.body, setVelocity: () => {} }));
+    this.inheritLeft = p.durationSec;
+    this.label(host, host.t(`boss.pattern.${p.id}`), this.def.enraged.auraColor);
   }
 
   /** 패턴 수치. 강화 단계면 `키Enraged`가 있으면 그것. 피해 값은 챕터 배율·자기 강화를 곱한다 */
@@ -278,10 +351,12 @@ export class BossController {
     for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]] as const) g.lineBetween(x + dx * r, y + dy * r, x + dx * (r + 12), y + dy * (r + 12));
   }
 
-  /** 시간 단계 개방: 이름 표시·흔들림, 첫 단계면 구속이 풀린다 */
+  /** 체력 단계 개방: 이름 표시·흔들림·잠깐 무적, 첫 단계면 구속이 풀린다 */
   private unlock(host: BossHost, stage: number): void {
     const e = this.enemy;
     this.applyPhaseArt();
+    e.invuln = this.def.enrageSec;
+    e.sprite.setVelocity(0, 0);
     if (stage === 1) {
       this.restraint?.destroy();
       this.restraint = null;
@@ -319,6 +394,8 @@ export class BossController {
   destroy(): void {
     this.run?.destroy();
     this.run = null;
+    this.inheritRun?.destroy();
+    this.inheritRun = null;
     this.aura?.destroy();
     this.aura = null;
     this.buffFx?.destroy();

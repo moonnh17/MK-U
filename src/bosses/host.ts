@@ -14,6 +14,12 @@ export interface BossHost extends HazardHost {
   fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean): void;
   /** 유도 미사일: 플레이어 쪽으로 초당 turnRate(rad)까지 휜다. 일반 탄처럼 굴절·탄 베기 가능 */
   fireEnemyMissile(from: Vec2, angle: number, speed: number, range: number, damage: number, turnRate: number): void;
+  /** 플레이어 속도 (이동 예측) */
+  playerVel(): Vec2;
+  /** 지금 정신력 (위압) */
+  playerSanity(): number;
+  /** sec 동안 플레이어가 움직일 수 없다 (위압) */
+  rootPlayer(sec: number): void;
   /** 이번 프레임 플레이어 이동에 속도를 더한다 (중력 붕괴) */
   pushPlayer(v: Vec2): void;
   /** 보스가 있는 방 안쪽 */

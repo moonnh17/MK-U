@@ -15,16 +15,19 @@ describe('챕터2 보스 (기획서 표)', () => {
     expect([boss('hectarChief').chapter, boss('hectarChief').stage]).toEqual([2, 2]);
     expect([boss('magiGolem').chapter, boss('magiGolem').stage]).toEqual([2, 5]);
   });
-  it('헥타르 수석 연구원: 척력 방출·마기 탄막·반물질 폭발·전투원 호출, 강화 시 반물질 2연속', () => {
+  it('헥타르 수석 연구원: 화력망 6종 + 벼락 실증(강화), 반물질 3→5, 주기 20% 단축', () => {
     const b = boss('hectarChief');
-    expect(b.patterns.map((p) => p.id)).toEqual(['repulse', 'spiralBarrage', 'antimatter', 'callTroopers']);
+    expect(b.patterns.map((p) => p.id)).toEqual(['repulse', 'droneFire', 'antimatter', 'railCross', 'mineSiege', 'vectorField', 'boltProof', 'callTroopers']);
+    expect(b.patterns.find((p) => p.id === 'boltProof')!.phase).toBe(2);
     const am = b.patterns.find((p) => p.id === 'antimatter')!.values;
-    expect([am.count, am.countEnraged]).toEqual([1, 2]);
+    expect([am.count, am.countEnraged]).toEqual([3, 5]);
+    expect(b.gapSecEnraged).toBeCloseTo(b.gapSec * 0.8);
     expect(b.patterns.find((p) => p.id === 'callTroopers')!.summon).toBe('hectarTrooper');
   });
-  it('마기골렘: 대지 분쇄·마기 포격·파멸 광선·파성 돌진·폐허의 군세, 광폭화에 지각 균열·붕괴 지대·종말의 단층', () => {
+  it('마기골렘: 대지 분쇄·마기 포격·파멸 광선·폐허의 군세·파성 돌진·위압, 광폭화에 지각 균열·붕괴 지대·종말의 단층', () => {
     const b = boss('magiGolem');
-    expect(b.patterns.filter((p) => p.phase === 1).map((p) => p.id)).toEqual(['earthCrush', 'bombard', 'ruinBeam', 'breakerDash', 'ruinLegion']);
+    expect(b.patterns.filter((p) => p.phase === 1).map((p) => p.id)).toEqual(['earthCrush', 'bombard', 'ruinBeam', 'ruinLegion', 'breakerDash', 'golemIntimidate']);
+    expect(b.patterns.find((p) => p.id === 'breakerDash')!.values).toMatchObject({ exposeSec: 2.1, exposeMul: 2.2 });
     expect(b.patterns.filter((p) => p.phase === 2).map((p) => p.id)).toEqual(['crustCrack', 'collapseZone', 'doomFault']);
   });
   it('모든 패턴에 실행 객체가 있다', () => {

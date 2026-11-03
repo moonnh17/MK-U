@@ -121,6 +121,8 @@ export class RunScene extends Phaser.Scene {
   bossControllers = new Map<Enemy, BossController>();
   /** MK 돌진 */
   dashLeft = 0;
+  /** 위압: 남은 이동 불가 시간 */
+  rootLeft = 0;
   dashVel: Vec2 = { x: 0, y: 0 };
 
   aimDir: Vec2 = { x: 1, y: 0 };
@@ -241,6 +243,15 @@ export class RunScene extends Phaser.Scene {
         const body = this.player.body as Phaser.Physics.Arcade.Body;
         body.velocity.x += v.x;
         body.velocity.y += v.y;
+      },
+      playerVel: () => {
+        const v = (this.player.body as Phaser.Physics.Arcade.Body).velocity;
+        return { x: v.x, y: v.y };
+      },
+      playerSanity: () => this.session.player.sanity,
+      rootPlayer: (sec) => {
+        if (this.rootLeft <= 0) this.floatLabel({ x: this.player.x, y: this.player.y - 14 }, this.ctx.t('boss.rooted'), '#ff5a5a');
+        this.rootLeft = Math.max(this.rootLeft, sec);
       },
       spawnMinion: (id, at, maxHp) => this.spawnMinion(id, at, maxHp),
       removeMinion: (e) => {
@@ -428,6 +439,7 @@ export class RunScene extends Phaser.Scene {
     this.skillRt.passiveKey = '';
     this.skillRt.passiveId = null;
     this.dashLeft = 0;
+    this.rootLeft = 0;
     this.aimDir = { x: 1, y: 0 };
     this.combat.fireCooldown = 0;
     this.invuln = 0;
@@ -472,7 +484,7 @@ export class RunScene extends Phaser.Scene {
     if (this.stageFx.intro) return null;
     for (const [e, c] of this.bossControllers) {
       if (e.dead) continue;
-      return { name: this.ctx.t(e.def.nameKey), hp: e.hp, maxHp: e.maxHp, markers: c.def.enrageAt > 0 ? [c.def.enrageAt] : [], color: e.def.color };
+      return { name: this.ctx.t(e.def.nameKey), hp: e.hp, maxHp: e.maxHp, markers: c.def.enrageAt > 0 ? [c.def.enrageAt] : (c.def.unlocks ?? []), color: e.def.color };
     }
     return null;
   }
@@ -552,6 +564,13 @@ export class RunScene extends Phaser.Scene {
     // 패닉: 방향이 뒤집힌다
     if (p.panic && !this.itemRt.first('panicCalm')) frame = { ...frame, move: { x: -frame.move.x, y: -frame.move.y } };
     this.itemRt.update(dt);
+    // 위압: 이동·회피 불가
+    if (this.rootLeft > 0) {
+      this.rootLeft -= dt;
+      const pressed = new Set(frame.pressed);
+      pressed.delete('dodge');
+      frame = { ...frame, move: { x: 0, y: 0 }, pressed };
+    }
     this.condition.updateDodge(dt, frame);
     const speed = d.player.moveSpeed * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus()) * (1 + this.combat.chargeMoveBonus());
     if (this.dashLeft > 0) {
