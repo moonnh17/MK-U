@@ -104,7 +104,8 @@ describe('데이터 검증', () => {
         skill(id).levels.forEach((lv) => expect(lv.values.greatChance, id).toBeGreaterThan(0));
       }
       expect(skill('mkPrototype').sources.punch).toEqual(['physical', 'melee']);
-      expect(skill('mkPrototype').sources.dash).toEqual(['physical', 'melee']);
+      expect(skill('mkPrototype').sources.laser).toEqual(['tech', 'ranged']);
+      expect(skill('mkPrototype').sources.dash).toBeUndefined();
     });
 
     it('카드로 나오는 스킬은 레벨·각성 수치가 채워져 있다', () => {

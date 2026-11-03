@@ -2,15 +2,17 @@
  * MK : 프로토타입 (아크로, 버프). 적이 없어도 쓸 수 있다. 입을 때 변신하고, 시간이 다 되면 해제 동작 뒤 벗는다.
  * 지속시간(버프 태그) 동안 슈트를 입는다: 이동속도 증가, 받는 피해 감소,
  * 사거리 안 가장 가까운 적을 자동 펀치(물리·근접).
- * 각성 'MK : 오버드라이브': 쓸 때 현재 체력 일부를 소모(죽지 않음). 펀치가 주변까지 터지는 폭발 펀치가 되고,
- * 펀치 사거리 밖 적에게는 짧게 돌진한다(돌진에 닿은 적도 피해, 물리·근접).
+ * 입은 동안 스킬을 한 번 더 누르면 조준 방향으로 강력한 레이저를 쏜다(슈트마다 한 번, 기술·원거리).
+ * 각성 'MK : 오버드라이브': 쓸 때 현재 체력 일부를 소모(죽지 않음). 펀치가 주변까지 터지는 폭발 펀치가 된다.
  */
 import type Phaser from 'phaser';
 import type { Enemy } from '../entities/enemy';
 import { skillTags } from '../systems/tags';
 import type { PlayerMods } from '../systems/vitals';
 import { animKey } from '../systems/art';
-import { levelRef, playFx } from './skillFx';
+import { shake } from '../entities/juice';
+import { lineHits } from '../systems/targeting';
+import { levelRef, playFx, stretchFx } from './skillFx';
 import type { SpriteRef } from '../types/data';
 import { nearestEnemy, trimOldest, type BuffView, type SkillCast, type SkillHost, type SkillImpl, type SkillObject } from './host';
 
@@ -18,6 +20,9 @@ const ID = 'mkPrototype';
 /** 이만큼 빠르면 걷는 그림 */
 const MOVING_SPEED = 5;
 const FIST_SEC = 0.1;
+/** 레이저 그림 굵기 (판정 반폭 배) · 사라지는 시간 */
+const LASER_ART_THICK = 4;
+const LASER_FADE_SEC = 0.35;
 const POSE_SEC = 0.25;
 /** 입을 때 작게 시작해 커진다 */
 const MORPH_START_SCALE = 0.7;
@@ -33,10 +38,9 @@ class Suit implements SkillObject {
   /** 해제 동작 남은 시간 (이때는 효과가 없다) */
   private releasing = 0;
   private punchTimer = 0;
-  private dashTimer = 0;
+  /** 이 슈트로 레이저를 이미 쐈다 */
+  private lasered = false;
   private readonly player: Phaser.Physics.Arcade.Sprite;
-  private dashing = 0;
-  private readonly dashHit = new Set<Enemy>();
 
   constructor(
     host: SkillHost,
@@ -133,35 +137,33 @@ class Suit implements SkillObject {
     const p = host.playerPos();
     this.follow(host, dt);
     this.punchTimer -= dt;
-    this.dashTimer -= dt;
-
-    if (this.dashing > 0) {
-      this.dashing -= dt;
-      const tags = skillTags(this.s.def, true, 'dash');
-      for (const e of [...host.enemies()]) {
-        if (this.dashHit.has(e) || Math.hypot(e.sprite.x - p.x, e.sprite.y - p.y) > e.radius + v.fxRadius!) continue;
-        this.dashHit.add(e);
-        host.hit(e, v.dashDamage!, tags);
-      }
-      return true;
-    }
-
     const target = nearestEnemy(host, p, host.area(v.range!));
     if (target && this.punchTimer <= 0) {
       this.punch(host, target);
       this.punchTimer = v.punchIntervalSec!;
-    } else if (!target && this.s.owned.awakened && this.dashTimer <= 0) {
-      const far = nearestEnemy(host, p, v.dashRange!);
-      if (far) {
-        const dx = far.sprite.x - p.x;
-        const dy = far.sprite.y - p.y;
-        const d = Math.hypot(dx, dy) || 1;
-        host.dash({ x: dx / d, y: dy / d }, v.dashSpeed!, v.dashSec!);
-        this.dashing = v.dashSec!;
-        this.pose(host, this.s.def.sprites.moveA!, v.dashSec!);
-        this.dashHit.clear();
-        this.dashTimer = v.dashCooldownSec!;
-      }
+    }
+    return true;
+  }
+
+  /** 입은 동안 다시 누름: 조준 방향 레이저 (슈트마다 한 번). 쐈으면 true */
+  laser(host: SkillHost): boolean {
+    if (this.lasered || this.releasing > 0) return false;
+    this.lasered = true;
+    const v = this.s.values;
+    const origin = { x: this.body.x, y: this.body.y };
+    const dir = host.aimDir();
+    const enemies: Enemy[] = [...host.enemies()];
+    const pos = enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius }));
+    const end = { x: origin.x + dir.x * v.laserLength!, y: origin.y + dir.y * v.laserLength! };
+    this.pose(host, this.art('punch'), POSE_SEC * 2);
+    stretchFx(host.scene, this.s.def.sprites.laser!, origin, end, v.laserHalfWidth! * LASER_ART_THICK, LASER_FADE_SEC);
+    playFx(host.scene, this.s.def.sprites.flash!, origin.x, origin.y, { w: 30 });
+    host.burst(origin, this.s.def.color);
+    shake(host.scene, 'light');
+    const tags = skillTags(this.s.def, this.s.owned.awakened, 'laser');
+    for (const i of lineHits(origin, dir, v.laserLength!, v.laserHalfWidth!, pos)) {
+      playFx(host.scene, this.s.def.sprites.flash!, pos[i]!.x, pos[i]!.y);
+      host.hit(enemies[i]!, v.laserDamage!, tags);
     }
     return true;
   }
@@ -210,6 +212,10 @@ class Suit implements SkillObject {
 }
 
 export const mkPrototype: SkillImpl = {
+  recast(host) {
+    const suit = host.objects().find((o): o is Suit => o instanceof Suit);
+    return suit ? suit.laser(host) : false;
+  },
   cast(host, s) {
     const v = s.values;
     if (s.owned.awakened) host.payHp(v.hpCost!);

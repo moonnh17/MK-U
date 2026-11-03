@@ -170,6 +170,8 @@
     "ghostStepDeg": 10
   },
   "turretRecoil": { "sec": 0.16, "px": 3.5, "bigPx": 1.5, "squash": 0.18 },
+  "bulletRim": { "player": "#ffd23f", "enemy": "#ff2a2a", "strength": 3, "distance": 4 },
+  "skillBurst": { "particles": [16, 24], "particleSpeed": [60, 170], "particleLifeSec": 0.4, "particleSize": 2, "ringRadiusPx": 34 },
   "shieldSpawn": {
     "particles": [26, 34],
     "particleSpeed": [40, 120],

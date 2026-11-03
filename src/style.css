@@ -1682,7 +1682,8 @@ body {
 
 /* 캐릭터 정보창 */
 #inventory-window {
-  justify-content: flex-start;
+  /* 화면보다 짧으면 가운데, 길면 위에서부터 스크롤 */
+  justify-content: safe center;
   background: rgba(5, 8, 12, 0.95);
   overflow-y: auto;
 }

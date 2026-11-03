@@ -218,6 +218,7 @@ export function validateGameData(d: GameData): Errors {
   if (!(lt.combatDrop.chance >= 0 && lt.combatDrop.chance <= 1)) errors.push('loot.combatDrop.chance: 0~1');
   checkWeights('loot.combatDrop.weights', lt.combatDrop.weights);
   checkWeights('loot.startChest', lt.startChest);
+  if (!(lt.bossWeaponChance >= 0 && lt.bossWeaponChance <= 1)) errors.push('loot.bossWeaponChance: 0~1');
   checkPositive(errors, 'loot.merchant.count', lt.merchant.count);
   checkWeights('loot.merchant.weights', lt.merchant.weights);
   for (const g of GRADE_IDS) checkPositive(errors, `loot.merchant.prices.${g}`, lt.merchant.prices[g]);

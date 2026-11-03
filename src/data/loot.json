@@ -1,6 +1,7 @@
 {
   "mythicChance": 0.001,
   "uniqueWeaponFallback": "legendary",
+  "bossWeaponChance": 0.2,
   "startChest": { "common": 80, "rare": 20 },
   "weaponChest": {
     "2": { "rare": 91.5, "legendary": 8, "unique": 0.5 },

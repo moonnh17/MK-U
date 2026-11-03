@@ -121,6 +121,9 @@ export class RunScene extends Phaser.Scene {
   bossControllers = new Map<Enemy, BossController>();
   /** MK 돌진 */
   dashLeft = 0;
+  /** 탄을 그리는 층 (테두리 빛) */
+  playerBulletLayer!: Phaser.GameObjects.Layer;
+  enemyBulletLayer!: Phaser.GameObjects.Layer;
   /** 위압: 남은 이동 불가 시간 */
   rootLeft = 0;
   dashVel: Vec2 = { x: 0, y: 0 };
@@ -224,7 +227,8 @@ export class RunScene extends Phaser.Scene {
       playerPos: () => ({ x: this.player.x, y: this.player.y }),
       playerRadius: d.player.size / 2,
       hurtPlayer: (amount, attacker, mental) => this.hurtPlayer(amount * this.enemyDamageMul(), attacker ?? null, mental === undefined ? undefined : mental * this.enemyDamageMul()),
-      fireEnemyBullet: (from, angle, speed, range, damage, refractable, mental) => this.fireEnemyBullet(from, angle, speed, range, damage * this.enemyDamageMul(), refractable, 0, (mental ?? 0) * this.enemyDamageMul()),
+      fireEnemyBullet: (from, angle, speed, range, damage, refractable, mental, sprite, tint) =>
+        this.fireEnemyBullet(from, angle, speed, range, damage * this.enemyDamageMul(), refractable, 0, (mental ?? 0) * this.enemyDamageMul(), sprite, tint),
       addHazard: (h) => this.hazards.push(h),
       linkWindup: (e, attackId) => this.linkWindup(e, attackId),
       rng: this.rng,
@@ -269,6 +273,12 @@ export class RunScene extends Phaser.Scene {
     this.enemyGroup = this.physics.add.group();
     this.bullets = this.physics.add.group();
     this.enemyBullets = this.physics.add.group();
+    // 탄 테두리: 층마다 한 번만 빛 테두리를 입힌다 (탄마다 효과를 거는 것보다 가볍다)
+    const rim = d.juice.bulletRim;
+    this.playerBulletLayer = this.add.layer().setDepth(5);
+    this.playerBulletLayer.postFX?.addGlow(hexColor(rim.player), rim.strength, 0, false, 0.1, rim.distance);
+    this.enemyBulletLayer = this.add.layer().setDepth(5);
+    this.enemyBulletLayer.postFX?.addGlow(hexColor(rim.enemy), rim.strength, 0, false, 0.1, rim.distance);
 
     this.world.buildWorld();
     this.stageFx.showTutorial();
@@ -410,7 +420,8 @@ export class RunScene extends Phaser.Scene {
     this.loot.vendings = [];
     this.loot.potions = [];
     this.loot.interactPrompt = null;
-    this.loot.itemGets = [];
+    // 이동 화면에서 고른 아이템(세트 합성 포함)의 획득 카드는 다음 스테이지에서
+    this.loot.itemGets = [...(this.initData.itemGets ?? [])];
     this.cores = [];
     this.loot.chests = [];
     this.loot.stands = [];
@@ -996,6 +1007,8 @@ export class RunScene extends Phaser.Scene {
       for (const o of [...this.enemies]) {
         if (Math.hypot(o.sprite.x - x, o.sprite.y - y) <= c.burstRadius + o.radius) this.combat.hit(o, c.burstDamage, c.burstTags);
       }
+      const b = c.bullets;
+      if (b) for (let k = 0; k < b.count; k++) this.combat.fireBullet({ x, y }, (k / b.count) * Math.PI * 2, b.speed, b.range, b.damage, c.burstTags, 'magiCorruption', { pierce: 0, crit: 0, sprite: b.sprite });
     }
   }
 
@@ -1183,9 +1196,11 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 적 탄. refractable=false면 굴절·탄 베기 불가(보스 대형 레이저 등). homing: 플레이어 쪽으로 휘는 속도(rad/s, 유도 미사일) */
-  fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, homing = 0, mental = 0, sprite?: SpriteRef): void {
+  fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, homing = 0, mental = 0, sprite?: SpriteRef, tint?: string): void {
     const ep = this.ctx.data.enemies.projectile;
     const b = this.enemyBullets.create(from.x, from.y, sprite?.spriteKey ?? ep.spriteKey) as Phaser.Physics.Arcade.Sprite;
+    this.enemyBulletLayer.add(b);
+    if (tint) b.setTint(hexColor(tint));
     fitArt(this.ctx.data, b, ep.size, ep.height ?? ep.size);
     // 보스 전용 탄: 날아가는 쪽을 보고 프레임이 돈다
     if (sprite) {
@@ -1353,7 +1368,7 @@ export class RunScene extends Phaser.Scene {
       this.dropSuit();
       this.stageFx.warpOut(() =>
         this.progression.queueOffers([{ kind: afterStage, boss: false }], () => {
-          const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [], warpIn: true };
+          const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [], warpIn: true, itemGets: this.loot.itemGets };
           this.scene.restart(data);
         }),
       );

@@ -10,7 +10,7 @@ import type { CorruptionState } from '../systems/acro';
 import { effectiveRank, eliteMods, type EliteMods } from '../systems/elites';
 import { aimLocked, chainWindup, forceWindup, initialAi, keepDistanceStep, stepAi, type AiEvent, type AiState } from '../systems/enemyAi';
 import type { BleedState } from '../systems/tags';
-import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank } from '../types/data';
+import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank, SpriteRef } from '../types/data';
 import { Beams, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
 import { animateArt, fitArt } from './art';
 import { getContext } from '../core/context';
@@ -18,7 +18,8 @@ import { getContext } from '../core/context';
 /** 적이 전투 씬에 바라는 것 (원거리 탄·장판·전술 연계·밧줄) */
 export interface EnemyHost extends HazardHost {
   readonly rng: Rng;
-  fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, mental?: number): void;
+  /** sprite·tint: 전용 탄 그림 (유령 사수 붉은 화살) */
+  fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, mental?: number, sprite?: SpriteRef, tint?: string): void;
   addHazard(h: Hazard): void;
   /** 전술 연계: 이 적이 조준을 시작했다 (같은 방의 동료도 함께 조준) */
   linkWindup(e: Enemy, attackId: string): void;
@@ -434,7 +435,7 @@ export class Enemy {
   private fireShot(a: EnemyAttackDef, host: EnemyHost): void {
     const p = host.playerPos();
     const from = { x: this.sprite.x, y: this.sprite.y };
-    host.fireEnemyBullet(from, Math.atan2(p.y - from.y, p.x - from.x), a.speed!, a.range!, a.damage * this.damageMul, true, a.damage * this.damageMul * (this.def.mentalRatio ?? 0));
+    host.fireEnemyBullet(from, Math.atan2(p.y - from.y, p.x - from.x), a.speed!, a.range!, a.damage * this.damageMul, true, a.damage * this.damageMul * (this.def.mentalRatio ?? 0), a.shot, a.shotTint);
     this.shotsFired++;
     this.shotTimer = a.shotGapSec ?? 0;
   }

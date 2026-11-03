@@ -1,6 +1,6 @@
 /**
  * 마기 변질 (아크로, 마기·확률·원거리). 전방 부채꼴로 변질을 주입한다.
- * 변질된 적은 지속시간 동안 받는 피해가 늘고, 변질된 채 죽으면 폭발한다.
+ * 변질된 적은 지속시간 동안 받는 피해가 늘고, 변질된 채 죽으면 폭발하며 사방으로 탄을 쏟는다(레벨마다 늘어남). 보스는 변질되지 않는다.
  * 대성공(확률 태그, 상한 60%)이면 받는 피해 증가가 2배.
  * 각성 '적색 반역': 변질된 적이 확률(실험 성공, 상한 98%)로 반역 개체가 되어 적과 싸운다(보스 불가).
  * 대성공이면 그 시전의 반역 개체가 더 강하고 오래가는 지배 개체가 된다. 반역 개체화는 처치로 친다.
@@ -114,6 +114,7 @@ export const magiCorruption: SkillImpl = {
         burstRadius: host.area(v.burstRadius!),
         burstTags: tags,
         fx: { mark: awakened ? sp.markA! : levelRef(s, 'mark'), burst: sp.blast!, shards: sp.shard, end: sp.end },
+        bullets: { count: v.burstBullets!, damage: v.burstBulletDamage!, speed: v.burstBulletSpeed!, range: v.burstBulletRange!, sprite: sp.bullet },
       });
       if (!awakened || !canRebel(e.rank)) continue;
       if (!rollChance(host.rng, host.chance(v.rebelChance!, 'success', tags))) continue;

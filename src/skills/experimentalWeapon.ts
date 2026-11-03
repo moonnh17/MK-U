@@ -10,6 +10,7 @@ import { skillTags } from '../systems/tags';
 import { chainTargets } from '../systems/targeting';
 import type { SpriteRef } from '../types/data';
 import { Explosive } from './explosive';
+import { shake } from '../entities/juice';
 import { playFx, stretchFx } from './skillFx';
 import { floatText, nearestEnemy, type SkillCast, type SkillHost, type SkillImpl } from './host';
 
@@ -65,6 +66,7 @@ const RESULTS: Record<string, (host: SkillHost, s: SkillCast, mult: number) => v
     for (const i of chainTargets(from, pos, v.dischargeCount!, v.dischargeRange!, new Set())) {
       stretchFx(host.scene, art(s, 'laser'), at, pos[i]!, DISCHARGE_THICK);
       playFx(host.scene, s.def.sprites.flash!, pos[i]!.x, pos[i]!.y);
+      host.burst(pos[i]!, s.def.color);
       host.hit(enemies[i]!, v.dischargeDamage! * mult, tags);
       at = pos[i]!;
     }
@@ -75,6 +77,7 @@ const RESULTS: Record<string, (host: SkillHost, s: SkillCast, mult: number) => v
     const r = host.area(v.collapseRadius!);
     playFx(host.scene, art(s, 'pull'), c.x, c.y, { w: r * 3, depth: 5 });
     playFx(host.scene, art(s, 'slice'), c.x, c.y, { w: r * 2.6 });
+    host.burst(c, s.def.color);
     const tags = skillTags(s.def, s.owned.awakened, 'collapse');
     for (const e of [...host.enemies()]) {
       if (Math.hypot(e.sprite.x - c.x, e.sprite.y - c.y) <= r + e.radius) host.hit(e, v.collapseDamage! * mult, tags);
@@ -95,6 +98,10 @@ export const experimentalWeapon: SkillImpl = {
       floatText(host, p.x, p.y - 20, host.ctx.t('skillMsg.greatSuccess'), '#ffd23f');
       host.greatSuccess();
     }
+    // 발동 순간: 몸에서 빛 입자가 터지고 화면이 흔들린다
+    host.burst(p, s.def.color);
+    playFx(host.scene, s.def.sprites.flash!, p.x, p.y, { w: 34 });
+    shake(host.scene, great ? 'medium' : 'light');
     picks.forEach((id, i) => {
       floatText(host, p.x, p.y - 10 + i * 9, host.ctx.t(`skill.experimentalWeapon.result.${id}`), s.def.color);
       RESULTS[id]?.(host, s, mult);

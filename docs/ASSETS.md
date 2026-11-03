@@ -188,7 +188,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (161)
+## skill (162)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -268,7 +268,7 @@
 | `skill_corrupt_mark2` | 불안정 실험체 (aura2) 외 1곳 | 12×12 | center | #9ad94a | mku/skill_corrupt_mark2.png (1프레임) |
 | `skill_corrupt_mark3` | 불안정 실험체 (aura3) 외 1곳 | 12×12 | center | #9ad94a | mku/skill_corrupt_mark3.png (1프레임) |
 | `skill_acro_spawn` | 불안정 실험체 (spawn) 외 1곳 | 13×13 | center | #9ad94a | mku/skill_acro_spawn.png (4프레임) |
-| `skill_acro_bullet` | 불안정 실험체 (bullet) 외 1곳 | 7×7 | center | #9ad94a | mku/skill_acro_bullet.png (3프레임) |
+| `skill_acro_bullet` | 불안정 실험체 (bullet) 외 2곳 | 7×7 | center | #9ad94a | mku/skill_acro_bullet.png (3프레임) |
 | `skill_acro_shard` | 불안정 실험체 (shard) 외 2곳 | 15×15 | center | #9ad94a | mku/skill_acro_shard.png (4프레임) |
 | `skill_acro_blast` | 불안정 실험체 (blast) 외 4곳 | 20×20 | center | #9ad94a | mku/skill_acro_blast.png (7프레임) |
 | `skill_acro_flash` | 불안정 실험체 (flash) 외 4곳 | 8×8 | center | #9ad94a | mku/skill_acro_flash.png (3프레임) |
@@ -327,6 +327,7 @@
 | `skill_mkA_blast` | MK : 프로토타입 (blastPunchA) | 20×20 | center | #d9783b | mku/skill_mkA_blast.png (6프레임) |
 | `skill_mkA_drain` | MK : 프로토타입 (drainA) | 20×20 | center | #d9783b | mku/skill_mkA_drain.png (6프레임) |
 | `skill_mkA_release` | MK : 프로토타입 (releaseA) | 20×20 | center | #d9783b | mku/skill_mkA_release.png (6프레임) |
+| `fx_kaiser_laser` | MK : 프로토타입 (laser) 외 1곳 | 60×60 | center | #d9783b | mku/fx_kaiser_laser.png (3프레임) |
 | `skill_reduction_smoke` | 환원주의자 (smoke) | 12×12 | center | #5ad95a | mku/skill_reduction_smoke.png (1프레임) |
 | `skill_reduction_unit` | 환원주의자 (unit) | 14×14 | center | #5ad95a | mku/skill_reduction_unit.png (1프레임) |
 | `ult_first_law` | 열역학 제1법칙 (particle) | 8×8 | center | #ff9a3c | mku/ult_first_law.png (1프레임) |
@@ -447,7 +448,7 @@
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
-## fx (79)
+## fx (78)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -513,7 +514,6 @@
 | `fx_kaiser_punch` | 마기카이저 (sectorHit) | 50×50 | center | #ff2a2a | mku/fx_kaiser_punch.png (4프레임) |
 | `fx_kaiser_impact` | 마기카이저 (blastHit) | 35×35 | center | #ff2a2a | mku/fx_kaiser_impact.png (4프레임) |
 | `fx_kaiser_lock` | 마기카이저 (blastWarn) | 20×20 | center | #ff2a2a | mku/fx_kaiser_lock.png (4프레임) |
-| `fx_kaiser_laser` | 마기카이저 (beam) | 60×60 | center | #ff2a2a | mku/fx_kaiser_laser.png (3프레임) |
 | `fx_kaiser_laser_warn` | 마기카이저 (beamWarn) | 60×60 | center | #ff2a2a | mku/fx_kaiser_laser_warn.png (7프레임) |
 | `fx_kaiser_sweep` | 마기카이저 (spinLaser.beam) 외 1곳 | 60×60 | center | #ff2a2a | mku/fx_kaiser_sweep.png (4프레임) |
 | `fx_kaiser_sweep_warn` | 마기카이저 (spinLaser.beamWarn) 외 1곳 | 60×60 | center | #ff2a2a | mku/fx_kaiser_sweep_warn.png (5프레임) |

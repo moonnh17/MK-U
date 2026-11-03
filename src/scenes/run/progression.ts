@@ -284,9 +284,12 @@ export class Progression {
       if (weights) this.run.loot.addChest('weapon', c.x - 40, c.y, weights);
       // 보스 전용 아이템 확정 (무기 상자와 별도)
       if (bossItem) this.run.loot.addChest('item', c.x + 40, c.y, {}, bossItem.id);
-      // 보스 전용 무기 확정
+      // 보스 전용 무기: 확률로, 아니면 다른 무기
       const bossWeapon = d.weapons.weapons.find((w) => w.bossId === bossId);
-      if (bossWeapon) this.run.loot.addChest('weapon', c.x + 40, c.y, {}, bossWeapon.id);
+      if (bossWeapon && weights) {
+        const unique = Rng.derive(this.run.ctx.config.seed, `boss-weapon-${stage.chapter}-${stage.stage}`).chance(d.loot.bossWeaponChance);
+        this.run.loot.addChest('weapon', c.x + 40, c.y + (bossItem ? 28 : 0), weights, unique ? bossWeapon.id : undefined);
+      }
     };
     if (last && this.run.session.player.advancement === null) this.advance(reward);
     else reward();

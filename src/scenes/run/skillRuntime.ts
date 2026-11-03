@@ -54,6 +54,7 @@ export class SkillRuntime {
       rng: this.run.rng,
       playerPos: () => ({ x: this.run.player.x, y: this.run.player.y }),
       playerSprite: () => this.run.player,
+      burst: (at, color) => this.run.juice.colorBurst(at, color, this.run.ctx.data.juice.skillBurst),
       aimDir: () => this.run.aimDir,
       enemies: () => this.run.enemies.filter((e) => !e.dead),
       area: (r) => this.area(r),
@@ -82,7 +83,8 @@ export class SkillRuntime {
         Math.min(1, skillChance(base, capKey, tags, ctx.data.tags) + (capKey === 'greatSuccess' ? this.run.itemRt.greatSuccess().bonus : 0)),
       noGreatFailure: () => this.run.itemRt.greatSuccess().noFailure,
       corrupt: (e, state) => {
-        if (!e.dead) e.corruption = applyCorruption(e.corruption, state);
+        // 보스에게는 변질이 걸리지 않는다
+        if (!e.dead && e.rank !== 'boss' && e.rank !== 'hiddenBoss') e.corruption = applyCorruption(e.corruption, state);
       },
       defeat: (e) => {
         if (e.dead) return;
@@ -245,12 +247,17 @@ export class SkillRuntime {
   castSlot(i: number): void {
     const p = this.run.session.player;
     const id = p.loadout.active[i];
-    if (!id || cooldownLeft(p.cooldowns, id) > 0) return;
+    if (!id) return;
     const impl = skillImpl(id);
     const owned = p.loadout.owned[id];
     if (!impl || !owned) return;
     const def = findSkill(this.run.ctx.data.skills, id);
     const sv = skillValues(def, owned);
+    if (impl.recast?.(this.hostFor(id), { def, owned, values: sv.values })) {
+      sfx('skill');
+      return;
+    }
+    if (cooldownLeft(p.cooldowns, id) > 0) return;
     if (!this.skillUsable(def, owned.awakened, sv.values)) {
       this.run.toastThrottled(this.run.ctx.t('skillMsg.noTarget'));
       return;

@@ -415,6 +415,7 @@ export class WeaponCombat {
   ): void {
     const proj = this.run.ctx.data.weapons.projectile;
     const b = this.run.bullets.create(from.x, from.y, opts.sprite?.spriteKey ?? proj.spriteKey) as Phaser.Physics.Arcade.Sprite;
+    this.run.playerBulletLayer.add(b);
     // 스킬 전용 탄: 날아가는 쪽을 보고 프레임이 돈다
     if (opts.sprite) {
       b.setRotation(angle);
@@ -474,7 +475,7 @@ export class WeaponCombat {
     const radMul = (w.charge ? 1 + (w.charge.radiusMul - 1) * chargeRatio : 1) * (1 + this.run.itemRt.sums.area) * (big ? big.radiusMul : 1);
     const tags: readonly TagId[] = sig?.kind === 'space' ? [...w.tags, 'space'] : w.tags;
     if (big) {
-      shake(this.run, 'medium');
+      shake(this.run, 'light');
       this.run.floatLabel(origin, this.run.ctx.t('weapon.sig.bigSmash'), w.color);
     }
     const p = w.pattern;

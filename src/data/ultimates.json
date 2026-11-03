@@ -56,57 +56,202 @@
       "shortKey": "ultimate.singularity.short",
       "descKey": "ultimate.singularity.desc",
       "school": "acro",
-      "tags": ["tech", "chance", "ranged"],
+      "tags": [
+        "tech",
+        "chance",
+        "ranged"
+      ],
       "sources": {
-        "collapse": ["tech", "chance", "ranged", "space"],
-        "corrupt": ["tech", "chance", "ranged"],
-        "overload": ["tech", "chance", "ranged"],
-        "failure": ["tech", "chance", "ranged"],
-        "replay": ["tech", "chance", "ranged"],
-        "replayGreat": ["tech", "chance", "ranged", "space"]
+        "collapse": [
+          "tech",
+          "chance",
+          "ranged",
+          "space"
+        ],
+        "corrupt": [
+          "tech",
+          "chance",
+          "ranged"
+        ],
+        "overload": [
+          "tech",
+          "chance",
+          "ranged"
+        ],
+        "failure": [
+          "tech",
+          "chance",
+          "ranged"
+        ],
+        "replay": [
+          "tech",
+          "chance",
+          "ranged"
+        ],
+        "replayGreat": [
+          "tech",
+          "chance",
+          "ranged",
+          "space"
+        ]
       },
       "gaugeMax": 100,
-      "gauge": { "kind": "damage", "skills": ["unstableSubject", "magiCorruption", "experimentalWeapon"], "perDamage": 0.15, "perGreatSuccess": 5 },
+      "gauge": {
+        "kind": "damage",
+        "skills": [
+          "unstableSubject",
+          "magiCorruption",
+          "experimentalWeapon"
+        ],
+        "perDamage": 0.15,
+        "perGreatSuccess": 5
+      },
       "values": {
-        "range": 160, "pullRadius": 70, "pullSec": 1.0, "pullSpeed": 140,
-        "greatChance": 0.1, "greatMultiplier": 1.5,
-        "collapseWeight": 2, "proliferateWeight": 2, "corruptWeight": 2, "overloadWeight": 2, "failureWeight": 1,
-        "collapseRadius": 50, "collapseDamage": 40,
+        "range": 224,
+        "pullRadius": 98,
+        "pullSec": 1,
+        "pullSpeed": 140,
+        "greatChance": 0.1,
+        "greatMultiplier": 1.5,
+        "collapseWeight": 2,
+        "proliferateWeight": 2,
+        "corruptWeight": 2,
+        "overloadWeight": 2,
+        "failureWeight": 1,
+        "collapseRadius": 70,
+        "collapseDamage": 40,
         "proliferateCount": 3,
-        "corruptSec": 6, "corruptVulnerability": 0.35, "corruptBurstDamage": 12, "corruptBurstRadius": 26,
-        "overloadRadius": 70, "overloadDamage": 70,
-        "failureRadius": 70, "failureDamage": 35, "failureSelfDamage": 8
+        "corruptSec": 6,
+        "corruptVulnerability": 0.35,
+        "corruptBurstDamage": 12,
+        "corruptBurstRadius": 36,
+        "overloadRadius": 98,
+        "overloadDamage": 70,
+        "failureRadius": 98,
+        "failureDamage": 35,
+        "failureSelfDamage": 8
       },
       "awakening": {
         "requiredItem": "atrosCodex",
         "nameKey": "ultimate.singularity.awakened",
         "shortKey": "ultimate.singularity.awakened.short",
         "descKey": "ultimate.singularity.awakened.desc",
-        "tags": ["tech", "chance", "ranged"],
-        "values": { "observeSec": 5, "observeRadius": 90, "partialRatio": 0.3, "majorRatio": 0.6, "fullRatio": 1.0, "successChance": 0.5 }
+        "tags": [
+          "tech",
+          "chance",
+          "ranged"
+        ],
+        "values": {
+          "observeSec": 5,
+          "observeRadius": 126,
+          "partialRatio": 0.3,
+          "majorRatio": 0.6,
+          "fullRatio": 1,
+          "successChance": 0.5
+        }
       },
       "color": "#ff3a4a",
       "sprites": {
-        "core": { "spriteKey": "ult_singularity", "color": "#ff3a4a", "size": 10 },
-        "collapse": { "spriteKey": "ult_sing_collapse", "color": "#ff3a4a", "size": 30 },
-        "collapseFlash": { "spriteKey": "ult_sing_flash", "color": "#ff3a4a", "size": 20 },
-        "collapseRift": { "spriteKey": "ult_sing_rift", "color": "#ff3a4a", "size": 20 },
-        "warning": { "spriteKey": "ult_sing_warning", "color": "#ff3a4a", "size": 12 },
-        "spawn": { "spriteKey": "skill_acro_spawn", "color": "#ff3a4a", "size": 13 },
-        "convert": { "spriteKey": "ult_sing_convert", "color": "#ff3a4a", "size": 25 },
-        "overload": { "spriteKey": "ult_sing_overload", "color": "#ff3a4a", "size": 30 },
-        "failure": { "spriteKey": "ult_sing_failure", "color": "#ff3a4a", "size": 25 },
-        "blast": { "spriteKey": "skill_acro_blast", "color": "#ff3a4a", "size": 20 },
-        "observeStart": { "spriteKey": "ult_paradox_start", "color": "#ff3a4a", "size": 25 },
-        "record": { "spriteKey": "ult_paradox_record", "color": "#ff3a4a", "size": 20 },
-        "mark": { "spriteKey": "ult_paradox_mark", "color": "#ff3a4a", "size": 12 },
-        "pull": { "spriteKey": "ult_paradox_pull", "color": "#ff3a4a", "size": 30 },
-        "replay1": { "spriteKey": "ult_paradox_replay1", "color": "#ff3a4a", "size": 15 },
-        "replay2": { "spriteKey": "ult_paradox_replay2", "color": "#ff3a4a", "size": 17 },
-        "replay3": { "spriteKey": "ult_paradox_replay3", "color": "#ff3a4a", "size": 19 },
-        "crumble": { "spriteKey": "ult_paradox_crumble", "color": "#ff3a4a", "size": 22 },
-        "send": { "spriteKey": "ult_paradox_send", "color": "#ff3a4a", "size": 17 },
-        "observeEnd": { "spriteKey": "ult_paradox_end", "color": "#ff3a4a", "size": 30 }
+        "core": {
+          "spriteKey": "ult_singularity",
+          "color": "#ff3a4a",
+          "size": 10
+        },
+        "collapse": {
+          "spriteKey": "ult_sing_collapse",
+          "color": "#ff3a4a",
+          "size": 30
+        },
+        "collapseFlash": {
+          "spriteKey": "ult_sing_flash",
+          "color": "#ff3a4a",
+          "size": 20
+        },
+        "collapseRift": {
+          "spriteKey": "ult_sing_rift",
+          "color": "#ff3a4a",
+          "size": 20
+        },
+        "warning": {
+          "spriteKey": "ult_sing_warning",
+          "color": "#ff3a4a",
+          "size": 12
+        },
+        "spawn": {
+          "spriteKey": "skill_acro_spawn",
+          "color": "#ff3a4a",
+          "size": 13
+        },
+        "convert": {
+          "spriteKey": "ult_sing_convert",
+          "color": "#ff3a4a",
+          "size": 25
+        },
+        "overload": {
+          "spriteKey": "ult_sing_overload",
+          "color": "#ff3a4a",
+          "size": 30
+        },
+        "failure": {
+          "spriteKey": "ult_sing_failure",
+          "color": "#ff3a4a",
+          "size": 25
+        },
+        "blast": {
+          "spriteKey": "skill_acro_blast",
+          "color": "#ff3a4a",
+          "size": 20
+        },
+        "observeStart": {
+          "spriteKey": "ult_paradox_start",
+          "color": "#ff3a4a",
+          "size": 25
+        },
+        "record": {
+          "spriteKey": "ult_paradox_record",
+          "color": "#ff3a4a",
+          "size": 20
+        },
+        "mark": {
+          "spriteKey": "ult_paradox_mark",
+          "color": "#ff3a4a",
+          "size": 12
+        },
+        "pull": {
+          "spriteKey": "ult_paradox_pull",
+          "color": "#ff3a4a",
+          "size": 30
+        },
+        "replay1": {
+          "spriteKey": "ult_paradox_replay1",
+          "color": "#ff3a4a",
+          "size": 15
+        },
+        "replay2": {
+          "spriteKey": "ult_paradox_replay2",
+          "color": "#ff3a4a",
+          "size": 17
+        },
+        "replay3": {
+          "spriteKey": "ult_paradox_replay3",
+          "color": "#ff3a4a",
+          "size": 19
+        },
+        "crumble": {
+          "spriteKey": "ult_paradox_crumble",
+          "color": "#ff3a4a",
+          "size": 22
+        },
+        "send": {
+          "spriteKey": "ult_paradox_send",
+          "color": "#ff3a4a",
+          "size": 17
+        },
+        "observeEnd": {
+          "spriteKey": "ult_paradox_end",
+          "color": "#ff3a4a",
+          "size": 30
+        }
       }
     }
   ]

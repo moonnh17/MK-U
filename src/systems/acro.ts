@@ -38,6 +38,8 @@ export interface CorruptionState {
   burstRadius: number;
   /** 폭발 공격의 source 태그 */
   burstTags: readonly TagId[];
+  /** 죽을 때 사방으로 쏟는 탄 (플레이어 쪽 탄) */
+  bullets?: { count: number; damage: number; speed: number; range: number; sprite?: SpriteRef };
   /** 표식(유지) · 폭발 · 파편 · 풀릴 때 그림 */
   fx?: { mark: SpriteRef; burst: SpriteRef; shards?: SpriteRef; end?: SpriteRef };
 }
@@ -62,6 +64,7 @@ export function applyCorruption(prev: CorruptionState | null, next: CorruptionSt
     burstRadius: Math.max(prev.burstRadius, next.burstRadius),
     burstTags: next.burstTags,
     fx: next.fx ?? prev.fx,
+    bullets: next.bullets ?? prev.bullets,
   };
 }
 

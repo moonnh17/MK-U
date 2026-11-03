@@ -67,6 +67,8 @@ export interface SkillHost {
   payHp(ratio: number): void;
   /** 플레이어 돌진: sec 동안 입력 대신 dir 방향으로 speed로 움직인다(벽에는 막힘) */
   dash(dir: Vec2, speed: number, sec: number): void;
+  /** 빛 입자가 사방으로 터지는 연출 */
+  burst(at: Vec2, color: string): void;
   /** 짧은 이펙트를 fxSec 뒤에 지운다 */
   fx(obj: Phaser.GameObjects.GameObject, sec?: number): void;
   /** 색 사각형 텍스처 스프라이트 */
@@ -113,6 +115,8 @@ export interface SkillCast {
 export interface SkillImpl {
   /** 발동. false면 발동하지 않은 것(쿨타임이 돌지 않음) */
   cast(host: SkillHost, s: SkillCast): boolean;
+  /** 이미 켜진 효과가 있을 때 다시 누름 (쿨타임과 상관없이 먼저 묻는다). 처리했으면 true */
+  recast?(host: SkillHost, s: SkillCast): boolean;
 }
 
 /** 패시브: 장착되면 한 번 불려 상시 오브젝트(드론 등)를 깐다. 해제·레벨 변경 시 그 오브젝트를 치우고 다시 부른다 */

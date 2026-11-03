@@ -66,7 +66,8 @@
       "energyOrbs": [1, 2], "coins": [1, 2], "keepDistance": 100,
       "attacks": [
         { "id": "arrow", "kind": "burst", "triggerRange": 180, "windupSec": 0.7, "actSec": 0.05, "recoverSec": 0.4, "cooldownSec": 2.4, "firstDelayJitterSec": 1.5,
-          "damage": 6, "shots": 1, "shotGapSec": 0, "speed": 140, "range": 240 }
+          "damage": 6, "shots": 1, "shotGapSec": 0, "speed": 140, "range": 240,
+          "shot": { "spriteKey": "projectile_arrow", "color": "#ff3a3a", "size": 3 }, "shotTint": "#ff3a3a" }
       ],
       "spriteKey": "enemy_ghost_shooter", "color": "#c0303a", "size": 11
     },

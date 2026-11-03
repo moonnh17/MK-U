@@ -306,37 +306,175 @@
       "nameKey": "skill.magiCorruption",
       "shortKey": "skill.magiCorruption.short",
       "descKey": "skill.magiCorruption.desc",
-      "tags": ["magic", "chance", "ranged"],
-      "sources": { "corruption": ["magic", "chance", "ranged"] },
+      "tags": [
+        "magic",
+        "chance",
+        "ranged"
+      ],
+      "sources": {
+        "corruption": [
+          "magic",
+          "chance",
+          "ranged"
+        ]
+      },
       "levels": [
-        { "cooldownSec": 8, "values": { "damage": 6, "range": 70, "arcDeg": 90, "durationSec": 5, "vulnerability": 0.25, "burstDamage": 8, "burstRadius": 22, "greatChance": 0.1, "greatVulnerabilityMultiplier": 2 } },
-        { "cooldownSec": 7, "values": { "damage": 9.5, "range": 75, "arcDeg": 90, "durationSec": 5, "vulnerability": 0.3, "burstDamage": 12, "burstRadius": 24, "greatChance": 0.1, "greatVulnerabilityMultiplier": 2 } },
-        { "cooldownSec": 6, "values": { "damage": 14, "range": 80, "arcDeg": 100, "durationSec": 6, "vulnerability": 0.35, "burstDamage": 16, "burstRadius": 26, "greatChance": 0.1, "greatVulnerabilityMultiplier": 2 } }
+        {
+          "cooldownSec": 8,
+          "values": {
+            "damage": 6,
+            "range": 115,
+            "arcDeg": 90,
+            "durationSec": 5,
+            "vulnerability": 0.25,
+            "burstDamage": 8,
+            "burstRadius": 30,
+            "greatChance": 0.1,
+            "greatVulnerabilityMultiplier": 2,
+            "burstBullets": 6,
+            "burstBulletDamage": 4,
+            "burstBulletSpeed": 170,
+            "burstBulletRange": 150
+          }
+        },
+        {
+          "cooldownSec": 7,
+          "values": {
+            "damage": 9.5,
+            "range": 125,
+            "arcDeg": 90,
+            "durationSec": 5,
+            "vulnerability": 0.3,
+            "burstDamage": 12,
+            "burstRadius": 32,
+            "greatChance": 0.1,
+            "greatVulnerabilityMultiplier": 2,
+            "burstBullets": 9,
+            "burstBulletDamage": 6,
+            "burstBulletSpeed": 170,
+            "burstBulletRange": 150
+          }
+        },
+        {
+          "cooldownSec": 6,
+          "values": {
+            "damage": 14,
+            "range": 135,
+            "arcDeg": 100,
+            "durationSec": 6,
+            "vulnerability": 0.35,
+            "burstDamage": 16,
+            "burstRadius": 34,
+            "greatChance": 0.1,
+            "greatVulnerabilityMultiplier": 2,
+            "burstBullets": 12,
+            "burstBulletDamage": 8,
+            "burstBulletSpeed": 170,
+            "burstBulletRange": 150
+          }
+        }
       ],
       "awakening": {
         "nameKey": "skill.magiCorruption.awakened",
         "descKey": "skill.magiCorruption.awakened.desc",
         "requiredItem": "forbiddenVirus",
-        "tags": ["magic", "chance", "ranged"],
+        "tags": [
+          "magic",
+          "chance",
+          "ranged"
+        ],
         "cooldownSec": 6,
-        "values": { "damage": 16, "range": 85, "arcDeg": 110, "rebelChance": 0.35, "rebelSec": 8, "rebelDamage": 8, "rebelIntervalSec": 0.6, "dominateSec": 14, "dominateDamageMultiplier": 2 }
+        "values": {
+          "damage": 16,
+          "range": 145,
+          "arcDeg": 110,
+          "rebelChance": 0.35,
+          "rebelSec": 8,
+          "rebelDamage": 8,
+          "rebelIntervalSec": 0.6,
+          "dominateSec": 14,
+          "dominateDamageMultiplier": 2,
+          "burstBullets": 14,
+          "burstBulletDamage": 9
+        }
       },
       "color": "#c83a5a",
       "sprites": {
-        "mark1": { "spriteKey": "skill_corrupt_mark1", "color": "#c83a5a", "size": 12 },
-        "mark2": { "spriteKey": "skill_corrupt_mark2", "color": "#c83a5a", "size": 12 },
-        "mark3": { "spriteKey": "skill_corrupt_mark3", "color": "#c83a5a", "size": 12 },
-        "smoke": { "spriteKey": "skill_corrupt_smoke", "color": "#c83a5a", "size": 20 },
-        "pull": { "spriteKey": "skill_acro_pull", "color": "#c83a5a", "size": 18 },
-        "end": { "spriteKey": "skill_acro_dispel", "color": "#c83a5a", "size": 17 },
-        "shard": { "spriteKey": "skill_acro_shard", "color": "#c83a5a", "size": 15 },
-        "blast": { "spriteKey": "skill_acro_blast", "color": "#c83a5a", "size": 20 },
-        "flash": { "spriteKey": "skill_acro_flash", "color": "#c83a5a", "size": 8 },
-        "shotA": { "spriteKey": "skill_corruptA_shot", "color": "#c83a5a", "size": 20 },
-        "markA": { "spriteKey": "skill_corruptA_mark", "color": "#c83a5a", "size": 12 },
-        "auraA": { "spriteKey": "skill_corruptA_aura", "color": "#c83a5a", "size": 14 },
-        "attackA": { "spriteKey": "skill_corruptA_attack", "color": "#c83a5a", "size": 14 },
-        "endA": { "spriteKey": "skill_corruptA_end", "color": "#c83a5a", "size": 14 }
+        "mark1": {
+          "spriteKey": "skill_corrupt_mark1",
+          "color": "#c83a5a",
+          "size": 12
+        },
+        "mark2": {
+          "spriteKey": "skill_corrupt_mark2",
+          "color": "#c83a5a",
+          "size": 12
+        },
+        "mark3": {
+          "spriteKey": "skill_corrupt_mark3",
+          "color": "#c83a5a",
+          "size": 12
+        },
+        "smoke": {
+          "spriteKey": "skill_corrupt_smoke",
+          "color": "#c83a5a",
+          "size": 20
+        },
+        "pull": {
+          "spriteKey": "skill_acro_pull",
+          "color": "#c83a5a",
+          "size": 18
+        },
+        "end": {
+          "spriteKey": "skill_acro_dispel",
+          "color": "#c83a5a",
+          "size": 17
+        },
+        "shard": {
+          "spriteKey": "skill_acro_shard",
+          "color": "#c83a5a",
+          "size": 15
+        },
+        "blast": {
+          "spriteKey": "skill_acro_blast",
+          "color": "#c83a5a",
+          "size": 20
+        },
+        "flash": {
+          "spriteKey": "skill_acro_flash",
+          "color": "#c83a5a",
+          "size": 8
+        },
+        "shotA": {
+          "spriteKey": "skill_corruptA_shot",
+          "color": "#c83a5a",
+          "size": 20
+        },
+        "markA": {
+          "spriteKey": "skill_corruptA_mark",
+          "color": "#c83a5a",
+          "size": 12
+        },
+        "auraA": {
+          "spriteKey": "skill_corruptA_aura",
+          "color": "#c83a5a",
+          "size": 14
+        },
+        "attackA": {
+          "spriteKey": "skill_corruptA_attack",
+          "color": "#c83a5a",
+          "size": 14
+        },
+        "endA": {
+          "spriteKey": "skill_corruptA_end",
+          "color": "#c83a5a",
+          "size": 14
+        },
+        "bullet": {
+          "spriteKey": "skill_acro_bullet",
+          "color": "#c83a5a",
+          "size": 6
+        }
       }
     },
     {
@@ -347,43 +485,204 @@
       "nameKey": "skill.experimentalWeapon",
       "shortKey": "skill.experimentalWeapon.short",
       "descKey": "skill.experimentalWeapon.desc",
-      "tags": ["tech", "chance", "ranged"],
+      "tags": [
+        "tech",
+        "chance",
+        "ranged"
+      ],
       "sources": {
-        "explosion": ["tech", "chance", "ranged"],
-        "barrage": ["tech", "chance", "ranged"],
-        "discharge": ["tech", "chance", "ranged"],
-        "collapse": ["tech", "chance", "ranged", "space"]
+        "explosion": [
+          "tech",
+          "chance",
+          "ranged"
+        ],
+        "barrage": [
+          "tech",
+          "chance",
+          "ranged"
+        ],
+        "discharge": [
+          "tech",
+          "chance",
+          "ranged"
+        ],
+        "collapse": [
+          "tech",
+          "chance",
+          "ranged",
+          "space"
+        ]
       },
       "levels": [
-        { "cooldownSec": 9, "values": { "results": 1, "greatResults": 1, "greatChance": 0.1, "greatMultiplier": 1.5, "range": 200, "explosionWeight": 3, "explosionDamage": 20, "explosionRadius": 30, "explosionSpeed": 220, "barrageWeight": 3, "barrageCount": 10, "barrageDamage": 4, "barrageSpeed": 220, "dischargeWeight": 3, "dischargeDamage": 12, "dischargeCount": 3, "dischargeRange": 90, "collapseWeight": 1, "collapseDamage": 10, "collapseRadius": 16 } },
-        { "cooldownSec": 8, "values": { "results": 1, "greatResults": 1, "greatChance": 0.1, "greatMultiplier": 1.5, "range": 200, "explosionWeight": 3, "explosionDamage": 31, "explosionRadius": 32, "explosionSpeed": 220, "barrageWeight": 3, "barrageCount": 12, "barrageDamage": 6, "barrageSpeed": 220, "dischargeWeight": 3, "dischargeDamage": 18, "dischargeCount": 4, "dischargeRange": 90, "collapseWeight": 1, "collapseDamage": 17, "collapseRadius": 18 } },
-        { "cooldownSec": 7, "values": { "results": 1, "greatResults": 1, "greatChance": 0.1, "greatMultiplier": 1.5, "range": 220, "explosionWeight": 3, "explosionDamage": 43, "explosionRadius": 34, "explosionSpeed": 220, "barrageWeight": 3, "barrageCount": 14, "barrageDamage": 8, "barrageSpeed": 220, "dischargeWeight": 3, "dischargeDamage": 24, "dischargeCount": 5, "dischargeRange": 100, "collapseWeight": 1, "collapseDamage": 24, "collapseRadius": 20 } }
+        {
+          "cooldownSec": 9,
+          "values": {
+            "results": 1,
+            "greatResults": 1,
+            "greatChance": 0.1,
+            "greatMultiplier": 1.5,
+            "range": 260,
+            "explosionWeight": 3,
+            "explosionDamage": 20,
+            "explosionRadius": 45,
+            "explosionSpeed": 220,
+            "barrageWeight": 3,
+            "barrageCount": 10,
+            "barrageDamage": 4,
+            "barrageSpeed": 220,
+            "dischargeWeight": 3,
+            "dischargeDamage": 12,
+            "dischargeCount": 3,
+            "dischargeRange": 126,
+            "collapseWeight": 1,
+            "collapseDamage": 10,
+            "collapseRadius": 26
+          }
+        },
+        {
+          "cooldownSec": 8,
+          "values": {
+            "results": 1,
+            "greatResults": 1,
+            "greatChance": 0.1,
+            "greatMultiplier": 1.5,
+            "range": 260,
+            "explosionWeight": 3,
+            "explosionDamage": 31,
+            "explosionRadius": 48,
+            "explosionSpeed": 220,
+            "barrageWeight": 3,
+            "barrageCount": 12,
+            "barrageDamage": 6,
+            "barrageSpeed": 220,
+            "dischargeWeight": 3,
+            "dischargeDamage": 18,
+            "dischargeCount": 4,
+            "dischargeRange": 126,
+            "collapseWeight": 1,
+            "collapseDamage": 17,
+            "collapseRadius": 29
+          }
+        },
+        {
+          "cooldownSec": 7,
+          "values": {
+            "results": 1,
+            "greatResults": 1,
+            "greatChance": 0.1,
+            "greatMultiplier": 1.5,
+            "range": 286,
+            "explosionWeight": 3,
+            "explosionDamage": 43,
+            "explosionRadius": 51,
+            "explosionSpeed": 220,
+            "barrageWeight": 3,
+            "barrageCount": 14,
+            "barrageDamage": 8,
+            "barrageSpeed": 220,
+            "dischargeWeight": 3,
+            "dischargeDamage": 24,
+            "dischargeCount": 5,
+            "dischargeRange": 140,
+            "collapseWeight": 1,
+            "collapseDamage": 24,
+            "collapseRadius": 32
+          }
+        }
       ],
       "awakening": {
         "nameKey": "skill.experimentalWeapon.awakened",
         "descKey": "skill.experimentalWeapon.awakened.desc",
         "requiredItem": "forbiddenGift",
-        "tags": ["tech", "chance", "ranged"],
+        "tags": [
+          "tech",
+          "chance",
+          "ranged"
+        ],
         "cooldownSec": 7,
-        "values": { "results": 2, "greatResults": 3, "greatMultiplier": 1 }
+        "values": {
+          "results": 2,
+          "greatResults": 3,
+          "greatMultiplier": 1
+        }
       },
       "color": "#d9d03b",
       "sprites": {
-        "shell": { "spriteKey": "skill_acro_bullet", "color": "#d9d03b", "size": 6 },
-        "burst": { "spriteKey": "skill_acro_shard", "color": "#d9d03b", "size": 15 },
-        "laser": { "spriteKey": "skill_experiment_laser", "color": "#d9d03b", "size": 20 },
-        "shock": { "spriteKey": "skill_acro_dispel", "color": "#d9d03b", "size": 17 },
-        "slice": { "spriteKey": "skill_acro_slice", "color": "#d9d03b", "size": 18 },
-        "pull": { "spriteKey": "skill_acro_pull", "color": "#d9d03b", "size": 18 },
-        "blast": { "spriteKey": "skill_acro_blast", "color": "#d9d03b", "size": 20 },
-        "flash": { "spriteKey": "skill_acro_flash", "color": "#d9d03b", "size": 8 },
-        "shellA": { "spriteKey": "skill_pandora_shell", "color": "#d9d03b", "size": 6 },
-        "blastA": { "spriteKey": "skill_pandora_blast", "color": "#d9d03b", "size": 22 },
-        "burstA": { "spriteKey": "skill_pandora_burst", "color": "#d9d03b", "size": 20 },
-        "laserA": { "spriteKey": "skill_pandora_laser", "color": "#d9d03b", "size": 20 },
-        "shockA": { "spriteKey": "skill_pandora_shock", "color": "#d9d03b", "size": 20 },
-        "sliceA": { "spriteKey": "skill_pandora_slice", "color": "#d9d03b", "size": 20 },
-        "pullA": { "spriteKey": "skill_pandora_pull", "color": "#d9d03b", "size": 22 }
+        "shell": {
+          "spriteKey": "skill_acro_bullet",
+          "color": "#d9d03b",
+          "size": 6
+        },
+        "burst": {
+          "spriteKey": "skill_acro_shard",
+          "color": "#d9d03b",
+          "size": 15
+        },
+        "laser": {
+          "spriteKey": "skill_experiment_laser",
+          "color": "#d9d03b",
+          "size": 20
+        },
+        "shock": {
+          "spriteKey": "skill_acro_dispel",
+          "color": "#d9d03b",
+          "size": 17
+        },
+        "slice": {
+          "spriteKey": "skill_acro_slice",
+          "color": "#d9d03b",
+          "size": 18
+        },
+        "pull": {
+          "spriteKey": "skill_acro_pull",
+          "color": "#d9d03b",
+          "size": 18
+        },
+        "blast": {
+          "spriteKey": "skill_acro_blast",
+          "color": "#d9d03b",
+          "size": 20
+        },
+        "flash": {
+          "spriteKey": "skill_acro_flash",
+          "color": "#d9d03b",
+          "size": 8
+        },
+        "shellA": {
+          "spriteKey": "skill_pandora_shell",
+          "color": "#d9d03b",
+          "size": 6
+        },
+        "blastA": {
+          "spriteKey": "skill_pandora_blast",
+          "color": "#d9d03b",
+          "size": 22
+        },
+        "burstA": {
+          "spriteKey": "skill_pandora_burst",
+          "color": "#d9d03b",
+          "size": 20
+        },
+        "laserA": {
+          "spriteKey": "skill_pandora_laser",
+          "color": "#d9d03b",
+          "size": 20
+        },
+        "shockA": {
+          "spriteKey": "skill_pandora_shock",
+          "color": "#d9d03b",
+          "size": 20
+        },
+        "sliceA": {
+          "spriteKey": "skill_pandora_slice",
+          "color": "#d9d03b",
+          "size": 20
+        },
+        "pullA": {
+          "spriteKey": "skill_pandora_pull",
+          "color": "#d9d03b",
+          "size": 22
+        }
       }
     },
     {
@@ -443,47 +742,214 @@
       "nameKey": "skill.mkPrototype",
       "shortKey": "skill.mkPrototype.short",
       "descKey": "skill.mkPrototype.desc",
-      "tags": ["buff"],
-      "sources": { "punch": ["physical", "melee"], "dash": ["physical", "melee"] },
+      "tags": [
+        "buff"
+      ],
+      "sources": {
+        "punch": [
+          "physical",
+          "melee"
+        ],
+        "laser": [
+          "tech",
+          "ranged"
+        ]
+      },
       "levels": [
-        { "cooldownSec": 14, "values": { "range": 40, "durationSec": 6, "moveSpeed": 0.2, "damageReduction": 0.2, "punchDamage": 8, "punchIntervalSec": 0.5, "fxRadius": 9 } },
-        { "cooldownSec": 13, "values": { "range": 42, "durationSec": 7, "moveSpeed": 0.25, "damageReduction": 0.25, "punchDamage": 12, "punchIntervalSec": 0.45, "fxRadius": 9 } },
-        { "cooldownSec": 12, "values": { "range": 44, "durationSec": 8, "moveSpeed": 0.3, "damageReduction": 0.3, "punchDamage": 16, "punchIntervalSec": 0.4, "fxRadius": 9 } }
+        {
+          "cooldownSec": 14,
+          "values": {
+            "range": 40,
+            "durationSec": 6,
+            "moveSpeed": 0.2,
+            "damageReduction": 0.2,
+            "punchDamage": 8,
+            "punchIntervalSec": 0.5,
+            "fxRadius": 9,
+            "laserDamage": 30,
+            "laserLength": 260,
+            "laserHalfWidth": 9
+          }
+        },
+        {
+          "cooldownSec": 13,
+          "values": {
+            "range": 42,
+            "durationSec": 7,
+            "moveSpeed": 0.25,
+            "damageReduction": 0.25,
+            "punchDamage": 12,
+            "punchIntervalSec": 0.45,
+            "fxRadius": 9,
+            "laserDamage": 45,
+            "laserLength": 260,
+            "laserHalfWidth": 9
+          }
+        },
+        {
+          "cooldownSec": 12,
+          "values": {
+            "range": 44,
+            "durationSec": 8,
+            "moveSpeed": 0.3,
+            "damageReduction": 0.3,
+            "punchDamage": 16,
+            "punchIntervalSec": 0.4,
+            "fxRadius": 9,
+            "laserDamage": 60,
+            "laserLength": 260,
+            "laserHalfWidth": 9
+          }
+        }
       ],
       "awakening": {
         "nameKey": "skill.mkPrototype.awakened",
         "descKey": "skill.mkPrototype.awakened.desc",
         "requiredItem": "steelCastleFigure",
-        "tags": ["buff"],
+        "tags": [
+          "buff"
+        ],
         "cooldownSec": 12,
-        "values": { "hpCost": 0.15, "durationSec": 8, "moveSpeed": 0.35, "damageReduction": 0.3, "punchDamage": 21, "blastRadius": 24, "dashRange": 100, "dashSpeed": 360, "dashSec": 0.18, "dashDamage": 13, "dashCooldownSec": 1.5, "fxRadius": 11 }
+        "values": {
+          "hpCost": 0.15,
+          "durationSec": 8,
+          "moveSpeed": 0.35,
+          "damageReduction": 0.3,
+          "punchDamage": 21,
+          "blastRadius": 24,
+          "fxRadius": 11,
+          "laserDamage": 90,
+          "laserLength": 300,
+          "laserHalfWidth": 12
+        }
       },
       "color": "#d9783b",
       "sprites": {
-        "morph1": { "spriteKey": "skill_mk_morph1", "color": "#d9783b", "size": 19 },
-        "idle1": { "spriteKey": "skill_mk_idle1", "color": "#d9783b", "size": 19 },
-        "move1": { "spriteKey": "skill_mk_move1", "color": "#d9783b", "size": 19 },
-        "punch1": { "spriteKey": "skill_mk_punch1", "color": "#d9783b", "size": 19 },
-        "fist1": { "spriteKey": "skill_mk_fist1", "color": "#d9783b", "size": 7 },
-        "morph2": { "spriteKey": "skill_mk_morph2", "color": "#d9783b", "size": 19 },
-        "idle2": { "spriteKey": "skill_mk_idle2", "color": "#d9783b", "size": 19 },
-        "move2": { "spriteKey": "skill_mk_move2", "color": "#d9783b", "size": 19 },
-        "punch2": { "spriteKey": "skill_mk_punch2", "color": "#d9783b", "size": 19 },
-        "fist2": { "spriteKey": "skill_mk_fist2", "color": "#d9783b", "size": 7 },
-        "morph3": { "spriteKey": "skill_mk_morph3", "color": "#d9783b", "size": 19 },
-        "idle3": { "spriteKey": "skill_mk_idle3", "color": "#d9783b", "size": 19 },
-        "move3": { "spriteKey": "skill_mk_move3", "color": "#d9783b", "size": 19 },
-        "punch3": { "spriteKey": "skill_mk_punch3", "color": "#d9783b", "size": 19 },
-        "fist3": { "spriteKey": "skill_mk_fist3", "color": "#d9783b", "size": 7 },
-        "blast": { "spriteKey": "skill_acro_blast", "color": "#d9783b", "size": 20 },
-        "flash": { "spriteKey": "skill_acro_flash", "color": "#d9783b", "size": 8 },
-        "morphA": { "spriteKey": "skill_mkA_morph", "color": "#d9783b", "size": 20 },
-        "idleA": { "spriteKey": "skill_mkA_idle", "color": "#d9783b", "size": 20 },
-        "moveA": { "spriteKey": "skill_mkA_move", "color": "#d9783b", "size": 20 },
-        "punchA": { "spriteKey": "skill_mkA_punch", "color": "#d9783b", "size": 20 },
-        "blastPunchA": { "spriteKey": "skill_mkA_blast", "color": "#d9783b", "size": 20 },
-        "drainA": { "spriteKey": "skill_mkA_drain", "color": "#d9783b", "size": 20 },
-        "releaseA": { "spriteKey": "skill_mkA_release", "color": "#d9783b", "size": 20 }
+        "morph1": {
+          "spriteKey": "skill_mk_morph1",
+          "color": "#d9783b",
+          "size": 19
+        },
+        "idle1": {
+          "spriteKey": "skill_mk_idle1",
+          "color": "#d9783b",
+          "size": 19
+        },
+        "move1": {
+          "spriteKey": "skill_mk_move1",
+          "color": "#d9783b",
+          "size": 19
+        },
+        "punch1": {
+          "spriteKey": "skill_mk_punch1",
+          "color": "#d9783b",
+          "size": 19
+        },
+        "fist1": {
+          "spriteKey": "skill_mk_fist1",
+          "color": "#d9783b",
+          "size": 7
+        },
+        "morph2": {
+          "spriteKey": "skill_mk_morph2",
+          "color": "#d9783b",
+          "size": 19
+        },
+        "idle2": {
+          "spriteKey": "skill_mk_idle2",
+          "color": "#d9783b",
+          "size": 19
+        },
+        "move2": {
+          "spriteKey": "skill_mk_move2",
+          "color": "#d9783b",
+          "size": 19
+        },
+        "punch2": {
+          "spriteKey": "skill_mk_punch2",
+          "color": "#d9783b",
+          "size": 19
+        },
+        "fist2": {
+          "spriteKey": "skill_mk_fist2",
+          "color": "#d9783b",
+          "size": 7
+        },
+        "morph3": {
+          "spriteKey": "skill_mk_morph3",
+          "color": "#d9783b",
+          "size": 19
+        },
+        "idle3": {
+          "spriteKey": "skill_mk_idle3",
+          "color": "#d9783b",
+          "size": 19
+        },
+        "move3": {
+          "spriteKey": "skill_mk_move3",
+          "color": "#d9783b",
+          "size": 19
+        },
+        "punch3": {
+          "spriteKey": "skill_mk_punch3",
+          "color": "#d9783b",
+          "size": 19
+        },
+        "fist3": {
+          "spriteKey": "skill_mk_fist3",
+          "color": "#d9783b",
+          "size": 7
+        },
+        "blast": {
+          "spriteKey": "skill_acro_blast",
+          "color": "#d9783b",
+          "size": 20
+        },
+        "flash": {
+          "spriteKey": "skill_acro_flash",
+          "color": "#d9783b",
+          "size": 8
+        },
+        "morphA": {
+          "spriteKey": "skill_mkA_morph",
+          "color": "#d9783b",
+          "size": 20
+        },
+        "idleA": {
+          "spriteKey": "skill_mkA_idle",
+          "color": "#d9783b",
+          "size": 20
+        },
+        "moveA": {
+          "spriteKey": "skill_mkA_move",
+          "color": "#d9783b",
+          "size": 20
+        },
+        "punchA": {
+          "spriteKey": "skill_mkA_punch",
+          "color": "#d9783b",
+          "size": 20
+        },
+        "blastPunchA": {
+          "spriteKey": "skill_mkA_blast",
+          "color": "#d9783b",
+          "size": 20
+        },
+        "drainA": {
+          "spriteKey": "skill_mkA_drain",
+          "color": "#d9783b",
+          "size": 20
+        },
+        "releaseA": {
+          "spriteKey": "skill_mkA_release",
+          "color": "#d9783b",
+          "size": 20
+        },
+        "laser": {
+          "spriteKey": "fx_kaiser_laser",
+          "color": "#d9783b",
+          "size": 60
+        }
       }
     },
     {
@@ -494,25 +960,54 @@
       "nameKey": "skill.reductionist",
       "shortKey": "skill.reductionist.short",
       "descKey": "skill.reductionist.desc",
-      "tags": ["buff"],
+      "tags": [
+        "buff"
+      ],
       "sources": {},
       "levels": [
-        { "cooldownSec": 0, "values": { "hitHeal": 0.5, "hitHealIntervalSec": 0.5, "killHeal": 2 } },
-        { "cooldownSec": 0, "values": { "hitHeal": 0.7, "hitHealIntervalSec": 0.5, "killHeal": 3 } },
-        { "cooldownSec": 0, "values": { "hitHeal": 1, "hitHealIntervalSec": 0.5, "killHeal": 4 } }
+        {
+          "cooldownSec": 0,
+          "values": {
+            "killHeal": 1
+          }
+        },
+        {
+          "cooldownSec": 0,
+          "values": {
+            "killHeal": 1.5
+          }
+        },
+        {
+          "cooldownSec": 0,
+          "values": {
+            "killHeal": 2
+          }
+        }
       ],
       "awakening": {
         "nameKey": "skill.reductionist.awakened",
         "descKey": "skill.reductionist.awakened.desc",
         "requiredItem": "elegantMagi",
-        "tags": ["buff"],
+        "tags": [
+          "buff"
+        ],
         "cooldownSec": 0,
-        "values": { "lifesteal": 0.05, "basicUnit": 6 }
+        "values": {
+          "basicUnit": 3
+        }
       },
       "color": "#5ad95a",
       "sprites": {
-        "smoke": { "spriteKey": "skill_reduction_smoke", "color": "#5ad95a", "size": 12 },
-        "unit": { "spriteKey": "skill_reduction_unit", "color": "#5ad95a", "size": 14 }
+        "smoke": {
+          "spriteKey": "skill_reduction_smoke",
+          "color": "#5ad95a",
+          "size": 12
+        },
+        "unit": {
+          "spriteKey": "skill_reduction_unit",
+          "color": "#5ad95a",
+          "size": 14
+        }
       }
     }
   ]

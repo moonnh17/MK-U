@@ -319,6 +319,9 @@ export interface EnemyAttackDef {
   mentalDamage?: number;
   /** slam: 내리칠 때 사방으로 퍼지는 충격 탄 */
   ring?: { shots: number; speed: number; range: number; damage: number };
+  /** 탄 그림과 물들일 색 (없으면 기본 적 탄) */
+  shot?: SpriteRef;
+  shotTint?: string;
   /** 등장 후 첫 공격을 이 시간 안에서 무작위로 늦춘다 (떼가 한꺼번에 쏘지 않게) */
   firstDelayJitterSec?: number;
   /** lunge: 벽에 부딪히면 이 시간 기절, 그동안 받는 피해 ×stunTakenMul (마기갑충) */
@@ -1013,6 +1016,8 @@ export interface LootData {
   merchant: { count: number; weights: Partial<Record<GradeId, number>>; prices: Record<GradeId, number> };
   /** 런 시작 방의 무기 상자 등급 가중치 */
   startChest: Partial<Record<GradeId, number>>;
+  /** 스테이지 보스 처치 시 그 보스의 유니크 무기가 나올 확률 (아니면 무기 상자 가중치대로) */
+  bossWeaponChance: number;
   /** 상점 진열대 위 아이콘 크기(px) */
   cardStandIconPx: number;
   /** 스킬 상점: 카드 종류별 가격 */
@@ -1340,6 +1345,10 @@ export interface JuiceData {
   /** 포탑이 쏠 때 포신이 뒤로 밀렸다 돌아온다 */
   turretRecoil: { sec: number; px: number; bigPx: number; squash: number };
   /** 마기역장이 생길 때: 입자가 뿜어져 나오며 막이 작게 시작해 몸을 덮는다 */
+  /** 탄 테두리 빛: 플레이어 탄·적 탄 색 */
+  bulletRim: { player: string; enemy: string; strength: number; distance: number };
+  /** 스킬 빛 입자 (실험 병기) */
+  skillBurst: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number };
   shieldSpawn: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; growSec: number; startScale: number; stacks: { bodyAlpha: number }[] };
   bossPhase: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; flashMs: number; zoom: number; zoomSec: number; bannerSec: number; bannerSize: number };
   /** 보스 처치: slowSec 동안 slowScale 배속에서 점점 원래대로, 연쇄 폭발 */
