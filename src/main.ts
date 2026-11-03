@@ -59,6 +59,7 @@ const keyboard = new KeyboardSource(data.keybindings);
 const touchLabels: Record<TouchControlId, string> = {
   attack: t('mobile.attack'),
   dodge: t('mobile.dodge'),
+  weaponSpecial: t('mobile.special'),
   skill1: '1',
   skill2: '2',
   skill3: '3',

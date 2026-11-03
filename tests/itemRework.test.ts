@@ -19,7 +19,9 @@ describe('아이템에서 무기로', () => {
   });
   it('등급', () => {
     expect(w('brokenBlade').grade).toBe('common');
-    for (const id of ['alGulBlade', 'gihwanArm', 'ancientCore', 'eclipseCore']) expect(w(id).grade, id).toBe('unique');
+    for (const id of ['alGulBlade', 'gihwanArm']) expect(w(id).grade, id).toBe('unique');
+    // 고대병기의 코어·식광의 핵은 특별한 전설 (성능은 유니크 때 그대로)
+    for (const id of ['ancientCore', 'eclipseCore']) expect(w(id), id).toMatchObject({ grade: 'legendary', showcase: true });
   });
   it('부러진 칼날은 사거리가 가장 짧은 축이다', () => {
     expect(w('brokenBlade').range).toBeLessThanOrEqual(w('dagger').range);

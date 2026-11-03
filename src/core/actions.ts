@@ -5,6 +5,7 @@
 export const BUTTON_ACTIONS = [
   'attack',
   'dodge',
+  'weaponSpecial',
   'skill1',
   'skill2',
   'skill3',

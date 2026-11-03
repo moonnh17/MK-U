@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 465개 · 그림 있음 452개
+전체 473개 · 그림 있음 460개
 
 ## player (3)
 
@@ -18,7 +18,7 @@
 | `player_hectar` | 플레이어 헥타르 | 10×10 | feet | #e8e2d0 | mku/player_hectar.png (5프레임) |
 | `player_acro` | 플레이어 아크로 | 10×10 | feet | #e8e2d0 | mku/player_acro.png (5프레임) |
 
-## weapon (31)
+## weapon (36)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -52,9 +52,14 @@
 | `weapon_soul_calibur` | 소울 칼리버 | 12×12 | center | #7a4ad0 | mku/weapon_soul_calibur.png (1프레임) |
 | `weapon_magi_fang` | 마기족의 송곳니 | 11×11 | center | #c0202a | mku/weapon_magi_fang.png (1프레임) |
 | `weapon_antimatter_pistol` | 반물질 권총 | 9×9 | center | #3a7bff | mku/weapon_antimatter_pistol.png (1프레임) |
+| `weapon_orbital_disc` | 궤도절삭륜 | 9×9 | center | #7a8aa0 | mku/weapon_orbital_disc.png (1프레임) |
+| `weapon_space_needle` | 아크로제 공간봉합침 | 11×11 | center | #c0202a | mku/weapon_space_needle.png (1프레임) |
+| `weapon_bootleg_gun` | 야시장 복제총 | 11×11 | center | #3ad9e0 | mku/weapon_bootleg_gun.png (1프레임) |
+| `weapon_debtor_arm` | 체납자의 의수 | 10×10 | center | #e0b030 | mku/weapon_debtor_arm.png (1프레임) |
+| `weapon_hwan_remnant` | 환국의 잔명 | 12×12 | center | #6a5030 | mku/weapon_hwan_remnant.png (1프레임) |
 | `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | mku/weapon_fist.png (1프레임) |
 
-## projectile (14)
+## projectile (17)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -65,6 +70,9 @@
 | `fx_soul_burst` | 소울 칼리버 (fx) | 20×20 | center | #c060ff | mku/fx_soul_burst.png (1프레임) |
 | `skill_antimatter_shellA` | 반물질 권총 (fx) 외 1곳 | 9×9 | center | #5ab0ff | mku/skill_antimatter_shellA.png (6프레임) |
 | `skill_antimatter_blastA` | 반물질 권총 (fx) 외 1곳 | 24×24 | center | #5ab0ff | mku/skill_antimatter_blastA.png (6프레임) |
+| `proj_orbital_disc` | 궤도절삭륜 (fx) | 10×10 | center | #5ad9ff | mku/proj_orbital_disc.png (1프레임) |
+| `proj_space_needle` | 아크로제 공간봉합침 (fx) | 12×12 | center | #ff2a3a | mku/proj_space_needle.png (1프레임) |
+| `fx_hwan_gauge` | 환국의 잔명 (fx) | 12×12 | center | #ffd27a | mku/fx_hwan_gauge.png (6프레임) |
 | `projectile_player` | 플레이어 탄 | 3×3 | center | #fff3a0 | mku/projectile_player.png (1프레임) |
 | `fx_melee_slash` | 근접 이펙트 (fx) | 20×20 | center | #ffffff | mku/fx_melee_slash.png (6프레임) |
 | `fx_melee_slam` | 근접 이펙트 (fx) | 20×20 | center | #ffffff | mku/fx_melee_slam.png (8프레임) |

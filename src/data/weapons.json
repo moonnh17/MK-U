@@ -3,6 +3,7 @@
   "projectile": { "spriteKey": "projectile_player", "color": "#fff3a0", "size": 3 },
   "critMultiplier": 1.5,
   "swapDelaySec": 0.35,
+  "debtDelaySec": 0.6,
   "meleeFx": {
     "slash": { "spriteKey": "fx_melee_slash", "color": "#ffffff", "size": 20 },
     "slam": { "spriteKey": "fx_melee_slam", "color": "#ffffff", "size": 20 },
@@ -166,15 +167,15 @@
       "spriteKey": "weapon_gihwan_arm", "color": "#3a7bff", "size": 11
     },
     {
-      "id": "ancientCore", "flavor": "codex.itemFlavor.ancientCore", "nameKey": "weapon.ancientCore", "category": "staff", "grade": "unique", "tags": ["magic", "ranged"], "bossId": "magiGolem",
-      "baseDamage": 14, "fireIntervalSec": 0.8, "energyCost": 3, "pattern": { "kind": "homing", "turnRate": 1 },
+      "id": "ancientCore", "flavor": "codex.itemFlavor.ancientCore", "nameKey": "weapon.ancientCore", "category": "staff", "grade": "legendary", "showcase": true, "tags": ["magic", "ranged"], "bossId": "magiGolem",
+      "baseDamage": 18.42, "fireIntervalSec": 0.8, "energyCost": 3.75, "pattern": { "kind": "homing", "turnRate": 1 },
       "signature": { "every": 1, "kind": "laser", "damageMul": 1, "length": 260, "width": 12, "beam": { "spriteKey": "fx_golem_laser", "color": "#a05aff", "size": 12 } },
       "projectileSpeed": 200, "range": 260, "cutsProjectiles": false, "droppable": false,
       "spriteKey": "weapon_ancient_core", "color": "#a05aff", "size": 8
     },
     {
-      "id": "eclipseCore", "flavor": "codex.itemFlavor.eclipseCore", "nameKey": "weapon.eclipseCore", "category": "staff", "grade": "unique", "tags": ["magic", "ranged"], "bossId": "eclipse",
-      "baseDamage": 20, "fireIntervalSec": 1, "energyCost": 3,
+      "id": "eclipseCore", "flavor": "codex.itemFlavor.eclipseCore", "nameKey": "weapon.eclipseCore", "category": "staff", "grade": "legendary", "showcase": true, "tags": ["magic", "ranged"], "bossId": "eclipse",
+      "baseDamage": 26.32, "fireIntervalSec": 1, "energyCost": 3.75,
       "pattern": { "kind": "meteor", "radius": 30, "delaySec": 0.45, "fallPx": 130, "color": "#ff3a4a", "sprite": { "spriteKey": "fx_eclipse_meteor", "color": "#ff3a4a", "size": 10 } },
       "projectileSpeed": 200, "range": 280, "cutsProjectiles": false, "droppable": false,
       "spriteKey": "weapon_eclipse_core", "color": "#ff3a4a", "size": 8
@@ -260,6 +261,51 @@
       "lobBlast": { "spriteKey": "skill_antimatter_blastA", "color": "#5ab0ff", "size": 24 },
       "projectileSpeed": 300, "range": 280, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_antimatter_pistol", "color": "#3a7bff", "size": 9
+    },
+    {
+      "id": "orbitalDisc", "nameKey": "weapon.orbitalDisc", "category": "gun", "grade": "rare", "tags": ["tech", "ranged"],
+      "baseDamage": 6.5, "fireIntervalSec": 0.3, "energyCost": 1, "pattern": { "kind": "single" },
+      "boomerang": { "charges": 3, "range": 150, "returnSpeed": 300, "catchPx": 12, "maxSec": 5, "spinPerSec": 18, "shot": { "spriteKey": "proj_orbital_disc", "color": "#5ad9ff", "size": 10 } },
+      "attackParticles": { "color": "#5ad9ff" },
+      "projectileSpeed": 280, "range": 150, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_orbital_disc", "color": "#7a8aa0", "size": 9
+    },
+    {
+      "id": "spaceNeedle", "nameKey": "weapon.spaceNeedle", "category": "gun", "grade": "legendary", "tags": ["tech", "ranged"],
+      "abilityNameKey": "weapon.ability.spaceNeedle",
+      "baseDamage": 8, "fireIntervalSec": 0.45, "energyCost": 2, "pattern": { "kind": "single" },
+      "needle": { "max": 5, "lifeSec": 8, "tickSec": 0.5, "lineDamageMul": 0.6, "lineWidth": 6, "recallDamageMul": 2, "recallSec": 0.25, "color": "#ff2a3a", "shot": { "spriteKey": "proj_space_needle", "color": "#ff2a3a", "size": 12 } },
+      "projectileSpeed": 420, "range": 260, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_space_needle", "color": "#c0202a", "size": 11
+    },
+    {
+      "id": "bootlegGun", "nameKey": "weapon.bootlegGun", "category": "gun", "grade": "rare", "tags": ["tech", "ranged"],
+      "abilityNameKey": "weapon.ability.bootlegGun",
+      "baseDamage": 3.2, "fireIntervalSec": 0.2, "energyCost": 0.5, "pattern": { "kind": "single", "jitterDeg": 8 },
+      "spinUp": { "perShot": 0.08, "maxMul": 2.8, "resetSec": 0.7 },
+      "energyRange": [0.2, 2.6], "selfDestruct": { "chance": 0.005 },
+      "projectileSpeed": 340, "range": 280, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_bootleg_gun", "color": "#3ad9e0", "size": 11
+    },
+    {
+      "id": "debtorArm", "nameKey": "weapon.debtorArm", "category": "blade", "fxColor": "#ffc83a", "grade": "rare", "tags": ["physical", "melee"],
+      "abilityNameKey": "weapon.ability.debtorArm",
+      "baseDamage": 32, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 100, "radius": 38 },
+      "debt": { "coins": 10, "moveSpeed": 0.2, "color": "#4aff7a" },
+      "projectileSpeed": 0, "range": 38, "cutsProjectiles": true, "droppable": true,
+      "spriteKey": "weapon_debtor_arm", "color": "#e0b030", "size": 10
+    },
+    {
+      "id": "hwanRemnant", "flavor": "codex.itemFlavor.hwanRemnant", "nameKey": "weapon.hwanRemnant", "category": "staff", "grade": "legendary", "tags": ["magic", "ranged"],
+      "baseDamage": 14, "fireIntervalSec": 0.55, "energyCost": 6, "pattern": { "kind": "single" },
+      "beam": {
+        "length": 260, "width": 6, "energyGain": 8, "stacks": 5,
+        "empowered": { "damageMul": 4, "length": 340, "width": 18 },
+        "color": "#ffd27a", "glyphColor": "#ffe9a8",
+        "gauge": { "spriteKey": "fx_hwan_gauge", "color": "#ffd27a", "size": 12 }
+      },
+      "projectileSpeed": 600, "range": 260, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_hwan_remnant", "color": "#6a5030", "size": 12
     },
     {
       "id": "fist", "nameKey": "weapon.fist", "category": "blade", "fxColor": "#ffe0c0", "grade": "common", "tags": ["physical", "melee"],

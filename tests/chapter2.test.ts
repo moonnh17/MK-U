@@ -44,9 +44,9 @@ describe('챕터2 보스 전용 아이템', () => {
     expect(item('hectarRam').dropChance).toBeUndefined();
     expect(item('hectarRam').effects).toContainEqual(expect.objectContaining({ kind: 'damage', scope: 'tech', value: 0.08 }));
   });
-  it('고대병기의 코어: 마기골렘 전용 유니크 레이저 무기', () => {
+  it('고대병기의 코어: 마기골렘 전용 전설(특별) 레이저 무기', () => {
     const w = gameData.weapons.weapons.find((x) => x.id === 'ancientCore')!;
-    expect(w).toMatchObject({ grade: 'unique', bossId: 'magiGolem', droppable: false });
+    expect(w).toMatchObject({ grade: 'legendary', showcase: true, bossId: 'magiGolem', droppable: false });
     expect(w.signature).toMatchObject({ kind: 'laser', every: 1 });
   });
 });

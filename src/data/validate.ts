@@ -181,6 +181,19 @@ export function validateGameData(d: GameData): Errors {
     if (wpn.shot) checkSprite(errors, `${w}.shot`, wpn.shot);
     if (wpn.fireFlash) checkSprite(errors, `${w}.fireFlash`, wpn.fireFlash);
     if (wpn.lobBlast) checkSprite(errors, `${w}.lobBlast`, wpn.lobBlast);
+    if (wpn.boomerang) {
+      checkSprite(errors, `${w}.boomerang.shot`, wpn.boomerang.shot);
+      if (wpn.boomerang.charges < 1) errors.push(`${w}.boomerang.charges: 1 이상`);
+    }
+    if (wpn.needle) {
+      checkSprite(errors, `${w}.needle.shot`, wpn.needle.shot);
+      if (wpn.needle.max < 2) errors.push(`${w}.needle.max: 2 이상 (선이 생기려면)`);
+      if (!wpn.abilityNameKey) errors.push(`${w}: 회수에는 abilityNameKey가 필요`);
+    }
+    if (wpn.energyRange && !(wpn.energyRange[0] > 0 && wpn.energyRange[0] <= wpn.energyRange[1])) errors.push(`${w}.energyRange: 0 < 최소 ≤ 최대`);
+    if (wpn.selfDestruct && !(wpn.selfDestruct.chance > 0 && wpn.selfDestruct.chance < 1)) errors.push(`${w}.selfDestruct.chance: 0~1`);
+    if (wpn.debt && !wpn.abilityNameKey) errors.push(`${w}: 징수에는 abilityNameKey가 필요`);
+    if (wpn.beam) checkSprite(errors, `${w}.beam.gauge`, wpn.beam.gauge);
     if (wpn.spinUp && wpn.spinUp.maxMul < 1) errors.push(`${w}.spinUp.maxMul: 1 이상`);
     if ((p.kind === 'arc' || p.kind === 'line' || p.kind === 'smash') && wpn.category !== 'blade') errors.push(`${w}: ${p.kind}는 칼 패턴`);
     if (p.kind === 'homing' && wpn.category !== 'staff') errors.push(`${w}: homing은 지팡이 패턴`);

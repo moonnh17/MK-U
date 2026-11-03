@@ -13,7 +13,7 @@ import type { LabObjectDef } from '../types/data';
 import type { TouchControlId } from '../ui/mobileLayout';
 
 /** 실험장에서 숨기는 런 전용 터치 버튼 */
-const RUN_ONLY_BUTTONS: TouchControlId[] = ['dodge', 'skill1', 'skill2', 'skill3', 'skill4', 'ultimate', 'swapWeapon', 'inventory', 'map', 'pause'];
+const RUN_ONLY_BUTTONS: TouchControlId[] = ['dodge', 'weaponSpecial', 'skill1', 'skill2', 'skill3', 'skill4', 'ultimate', 'swapWeapon', 'inventory', 'map', 'pause'];
 const JOB_KEYS = ['skill1', 'skill2', 'skill3'] as const;
 
 /**

@@ -630,6 +630,19 @@ function userWeapon(key, file, { rotate = 0, flip = false, fit, gripX, black = 4
 }
 // 배경이 완전한 검정이라 문턱을 낮춘다 (40이면 어두운 칼날까지 배경으로 지워져 가운데가 뚫린다)
 userWeapon('weapon_nekkar_cleaver', 'nekkar.png', { rotate: 45, fit: 28, gripX: 0.22, dim: 1.5, black: 8 });
+// 새 무기 5종 (원본이 이미 투명 배경이라 검정 지우기는 끈다)
+userWeapon('weapon_orbital_disc', 'orbital_disc.png', { fit: 16, gripX: 0.5, black: 0 });
+userWeapon('weapon_space_needle', 'space_needle.png', { fit: 30, gripX: 0.15, black: 0 });
+userWeapon('weapon_bootleg_gun', 'bootleg_gun.png', { fit: 30, gripX: 0.3, black: 0 });
+userWeapon('weapon_debtor_arm', 'debtor_arm.png', { fit: 26, gripX: 0.2, black: 0 });
+userWeapon('weapon_hwan_remnant', 'hwan_remnant.png', { fit: 32, gripX: 0.25, black: 0 });
+{
+  const w = (f) => k.read(path.join(__dirname, 'art-src/weapons', f));
+  sprites.proj_orbital_disc = sheet('proj_orbital_disc', [w('orbital_disc.png')], 11, { alphaCut: 0.25 });
+  sprites.proj_space_needle = sheet('proj_space_needle', [w('space_needle.png')], 14, { alphaCut: 0.25 });
+  // 환국의 잔명 충전 단계 0~5 (무기 위에 작게 띄운다)
+  sprites.fx_hwan_gauge = sheet('fx_hwan_gauge', [0, 1, 2, 3, 4, 5].map((i) => w(`hwan_gauge_${i}.png`)), 12, { alphaCut: 0.25 });
+}
 userWeapon('weapon_algieba_sling', 'algieba.png', { flip: true, rotate: -32, fit: 28, gripX: 0.3, black: 46 });
 userWeapon('weapon_argo_banner', 'argo.png', { fit: 40, gripX: 0.2 });
 bigWeapon('weapon_gihwan_arm', 'rewards/arm.png', -90, 26, 0.2);

@@ -206,7 +206,14 @@ export class WeaponCombat {
       return;
     }
 
-    const left = spendEnergy(p.energy, st);
+    // 궤도절삭륜: 충전(손에 남은 원반)이 없으면 던지지 않는다
+    if (w.boomerang && this.run.special.discCharges(w) <= 0) {
+      this.fireCooldown = 0.05;
+      return;
+    }
+    // 야시장 복제총: 이번 공격의 에너지 소모가 무작위
+    const rolled = this.run.special.rolledStats(w, st);
+    const left = spendEnergy(p.energy, rolled);
     if (left === null) {
       this.run.session.energyEmptyAt = this.run.time.now;
       this.run.toastThrottled(this.run.ctx.t('room.energyEmpty'));
@@ -236,6 +243,18 @@ export class WeaponCombat {
     }
     const muzzle = this.firePoint();
     const shotAngle = muzzleAngle(muzzle, this.run.aimTarget, aimAngle, this.run.ctx.data.player.muzzleMinTargetPx);
+    if (w.boomerang) {
+      this.run.special.throwDisc(w, { ...st, damage: st.damage * emp }, muzzle, shotAngle);
+      return;
+    }
+    if (w.needle) {
+      this.run.special.fireNeedle(w, { ...st, damage: st.damage * emp }, muzzle, shotAngle);
+      return;
+    }
+    if (w.beam) {
+      this.run.special.fireBeam(w, { ...st, damage: st.damage * emp }, shotAngle);
+      return;
+    }
     if (w.pattern.kind === 'homing') {
       this.fireBullet(muzzle, shotAngle, st.projectileSpeed, w.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, homing: w.pattern.turnRate });
       return;
@@ -263,6 +282,8 @@ export class WeaponCombat {
     for (const shot of gunShots(w, shotAngle, this.run.rng, this.run.itemRt.sums.pellets)) {
       this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: chargedCrit(st.critChance, chargeRatio, w.charge?.critAtMax), ricochet: w.ricochet, tint: w.ricochet || w.flame ? w.color : undefined, sprite: w.shot, flame: w.flame?.scaleTo, trail: w.attackParticles?.color });
     }
+    // 질 낮은 가품: 쏠 때마다 따로 판정해 터지면 무기가 사라진다
+    this.run.special.rollSelfDestruct(w);
   }
 
   /** 총은 뒤로 튕기고(느린 총일수록 크게), 지팡이는 끝에서 번쩍인다 */

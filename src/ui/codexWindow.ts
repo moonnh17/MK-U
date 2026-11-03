@@ -233,6 +233,8 @@ export class CodexWindow {
         fx.appendChild(sp);
       }
       c.appendChild(fx);
+      // 보스가 남기는 특별한 전설: 빛줄기도 뿜는다
+      if (a.showcase) c.appendChild(this.el('span', 'cx-rays'));
     } else if (a.grade === 'mythic') {
       // 신화: 칸 뒤에서 빛줄기가 사방으로 뿜어져 나온다
       c.classList.add('fx-mythic');
@@ -245,7 +247,7 @@ export class CodexWindow {
     return c;
   }
 
-  private art(e: CodexEntry): { key: string; color: string; ring?: string; grade?: string } {
+  private art(e: CodexEntry): { key: string; color: string; ring?: string; grade?: string; showcase?: boolean } {
     const d = this.ctx.data;
     const grade = (g: string) => d.groupMultipliers.grades.find((x) => x.id === g)?.color;
     if (e.kind === 'enemy') {
@@ -259,7 +261,7 @@ export class CodexWindow {
       return { key: def.spriteKey, color: def.color, ring: grade(def.grade), grade: def.grade };
     }
     const w = d.weapons.weapons.find((x) => x.id === e.id)!;
-    return { key: w.spriteKey, color: w.color, ring: grade(w.grade), grade: w.grade };
+    return { key: w.spriteKey, color: w.color, ring: grade(w.grade), grade: w.grade, showcase: w.showcase };
   }
 
   private name(e: CodexEntry): string {

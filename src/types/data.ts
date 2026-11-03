@@ -211,6 +211,43 @@ export interface WeaponDef extends SpriteRef {
   meleeShot?: { damageMul: number; speed: number; range: number; energyCost: number; color: string };
   /** 칼: 공격할 때 조준한 적 쪽으로 돌진한 뒤 벤다 (최대 distance, sec초) */
   lunge?: { distance: number; sec: number };
+  /**
+   * 되돌아오는 원반 (궤도절삭륜): 충전이 있을 때 던지고, 관통하며 range까지 날아간 뒤 플레이어를 따라 돌아온다.
+   * 가는 길·오는 길 모두 피해, 잡으면 충전 하나가 바로 찬다. maxSec이 지나면 사라지고 충전이 돌아온다
+   */
+  boomerang?: { charges: number; range: number; returnSpeed: number; catchPx: number; maxSec: number; spinPerSec: number; shot: SpriteRef };
+  /**
+   * 공간봉합침 (아크로제): 침이 적이나 벽에 박힌다. 박힌 침은 가까운 순서로 이어져 절단선이 되고 tickSec마다 선에 닿은 적에게 피해.
+   * 최대 max개(넘으면 가장 오래된 것부터 사라짐), lifeSec 뒤 사라짐. 특수공격(Q)으로 모두 회수하며 지나는 길의 적에게 피해
+   */
+  needle?: { max: number; lifeSec: number; tickSec: number; lineDamageMul: number; lineWidth: number; recallDamageMul: number; recallSec: number; color: string; shot: SpriteRef };
+  /** 공격마다 에너지 소모가 기본값 × [min, max] 사이에서 무작위 (야시장 복제총) */
+  energyRange?: [number, number];
+  /** 공격마다 chance 확률로 터지며 무기가 사라진다 (야시장 복제총) */
+  selfDestruct?: { chance: number };
+  /**
+   * 징수 (체납자의 의수): 스테이지에 들어설 때마다 들고 있으면 마기 입자 coins를 가져간다.
+   * 못 내면 그 스테이지 동안 주먹과 같은 성능. moveSpeed: 낸 동안 이동속도 증가
+   */
+  debt?: { coins: number; moveSpeed: number; color: string };
+  /**
+   * 환국의 잔명: 관통 광선. 적을 맞힌 발사마다(여러 적이어도 한 번) 에너지 energyGain 회복·충전 1.
+   * 충전이 stacks가 되면 다음 사격이 강화 광선(피해 ×damageMul, 굵기·길이 증가). 강화 사격은 충전에 들어가지 않는다
+   */
+  beam?: {
+    length: number;
+    width: number;
+    energyGain: number;
+    stacks: number;
+    empowered: { damageMul: number; length: number; width: number };
+    color: string;
+    glyphColor: string;
+    gauge: SpriteRef;
+  };
+  /** 이름 있는 고유 능력·특수공격 (도감 굵은 제목). 특수공격 버튼(Q)으로 쓰는 것은 needle 회수 */
+  abilityNameKey?: string;
+  /** 도감에서 특별한 칸으로 (보스가 남기는 전설) */
+  showcase?: boolean;
   /** 공격할 때 흘리는 파티클 */
   attackParticles?: { color: string };
   /** 그림 안 마력 중심(가로·세로 0~1). onCharge면 차징 중, 아니면 발사 때 번쩍인다 */
@@ -251,6 +288,8 @@ export interface WeaponsData {
   critMultiplier: number;
   /** 무기를 바꾼 뒤 공격할 수 없는 시간(초) */
   swapDelaySec: number;
+  /** 체납자의 의수 징수를 스테이지 시작 뒤 몇 초에 할지 */
+  debtDelaySec: number;
   /** 근접 이펙트: 흑백 그림에 무기 색을 입힌다. glowAlpha: 밝은 심을 더하는 겹 / buffSparkSec: 버프 불티 간격 */
   meleeFx: { slash: SpriteRef; slam: SpriteRef; slashBig: SpriteRef; slamBig: SpriteRef; buffAura: SpriteRef; glowAlpha: number; buffSparkSec: number };
   options: WeaponOptionDef[];
@@ -725,6 +764,8 @@ export interface MobileLayoutData {
   ultimateDp: number;
   swapDp: number;
   dodgeDp: number;
+  /** 무기 특수공격 버튼 */
+  specialDp: number;
   bagDp: number;
   pauseDp: number;
   /** 버튼 사이 간격(dp) */

@@ -10,6 +10,7 @@ import { DebugPanel } from '../ui/debugPanel';
 import { buildDebugSkills } from '../ui/debugSkills';
 import { Hud } from '../ui/hud';
 import { TouchSkills } from '../ui/touchSkills';
+import { activeWeapon } from '../systems/weapons';
 
 /** HUD·미니맵·알림·디버그 표시. Run·Lab 씬 위에 겹쳐 돈다(HUD는 런 중에만). */
 export class UIScene extends Phaser.Scene {
@@ -108,6 +109,12 @@ export class UIScene extends Phaser.Scene {
         // 회피 버튼: 이름(전직하면 바뀜), 대기 중이면 남은 초
         const dv = s.dodgeView;
         this.ctx.touch.setLabel('dodge', dv.left > 0 ? dv.left.toFixed(1) : this.ctx.t(dv.nameKey));
+        // 무기 특수공격 버튼: 특수공격이 있는 무기면 그 이름, 없으면 흐리게
+        const held = activeWeapon(s.player.weapons);
+        const special = held ? this.ctx.data.weapons.weapons.find((w) => w.id === held.defId) : undefined;
+        const has = !!special?.needle;
+        this.ctx.touch.setLabel('weaponSpecial', has ? this.ctx.t(special!.abilityNameKey!) : this.ctx.t('mobile.special'));
+        this.ctx.touch.setDisabled('weaponSpecial', !has);
       }
     }
 

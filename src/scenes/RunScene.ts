@@ -10,6 +10,7 @@ import { SkillRuntime } from './run/skillRuntime';
 import { Encounters } from './run/encounters';
 import { Progression } from './run/progression';
 import { WeaponCombat } from './run/weaponCombat';
+import { SpecialWeapons } from './run/specialWeapons';
 import { StageFx } from './run/stageFx';
 import { PlayerCondition } from './run/playerCondition';
 import { RoomProps } from './run/roomProps';
@@ -67,6 +68,7 @@ export class RunScene extends Phaser.Scene {
   condition!: PlayerCondition;
   stageFx!: StageFx;
   combat!: WeaponCombat;
+  special!: SpecialWeapons;
   progression!: Progression;
   encounters!: Encounters;
   skillRt!: SkillRuntime;
@@ -162,6 +164,7 @@ export class RunScene extends Phaser.Scene {
     this.roomProps = new RoomProps(this);
     this.ctx = getContext();
     const d = this.ctx.data;
+    this.special = new SpecialWeapons(this);
     this.resetFields();
 
     const stage = this.initData.stage ?? firstStage();
@@ -300,6 +303,8 @@ export class RunScene extends Phaser.Scene {
     if (stage.chapter === 1 && stage.stage === 1 && this.ctx.config.testWeapons) this.world.placeTestWeapons();
     // 런 시작: 무기 대신 무기 상자
     if (newRun) this.loot.addChest('weapon', start.x, start.y + d.mapgen.startChestOffsetPx, d.loot.startChest);
+    // 체납자의 의수: 스테이지에 들어서면 징수 (등장 연출이 끝난 뒤 보이게 조금 늦춘다)
+    else this.time.delayedCall(d.weapons.debtDelaySec * 1000, () => this.special.collectDebts());
 
     this.physics.add.collider(this.player, this.walls);
     this.physics.add.collider(this.player, this.doorGroup);
@@ -585,7 +590,7 @@ export class RunScene extends Phaser.Scene {
       frame = { ...frame, move: { x: 0, y: 0 }, pressed };
     }
     this.condition.updateDodge(dt, frame);
-    const speed = d.player.moveSpeed * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus()) * (1 + this.combat.chargeMoveBonus());
+    const speed = d.player.moveSpeed * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus()) * (1 + this.combat.chargeMoveBonus()) * (1 + this.special.moveBonus());
     if (this.dashLeft > 0) {
       // MK 돌진: 입력 대신 돌진 방향으로
       this.dashLeft -= dt;
@@ -633,6 +638,9 @@ export class RunScene extends Phaser.Scene {
     if (frame.pressed.has('interact')) this.loot.interact();
 
     this.combat.updateAttack(dt, frame.held.has('attack'), aimAngle);
+    // 무기 특수공격 (Q): 지금은 공간봉합침 회수
+    if (frame.pressed.has('weaponSpecial')) this.useWeaponSpecial();
+    this.special.update(dt);
 
     // 스킬
     p.cooldowns = tickCooldowns(p.cooldowns, dt);
@@ -911,6 +919,13 @@ export class RunScene extends Phaser.Scene {
     return this.weaponDefOf(this.fistItem().defId).spriteKey;
   }
 
+  /** 무기 특수공격 버튼: 들고 있는 무기에 특수공격이 없거나 쓸 것이 없으면 짧게 알린다 */
+  useWeaponSpecial(): void {
+    const def = this.weaponDef();
+    if (def.needle && this.special.recallNeedles(def)) return;
+    this.toastThrottled(this.ctx.t(def.needle ? 'weapon.noNeedles' : 'weapon.noSpecial'));
+  }
+
   weaponDef(): WeaponDef {
     return this.weaponDefOf(this.weaponItem().defId);
   }
@@ -918,6 +933,8 @@ export class RunScene extends Phaser.Scene {
   /** 등급 배율·옵션을 반영한 무기 수치. 태그 보정은 hit()에서 */
   weaponStatsOf(item: WeaponItem): WeaponStats {
     const g = this.ctx.data.groupMultipliers;
+    // 징수를 못 낸 의수는 주먹과 같은 성능
+    if (item.unpaid) return this.weaponStatsOf(this.fistItem());
     return weaponStats(this.weaponDefOf(item.defId), item, gradeMultiplier(item.grade, g), gradeEnergyMultiplier(item.grade, g));
   }
 

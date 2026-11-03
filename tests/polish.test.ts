@@ -175,7 +175,7 @@ describe('무기 밸런스', () => {
     expect(w('greatsword').grade).toBe('rare');
     expect(D.weapons.weapons.some((x) => x.id === 'longsword')).toBe(false);
     for (const x of D.weapons.weapons.filter((y) => y.grade === 'legendary')) {
-      expect(!!(x.signature || x.pierce || x.chargeMoveSpeed || x.meleeShot || x.charge), x.id).toBe(true);
+      expect(!!(x.signature || x.pierce || x.chargeMoveSpeed || x.meleeShot || x.charge || x.pattern.kind === 'meteor' || x.needle || x.beam), x.id).toBe(true);
     }
   });
   it('활은 차징 무기, 화살 그림이 있다', () => {

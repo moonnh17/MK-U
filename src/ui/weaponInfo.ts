@@ -41,6 +41,22 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
   if (def.selfBuff) out.push({ text: t('weapon.sigDesc.gust', { dmg: Math.round(def.selfBuff.damage * 100), sec: def.selfBuff.sec }), sig: true });
   const sig = def.signature;
   if (def.lunge) out.push({ text: t('weapon.sigDesc.lunge'), sig: true });
+  // 이름 있는 고유 능력·특수공격은 제목을 붙인다 (도감은 굵은 제목으로 따로)
+  const titled = (desc: string): WeaponInfoLine => {
+    const title = def.abilityNameKey ? t(def.abilityNameKey) : undefined;
+    return { text: title ? t('weapon.sigLine', { title, desc }) : desc, sig: true, title, desc };
+  };
+  if (def.boomerang) out.push({ text: t('weapon.sigDesc.boomerang', { n: def.boomerang.charges }), sig: true });
+  if (def.needle) {
+    const n = def.needle;
+    out.push({ text: t('weapon.sigDesc.needle', { tick: n.tickSec, line: n.lineDamageMul, max: n.max, life: n.lifeSec }), sig: true });
+    out.push(titled(t('weapon.sigDesc.recall', { n: n.recallDamageMul })));
+  }
+  if (def.energyRange && def.selfDestruct) {
+    out.push(titled(t('weapon.sigDesc.bootleg', { min: def.energyRange[0], max: def.energyRange[1], pct: Math.round(def.selfDestruct.chance * 1000) / 10 })));
+  }
+  if (def.debt) out.push(titled(t('weapon.sigDesc.debt', { n: def.debt.coins, move: Math.round(def.debt.moveSpeed * 100) })));
+  if (def.beam) out.push({ text: t('weapon.sigDesc.beam', { gain: def.beam.energyGain, n: def.beam.stacks, dmg: def.beam.empowered.damageMul }), sig: true });
   if (sig) {
     const params: Record<string, string | number> = { every: sig.every };
     let key: string = sig.kind === 'laser' && sig.every === 1 ? 'weapon.sigDesc.beam' : `weapon.sigDesc.${sig.kind}`;

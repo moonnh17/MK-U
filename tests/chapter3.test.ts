@@ -205,9 +205,9 @@ describe('체력 단계 (마기카이저)', () => {
 });
 
 describe('식광의 핵', () => {
-  it('식광 전용 유니크 무기: 적 자리에 운석', () => {
+  it('식광 전용 전설(특별) 무기: 적 자리에 운석', () => {
     const w = gameData.weapons.weapons.find((x) => x.id === 'eclipseCore')!;
-    expect(w).toMatchObject({ grade: 'unique', bossId: 'eclipse', droppable: false });
+    expect(w).toMatchObject({ grade: 'legendary', showcase: true, bossId: 'eclipse', droppable: false });
     expect(w.pattern.kind).toBe('meteor');
   });
 });
