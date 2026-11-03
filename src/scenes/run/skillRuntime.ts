@@ -73,6 +73,7 @@ export class SkillRuntime {
         ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gaugeFromGreatSuccess(udef));
       },
       buffDuration: (sec, tags) => sec * (tags.includes('buff') ? 1 + this.run.itemRt.sums.buffDuration : 1),
+      chargeTime: (sec) => sec * (1 - this.run.itemRt.sums.chargeTime),
       shield: () => this.shield,
       setShield: (shield, opts) => {
         this.shield = shield;

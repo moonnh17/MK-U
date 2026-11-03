@@ -10,7 +10,7 @@ import { plainWeapon } from '../systems/weapons';
 import type { GroupMultipliersData, ItemDef } from '../types/data';
 import { weaponInfoLines } from './weaponInfo';
 
-const PCT = new Set(['damage', 'enemyTaken', 'damageTaken', 'coinGain', 'energyGain', 'area', 'buffDuration', 'skillDamage', 'moveSpeed', 'skillCooldown']);
+const PCT = new Set(['damage', 'enemyTaken', 'damageTaken', 'coinGain', 'energyGain', 'chargeTime', 'area', 'buffDuration', 'skillDamage', 'moveSpeed', 'skillCooldown']);
 
 function num(v: number): string {
   return String(Math.round(v * 10) / 10);

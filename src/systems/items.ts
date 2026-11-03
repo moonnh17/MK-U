@@ -52,6 +52,10 @@ export interface ItemTotals {
   coinGain: number;
   maxEnergy: number;
   energyGain: number;
+  /** 차징 시간 감소 비율 */
+  chargeTime: number;
+  /** 무기 레이저가 벽에서 튕기는 횟수 */
+  laserBounce: number;
   area: number;
   buffDuration: number;
   skillDamage: Record<string, number>;
@@ -99,6 +103,8 @@ export function itemTotals(
     coinGain: 0,
     maxEnergy: 0,
     energyGain: 0,
+    chargeTime: 0,
+    laserBounce: 0,
     area: 0,
     buffDuration: 0,
     skillDamage: {},
@@ -140,6 +146,12 @@ export function itemTotals(
           break;
         case 'energyGain':
           t.energyGain += e.value;
+          break;
+        case 'chargeTime':
+          t.chargeTime += e.value;
+          break;
+        case 'laserBounce':
+          t.laserBounce += e.bounces;
           break;
         case 'area':
           t.area += e.value;

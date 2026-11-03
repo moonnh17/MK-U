@@ -47,6 +47,8 @@ export interface SkillHost {
   objects(): readonly SkillObject[];
   /** 시간제 버프 지속시간 (버프 태그: 정신력) */
   buffDuration(baseSec: number, tags: readonly TagId[]): number;
+  /** 차징 시간 (아이템의 차징 시간 감소 반영) */
+  chargeTime(baseSec: number): number;
   /** 지금 보호막 (없으면 null) */
   shield(): ShieldState | null;
   /** 플레이어 보호막(마기역장)을 씌운다 */

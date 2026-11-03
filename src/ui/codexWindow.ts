@@ -33,6 +33,8 @@ interface SkillVariant {
   desc: string;
   note: string;
   awakened?: boolean;
+  /** 이 단계의 태그 (각성하면 바뀔 수 있다) */
+  tags?: readonly TagId[];
 }
 
 function fmt(values: Record<string, number>): Record<string, string> {
@@ -50,7 +52,7 @@ function itemStatRows(def: ItemDef, d: GameData, t: GameContext['t']): [string, 
     else if (e.kind === 'maxHp' || e.kind === 'maxSanity' || e.kind === 'pellets' || e.kind === 'maxEnergy') rows.push([t(`codex.istat.${e.kind}`), flat(e.value)]);
     else if (e.kind === 'moveSpeed' || e.kind === 'enemyTaken' || e.kind === 'coinGain' || e.kind === 'energyGain' || e.kind === 'area' || e.kind === 'buffDuration') rows.push([t(`codex.istat.${e.kind}`), pc(e.value)]);
     // 쿨타임 감소·받는 피해 감소는 값이 양수일 때 줄어드는 쪽
-    else if (e.kind === 'skillCooldown' || e.kind === 'damageTaken') rows.push([t(`codex.istat.${e.kind}`), pc(-e.value)]);
+    else if (e.kind === 'skillCooldown' || e.kind === 'damageTaken' || e.kind === 'chargeTime') rows.push([t(`codex.istat.${e.kind}`), pc(-e.value)]);
     else if (e.kind === 'skillDamage') rows.push([t('codex.istat.skillDamage', { skill: t(findSkill(d.skills, e.skillId).nameKey) }), pc(e.value)]);
   }
   return rows;
@@ -233,8 +235,6 @@ export class CodexWindow {
         fx.appendChild(sp);
       }
       c.appendChild(fx);
-      // 보스가 남기는 특별한 전설: 빛줄기도 뿜는다
-      if (a.showcase) c.appendChild(this.el('span', 'cx-rays'));
     } else if (a.grade === 'mythic') {
       // 신화: 칸 뒤에서 빛줄기가 사방으로 뿜어져 나온다
       c.classList.add('fx-mythic');
@@ -247,7 +247,7 @@ export class CodexWindow {
     return c;
   }
 
-  private art(e: CodexEntry): { key: string; color: string; ring?: string; grade?: string; showcase?: boolean } {
+  private art(e: CodexEntry): { key: string; color: string; ring?: string; grade?: string } {
     const d = this.ctx.data;
     const grade = (g: string) => d.groupMultipliers.grades.find((x) => x.id === g)?.color;
     if (e.kind === 'enemy') {
@@ -261,7 +261,7 @@ export class CodexWindow {
       return { key: def.spriteKey, color: def.color, ring: grade(def.grade), grade: def.grade };
     }
     const w = d.weapons.weapons.find((x) => x.id === e.id)!;
-    return { key: w.spriteKey, color: w.color, ring: grade(w.grade), grade: w.grade, showcase: w.showcase };
+    return { key: w.spriteKey, color: w.color, ring: grade(w.grade), grade: w.grade };
   }
 
   private name(e: CodexEntry): string {
@@ -422,12 +422,20 @@ export class CodexWindow {
     const title = this.el('b', '');
     const desc = this.el('span', '');
     const note = this.el('small', '');
+    const tagRow = this.el('div', 'cw-badges cx-skill-tags');
     const tabs = this.el('div', 'cx-lv');
     const show = (i: number) => {
       const v = variants[i]!;
       title.textContent = v.title;
       desc.textContent = v.desc;
       note.textContent = v.note;
+      tagRow.replaceChildren(
+        ...tagBadges(v.tags ?? [], this.ctx.data.tags).map((b) => {
+          const el = this.el('span', '', this.ctx.t(b.nameKey));
+          el.style.background = b.color;
+          return el;
+        }),
+      );
       tabs.querySelectorAll('button').forEach((b, k) => b.classList.toggle('on', k === i));
       line.classList.toggle('awakened', !!v.awakened);
     };
@@ -436,7 +444,7 @@ export class CodexWindow {
       b.addEventListener('click', () => show(i));
       tabs.appendChild(b);
     });
-    text.append(title, desc, note, tabs);
+    text.append(title, tagRow, desc, note, tabs);
     line.append(icon, text);
     show(0);
     return line;
@@ -567,13 +575,14 @@ export class CodexWindow {
         const cd = (sec: number) => (passive ? '' : t('inventory.detailCooldown', { sec: Math.round(sec * 10) / 10 }));
         const levels = s.levels.map((_, i): SkillVariant => {
           const v = skillValues(s, { level: i + 1, awakened: false });
-          return { label: `Lv${i + 1}`, title: `${t(s.nameKey)}${passive ? ` (${t('card.passive')})` : ''}`, desc: t(s.descKey, fmt(v.values)), note: cd(v.cooldownSec) };
+          return { label: `Lv${i + 1}`, title: `${t(s.nameKey)}${passive ? ` (${t('card.passive')})` : ''}`, desc: t(s.descKey, fmt(v.values)), note: cd(v.cooldownSec), tags: s.tags };
         });
         const aw = skillValues(s, { level: s.levels.length, awakened: true });
         const awakened: SkillVariant = {
           label: t('codex.lv.awakened'),
           awakened: true,
           title: `★ ${t(s.awakening.nameKey)}`,
+          tags: s.awakening.tags,
           desc: t(s.awakening.descKey, fmt(aw.values)),
           note: [cd(aw.cooldownSec), t('codex.needItem', { item: itemName(s.awakening.requiredItem) })].filter(Boolean).join(' · '),
         };
@@ -582,12 +591,13 @@ export class CodexWindow {
     );
     const ult = d.ultimates.ultimates.find((u) => u.id === adv.ultimate);
     if (ult) {
-      const variants: SkillVariant[] = [{ label: t('codex.lv.base'), title: t(ult.nameKey), desc: t(ult.descKey, fmt(ult.values)), note: '' }];
+      const variants: SkillVariant[] = [{ label: t('codex.lv.base'), title: t(ult.nameKey), desc: t(ult.descKey, fmt(ult.values)), note: '', tags: ult.tags }];
       if (ult.awakening)
         variants.push({
           label: t('codex.lv.awakened'),
           awakened: true,
           title: `★ ${t(ult.awakening.nameKey)}`,
+          tags: ult.awakening.tags,
           desc: t(ult.awakening.descKey, fmt({ ...ult.values, ...ult.awakening.values })),
           note: t('codex.needItem', { item: itemName(ult.awakening.requiredItem) }),
         });
@@ -621,7 +631,8 @@ export class CodexWindow {
     }
     // 버프 이름(화면 왼쪽 버프 목록과 같은 이름)을 효과 위 굵은 제목으로. 태세처럼 둘이면 '/'로
     const bk = `item.${id}.buff`;
-    const buffNames = [bk, `${bk}.attack`, `${bk}.defense`].filter((k) => t(k) !== k).map((k) => t(k));
+    // 추가 능력 이름도 같은 제목으로 (아크룩스의 십자가 '부활과 대속' 등)
+    const buffNames = [...(def.abilityNameKey ? [t(def.abilityNameKey)] : []), ...[bk, `${bk}.attack`, `${bk}.defense`].filter((k) => t(k) !== k).map((k) => t(k))];
     if (buffNames.length) box.appendChild(this.el('b', 'cx-buff-name', buffNames.join(' / ')));
     box.appendChild(this.el('p', 'cx-desc', t(def.descKey, itemDescParams(def, d.groupMultipliers))));
     this.flavor(box, def.flavor, 'cx-flavor small');
@@ -641,6 +652,8 @@ export class CodexWindow {
     const w = d.weapons.weapons.find((x) => x.id === id)!;
     const grade = d.groupMultipliers.grades.find((g) => g.id === w.grade);
     this.chip(chips, grade ? t(grade.nameKey) : w.grade, grade?.color);
+    // 무기 분류 (산탄·레이저 등)
+    for (const c of w.classes) this.chip(chips, t(d.weapons.classes.find((x) => x.id === c)?.nameKey ?? c));
     this.chip(chips, t(`weapon.category.${w.category}`));
     const hidden = d.bosses.hiddenBosses.find((b) => b.weaponId === id);
     const set = d.items.weaponSets.find((s) => s.result === id);

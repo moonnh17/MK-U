@@ -176,6 +176,8 @@ export interface WeaponDef extends SpriteRef {
   flavor?: string;
   category: WeaponCategory;
   grade: GradeId;
+  /** 무기 분류 id (weapons.classes) */
+  classes: string[];
   tags: TagId[];
   /** 기준 피해 (그룹 배율 적용 전) */
   baseDamage: number;
@@ -215,7 +217,7 @@ export interface WeaponDef extends SpriteRef {
    * 되돌아오는 원반 (궤도절삭륜): 충전이 있을 때 던지고, 관통하며 range까지 날아간 뒤 플레이어를 따라 돌아온다.
    * 가는 길·오는 길 모두 피해, 잡으면 충전 하나가 바로 찬다. maxSec이 지나면 사라지고 충전이 돌아온다
    */
-  boomerang?: { charges: number; range: number; returnSpeed: number; catchPx: number; maxSec: number; spinPerSec: number; shot: SpriteRef };
+  boomerang?: { charges: number; /** 산탄 아이템(발사 탄수 +)으로 늘어나는 충전 상한 */ maxExtraCharges: number; range: number; returnSpeed: number; catchPx: number; maxSec: number; spinPerSec: number; shot: SpriteRef };
   /**
    * 공간봉합침 (아크로제): 침이 적이나 벽에 박힌다. 박힌 침은 가까운 순서로 이어져 절단선이 되고 tickSec마다 선에 닿은 적에게 피해.
    * 최대 max개(넘으면 가장 오래된 것부터 사라짐), lifeSec 뒤 사라짐. 특수공격(Q)으로 모두 회수하며 지나는 길의 적에게 피해
@@ -246,8 +248,6 @@ export interface WeaponDef extends SpriteRef {
   };
   /** 이름 있는 고유 능력·특수공격 (도감 굵은 제목). 특수공격 버튼(Q)으로 쓰는 것은 needle 회수 */
   abilityNameKey?: string;
-  /** 도감에서 특별한 칸으로 (보스가 남기는 전설) */
-  showcase?: boolean;
   /** 공격할 때 흘리는 파티클 */
   attackParticles?: { color: string };
   /** 그림 안 마력 중심(가로·세로 0~1). onCharge면 차징 중, 아니면 발사 때 번쩍인다 */
@@ -290,6 +290,8 @@ export interface WeaponsData {
   swapDelaySec: number;
   /** 체납자의 의수 징수를 스테이지 시작 뒤 몇 초에 할지 */
   debtDelaySec: number;
+  /** 무기 분류 (산탄·레이저 등). 아이템 효과가 분류를 보고 붙는다 (산탄: 발사 탄수 +) */
+  classes: { id: string; nameKey: string }[];
   /** 근접 이펙트: 흑백 그림에 무기 색을 입힌다. glowAlpha: 밝은 심을 더하는 겹 / buffSparkSec: 버프 불티 간격 */
   meleeFx: { slash: SpriteRef; slam: SpriteRef; slashBig: SpriteRef; slamBig: SpriteRef; buffAura: SpriteRef; glowAlpha: number; buffSparkSec: number };
   options: WeaponOptionDef[];
@@ -974,6 +976,10 @@ export type ItemEffect =
   | { kind: 'maxEnergy'; value: number; group: 'hpFlat' }
   /** 에너지 구슬로 얻는 에너지 증가 */
   | { kind: 'energyGain'; value: number; group: 'damagePct' }
+  /** 무기 레이저가 벽에 닿으면 bounces번 튕긴다 (스넬의 법칙) */
+  | { kind: 'laserBounce'; bounces: number }
+  /** 차징 시간 감소 (무기 차징·차징 스킬) */
+  | { kind: 'chargeTime'; value: number; group: 'damagePct' }
   /** 공격 범위(스킬 범위·근접 무기 범위·폭발 반지름) */
   | { kind: 'area'; value: number; group: 'damagePct' }
   | { kind: 'buffDuration'; value: number; group: 'damagePct' }
@@ -1043,6 +1049,8 @@ export interface ItemDef extends SpriteRef {
   descKey: string;
   /** 도감 효과 아래 플레이버 문구 (ko.json 키) */
   flavor?: string;
+  /** 추가 능력의 이름 (도감 굵은 제목) */
+  abilityNameKey?: string;
   grade: GradeId;
   /** normal: 상자·첨탑 / boss: 그 보스 처치로만 / hiddenBoss: 히든보스 처치로만 / set: 세트 합성으로만 */
   pool: ItemPool;

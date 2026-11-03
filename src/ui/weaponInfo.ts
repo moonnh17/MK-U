@@ -56,7 +56,10 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
     out.push(titled(t('weapon.sigDesc.bootleg', { min: def.energyRange[0], max: def.energyRange[1], pct: Math.round(def.selfDestruct.chance * 1000) / 10 })));
   }
   if (def.debt) out.push(titled(t('weapon.sigDesc.debt', { n: def.debt.coins, move: Math.round(def.debt.moveSpeed * 100) })));
-  if (def.beam) out.push({ text: t('weapon.sigDesc.beam', { gain: def.beam.energyGain, n: def.beam.stacks, dmg: def.beam.empowered.damageMul }), sig: true });
+  if (def.beam) {
+    out.push({ text: t('weapon.sigDesc.beam', { gain: def.beam.energyGain }), sig: true });
+    out.push(titled(t('weapon.sigDesc.beamCharge', { n: def.beam.stacks, dmg: def.beam.empowered.damageMul })));
+  }
   if (sig) {
     const params: Record<string, string | number> = { every: sig.every };
     let key: string = sig.kind === 'laser' && sig.every === 1 ? 'weapon.sigDesc.beam' : `weapon.sigDesc.${sig.kind}`;

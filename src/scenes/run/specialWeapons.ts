@@ -94,6 +94,46 @@ export class SpecialWeapons {
     return d;
   }
 
+  /**
+   * 무기 레이저의 길: 벽·장애물에서 끊긴다. 스넬의 법칙이 있으면 닿은 면에서 반사해 남은 길이만큼 이어진다
+   * (막힌 축의 방향만 뒤집는다. 모서리면 둘 다)
+   */
+  laserPath(origin: Vec2, dir: Vec2, length: number): { from: Vec2; dir: Vec2; len: number }[] {
+    const out: { from: Vec2; dir: Vec2; len: number }[] = [];
+    let from = origin;
+    let d = dir;
+    let left = length;
+    let bounces = this.run.itemRt.sums.laserBounce;
+    for (;;) {
+      const len = this.clipRay(from, d, left);
+      out.push({ from, dir: d, len });
+      left -= len;
+      if (left < RAY_STEP || bounces <= 0 || len < RAY_STEP) return out;
+      bounces--;
+      const at = { x: from.x + d.x * len, y: from.y + d.y * len };
+      const flipX = !this.open({ x: at.x + d.x * RAY_STEP, y: at.y });
+      const flipY = !this.open({ x: at.x, y: at.y + d.y * RAY_STEP });
+      d = { x: flipX || !flipY ? -d.x : d.x, y: flipY || !flipX ? -d.y : d.y };
+      from = at;
+    }
+  }
+
+  /** 레이저 길 위의 적에게 피해 (반사돼 같은 적을 다시 지나도 한 번). 맞힌 적 수 */
+  laserHits(path: readonly { from: Vec2; dir: Vec2; len: number }[], width: number, damage: (e: Enemy) => void): number {
+    const enemies = this.live();
+    const pts = enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius }));
+    const done = new Set<Enemy>();
+    for (const s of path) {
+      for (const i of lineHits(s.from, s.dir, s.len, width / 2, pts)) {
+        const e = enemies[i]!;
+        if (done.has(e)) continue;
+        done.add(e);
+        damage(e);
+      }
+    }
+    return done.size;
+  }
+
   private live(): Enemy[] {
     return this.run.enemies.filter((e) => !e.dead);
   }
@@ -127,9 +167,17 @@ export class SpecialWeapons {
 
   // ---------- 궤도절삭륜 ----------
 
+  /** 원반 최대 충전: 산탄 분류라 발사 탄수 + 아이템만큼 늘어난다 (maxExtraCharges까지) */
+  discMax(def: WeaponDef): number {
+    const b = def.boomerang;
+    if (!b) return 0;
+    const extra = def.classes.includes('spread') ? Math.min(b.maxExtraCharges, Math.floor(this.run.itemRt.sums.pellets)) : 0;
+    return b.charges + extra;
+  }
+
   /** 남은 원반 충전 */
   discCharges(def: WeaponDef): number {
-    return (def.boomerang?.charges ?? 0) - this.discs.filter((d) => d.def === def).length;
+    return this.discMax(def) - this.discs.filter((d) => d.def === def).length;
   }
 
   throwDisc(def: WeaponDef, st: WeaponStats, from: Vec2, angle: number): void {
@@ -361,17 +409,15 @@ export class SpecialWeapons {
     const empowered = beamEmpowered(this.beamStacks, b.stacks);
     const origin = this.run.combat.muzzle();
     const dir = { x: Math.cos(aimAngle), y: Math.sin(aimAngle) };
-    const len = this.clipRay(origin, dir, (empowered ? b.empowered.length : b.length) * (1 + this.run.itemRt.sums.area));
+    const path = this.laserPath(origin, dir, (empowered ? b.empowered.length : b.length) * (1 + this.run.itemRt.sums.area));
     const width = empowered ? b.empowered.width : b.width;
-    const enemies = this.live();
-    const idx = lineHits(origin, dir, len, width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
-    for (const i of idx) this.hit(enemies[i]!, st.damage * (empowered ? b.empowered.damageMul : 1), st.critChance, def);
+    const hits = this.laserHits(path, width, (e) => this.hit(e, st.damage * (empowered ? b.empowered.damageMul : 1), st.critChance, def));
     // 관통으로 여럿 맞혀도 에너지 회복·충전은 발사 한 번에 한 번
     const p = this.run.session.player;
-    if (idx.length > 0) p.energy = gainEnergy(p.energy, b.energyGain, p.energyMax);
+    if (hits > 0) p.energy = gainEnergy(p.energy, b.energyGain, p.energyMax);
     const before = this.beamStacks;
-    this.beamStacks = beamStacksAfter(this.beamStacks, b.stacks, idx.length > 0);
-    this.beamFx(def, origin, dir, len, width, empowered);
+    this.beamStacks = beamStacksAfter(this.beamStacks, b.stacks, hits > 0);
+    for (const s of path) this.beamFx(def, s.from, s.dir, s.len, width, empowered);
     this.glyphs(origin, b.glyphColor, empowered ? 6 : 3);
     if (this.beamStacks > before) this.stackFx(def);
     if (empowered) {
@@ -442,7 +488,7 @@ export class SpecialWeapons {
     this.pips.clear();
     const at = this.gaugePos();
     const dots = def.boomerang
-      ? { on: this.discCharges(def), all: def.boomerang.charges, color: def.attackParticles?.color ?? '#5ad9ff' }
+      ? { on: this.discCharges(def), all: this.discMax(def), color: def.attackParticles?.color ?? '#5ad9ff' }
       : def.needle
         ? { on: this.needles.filter((n) => n.stuck).length, all: def.needle.max, color: def.needle.color }
         : null;

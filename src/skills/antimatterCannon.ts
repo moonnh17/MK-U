@@ -31,7 +31,7 @@ class Charge implements SkillObject {
     private readonly s: SkillCast,
   ) {
     this.createdAt = host.scene.time.now;
-    this.total = s.values.chargeSec!;
+    this.total = host.chargeTime(s.values.chargeSec!);
     this.shotsLeft = s.owned.awakened ? s.values.barrels! : 1;
     this.shotsTotal = this.shotsLeft;
     const ref = s.owned.awakened ? s.def.sprites.chargeA! : levelRef(s, 'charge');

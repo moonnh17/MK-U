@@ -358,6 +358,12 @@ body {
   gap: 3px;
 }
 
+.cx-skill-tags {
+  margin: 2px 0;
+}
+.cx-skill-tags:empty {
+  display: none;
+}
 .cw-badges span {
   font-size: 10px;
   padding: 1px 5px;

@@ -60,3 +60,36 @@ describe('등급 이동', () => {
     }
   });
 });
+
+describe('무기 분류·차징 태그', () => {
+  const weapons = gameData.weapons.weapons;
+  it('모든 무기는 아는 분류가 하나 이상', () => {
+    const ids = new Set(gameData.weapons.classes.map((c) => c.id));
+    for (const w of weapons) {
+      expect(w.classes.length, w.id).toBeGreaterThan(0);
+      for (const c of w.classes) expect(ids.has(c), `${w.id}:${c}`).toBe(true);
+    }
+  });
+  it('여러 발 쏘는 무기와 궤도절삭륜은 산탄, 레이저 무기는 레이저', () => {
+    for (const w of weapons.filter((x) => x.pattern.kind === 'spread')) expect(w.classes, w.id).toContain('spread');
+    expect(W('orbitalDisc').classes).toContain('spread');
+    expect(W('orbitalDisc').boomerang!.maxExtraCharges).toBe(1);
+    expect(W('hwanRemnant').classes).toContain('laser');
+    expect(W('ancientCore').classes).toContain('laser');
+  });
+  it('차징 무기는 차징 태그', () => {
+    for (const w of weapons.filter((x) => x.charge)) expect(w.tags, w.id).toContain('charging');
+  });
+});
+
+describe('스넬의 법칙·LK-99', () => {
+  const item = (id: string) => gameData.items.items.find((x) => x.id === id)!;
+  it('스넬의 법칙: 기술 피해 없음, 레이저 튕김 1', () => {
+    expect(item('snellLaw').effects.some((e) => e.kind === 'damage')).toBe(false);
+    expect(item('snellLaw').effects).toContainEqual({ kind: 'laserBounce', bounces: 1 });
+  });
+  it('LK-99: 모든 피해 15%, 차징 시간 -10%', () => {
+    expect(item('lk99').effects).toContainEqual({ kind: 'damage', scope: 'all', value: 0.15, group: 'damagePct' });
+    expect(item('lk99').effects).toContainEqual({ kind: 'chargeTime', value: 0.1, group: 'damagePct' });
+  });
+});

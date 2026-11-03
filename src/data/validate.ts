@@ -106,8 +106,13 @@ export function validateGameData(d: GameData): Errors {
   else if (fist.droppable || fist.category !== 'blade' || fist.energyCost !== 0) errors.push('weapons.fistWeapon: 에너지 없는 칼, droppable false');
   checkSprite(errors, 'weapons.projectile', d.weapons.projectile);
   for (const k of ['slash', 'slam', 'slashBig', 'slamBig', 'buffAura'] as const) checkSprite(errors, `weapons.meleeFx.${k}`, d.weapons.meleeFx[k]);
+  const classIds = new Set(d.weapons.classes.map((c) => c.id));
   for (const wpn of d.weapons.weapons) {
     const w = `weapons.${wpn.id}`;
+    if (!wpn.classes?.length) errors.push(`${w}.classes: 분류가 하나 이상 필요`);
+    for (const c of wpn.classes ?? []) if (!classIds.has(c)) errors.push(`${w}.classes: 없는 분류 '${c}'`);
+    if (wpn.pattern.kind === 'spread' && !wpn.classes?.includes('spread')) errors.push(`${w}: 부채꼴 사격은 산탄 분류`);
+    if (wpn.charge && !wpn.tags.includes('charging')) errors.push(`${w}: 차징 무기는 차징 태그`);
     checkSprite(errors, w, wpn);
     needText(w, wpn.nameKey);
     if (!gradeIds.has(wpn.grade)) errors.push(`${w}: 알 수 없는 등급 '${wpn.grade}'`);

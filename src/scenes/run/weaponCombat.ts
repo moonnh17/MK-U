@@ -69,7 +69,8 @@ export class WeaponCombat {
       this.spinIdle += dt;
       if (this.spinIdle > def.spinUp.resetSec) this.spinShots = 0;
     }
-    const charge = def.charge;
+    // LK-99: 차징 시간 감소
+    const charge = def.charge ? { ...def.charge, maxSec: def.charge.maxSec * (1 - this.run.itemRt.sums.chargeTime) } : undefined;
     if (!charge) {
       if (held && this.fireCooldown <= 0) this.attack(aimAngle, 0);
       return;
@@ -427,22 +428,20 @@ export class WeaponCombat {
   weaponLaser(w: WeaponDef, base: number, crit: number, aimAngle: number, length: number, width: number, beamKey?: string): void {
     const origin = { x: this.run.player.x, y: this.run.player.y };
     const dir = { x: Math.cos(aimAngle), y: Math.sin(aimAngle) };
-    const len = length * (1 + this.run.itemRt.sums.area);
-    const enemies = [...this.run.enemies];
-    const idx = lineHits(origin, dir, len, width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
-    for (const i of idx) {
-      const e = enemies[i]!;
-      this.hit(e, this.critRoll(base, crit, { x: e.sprite.x, y: e.sprite.y }), w.tags);
+    // 벽에서 끊기고, 스넬의 법칙이 있으면 반사된다
+    const path = this.run.special.laserPath(origin, dir, length * (1 + this.run.itemRt.sums.area));
+    this.run.special.laserHits(path, width, (e) => this.hit(e, this.critRoll(base, crit, { x: e.sprite.x, y: e.sprite.y }), w.tags));
+    for (const s of path) {
+      if (beamKey && this.run.textures.exists(beamKey)) {
+        // 그림 레이저: 길이에 맞춰 늘려 뻗는다
+        const beam = this.run.add.image(s.from.x, s.from.y, beamKey).setOrigin(0, 0.5).setDepth(6).setRotation(Math.atan2(s.dir.y, s.dir.x)).setDisplaySize(Math.max(1, s.len), width * 2.5);
+        this.run.tweens.add({ targets: beam, alpha: 0, duration: 180, onComplete: () => beam.destroy() });
+        continue;
+      }
+      const g = this.run.add.graphics().setDepth(6);
+      g.lineStyle(width, hexColor(w.color), 0.8).lineBetween(s.from.x, s.from.y, s.from.x + s.dir.x * s.len, s.from.y + s.dir.y * s.len);
+      this.run.time.delayedCall(this.run.ctx.data.ui.slashFxSec * 1000, () => g.destroy());
     }
-    if (beamKey && this.run.textures.exists(beamKey)) {
-      // 그림 레이저: 길이에 맞춰 늘려 총구에서 뻗는다
-      const beam = this.run.add.image(origin.x, origin.y, beamKey).setOrigin(0, 0.5).setDepth(6).setRotation(aimAngle).setDisplaySize(len, width * 2.5);
-      this.run.tweens.add({ targets: beam, alpha: 0, duration: 180, onComplete: () => beam.destroy() });
-      return;
-    }
-    const g = this.run.add.graphics().setDepth(6);
-    g.lineStyle(width, hexColor(w.color), 0.8).lineBetween(origin.x, origin.y, origin.x + dir.x * len, origin.y + dir.y * len);
-    this.run.time.delayedCall(this.run.ctx.data.ui.slashFxSec * 1000, () => g.destroy());
   }
 
   fireBullet(

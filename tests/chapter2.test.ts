@@ -46,7 +46,7 @@ describe('챕터2 보스 전용 아이템', () => {
   });
   it('고대병기의 코어: 마기골렘 전용 전설(특별) 레이저 무기', () => {
     const w = gameData.weapons.weapons.find((x) => x.id === 'ancientCore')!;
-    expect(w).toMatchObject({ grade: 'legendary', showcase: true, bossId: 'magiGolem', droppable: false });
+    expect(w).toMatchObject({ grade: 'legendary', bossId: 'magiGolem', droppable: false });
     expect(w.signature).toMatchObject({ kind: 'laser', every: 1 });
   });
 });
