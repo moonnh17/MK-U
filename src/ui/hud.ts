@@ -3,7 +3,7 @@ import type { ButtonAction } from '../core/actions';
 import type { GameContext } from '../core/context';
 import { DISABLED_ACTIONS } from '../core/features';
 import { hexColor } from '../core/scale';
-import { buffText, type RunSession } from '../core/session';
+import type { RunSession } from '../core/session';
 import type { UiMode } from '../input/uiMode';
 import { storedSkills } from '../systems/skills';
 import { gradeEnergyMultiplier } from '../systems/damage';
@@ -45,6 +45,15 @@ interface SlotUi {
  * PC: 좌상단 체력·보호막·에너지 바 / 우상단 미니맵 / 하단 중앙 스킬바 / 우하단 무기 2슬롯
  * 모바일: 바는 가방·일시정지 버튼 오른쪽, 미니맵은 지도 탭 아래, 스킬·무기는 터치 버튼이 대신한다.
  */
+interface BuffRow {
+  box: Phaser.GameObjects.Container;
+  bg: Phaser.GameObjects.Rectangle;
+  accent: Phaser.GameObjects.Rectangle;
+  bar: Phaser.GameObjects.Rectangle;
+  name: Phaser.GameObjects.Text;
+  value: Phaser.GameObjects.Text;
+}
+
 export class Hud {
   private readonly bars: Phaser.GameObjects.Container;
   private readonly hp: Bar;
@@ -67,7 +76,7 @@ export class Hud {
   private shown = true;
   private mode: UiMode = 'pc';
   private readonly buffY: number;
-  private readonly buffTexts: Phaser.GameObjects.Text[] = [];
+  private readonly buffRows: BuffRow[] = [];
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -202,23 +211,52 @@ export class Hud {
     if (this.pcOnly.visible) this.updateSkillbar(s);
   }
 
-  /** 현재 버프: 왼쪽에 한 줄씩. 지속 중이면 남은 초, 쿨타임이면 흐리게 대기 초, 상시면 이름만 */
+  /**
+   * 현재 버프: 왼쪽에 작은 줄로 하나씩. 어두운 칸 + 버프 색 띠 + 이름 / 오른쪽 값, 아래 가는 줄은 남은 비율.
+   * 지속 중이면 남은 초, 쿨타임이면 흐리게 ↻초, 겹·횟수면 ×n, 상시면 이름만.
+   */
   private updateBuffs(s: RunSession): void {
-    const h = this.ctx.data.ui.hud;
+    const b = this.ctx.data.ui.hud.buffs;
     let y = this.buffY;
-    s.buffs.forEach((b, i) => {
-      let t = this.buffTexts[i];
-      if (!t) {
-        t = this.scene.add
-          .text(0, this.buffY, '', { fontFamily: 'sans-serif', fontSize: `${h.fontSize - 2}px`, color: '#ffffff', padding: { x: 2, y: 1 } })
-          .setStroke('#000000', 2);
-        this.buffTexts.push(t);
-        this.bars.add(t);
-      }
-      t.setVisible(true).setY(y).setBackgroundColor(b.color).setAlpha(b.cdSec !== undefined ? 0.55 : 1).setText(buffText(b, this.ctx.t));
-      y += t.height + 1;
+    s.buffs.forEach((v, i) => {
+      const row = this.buffRows[i] ?? this.makeBuffRow();
+      const cd = v.cdSec !== undefined;
+      const value =
+        v.leftSec !== undefined
+          ? this.ctx.t('hud.buff.short.timed', { s: Math.ceil(v.leftSec) })
+          : cd
+            ? this.ctx.t('hud.buff.short.cooldown', { s: Math.ceil(v.cdSec!) })
+            : v.count !== undefined
+              ? this.ctx.t('hud.buff.short.count', { n: v.count })
+              : '';
+      const frac = v.leftSec !== undefined && v.totalSec ? v.leftSec / v.totalSec : cd && v.cdTotalSec ? 1 - v.cdSec! / v.cdTotalSec : null;
+      const color = hexColor(v.color);
+      row.name.setText(v.label);
+      row.value.setText(value).setColor(cd ? b.cooldownTextColor : b.valueColor);
+      const w = Math.max(b.minWidth, b.padX * 2 + b.accentWidth + row.name.width + (value ? row.value.width + b.padX : 0));
+      row.bg.setSize(w, b.height);
+      row.accent.setFillStyle(color);
+      row.value.setX(w - b.padX);
+      row.bar.setVisible(frac !== null).setFillStyle(color).setSize(Math.max(0, (w - b.accentWidth) * (frac ?? 0)), 1);
+      row.box.setVisible(true).setY(y).setAlpha(cd ? b.cooldownAlpha : 1);
+      y += b.height + b.gap;
     });
-    for (let i = s.buffs.length; i < this.buffTexts.length; i++) this.buffTexts[i]!.setVisible(false);
+    for (let i = s.buffs.length; i < this.buffRows.length; i++) this.buffRows[i]!.box.setVisible(false);
+  }
+
+  private makeBuffRow(): BuffRow {
+    const b = this.ctx.data.ui.hud.buffs;
+    const style = { fontFamily: 'sans-serif', fontSize: `${b.fontSize}px`, color: b.nameColor };
+    const bg = this.scene.add.rectangle(0, 0, b.minWidth, b.height, hexColor(b.backColor), b.backAlpha).setOrigin(0);
+    const accent = this.scene.add.rectangle(0, 0, b.accentWidth, b.height, 0xffffff).setOrigin(0);
+    const bar = this.scene.add.rectangle(b.accentWidth, b.height - 1, 0, 1, 0xffffff).setOrigin(0);
+    const name = this.scene.add.text(b.accentWidth + b.padX, b.height / 2, '', style).setOrigin(0, 0.5);
+    const value = this.scene.add.text(0, b.height / 2, '', style).setOrigin(1, 0.5);
+    const box = this.scene.add.container(0, 0, [bg, accent, bar, name, value]);
+    this.bars.add(box);
+    const row = { box, bg, accent, bar, name, value };
+    this.buffRows.push(row);
+    return row;
   }
 
   private updateSkillbar(s: RunSession): void {

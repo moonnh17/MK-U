@@ -17,6 +17,20 @@
       "energyColor": "#3fc8e0",
       "backColor": "#1d232b"
     },
+    "buffs": {
+      "fontSize": 7,
+      "height": 9,
+      "gap": 1,
+      "minWidth": 44,
+      "padX": 3,
+      "accentWidth": 2,
+      "backColor": "#0b0f15",
+      "backAlpha": 0.72,
+      "nameColor": "#e8ecf2",
+      "valueColor": "#ffe9a8",
+      "cooldownTextColor": "#9aa4b0",
+      "cooldownAlpha": 0.7
+    },
     "minimap": {
       "width": 72,
       "height": 56,

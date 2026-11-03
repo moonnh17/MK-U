@@ -88,6 +88,8 @@ export interface BuffView {
   totalSec?: number;
   /** 재사용 대기(초): 지속이 끝나고 쿨타임이 도는 중 */
   cdSec?: number;
+  /** 쿨타임 전체(초). 있으면 아래 줄로 채워지는 정도를 보여 준다 */
+  cdTotalSec?: number;
   /** 남은 겹·횟수 (역장 겹, 약전한우) */
   count?: number;
 }

@@ -50,6 +50,8 @@ export interface ItemTotals {
   enemyTaken: number;
   damageTaken: number;
   coinGain: number;
+  maxEnergy: number;
+  energyGain: number;
   area: number;
   buffDuration: number;
   skillDamage: Record<string, number>;
@@ -95,6 +97,8 @@ export function itemTotals(
     enemyTaken: 0,
     damageTaken: 0,
     coinGain: 0,
+    maxEnergy: 0,
+    energyGain: 0,
     area: 0,
     buffDuration: 0,
     skillDamage: {},
@@ -130,6 +134,12 @@ export function itemTotals(
           break;
         case 'coinGain':
           t.coinGain += e.value;
+          break;
+        case 'maxEnergy':
+          t.maxEnergy += e.value;
+          break;
+        case 'energyGain':
+          t.energyGain += e.value;
           break;
         case 'area':
           t.area += e.value;

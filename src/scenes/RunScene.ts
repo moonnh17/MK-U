@@ -572,6 +572,7 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     const mods = this.skillRt.playerMods();
     this.syncMaxHp();
+    this.syncMaxEnergy();
     this.condition.updateSanity(dt);
     // 패닉: 방향이 뒤집힌다
     if (p.panic && !this.itemRt.first('panicCalm')) frame = { ...frame, move: { x: -frame.move.x, y: -frame.move.y } };
@@ -1225,7 +1226,7 @@ export class RunScene extends Phaser.Scene {
   updatePickups(dt: number): void {
     const d = this.ctx.data;
     const p = this.session.player;
-    const orb = d.player.energy.orbValue;
+    const orb = d.player.energy.orbValue * (1 + this.itemRt.sums.energyGain);
     const coin = d.pickups.coin.value * (1 + this.itemRt.sums.coinGain);
     for (const pk of this.pickups) {
       if (!pk.update(dt, this.player, d.pickups)) continue;
@@ -1275,6 +1276,16 @@ export class RunScene extends Phaser.Scene {
     if (target > p.maxHp) p.hp += target - p.maxHp;
     p.maxHp = target;
     p.hp = Math.min(p.hp, p.maxHp);
+  }
+
+  /** 최대 에너지 = 기본 + 아이템 + 회복할 때마다 늘어난 양. 늘면 그만큼 현재 에너지도 채운다 */
+  syncMaxEnergy(): void {
+    const p = this.session.player;
+    const target = this.ctx.data.player.energy.max + this.itemRt.sums.maxEnergy + this.itemRt.healMaxEnergy();
+    if (target === p.energyMax) return;
+    if (target > p.energyMax) p.energy += target - p.energyMax;
+    p.energyMax = target;
+    p.energy = Math.min(p.energy, p.energyMax);
   }
 
   // ---------- 카드·인벤토리 ----------

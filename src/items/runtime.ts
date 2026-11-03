@@ -265,6 +265,11 @@ export class ItemRuntime {
     return v;
   }
 
+  /** 회복을 쓸 때마다 늘어난 최대 에너지 (한우촌의 생등심) */
+  healMaxEnergy(): number {
+    return this.each('lowHpHeal').reduce((v, { id, e }) => v + (e.maxEnergyPerUse ?? 0) * healCount(this.state(id)), 0);
+  }
+
   moveSpeedBonus(): number {
     let v = this.sums.moveSpeed;
     for (const { id, e } of this.each('tempRoar')) if (this.state(id).roarLeft > 0) v += e.moveSpeed;
@@ -532,7 +537,7 @@ export class ItemRuntime {
       if (e.afterDamage) {
         if (s.used) out.push(base);
       } else if (e.cooldownSec > 0) {
-        if (s.cd > 0) out.push({ ...base, cdSec: s.cd });
+        if (s.cd > 0) out.push({ ...base, cdSec: s.cd, cdTotalSec: e.cooldownSec });
       } else if ((e.uses ?? 1) - healCount(s) > 0) {
         out.push({ ...base, count: (e.uses ?? 1) - healCount(s) });
       }
@@ -548,7 +553,22 @@ export class ItemRuntime {
       const left = s.cd - (e.cooldownSec - e.sec);
       const base = { id: `item.${id}`, label: t(`item.${id}.buff`), color: color(id) };
       if (left > 0) out.push({ ...base, leftSec: left, totalSec: e.sec });
-      else if (s.cd > 0) out.push({ ...base, cdSec: s.cd });
+      else if (s.cd > 0) out.push({ ...base, cdSec: s.cd, cdTotalSec: e.cooldownSec });
+    }
+    // 순간이동(특무 인장): 강화 공격이 남았으면 ×n, 아니면 쿨타임
+    if (this.dodge) {
+      const { id, e } = this.dodge;
+      const s = this.state(id);
+      const base = { id: `item.${id}`, label: t(`item.${id}.buff`), color: color(id) };
+      if (s.empower > 0) out.push({ ...base, count: s.empower });
+      else if (s.cd > 0) out.push({ ...base, cdSec: s.cd, cdTotalSec: e.cooldownSec });
+    }
+    // 타비트의 성물(오리온의 방패): 방패가 날아가는 동안 상시, 아니면 다음 투척까지
+    if (this.shield) {
+      const { id, e } = this.shield;
+      const s = this.state(id);
+      const base = { id: `item.${id}`, label: t(`item.${id}.buff`), color: color(id) };
+      out.push(this.shieldsOut > 0 ? base : { ...base, cdSec: Math.max(0, e.everySec - s.timer), cdTotalSec: e.everySec });
     }
     for (const { id, e } of this.each('tempRoar')) {
       const s = this.state(id);

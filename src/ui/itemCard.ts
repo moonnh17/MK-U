@@ -10,7 +10,7 @@ import { plainWeapon } from '../systems/weapons';
 import type { GroupMultipliersData, ItemDef } from '../types/data';
 import { weaponInfoLines } from './weaponInfo';
 
-const PCT = new Set(['damage', 'enemyTaken', 'damageTaken', 'coinGain', 'area', 'buffDuration', 'skillDamage', 'moveSpeed', 'skillCooldown']);
+const PCT = new Set(['damage', 'enemyTaken', 'damageTaken', 'coinGain', 'energyGain', 'area', 'buffDuration', 'skillDamage', 'moveSpeed', 'skillCooldown']);
 
 function num(v: number): string {
   return String(Math.round(v * 10) / 10);
@@ -34,6 +34,7 @@ export function itemDescParams(def: ItemDef, groups: GroupMultipliersData): Reco
     if (typeof e.healTo === 'number') out[`to${i}`] = num(e.healTo * 100);
     if (typeof e.afterDamage === 'number') out[`a${i}`] = num(e.afterDamage * 100);
     if (typeof e.uses === 'number') out[`u${i}`] = num(e.uses);
+    if (typeof e.maxEnergyPerUse === 'number') out[`me${i}`] = num(e.maxEnergyPerUse);
     if (typeof e.durationSec === 'number') out[`dur${i}`] = num(e.durationSec);
     if (typeof e.absorbSec === 'number') out[`dur${i}`] = num(e.absorbSec);
     if (typeof e.perCoins === 'number') out[`per${i}`] = num(e.perCoins);

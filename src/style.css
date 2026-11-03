@@ -2437,6 +2437,79 @@ body {
   min-width: 0;
   transition: transform 0.12s, box-shadow 0.12s;
 }
+/* 전설·유니크 칸: 테두리가 은은히 빛나고 불꽃이 피어오른다 / 신화 칸: 빛줄기가 사방으로 */
+.cx-cell.fx-spark,
+.cx-cell.fx-mythic {
+  position: relative;
+  isolation: isolate;
+}
+.cx-cell.fx-spark::after,
+.cx-cell.fx-mythic::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 7px 1px var(--ring), inset 0 0 6px color-mix(in srgb, var(--ring) 40%, transparent);
+  pointer-events: none;
+  animation: cx-cell-glow 1.8s ease-in-out infinite;
+}
+@keyframes cx-cell-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.cx-cell-fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --grade: var(--ring);
+}
+.cx-cell-fx .cx-spark {
+  width: 3px;
+  height: 3px;
+  margin-left: -1.5px;
+  animation-duration: 1.6s;
+}
+.cx-rays {
+  position: absolute;
+  inset: -14px;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--ring) 75%, #fff 25%) 0deg 5deg, transparent 5deg 22.5deg);
+  -webkit-mask: radial-gradient(circle, #000 18%, transparent 68%);
+  mask: radial-gradient(circle, #000 18%, transparent 68%);
+  animation: cx-rays-spin 9s linear infinite, cx-rays-pulse 1.6s ease-in-out infinite;
+}
+.cx-cell.fx-mythic .cx-icon {
+  filter: drop-shadow(0 0 4px var(--ring));
+}
+@keyframes cx-rays-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes cx-rays-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    scale: 0.85;
+  }
+  50% {
+    opacity: 1;
+    scale: 1.1;
+  }
+}
+.cx-buff-name {
+  display: block;
+  margin-bottom: 2px;
+  font: bold 15px sans-serif;
+  color: #5a3a10;
+  letter-spacing: 0.5px;
+}
 .cx-cell i {
   font: normal 10px monospace;
   color: #c9b48a;
@@ -2761,7 +2834,9 @@ body {
   .cx-spark {
     display: none;
   }
-  .cx-section .cx-stitle {
+  .cx-section .cx-stitle,
+  .cx-rays,
+  .cx-cell::after {
     animation: none;
   }
 }

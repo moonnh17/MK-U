@@ -23,6 +23,8 @@ const TABS: CodexTab[] = ['monsters', 'characters', 'items', 'weapons'];
 /** 머리말에서 불꽃이 피어오르는 등급과 불꽃 수 */
 const SPARK_GRADES: ReadonlySet<string> = new Set(['legendary', 'unique']);
 const SPARKS = 12;
+/** 목록 칸 테두리 불꽃 수 */
+const CELL_SPARKS = 9;
 
 /** 스킬 설명 한 단계 (Lv1~3, 각성) */
 interface SkillVariant {
@@ -45,8 +47,8 @@ function itemStatRows(def: ItemDef, d: GameData, t: GameContext['t']): [string, 
   for (const raw of def.effects) {
     const e = scaleEffect(raw, d.groupMultipliers);
     if (e.kind === 'damage') rows.push([t(`codex.istat.damage.${e.scope}`), pc(e.value)]);
-    else if (e.kind === 'maxHp' || e.kind === 'maxSanity' || e.kind === 'pellets') rows.push([t(`codex.istat.${e.kind}`), flat(e.value)]);
-    else if (e.kind === 'moveSpeed' || e.kind === 'enemyTaken' || e.kind === 'coinGain' || e.kind === 'area' || e.kind === 'buffDuration') rows.push([t(`codex.istat.${e.kind}`), pc(e.value)]);
+    else if (e.kind === 'maxHp' || e.kind === 'maxSanity' || e.kind === 'pellets' || e.kind === 'maxEnergy') rows.push([t(`codex.istat.${e.kind}`), flat(e.value)]);
+    else if (e.kind === 'moveSpeed' || e.kind === 'enemyTaken' || e.kind === 'coinGain' || e.kind === 'energyGain' || e.kind === 'area' || e.kind === 'buffDuration') rows.push([t(`codex.istat.${e.kind}`), pc(e.value)]);
     // 쿨타임 감소·받는 피해 감소는 값이 양수일 때 줄어드는 쪽
     else if (e.kind === 'skillCooldown' || e.kind === 'damageTaken') rows.push([t(`codex.istat.${e.kind}`), pc(-e.value)]);
     else if (e.kind === 'skillDamage') rows.push([t('codex.istat.skillDamage', { skill: t(findSkill(d.skills, e.skillId).nameKey) }), pc(e.value)]);
@@ -217,6 +219,25 @@ export class CodexWindow {
     applyArtIcon(icon, this.ctx, a.key, a.color);
     c.append(icon, this.el('i', '', String(i + 1).padStart(3, '0')), this.el('small', '', known ? this.name(e) : '???'));
     if (a.ring) c.style.setProperty('--ring', a.ring);
+    if (a.grade && SPARK_GRADES.has(a.grade)) {
+      // 전설·유니크: 테두리에서 등급 색 불꽃이 피어오른다 (왼쪽 변·오른쪽 변·아랫변을 돌아가며)
+      c.classList.add('fx-spark');
+      const fx = this.el('span', 'cx-cell-fx');
+      for (let k = 0; k < CELL_SPARKS; k++) {
+        const sp = this.el('i', 'cx-spark');
+        const side = k % 3;
+        sp.style.left = side === 0 ? '0%' : side === 1 ? '100%' : `${(k * 37) % 100}%`;
+        sp.style.bottom = side === 2 ? '0%' : `${(k * 29) % 90}%`;
+        sp.style.animationDelay = `${((k * 0.37) % 1.6).toFixed(2)}s`;
+        sp.style.setProperty('--drift', `${side === 0 ? -4 : side === 1 ? 4 : 0}px`);
+        fx.appendChild(sp);
+      }
+      c.appendChild(fx);
+    } else if (a.grade === 'mythic') {
+      // 신화: 칸 뒤에서 빛줄기가 사방으로 뿜어져 나온다
+      c.classList.add('fx-mythic');
+      c.appendChild(this.el('span', 'cx-rays'));
+    }
     c.addEventListener('click', () => {
       this.selected = e;
       this.render();
@@ -224,7 +245,7 @@ export class CodexWindow {
     return c;
   }
 
-  private art(e: CodexEntry): { key: string; color: string; ring?: string } {
+  private art(e: CodexEntry): { key: string; color: string; ring?: string; grade?: string } {
     const d = this.ctx.data;
     const grade = (g: string) => d.groupMultipliers.grades.find((x) => x.id === g)?.color;
     if (e.kind === 'enemy') {
@@ -235,10 +256,10 @@ export class CodexWindow {
     if (e.kind === 'school') return { key: artKeys.playerSchool(e.id), color: d.player.color };
     if (e.kind === 'item') {
       const def = d.items.items.find((x) => x.id === e.id)!;
-      return { key: def.spriteKey, color: def.color, ring: grade(def.grade) };
+      return { key: def.spriteKey, color: def.color, ring: grade(def.grade), grade: def.grade };
     }
     const w = d.weapons.weapons.find((x) => x.id === e.id)!;
-    return { key: w.spriteKey, color: w.color, ring: grade(w.grade) };
+    return { key: w.spriteKey, color: w.color, ring: grade(w.grade), grade: w.grade };
   }
 
   private name(e: CodexEntry): string {
@@ -596,6 +617,10 @@ export class CodexWindow {
       this.rateView(box, def.pool === 'normal' ? null : source, itemSources(d), (r) => itemChance(d, id, r), 'codex.rate.noteItem');
       return;
     }
+    // 버프 이름(화면 왼쪽 버프 목록과 같은 이름)을 효과 위 굵은 제목으로. 태세처럼 둘이면 '/'로
+    const bk = `item.${id}.buff`;
+    const buffNames = [bk, `${bk}.attack`, `${bk}.defense`].filter((k) => t(k) !== k).map((k) => t(k));
+    if (buffNames.length) box.appendChild(this.el('b', 'cx-buff-name', buffNames.join(' / ')));
     box.appendChild(this.el('p', 'cx-desc', t(def.descKey, itemDescParams(def, d.groupMultipliers))));
     this.flavor(box, def.flavor, 'cx-flavor small');
     const links: string[] = [];

@@ -744,6 +744,21 @@ export interface HudLayoutData {
     energyColor: string;
     backColor: string;
   };
+  /** 현재 버프 목록 (왼쪽 작은 줄) */
+  buffs: {
+    fontSize: number;
+    height: number;
+    gap: number;
+    minWidth: number;
+    padX: number;
+    accentWidth: number;
+    backColor: string;
+    backAlpha: number;
+    nameColor: string;
+    valueColor: string;
+    cooldownTextColor: string;
+    cooldownAlpha: number;
+  };
   minimap: {
     width: number;
     height: number;
@@ -909,12 +924,16 @@ export type ItemEffect =
   /** 받는 피해 감소 */
   | { kind: 'damageTaken'; value: number; group: 'damagePct' }
   | { kind: 'coinGain'; value: number; group: 'damagePct' }
+  /** 최대 에너지 + */
+  | { kind: 'maxEnergy'; value: number; group: 'hpFlat' }
+  /** 에너지 구슬로 얻는 에너지 증가 */
+  | { kind: 'energyGain'; value: number; group: 'damagePct' }
   /** 공격 범위(스킬 범위·근접 무기 범위·폭발 반지름) */
   | { kind: 'area'; value: number; group: 'damagePct' }
   | { kind: 'buffDuration'; value: number; group: 'damagePct' }
   /** 체력이 threshold 이하가 되면 healTo까지(추가가 아니라 그 비율까지) 회복. cooldownSec 0이면 1회. afterDamage: 쓴 뒤 피해 증가 */
-  /** uses: 재사용 대기가 없을 때 런당 쓸 수 있는 횟수 (기본 1) */
-  | { kind: 'lowHpHeal'; threshold: number; healTo: number; cooldownSec: number; priority: number; afterDamage?: number; uses?: number }
+  /** uses: 재사용 대기가 없을 때 런당 쓸 수 있는 횟수 (기본 1). maxEnergyPerUse: 쓸 때마다 최대 에너지 + */
+  | { kind: 'lowHpHeal'; threshold: number; healTo: number; cooldownSec: number; priority: number; afterDamage?: number; uses?: number; maxEnergyPerUse?: number }
   /** 사망 시 완전 회복 + 무적 (school이면 그 학파로 전직했을 때만) */
   | { kind: 'revive'; invulnSec: number; school?: SchoolId }
   /** 특정 스킬 피해 증가 (school이면 그 학파로 전직했을 때만) */

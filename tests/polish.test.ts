@@ -220,8 +220,8 @@ describe('무기 옵션·치명타', () => {
 });
 
 describe('에너지', () => {
-  it('에너지 구슬 하나가 6', () => {
-    expect(D.player.energy.orbValue).toBe(6);
+  it('에너지 구슬 하나가 5', () => {
+    expect(D.player.energy.orbValue).toBe(5);
   });
 });
 

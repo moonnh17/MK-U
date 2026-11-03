@@ -66,13 +66,14 @@ describe('효과 합산', () => {
     expect(itemDamageMultiplier(t, 0, false, null)).toBeCloseTo(1.15 * 1.05);
   });
   it('각성 아이템 효과: 태그 피해·쿨타임·정신력·탄수·받는 피해', () => {
-    expect(totals(['magnetResonator']).damage).toMatchObject({ tech: 0.1, magic: 0.1 });
+    expect(totals(['magnetResonator'])).toMatchObject({ damage: { tech: 0.07, magic: 0.07 }, moveSpeed: 0.1 });
+    expect(totals(['magowikiCodex']).energyGain).toBeCloseTo(0.05);
     expect(totals(['lk99', 'warDiary', 'helaCell']).skillCooldown).toBeCloseTo(0.28);
     expect(totals(['helaCell']).maxSanity).toBe(15);
     expect(totals(['extraArms']).pellets).toBe(1);
     expect(totals(['forbiddenVirus']).damage.magic).toBeCloseTo(0.05);
     expect(totals(['forbiddenGift']).damageTaken).toBeCloseTo(-0.1);
-    expect(totals(['steelCastleFigure'])).toMatchObject({ maxHp: 20, damageTaken: 0.05 });
+    expect(totals(['steelCastleFigure'])).toMatchObject({ maxHp: 20, damageTaken: 0.05, maxEnergy: 20 });
   });
   it('각성 아이템은 모두 일반 풀 또는 보스 드롭에 있다', () => {
     const skills = gameData.skills.skills.map((s) => s.awakening.requiredItem);
