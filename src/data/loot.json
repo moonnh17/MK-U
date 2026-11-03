@@ -2,12 +2,19 @@
   "mythicChance": 0.001,
   "uniqueWeaponFallback": "legendary",
   "bossWeaponChance": 0.2,
-  "startChest": { "common": 80, "rare": 20 },
+  "startChest": { "common": 80, "rare": 19, "legendary": 1 },
   "weaponChest": {
     "2": { "rare": 83, "legendary": 16, "unique": 1 },
     "5": { "rare": 50, "legendary": 42, "unique": 8 }
   },
-  "combatDrop": { "chance": 0.03, "weights": { "common": 80, "rare": 20 } },
+  "combatDrop": {
+    "chance": 0.03,
+    "weights": {
+      "1": { "common": 80, "rare": 20 },
+      "2": { "common": 80, "rare": 20 },
+      "3": { "common": 60, "rare": 30, "legendary": 8, "unique": 2 }
+    }
+  },
   "merchant": {
     "count": 3,
     "weights": { "common": 62, "rare": 35, "legendary": 3 },

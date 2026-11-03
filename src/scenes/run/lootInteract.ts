@@ -243,7 +243,7 @@ export class LootInteract {
     if (!id) {
       const { stage } = this.run.session;
       const rng = Rng.derive(this.run.ctx.config.seed, `item-${stage.chapter}-${stage.stage}-${this.lootSeq++}`);
-      const weights = effectiveWeights(chest.weights, stage.chapter, d.items.chapterCommonShift, p.lootShift);
+      const weights = effectiveWeights(chest.weights, p.lootShift);
       id = rollItem(rng, weights, d.loot.mythicChance, d.items, new Set(p.itemsObtained)) ?? undefined;
     }
     if (id) {

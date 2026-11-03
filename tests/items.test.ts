@@ -4,6 +4,7 @@ import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
 import {
   activeEffects,
+  chapterWeights,
   effectiveWeights,
   itemDamageMultiplier,
   itemTotals,
@@ -107,20 +108,18 @@ describe('등급 가중치', () => {
     expect(s).toEqual({ common: -2, rare: 0, legendary: 2 });
     expect(transferWeight(s, 'unique', 2)).toBe(s);
   });
-  it('챕터마다 일반 −15를 상위 등급에 비율대로, 정수로 나눈다', () => {
-    const base = { common: 67, rare: 26, legendary: 6, unique: 1 };
-    // 15 × 26:6:1 = 11.82·2.73·0.45 → 11·2·0 + 나머지 큰 순서로 2개(전설·레어) → 12·3·0
-    expect(effectiveWeights(base, 2, 15, {})).toEqual({ common: 52, rare: 38, legendary: 9, unique: 1 });
-    // 30 → 23.64·5.45·0.91 → 23·5·0 + 2개(유니크·레어) → 24·5·1
-    expect(effectiveWeights(base, 3, 15, {})).toEqual({ common: 37, rare: 50, legendary: 11, unique: 2 });
+  it('보물 상자 표는 챕터별, 유니크 1·2·3%, 모두 합 100인 정수', () => {
+    expect([1, 2, 3].map((ch) => chapterWeights(I.treasureWeights, ch).unique)).toEqual([1, 2, 3]);
     for (const ch of [1, 2, 3]) {
-      const w = effectiveWeights(I.treasureWeights, ch, 15, {});
+      const w = chapterWeights(I.treasureWeights, ch);
       expect(Object.values(w).every((v) => Number.isInteger(v))).toBe(true);
       expect(Object.values(w).reduce((s, v) => s + (v ?? 0), 0)).toBe(100);
     }
+    // 표가 없는 챕터는 가장 가까운 아래 챕터 표
+    expect(chapterWeights({ '1': 'a', '3': 'c' }, 2)).toBe('a');
   });
   it('가중치는 0 아래로 내려가지 않는다', () => {
-    expect(effectiveWeights({ common: 1, rare: 1 }, 1, 15, { common: -5 }).common).toBe(0);
+    expect(effectiveWeights({ common: 1, rare: 1 }, { common: -5 }).common).toBe(0);
   });
 });
 
@@ -137,11 +136,11 @@ describe('아이템 뽑기', () => {
   });
   it('보스 전용·세트 결과는 상자에서 나오지 않는다', () => {
     const seen = new Set<string>();
-    for (let s = 0; s < 400; s++) seen.add(rollItem(new Rng(s), I.treasureWeights, 0.001, I, new Set())!);
+    for (let s = 0; s < 400; s++) seen.add(rollItem(new Rng(s), I.treasureWeights['1']!, 0.001, I, new Set())!);
     for (const id of ['wonhonLump', 'warriorMemory']) expect(seen.has(id)).toBe(false);
   });
   it('신화 판정이 나면 신검 영디·마기', () => {
-    expect(rollItem(new Rng(1), I.treasureWeights, 1, I, new Set())).toBe('divineSword');
+    expect(rollItem(new Rng(1), I.treasureWeights['1']!, 1, I, new Set())).toBe('divineSword');
   });
 });
 
@@ -170,7 +169,7 @@ describe('아이템 카드', () => {
   it('서로 다른 아이템 3장, 가진 아이템·보스 전용·세트 결과는 나오지 않는다', () => {
     const owned = new Set(['elegantMagi', 'leeSeal']);
     for (let seed = 0; seed < 100; seed++) {
-      const ids = itemChoices(new Rng(seed), I.treasureWeights, 0.001, I, owned, 3);
+      const ids = itemChoices(new Rng(seed), I.treasureWeights['1']!, 0.001, I, owned, 3);
       expect(new Set(ids).size).toBe(3);
       for (const id of ids) {
         expect(owned.has(id)).toBe(false);
@@ -181,6 +180,6 @@ describe('아이템 카드', () => {
   it('남은 아이템이 모자라면 있는 만큼만', () => {
     const got = new Set(I.items.filter((x) => x.pool === 'normal').map((x) => x.id));
     got.delete('magicasol');
-    expect(itemChoices(new Rng(3), I.treasureWeights, 0.001, I, got, 3)).toEqual(['magicasol']);
+    expect(itemChoices(new Rng(3), I.treasureWeights['1']!, 0.001, I, got, 3)).toEqual(['magicasol']);
   });
 });

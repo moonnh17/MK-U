@@ -8,6 +8,7 @@ import { assignElites, eliteCount, pickTwoElites } from '../../systems/elites';
 import { IMPLEMENTED_ENCOUNTERS } from '../../systems/encounter';
 import { encounterPool, merchantStock, rollCoinDrops, rollEncounter } from '../../systems/loot';
 import { encounterKinds, pickHiddenBoss } from '../../systems/hiddenBoss';
+import { chapterWeights } from '../../systems/items';
 import { spireEliteCount, spireSize, type SpireEvent } from '../../systems/spire';
 import { planCombatWaves, RoomState } from '../../systems/roomState';
 import { roomCenter } from '../../systems/worldLayout';
@@ -50,7 +51,7 @@ export class Encounters {
     bus.emit('toast', { text: this.run.ctx.t(`encounter.${kind}`) });
 
     if (kind === 'treasure') {
-      this.run.loot.addChest('item', c.x, c.y, d.items.treasureWeights);
+      this.run.loot.addChest('item', c.x, c.y, chapterWeights(d.items.treasureWeights, this.run.session.stage.chapter));
     } else if (kind === 'merchant') {
       const stock = merchantStock(rng, d.loot, d.weapons.weapons, d.weapons.options, d.groupMultipliers);
       stock.forEach((s, i) => {
@@ -187,7 +188,7 @@ export class Encounters {
     const rng = Rng.derive(this.run.ctx.config.seed, `drop-${stage.chapter}-${stage.stage}-${roomId}`);
     if (!rng.chance(d.loot.combatDrop.chance)) return;
     // 방 가운데는 장애물일 수 있어 플레이어 발밑에 떨어뜨린다
-    this.run.loot.dropWeapon(this.run.loot.rollWeaponItem(d.loot.combatDrop.weights, 'drop'), this.run.player.x, this.run.player.y);
+    this.run.loot.dropWeapon(this.run.loot.rollWeaponItem(chapterWeights(d.loot.combatDrop.weights, stage.chapter), 'drop'), this.run.player.x, this.run.player.y);
   }
 
   /** 대규모 습격 보상: 아이템 상자(레어 이상, M4-B) + 코인 다량 */

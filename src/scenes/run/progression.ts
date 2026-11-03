@@ -9,7 +9,7 @@ import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type Cutscene 
 import { type RoomNode } from '../../systems/mapgen';
 import { registerCutscene, registerGemini } from '../../core/save';
 import { hasLines, MiniQueue, pickMini, saidKeys, storyFor } from '../../systems/gemini';
-import { effectiveWeights, itemChoices } from '../../systems/items';
+import { chapterWeights, effectiveWeights, itemChoices } from '../../systems/items';
 import { awakenSkill, awakeningReady, equipSkill, findSkill, skillValues } from '../../systems/skills';
 import { roomCenter } from '../../systems/worldLayout';
 import type { GeminiEventId, SchoolId } from '../../types/data';
@@ -111,7 +111,7 @@ export class Progression {
   private drawItems(rng: Rng): AnyCard[] {
     const d = this.run.ctx.data;
     const p = this.run.session.player;
-    const weights = effectiveWeights(d.items.treasureWeights, this.run.session.stage.chapter, d.items.chapterCommonShift, p.lootShift);
+    const weights = effectiveWeights(chapterWeights(d.items.treasureWeights, this.run.session.stage.chapter), p.lootShift);
     return itemChoices(rng, weights, d.loot.mythicChance, d.items, new Set(p.itemsObtained), d.cards.cardCount).map((itemId) => ({ kind: 'item', itemId }));
   }
 

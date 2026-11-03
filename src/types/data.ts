@@ -628,8 +628,9 @@ export interface ChampionRules {
   maxPerRoom: number;
   /** 대규모 습격: 한 웨이브에 정예가 나오고, 이 확률로 둘이 함께 */
   raidBothChance: number;
-  /** 처치 시 아이템 상자 확률 */
-  itemChestChance: number;
+  /** 처치 시 무기 상자 확률과 그 등급 가중치 */
+  weaponChestChance: number;
+  weaponChestWeights: Partial<Record<GradeId, number>>;
 }
 
 export interface WavesData {
@@ -990,14 +991,12 @@ export interface ItemDef extends SpriteRef {
 }
 
 export interface ItemsData {
-  /** 등급 가중치 (보물 상자) */
-  treasureWeights: Partial<Record<GradeId, number>>;
+  /** 등급 가중치 (보물 상자·아이템 카드), 챕터 번호별 */
+  treasureWeights: Record<string, Partial<Record<GradeId, number>>>;
   /** 대규모 습격 상자 (레어 이상) */
   raidWeights: Partial<Record<GradeId, number>>;
   /** 획득 1회당 그 등급에서 바로 위 등급으로 옮기는 가중치 (확률 이전) */
   transferPerPickup: number;
-  /** 챕터가 오를 때마다 일반에서 빼서 상위 등급에 나누는 가중치 */
-  chapterCommonShift: number;
   /** 세트 합성: 재료 → 결과 */
   sets: { materials: string[]; result: string }[];
   /** 무기 세트: 든 무기 + 아이템 → 그 슬롯의 새 무기 (아이템은 사라진다) */
@@ -1018,7 +1017,7 @@ export interface LootData {
   /** 보스 무기 상자 등급 가중치 (스테이지 번호별) */
   weaponChest: Record<string, Partial<Record<GradeId, number>>>;
   /** 전투 칸을 깼을 때 무기가 떨어질 확률과 등급 */
-  combatDrop: { chance: number; weights: Partial<Record<GradeId, number>> };
+  combatDrop: { chance: number; weights: Record<string, Partial<Record<GradeId, number>>> };
   merchant: { count: number; weights: Partial<Record<GradeId, number>>; prices: Record<GradeId, number> };
   /** 런 시작 방의 무기 상자 등급 가중치 */
   startChest: Partial<Record<GradeId, number>>;

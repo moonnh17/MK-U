@@ -216,7 +216,7 @@ export function validateGameData(d: GameData): Errors {
   }
   for (const s of d.mapgen.bossStages) if (!lt.weaponChest[String(s)]) errors.push(`loot.weaponChest: ${s} 스테이지 가중치 없음`);
   if (!(lt.combatDrop.chance >= 0 && lt.combatDrop.chance <= 1)) errors.push('loot.combatDrop.chance: 0~1');
-  checkWeights('loot.combatDrop.weights', lt.combatDrop.weights);
+  for (const [ch, w] of Object.entries(lt.combatDrop.weights)) checkWeights(`loot.combatDrop.weights.${ch}`, w);
   checkWeights('loot.startChest', lt.startChest);
   if (!(lt.bossWeaponChance >= 0 && lt.bossWeaponChance <= 1)) errors.push('loot.bossWeaponChance: 0~1');
   checkPositive(errors, 'loot.merchant.count', lt.merchant.count);
@@ -261,8 +261,8 @@ export function validateGameData(d: GameData): Errors {
   for (const k of ['hpFlat', 'damagePct', 'procDamage', 'area', 'cooldown'] as const) checkPositive(errors, `groupMultipliers.itemGroups.${k}`, d.groupMultipliers.itemGroups?.[k]);
   checkUnique(errors, 'items', it.items.map((x) => x.id));
   checkPositive(errors, 'items.transferPerPickup', it.transferPerPickup, true);
-  checkPositive(errors, 'items.chapterCommonShift', it.chapterCommonShift, true);
-  for (const [k, v] of Object.entries({ ...it.treasureWeights, ...it.raidWeights })) {
+  for (const [ch, w] of Object.entries(it.treasureWeights)) checkWeights(`items.treasureWeights.${ch}`, w);
+  for (const [k, v] of Object.entries(it.raidWeights)) {
     if (!gradeIds.has(k)) errors.push(`items: 알 수 없는 등급 '${k}'`);
     checkPositive(errors, `items.weights.${k}`, v, true);
   }
@@ -371,7 +371,7 @@ export function validateGameData(d: GameData): Errors {
   for (const [c, stages] of Object.entries(ch.stages)) {
     for (const s of stages) if (!Number.isInteger(s) || s < 1 || s > d.mapgen.stagesPerChapter) errors.push(`waves.champions.stages.${c}: 스테이지 범위 밖 (${s})`);
   }
-  for (const k of ['waveChance', 'raidBothChance', 'itemChestChance'] as const) if (!(ch[k] >= 0 && ch[k] <= 1)) errors.push(`waves.champions.${k}: 0~1`);
+  for (const k of ['waveChance', 'raidBothChance', 'weaponChestChance'] as const) if (!(ch[k] >= 0 && ch[k] <= 1)) errors.push(`waves.champions.${k}: 0~1`);
   if (!(Number.isInteger(ch.maxPerRoom) && ch.maxPerRoom >= 1)) errors.push('waves.champions.maxPerRoom: 1 이상 정수');
   for (const [c, room] of Object.entries(d.ui.chapterRooms)) for (const [k, col] of Object.entries(room)) if (!HEX_COLOR.test(col)) errors.push(`ui.chapterRooms.${c}.${k}: #RRGGBB`);
   if (!d.enemies.enemies.some((x) => x.id === d.loot.spire.troopers.enemy)) errors.push('loot.spire.troopers.enemy: 없는 적');

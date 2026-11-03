@@ -28,7 +28,7 @@ describe('획득 확률', () => {
     const rng = new Rng(7);
     const target = D.items.items.find((x) => x.pool === 'normal' && x.grade === 'rare')!.id;
     let hit = 0;
-    for (let i = 0; i < n; i++) if (rollItem(rng, D.items.treasureWeights, D.loot.mythicChance, D.items, new Set()) === target) hit++;
+    for (let i = 0; i < n; i++) if (rollItem(rng, D.items.treasureWeights['1']!, D.loot.mythicChance, D.items, new Set()) === target) hit++;
     expect(hit / n).toBeCloseTo(itemChance(D, target, src.rates), 2);
 
     const w = D.weapons.weapons.find((x) => x.droppable && x.grade === 'rare')!.id;

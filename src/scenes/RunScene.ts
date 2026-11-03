@@ -975,11 +975,11 @@ export class RunScene extends Phaser.Scene {
       if (!absorbed) drop('energy', this.rng.int(c.bonusEnergyOrbs[0], c.bonusEnergyOrbs[1]));
       drop('coin', this.rng.int(c.bonusCoins[0], c.bonusCoins[1]));
     }
-    // 정예: 낮은 확률로 아이템 상자
+    // 정예: 낮은 확률로 무기 상자
     if (e.rank === 'champion' && !e.noReward) {
       const { stage } = this.session;
       const chestRng = Rng.derive(this.ctx.config.seed, `champion-chest-${stage.chapter}-${stage.stage}-${this.loot.lootSeq++}`);
-      if (chestRng.chance(d.waves.champions.itemChestChance)) this.loot.addChest('item', x, y, d.items.treasureWeights);
+      if (chestRng.chance(d.waves.champions.weaponChestChance)) this.loot.addChest('weapon', x, y, d.waves.champions.weaponChestWeights);
     }
     // 궁극기 게이지는 적 처치로 충전
     const ult = this.session.player.ultimate;

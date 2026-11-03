@@ -1,8 +1,11 @@
 {
-  "treasureWeights": { "common": 67, "rare": 26, "legendary": 6, "unique": 1 },
-  "raidWeights": { "rare": 83, "legendary": 15, "unique": 2 },
+  "treasureWeights": {
+    "1": { "common": 67, "rare": 26, "legendary": 6, "unique": 1 },
+    "2": { "common": 52, "rare": 37, "legendary": 9, "unique": 2 },
+    "3": { "common": 37, "rare": 49, "legendary": 11, "unique": 3 }
+  },
+  "raidWeights": { "rare": 80, "legendary": 15, "unique": 5 },
   "transferPerPickup": 2,
-  "chapterCommonShift": 15,
   "sets": [{ "materials": ["namelessSword", "namelessHelm"], "result": "warriorMemory" }],
   "weaponSets": [{ "weapon": "brokenBlade", "item": "brokenHilt", "result": "alGulBlade" }],
   "items": [

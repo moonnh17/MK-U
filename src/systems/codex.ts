@@ -4,6 +4,7 @@
  */
 import type { GameData } from '../data/index';
 import type { SaveData } from '../core/save';
+import type { GradeId } from '../types/data';
 
 export type CodexKind = 'enemies' | 'items' | 'weapons';
 export type CodexTab = 'monsters' | 'characters' | 'items' | 'weapons';
@@ -19,6 +20,8 @@ export interface CodexSection {
   /** ko.json 묶음 이름 키 */
   titleKey: string;
   entries: CodexEntry[];
+  /** 등급별 묶음이면 그 등급 (아이템·무기 탭) */
+  grade?: GradeId;
 }
 
 /** 처음 만났으면 기록하고 true (저장은 부른 쪽이 한다) */
@@ -58,11 +61,11 @@ export function codexSections(d: GameData, tab: CodexTab): CodexSection[] {
   }
   if (tab === 'weapons') {
     const weapons = d.weapons.weapons.filter((w) => w.id !== d.weapons.fistWeapon);
-    return GRADES.map((g) => ({ titleKey: `codex.section.weapons.${g}`, entries: weapons.filter((w) => w.grade === g).map((w): CodexEntry => ({ kind: 'weapon', id: w.id, record: 'weapons' })) })).filter((s) => s.entries.length > 0);
+    return GRADES.map((g) => ({ titleKey: `codex.section.weapons.${g}`, grade: g, entries: weapons.filter((w) => w.grade === g).map((w): CodexEntry => ({ kind: 'weapon', id: w.id, record: 'weapons' })) })).filter((s) => s.entries.length > 0);
   }
   const items = d.items.items;
   return [
-    ...GRADES.map((g) => ({ titleKey: `codex.section.items.${g}`, entries: items.filter((x) => x.pool === 'normal' && x.grade === g).map((x): CodexEntry => ({ kind: 'item', id: x.id, record: 'items' })) })),
+    ...GRADES.map((g) => ({ titleKey: `codex.section.items.${g}`, grade: g, entries: items.filter((x) => x.pool === 'normal' && x.grade === g).map((x): CodexEntry => ({ kind: 'item', id: x.id, record: 'items' })) })),
     { titleKey: 'codex.section.items.special', entries: items.filter((x) => x.pool !== 'normal').map((x): CodexEntry => ({ kind: 'item', id: x.id, record: 'items' })) },
   ].filter((s) => s.entries.length > 0);
 }

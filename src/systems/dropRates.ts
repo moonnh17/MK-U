@@ -7,7 +7,7 @@
  */
 import type { GameData } from '../data/index';
 import { GRADE_IDS, type GradeId, type WeaponDef } from '../types/data';
-import { effectiveWeights } from './items';
+import { chapterWeights } from './items';
 
 export type GradeRates = Record<GradeId, number>;
 
@@ -35,12 +35,12 @@ function source(key: string, weights: Partial<Record<GradeId, number>>, mythicCh
   return { key, vars, rates: gradeRates(weights, mythicChance), shares: gradeShares(weights) };
 }
 
-/** 아이템 출처: 보물 상자·아이템 카드는 챕터마다 일반이 줄어든다 */
+/** 아이템 출처: 보물 상자·아이템 카드는 챕터마다 표가 다르다 */
 export function itemSources(d: GameData): DropSource[] {
   const m = d.loot.mythicChance;
   const chapters = Array.from({ length: d.mapgen.chapters }, (_, i) => i + 1);
   return [
-    ...chapters.map((n) => source('drop.src.treasure', effectiveWeights(d.items.treasureWeights, n, d.items.chapterCommonShift, {}), m, { n })),
+    ...chapters.map((n) => source('drop.src.treasure', chapterWeights(d.items.treasureWeights, n), m, { n })),
     source('drop.src.raid', d.items.raidWeights, m),
   ];
 }
@@ -48,10 +48,13 @@ export function itemSources(d: GameData): DropSource[] {
 /** 무기 출처 */
 export function weaponSources(d: GameData): DropSource[] {
   const m = d.loot.mythicChance;
+  const chapters = Array.from({ length: d.mapgen.chapters }, (_, i) => i + 1);
+  const ch = d.waves.champions;
   return [
     source('drop.src.start', d.loot.startChest, m),
     ...Object.entries(d.loot.weaponChest).map(([stage, w]) => source('drop.src.bossChest', w, m, { stage })),
-    source('drop.src.combat', d.loot.combatDrop.weights, m, { pct: d.loot.combatDrop.chance * 100 }),
+    ...chapters.map((n) => source('drop.src.combat', chapterWeights(d.loot.combatDrop.weights, n), m, { n, pct: d.loot.combatDrop.chance * 100 })),
+    source('drop.src.champion', ch.weaponChestWeights, m, { pct: ch.weaponChestChance * 100 }),
     source('drop.src.merchant', d.loot.merchant.weights, m, { n: d.loot.merchant.count }),
   ];
 }

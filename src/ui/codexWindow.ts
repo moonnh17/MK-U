@@ -5,18 +5,24 @@
  */
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
+import type { GameData } from '../data/index';
 import { artKeys } from '../systems/art';
-import { codexProgress, codexSections, isKnown, type CodexEntry, type CodexTab } from '../systems/codex';
+import { gradeEnergyMultiplier, gradeMultiplier } from '../systems/damage';
+import { codexProgress, codexSections, isKnown, type CodexEntry, type CodexSection, type CodexTab } from '../systems/codex';
 import { itemChance, itemSources, pct, weaponChance, weaponSources, type DropSource, type GradeRates } from '../systems/dropRates';
+import { scaleEffect } from '../systems/items';
 import { findSkill, skillValues } from '../systems/skills';
 import { tagBadges } from '../systems/tags';
-import { plainWeapon } from '../systems/weapons';
-import type { BossCore, TagId } from '../types/data';
+import { plainWeapon, weaponStats } from '../systems/weapons';
+import type { BossCore, ItemDef, TagId } from '../types/data';
 import { applyArtIcon } from './artIcon';
 import { itemDescParams } from './itemCard';
 import { weaponInfoLines } from './weaponInfo';
 
 const TABS: CodexTab[] = ['monsters', 'characters', 'items', 'weapons'];
+/** 머리말에서 불꽃이 피어오르는 등급과 불꽃 수 */
+const SPARK_GRADES: ReadonlySet<string> = new Set(['legendary', 'unique']);
+const SPARKS = 12;
 
 /** 스킬 설명 한 단계 (Lv1~3, 각성) */
 interface SkillVariant {
@@ -29,6 +35,23 @@ interface SkillVariant {
 
 function fmt(values: Record<string, number>): Record<string, string> {
   return Object.fromEntries(Object.entries(values).map(([k, v]) => [k, String(Math.round(v * 10) / 10)]));
+}
+
+/** 아이템의 늘 켜진 수치 효과를 그림 옆 수치 칸으로 (발동형·조건부 효과는 설명에만) */
+function itemStatRows(def: ItemDef, d: GameData, t: GameContext['t']): [string, string][] {
+  const pc = (v: number) => `${v > 0 ? '+' : ''}${Math.round(v * 1000) / 10}%`;
+  const flat = (v: number) => `${v > 0 ? '+' : ''}${v}`;
+  const rows: [string, string][] = [];
+  for (const raw of def.effects) {
+    const e = scaleEffect(raw, d.groupMultipliers);
+    if (e.kind === 'damage') rows.push([t(`codex.istat.damage.${e.scope}`), pc(e.value)]);
+    else if (e.kind === 'maxHp' || e.kind === 'maxSanity' || e.kind === 'pellets') rows.push([t(`codex.istat.${e.kind}`), flat(e.value)]);
+    else if (e.kind === 'moveSpeed' || e.kind === 'enemyTaken' || e.kind === 'coinGain' || e.kind === 'area' || e.kind === 'buffDuration') rows.push([t(`codex.istat.${e.kind}`), pc(e.value)]);
+    // 쿨타임 감소·받는 피해 감소는 값이 양수일 때 줄어드는 쪽
+    else if (e.kind === 'skillCooldown' || e.kind === 'damageTaken') rows.push([t(`codex.istat.${e.kind}`), pc(-e.value)]);
+    else if (e.kind === 'skillDamage') rows.push([t('codex.istat.skillDamage', { skill: t(findSkill(d.skills, e.skillId).nameKey) }), pc(e.value)]);
+  }
+  return rows;
 }
 
 /** 공격 정의의 숫자를 설명 문구 값으로 편다 (ring.shots → ring_shots, chain[0] → chain_0) */
@@ -109,7 +132,7 @@ export class CodexWindow {
     const list = this.el('div', 'cx-list');
     const scroll = this.el('div', 'cx-scroll');
     for (const s of sections) {
-      scroll.appendChild(this.el('div', 'cx-section', t(s.titleKey)));
+      scroll.appendChild(this.sectionHead(s));
       const grid = this.el('div', 'cx-grid');
       for (const e of s.entries) grid.appendChild(this.cell(e, flat.indexOf(e)));
       scroll.appendChild(grid);
@@ -135,6 +158,44 @@ export class CodexWindow {
     this.root.style.display = 'flex';
     scroll.scrollTop = keepScroll;
     scroll.querySelector('.cx-cell.on')?.scrollIntoView({ block: 'nearest' });
+  }
+
+  /**
+   * 목록의 묶음 머리말. 등급 묶음은 등급 색 글씨, 전설·유니크는 불꽃이 피어오른다.
+   * 아이템·무기의 등급 묶음 옆 작은 '확률' 단추: 그 묶음 칸의 획득 확률 보기를 연다
+   */
+  private sectionHead(s: CodexSection): HTMLElement {
+    const t = this.ctx.t;
+    const head = this.el('div', 'cx-section');
+    const title = this.el('span', 'cx-stitle', t(s.titleKey));
+    const grade = s.grade && this.ctx.data.groupMultipliers.grades.find((g) => g.id === s.grade);
+    if (grade) {
+      head.classList.add('graded', `grade-${grade.id}`);
+      head.style.setProperty('--grade', grade.color);
+      if (SPARK_GRADES.has(grade.id)) {
+        // 그림 위치·박자는 칸 번호로 정한다 (꾸밈이라 시드 RNG를 쓰지 않아도 매번 같게)
+        for (let i = 0; i < SPARKS; i++) {
+          const sp = this.el('i', 'cx-spark');
+          sp.style.left = `${(i * 37) % 100}%`;
+          sp.style.animationDelay = `${((i * 0.29) % 1.6).toFixed(2)}s`;
+          sp.style.animationDuration = `${(1.1 + ((i * 0.17) % 0.7)).toFixed(2)}s`;
+          sp.style.setProperty('--drift', `${((i % 3) - 1) * 5}px`);
+          title.appendChild(sp);
+        }
+      }
+    }
+    head.appendChild(title);
+    if (grade && (this.tab === 'items' || this.tab === 'weapons')) {
+      const b = this.el('button', 'cx-rate-btn', t('codex.rateShort'));
+      b.addEventListener('click', () => {
+        if (!s.entries.some((e) => e.kind === this.selected?.kind && e.id === this.selected.id)) this.selected = s.entries[0] ?? this.selected;
+        this.shownKey = `${this.selected?.kind}:${this.selected?.id}`;
+        this.altView = true;
+        this.render();
+      });
+      head.appendChild(b);
+    }
+    return head;
   }
 
   private known(e: CodexEntry): boolean {
@@ -232,6 +293,7 @@ export class CodexWindow {
 
   /** 그림 옆 수치 칸 */
   private stats(rows: [string, string][]): void {
+    if (rows.length === 0) return;
     const g = this.el('div', 'cx-stats');
     for (const [k, v] of rows) {
       const s = this.el('div', 'cx-stat');
@@ -387,7 +449,14 @@ export class CodexWindow {
   private rateView(box: HTMLElement, fixed: string | null, sources: DropSource[], chanceOf: (r: GradeRates) => number, noteKey: string): void {
     const t = this.ctx.t;
     const d = this.ctx.data;
-    box.querySelector('.cx-sub')!.textContent = t('codex.showRates');
+    const sub = box.querySelector('.cx-sub')!;
+    sub.textContent = t('codex.showRates');
+    const back = this.el('button', 'cx-rate-btn back', t('codex.showRecord'));
+    back.addEventListener('click', () => {
+      this.altView = false;
+      this.render();
+    });
+    sub.appendChild(back);
     const src = (s: DropSource) => t(s.key, s.vars);
     if (fixed) box.appendChild(this.el('p', 'cx-desc', t('codex.rate.fixed', { source: fixed })));
     else {
@@ -419,7 +488,7 @@ export class CodexWindow {
     }
     const wrap = this.el('div', 'cx-table-wrap');
     wrap.appendChild(table);
-    box.append(wrap, this.el('p', 'cx-desc dim cx-note', t('codex.rate.mythic', { pct: d.loot.mythicChance * 100 })), this.el('p', 'cx-desc dim cx-note', t(noteKey, { n: d.items.transferPerPickup, chest: Math.round(d.waves.champions.itemChestChance * 100) })));
+    box.append(wrap, this.el('p', 'cx-desc dim cx-note', t('codex.rate.mythic', { pct: d.loot.mythicChance * 100 })), this.el('p', 'cx-desc dim cx-note', t(noteKey, { n: d.items.transferPerPickup })));
   }
 
   /** 플레이버 문구 문단. 문구가 이미 따옴표로 시작하면(인용 + 출처) 더 붙이지 않는다 */
@@ -521,8 +590,8 @@ export class CodexWindow {
           ? t('codex.source.hiddenBoss', { name: bossName(def.bossId) })
           : t(`codex.source.${def.pool}`);
     this.chip(chips, source);
+    this.stats(itemStatRows(def, d, t));
     this.badges(def.tags);
-    this.altToggle('codex.showRates');
     if (this.altView) {
       this.rateView(box, def.pool === 'normal' ? null : source, itemSources(d), (r) => itemChance(d, id, r), 'codex.rate.noteItem');
       return;
@@ -559,8 +628,16 @@ export class CodexWindow {
             ? t('codex.source.weapon')
             : t('codex.source.special');
     this.chip(chips, source);
+    const st = weaponStats(w, plainWeapon(w), gradeMultiplier(w.grade, d.groupMultipliers), gradeEnergyMultiplier(w.grade, d.groupMultipliers));
+    const r1 = (v: number) => String(Math.round(v * 10) / 10);
+    this.stats([
+      [t('codex.wstat.damage'), r1(st.damage)],
+      [t('codex.wstat.interval'), t('codex.wstat.sec', { n: Math.round(st.fireIntervalSec * 100) / 100 })],
+      [t('codex.wstat.energy'), r1(st.energyCost)],
+      [t('codex.wstat.range'), String(w.range)],
+      ...(st.critChance > 0 ? [[t('codex.wstat.crit'), `${Math.round(st.critChance * 100)}%`] as [string, string]] : []),
+    ]);
     this.badges(w.tags);
-    this.altToggle('codex.showRates');
     if (this.altView) {
       // 상자·상인에서 나오지 않는 무기(보스·히든보스·합성 전용)는 얻는 곳만 보인다. 신화 무기는 신화 판정으로 나온다
       const fixed = !w.droppable && w.grade !== 'mythic' ? source : null;
