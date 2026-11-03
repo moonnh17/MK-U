@@ -6,7 +6,7 @@ import type { GameData } from '../data/index';
 import type { SaveData } from '../core/save';
 
 export type CodexKind = 'enemies' | 'items' | 'weapons';
-export type CodexTab = 'monsters' | 'characters' | 'items';
+export type CodexTab = 'monsters' | 'characters' | 'items' | 'weapons';
 
 export interface CodexEntry {
   kind: 'enemy' | 'job' | 'school' | 'item' | 'weapon';
@@ -56,12 +56,14 @@ export function codexSections(d: GameData, tab: CodexTab): CodexSection[] {
       },
     ];
   }
+  if (tab === 'weapons') {
+    const weapons = d.weapons.weapons.filter((w) => w.id !== d.weapons.fistWeapon);
+    return GRADES.map((g) => ({ titleKey: `codex.section.weapons.${g}`, entries: weapons.filter((w) => w.grade === g).map((w): CodexEntry => ({ kind: 'weapon', id: w.id, record: 'weapons' })) })).filter((s) => s.entries.length > 0);
+  }
   const items = d.items.items;
-  const weapons = d.weapons.weapons.filter((w) => w.id !== d.weapons.fistWeapon);
   return [
     ...GRADES.map((g) => ({ titleKey: `codex.section.items.${g}`, entries: items.filter((x) => x.pool === 'normal' && x.grade === g).map((x): CodexEntry => ({ kind: 'item', id: x.id, record: 'items' })) })),
     { titleKey: 'codex.section.items.special', entries: items.filter((x) => x.pool !== 'normal').map((x): CodexEntry => ({ kind: 'item', id: x.id, record: 'items' })) },
-    ...GRADES.map((g) => ({ titleKey: `codex.section.weapons.${g}`, entries: weapons.filter((w) => w.grade === g).map((w): CodexEntry => ({ kind: 'weapon', id: w.id, record: 'weapons' })) })),
   ].filter((s) => s.entries.length > 0);
 }
 

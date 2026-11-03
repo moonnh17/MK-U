@@ -17,12 +17,23 @@ describe('도감', () => {
     for (const e of codexSections(D, 'monsters').flatMap((s) => s.entries)) expect(D.text[`codex.enemy.${e.id}`], e.id).toBeTypeOf('string');
     for (const j of D.jobs.jobs) expect(D.text[`codex.job.${j.id}`], j.id).toBeTypeOf('string');
     for (const e of codexSections(D, 'characters')[1]!.entries) expect(D.text[`codex.school.${e.id}`], e.id).toBeTypeOf('string');
-    for (const s of [...codexSections(D, 'monsters'), ...codexSections(D, 'characters'), ...codexSections(D, 'items')]) expect(D.text[s.titleKey], s.titleKey).toBeTypeOf('string');
+    for (const s of [...codexSections(D, 'monsters'), ...codexSections(D, 'characters'), ...codexSections(D, 'items'), ...codexSections(D, 'weapons')]) expect(D.text[s.titleKey], s.titleKey).toBeTypeOf('string');
   });
-  it('아이템 탭: 모든 아이템과 맨손을 뺀 모든 무기', () => {
-    const entries = codexSections(D, 'items').flatMap((s) => s.entries);
-    expect(entries.filter((e) => e.kind === 'item')).toHaveLength(D.items.items.length);
-    expect(entries.filter((e) => e.kind === 'weapon')).toHaveLength(D.weapons.weapons.length - 1);
+  it('모든 일반 적 공격과 보스 패턴에 도감 설명이 있다', () => {
+    for (const e of D.enemies.enemies)
+      for (const a of e.attacks ?? []) {
+        expect(D.text[`codex.attackName.${e.id}.${a.id}`], `${e.id}.${a.id}`).toBeTypeOf('string');
+        expect(D.text[`codex.attack.${e.id}.${a.id}`], `${e.id}.${a.id}`).toBeTypeOf('string');
+      }
+    for (const b of [...D.bosses.bosses, ...D.bosses.hiddenBosses]) for (const p of b.patterns) expect(D.text[`codex.pattern.${p.id}`], p.id).toBeTypeOf('string');
+  });
+  it('아이템 탭은 아이템만, 무기 탭은 맨손을 뺀 모든 무기', () => {
+    const items = codexSections(D, 'items').flatMap((s) => s.entries);
+    expect(items.every((e) => e.kind === 'item')).toBe(true);
+    expect(items).toHaveLength(D.items.items.length);
+    const weapons = codexSections(D, 'weapons').flatMap((s) => s.entries);
+    expect(weapons.every((e) => e.kind === 'weapon')).toBe(true);
+    expect(weapons).toHaveLength(D.weapons.weapons.length - 1);
   });
   it('처음 만난 것만 기록하고, 기록한 것만 보인다', () => {
     const s = defaultSave();

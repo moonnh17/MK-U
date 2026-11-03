@@ -2011,143 +2011,243 @@ body {
 /* 남색 틀 + 금테, 안쪽은 양피지 기록지. 창 크기는 고정이고 긴 설명은 기록 칸만 스크롤한다. */
 #codex-window {
   overflow: hidden;
+  --cx-gold: #c9a45c;
+  --cx-gold-hi: #ffe2a0;
+  --cx-ink: #2a1f10;
+  --cx-ink-soft: #6e5a3a;
+  --cx-line: rgba(150, 110, 50, 0.35);
 }
 .cx-frame {
   width: min(1100px, 100%);
   height: min(660px, 100%);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: 10px;
+  padding: 12px 14px;
   box-sizing: border-box;
-  background: #121a2a;
-  border: 2px solid #b8975a;
-  box-shadow: 0 0 0 4px #0a0f18, 0 10px 40px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, #1a2440 0%, #10172a 100%);
+  border: 1px solid var(--cx-gold);
+  border-radius: 14px;
+  outline: 1px solid rgba(201, 164, 92, 0.28);
+  outline-offset: -6px;
+  box-shadow: 0 0 0 3px #0a0f18, 0 18px 50px rgba(0, 0, 0, 0.65);
 }
 .cx-head {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 2px 4px 8px;
-  border-bottom: 1px solid #b8975a;
+  gap: 12px;
+  padding: 2px 6px 10px;
+  border-bottom: 1px solid rgba(201, 164, 92, 0.45);
   flex-shrink: 0;
 }
 .cx-heading {
   font-size: 24px;
-  color: #f3e6c4;
-  letter-spacing: 1px;
-  margin-right: 6px;
+  letter-spacing: 2px;
+  background: linear-gradient(180deg, #fff1c8, #d6a94e);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  white-space: nowrap;
+}
+.cx-heading::before {
+  content: '◆ ';
+  font-size: 14px;
+  vertical-align: middle;
 }
 .cx-tabs {
   display: flex;
-  gap: 4px;
+  gap: 2px;
+  padding: 3px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(201, 164, 92, 0.35);
+  border-radius: 999px;
 }
 .cx-btn {
-  padding: 5px 12px;
-  background: #0f1522;
-  border: 2px solid #9c8150;
-  color: #f3e6c4;
+  padding: 5px 14px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: #e8dcc0;
   font: bold 13px sans-serif;
   cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
 .cx-btn:hover {
-  background: #1d2740;
+  background: rgba(255, 226, 160, 0.12);
 }
 .cx-btn.on {
-  background: #26314d;
-  border-color: #ffd23f;
-  color: #ffd23f;
+  background: linear-gradient(180deg, #f6d995, #c99a45);
+  color: var(--cx-ink);
+}
+.cx-head > .cx-btn {
+  border-color: rgba(201, 164, 92, 0.6);
+  border-radius: 8px;
 }
 .cx-progress {
-  color: #7ae0ff;
-  font-size: 13px;
   margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  color: #9fe6ff;
+  font-size: 12px;
+}
+.cx-progress i {
+  width: 110px;
+  height: 5px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #4fd2ff, #9fe6ff) 0 0 / var(--p) 100% no-repeat, #0a0f18;
+  box-shadow: inset 0 0 0 1px rgba(122, 224, 255, 0.25);
 }
 .cx-body {
   flex: 1;
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
 .cx-detail,
 .cx-list {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: #f1e2bf;
-  border: 2px solid #c9a86a;
-  color: #2b2418;
+  background: radial-gradient(ellipse at 25% 0%, #fdf5e2 0%, #f2e2bb 55%, #e9d3a3 100%);
+  border: 1px solid var(--cx-gold);
+  border-radius: 10px;
+  box-shadow: inset 0 0 22px rgba(140, 100, 40, 0.2);
+  color: var(--cx-ink);
   box-sizing: border-box;
 }
 .cx-detail {
   gap: 6px;
-  padding: 10px 12px;
+  padding: 12px 14px;
+  animation: cx-in 0.18s ease-out;
+}
+@keyframes cx-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
 }
 .cx-chips {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
 .cx-no {
-  font-size: 12px;
-  color: #6a5a40;
+  font: bold 11px monospace;
+  color: var(--cx-ink-soft);
+  letter-spacing: 1px;
   margin-right: 2px;
 }
 .cx-chip {
-  --chip: #9c8150;
+  --chip: #a8874e;
   font-size: 11px;
-  padding: 1px 7px;
+  padding: 1px 9px;
   border: 1px solid var(--chip);
-  color: #2b2418;
-  background: color-mix(in srgb, var(--chip) 28%, #f1e2bf);
+  border-radius: 999px;
+  color: var(--cx-ink);
+  background: color-mix(in srgb, var(--chip) 24%, #fbf2dc);
 }
 .cx-name {
-  font-size: 22px;
-  color: #1f1a12;
+  font-size: 23px;
+  letter-spacing: 0.5px;
+  color: var(--cx-ink);
 }
 .cx-hero {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   align-items: center;
   flex-shrink: 0;
 }
-.cx-big {
-  width: 104px;
-  height: 104px;
+.cx-stage {
+  position: relative;
+  width: 116px;
+  height: 116px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 55%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 244, 214, 0.5) 45%, rgba(255, 244, 214, 0) 70%);
+}
+.cx-stage::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  width: 64px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(90, 60, 20, 0.22);
+}
+.cx-big {
+  position: relative;
+  z-index: 1;
+  width: 100px;
+  height: 100px;
   image-rendering: pixelated;
+  animation: cx-bob 2.6s ease-in-out infinite;
+}
+@keyframes cx-bob {
+  50% {
+    transform: translateY(-3px);
+  }
 }
 .cx-big.unknown {
-  filter: brightness(0) opacity(0.55);
+  filter: brightness(0) opacity(0.5);
+  animation: none;
 }
 .cx-side {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 .cx-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 5px;
+  gap: 6px;
 }
 .cx-stat {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 5px 8px;
-  background: #ecd3a0;
-  border: 1px solid #b8975a;
-  font-size: 13px;
+  align-items: baseline;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--cx-line);
+  border-left: 3px solid var(--cx-gold);
+  border-radius: 6px;
+  font-size: 12px;
 }
 .cx-stat span {
-  color: #5a4a30;
+  color: var(--cx-ink-soft);
 }
 .cx-stat b {
-  font-size: 15px;
+  font-size: 16px;
+}
+.cx-toggle {
+  align-self: flex-start;
+  padding: 6px 14px;
+  background: linear-gradient(180deg, #2b375a, #1a2238);
+  border: 1px solid var(--cx-gold);
+  border-radius: 8px;
+  color: var(--cx-gold-hi);
+  font: bold 13px sans-serif;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+  transition: transform 0.12s, filter 0.12s;
+}
+.cx-toggle::after {
+  content: ' ▸';
+}
+.cx-toggle.on::after {
+  content: ' ◂';
+}
+.cx-toggle:hover {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
 }
 .cx-record {
   flex: 1;
@@ -2155,35 +2255,115 @@ body {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px 12px;
-  background: #f8eed6;
-  border: 1px solid #b8975a;
-  scrollbar-color: #9c8150 #ecd3a0;
+  gap: 8px;
+  padding: 10px 14px 14px;
+  background: rgba(255, 252, 242, 0.65);
+  border: 1px solid var(--cx-line);
+  border-radius: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #b8975a transparent;
 }
 .cx-desc {
   margin: 0;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 .cx-desc.dim {
-  color: #7a6a50;
+  color: #8a7656;
 }
 .cx-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: #8a5a10;
   font-size: 13px;
   font-weight: bold;
   margin-top: 2px;
+}
+.cx-sub::before {
+  content: '◆';
+  font-size: 9px;
+}
+.cx-sub::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cx-line), transparent);
+}
+.cx-group {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #26314d;
+  color: var(--cx-gold-hi);
+  font-size: 12px;
+  font-weight: bold;
+}
+.cx-card {
+  padding: 8px 12px;
+  background: #fffaf0;
+  border: 1px solid var(--cx-line);
+  border-left: 3px solid var(--cx-gold);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(90, 60, 20, 0.12);
+}
+.cx-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.cx-card-head b {
+  font-size: 14px;
+  margin-right: 2px;
+}
+.cx-tag {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #f1e2bf;
+  color: #6a4a1a;
+}
+.cx-card-head .cx-tag:first-of-type {
+  background: #f6d9cf;
+  color: #8a2a18;
+}
+.cx-card p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #3a3020;
+}
+.cx-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.cx-flow span {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fffaf0;
+  border: 1px solid var(--cx-line);
+}
+.cx-flow span + span::before {
+  content: '→ ';
+  color: #b8975a;
 }
 .cx-lines {
   margin: 0;
   padding-left: 18px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: #3a3020;
+}
+.cx-lines li::marker {
+  color: #b8975a;
 }
 .cx-skill {
   display: flex;
@@ -2196,7 +2376,7 @@ body {
   gap: 1px;
 }
 .cx-skill small {
-  color: #6a5a40;
+  color: var(--cx-ink-soft);
 }
 .cx-mini {
   width: 28px;
@@ -2205,50 +2385,60 @@ body {
   image-rendering: pixelated;
 }
 .cx-list {
-  padding: 8px 6px 8px 10px;
+  padding: 10px 6px 10px 12px;
   gap: 6px;
 }
 .cx-list-title {
   font-size: 13px;
   font-weight: bold;
-  color: #5a4a30;
+  color: var(--cx-ink-soft);
 }
 .cx-scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding-right: 4px;
-  scrollbar-color: #9c8150 #ecd3a0;
+  padding: 2px 6px 4px 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #b8975a transparent;
 }
 .cx-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: #8a5a10;
   font-size: 12px;
   font-weight: bold;
-  border-bottom: 1px solid #c9a86a;
-  padding: 6px 2px 3px;
-  margin-bottom: 6px;
+  padding: 8px 2px 6px;
+}
+.cx-section::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cx-line), transparent);
 }
 .cx-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
-  gap: 6px;
+  gap: 7px;
 }
 .cx-cell {
-  --ring: #9c8150;
+  --ring: rgba(201, 164, 92, 0.6);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1px;
-  padding: 6px 4px 5px;
-  background: #1b2333;
-  border: 2px solid var(--ring);
+  padding: 7px 4px 6px;
+  background: linear-gradient(180deg, #232d47, #161d2f);
+  border: 1px solid var(--ring);
+  border-radius: 10px;
   color: #f3e6c4;
   cursor: pointer;
   font: bold 12px sans-serif;
   min-width: 0;
+  transition: transform 0.12s, box-shadow 0.12s;
 }
 .cx-cell i {
-  font: normal 10px sans-serif;
+  font: normal 10px monospace;
   color: #c9b48a;
 }
 .cx-cell small {
@@ -2259,12 +2449,17 @@ body {
   font-size: 12px;
 }
 .cx-cell:hover {
-  background: #26314d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(60, 40, 10, 0.3);
 }
 .cx-cell.on {
   border-color: #ffd23f;
-  background: #2c3756;
-  box-shadow: 0 0 8px rgba(255, 210, 63, 0.6);
+  background: linear-gradient(180deg, #34406a, #1f2843);
+  box-shadow: 0 0 0 2px rgba(255, 210, 63, 0.4), 0 4px 12px rgba(60, 40, 10, 0.35);
+}
+.cx-cell.unknown {
+  border-style: dashed;
+  background: #1a2030;
 }
 .cx-cell.unknown small,
 .cx-cell.locked small {
@@ -2290,20 +2485,27 @@ body {
   position: relative;
 }
 .cx-arrow {
-  padding: 4px 16px;
-  font-size: 14px;
+  padding: 4px 18px;
+  font-size: 13px;
+  border-color: rgba(201, 164, 92, 0.6);
 }
 .cx-page {
   min-width: 64px;
   text-align: center;
   color: #f3e6c4;
-  font-size: 13px;
+  font: 13px monospace;
 }
 .cx-hint {
   position: absolute;
-  right: 4px;
+  right: 6px;
   color: #8a96a8;
   font-size: 11px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cx-big,
+  .cx-detail {
+    animation: none;
+  }
 }
 /* 낮은 화면(휴대폰 가로 등): 두 칸은 유지하고 크기만 줄인다 */
 @media (max-height: 500px) {
@@ -2322,12 +2524,16 @@ body {
     font-size: 17px;
   }
   #codex-window .cx-btn {
-    padding: 4px 8px;
+    padding: 3px 9px;
     font-size: 12px;
   }
+  #codex-window .cx-stage {
+    width: 70px;
+    height: 70px;
+  }
   #codex-window .cx-big {
-    width: 64px;
-    height: 64px;
+    width: 62px;
+    height: 62px;
   }
   #codex-window .cx-name {
     font-size: 17px;
@@ -2339,6 +2545,7 @@ body {
     width: 32px;
     height: 32px;
   }
+  #codex-window .cx-progress i,
   #codex-window .cx-hint {
     display: none;
   }

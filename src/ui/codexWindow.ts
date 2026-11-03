@@ -15,10 +15,20 @@ import { applyArtIcon } from './artIcon';
 import { itemDescParams } from './itemCard';
 import { weaponInfoLines } from './weaponInfo';
 
-const TABS: CodexTab[] = ['monsters', 'characters', 'items'];
+const TABS: CodexTab[] = ['monsters', 'characters', 'items', 'weapons'];
 
 function fmt(values: Record<string, number>): Record<string, string> {
   return Object.fromEntries(Object.entries(values).map(([k, v]) => [k, String(Math.round(v * 10) / 10)]));
+}
+
+/** 공격 정의의 숫자를 설명 문구 값으로 편다 (ring.shots → ring_shots, chain[0] → chain_0) */
+function flatNumbers(o: object, prefix = ''): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const [k, v] of Object.entries(o)) {
+    if (typeof v === 'number') out[prefix + k] = v;
+    else if (v && typeof v === 'object') Object.assign(out, flatNumbers(v as object, `${prefix}${k}_`));
+  }
+  return out;
 }
 
 export class CodexWindow {
@@ -27,6 +37,9 @@ export class CodexWindow {
   private selected: CodexEntry | null = null;
   /** 지금 그리는 기록의 그림 옆 칸 */
   private side!: HTMLElement;
+  /** 보스 기록을 패턴 보기로 바꿨는지 (다른 칸을 고르면 기록 보기로 돌아간다) */
+  private patternView = false;
+  private shownKey = '';
 
   constructor(private readonly ctx: GameContext) {
     this.root = document.createElement('div');
@@ -57,6 +70,9 @@ export class CodexWindow {
     const flat = sections.flatMap((s) => s.entries);
     this.selected ??= flat[0] ?? null;
     const index = flat.findIndex((e) => e.kind === this.selected?.kind && e.id === this.selected.id);
+    const key = `${this.selected?.kind}:${this.selected?.id}`;
+    if (key !== this.shownKey) this.patternView = false;
+    this.shownKey = key;
 
     const head = this.el('div', 'cx-head');
     const tabs = this.el('div', 'cx-tabs');
@@ -72,7 +88,11 @@ export class CodexWindow {
     const p = codexProgress(this.ctx.data, this.ctx.save.data, this.tab);
     const close = this.el('button', 'cx-btn', t('codex.close'));
     close.addEventListener('click', () => bus.emit('codexClose', {}));
-    head.append(this.el('b', 'cx-heading', t('codex.title')), tabs, this.el('span', 'cx-progress', t('codex.progress', { known: p.known, total: p.total })), close);
+    const progress = this.el('div', 'cx-progress');
+    const bar = this.el('i', '');
+    bar.style.setProperty('--p', `${p.total ? (p.known / p.total) * 100 : 0}%`);
+    progress.append(this.el('span', '', t('codex.progress', { known: p.known, total: p.total })), bar);
+    head.append(this.el('b', 'cx-heading', t('codex.title')), tabs, progress, close);
 
     const list = this.el('div', 'cx-list');
     const scroll = this.el('div', 'cx-scroll');
@@ -174,7 +194,9 @@ export class CodexWindow {
     const a = this.art(e);
     applyArtIcon(icon, this.ctx, a.key, a.color);
     this.side = this.el('div', 'cx-side');
-    hero.append(icon, this.side);
+    const stage = this.el('div', 'cx-stage');
+    stage.appendChild(icon);
+    hero.append(stage, this.side);
     const record = this.el('div', 'cx-record');
     record.appendChild(this.el('div', 'cx-sub', t('codex.record')));
     box.append(chips, this.el('b', 'cx-name', known ? this.name(e) : '???'), hero, record);
@@ -239,31 +261,71 @@ export class CodexWindow {
     this.chip(chips, t(`codex.rank.${def.rank}`), def.rank === 'normal' ? undefined : d.enemies.enemies.find((x) => x.id === id)!.color);
     const stage = d.bosses.bosses.find((b) => b.id === id);
     this.chip(chips, stage ? t('codex.bossStage', { chapter: stage.chapter, stage: stage.stage }) : def.rank === 'hiddenBoss' ? t('codex.anyChapter') : t('codex.chapter', { n: def.chapter }));
-    box.appendChild(this.el('p', 'cx-desc', t(`codex.enemy.${id}`)));
     this.stats([
       [t('codex.stat.hp'), String(def.maxHp)],
       [t('codex.stat.speed'), String(def.moveSpeed)],
       [t('codex.stat.contact'), String(def.contactDamage)],
     ]);
-    if (!boss) return;
-    const phase: string[] = [];
-    if (boss.enrageAt > 0) phase.push(t('codex.phase.enrage', { hp: Math.round(boss.enrageAt * 100), name: t(`boss.enraged.${id}`) }));
-    (boss.unlocks ?? []).forEach((hp, i) => phase.push(t('codex.phase.enrage', { hp: Math.round(hp * 100), name: t(`boss.unlock.${id}.${i + 1}`) })));
-    this.block(box, 'codex.sub.phases', phase);
-    const names = (filter: (p: BossCore['patterns'][number]) => boolean) => boss.patterns.filter(filter).map((p) => t(`boss.pattern.${p.id}`)).join(' · ');
-    const lines: string[] = [];
-    const base = names((p) => p.phase === 1 && !p.inherit && (p.unlock ?? 0) === 0 && p.hpBelow === undefined);
-    if (base) lines.push(t('codex.patterns.base', { list: base }));
-    const enraged = names((p) => p.phase === 2);
-    if (enraged) lines.push(t('codex.patterns.enraged', { list: enraged }));
-    (boss.unlocks ?? []).forEach((_, i) => {
-      const at = names((p) => !p.inherit && p.unlock === i + 1);
-      if (at) lines.push(t('codex.patterns.unlock', { name: t(`boss.unlock.${id}.${i + 1}`), list: at }));
+    if (!boss) {
+      box.appendChild(this.el('p', 'cx-desc', t(`codex.enemy.${id}`)));
+      box.appendChild(this.el('div', 'cx-sub', t('codex.sub.attacks')));
+      if (!def.attacks?.length) box.appendChild(this.el('p', 'cx-desc dim', t('codex.noAttack')));
+      for (const a of def.attacks ?? []) {
+        box.appendChild(this.card(t(`codex.attackName.${id}.${a.id}`), t(`codex.attack.${id}.${a.id}`, fmt(flatNumbers(a))), [t('codex.chip.damage', { n: a.damage })]));
+      }
+      return;
+    }
+    const toggle = this.el('button', `cx-toggle${this.patternView ? ' on' : ''}`, t(this.patternView ? 'codex.showRecord' : 'codex.showPatterns'));
+    toggle.addEventListener('click', () => {
+      this.patternView = !this.patternView;
+      this.render();
     });
-    for (const p of boss.patterns.filter((x) => x.hpBelow !== undefined)) lines.push(t('codex.patterns.low', { hp: Math.round(p.hpBelow! * 100), list: t(`boss.pattern.${p.id}`) }));
-    const inherit = names((p) => !!p.inherit);
-    if (inherit) lines.push(t('codex.patterns.inherit', { list: inherit }));
-    this.block(box, 'codex.sub.patterns', lines);
+    this.side.appendChild(toggle);
+    const phaseName = (i: number) => (i === 0 ? t(`boss.enraged.${id}`) : t(`boss.unlock.${id}.${i}`));
+    if (!this.patternView) {
+      box.appendChild(this.el('p', 'cx-desc', t(`codex.enemy.${id}`)));
+      const flow = [t('codex.phase.start')];
+      if (boss.enrageAt > 0) flow.push(t('codex.phase.enrage', { hp: Math.round(boss.enrageAt * 100), name: phaseName(0) }));
+      (boss.unlocks ?? []).forEach((hp, i) => flow.push(t('codex.phase.enrage', { hp: Math.round(hp * 100), name: phaseName(i + 1) })));
+      if (flow.length > 1) {
+        box.appendChild(this.el('div', 'cx-sub', t('codex.sub.phaseFlow')));
+        const steps = this.el('div', 'cx-flow');
+        for (const f of flow) steps.appendChild(this.el('span', '', f));
+        box.appendChild(steps);
+      }
+      return;
+    }
+    box.querySelector('.cx-sub')!.textContent = t('codex.sub.patterns');
+    type P = BossCore['patterns'][number];
+    const groups: [string, (p: P) => boolean][] = [
+      [t('codex.group.base'), (p) => p.phase === 1 && !p.inherit && (p.unlock ?? 0) === 0 && p.hpBelow === undefined],
+      [t('codex.group.phase', { name: phaseName(0), hp: Math.round(boss.enrageAt * 100) }), (p) => p.phase === 2],
+      ...(boss.unlocks ?? []).map((hp, i): [string, (p: P) => boolean] => [t('codex.group.phase', { name: phaseName(i + 1), hp: Math.round(hp * 100) }), (p) => !p.inherit && p.unlock === i + 1]),
+      ...boss.patterns.filter((p) => p.hpBelow !== undefined).map((x): [string, (p: P) => boolean] => [t('codex.group.low', { hp: Math.round(x.hpBelow! * 100) }), (p) => p === x]),
+      [t('codex.group.inherit'), (p) => !!p.inherit],
+    ];
+    for (const [title, test] of groups) {
+      const list = boss.patterns.filter(test);
+      if (list.length === 0) continue;
+      box.appendChild(this.el('div', 'cx-group', title));
+      for (const p of list) {
+        const tags: string[] = [];
+        if (p.values.damage) tags.push(t('codex.chip.damage', { n: p.values.damage }));
+        if (p.reach === 'melee') tags.push(t('codex.chip.melee'));
+        if (p.summon) tags.push(t('codex.chip.summon'));
+        box.appendChild(this.card(t(`boss.pattern.${p.id}`), t(`codex.pattern.${p.id}`, fmt(p.values)), tags));
+      }
+    }
+  }
+
+  /** 패턴 한 칸: 이름 + 꼬리표, 아래 설명 */
+  private card(name: string, desc: string, tags: string[]): HTMLElement {
+    const c = this.el('div', 'cx-card');
+    const head = this.el('div', 'cx-card-head');
+    head.appendChild(this.el('b', '', name));
+    for (const x of tags) head.appendChild(this.el('span', 'cx-tag', x));
+    c.append(head, this.el('p', '', desc));
+    return c;
   }
 
   private jobDetail(id: string, box: HTMLElement, chips: HTMLElement): void {
@@ -367,6 +429,8 @@ export class CodexWindow {
             : t('codex.source.special');
     this.chip(chips, source);
     this.badges(w.tags);
+    // 무기는 설명 문구가 없어 '기록' 머리말 없이 성능만 보인다
+    box.querySelector('.cx-sub')?.remove();
     this.block(box, 'codex.sub.weapon', weaponInfoLines(this.ctx, plainWeapon(w)).map((l) => l.text));
   }
 }
