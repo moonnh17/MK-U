@@ -53,7 +53,7 @@ describe.each([
   it('공격은 오른쪽 아래, 궁극기는 스킬 위, 가방은 왼쪽 위', () => {
     expect(layout.attack.x).toBeGreaterThan(w / 2);
     expect(layout.attack.y).toBeGreaterThan(h / 2);
-    const topSkill = Math.min(layout.skill1.y, layout.skill2.y, layout.skill3.y, layout.skill4.y);
+    const topSkill = Math.min(layout.skill1.y, layout.skill2.y, layout.skill3.y);
     expect(layout.ultimate.y).toBeLessThan(topSkill);
     expect(layout.inventory.x).toBeLessThan(w / 2);
     expect(layout.inventory.y).toBeLessThan(h / 2);

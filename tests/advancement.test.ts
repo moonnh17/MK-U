@@ -91,14 +91,14 @@ describe('전직 스킬 변환 (기획서 예시)', () => {
       ['reductionist', 1],
       ['combatDrone', 1],
     ]);
-    // 액티브 4칸은 아크로가 차지, 헥타르 액티브 2개는 보관, 패시브 칸은 환원주의자
-    expect(lo.active).toEqual(['unstableSubject', 'magiCorruption', 'experimentalWeapon', 'mkPrototype']);
+    // 액티브 3칸은 아크로가 차지, 나머지 아크로 하나와 헥타르 액티브 2개는 보관, 패시브 칸은 환원주의자
+    expect(lo.active).toEqual(['unstableSubject', 'magiCorruption', 'experimentalWeapon']);
     expect(lo.passive).toBe('reductionist');
     const r = convertSkills(new Rng(3), lo, S, 'hectar');
     lo = r.loadout;
-    expect(lo.active).toEqual(['magiTurret', 'railgun', null, null]);
+    expect(lo.active).toEqual(['magiTurret', 'railgun', null]);
     expect(lo.passive).toBe('combatDrone');
-    expect(r.log.removed.map((x) => x.skillId)).toEqual(['unstableSubject', 'magiCorruption', 'experimentalWeapon', 'mkPrototype', 'reductionist']);
+    expect(r.log.removed.map((x) => x.skillId).sort()).toEqual(['experimentalWeapon', 'magiCorruption', 'mkPrototype', 'reductionist', 'unstableSubject']);
   });
 
   it('반대 학파 스킬이 없으면 아무것도 바뀌지 않는다', () => {

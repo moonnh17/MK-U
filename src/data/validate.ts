@@ -678,7 +678,7 @@ export function validateGameData(d: GameData): Errors {
   for (const k of ['edgeMarginDp', 'attackDp', 'skillDp', 'ultimateDp', 'swapDp', 'bagDp', 'pauseDp'] as const) {
     checkPositive(errors, `ui.mobile.${k}`, mb[k]);
   }
-  if (mb.skillFanDeg.length !== 4) errors.push('ui.mobile.skillFanDeg: 4개여야 함');
+  if (mb.skillFanDeg.length !== 3) errors.push('ui.mobile.skillFanDeg: 3개여야 함');
   if (!HEX_COLOR.test(d.ui.corruptionColor)) errors.push('ui.corruptionColor: #RRGGBB');
   const sb = d.ui.hud.skillbar;
   if (sb.levelColors.length !== 3) errors.push('ui.hud.skillbar.levelColors: Lv1~3, 3개여야 함');

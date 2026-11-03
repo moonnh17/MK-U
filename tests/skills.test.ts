@@ -31,12 +31,12 @@ function withActives(n: number): SkillLoadout {
 }
 
 describe('스킬 슬롯: 장착·보관', () => {
-  it('액티브는 빈 칸에 자동 장착, 5번째부터 보관', () => {
-    const lo = withActives(4);
-    expect(lo.active).toEqual(ACTIVES.slice(0, 4));
+  it('액티브는 빈 칸에 자동 장착, 4번째부터 보관', () => {
+    const lo = withActives(3);
+    expect(lo.active).toEqual(ACTIVES.slice(0, 3));
     const r = acquireSkill(lo, def('railgun'));
     expect(r.equipped).toBe(false);
-    expect(r.loadout.active).toEqual(ACTIVES.slice(0, 4));
+    expect(r.loadout.active).toEqual(ACTIVES.slice(0, 3));
     expect(storedSkills(r.loadout)).toEqual(['railgun']);
     expect(r.loadout.owned.railgun!.level).toBe(1);
   });
@@ -57,12 +57,12 @@ describe('스킬 슬롯: 장착·보관', () => {
   });
 
   it('보관 스킬을 찬 칸에 넣으면 원래 스킬이 보관되고, 넣은 스킬은 쿨타임이 처음부터', () => {
-    let lo = withActives(5);
-    const r = equipSkill(lo, 'railgun', 1, sd);
+    let lo = withActives(4);
+    const r = equipSkill(lo, 'magiField', 1, sd);
     lo = r.loadout;
-    expect(lo.active[1]).toBe('railgun');
+    expect(lo.active[1]).toBe('magiField');
     expect(storedSkills(lo)).toEqual(['magiMine']);
-    expect(r.restarted).toEqual(['railgun']);
+    expect(r.restarted).toEqual(['magiField']);
   });
 
   it('장착 칸끼리 바꾸면 자리만 바뀌고 쿨타임은 유지', () => {
@@ -73,8 +73,8 @@ describe('스킬 슬롯: 장착·보관', () => {
 
   it('빈 칸에 넣을 수 있다', () => {
     const lo = withActives(1);
-    const moved = equipSkill(lo, 'magiTurret', 3, sd).loadout;
-    expect(moved.active).toEqual([null, null, null, 'magiTurret']);
+    const moved = equipSkill(lo, 'magiTurret', 2, sd).loadout;
+    expect(moved.active).toEqual([null, null, 'magiTurret']);
   });
 
   it('보관 패시브를 패시브 칸에 넣으면 교체되고 레벨은 유지', () => {

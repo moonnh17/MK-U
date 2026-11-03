@@ -3,7 +3,7 @@ import type { MobileLayoutData } from '../types/data';
 
 export type TouchControlId = Extract<
   ButtonAction,
-  'attack' | 'dodge' | 'weaponSpecial' | 'skill1' | 'skill2' | 'skill3' | 'skill4' | 'ultimate' | 'swapWeapon' | 'inventory' | 'pause' | 'map'
+  'attack' | 'dodge' | 'weaponSpecial' | 'skill1' | 'skill2' | 'skill3' | 'ultimate' | 'swapWeapon' | 'inventory' | 'pause' | 'map'
 >;
 
 export interface ControlRect {
@@ -30,7 +30,7 @@ export function layoutMobileControls(viewW: number, viewH: number, c: MobileLayo
   const m = c.edgeMarginDp;
   const cx = viewW - m - c.attackDp / 2;
   const cy = viewH - m - c.attackDp / 2;
-  const [d1, d2, d3, d4] = c.skillFanDeg;
+  const [d1, d2, d3] = c.skillFanDeg;
   // 공격 버튼에 붙는 최소 반지름과, 이웃 스킬 버튼끼리 겹치지 않는 반지름 중 큰 값
   const sorted = [...c.skillFanDeg].sort((a, b) => a - b);
   const minStepRad = Math.min(...sorted.slice(1).map((d, i) => d - sorted[i]!)) * (Math.PI / 180);
@@ -55,7 +55,6 @@ export function layoutMobileControls(viewW: number, viewH: number, c: MobileLayo
     skill1: skill(d1),
     skill2: skill(d2),
     skill3: skill(d3),
-    skill4: skill(d4),
     ultimate: circle(cx + ultR * Math.cos(ultRad), cy + ultR * Math.sin(ultRad), c.ultimateDp),
     swapWeapon: circle(swapCx, swapCy, c.swapDp),
     dodge: circle(swapCx, swapCy - c.swapDp / 2 - c.gapDp - c.dodgeDp / 2, c.dodgeDp),

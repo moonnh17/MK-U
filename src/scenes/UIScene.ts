@@ -65,7 +65,7 @@ export class UIScene extends Phaser.Scene {
     );
     this.debugPanel.addSection(this.ctx.t('debug.skills'), buildDebugSkills(this.ctx));
     this.debugPanel.setVisible(this.ctx.debug);
-    this.touchSkillLabels = ['1', '2', '3', '4', this.ctx.t('mobile.ultimate')];
+    this.touchSkillLabels = ['1', '2', '3', this.ctx.t('mobile.ultimate')];
     this.touchSkills = new TouchSkills(this.ctx.touch, ui, this.touchSkillLabels);
 
     this.unsubs.push(

@@ -56,4 +56,4 @@ export interface Vending {
   sprite: Phaser.GameObjects.Image;
 }
 
-export const SKILL_ACTIONS: ButtonAction[] = ['skill1', 'skill2', 'skill3', 'skill4'];
+export const SKILL_ACTIONS: ButtonAction[] = ['skill1', 'skill2', 'skill3'];

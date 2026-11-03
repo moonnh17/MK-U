@@ -775,7 +775,7 @@ export interface MobileLayoutData {
   /** 버튼 사이 간격(dp) */
   gapDp: number;
   /** 스킬 4개 부채꼴 각도(도, 화면 좌표: 180=왼쪽, 270=위) */
-  skillFanDeg: [number, number, number, number];
+  skillFanDeg: [number, number, number];
   /** 궁극기 방향(도). 스킬 부채꼴 바깥쪽에 놓인다 */
   ultimateDeg: number;
   minimapTab: { widthDp: number; heightDp: number };

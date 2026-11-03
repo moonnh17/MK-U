@@ -1,5 +1,5 @@
 {
-  "activeSlots": 4,
+  "activeSlots": 3,
   "maxLevel": 3,
   "targetWeights": { "normal": 1, "elite": 3, "champion": 4, "boss": 6, "hiddenBoss": 6 },
   "skills": [

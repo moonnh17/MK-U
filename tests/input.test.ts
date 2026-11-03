@@ -34,10 +34,8 @@ describe('키보드 → ActionCommand', () => {
     ['Escape', 'pause'],
     ['Digit1', 'skill1'],
     ['Numpad1', 'skill1'],
-    ['Digit4', 'skill4'],
-    ['Numpad4', 'skill4'],
-    ['Digit5', 'ultimate'],
-    ['Numpad5', 'ultimate'],
+    ['Digit4', 'ultimate'],
+    ['Numpad4', 'ultimate'],
   ] as [string, ButtonAction][])('%s → %s', (code, action) => {
     expect([...keys(code).held]).toEqual([action]);
   });

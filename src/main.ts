@@ -63,7 +63,6 @@ const touchLabels: Record<TouchControlId, string> = {
   skill1: '1',
   skill2: '2',
   skill3: '3',
-  skill4: '4',
   ultimate: t('mobile.ultimate'),
   swapWeapon: t('mobile.swap'),
   inventory: t('mobile.bag'),

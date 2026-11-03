@@ -5,9 +5,9 @@ import type { TouchSource } from '../input/touch';
 import type { UiData } from '../types/data';
 import type { TouchControlId } from './mobileLayout';
 
-/** skillView 순서(액티브 4 + 궁극기 + 패시브)와 같은 순서의 버튼. 패시브는 버튼이 없다 */
-const BUTTONS: (TouchControlId | null)[] = ['skill1', 'skill2', 'skill3', 'skill4', 'ultimate', null];
-const ULT = 4;
+/** skillView 순서(액티브 3 + 궁극기 + 패시브)와 같은 순서의 버튼. 패시브는 버튼이 없다 */
+const BUTTONS: (TouchControlId | null)[] = ['skill1', 'skill2', 'skill3', 'ultimate', null];
+const ULT = BUTTONS.indexOf('ultimate');
 
 interface Parts {
   root: HTMLDivElement;

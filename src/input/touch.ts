@@ -44,7 +44,6 @@ const CONTROL_IDS: TouchControlId[] = [
   'skill1',
   'skill2',
   'skill3',
-  'skill4',
   'ultimate',
   'swapWeapon',
   'inventory',

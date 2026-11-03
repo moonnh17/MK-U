@@ -10,13 +10,12 @@ import { gradeEnergyMultiplier } from '../systems/damage';
 import { activeWeapon, otherWeapon, weaponStats } from '../systems/weapons';
 import { Minimap } from './minimap';
 
-/** 스킬바 칸 순서는 RunSession.skillView와 같다 (액티브 4 + 궁극기 + 패시브) */
+/** 스킬바 칸 순서는 RunSession.skillView와 같다 (액티브 3 + 궁극기 + 패시브) */
 const SKILLBAR: { action: ButtonAction | 'passive'; keyLabel: string }[] = [
   { action: 'skill1', keyLabel: '1' },
   { action: 'skill2', keyLabel: '2' },
   { action: 'skill3', keyLabel: '3' },
-  { action: 'skill4', keyLabel: '4' },
-  { action: 'ultimate', keyLabel: '5' },
+  { action: 'ultimate', keyLabel: '4' },
   { action: 'passive', keyLabel: 'P' },
 ];
 
@@ -262,7 +261,7 @@ export class Hud {
   private updateSkillbar(s: RunSession): void {
     const sb = this.ctx.data.ui.hud.skillbar;
     const size = sb.slotSize;
-    const ultIndex = 4;
+    const ultIndex = SKILLBAR.findIndex((x) => x.action === 'ultimate');
     s.skillView.forEach((v, i) => {
       const ui = this.slots[i];
       if (!ui) return;
