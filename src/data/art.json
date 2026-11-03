@@ -560,12 +560,6 @@
       "frameHeight": 64,
       "frames": 1
     },
-    "item_warrior_memory": {
-      "file": "mku/item_warrior_memory.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
-    },
     "item_atros_codex": {
       "file": "mku/item_atros_codex.png",
       "frameWidth": 64,
@@ -586,6 +580,84 @@
     },
     "item_wonhon_lump": {
       "file": "mku/item_wonhon_lump.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_afro_belt": {
+      "file": "mku/item_afro_belt.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_magowiki_codex": {
+      "file": "mku/item_magowiki_codex.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_death_whistle": {
+      "file": "mku/item_death_whistle.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_royal_seal": {
+      "file": "mku/item_royal_seal.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_magnet_resonator": {
+      "file": "mku/item_magnet_resonator.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_steel_castle_figure": {
+      "file": "mku/item_steel_castle_figure.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_war_diary": {
+      "file": "mku/item_war_diary.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_snell_law": {
+      "file": "mku/item_snell_law.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_hela_cell": {
+      "file": "mku/item_hela_cell.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_forbidden_virus": {
+      "file": "mku/item_forbidden_virus.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_extra_arms": {
+      "file": "mku/item_extra_arms.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_forbidden_gift": {
+      "file": "mku/item_forbidden_gift.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_warrior_memory": {
+      "file": "mku/item_warrior_memory.png",
       "frameWidth": 64,
       "frameHeight": 64,
       "frames": 1
@@ -1434,20 +1506,8 @@
         }
       }
     },
-    "item_death_whistle": {
-      "file": "mku/item_death_whistle.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
-    },
     "item_orion_shield": {
       "file": "mku/item_orion_shield.png",
-      "frameWidth": 64,
-      "frameHeight": 64,
-      "frames": 1
-    },
-    "item_royal_seal": {
-      "file": "mku/item_royal_seal.png",
       "frameWidth": 64,
       "frameHeight": 64,
       "frames": 1

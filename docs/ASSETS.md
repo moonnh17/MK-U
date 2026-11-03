@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 456개 · 그림 있음 441개
+전체 464개 · 그림 있음 451개
 
 ## player (3)
 
@@ -382,23 +382,23 @@
 | `item_oak_heart` | 참나무의 심장 | 8×8 | center | #6a9a3a | mku/item_oak_heart.png (1프레임) |
 | `item_hanwoo_steak` | 한우촌의 생등심 | 8×8 | center | #c85a5a | mku/item_hanwoo_steak.png (1프레임) |
 | `item_lee_seal` | 이씨 가문의 증표 | 8×8 | center | #ffd23f | mku/item_lee_seal.png (1프레임) |
-| `item_magowiki_codex` | 마고위키 필사본 | 8×8 | center | #e0c060 | — |
+| `item_magowiki_codex` | 마고위키 필사본 | 8×8 | center | #e0c060 | mku/item_magowiki_codex.png (1프레임) |
 | `item_gisup_stone` | 기숲 비석의 조각 | 8×8 | center | #7a8a9a | mku/item_gisup_stone.png (1프레임) |
-| `item_afro_belt` | 아프로 씨의 벨트 | 8×8 | center | #a45cff | — |
+| `item_afro_belt` | 아프로 씨의 벨트 | 8×8 | center | #a45cff | mku/item_afro_belt.png (1프레임) |
 | `item_regulus_shard` | 레굴루스의 의식조각 | 8×8 | center | #8a6aff | mku/item_regulus_shard.png (1프레임) |
 | `item_caesar_crown` | 카이사르의 왕관 | 8×8 | center | #ffd23f | mku/item_caesar_crown.png (1프레임) |
 | `item_acrux_cross` | 아크룩스의 십자가 | 8×8 | center | #e0e0ff | mku/item_acrux_cross.png (1프레임) |
 | `item_orion_belt` | 오리온의 허리띠 | 8×8 | center | #5ad9ff | mku/item_orion_belt.png (1프레임) |
 | `item_divine_sword` | 신검 영디·마기 | 8×8 | center | #ff3b3b | mku/item_divine_sword.png (1프레임) |
-| `icon_skill_magiTurret` | 추가 무장 외 1곳 | 8×8 | center | #5a8ad9 | mku/icon_skill_magiTurret.png (1프레임) |
-| `icon_skill_magiMine` | 자기 공명 장치 외 1곳 | 8×8 | center | #5a8ad9 | mku/icon_skill_magiMine.png (1프레임) |
-| `icon_skill_magiField` | 스넬의 법칙 외 1곳 | 8×8 | center | #5a8ad9 | mku/icon_skill_magiField.png (1프레임) |
+| `item_extra_arms` | 추가 무장 | 8×8 | center | #5a8ad9 | mku/item_extra_arms.png (1프레임) |
+| `item_magnet_resonator` | 자기 공명 장치 | 8×8 | center | #5a8ad9 | mku/item_magnet_resonator.png (1프레임) |
+| `item_snell_law` | 스넬의 법칙 | 8×8 | center | #5a8ad9 | mku/item_snell_law.png (1프레임) |
 | `icon_skill_railgun` | LK-99 외 1곳 | 8×8 | center | #ffd23f | mku/icon_skill_railgun.png (1프레임) |
-| `icon_skill_unstableSubject` | 헬라 세포 외 1곳 | 8×8 | center | #5a8ad9 | mku/icon_skill_unstableSubject.png (1프레임) |
-| `icon_skill_magiCorruption` | 금지된 바이러스 외 1곳 | 8×8 | center | #5a8ad9 | mku/icon_skill_magiCorruption.png (1프레임) |
-| `icon_skill_experimentalWeapon` | 열어선 안되는 선물 외 1곳 | 8×8 | center | #ffd23f | mku/icon_skill_experimentalWeapon.png (1프레임) |
-| `icon_skill_purifyingWings` | 과기전쟁의 일기 외 1곳 | 8×8 | center | #ffd23f | mku/icon_skill_purifyingWings.png (1프레임) |
-| `icon_skill_mkPrototype` | 강철의 성 피규어 외 1곳 | 8×8 | center | #5a8ad9 | mku/icon_skill_mkPrototype.png (1프레임) |
+| `item_hela_cell` | 헬라 세포 | 8×8 | center | #5a8ad9 | mku/item_hela_cell.png (1프레임) |
+| `item_forbidden_virus` | 금지된 바이러스 | 8×8 | center | #5a8ad9 | mku/item_forbidden_virus.png (1프레임) |
+| `item_forbidden_gift` | 열어선 안되는 선물 | 8×8 | center | #ffd23f | mku/item_forbidden_gift.png (1프레임) |
+| `item_war_diary` | 과기전쟁의 일기 | 8×8 | center | #ffd23f | mku/item_war_diary.png (1프레임) |
+| `item_steel_castle_figure` | 강철의 성 피규어 | 8×8 | center | #5a8ad9 | mku/item_steel_castle_figure.png (1프레임) |
 | `item_atros_codex` | 아트로스 비석 필사본 | 8×8 | center | #d8c090 | mku/item_atros_codex.png (1프레임) |
 | `item_warrior_memory` | 어느 전사의 기억 | 8×8 | center | #c8ccd8 | mku/item_warrior_memory.png (1프레임) |
 | `item_wonhon_lump` | 원혼 덩어리 | 8×8 | center | #7a1f3a | mku/item_wonhon_lump.png (1프레임) |
@@ -407,12 +407,20 @@
 | `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | mku/item_orion_shield.png (1프레임) |
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | mku/item_hectar_ram.png (1프레임) |
 
-## icon (8)
+## icon (16)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
+| `icon_skill_magiTurret` | 마기 자동포탑 | 16×16 | center | #4fb3d9 | mku/icon_skill_magiTurret.png (1프레임) |
+| `icon_skill_magiMine` | 마기 지뢰 | 16×16 | center | #d9a03b | mku/icon_skill_magiMine.png (1프레임) |
 | `icon_skill_antimatterCannon` | 반물질포 | 16×16 | center | #a05ad9 | mku/icon_skill_antimatterCannon.png (1프레임) |
+| `icon_skill_magiField` | 마기역장 | 16×16 | center | #8aa4c8 | mku/icon_skill_magiField.png (1프레임) |
 | `icon_skill_combatDrone` | 전투 드론 | 16×16 | center | #5ad9c0 | mku/icon_skill_combatDrone.png (1프레임) |
+| `icon_skill_unstableSubject` | 불안정 실험체 | 16×16 | center | #9ad94a | mku/icon_skill_unstableSubject.png (1프레임) |
+| `icon_skill_magiCorruption` | 마기 변질 | 16×16 | center | #c83a5a | mku/icon_skill_magiCorruption.png (1프레임) |
+| `icon_skill_experimentalWeapon` | 실험 병기 | 16×16 | center | #d9d03b | mku/icon_skill_experimentalWeapon.png (1프레임) |
+| `icon_skill_purifyingWings` | 정화의 날개 | 16×16 | center | #d93a3a | mku/icon_skill_purifyingWings.png (1프레임) |
+| `icon_skill_mkPrototype` | MK : 프로토타입 | 16×16 | center | #d9783b | mku/icon_skill_mkPrototype.png (1프레임) |
 | `icon_skill_reductionist` | 환원주의자 | 16×16 | center | #5ad95a | mku/icon_skill_reductionist.png (1프레임) |
 | `icon_ult_firstLaw` | 열역학 제1법칙 | 16×16 | center | #ff9a3c | mku/icon_ult_firstLaw.png (1프레임) |
 | `icon_ult_thunderbolt` | 벼락 | 16×16 | center | #4ab0ff | mku/icon_ult_thunderbolt.png (1프레임) |

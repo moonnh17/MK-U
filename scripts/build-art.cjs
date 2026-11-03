@@ -307,11 +307,29 @@ const ITEM = {
   item_broken_hilt: 'items/broken-sheath.png', item_elegant_magi: 'items/elegant-magi.png', item_antimatter_sample: 'items/experimental-antimatter.png',
   item_combat_theory: 'items/combat-application.png', item_oak_heart: 'items/oak-heart.png', item_hanwoo_steak: 'items/raw-beef.png', item_lee_seal: 'items/lee-seal.png',
   item_regulus_shard: 'items/regulus.png', item_caesar_crown: 'items/caesar.png', item_acrux_cross: 'items/acrux.png', item_orion_belt: 'items/betelgeuse.png',
-  item_warrior_memory: 'warrior/icon-mastery-weapon.png', item_atros_codex: 'codex/simple-paper.png',
+  item_atros_codex: 'items/atros-codex.png',
   item_divine_sword: 'items/sword-youngdi.png', item_hectar_ram: 'items/hectar-ram.png',
-  item_wonhon_lump: 'rewards/ghost-icon.png',
+  item_wonhon_lump: 'items/wonhon-lump.png', item_afro_belt: 'items/afro-belt.png', item_magowiki_codex: 'items/magowiki.png',
+  item_death_whistle: 'items/death-whistle.png', item_royal_seal: 'items/royal-seal.png',
+  item_magnet_resonator: 'items/magnet-resonator.png', item_steel_castle_figure: 'items/steel-castle-figure.png', item_war_diary: 'items/war-diary.png',
+  item_snell_law: 'items/snell-law.png', item_hela_cell: 'items/hela-cell.png', item_forbidden_virus: 'items/forbidden-virus.png',
+  item_extra_arms: 'items/extra-arms.png', item_forbidden_gift: 'items/forbidden-gift.png',
 };
 for (const [key, f] of Object.entries(ITEM)) sprites[key] = icon(key, f, CARD_ICON);
+// 어느 전사의 기억: 원본 아이콘이 잘려 있어 세트 재료(이름 없는 검 뒤에 이름 없는 투구)를 겹친다
+{
+  const sword = load('items/nameless-sword.png');
+  const c = k.crop(sword, 0, 0, sword.w, sword.h);
+  const helm = k.resize(load('items/nameless-helm.png'), Math.round(c.w * 0.68), Math.round(c.h * 0.68), 0.5);
+  const ox = Math.round((c.w - helm.w) / 2), oy = c.h - helm.h;
+  for (let y = 0; y < helm.h; y++) for (let x = 0; x < helm.w; x++) {
+    const s = (y * helm.w + x) * 4;
+    if (helm.px[s + 3] > 127) helm.px.copy(c.px, ((oy + y) * c.w + ox + x) * 4, s, s + 4);
+  }
+  const file = `${OUT_DIR}/item_warrior_memory.png`;
+  k.write(path.join(REPO, 'public/assets', file), k.resize(c, CARD_ICON, CARD_ICON, 0.5));
+  sprites.item_warrior_memory = { file, frameWidth: CARD_ICON, frameHeight: CARD_ICON, frames: 1 };
+}
 
 // ---------- 방 타일 (terrain.png: 1행 돌, 2행 푸른 기술, 3행 붉은 균열) ----------
 // 3장은 붉은 적이 묻히지 않게 붉은 점이 드문 칸을 더 어둡게
@@ -710,13 +728,8 @@ actor('enemy_orion_crusader', gaps('warrior/paladin-idle.png'), gaps('warrior/pa
   actor('enemy_royal_mage', [fr[0]], fr.slice(0, 3), 46);
 }
 
-// 아이템 아이콘 (원본에 맞는 것이 없는 둘은 직접 찍는다)
-sprites.item_death_whistle = icon('item_death_whistle', 'warrior/icon-b-shout.png', CARD_ICON);
+// 아이템 아이콘 (원본에 맞는 것이 없는 것은 직접 찍는다)
 sprites.item_orion_shield = icon('item_orion_shield', 'warrior/icon-p-shield.png', CARD_ICON);
-dots('item_royal_seal', [
-  '.....KKKKKK.....', '...KKppppppKK...', '..KppPPPPPPppK..', '.KpPPpPPPPpPPpK.', '.KpPpPPggPPpPpK.', 'KpPPPPggggPPPPpK', 'KpPPPggwwggPPPpK', 'KpPPggwwwwggPPpK',
-  'KpPPggwwwwggPPpK', 'KpPPPggwwggPPPpK', 'KpPPPPggggPPPPpK', '.KpPpPPggPPpPpK.', '.KpPPpPPPPpPPpK.', '..KppPPPPPPppK..', '...KKppppppKK...', '.....KKKKKK.....',
-], { scale: 4 });
 dots('item_gisup_stone', [
   '................', '....KKKKKK......', '...KmmmmlKK.....', '..KmlllmmmlK....', '..KmldmmdmlKK...', '..KmmmmmmmmmK...', '..KmddmmdmmlK...', '..KmmmmmmmmlK...',
   '..KmdmmddmmmK...', '..KmmmmmmmmmK...', '..KmddmmmdmlK...', '..KmmmmmmmmmK...', '..KdmmmdmmmdK...', '..KddKmmmKddK...', '...KK.KdK.KK....', '......KK........',
