@@ -195,7 +195,8 @@ export class WeaponCombat {
     const sig = w.signature && signatureFires(++this.sigCount, w.signature.every) ? w.signature : null;
 
     if (w.category === 'blade') {
-      sfx(weaponSfx(w));
+      // 칼: 피해가 클수록 무거운 휘두르기 (내려찍기 같은 강화 공격은 한 단계 위로)
+      sfx(weaponSfx(w), st.damage * (sig?.kind === 'bigSmash' ? sig.damageMul : 1));
       // 특무 인장: 순간 회피 직후 기본공격 피해 증가
       const emp = this.run.itemRt.consumeEmpowered();
       if (w.lunge && this.lunge(w, w.lunge, aimAngle)) {
@@ -223,7 +224,7 @@ export class WeaponCombat {
       const fistStats = this.run.weaponStatsOf(fist);
       this.fireCooldown = fistStats.fireIntervalSec;
       const fistDef = this.run.weaponDefOf(fist.defId);
-      sfx(weaponSfx(fistDef));
+      sfx(weaponSfx(fistDef), fistStats.damage);
       this.melee(fistDef, fistStats, aimAngle, 0, null, this.run.itemRt.consumeEmpowered());
       return;
     }
@@ -386,7 +387,7 @@ export class WeaponCombat {
     const first = chainTargets(origin, pts, 1, sig.anyDistance ? Infinity : sig.range, new Set());
     const idx = first.length ? [...first, ...chainTargets(pts[first[0]!]!, pts, sig.jumps - 1, sig.range, new Set(first))] : [];
     if (idx.length === 0) return;
-    sfx('blink');
+    sfx('electric');
     const rng = (this.run.condition.dodgeFxRng ??= Rng.derive(this.run.ctx.config.seed, 'dodge-fx'));
     const g = this.run.add.graphics().setDepth(6);
     let at = origin;
@@ -414,7 +415,7 @@ export class WeaponCombat {
     this.run.time.delayedCall(p.delaySec * 1000, () => {
       mark.destroy();
       rock.destroy();
-      sfx('explosion');
+      sfx('explosion', radius);
       shake(this.run, 'light');
       this.run.juice.explosionNear(at, 0);
       for (const e of [...this.run.enemies]) {
@@ -755,7 +756,10 @@ export class WeaponCombat {
     const bossHit = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss';
     this.run.juice.damageNumber(top, dmg, damageKind({ crit: fx?.crit, space: fx?.space, dot: !fx }), bossHit);
     if (fx) {
-      sfx(fx.crit ? 'crit' : 'hit');
+      // 근접 타격은 피해에 맞는 무게, 쏘는 공격은 탄 맞는 소리
+      if (fx.crit) sfx('crit');
+      else if (fx.tags.includes('melee')) sfx('hit', dmg);
+      else sfx('hitBullet');
       this.run.juice.hitSpark({ x: enemy.sprite.x, y: enemy.sprite.y }, fx.tags);
       enemy.squash();
       const hs = this.run.ctx.data.juice.hitStop;

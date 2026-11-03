@@ -55,10 +55,10 @@ class Mine implements SkillObject {
   }
 
   private explode(host: SkillHost): void {
-    bus.emit('sfx', { id: 'explosion' });
     const v = this.s.values;
     const awakened = this.s.owned.awakened;
     const radius = host.area(v.radius!);
+    bus.emit('sfx', { id: 'explosion', size: radius });
     const tags = skillTags(this.s.def, awakened, awakened ? 'chainMine' : 'mine');
     const killedAt: Vec2[] = [];
     for (const e of [...host.enemies()]) {

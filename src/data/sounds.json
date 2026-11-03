@@ -5,13 +5,32 @@
     "fadeSec": 1.2,
     "labTrack": "lab",
     "runTrack": "run",
-    "bossTracks": { "1": "boss1", "2": "boss2", "3": "boss3" },
+    "bossTracks": {
+      "1": "boss1",
+      "2": "boss2",
+      "3": "boss3"
+    },
     "tracks": {
-      "lab": { "file": "architecture-of-doubt.mp3", "volume": 0.5 },
-      "run": { "file": "ruins-loop.ogg", "volume": 0.45 },
-      "boss1": { "file": "corrupted-technology.mp3", "volume": 0.55 },
-      "boss2": { "file": "corrupted-simulation.mp3", "volume": 0.55 },
-      "boss3": { "file": "despair-grandeur.mp3", "volume": 0.55 }
+      "lab": {
+        "file": "architecture-of-doubt.mp3",
+        "volume": 0.5
+      },
+      "run": {
+        "file": "ruins-loop.ogg",
+        "volume": 0.45
+      },
+      "boss1": {
+        "file": "corrupted-technology.mp3",
+        "volume": 0.55
+      },
+      "boss2": {
+        "file": "corrupted-simulation.mp3",
+        "volume": 0.55
+      },
+      "boss3": {
+        "file": "despair-grandeur.mp3",
+        "volume": 0.55
+      }
     }
   },
   "muteKey": "KeyM",
@@ -20,1007 +39,535 @@
   "pitchJitter": 0.05,
   "sounds": {
     "shotPistol": {
-      "layers": [
-        {
-          "wave": "square",
-          "freq": [
-            900,
-            300
-          ],
-          "durSec": 0.07,
-          "volume": 0.18
-        },
-        {
-          "wave": "noise",
-          "durSec": 0.04,
-          "volume": 0.12,
-          "filter": {
-            "type": "highpass",
-            "freq": [
-              3000,
-              3000
-            ]
-          }
-        }
-      ]
+      "files": [
+        "shotPistol_1.ogg",
+        "shotPistol_2.ogg"
+      ],
+      "volume": 0.45,
+      "durSec": 0.6,
+      "gapSec": 0.04,
+      "maxVoices": 4
+    },
+    "shotRifle": {
+      "files": [
+        "shotRifle_1.ogg",
+        "shotRifle_2.ogg"
+      ],
+      "volume": 0.42,
+      "durSec": 0.6,
+      "gapSec": 0.04,
+      "maxVoices": 4
+    },
+    "shotSmg": {
+      "files": [
+        "shotSmg_1.ogg",
+        "shotSmg_2.ogg",
+        "shotSmg_3.ogg"
+      ],
+      "volume": 0.32,
+      "durSec": 0.25,
+      "gapSec": 0.03,
+      "maxVoices": 5
     },
     "shotShotgun": {
+      "files": [
+        "shotShotgun_1.ogg",
+        "shotShotgun_2.ogg"
+      ],
+      "volume": 0.55,
+      "durSec": 0.82,
       "gapSec": 0.06,
-      "layers": [
-        {
-          "wave": "noise",
-          "durSec": 0.16,
-          "volume": 0.35,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              2400,
-              300
-            ]
-          }
-        },
-        {
-          "wave": "square",
-          "freq": [
-            200,
-            70
-          ],
-          "durSec": 0.1,
-          "volume": 0.15
-        }
-      ]
+      "maxVoices": 3
     },
     "shotSniper": {
+      "files": [
+        "shotSniper_1.ogg",
+        "shotSniper_2.ogg"
+      ],
+      "volume": 0.6,
+      "durSec": 1.2,
       "gapSec": 0.08,
-      "layers": [
-        {
-          "wave": "sawtooth",
-          "freq": [
-            1600,
-            120
-          ],
-          "durSec": 0.2,
-          "volume": 0.2
-        },
-        {
-          "wave": "noise",
-          "durSec": 0.12,
-          "volume": 0.25,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              3000,
-              400
-            ]
-          }
-        }
-      ]
+      "maxVoices": 2
     },
     "shotLob": {
-      "layers": [
-        {
-          "wave": "sine",
-          "freq": [
-            300,
-            120
-          ],
-          "durSec": 0.14,
-          "volume": 0.3
-        },
-        {
-          "wave": "noise",
-          "durSec": 0.08,
-          "volume": 0.12,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              900,
-              300
-            ]
-          }
-        }
-      ]
+      "files": [
+        "shotLob_1.ogg",
+        "shotLob_2.ogg"
+      ],
+      "volume": 0.5,
+      "durSec": 0.7,
+      "gapSec": 0.06,
+      "maxVoices": 3
     },
-    "shotStaff": {
-      "layers": [
-        {
-          "wave": "triangle",
-          "freq": [
-            700,
-            1300
-          ],
-          "durSec": 0.12,
-          "volume": 0.2
-        },
-        {
-          "wave": "sine",
-          "freq": [
-            1400,
-            2000
-          ],
-          "durSec": 0.08,
-          "volume": 0.08
-        }
-      ]
+    "shotBow": {
+      "files": [
+        "shotBow_1.ogg",
+        "shotBow_2.ogg"
+      ],
+      "volume": 0.45,
+      "durSec": 0.3,
+      "gapSec": 0.05,
+      "maxVoices": 3
     },
     "shotLaser": {
-      "gapSec": 0.08,
-      "layers": [
-        {
-          "wave": "sawtooth",
-          "freq": [
-            1900,
-            900
-          ],
-          "durSec": 0.18,
-          "volume": 0.16,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              5000,
-              2000
-            ]
-          }
-        }
-      ]
-    },
-    "swing": {
-      "layers": [
-        {
-          "wave": "noise",
-          "durSec": 0.12,
-          "volume": 0.3,
-          "filter": {
-            "type": "bandpass",
-            "freq": [
-              3500,
-              700
-            ]
-          }
-        }
-      ]
-    },
-    "hit": {
+      "files": [
+        "shotLaser_1.ogg"
+      ],
+      "volume": 0.4,
+      "durSec": 0.49,
       "gapSec": 0.04,
-      "maxVoices": 3,
-      "layers": [
-        {
-          "wave": "square",
-          "freq": [
-            240,
-            110
-          ],
-          "durSec": 0.05,
-          "volume": 0.12
-        },
-        {
-          "wave": "noise",
-          "durSec": 0.03,
-          "volume": 0.08,
-          "filter": {
-            "type": "highpass",
-            "freq": [
-              2000,
-              2000
-            ]
-          }
-        }
-      ]
+      "maxVoices": 4
+    },
+    "shotNeedle": {
+      "files": [
+        "shotNeedle_1.ogg"
+      ],
+      "volume": 0.45,
+      "durSec": 0.4,
+      "gapSec": 0.05,
+      "maxVoices": 3
+    },
+    "shotStaff": {
+      "files": [
+        "shotStaff_1.ogg",
+        "shotStaff_2.ogg"
+      ],
+      "volume": 0.4,
+      "durSec": 0.6,
+      "gapSec": 0.04,
+      "maxVoices": 4
+    },
+    "shotBeamHeavy": {
+      "files": [
+        "shotBeamHeavy_1.ogg"
+      ],
+      "volume": 0.7,
+      "durSec": 0.64,
+      "gapSec": 0.1,
+      "maxVoices": 2
+    },
+    "swingLight": {
+      "files": [
+        "swingLight_1.ogg",
+        "swingLight_2.ogg"
+      ],
+      "volume": 0.35,
+      "durSec": 0.27,
+      "gapSec": 0.03,
+      "maxVoices": 4
+    },
+    "swingMid": {
+      "files": [
+        "swingMid_1.ogg",
+        "swingMid_2.ogg"
+      ],
+      "volume": 0.45,
+      "durSec": 0.5,
+      "gapSec": 0.04,
+      "maxVoices": 3
+    },
+    "swingHeavy": {
+      "files": [
+        "swingHeavy_1.ogg",
+        "swingHeavy_2.ogg"
+      ],
+      "volume": 0.55,
+      "durSec": 0.22,
+      "gapSec": 0.06,
+      "maxVoices": 3
+    },
+    "hitLight": {
+      "files": [
+        "hitLight_1.ogg",
+        "hitLight_2.ogg"
+      ],
+      "volume": 0.3,
+      "durSec": 0.32,
+      "gapSec": 0.03,
+      "maxVoices": 4
+    },
+    "hitMid": {
+      "files": [
+        "hitMid_1.ogg",
+        "hitMid_2.ogg"
+      ],
+      "volume": 0.38,
+      "durSec": 0.5,
+      "gapSec": 0.03,
+      "maxVoices": 4
+    },
+    "hitHeavy": {
+      "files": [
+        "hitHeavy_1.ogg",
+        "hitHeavy_2.ogg"
+      ],
+      "volume": 0.5,
+      "durSec": 0.7,
+      "gapSec": 0.05,
+      "maxVoices": 3
+    },
+    "hitBullet": {
+      "files": [
+        "hitBullet_1.ogg",
+        "hitBullet_2.ogg"
+      ],
+      "volume": 0.25,
+      "durSec": 0.35,
+      "gapSec": 0.025,
+      "maxVoices": 5
     },
     "crit": {
-      "gapSec": 0.06,
-      "layers": [
-        {
-          "wave": "triangle",
-          "freq": [
-            1700,
-            900
-          ],
-          "durSec": 0.09,
-          "volume": 0.18
-        },
-        {
-          "wave": "square",
-          "freq": [
-            420,
-            200
-          ],
-          "durSec": 0.06,
-          "volume": 0.1
-        }
-      ]
+      "files": [
+        "crit_1.ogg"
+      ],
+      "volume": 0.45,
+      "durSec": 0.24,
+      "gapSec": 0.05,
+      "maxVoices": 3
     },
     "kill": {
+      "files": [
+        "kill_1.ogg",
+        "kill_2.ogg"
+      ],
+      "volume": 0.4,
+      "durSec": 0.33,
       "gapSec": 0.04,
-      "layers": [
-        {
-          "wave": "noise",
-          "durSec": 0.18,
-          "volume": 0.22,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              1400,
-              200
-            ]
-          }
-        },
-        {
-          "wave": "sine",
-          "freq": [
-            320,
-            80
-          ],
-          "durSec": 0.15,
-          "volume": 0.18
-        }
-      ]
+      "maxVoices": 4
     },
-    "explosion": {
+    "killBig": {
+      "files": [
+        "explosionMid_1.ogg"
+      ],
+      "volume": 0.6,
+      "durSec": 1.08,
+      "gapSec": 0.1,
+      "maxVoices": 2
+    },
+    "explosionSmall": {
+      "files": [
+        "explosionSmall_1.ogg",
+        "explosionSmall_2.ogg"
+      ],
+      "volume": 0.5,
+      "durSec": 0.43,
+      "gapSec": 0.05,
+      "maxVoices": 4
+    },
+    "explosionMid": {
+      "files": [
+        "explosionMid_1.ogg"
+      ],
+      "volume": 0.65,
+      "durSec": 1.08,
       "gapSec": 0.08,
-      "maxVoices": 3,
-      "layers": [
-        {
-          "wave": "noise",
-          "durSec": 0.5,
-          "volume": 0.45,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              1600,
-              60
-            ]
-          }
-        },
-        {
-          "wave": "sine",
-          "freq": [
-            120,
-            35
-          ],
-          "durSec": 0.45,
-          "volume": 0.35
-        }
-      ]
+      "maxVoices": 3
+    },
+    "explosionLarge": {
+      "files": [
+        "explosionLarge_1.ogg"
+      ],
+      "volume": 0.8,
+      "durSec": 0.79,
+      "gapSec": 0.2,
+      "maxVoices": 2
+    },
+    "electric": {
+      "files": [
+        "electric_1.ogg",
+        "electric_2.ogg"
+      ],
+      "volume": 0.4,
+      "durSec": 0.27,
+      "gapSec": 0.05,
+      "maxVoices": 3
     },
     "playerHurt": {
+      "files": [
+        "playerHurt_1.ogg",
+        "playerHurt_2.ogg"
+      ],
+      "volume": 0.55,
+      "durSec": 0.6,
       "gapSec": 0.15,
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "sawtooth",
-          "freq": [
-            320,
-            90
-          ],
-          "durSec": 0.2,
-          "volume": 0.3,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              2000,
-              600
-            ]
-          }
-        }
-      ]
+      "maxVoices": 1
     },
     "coin": {
-      "gapSec": 0.05,
-      "maxVoices": 2,
-      "layers": [
-        {
-          "wave": "square",
-          "freq": [
-            1300,
-            1300
-          ],
-          "durSec": 0.05,
-          "volume": 0.1
-        },
-        {
-          "wave": "square",
-          "freq": [
-            1900,
-            1900
-          ],
-          "durSec": 0.09,
-          "volume": 0.1,
-          "delaySec": 0.05
-        }
-      ]
-    },
-    "energy": {
-      "gapSec": 0.05,
-      "maxVoices": 2,
-      "layers": [
-        {
-          "wave": "sine",
-          "freq": [
-            600,
-            1100
-          ],
-          "durSec": 0.08,
-          "volume": 0.12
-        }
-      ]
-    },
-    "itemGet": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "triangle",
-          "freq": [
-            660,
-            660
-          ],
-          "durSec": 0.12,
-          "volume": 0.2
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            880,
-            880
-          ],
-          "durSec": 0.12,
-          "volume": 0.2,
-          "delaySec": 0.08
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            1320,
-            1320
-          ],
-          "durSec": 0.25,
-          "volume": 0.2,
-          "delaySec": 0.16
-        }
-      ]
-    },
-    "skill": {
-      "layers": [
-        {
-          "wave": "sine",
-          "freq": [
-            400,
-            950
-          ],
-          "durSec": 0.16,
-          "volume": 0.2
-        },
-        {
-          "wave": "noise",
-          "durSec": 0.1,
-          "volume": 0.08,
-          "filter": {
-            "type": "highpass",
-            "freq": [
-              4000,
-              2000
-            ]
-          }
-        }
-      ]
-    },
-    "ultimate": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "sawtooth",
-          "freq": [
-            180,
-            900
-          ],
-          "durSec": 0.45,
-          "volume": 0.2,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              1200,
-              4000
-            ]
-          }
-        },
-        {
-          "wave": "sine",
-          "freq": [
-            100,
-            50
-          ],
-          "durSec": 0.6,
-          "volume": 0.35
-        }
-      ]
-    },
-    "bossSlam": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "noise",
-          "durSec": 0.7,
-          "volume": 0.55,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              700,
-              50
-            ]
-          }
-        },
-        {
-          "wave": "sine",
-          "freq": [
-            80,
-            28
-          ],
-          "durSec": 0.7,
-          "volume": 0.5
-        }
-      ]
-    },
-    "warning": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "square",
-          "freq": [
-            660,
-            660
-          ],
-          "durSec": 0.18,
-          "volume": 0.12
-        },
-        {
-          "wave": "square",
-          "freq": [
-            440,
-            440
-          ],
-          "durSec": 0.18,
-          "volume": 0.12,
-          "delaySec": 0.22
-        },
-        {
-          "wave": "square",
-          "freq": [
-            660,
-            660
-          ],
-          "durSec": 0.18,
-          "volume": 0.12,
-          "delaySec": 0.44
-        },
-        {
-          "wave": "square",
-          "freq": [
-            440,
-            440
-          ],
-          "durSec": 0.18,
-          "volume": 0.12,
-          "delaySec": 0.66
-        }
-      ]
-    },
-    "bossPhase": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "sawtooth",
-          "freq": [
-            140,
-            320
-          ],
-          "durSec": 0.5,
-          "volume": 0.22,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              800,
-              2400
-            ]
-          }
-        },
-        {
-          "wave": "noise",
-          "durSec": 0.4,
-          "volume": 0.18,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              1500,
-              200
-            ]
-          }
-        }
-      ]
-    },
-    "doorLock": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "square",
-          "freq": [
-            170,
-            110
-          ],
-          "durSec": 0.12,
-          "volume": 0.18
-        },
-        {
-          "wave": "noise",
-          "durSec": 0.08,
-          "volume": 0.15,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              1000,
-              300
-            ]
-          }
-        }
-      ]
-    },
-    "doorOpen": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "triangle",
-          "freq": [
-            300,
-            650
-          ],
-          "durSec": 0.16,
-          "volume": 0.16
-        }
-      ]
-    },
-    "roomClear": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "triangle",
-          "freq": [
-            523,
-            523
-          ],
-          "durSec": 0.12,
-          "volume": 0.18
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            659,
-            659
-          ],
-          "durSec": 0.12,
-          "volume": 0.18,
-          "delaySec": 0.09
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            784,
-            784
-          ],
-          "durSec": 0.12,
-          "volume": 0.18,
-          "delaySec": 0.18
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            1046,
-            1046
-          ],
-          "durSec": 0.3,
-          "volume": 0.18,
-          "delaySec": 0.27
-        }
-      ]
-    },
-    "cardPick": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "triangle",
-          "freq": [
-            880,
-            1320
-          ],
-          "durSec": 0.09,
-          "volume": 0.16
-        }
-      ]
-    },
-    "uiClick": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "square",
-          "freq": [
-            1000,
-            1000
-          ],
-          "durSec": 0.03,
-          "volume": 0.08
-        }
-      ]
-    },
-    "awaken": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "triangle",
-          "freq": [
-            523,
-            523
-          ],
-          "durSec": 0.7,
-          "volume": 0.14
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            659,
-            659
-          ],
-          "durSec": 0.7,
-          "volume": 0.14,
-          "delaySec": 0.06
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            784,
-            784
-          ],
-          "durSec": 0.8,
-          "volume": 0.14,
-          "delaySec": 0.12
-        },
-        {
-          "wave": "sine",
-          "freq": [
-            1568,
-            1568
-          ],
-          "durSec": 0.6,
-          "volume": 0.06,
-          "delaySec": 0.2
-        }
-      ]
-    },
-    "warp": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "noise",
-          "durSec": 0.9,
-          "volume": 0.3,
-          "filter": {
-            "type": "bandpass",
-            "freq": [
-              300,
-              3500
-            ]
-          }
-        },
-        {
-          "wave": "sine",
-          "freq": [
-            180,
-            900
-          ],
-          "durSec": 0.8,
-          "volume": 0.22
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            660,
-            1320
-          ],
-          "durSec": 0.4,
-          "volume": 0.1,
-          "delaySec": 0.5
-        }
-      ]
-    },
-    "warpArrive": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "sine",
-          "freq": [
-            900,
-            300
-          ],
-          "durSec": 0.35,
-          "volume": 0.2
-        },
-        {
-          "wave": "noise",
-          "durSec": 0.25,
-          "volume": 0.15,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              2500,
-              300
-            ]
-          }
-        }
-      ]
-    },
-    "panic": {
-      "gapSec": 0.5,
-      "maxVoices": 1,
-      "layers": [
-        { "wave": "sawtooth", "freq": [420, 70], "durSec": 0.7, "volume": 0.22 },
-        { "wave": "square", "freq": [437, 66], "durSec": 0.7, "volume": 0.1 },
-        { "wave": "noise", "durSec": 0.5, "volume": 0.14, "filter": { "type": "lowpass", "freq": [1800, 200] } }
-      ]
-    },
-    "blink": {
-      "gapSec": 0.08,
-      "maxVoices": 2,
-      "layers": [
-        { "wave": "noise", "durSec": 0.14, "volume": 0.3, "filter": { "type": "highpass", "freq": [3000, 6000] } },
-        { "wave": "square", "freq": [1800, 240], "durSec": 0.12, "volume": 0.12 },
-        { "wave": "sawtooth", "freq": [900, 1600], "durSec": 0.08, "volume": 0.1 }
-      ]
-    },
-    "dash": {
-      "gapSec": 0.08,
-      "maxVoices": 2,
-      "layers": [
-        {
-          "wave": "noise",
-          "durSec": 0.22,
-          "volume": 0.28,
-          "filter": {
-            "type": "bandpass",
-            "freq": [
-              500,
-              2600
-            ]
-          }
-        },
-        {
-          "wave": "sawtooth",
-          "freq": [
-            160,
-            420
-          ],
-          "durSec": 0.16,
-          "volume": 0.1
-        }
-      ]
+      "files": [
+        "coin_1.ogg"
+      ],
+      "volume": 0.35,
+      "durSec": 0.27,
+      "gapSec": 0.03,
+      "maxVoices": 4
     },
     "vend": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "square",
-          "freq": [
-            880,
-            880
-          ],
-          "durSec": 0.06,
-          "volume": 0.1
-        },
-        {
-          "wave": "square",
-          "freq": [
-            1175,
-            1175
-          ],
-          "durSec": 0.08,
-          "volume": 0.1,
-          "delaySec": 0.07
-        },
-        {
-          "wave": "noise",
-          "durSec": 0.12,
-          "volume": 0.25,
-          "delaySec": 0.2,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              900,
-              200
-            ]
-          }
-        }
-      ]
+      "files": [
+        "vend_1.ogg"
+      ],
+      "volume": 0.5,
+      "durSec": 0.63,
+      "gapSec": 0.1,
+      "maxVoices": 2
     },
-    "heal": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "sine",
-          "freq": [
-            520,
-            1040
-          ],
-          "durSec": 0.3,
-          "volume": 0.2
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            780,
-            1560
-          ],
-          "durSec": 0.3,
-          "volume": 0.1,
-          "delaySec": 0.08
-        }
-      ]
+    "doorLock": {
+      "files": [
+        "doorLock_1.ogg"
+      ],
+      "volume": 0.55,
+      "durSec": 1,
+      "gapSec": 0.2,
+      "maxVoices": 1
     },
-    "itemFanfare": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "triangle",
-          "freq": [
-            523,
-            523
-          ],
-          "durSec": 0.14,
-          "volume": 0.22
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            659,
-            659
-          ],
-          "durSec": 0.14,
-          "volume": 0.22,
-          "delaySec": 0.13
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            784,
-            784
-          ],
-          "durSec": 0.14,
-          "volume": 0.22,
-          "delaySec": 0.26
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            1047,
-            1047
-          ],
-          "durSec": 0.55,
-          "volume": 0.25,
-          "delaySec": 0.39
-        },
-        {
-          "wave": "sine",
-          "freq": [
-            1568,
-            1568
-          ],
-          "durSec": 0.5,
-          "volume": 0.1,
-          "delaySec": 0.39
-        }
-      ]
+    "doorOpen": {
+      "files": [
+        "doorOpen_1.ogg"
+      ],
+      "volume": 0.5,
+      "durSec": 0.13,
+      "gapSec": 0.2,
+      "maxVoices": 1
+    },
+    "dash": {
+      "files": [
+        "dash_1.ogg",
+        "dash_2.ogg"
+      ],
+      "volume": 0.4,
+      "durSec": 0.4,
+      "gapSec": 0.05,
+      "maxVoices": 2
+    },
+    "warning": {
+      "files": [
+        "warning_1.ogg"
+      ],
+      "volume": 0.5,
+      "durSec": 0.74,
+      "gapSec": 0.3,
+      "maxVoices": 1
+    },
+    "bossSlam": {
+      "files": [
+        "bossSlam_1.ogg"
+      ],
+      "volume": 0.7,
+      "durSec": 0.32,
+      "gapSec": 0.1,
+      "maxVoices": 2
+    },
+    "uiClick": {
+      "files": [
+        "uiClick.ogg"
+      ],
+      "volume": 0.5,
+      "durSec": 0.05,
+      "gapSec": 0.03,
+      "maxVoices": 3
+    },
+    "cardPick": {
+      "files": [
+        "cardPick.ogg"
+      ],
+      "volume": 0.55,
+      "durSec": 0.19,
+      "gapSec": 0.05,
+      "maxVoices": 2
+    },
+    "itemGet": {
+      "files": [
+        "itemGet.ogg"
+      ],
+      "volume": 0.5,
+      "durSec": 0.36,
+      "gapSec": 0.1,
+      "maxVoices": 2
+    },
+    "roomClear": {
+      "files": [
+        "roomClear.ogg"
+      ],
+      "volume": 0.55,
+      "durSec": 0.43,
+      "gapSec": 0.3,
+      "maxVoices": 1
     },
     "combatStart": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "sawtooth",
-          "freq": [
-            110,
-            90
-          ],
-          "durSec": 0.35,
-          "volume": 0.22
-        },
-        {
-          "wave": "square",
-          "freq": [
-            440,
-            440
-          ],
-          "durSec": 0.08,
-          "volume": 0.12
-        },
-        {
-          "wave": "square",
-          "freq": [
-            440,
-            440
-          ],
-          "durSec": 0.08,
-          "volume": 0.12,
-          "delaySec": 0.14
-        },
-        {
-          "wave": "noise",
-          "durSec": 0.2,
-          "volume": 0.2,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              1800,
-              200
-            ]
-          }
-        }
-      ]
+      "files": [
+        "combatStart.ogg"
+      ],
+      "volume": 0.6,
+      "durSec": 0.28,
+      "gapSec": 0.3,
+      "maxVoices": 1
+    },
+    "bossPhase": {
+      "files": [
+        "bossPhase.ogg"
+      ],
+      "volume": 0.75,
+      "durSec": 1.31,
+      "gapSec": 0.3,
+      "maxVoices": 1
+    },
+    "awaken": {
+      "files": [
+        "awaken.ogg"
+      ],
+      "volume": 0.7,
+      "durSec": 1.3,
+      "gapSec": 0.3,
+      "maxVoices": 1
+    },
+    "warp": {
+      "files": [
+        "warp.ogg"
+      ],
+      "volume": 0.6,
+      "durSec": 0.81,
+      "gapSec": 0.3,
+      "maxVoices": 1
+    },
+    "warpArrive": {
+      "files": [
+        "warpArrive.ogg"
+      ],
+      "volume": 0.6,
+      "durSec": 0.85,
+      "gapSec": 0.3,
+      "maxVoices": 1
+    },
+    "blink": {
+      "files": [
+        "blink.ogg"
+      ],
+      "volume": 0.45,
+      "durSec": 0.45,
+      "gapSec": 0.05,
+      "maxVoices": 2
+    },
+    "panic": {
+      "files": [
+        "panic.ogg"
+      ],
+      "volume": 0.6,
+      "durSec": 0.87,
+      "gapSec": 0.3,
+      "maxVoices": 1
+    },
+    "skill": {
+      "files": [
+        "skill.ogg"
+      ],
+      "volume": 0.5,
+      "durSec": 0.17,
+      "gapSec": 0.05,
+      "maxVoices": 3
+    },
+    "ultimate": {
+      "files": [
+        "ultimate.ogg"
+      ],
+      "volume": 0.7,
+      "durSec": 1.36,
+      "gapSec": 0.2,
+      "maxVoices": 1
     },
     "advCharge": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "sawtooth",
-          "freq": [
-            70,
-            620
-          ],
-          "durSec": 3,
-          "volume": 0.14
-        },
-        {
-          "wave": "noise",
-          "durSec": 3,
-          "volume": 0.18,
-          "filter": {
-            "type": "bandpass",
-            "freq": [
-              200,
-              5000
-            ]
-          }
-        }
-      ]
+      "files": [
+        "advCharge.ogg"
+      ],
+      "volume": 0.6,
+      "durSec": 0.64,
+      "gapSec": 0.2,
+      "maxVoices": 1
     },
     "advBurst": {
-      "maxVoices": 1,
-      "layers": [
-        {
-          "wave": "noise",
-          "durSec": 0.9,
-          "volume": 0.4,
-          "filter": {
-            "type": "lowpass",
-            "freq": [
-              6000,
-              200
-            ]
-          }
-        },
-        {
-          "wave": "sine",
-          "freq": [
-            180,
-            45
-          ],
-          "durSec": 0.8,
-          "volume": 0.35
-        },
-        {
-          "wave": "triangle",
-          "freq": [
-            880,
-            1760
-          ],
-          "durSec": 0.5,
-          "volume": 0.15,
-          "delaySec": 0.05
-        }
-      ]
+      "files": [
+        "advBurst.ogg"
+      ],
+      "volume": 0.7,
+      "durSec": 1.12,
+      "gapSec": 0.2,
+      "maxVoices": 1
+    },
+    "itemFanfare": {
+      "files": [
+        "itemFanfare.ogg"
+      ],
+      "volume": 0.6,
+      "durSec": 1.5,
+      "gapSec": 0.3,
+      "maxVoices": 1
+    },
+    "shotDisc": {
+      "files": [
+        "shotDisc.ogg"
+      ],
+      "volume": 0.4,
+      "durSec": 0.54,
+      "gapSec": 0.05,
+      "maxVoices": 3
+    },
+    "energy": {
+      "files": [
+        "energy.ogg"
+      ],
+      "volume": 0.3,
+      "durSec": 0.09,
+      "gapSec": 0.03,
+      "maxVoices": 4
+    },
+    "heal": {
+      "files": [
+        "heal.ogg"
+      ],
+      "volume": 0.5,
+      "durSec": 0.75,
+      "gapSec": 0.2,
+      "maxVoices": 1
     }
+  },
+  "sfxBasePath": "assets/sfx/",
+  "tiers": {
+    "swing": [
+      {
+        "upTo": 10,
+        "id": "swingLight"
+      },
+      {
+        "upTo": 30,
+        "id": "swingMid"
+      },
+      {
+        "id": "swingHeavy"
+      }
+    ],
+    "hit": [
+      {
+        "upTo": 8,
+        "id": "hitLight"
+      },
+      {
+        "upTo": 30,
+        "id": "hitMid"
+      },
+      {
+        "id": "hitHeavy"
+      }
+    ],
+    "explosion": [
+      {
+        "upTo": 26,
+        "id": "explosionSmall"
+      },
+      {
+        "upTo": 55,
+        "id": "explosionMid"
+      },
+      {
+        "id": "explosionLarge"
+      }
+    ]
   }
 }

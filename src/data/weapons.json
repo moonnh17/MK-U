@@ -36,7 +36,7 @@
   "weapons": [
     {
       "id": "pistol",
-      "nameKey": "weapon.pistol",
+      "nameKey": "weapon.pistol", "sfx": "shotPistol",
       "category": "gun",
       "grade": "common", "classes": ["single"],
       "tags": ["tech", "ranged"],
@@ -71,13 +71,13 @@
       "size": 8
     },
     {
-      "id": "smg", "nameKey": "weapon.smg", "category": "gun", "grade": "common", "classes": ["rapid"], "tags": ["tech", "ranged"],
+      "id": "smg", "nameKey": "weapon.smg", "sfx": "shotSmg", "category": "gun", "grade": "common", "classes": ["rapid"], "tags": ["tech", "ranged"],
       "baseDamage": 2, "fireIntervalSec": 0.09, "energyCost": 1, "pattern": { "kind": "single", "jitterDeg": 12 },
       "projectileSpeed": 280, "range": 220, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_smg", "color": "#9ab0c8", "size": 7
     },
     {
-      "id": "rifle", "nameKey": "weapon.rifle", "category": "gun", "grade": "rare", "classes": ["single"], "tags": ["tech", "ranged"],
+      "id": "rifle", "nameKey": "weapon.rifle", "sfx": "shotRifle", "category": "gun", "grade": "rare", "classes": ["single"], "tags": ["tech", "ranged"],
       "baseDamage": 5, "fireIntervalSec": 0.22, "energyCost": 1, "pattern": { "kind": "single" },
       "projectileSpeed": 340, "range": 300, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_rifle", "color": "#7a9a6a", "size": 9
@@ -89,7 +89,7 @@
       "spriteKey": "weapon_sniper", "color": "#5a6a8a", "size": 10
     },
     {
-      "id": "grenadeLauncher", "nameKey": "weapon.grenadeLauncher", "category": "gun", "grade": "rare", "classes": ["explosive"], "tags": ["tech", "ranged"],
+      "id": "grenadeLauncher", "nameKey": "weapon.grenadeLauncher", "sfx": "shotLob", "category": "gun", "grade": "rare", "classes": ["explosive"], "tags": ["tech", "ranged"],
       "baseDamage": 12, "fireIntervalSec": 0.8, "energyCost": 4, "pattern": { "kind": "lob", "radius": 30 },
       "projectileSpeed": 200, "range": 220, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_grenade_launcher", "color": "#8a7a3a", "size": 9
@@ -121,7 +121,7 @@
       "spriteKey": "weapon_hammer", "color": "#8a8a9a", "size": 10
     },
     {
-      "id": "handi", "flavor": "codex.itemFlavor.handi", "nameKey": "weapon.handi", "category": "gun", "grade": "mythic", "classes": ["single"], "tags": ["physical", "ranged"],
+      "id": "handi", "flavor": "codex.itemFlavor.handi", "nameKey": "weapon.handi", "sfx": "shotRifle", "category": "gun", "grade": "mythic", "classes": ["single"], "tags": ["physical", "ranged"],
       "baseDamage": 10, "fireIntervalSec": 0.35, "energyCost": 1, "pattern": { "kind": "single" }, "pierce": 99,
       "equipBonus": { "physicalDamage": 0.6, "rangedDamage": 3 },
       "projectileSpeed": 400, "range": 360, "cutsProjectiles": false, "droppable": false,
@@ -195,7 +195,7 @@
       "spriteKey": "weapon_eclipse_core", "color": "#ff3a4a", "size": 8
     },
     {
-      "id": "algiebaSling", "sfx": "shotSniper", "nameKey": "weapon.algiebaSling", "abilityNameKey": "weapon.ability.algiebaSling", "category": "gun", "grade": "unique", "classes": ["single"], "tags": ["tech", "ranged"],
+      "id": "algiebaSling", "sfx": "shotBow", "nameKey": "weapon.algiebaSling", "abilityNameKey": "weapon.ability.algiebaSling", "category": "gun", "grade": "unique", "classes": ["single"], "tags": ["tech", "ranged"],
       "baseDamage": 16, "fireIntervalSec": 0.7, "energyCost": 2, "pattern": { "kind": "single" },
       "critChance": 1,
       "ricochet": { "bounces": 3, "range": 160 },
@@ -227,7 +227,7 @@
       "spriteKey": "weapon_curved_bow", "color": "#a0784a", "size": 9
     },
     {
-      "id": "mg70", "nameKey": "weapon.mg70", "abilityNameKey": "weapon.ability.mg70", "category": "gun", "grade": "rare", "classes": ["rapid"], "tags": ["tech", "ranged"],
+      "id": "mg70", "nameKey": "weapon.mg70", "sfx": "shotSmg", "abilityNameKey": "weapon.ability.mg70", "category": "gun", "grade": "rare", "classes": ["rapid"], "tags": ["tech", "ranged"],
       "baseDamage": 2.5, "fireIntervalSec": 0.2, "energyCost": 0.5, "pattern": { "kind": "single", "jitterDeg": 6 },
       "spinUp": { "perShot": 0.08, "maxMul": 2.8, "resetSec": 0.7 },
       "projectileSpeed": 340, "range": 280, "cutsProjectiles": false, "droppable": true,
@@ -267,7 +267,7 @@
       "spriteKey": "weapon_magi_fang", "color": "#c0202a", "size": 11
     },
     {
-      "id": "antimatterPistol", "nameKey": "weapon.antimatterPistol", "category": "gun", "grade": "legendary", "classes": ["explosive"], "tags": ["tech", "ranged", "charging"],
+      "id": "antimatterPistol", "nameKey": "weapon.antimatterPistol", "sfx": "shotLob", "category": "gun", "grade": "legendary", "classes": ["explosive"], "tags": ["tech", "ranged", "charging"],
       "baseDamage": 20, "fireIntervalSec": 0.9, "energyCost": 5, "pattern": { "kind": "lob", "radius": 30 },
       "charge": { "maxSec": 1, "damageMul": 2.5, "radiusMul": 1.3, "minRatio": 0.5 },
       "core": { "u": 0.56, "v": 0.47, "color": "#5ab0ff", "onCharge": true },
@@ -277,7 +277,7 @@
       "spriteKey": "weapon_antimatter_pistol", "color": "#3a7bff", "size": 9
     },
     {
-      "id": "orbitalDisc", "nameKey": "weapon.orbitalDisc", "abilityNameKey": "weapon.ability.orbitalDisc", "category": "gun", "grade": "rare", "classes": ["spread"], "tags": ["tech", "ranged"],
+      "id": "orbitalDisc", "nameKey": "weapon.orbitalDisc", "sfx": "shotDisc", "abilityNameKey": "weapon.ability.orbitalDisc", "category": "gun", "grade": "rare", "classes": ["spread"], "tags": ["tech", "ranged"],
       "baseDamage": 6.5, "fireIntervalSec": 0.3, "energyCost": 1, "pattern": { "kind": "single" },
       "boomerang": { "charges": 3, "maxExtraCharges": 1, "range": 150, "returnSpeed": 300, "catchPx": 12, "maxSec": 5, "spinPerSec": 18, "shot": { "spriteKey": "proj_orbital_disc", "color": "#5ad9ff", "size": 10 } },
       "attackParticles": { "color": "#5ad9ff" },
@@ -285,7 +285,7 @@
       "spriteKey": "weapon_orbital_disc", "color": "#7a8aa0", "size": 9
     },
     {
-      "id": "spaceNeedle", "nameKey": "weapon.spaceNeedle", "category": "gun", "grade": "legendary", "classes": ["install"], "tags": ["tech", "ranged"],
+      "id": "spaceNeedle", "nameKey": "weapon.spaceNeedle", "sfx": "shotNeedle", "category": "gun", "grade": "legendary", "classes": ["install"], "tags": ["tech", "ranged"],
       "abilityNameKey": "weapon.ability.spaceNeedle",
       "baseDamage": 8, "fireIntervalSec": 0.45, "energyCost": 2, "pattern": { "kind": "single" },
       "needle": { "max": 5, "lifeSec": 8, "tickSec": 0.5, "lineDamageMul": 0.6, "lineWidth": 6, "recallDamageMul": 2, "recallSec": 0.25, "color": "#ff2a3a", "shot": { "spriteKey": "proj_space_needle", "color": "#ff2a3a", "size": 12 } },
@@ -293,7 +293,7 @@
       "spriteKey": "weapon_space_needle", "color": "#c0202a", "size": 11
     },
     {
-      "id": "bootlegGun", "nameKey": "weapon.bootlegGun", "category": "gun", "grade": "rare", "classes": ["rapid"], "tags": ["tech", "ranged"],
+      "id": "bootlegGun", "nameKey": "weapon.bootlegGun", "sfx": "shotSmg", "category": "gun", "grade": "rare", "classes": ["rapid"], "tags": ["tech", "ranged"],
       "abilityNameKey": "weapon.ability.bootlegGun",
       "baseDamage": 3.2, "fireIntervalSec": 0.2, "energyCost": 0.5, "pattern": { "kind": "single", "jitterDeg": 8 },
       "spinUp": { "perShot": 0.08, "maxMul": 2.8, "resetSec": 0.7 },
@@ -310,7 +310,7 @@
       "spriteKey": "weapon_debtor_arm", "color": "#e0b030", "size": 10
     },
     {
-      "id": "hwanRemnant", "flavor": "codex.itemFlavor.hwanRemnant", "nameKey": "weapon.hwanRemnant", "abilityNameKey": "weapon.ability.hwanRemnant", "category": "staff", "grade": "legendary", "classes": ["laser"], "tags": ["magic", "ranged"],
+      "id": "hwanRemnant", "flavor": "codex.itemFlavor.hwanRemnant", "nameKey": "weapon.hwanRemnant", "sfx": "shotLaser", "abilityNameKey": "weapon.ability.hwanRemnant", "category": "staff", "grade": "legendary", "classes": ["laser"], "tags": ["magic", "ranged"],
       "baseDamage": 14, "fireIntervalSec": 0.55, "energyCost": 6, "pattern": { "kind": "single" },
       "beam": {
         "length": 260, "width": 6, "energyGain": 8, "stacks": 5,

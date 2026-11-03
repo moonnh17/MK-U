@@ -4,11 +4,11 @@ import type { ButtonAction } from '../../core/actions';
 import { bus } from '../../core/events';
 import type { PlayerState } from '../../core/session';
 import type { StageRef } from '../../systems/run';
-import type { SfxId } from '../../systems/sound';
+import type { SfxGroup, SfxId } from '../../systems/sound';
 import type { CardOfferKind, SchoolId } from '../../types/data';
 
 /** 효과음 하나 (합성은 audio/sfx.ts) */
-export const sfx = (id: SfxId) => bus.emit('sfx', { id });
+export const sfx = (id: SfxId | SfxGroup, size?: number) => bus.emit('sfx', { id, size });
 
 export interface RunSceneData {
   stage?: StageRef;

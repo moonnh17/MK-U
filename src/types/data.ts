@@ -1455,7 +1455,14 @@ export interface SoundLayer {
 }
 
 export interface SoundDef {
-  layers: SoundLayer[];
+  /** 합성 층 (files가 없을 때) */
+  layers?: SoundLayer[];
+  /** 녹음 파일 (sfxBasePath 기준). 여럿이면 낼 때마다 하나를 고른다 */
+  files?: string[];
+  /** 파일 소리 음량 (0~1) */
+  volume?: number;
+  /** 파일 소리의 대략 길이(초): 겹침 제한용 */
+  durSec?: number;
   /** 같은 소리를 다시 내기까지 최소 간격(초), 동시에 나는 최대 수 */
   gapSec?: number;
   maxVoices?: number;
@@ -1482,5 +1489,12 @@ export interface SoundsData {
   defaultMaxVoices: number;
   /** 음 높이 흔들림 비율 */
   pitchJitter: number;
+  /** 녹음 효과음 폴더 (public/ 아래) */
+  sfxBasePath: string;
+  /**
+   * 크기·위력에 따라 다른 소리를 내는 묶음: 값(반지름·피해)이 upTo 이하인 첫 단계. 마지막 단계는 upTo 없이 나머지 전부.
+   * 예) explosion: 작은 폭발 / 폭발 / 큰 폭발
+   */
+  tiers: Record<string, { upTo?: number; id: string }[]>;
   sounds: Record<string, SoundDef>;
 }

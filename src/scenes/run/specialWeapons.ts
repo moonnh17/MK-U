@@ -352,7 +352,7 @@ export class SpecialWeapons {
     if (!def.selfDestruct || !this.run.rng.chance(def.selfDestruct.chance)) return false;
     const p = this.run.session.player;
     const at = this.run.combat.muzzle();
-    sfx('explosion');
+    sfx('explosionMid');
     shake(this.run, 'heavy');
     this.run.juice.explosionNear(at, 0);
     this.run.juice.colorBurst(at, '#ff7a2a', this.run.ctx.data.juice.skillBurst);
@@ -421,7 +421,7 @@ export class SpecialWeapons {
     this.glyphs(origin, b.glyphColor, empowered ? 6 : 3);
     if (this.beamStacks > before) this.stackFx(def);
     if (empowered) {
-      sfx('advBurst');
+      sfx('shotBeamHeavy');
       shake(this.run, 'light');
     }
   }

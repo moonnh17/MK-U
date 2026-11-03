@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Rng } from '../src/core/rng';
 import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
-import { pitchFactor, SFX_IDS, SoundGate, soundLength, weaponSfx } from '../src/systems/sound';
+import { pitchFactor, resolveSfx, SFX_GROUPS, SFX_IDS, SoundGate, soundLength, weaponSfx } from '../src/systems/sound';
 
 const S = gameData.sounds;
 
@@ -16,17 +16,37 @@ describe('효과음 목록', () => {
     const e = validateGameData(bad).join('\n');
     for (const k of ['wave', 'freq', 'durSec', 'volume']) expect(e).toContain(k);
   });
-  it('소리 길이는 가장 늦게 끝나는 층', () => {
-    expect(soundLength(S.sounds.warning!)).toBeCloseTo(0.66 + 0.18);
+  it('소리 길이: 합성은 가장 늦게 끝나는 층, 파일은 적힌 길이', () => {
+    expect(soundLength({ layers: [{ wave: 'sine', freq: [1, 1], durSec: 0.66, volume: 0.5, delaySec: 0.18 }] })).toBeCloseTo(0.66 + 0.18);
+    expect(soundLength({ files: ['a.ogg'], durSec: 0.4 })).toBe(0.4);
+  });
+  it('묶음(휘두르기·타격·폭발)은 크기별 단계가 있고 모든 단계 소리가 있다', () => {
+    expect(Object.keys(S.tiers).sort()).toEqual([...SFX_GROUPS].sort());
+    for (const tiers of Object.values(S.tiers)) for (const t of tiers) expect(S.sounds[t.id], t.id).toBeDefined();
+  });
+});
+
+describe('크기별 소리', () => {
+  it('폭발은 반지름, 휘두르기·타격은 피해가 클수록 큰 소리', () => {
+    expect(resolveSfx(S, 'explosion', 20)).toBe('explosionSmall');
+    expect(resolveSfx(S, 'explosion', 40)).toBe('explosionMid');
+    expect(resolveSfx(S, 'explosion', 120)).toBe('explosionLarge');
+    expect(resolveSfx(S, 'swing', 4)).toBe('swingLight');
+    expect(resolveSfx(S, 'swing', 45)).toBe('swingHeavy');
+    expect(resolveSfx(S, 'hit', 15)).toBe('hitMid');
+  });
+  it('크기를 모르면 가운데 단계, 묶음이 아니면 그대로', () => {
+    expect(resolveSfx(S, 'explosion')).toBe('explosionMid');
+    expect(resolveSfx(S, 'coin', 99)).toBe('coin');
   });
 });
 
 describe('겹침 제한', () => {
   it('같은 소리는 간격 안에 다시 나지 않는다', () => {
     const g = new SoundGate(S);
-    expect(g.tryPlay('hit', 0, 0.05)).toBe(true);
-    expect(g.tryPlay('hit', 0.02, 0.05)).toBe(false);
-    expect(g.tryPlay('hit', 0.05, 0.05)).toBe(true);
+    expect(g.tryPlay('hitMid', 0, 0.05)).toBe(true);
+    expect(g.tryPlay('hitMid', 0.02, 0.05)).toBe(false);
+    expect(g.tryPlay('hitMid', 0.05, 0.05)).toBe(true);
   });
   it('동시에 나는 수 상한 (끝난 소리는 빠진다)', () => {
     const g = new SoundGate(S);
@@ -54,9 +74,13 @@ describe('음 높이·무기 소리', () => {
     const w = (id: string) => gameData.weapons.weapons.find((x) => x.id === id)!;
     expect(weaponSfx(w('dagger'))).toBe('swing');
     expect(weaponSfx(w('pistol'))).toBe('shotPistol');
+    expect(weaponSfx(w('rifle'))).toBe('shotRifle');
+    expect(weaponSfx(w('smg'))).toBe('shotSmg');
     expect(weaponSfx(w('shotgun'))).toBe('shotShotgun');
     expect(weaponSfx(w('sniper'))).toBe('shotSniper');
     expect(weaponSfx(w('grenadeLauncher'))).toBe('shotLob');
+    expect(weaponSfx(w('curvedBow'))).toBe('shotBow');
     expect(weaponSfx(w('aviorStaff'))).toBe('shotStaff');
+    expect(weaponSfx(w('orbitalDisc'))).toBe('shotDisc');
   });
 });

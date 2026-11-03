@@ -979,7 +979,7 @@ export class RunScene extends Phaser.Scene {
     // 처치 연출: 번쩍임·파편, 엘리트·정예·보스는 폭발·흔들림·히트스톱
     const big = e.elites.length > 0 || e.rank === 'champion' || e.rank === 'boss' || e.rank === 'hiddenBoss';
     this.juice.death(e.sprite, e.def.color, big);
-    sfx(big ? 'explosion' : 'kill');
+    sfx(big ? 'killBig' : 'kill');
     if (big) this.hitStop.request(e.rank === 'boss' || e.rank === 'hiddenBoss' ? d.juice.hitStop.bossKill : d.juice.hitStop.eliteKill);
     if (this.bossControllers.has(e)) this.stageFx.startBossKill({ x, y });
     this.recordKill(e);

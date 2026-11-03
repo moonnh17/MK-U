@@ -97,7 +97,7 @@ export class RoomProps {
   explodeBarrel(p: BreakableProp, at: Vec2): void {
     const b = this.run.ctx.data.mapgen.roomProps.barrel;
     p.destroy();
-    sfx('explosion');
+    sfx('explosion', b.radius);
     shake(this.run, 'light');
     this.run.juice.explosionNear(at, 0);
     for (const e of [...this.run.enemies]) {

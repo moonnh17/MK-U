@@ -795,8 +795,14 @@ export function validateGameData(d: GameData): Errors {
   if (!(so.masterVolume >= 0 && so.masterVolume <= 1)) errors.push('sounds.masterVolume: 0~1');
   for (const [id, def] of Object.entries(so.sounds)) {
     const w = `sounds.${id}`;
-    if (def.layers.length === 0) errors.push(`${w}: 층이 없음`);
-    def.layers.forEach((l, i) => {
+    if (def.files) {
+      if (def.files.length === 0) errors.push(`${w}.files: 비어 있음`);
+      if (!(def.volume === undefined || (def.volume > 0 && def.volume <= 1))) errors.push(`${w}.volume: 0~1`);
+      if (!(def.durSec && def.durSec > 0)) errors.push(`${w}.durSec: 파일 소리는 대략 길이가 필요`);
+      continue;
+    }
+    if (!def.layers?.length) errors.push(`${w}: 층이 없음`);
+    (def.layers ?? []).forEach((l, i) => {
       const lw = `${w}.layers[${i}]`;
       if (!['sine', 'square', 'triangle', 'sawtooth', 'noise'].includes(l.wave)) errors.push(`${lw}.wave: sine·square·triangle·sawtooth·noise`);
       if (l.wave !== 'noise' && !(l.freq && l.freq[0] > 0 && l.freq[1] > 0)) errors.push(`${lw}.freq: 0보다 큰 [시작, 끝]`);
@@ -805,7 +811,14 @@ export function validateGameData(d: GameData): Errors {
       if (l.filter && !(['lowpass', 'highpass', 'bandpass'].includes(l.filter.type) && l.filter.freq[0] > 0 && l.filter.freq[1] > 0)) errors.push(`${lw}.filter`);
     });
   }
-  for (const wpn of d.weapons.weapons) if (wpn.sfx !== undefined && !so.sounds[wpn.sfx]) errors.push(`weapons.${wpn.id}.sfx: 없는 소리 '${wpn.sfx}'`);
+  for (const wpn of d.weapons.weapons) if (wpn.sfx !== undefined && !so.sounds[wpn.sfx] && !so.tiers[wpn.sfx]) errors.push(`weapons.${wpn.id}.sfx: 없는 소리 '${wpn.sfx}'`);
+  for (const [g, tiers] of Object.entries(so.tiers)) {
+    if (tiers.length === 0) errors.push(`sounds.tiers.${g}: 비어 있음`);
+    tiers.forEach((t, i) => {
+      if (!so.sounds[t.id]) errors.push(`sounds.tiers.${g}[${i}]: 없는 소리 '${t.id}'`);
+      if (i < tiers.length - 1 && t.upTo === undefined) errors.push(`sounds.tiers.${g}[${i}]: 마지막이 아니면 upTo 필요`);
+    });
+  }
 
   // --- 도트 아트 ---
   errors.push(...validateArt(d.art, collectAssets(d)));

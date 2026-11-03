@@ -1,18 +1,21 @@
 /**
- * 효과음 합성 (Web Audio, 파일 없음). sounds.json의 층마다 발진기(또는 잡음) → 걸러내기 → 음량 봉투를 만들어 바로 낸다.
- * 게임 쪽은 bus.emit('sfx', { id })만 한다. 브라우저 규칙상 첫 클릭·키 입력 뒤에 소리가 켜진다.
+ * 효과음 (Web Audio). sounds.json의 files가 있으면 녹음 파일(여럿이면 무작위 하나), 없으면 층마다 발진기(또는 잡음) →
+ * 걸러내기 → 음량 봉투로 합성한다. 묶음 이름(swing·hit·explosion)은 size(피해·반지름)에 맞는 단계로 바꿔 낸다.
+ * 게임 쪽은 bus.emit('sfx', { id, size })만 한다. 브라우저 규칙상 첫 클릭·키 입력 뒤에 소리가 켜진다.
  * 소리 끄기는 저장에 남고, M 키(또는 일시정지 창)로 바꾼다.
  */
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { Rng } from '../core/rng';
-import { pitchFactor, SoundGate, soundLength } from '../systems/sound';
+import { pitchFactor, resolveSfx, SoundGate, soundLength } from '../systems/sound';
 import type { SoundLayer } from '../types/data';
 
 export class Sfx {
   private ac: AudioContext | null = null;
   private master: GainNode | null = null;
   private noise: AudioBuffer | null = null;
+  /** 녹음 파일 (불러온 것만). 불러오는 중이면 그 소리는 건너뛴다 */
+  private readonly buffers = new Map<string, AudioBuffer>();
   private readonly gate: SoundGate;
   private readonly rng: Rng;
 
@@ -26,7 +29,7 @@ export class Sfx {
     window.addEventListener('keydown', (e) => {
       if (e.code === ctx.data.sounds.muteKey && !e.repeat) bus.emit('muteToggle', {});
     });
-    bus.on('sfx', ({ id }) => this.play(id));
+    bus.on('sfx', ({ id, size }) => this.play(resolveSfx(ctx.data.sounds, id, size)));
     bus.on('muteToggle', () => this.setMuted(!ctx.save.data.muted));
     bus.on('volumeChanged', () => this.applyGain());
   }
@@ -60,6 +63,7 @@ export class Sfx {
       this.noise = this.ac.createBuffer(1, len, this.ac.sampleRate);
       const ch = this.noise.getChannelData(0);
       for (let i = 0; i < len; i++) ch[i] = this.rng.range(-1, 1);
+      this.loadFiles(this.ac);
     }
     if (this.ac.state === 'suspended') void this.ac.resume();
     return this.ac;
@@ -72,7 +76,33 @@ export class Sfx {
     if (!ac || ac.state !== 'running' || !def || !this.master) return;
     if (!this.gate.tryPlay(id, ac.currentTime, soundLength(def))) return;
     const pitch = pitchFactor(this.rng, this.ctx.data.sounds.pitchJitter);
-    for (const layer of def.layers) this.layer(ac, layer, pitch);
+    if (def.files) {
+      const buf = this.buffers.get(this.rng.pick(def.files));
+      if (!buf) return;
+      const src = ac.createBufferSource();
+      src.buffer = buf;
+      src.playbackRate.value = pitch;
+      const g = ac.createGain();
+      g.gain.value = def.volume ?? 1;
+      src.connect(g);
+      g.connect(this.master);
+      src.start();
+      return;
+    }
+    for (const layer of def.layers ?? []) this.layer(ac, layer, pitch);
+  }
+
+  /** 녹음 효과음을 모두 미리 불러온다 (첫 입력 뒤 한 번) */
+  private loadFiles(ac: AudioContext): void {
+    const base = this.ctx.data.sounds.sfxBasePath;
+    const files = new Set(Object.values(this.ctx.data.sounds.sounds).flatMap((d) => d.files ?? []));
+    for (const file of files) {
+      fetch(base + file)
+        .then((r) => r.arrayBuffer())
+        .then((b) => ac.decodeAudioData(b))
+        .then((buf) => this.buffers.set(file, buf))
+        .catch(() => console.warn('효과음을 불러오지 못함', file));
+    }
   }
 
   private layer(ac: AudioContext, l: SoundLayer, pitch: number): void {

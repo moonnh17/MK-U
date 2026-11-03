@@ -347,7 +347,7 @@ export class DelayedBlast implements Hazard {
     if (this.left > 0) return true;
     const p = host.playerPos();
     if (Math.hypot(p.x - this.at.x, p.y - this.at.y) <= this.radius + host.playerRadius) host.hurtPlayer(this.damage);
-    bus.emit('sfx', { id: 'explosion' });
+    bus.emit('sfx', { id: 'explosion', size: this.radius });
     if (this.art?.hit) {
       playFx(host.scene, this.art.hit, this.at.x, this.at.y, { w: this.radius * 2.4 });
       return false;
@@ -434,7 +434,7 @@ export class RectBlast implements Hazard {
     const p = host.playerPos();
     const pr = host.playerRadius;
     if (p.x + pr >= r.x && p.x - pr <= r.x + r.w && p.y + pr >= r.y && p.y - pr <= r.y + r.h) host.hurtPlayer(this.damage);
-    bus.emit('sfx', { id: 'explosion' });
+    bus.emit('sfx', { id: 'explosion', size: Math.max(r.w, r.h) / 2 });
     if (this.hitArt) playFx(host.scene, this.hitArt, r.x + r.w / 2, r.y + r.h / 2, { w: r.w * 1.3, h: r.h, grow: 1 });
     const flash = host.scene.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, this.color, this.hitArt ? 0.25 : 0.6).setDepth(6);
     host.scene.time.delayedCall(150, () => flash.destroy());
@@ -497,7 +497,7 @@ export class FollowBlast implements Hazard {
     }
     if (this.left > 0) return true;
     if (Math.hypot(p.x - this.pos.x, p.y - this.pos.y) <= this.radius + host.playerRadius) host.hurtPlayer(this.damage);
-    bus.emit('sfx', { id: 'explosion' });
+    bus.emit('sfx', { id: 'explosion', size: this.radius });
     if (this.art?.hit) playFx(host.scene, this.art.hit, this.pos.x, this.pos.y, { w: this.radius * 2.4 });
     else flash(host, host.scene.add.circle(this.pos.x, this.pos.y, this.radius, this.color, 0.6).setDepth(6));
     return false;

@@ -71,8 +71,8 @@ export class Explosive implements SkillObject {
   }
 
   private explode(host: SkillHost): void {
-    bus.emit('sfx', { id: 'explosion' });
     const r = this.spec.radius;
+    bus.emit('sfx', { id: 'explosion', size: r });
     host.blastProps({ x: this.x, y: this.y }, r, this.spec.base);
     for (const e of [...host.enemies()]) {
       if (Math.hypot(e.sprite.x - this.x, e.sprite.y - this.y) <= r + e.radius) host.hit(e, this.spec.base, this.spec.tags);

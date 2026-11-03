@@ -1,6 +1,6 @@
 import type { WeaponItem } from '../systems/weapons';
 import type { CutIn, CutPage } from '../ui/cutscenePages';
-import type { SfxId } from '../systems/sound';
+import type { SfxGroup, SfxId } from '../systems/sound';
 import type { ButtonAction } from './actions';
 import type { UiMode } from '../input/uiMode';
 import type { AnyCard, Card } from '../systems/cards';
@@ -32,7 +32,8 @@ export interface GameEvents {
   /** 포탈 이동 화면을 덮거나(on) 걷는다 */
   warp: { on: boolean };
   /** 효과음 하나 */
-  sfx: { id: SfxId };
+  /** size: 묶음 소리(휘두르기·타격·폭발)의 크기 — 피해나 반지름 */
+  sfx: { id: SfxId | SfxGroup; size?: number };
   /** 소리 켜기·끄기 요청 / 바뀜 */
   muteToggle: Record<string, never>;
   /** 지금 앞에 있는 바닥 무기·진열 무기 (없으면 null) */

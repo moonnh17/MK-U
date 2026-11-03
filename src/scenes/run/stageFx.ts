@@ -186,7 +186,7 @@ export class StageFx {
     for (let i = 0; i < k.explosions; i++) {
       this.run.time.delayedCall(i * k.stepSec * 1000, () => {
         this.run.juice.explosionNear(at, k.spreadPx);
-        sfx('explosion');
+        sfx('explosionLarge');
       });
     }
   }

@@ -8,16 +8,31 @@ import type { SoundsData, WeaponDef } from '../types/data';
 /** 게임이 내는 효과음 이름 (sounds.json의 키와 같아야 한다) */
 export const SFX_IDS = [
   'shotPistol',
+  'shotRifle',
+  'shotSmg',
   'shotShotgun',
   'shotSniper',
   'shotLob',
+  'shotBow',
   'shotStaff',
   'shotLaser',
-  'swing',
-  'hit',
+  'shotBeamHeavy',
+  'shotDisc',
+  'shotNeedle',
+  'swingLight',
+  'swingMid',
+  'swingHeavy',
+  'hitLight',
+  'hitMid',
+  'hitHeavy',
+  'hitBullet',
   'crit',
   'kill',
-  'explosion',
+  'killBig',
+  'explosionSmall',
+  'explosionMid',
+  'explosionLarge',
+  'electric',
   'playerHurt',
   'coin',
   'energy',
@@ -45,6 +60,10 @@ export const SFX_IDS = [
   'advCharge',
   'advBurst',
 ] as const;
+
+/** 크기·위력에 따라 소리가 바뀌는 묶음 (sounds.json tiers): 휘두르기·타격은 피해, 폭발은 반지름 */
+export const SFX_GROUPS = ['swing', 'hit', 'explosion'] as const;
+export type SfxGroup = (typeof SFX_GROUPS)[number];
 
 export type SfxId = (typeof SFX_IDS)[number];
 
@@ -78,9 +97,18 @@ export class SoundGate {
   }
 }
 
-/** 소리 하나의 길이 (가장 늦게 끝나는 층) */
+/** 소리 하나의 길이: 파일 소리는 적힌 길이, 합성은 가장 늦게 끝나는 층 */
 export function soundLength(def: SoundsData['sounds'][string]): number {
-  return Math.max(...def.layers.map((l) => (l.delaySec ?? 0) + l.durSec));
+  if (def.files) return def.durSec ?? 0.3;
+  return Math.max(...(def.layers ?? []).map((l) => (l.delaySec ?? 0) + l.durSec));
+}
+
+/** 묶음 이름이면 크기(반지름·피해)에 맞는 단계의 소리, 아니면 그대로. 크기를 모르면 가운데 단계 */
+export function resolveSfx(data: SoundsData, id: string, size?: number): string {
+  const tiers = data.tiers[id];
+  if (!tiers) return id;
+  if (size === undefined) return tiers[Math.floor((tiers.length - 1) / 2)]!.id;
+  return (tiers.find((t) => t.upTo === undefined || size <= t.upTo) ?? tiers[tiers.length - 1]!).id;
 }
 
 /** 매번 똑같이 들리지 않게 음 높이를 ±jitter 비율로 흔든다 */
@@ -89,10 +117,10 @@ export function pitchFactor(rng: Rng, jitter: number): number {
 }
 
 /** 무기 공격 소리: 데이터에 적힌 것, 없으면 분류·탄 모양에 따라 */
-export function weaponSfx(w: Pick<WeaponDef, 'category' | 'pattern'> & { sfx?: string }): SfxId {
+export function weaponSfx(w: Pick<WeaponDef, 'category' | 'pattern'> & { sfx?: string }): SfxId | SfxGroup {
   if (w.sfx && (SFX_IDS as readonly string[]).includes(w.sfx)) return w.sfx as SfxId;
   if (w.category === 'blade') return 'swing';
-  if (w.category === 'bow') return 'shotLob';
+  if (w.category === 'bow') return 'shotBow';
   if (w.category === 'staff' || w.pattern.kind === 'homing') return 'shotStaff';
   if (w.pattern.kind === 'lob') return 'shotLob';
   return 'shotPistol';
