@@ -793,6 +793,9 @@ export function validateGameData(d: GameData): Errors {
   // --- 효과음 ---
   const so = d.sounds;
   if (!(so.masterVolume >= 0 && so.masterVolume <= 1)) errors.push('sounds.masterVolume: 0~1');
+  const mu = so.music;
+  for (const id of [mu.labTrack, mu.runTrack, mu.hiddenBossTrack, ...Object.values(mu.bossTracks), ...Object.values(mu.combatTracks)]) if (!mu.tracks[id]) errors.push(`sounds.music: 없는 곡 '${id}'`);
+  for (const [id, t] of Object.entries(mu.tracks)) if (t.startSec !== undefined && !(t.startSec >= 0)) errors.push(`sounds.music.tracks.${id}.startSec: 0 이상`);
   for (const [id, def] of Object.entries(so.sounds)) {
     const w = `sounds.${id}`;
     if (def.files) {

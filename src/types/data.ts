@@ -1479,7 +1479,12 @@ export interface MusicData {
   runTrack: string;
   /** 챕터 → 보스 곡 id */
   bossTracks: Record<string, string>;
-  tracks: Record<string, { file: string; volume: number }>;
+  /** 챕터 → 일반 전투 칸에서 싸우는 동안의 곡 id (없는 챕터는 런 곡) */
+  combatTracks: Record<string, string>;
+  /** 히든보스와 마주한 동안의 곡 id */
+  hiddenBossTrack: string;
+  /** startSec: 처음 틀 때 이 초부터 (반복은 처음부터) */
+  tracks: Record<string, { file: string; volume: number; startSec?: number }>;
 }
 
 export interface SoundsData {

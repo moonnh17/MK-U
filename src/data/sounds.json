@@ -5,12 +5,26 @@
     "fadeSec": 1.2,
     "labTrack": "lab",
     "runTrack": "run",
+    "combatTracks": {
+      "1": "combat",
+      "2": "combat"
+    },
+    "hiddenBossTrack": "hiddenBoss",
     "bossTracks": {
       "1": "boss1",
       "2": "boss2",
       "3": "boss3"
     },
     "tracks": {
+      "combat": {
+        "file": "anc-ruins-pulse.mp3",
+        "volume": 0.5
+      },
+      "hiddenBoss": {
+        "file": "corrupted-simulation.mp3",
+        "volume": 0.55,
+        "startSec": 79
+      },
       "lab": {
         "file": "architecture-of-doubt.mp3",
         "volume": 0.5

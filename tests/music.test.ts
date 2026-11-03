@@ -13,6 +13,15 @@ describe('배경 음악', () => {
     expect(M.tracks[pickTrack(M, { place: 'run', chapter: 2, facingBoss: true })]!.file).toBe('corrupted-simulation.mp3');
     expect(M.tracks[pickTrack(M, { place: 'run', chapter: 3, facingBoss: true })]!.file).toBe('despair-grandeur.mp3');
   });
+  it('1·2장 일반 전투 칸에서 싸우는 동안은 전투 곡, 3장은 런 곡 그대로', () => {
+    expect(M.tracks[pickTrack(M, { place: 'run', chapter: 1, facingBoss: false, inCombat: true })]!.file).toBe('anc-ruins-pulse.mp3');
+    expect(M.tracks[pickTrack(M, { place: 'run', chapter: 2, facingBoss: false, inCombat: true })]!.file).toBe('anc-ruins-pulse.mp3');
+    expect(pickTrack(M, { place: 'run', chapter: 3, facingBoss: false, inCombat: true })).toBe(M.runTrack);
+  });
+  it('히든보스는 2장 보스 곡을 1분 19초부터 (보스·전투 곡보다 먼저)', () => {
+    const id = pickTrack(M, { place: 'run', chapter: 1, facingBoss: true, hiddenBoss: true, inCombat: true });
+    expect(M.tracks[id]).toMatchObject({ file: M.tracks[M.bossTracks['2']!]!.file, startSec: 79 });
+  });
   it('보스 곡이 없는 챕터면 런 곡', () => {
     expect(pickTrack(M, { place: 'run', chapter: 9, facingBoss: true })).toBe(M.runTrack);
   });

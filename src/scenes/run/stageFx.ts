@@ -207,10 +207,15 @@ export class StageFx {
     shake(this.run, 'rumble', sec * 1000);
   }
 
-  /** 보스와 마주하면 챕터 보스 곡, 아니면 런 곡 (같은 곡이면 음악 쪽에서 무시한다) */
+  /** 히든보스·보스와 마주하면 그 곡, 일반 전투 칸에서 싸우는 동안은 챕터 전투 곡, 아니면 런 곡 (같은 곡이면 음악 쪽에서 무시한다) */
   updateMusic(): void {
-    const facingBoss = this.run.enemies.some((e) => !e.dead && (e.rank === 'boss' || e.rank === 'hiddenBoss'));
-    bus.emit('music', { track: pickTrack(this.run.ctx.data.sounds.music, { place: 'run', chapter: this.run.session.stage.chapter, facingBoss }) });
+    const live = this.run.enemies.filter((e) => !e.dead);
+    const facingBoss = live.some((e) => e.rank === 'boss' || e.rank === 'hiddenBoss');
+    const hiddenBoss = live.some((e) => e.rank === 'hiddenBoss');
+    const rid = this.run.session.currentRoomId;
+    const room = rid === null ? undefined : this.run.rooms.get(rid);
+    const inCombat = room?.kind === 'combatRoom' && room.phase === 'locked';
+    bus.emit('music', { track: pickTrack(this.run.ctx.data.sounds.music, { place: 'run', chapter: this.run.session.stage.chapter, facingBoss, hiddenBoss, inCombat }) });
   }
 
   /** 첫 런 시작 방: 조작 안내. 다른 방으로 가면 사라지고 다시 나오지 않는다 */

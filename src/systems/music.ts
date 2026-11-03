@@ -4,12 +4,15 @@
  */
 import type { MusicData } from '../types/data';
 
-export type MusicPlace = { place: 'lab' } | { place: 'run'; chapter: number; facingBoss: boolean };
+/** facingBoss: 보스·히든보스와 마주함 / hiddenBoss: 그중 히든보스 / inCombat: 일반 전투 칸에서 싸우는 중 */
+export type MusicPlace = { place: 'lab' } | { place: 'run'; chapter: number; facingBoss: boolean; hiddenBoss?: boolean; inCombat?: boolean };
 
-/** 틀어야 할 곡 id */
+/** 틀어야 할 곡 id: 히든보스 > 챕터 보스 > 챕터 전투 > 런 */
 export function pickTrack(m: MusicData, at: MusicPlace): string {
   if (at.place === 'lab') return m.labTrack;
+  if (at.facingBoss && at.hiddenBoss) return m.hiddenBossTrack;
   if (at.facingBoss) return m.bossTracks[String(at.chapter)] ?? m.runTrack;
+  if (at.inCombat) return m.combatTracks[String(at.chapter)] ?? m.runTrack;
   return m.runTrack;
 }
 

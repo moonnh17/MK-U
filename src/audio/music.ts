@@ -47,6 +47,8 @@ export class Music {
     const el = new Audio(`${m.basePath}${def.file}`);
     el.loop = true;
     el.volume = 0;
+    // 곡 중간부터 (히든보스: 2장 보스 곡 1분 19초부터). 반복은 처음부터
+    if (def.startSec) el.currentTime = def.startSec;
     this.playing.push({ id, el, fade: 0, leaving: false });
     void el.play().catch(() => undefined);
   }
