@@ -5,6 +5,7 @@
  * 스킬 교체: 끌어다 놓기(PC) 또는 스킬 탭 → 칸 탭. 모바일은 화면이 낮아 세 칸을 탭으로 나눈다.
  */
 import { applyArtIcon } from './artIcon';
+import { skillTextValues } from './skillText';
 import type { GameContext } from '../core/context';
 import { buffText } from '../core/session';
 import { bus } from '../core/events';
@@ -380,9 +381,9 @@ export class InventoryWindow {
         this.line('iw-dname', t(aw ? u.awakening!.nameKey : u.nameKey), u.color),
         this.line('iw-dmeta', t('inventory.ultimate')),
         this.badges(u.tags),
-        this.line('iw-desc', t(aw ? u.awakening!.descKey : u.descKey, fmt(aw ? { ...u.values, ...u.awakening!.values } : u.values))),
+        this.line('iw-desc', t(aw ? u.awakening!.descKey : u.descKey, skillTextValues(aw ? { ...u.values, ...u.awakening!.values } : u.values))),
       );
-      if (u.awakening && !p.ultimate.awakened) box.append(this.line('iw-dsub', t('inventory.detailAwakened')), this.line('iw-desc dim', t(u.awakening.descKey, fmt({ ...u.values, ...u.awakening.values }))));
+      if (u.awakening && !p.ultimate.awakened) box.append(this.line('iw-dsub', t('inventory.detailAwakened')), this.line('iw-desc dim', t(u.awakening.descKey, skillTextValues({ ...u.values, ...u.awakening.values }))));
       return;
     }
     const owned = p.loadout.owned[id];
@@ -395,11 +396,11 @@ export class InventoryWindow {
       this.line('iw-dname', owned.awakened ? `★ ${t(def.awakening.nameKey)}` : t(def.nameKey)),
       this.line('iw-dmeta', meta.join(' · ')),
       this.badges(skillTags(def, owned.awakened)),
-      this.line('iw-desc', t(owned.awakened ? def.awakening.descKey : def.descKey, fmt(sv.values))),
+      this.line('iw-desc', t(owned.awakened ? def.awakening.descKey : def.descKey, skillTextValues(sv.values))),
     );
     if (!owned.awakened && owned.level < d.skills.maxLevel) {
       const next = skillValues(def, { level: owned.level + 1, awakened: false });
-      box.append(this.line('iw-dsub', t('inventory.detailNext', { level: owned.level + 1 })), this.line('iw-desc dim', t(def.descKey, fmt(next.values))));
+      box.append(this.line('iw-dsub', t('inventory.detailNext', { level: owned.level + 1 })), this.line('iw-desc dim', t(def.descKey, skillTextValues(next.values))));
     }
     if (!owned.awakened) {
       const a = def.awakening;
@@ -407,7 +408,7 @@ export class InventoryWindow {
       const req = this.line('iw-dsub', t('inventory.detailAwaken', { item: this.itemName(a.requiredItem), level: d.skills.maxLevel }));
       req.classList.toggle('met', met);
       const after = skillValues(def, { level: d.skills.maxLevel, awakened: true });
-      box.append(req, this.line('iw-desc dim', `${t(a.nameKey)} — ${t(a.descKey, fmt(after.values))}`));
+      box.append(req, this.line('iw-desc dim', `${t(a.nameKey)} — ${t(a.descKey, skillTextValues(after.values))}`));
     }
   }
 
@@ -517,8 +518,3 @@ export class InventoryWindow {
 }
 
 /** 설명 문구에 넣을 수치 (소수점 정리) */
-function fmt(values: Record<string, number>): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const [k, v] of Object.entries(values)) out[k] = String(Math.round(v * 100) / 100);
-  return out;
-}

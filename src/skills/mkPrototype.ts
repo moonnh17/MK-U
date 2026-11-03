@@ -2,7 +2,8 @@
  * MK : 프로토타입 (아크로, 버프). 적이 없어도 쓸 수 있다. 입을 때 변신하고, 시간이 다 되면 해제 동작 뒤 벗는다.
  * 지속시간(버프 태그) 동안 슈트를 입는다: 이동속도 증가, 받는 피해 감소,
  * 사거리 안 가장 가까운 적을 자동 펀치(물리·근접).
- * 각성 'MK : 오버드라이브': 쓸 때 현재 체력 일부를 소모(죽지 않음). 펀치가 주변까지 터지는 폭발 펀치가 된다.
+ * 각성 'MK : 오버드라이브': 입고 있는 동안 체력이 초당 hpDrainPerSec씩 닳고(죽지 않음), 체력이 releaseHpRatio 아래가 되면
+ * 강제로 벗는다. 펀치가 주변까지 터지는 폭발 펀치가 된다.
  * 각성 슈트만: 입은 동안 스킬을 한 번 더 누르면 조준 방향으로 강력한 레이저를 쏜다(슈트마다 한 번, 기술·원거리).
  */
 import type Phaser from 'phaser';
@@ -134,6 +135,14 @@ class Suit implements SkillObject {
       return true;
     }
     const v = this.s.values;
+    // 오버드라이브: 입고 있는 동안 체력이 닳고, 너무 낮아지면 강제 해제
+    if (this.s.owned.awakened) {
+      host.drainHp(v.hpDrainPerSec! * dt);
+      if (host.hpRatio() < v.releaseHpRatio!) {
+        this.startRelease(host);
+        return true;
+      }
+    }
     const p = host.playerPos();
     this.follow(host, dt);
     this.punchTimer -= dt;
@@ -226,7 +235,6 @@ export const mkPrototype: SkillImpl = {
   },
   cast(host, s) {
     const v = s.values;
-    if (s.owned.awakened) host.payHp(v.hpCost!);
     // 다시 입으면 새 슈트로
     trimOldest(host, ID, 0);
     host.addObject(new Suit(host, s, host.buffDuration(v.durationSec!, skillTags(s.def, s.owned.awakened))));

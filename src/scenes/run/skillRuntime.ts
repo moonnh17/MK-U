@@ -106,6 +106,11 @@ export class SkillRuntime {
         const p = this.run.session.player;
         p.hp = payHp(p.hp, ratio).hp;
       },
+      drainHp: (amount) => {
+        const p = this.run.session.player;
+        p.hp = Math.max(1, p.hp - amount);
+      },
+      hpRatio: () => this.run.session.player.hp / this.run.session.player.maxHp,
       dash: (dir, speed, sec) => {
         sfx('dash');
         this.run.dashVel = { x: dir.x * speed, y: dir.y * speed };
@@ -243,8 +248,7 @@ export class SkillRuntime {
   /** 근접 스킬은 사거리 안에 적이 있어야 발동한다 */
   skillUsable(def: SkillDef, awakened: boolean, values: Record<string, number>): boolean {
     const targets = this.run.enemies.filter((e) => !e.dead).map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius }));
-    // 근접 스킬은 실제 피해 범위보다 넓은 인식 범위(detectRange) 안에 적이 있으면 쓸 수 있다
-    return canAutoCast(skillTags(def, awakened), this.area(values.detectRange ?? values.range ?? 0), this.run.player, targets);
+    return canAutoCast(skillTags(def, awakened), this.area(values.range ?? 0), this.run.player, targets);
   }
 
   castSlot(i: number): void {

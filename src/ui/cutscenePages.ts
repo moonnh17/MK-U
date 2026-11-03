@@ -3,6 +3,7 @@
  * 그리는 것은 cutsceneWindow.ts. 학파 엠블럼·실루엣은 지금 색 도형으로 대신한다.
  */
 import { artKeys } from '../systems/art';
+import { skillTextValues } from './skillText';
 import type { GameContext } from '../core/context';
 import type { ConversionLog } from '../systems/advancement';
 import { findSkill, skillValues } from '../systems/skills';
@@ -33,12 +34,6 @@ export interface CutPage {
   accent: string;
 }
 
-function fmt(values: Record<string, number>): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const [k, v] of Object.entries(values)) out[k] = String(Math.round(v * 100) / 100);
-  return out;
-}
-
 /** 학파 색 (전직 데이터) */
 export function schoolColor(ctx: GameContext, school: SchoolId): string {
   for (const j of ctx.data.jobs.jobs) for (const a of j.advancements) if (a.id === school) return a.color;
@@ -65,8 +60,8 @@ export function skillAwakeningCut(ctx: GameContext, skillId: string): Cutscene {
       {
         title: `${t('cut.skillAwakening')} — ${t(def.nameKey)} → ${t(a.nameKey)}`,
         lines: [
-          `${t('cut.before')}: ${t(def.descKey, fmt(before.values))}`,
-          `${t('cut.after')}: ${t(a.descKey, fmt(after.values))}`,
+          `${t('cut.before')}: ${t(def.descKey, skillTextValues(before.values))}`,
+          `${t('cut.after')}: ${t(a.descKey, skillTextValues(after.values))}`,
           t('cut.condition', { item: itemName(ctx, a.requiredItem) }),
         ],
         accent: color,
@@ -80,7 +75,7 @@ export function ultimateAwakeningCut(ctx: GameContext, ult: UltimateDef): Cutsce
   const a = ult.awakening!;
   const item = ctx.data.items.items.find((x) => x.id === a.requiredItem)!;
   const icons = [{ label: t(item.nameKey), color: item.color, key: item.spriteKey }];
-  const values = fmt({ ...ult.values, ...a.values });
+  const values = skillTextValues({ ...ult.values, ...a.values });
   return {
     id: `ultimate.${ult.id}`,
     cut: { kind: 'ultimateAwakening', from: icons, to: { label: t(a.shortKey), color: ult.color, key: artKeys.ultimateIcon(ult.id) }, flash: ult.color },

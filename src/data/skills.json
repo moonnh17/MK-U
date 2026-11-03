@@ -700,9 +700,9 @@
         "bleed": ["physical", "bleed"]
       },
       "levels": [
-        { "cooldownSec": 6.8, "values": { "damage": 25, "range": 60, "detectRange": 96, "lungeSec": 0.14, "arcDeg": 188 } },
-        { "cooldownSec": 6.1, "values": { "damage": 40, "range": 66, "detectRange": 106, "lungeSec": 0.14, "arcDeg": 188 } },
-        { "cooldownSec": 5.4, "values": { "damage": 54, "range": 72, "detectRange": 115, "lungeSec": 0.14, "arcDeg": 200 } }
+        { "cooldownSec": 6.8, "values": { "damage": 25, "range": 56, "arcDeg": 188 } },
+        { "cooldownSec": 6.1, "values": { "damage": 40, "range": 58, "arcDeg": 188 } },
+        { "cooldownSec": 5.4, "values": { "damage": 54, "range": 60, "arcDeg": 200 } }
       ],
       "awakening": {
         "nameKey": "skill.purifyingWings.awakened",
@@ -714,7 +714,7 @@
           "hit1Damage": 38,
           "hit2Damage": 38,
           "hit3Damage": 65,
-          "range": 78, "detectRange": 125, "lungeSec": 0.14,
+          "range": 64,
           "arcDeg": 220,
           "hitDelaySec": 0.18,
           "bleedDamage": 7.2,
@@ -759,7 +759,7 @@
         {
           "cooldownSec": 18.9,
           "values": {
-            "range": 60,
+            "range": 56,
             "durationSec": 6,
             "moveSpeed": 0.2,
             "damageReduction": 0.2,
@@ -771,7 +771,7 @@
         {
           "cooldownSec": 17.6,
           "values": {
-            "range": 63,
+            "range": 58,
             "durationSec": 7,
             "moveSpeed": 0.25,
             "damageReduction": 0.25,
@@ -783,7 +783,7 @@
         {
           "cooldownSec": 16.2,
           "values": {
-            "range": 66,
+            "range": 60,
             "durationSec": 8,
             "moveSpeed": 0.3,
             "damageReduction": 0.3,
@@ -802,7 +802,8 @@
         ],
         "cooldownSec": 16.2,
         "values": {
-          "hpCost": 0.15,
+          "hpDrainPerSec": 3,
+          "releaseHpRatio": 0.1,
           "durationSec": 8,
           "moveSpeed": 0.35,
           "damageReduction": 0.3,

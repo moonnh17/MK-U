@@ -4,6 +4,7 @@
  * 만나지 않은 칸은 실루엣과 ???만 보이고, 고르면 '아직 기록이 없다'만 나온다.
  */
 import type { GameContext } from '../core/context';
+import { skillTextValues } from './skillText';
 import { bus } from '../core/events';
 import type { GameData } from '../data/index';
 import { artKeys } from '../systems/art';
@@ -35,10 +36,6 @@ interface SkillVariant {
   awakened?: boolean;
   /** 이 단계의 태그 (각성하면 바뀔 수 있다) */
   tags?: readonly TagId[];
-}
-
-function fmt(values: Record<string, number>): Record<string, string> {
-  return Object.fromEntries(Object.entries(values).map(([k, v]) => [k, String(Math.round(v * 10) / 10)]));
 }
 
 /** 아이템의 늘 켜진 수치 효과를 그림 옆 수치 칸으로 (발동형·조건부 효과는 설명에만) */
@@ -370,7 +367,7 @@ export class CodexWindow {
       box.appendChild(this.el('div', 'cx-sub', t('codex.sub.attacks')));
       if (!def.attacks?.length) box.appendChild(this.el('p', 'cx-desc dim', t('codex.noAttack')));
       for (const a of def.attacks ?? []) {
-        box.appendChild(this.card(t(`codex.attackName.${id}.${a.id}`), t(`codex.attack.${id}.${a.id}`, fmt(flatNumbers(a))), [t('codex.chip.damage', { n: a.damage })]));
+        box.appendChild(this.card(t(`codex.attackName.${id}.${a.id}`), t(`codex.attack.${id}.${a.id}`, skillTextValues(flatNumbers(a))), [t('codex.chip.damage', { n: a.damage })]));
       }
       return;
     }
@@ -408,7 +405,7 @@ export class CodexWindow {
         if (p.values.damage) tags.push(t('codex.chip.damage', { n: p.values.damage }));
         if (p.reach === 'melee') tags.push(t('codex.chip.melee'));
         if (p.summon) tags.push(t('codex.chip.summon'));
-        box.appendChild(this.card(t(`boss.pattern.${p.id}`), t(`codex.pattern.${p.id}`, fmt(p.values)), tags));
+        box.appendChild(this.card(t(`boss.pattern.${p.id}`), t(`codex.pattern.${p.id}`, skillTextValues(p.values)), tags));
       }
     }
   }
@@ -555,7 +552,7 @@ export class CodexWindow {
       [t('codex.stat.sanity'), String(d.player.sanity.base)],
     ]);
     const ult = d.ultimates.ultimates.find((u) => u.id === job.startUltimate)!;
-    this.block(box, 'codex.sub.ultimate', [`${t(ult.nameKey)} — ${t(ult.descKey, fmt(ult.values))}`]);
+    this.block(box, 'codex.sub.ultimate', [`${t(ult.nameKey)} — ${t(ult.descKey, skillTextValues(ult.values))}`]);
     this.block(box, 'codex.sub.advancements', job.advancements.map((a) => `${t(a.nameKey)} — ${t(`codex.school.${a.id}`)}`));
   }
 
@@ -575,7 +572,7 @@ export class CodexWindow {
         const cd = (sec: number) => (passive ? '' : t('inventory.detailCooldown', { sec: Math.round(sec * 10) / 10 }));
         const levels = s.levels.map((_, i): SkillVariant => {
           const v = skillValues(s, { level: i + 1, awakened: false });
-          return { label: `Lv${i + 1}`, title: `${t(s.nameKey)}${passive ? ` (${t('card.passive')})` : ''}`, desc: t(s.descKey, fmt(v.values)), note: cd(v.cooldownSec), tags: s.tags };
+          return { label: `Lv${i + 1}`, title: `${t(s.nameKey)}${passive ? ` (${t('card.passive')})` : ''}`, desc: t(s.descKey, skillTextValues(v.values)), note: cd(v.cooldownSec), tags: s.tags };
         });
         const aw = skillValues(s, { level: s.levels.length, awakened: true });
         const awakened: SkillVariant = {
@@ -583,7 +580,7 @@ export class CodexWindow {
           awakened: true,
           title: `★ ${t(s.awakening.nameKey)}`,
           tags: s.awakening.tags,
-          desc: t(s.awakening.descKey, fmt(aw.values)),
+          desc: t(s.awakening.descKey, skillTextValues(aw.values)),
           note: [cd(aw.cooldownSec), t('codex.needItem', { item: itemName(s.awakening.requiredItem) })].filter(Boolean).join(' · '),
         };
         return this.skillRow(artKeys.skillIcon(s.id), s.color, [...levels, awakened]);
@@ -591,14 +588,14 @@ export class CodexWindow {
     );
     const ult = d.ultimates.ultimates.find((u) => u.id === adv.ultimate);
     if (ult) {
-      const variants: SkillVariant[] = [{ label: t('codex.lv.base'), title: t(ult.nameKey), desc: t(ult.descKey, fmt(ult.values)), note: '', tags: ult.tags }];
+      const variants: SkillVariant[] = [{ label: t('codex.lv.base'), title: t(ult.nameKey), desc: t(ult.descKey, skillTextValues(ult.values)), note: '', tags: ult.tags }];
       if (ult.awakening)
         variants.push({
           label: t('codex.lv.awakened'),
           awakened: true,
           title: `★ ${t(ult.awakening.nameKey)}`,
           tags: ult.awakening.tags,
-          desc: t(ult.awakening.descKey, fmt({ ...ult.values, ...ult.awakening.values })),
+          desc: t(ult.awakening.descKey, skillTextValues({ ...ult.values, ...ult.awakening.values })),
           note: t('codex.needItem', { item: itemName(ult.awakening.requiredItem) }),
         });
       this.block(box, 'codex.sub.ultimate', [this.skillRow(artKeys.ultimateIcon(ult.id), ult.color, variants)]);

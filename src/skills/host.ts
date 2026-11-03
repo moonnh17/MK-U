@@ -67,6 +67,10 @@ export interface SkillHost {
   heal(amount: number, overflowToSanity: boolean): void;
   /** 현재 체력의 ratio만큼 소모한다(죽지 않음) */
   payHp(ratio: number): void;
+  /** 체력을 amount만큼 잃는다 (1 아래로는 내려가지 않음) */
+  drainHp(amount: number): void;
+  /** 지금 체력 비율 (0~1) */
+  hpRatio(): number;
   /** 플레이어 돌진: sec 동안 입력 대신 dir 방향으로 speed로 움직인다(벽에는 막힘) */
   dash(dir: Vec2, speed: number, sec: number): void;
   /** 빛 입자가 사방으로 터지는 연출 */

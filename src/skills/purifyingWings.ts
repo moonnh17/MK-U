@@ -45,39 +45,20 @@ function slash(host: SkillHost, s: SkillCast, art: SpriteRef, damage: number, so
   }
 }
 
-function strike(host: SkillHost, s: SkillCast): void {
-  if (!s.owned.awakened) {
-    slash(host, s, levelRef(s, 'slash'), s.values.damage!, 'slash');
-    return;
-  }
-  const v = s.values;
-  const hits = [v.hit1Damage!, v.hit2Damage!, v.hit3Damage!];
-  hits.forEach((dmg, i) => {
-    const label = host.ctx.t(`skill.purifyingWings.hit${i + 1}`);
-    host.scene.time.delayedCall(i * v.hitDelaySec! * 1000, () => slash(host, s, s.def.sprites[`hit${i + 1}A`]!, dmg, 'awakenedSlash', label));
-  });
-}
-
 export const purifyingWings: SkillImpl = {
   cast(host, s) {
-    // 근접: 인식 범위(detectRange) 안에 적이 없으면 발동하지 않는다(쿨타임도 돌지 않음)
-    const v = s.values;
-    const origin = host.playerPos();
-    const target = nearestEnemy(host, origin, host.area(v.detectRange ?? v.range!));
-    if (!target) return false;
-    // 베기 범위 밖이면 그 적 쪽으로 돌진한 뒤 벤다
-    const range = host.area(v.range!);
-    const dx = target.sprite.x - origin.x;
-    const dy = target.sprite.y - origin.y;
-    const gap = Math.hypot(dx, dy) - target.radius;
-    if (gap > range * 0.8 && v.lungeSec) {
-      const move = gap - range * 0.6;
-      const len = Math.hypot(dx, dy) || 1;
-      host.dash({ x: dx / len, y: dy / len }, move / v.lungeSec, v.lungeSec);
-      host.scene.time.delayedCall(v.lungeSec * 1000, () => strike(host, s));
+    // 근접: 사거리 안에 적이 없으면 발동하지 않는다(쿨타임도 돌지 않음)
+    if (!nearestEnemy(host, host.playerPos(), host.area(s.values.range!))) return false;
+    if (!s.owned.awakened) {
+      slash(host, s, levelRef(s, 'slash'), s.values.damage!, 'slash');
       return true;
     }
-    strike(host, s);
+    const v = s.values;
+    const hits = [v.hit1Damage!, v.hit2Damage!, v.hit3Damage!];
+    hits.forEach((dmg, i) => {
+      const label = host.ctx.t(`skill.purifyingWings.hit${i + 1}`);
+      host.scene.time.delayedCall(i * v.hitDelaySec! * 1000, () => slash(host, s, s.def.sprites[`hit${i + 1}A`]!, dmg, 'awakenedSlash', label));
+    });
     return true;
   },
 };

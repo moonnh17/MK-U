@@ -1,5 +1,6 @@
 /** 카드 한 장을 화면에 그릴 문구·배지로 바꾼다 (카드 선택창과 테스트에서 쓴다). */
 import type { GameContext } from '../core/context';
+import { skillTextValues } from './skillText';
 import type { PlayerState } from '../core/session';
 import type { AnyCard } from '../systems/cards';
 import { findSkill, skillValues } from '../systems/skills';
@@ -25,12 +26,6 @@ export interface CardView {
 }
 
 /** 숫자 수치를 설명 문구에 넣을 때 소수점 정리 */
-function fmtValues(values: Record<string, number>): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const [k, v] of Object.entries(values)) out[k] = String(Math.round(v * 100) / 100);
-  return out;
-}
-
 export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContext): CardView {
   const t = ctx.t;
   const d = ctx.data;
@@ -81,7 +76,7 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
     name: t(def.nameKey),
     subName: '',
     levelText: card.kind === 'skillNew' ? `Lv${to}` : t('card.levelUp', { from, to }),
-    desc: t(def.descKey, fmtValues(v.values)),
+    desc: t(def.descKey, skillTextValues(v.values)),
     badges: tagBadges(skillTags(def, false), d.tags),
     accent: sb.levelColors[to - 1] ?? '#ffffff',
     school,
