@@ -48,3 +48,9 @@ describe('획득 확률', () => {
     expect(pct(0)).toBe('0%');
   });
 });
+describe('등급표', () => {
+  it('모든 출처의 등급표 몫은 정수 %', () => {
+    for (const s of [...itemSources(D), ...weaponSources(D)])
+      for (const v of Object.values(s.shares)) expect(Number.isInteger(Math.round(v * 1e6) / 1e4), s.key).toBe(true);
+  });
+});

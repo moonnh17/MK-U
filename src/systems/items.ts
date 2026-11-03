@@ -169,7 +169,10 @@ export function transferWeight(shift: Partial<Record<GradeId, number>>, grade: G
   return { ...shift, [grade]: (shift[grade] ?? 0) - amount, [next]: (shift[next] ?? 0) + amount };
 }
 
-/** 실제 가중치: 기본 + 챕터 이동(일반 −N을 상위 등급에 비율대로) + 확률 이전. 0 아래로는 내려가지 않는다 */
+/**
+ * 실제 가중치: 기본 + 챕터 이동(일반 −N을 상위 등급에 비율대로) + 확률 이전. 0 아래로는 내려가지 않는다.
+ * 나눌 때는 정수로 떨어지게 최대 나머지 방식으로 반올림한다(가중치 합 100이면 확률도 정수 %).
+ */
 export function effectiveWeights(
   base: Partial<Record<GradeId, number>>,
   chapter: number,
@@ -182,7 +185,12 @@ export function effectiveWeights(
     w.common = (w.common ?? 0) - take;
     const upper = (['rare', 'legendary', 'unique'] as GradeId[]).filter((g) => (w[g] ?? 0) > 0);
     const sum = upper.reduce((s, g) => s + (w[g] ?? 0), 0);
-    for (const g of upper) w[g] = (w[g] ?? 0) + (take * (w[g] ?? 0)) / sum;
+    const exact = upper.map((g) => (take * (w[g] ?? 0)) / sum);
+    const add = exact.map(Math.floor);
+    const order = exact.map((v, i) => ({ i, r: v - Math.floor(v) })).sort((a, b) => b.r - a.r);
+    const left = Math.round(take) - add.reduce((s, v) => s + v, 0);
+    for (let k = 0; k < left; k++) add[order[k]!.i]!++;
+    upper.forEach((g, i) => (w[g] = (w[g] ?? 0) + add[i]!));
   }
   for (const [g, v] of Object.entries(shift)) {
     if (w[g as GradeId] === undefined) continue;

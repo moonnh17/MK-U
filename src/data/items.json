@@ -1,6 +1,6 @@
 {
-  "treasureWeights": { "common": 70.75, "rare": 26, "legendary": 3, "unique": 0.25 },
-  "raidWeights": { "rare": 36.75, "legendary": 3, "unique": 0.25 },
+  "treasureWeights": { "common": 67, "rare": 26, "legendary": 6, "unique": 1 },
+  "raidWeights": { "rare": 83, "legendary": 15, "unique": 2 },
   "transferPerPickup": 2,
   "chapterCommonShift": 15,
   "sets": [{ "materials": ["namelessSword", "namelessHelm"], "result": "warriorMemory" }],

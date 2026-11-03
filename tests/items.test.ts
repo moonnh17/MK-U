@@ -107,11 +107,17 @@ describe('등급 가중치', () => {
     expect(s).toEqual({ common: -2, rare: 0, legendary: 2 });
     expect(transferWeight(s, 'unique', 2)).toBe(s);
   });
-  it('챕터마다 일반 −15를 상위 등급에 비율대로', () => {
-    const w = effectiveWeights(I.treasureWeights, 2, 15, {});
-    expect(w.common).toBe(55.75);
-    expect((w.rare ?? 0) + (w.legendary ?? 0) + (w.unique ?? 0)).toBeCloseTo(44.25);
-    expect(w.rare! / w.legendary!).toBeCloseTo(26 / 3);
+  it('챕터마다 일반 −15를 상위 등급에 비율대로, 정수로 나눈다', () => {
+    const base = { common: 67, rare: 26, legendary: 6, unique: 1 };
+    // 15 × 26:6:1 = 11.82·2.73·0.45 → 11·2·0 + 나머지 큰 순서로 2개(전설·레어) → 12·3·0
+    expect(effectiveWeights(base, 2, 15, {})).toEqual({ common: 52, rare: 38, legendary: 9, unique: 1 });
+    // 30 → 23.64·5.45·0.91 → 23·5·0 + 2개(유니크·레어) → 24·5·1
+    expect(effectiveWeights(base, 3, 15, {})).toEqual({ common: 37, rare: 50, legendary: 11, unique: 2 });
+    for (const ch of [1, 2, 3]) {
+      const w = effectiveWeights(I.treasureWeights, ch, 15, {});
+      expect(Object.values(w).every((v) => Number.isInteger(v))).toBe(true);
+      expect(Object.values(w).reduce((s, v) => s + (v ?? 0), 0)).toBe(100);
+    }
   });
   it('가중치는 0 아래로 내려가지 않는다', () => {
     expect(effectiveWeights({ common: 1, rare: 1 }, 1, 15, { common: -5 }).common).toBe(0);

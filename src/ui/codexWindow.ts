@@ -403,7 +403,9 @@ export class CodexWindow {
     const table = this.el('table', 'cx-grade-table');
     const head = this.el('tr', '');
     head.appendChild(this.el('th', '', ''));
-    for (const g of d.groupMultipliers.grades) {
+    // 신화는 가중치 표 밖의 고정 확률이라 표 아래 한 줄로 따로 보인다
+    const grades = d.groupMultipliers.grades.filter((g) => g.id !== 'mythic');
+    for (const g of grades) {
       const th = this.el('th', '', t(g.nameKey));
       th.style.setProperty('--grade', g.color);
       head.appendChild(th);
@@ -412,12 +414,12 @@ export class CodexWindow {
     for (const s of sources) {
       const tr = this.el('tr', '');
       tr.appendChild(this.el('td', '', src(s)));
-      for (const g of d.groupMultipliers.grades) tr.appendChild(this.el('td', s.rates[g.id] > 0 ? '' : 'zero', pct(s.rates[g.id])));
+      for (const g of grades) tr.appendChild(this.el('td', s.shares[g.id] > 0 ? '' : 'zero', pct(s.shares[g.id])));
       table.appendChild(tr);
     }
     const wrap = this.el('div', 'cx-table-wrap');
     wrap.appendChild(table);
-    box.append(wrap, this.el('p', 'cx-desc dim cx-note', t(noteKey, { n: d.items.transferPerPickup, chest: Math.round(d.waves.champions.itemChestChance * 100) })));
+    box.append(wrap, this.el('p', 'cx-desc dim cx-note', t('codex.rate.mythic', { pct: d.loot.mythicChance * 100 })), this.el('p', 'cx-desc dim cx-note', t(noteKey, { n: d.items.transferPerPickup, chest: Math.round(d.waves.champions.itemChestChance * 100) })));
   }
 
   /** 플레이버 문구 문단. 문구가 이미 따옴표로 시작하면(인용 + 출처) 더 붙이지 않는다 */

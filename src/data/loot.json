@@ -4,13 +4,13 @@
   "bossWeaponChance": 0.2,
   "startChest": { "common": 80, "rare": 20 },
   "weaponChest": {
-    "2": { "rare": 91.5, "legendary": 8, "unique": 0.5 },
-    "5": { "rare": 75, "legendary": 21, "unique": 4 }
+    "2": { "rare": 83, "legendary": 16, "unique": 1 },
+    "5": { "rare": 50, "legendary": 42, "unique": 8 }
   },
   "combatDrop": { "chance": 0.03, "weights": { "common": 80, "rare": 20 } },
   "merchant": {
     "count": 3,
-    "weights": { "common": 63.5, "rare": 35, "legendary": 1.5 },
+    "weights": { "common": 62, "rare": 35, "legendary": 3 },
     "prices": { "common": 15, "rare": 30, "legendary": 60, "unique": 120, "mythic": 300 }
   },
   "skillShop": { "count": 3, "prices": { "skillNew": 100, "skillLevelUp": 100 } },

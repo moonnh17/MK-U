@@ -18,11 +18,21 @@ export function gradeRates(weights: Partial<Record<GradeId, number>>, mythicChan
   return out;
 }
 
-/** 확률 보기의 출처 한 줄 (ko.json 키 + 등급 확률) */
+/** 등급표에 보일 몫: 가중치 비율만 (신화는 표 밖에서 따로 안내). 가중치 합이 100이면 정수 % */
+export function gradeShares(weights: Partial<Record<GradeId, number>>): GradeRates {
+  return gradeRates(weights, 0);
+}
+
+/** 확률 보기의 출처 한 줄 (ko.json 키 + 등급 확률 + 등급표 몫) */
 export interface DropSource {
   key: string;
   vars?: Record<string, string | number>;
   rates: GradeRates;
+  shares: GradeRates;
+}
+
+function source(key: string, weights: Partial<Record<GradeId, number>>, mythicChance: number, vars?: Record<string, string | number>): DropSource {
+  return { key, vars, rates: gradeRates(weights, mythicChance), shares: gradeShares(weights) };
 }
 
 /** 아이템 출처: 보물 상자·아이템 카드는 챕터마다 일반이 줄어든다 */
@@ -30,8 +40,8 @@ export function itemSources(d: GameData): DropSource[] {
   const m = d.loot.mythicChance;
   const chapters = Array.from({ length: d.mapgen.chapters }, (_, i) => i + 1);
   return [
-    ...chapters.map((n) => ({ key: 'drop.src.treasure', vars: { n }, rates: gradeRates(effectiveWeights(d.items.treasureWeights, n, d.items.chapterCommonShift, {}), m) })),
-    { key: 'drop.src.raid', rates: gradeRates(d.items.raidWeights, m) },
+    ...chapters.map((n) => source('drop.src.treasure', effectiveWeights(d.items.treasureWeights, n, d.items.chapterCommonShift, {}), m, { n })),
+    source('drop.src.raid', d.items.raidWeights, m),
   ];
 }
 
@@ -39,10 +49,10 @@ export function itemSources(d: GameData): DropSource[] {
 export function weaponSources(d: GameData): DropSource[] {
   const m = d.loot.mythicChance;
   return [
-    { key: 'drop.src.start', rates: gradeRates(d.loot.startChest, m) },
-    ...Object.entries(d.loot.weaponChest).map(([stage, w]) => ({ key: 'drop.src.bossChest', vars: { stage }, rates: gradeRates(w, m) })),
-    { key: 'drop.src.combat', vars: { pct: d.loot.combatDrop.chance * 100 }, rates: gradeRates(d.loot.combatDrop.weights, m) },
-    { key: 'drop.src.merchant', vars: { n: d.loot.merchant.count }, rates: gradeRates(d.loot.merchant.weights, m) },
+    source('drop.src.start', d.loot.startChest, m),
+    ...Object.entries(d.loot.weaponChest).map(([stage, w]) => source('drop.src.bossChest', w, m, { stage })),
+    source('drop.src.combat', d.loot.combatDrop.weights, m, { pct: d.loot.combatDrop.chance * 100 }),
+    source('drop.src.merchant', d.loot.merchant.weights, m, { n: d.loot.merchant.count }),
   ];
 }
 
