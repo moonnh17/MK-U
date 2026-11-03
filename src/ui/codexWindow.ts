@@ -277,8 +277,12 @@ export class CodexWindow {
       [t('codex.stat.speed'), String(def.moveSpeed)],
       [t('codex.stat.contact'), String(def.contactDamage)],
     ]);
+    const flavor = () => {
+      if (def.flavor) box.appendChild(this.el('p', 'cx-flavor', `“${t(def.flavor)}”`));
+    };
     if (!boss) {
       box.appendChild(this.el('p', 'cx-desc', t(`codex.enemy.${id}`)));
+      flavor();
       box.appendChild(this.el('div', 'cx-sub', t('codex.sub.attacks')));
       if (!def.attacks?.length) box.appendChild(this.el('p', 'cx-desc dim', t('codex.noAttack')));
       for (const a of def.attacks ?? []) {
@@ -295,6 +299,7 @@ export class CodexWindow {
     const phaseName = (i: number) => (i === 0 ? t(`boss.enraged.${id}`) : t(`boss.unlock.${id}.${i}`));
     if (!this.patternView) {
       box.appendChild(this.el('p', 'cx-desc', t(`codex.enemy.${id}`)));
+      flavor();
       const flow = [t('codex.phase.start')];
       if (boss.enrageAt > 0) flow.push(t('codex.phase.enrage', { hp: Math.round(boss.enrageAt * 100), name: phaseName(0) }));
       (boss.unlocks ?? []).forEach((hp, i) => flow.push(t('codex.phase.enrage', { hp: Math.round(hp * 100), name: phaseName(i + 1) })));

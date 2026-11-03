@@ -19,6 +19,12 @@ describe('도감', () => {
     for (const e of codexSections(D, 'characters')[1]!.entries) expect(D.text[`codex.school.${e.id}`], e.id).toBeTypeOf('string');
     for (const s of [...codexSections(D, 'monsters'), ...codexSections(D, 'characters'), ...codexSections(D, 'items'), ...codexSections(D, 'weapons')]) expect(D.text[s.titleKey], s.titleKey).toBeTypeOf('string');
   });
+  it('적의 플레이버 문구 키는 모두 ko.json에 있다', () => {
+    const withFlavor = D.enemies.enemies.filter((e) => e.flavor);
+    expect(withFlavor.length).toBeGreaterThan(0);
+    for (const e of withFlavor) expect(D.text[e.flavor!], e.id).toBeTypeOf('string');
+    expect(D.enemies.enemies.find((e) => e.id === 'executor')?.flavor).toBeUndefined();
+  });
   it('모든 일반 적 공격과 보스 패턴에 도감 설명이 있다', () => {
     for (const e of D.enemies.enemies)
       for (const a of e.attacks ?? []) {

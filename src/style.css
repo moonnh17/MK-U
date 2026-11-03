@@ -2605,3 +2605,19 @@ body {
   list-style: none;
   margin-left: -18px;
 }
+/* 도감: 적 플레이버 문구 (밝은 기록지 위 #555555, 어두운 바탕에 놓이면 밝은 회색) */
+#codex-window {
+  --cx-flavor: #c4c4c4;
+}
+.cx-detail {
+  --cx-flavor: #555555;
+}
+.cx-flavor {
+  margin: 12px 0 0;
+  color: var(--cx-flavor);
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: normal;
+  overflow-wrap: break-word;
+}

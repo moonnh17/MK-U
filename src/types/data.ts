@@ -260,6 +260,8 @@ export type EnemyRank = 'normal' | 'elite' | 'champion' | 'boss' | 'hiddenBoss';
 export interface EnemyDef extends SpriteRef {
   id: string;
   nameKey: string;
+  /** 도감 설명 아래 플레이버 문구 (ko.json 키). 없으면 그 칸을 보이지 않는다 */
+  flavor?: string;
   chapter: number;
   rank: EnemyRank;
   ai: EnemyAi;
