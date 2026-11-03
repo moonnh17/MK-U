@@ -19,27 +19,27 @@
         "shell": ["tech", "ranged"]
       },
       "levels": [
-        { "cooldownSec": 8, "values": { "lifeSec": 9, "damage": 3, "fireIntervalSec": 0.6, "range": 140, "projectileSpeed": 420 } },
-        { "cooldownSec": 7, "values": { "lifeSec": 16, "damage": 4, "fireIntervalSec": 0.55, "range": 140, "projectileSpeed": 420 } },
-        { "cooldownSec": 6, "values": { "lifeSec": 24, "damage": 5.5, "fireIntervalSec": 0.5, "range": 150, "projectileSpeed": 420 } }
+        { "cooldownSec": 10.8, "values": { "lifeSec": 9, "damage": 4.4, "fireIntervalSec": 0.6, "range": 168, "projectileSpeed": 420 } },
+        { "cooldownSec": 9.5, "values": { "lifeSec": 16, "damage": 5.8, "fireIntervalSec": 0.55, "range": 168, "projectileSpeed": 420 } },
+        { "cooldownSec": 8.1, "values": { "lifeSec": 24, "damage": 8, "fireIntervalSec": 0.5, "range": 180, "projectileSpeed": 420 } }
       ],
       "awakening": {
         "nameKey": "skill.magiTurret.awakened",
         "descKey": "skill.magiTurret.awakened.desc",
         "requiredItem": "extraArms",
         "tags": ["physical", "tech", "ranged"],
-        "cooldownSec": 6,
+        "cooldownSec": 8.1,
         "values": {
           "lifeSec": 14,
-          "range": 170,
+          "range": 204,
           "projectileSpeed": 480,
-          "bulletDamage": 4,
+          "bulletDamage": 5.8,
           "bulletIntervalSec": 0.25,
-          "laserDamage": 13,
+          "laserDamage": 19,
           "laserIntervalSec": 1.5,
-          "shellDamage": 18,
+          "shellDamage": 26,
           "shellIntervalSec": 2.5,
-          "shellRadius": 32,
+          "shellRadius": 38,
           "shellSpeed": 160
         }
       },
@@ -73,17 +73,17 @@
       "tags": ["tech", "ranged"],
       "sources": { "mine": ["tech", "ranged"], "chainMine": ["tech", "magic", "ranged"] },
       "levels": [
-        { "cooldownSec": 8, "values": { "count": 3, "damage": 12, "radius": 22, "scatterRadius": 36, "throwSec": 0.25, "armSec": 0.4, "triggerRadius": 10, "maxMines": 15 } },
-        { "cooldownSec": 7, "values": { "count": 4, "damage": 17, "radius": 22, "scatterRadius": 38, "throwSec": 0.25, "armSec": 0.4, "triggerRadius": 10, "maxMines": 15 } },
-        { "cooldownSec": 6, "values": { "count": 5, "damage": 22, "radius": 24, "scatterRadius": 40, "throwSec": 0.25, "armSec": 0.4, "triggerRadius": 10, "maxMines": 15 } }
+        { "cooldownSec": 10.8, "values": { "count": 3, "damage": 17, "radius": 26, "scatterRadius": 43, "throwSec": 0.25, "armSec": 0.4, "triggerRadius": 12, "maxMines": 15 } },
+        { "cooldownSec": 9.5, "values": { "count": 4, "damage": 25, "radius": 26, "scatterRadius": 46, "throwSec": 0.25, "armSec": 0.4, "triggerRadius": 12, "maxMines": 15 } },
+        { "cooldownSec": 8.1, "values": { "count": 5, "damage": 32, "radius": 29, "scatterRadius": 48, "throwSec": 0.25, "armSec": 0.4, "triggerRadius": 12, "maxMines": 15 } }
       ],
       "awakening": {
         "nameKey": "skill.magiMine.awakened",
         "descKey": "skill.magiMine.awakened.desc",
         "requiredItem": "magnetResonator",
         "tags": ["tech", "magic", "ranged"],
-        "cooldownSec": 6,
-        "values": { "count": 6, "damage": 23, "radius": 26, "scatterRadius": 42, "chainArmSec": 0.2, "maxMines": 24 }
+        "cooldownSec": 8.1,
+        "values": { "count": 6, "damage": 33, "radius": 31, "scatterRadius": 50, "chainArmSec": 0.2, "maxMines": 24 }
       },
       "color": "#d9a03b",
       "sprites": {
@@ -112,17 +112,17 @@
       "tags": ["tech", "ranged", "charging"],
       "sources": { "blast": ["tech", "ranged", "charging"] },
       "levels": [
-        { "cooldownSec": 10, "values": { "chargeSec": 1.2, "interruptRefund": 0.5, "damage": 40, "radius": 36, "projectileSpeed": 200, "range": 260 } },
-        { "cooldownSec": 9, "values": { "chargeSec": 1.1, "interruptRefund": 0.5, "damage": 66, "radius": 40, "projectileSpeed": 200, "range": 260 } },
-        { "cooldownSec": 8, "values": { "chargeSec": 1.0, "interruptRefund": 0.5, "damage": 95, "radius": 44, "projectileSpeed": 200, "range": 260 } }
+        { "cooldownSec": 13.5, "values": { "chargeSec": 1.2, "interruptRefund": 0.5, "damage": 58, "radius": 43, "projectileSpeed": 200, "range": 312 } },
+        { "cooldownSec": 12.2, "values": { "chargeSec": 1.1, "interruptRefund": 0.5, "damage": 96, "radius": 48, "projectileSpeed": 200, "range": 312 } },
+        { "cooldownSec": 10.8, "values": { "chargeSec": 1, "interruptRefund": 0.5, "damage": 138, "radius": 53, "projectileSpeed": 200, "range": 312 } }
       ],
       "awakening": {
         "nameKey": "skill.antimatterCannon.awakened",
         "descKey": "skill.antimatterCannon.awakened.desc",
         "requiredItem": "antimatterSample",
         "tags": ["tech", "ranged", "charging"],
-        "cooldownSec": 8,
-        "values": { "chargeSec": 1.0, "barrels": 4, "barrelIntervalSec": 0.2, "damage": 52, "radius": 34, "projectileSpeed": 240, "range": 280, "clusterRadius": 40 }
+        "cooldownSec": 10.8,
+        "values": { "chargeSec": 1, "barrels": 4, "barrelIntervalSec": 0.2, "damage": 75, "radius": 41, "projectileSpeed": 240, "range": 336, "clusterRadius": 48 }
       },
       "color": "#a05ad9",
       "sprites": {
@@ -154,17 +154,17 @@
       "tags": ["buff"],
       "sources": {},
       "levels": [
-        { "cooldownSec": 12, "values": { "hits": 1, "maxHits": 1, "blockInvulnSec": 0.5, "fxRadius": 18 } },
-        { "cooldownSec": 10, "values": { "hits": 1, "maxHits": 1, "blockInvulnSec": 0.5, "fxRadius": 18 } },
-        { "cooldownSec": 8, "values": { "hits": 1, "maxHits": 1, "blockInvulnSec": 0.5, "fxRadius": 18 } }
+        { "cooldownSec": 16.2, "values": { "hits": 1, "maxHits": 1, "blockInvulnSec": 0.5, "fxRadius": 22 } },
+        { "cooldownSec": 13.5, "values": { "hits": 1, "maxHits": 1, "blockInvulnSec": 0.5, "fxRadius": 22 } },
+        { "cooldownSec": 10.8, "values": { "hits": 1, "maxHits": 1, "blockInvulnSec": 0.5, "fxRadius": 22 } }
       ],
       "awakening": {
         "nameKey": "skill.magiField.awakened",
         "descKey": "skill.magiField.awakened.desc",
         "requiredItem": "snellLaw",
         "tags": [],
-        "cooldownSec": 8,
-        "values": { "hits": 1, "maxHits": 1, "durationSec": 8, "refractRadius": 30, "fxRadius": 30 }
+        "cooldownSec": 10.8,
+        "values": { "hits": 1, "maxHits": 1, "durationSec": 8, "refractRadius": 36, "fxRadius": 36 }
       },
       "color": "#8aa4c8",
       "sprites": {
@@ -190,17 +190,17 @@
       "tags": ["tech", "ranged"],
       "sources": { "rail": ["tech", "ranged"], "wave": ["tech", "ranged"], "chain": ["tech", "ranged"] },
       "levels": [
-        { "cooldownSec": 6, "values": { "damage": 20, "length": 300, "halfWidth": 4 } },
-        { "cooldownSec": 5.5, "values": { "damage": 34, "length": 300, "halfWidth": 4 } },
-        { "cooldownSec": 5, "values": { "damage": 49, "length": 320, "halfWidth": 5 } }
+        { "cooldownSec": 8.1, "values": { "damage": 29, "length": 360, "halfWidth": 5 } },
+        { "cooldownSec": 7.4, "values": { "damage": 49, "length": 360, "halfWidth": 5 } },
+        { "cooldownSec": 6.8, "values": { "damage": 71, "length": 384, "halfWidth": 6 } }
       ],
       "awakening": {
         "nameKey": "skill.railgun.awakened",
         "descKey": "skill.railgun.awakened.desc",
         "requiredItem": "lk99",
         "tags": ["tech", "ranged"],
-        "cooldownSec": 5,
-        "values": { "damage": 52, "length": 340, "halfWidth": 6, "waveDamage": 13, "waveRadius": 20, "chainCount": 2, "chainRange": 90, "chainDamage": 31 }
+        "cooldownSec": 6.8,
+        "values": { "damage": 75, "length": 408, "halfWidth": 7, "waveDamage": 19, "waveRadius": 24, "chainCount": 2, "chainRange": 108, "chainDamage": 45 }
       },
       "color": "#3ba7d9",
       "sprites": {
@@ -230,9 +230,9 @@
       "tags": ["tech", "ranged"],
       "sources": { "droneShot": ["tech", "ranged"] },
       "levels": [
-        { "cooldownSec": 0, "values": { "count": 1, "damage": 3, "fireIntervalSec": 0.8, "range": 120, "projectileSpeed": 260, "orbitRadius": 18, "orbitSpeed": 2.5 } },
-        { "cooldownSec": 0, "values": { "count": 2, "damage": 3.5, "fireIntervalSec": 0.75, "range": 120, "projectileSpeed": 260, "orbitRadius": 20, "orbitSpeed": 2.5 } },
-        { "cooldownSec": 0, "values": { "count": 3, "damage": 4.5, "fireIntervalSec": 0.7, "range": 130, "projectileSpeed": 260, "orbitRadius": 22, "orbitSpeed": 2.5 } }
+        { "cooldownSec": 0, "values": { "count": 1, "damage": 4.4, "fireIntervalSec": 0.8, "range": 144, "projectileSpeed": 260, "orbitRadius": 18, "orbitSpeed": 2.5 } },
+        { "cooldownSec": 0, "values": { "count": 2, "damage": 5.1, "fireIntervalSec": 0.75, "range": 144, "projectileSpeed": 260, "orbitRadius": 20, "orbitSpeed": 2.5 } },
+        { "cooldownSec": 0, "values": { "count": 3, "damage": 6.5, "fireIntervalSec": 0.7, "range": 156, "projectileSpeed": 260, "orbitRadius": 22, "orbitSpeed": 2.5 } }
       ],
       "awakening": {
         "nameKey": "skill.combatDrone.awakened",
@@ -240,7 +240,7 @@
         "requiredItem": "hectarRam",
         "tags": ["tech", "ranged"],
         "cooldownSec": 0,
-        "values": { "count": 4, "damage": 5, "fireIntervalSec": 0.5, "range": 140, "moveSpeed": 130, "standoff": 36, "searchRange": 220 }
+        "values": { "count": 4, "damage": 7.3, "fireIntervalSec": 0.5, "range": 168, "moveSpeed": 130, "standoff": 36, "searchRange": 264 }
       },
       "color": "#5ad9c0",
       "sprites": {
@@ -265,17 +265,17 @@
       "tags": ["tech", "chance", "ranged"],
       "sources": { "subject": ["tech", "chance", "ranged"] },
       "levels": [
-        { "cooldownSec": 9, "values": { "count": 1, "lifeSec": 8, "moveSpeed": 110, "rushDamage": 6, "rushIntervalSec": 0.5, "blastDamage": 16, "blastRadius": 22, "shotDamage": 3, "shotIntervalSec": 0.6, "range": 120, "projectileSpeed": 240, "rushWeight": 1, "blastWeight": 1, "shotWeight": 1, "greatChance": 0.1 } },
-        { "cooldownSec": 8, "values": { "count": 1, "lifeSec": 9, "moveSpeed": 115, "rushDamage": 9.5, "rushIntervalSec": 0.5, "blastDamage": 24, "blastRadius": 24, "shotDamage": 5, "shotIntervalSec": 0.55, "range": 120, "projectileSpeed": 240, "rushWeight": 1, "blastWeight": 1, "shotWeight": 1, "greatChance": 0.1 } },
-        { "cooldownSec": 7, "values": { "count": 1, "lifeSec": 10, "moveSpeed": 120, "rushDamage": 14, "rushIntervalSec": 0.45, "blastDamage": 32, "blastRadius": 26, "shotDamage": 7, "shotIntervalSec": 0.5, "range": 130, "projectileSpeed": 240, "rushWeight": 1, "blastWeight": 1, "shotWeight": 1, "greatChance": 0.1 } }
+        { "cooldownSec": 12.2, "values": { "count": 1, "lifeSec": 8, "moveSpeed": 110, "rushDamage": 11, "rushIntervalSec": 0.5, "blastDamage": 29, "blastRadius": 33, "shotDamage": 5.4, "shotIntervalSec": 0.6, "range": 180, "projectileSpeed": 240, "rushWeight": 1, "blastWeight": 1, "shotWeight": 1, "greatChance": 0.1 } },
+        { "cooldownSec": 10.8, "values": { "count": 1, "lifeSec": 9, "moveSpeed": 115, "rushDamage": 17, "rushIntervalSec": 0.5, "blastDamage": 43, "blastRadius": 36, "shotDamage": 9, "shotIntervalSec": 0.55, "range": 180, "projectileSpeed": 240, "rushWeight": 1, "blastWeight": 1, "shotWeight": 1, "greatChance": 0.1 } },
+        { "cooldownSec": 9.5, "values": { "count": 1, "lifeSec": 10, "moveSpeed": 120, "rushDamage": 25, "rushIntervalSec": 0.45, "blastDamage": 58, "blastRadius": 39, "shotDamage": 13, "shotIntervalSec": 0.5, "range": 195, "projectileSpeed": 240, "rushWeight": 1, "blastWeight": 1, "shotWeight": 1, "greatChance": 0.1 } }
       ],
       "awakening": {
         "nameKey": "skill.unstableSubject.awakened",
         "descKey": "skill.unstableSubject.awakened.desc",
         "requiredItem": "helaCell",
         "tags": ["tech", "chance", "ranged"],
-        "cooldownSec": 7,
-        "values": { "count": 3, "lifeSec": 8, "moveSpeed": 140, "blastDamage": 31, "blastRadius": 26, "multiplyChance": 0.4, "maxSubjects": 12 }
+        "cooldownSec": 9.5,
+        "values": { "count": 3, "lifeSec": 8, "moveSpeed": 140, "blastDamage": 56, "blastRadius": 39, "multiplyChance": 0.4, "maxSubjects": 12 }
       },
       "color": "#9ad94a",
       "sprites": {
@@ -320,57 +320,57 @@
       },
       "levels": [
         {
-          "cooldownSec": 8,
+          "cooldownSec": 10.8,
           "values": {
-            "damage": 6,
-            "range": 115,
-            "arcDeg": 90,
+            "damage": 11,
+            "range": 173,
+            "arcDeg": 113,
             "durationSec": 5,
             "vulnerability": 0.25,
-            "burstDamage": 8,
-            "burstRadius": 30,
+            "burstDamage": 14,
+            "burstRadius": 45,
             "greatChance": 0.1,
             "greatVulnerabilityMultiplier": 2,
             "burstBullets": 6,
-            "burstBulletDamage": 4,
+            "burstBulletDamage": 7.2,
             "burstBulletSpeed": 170,
-            "burstBulletRange": 150
+            "burstBulletRange": 225
           }
         },
         {
-          "cooldownSec": 7,
+          "cooldownSec": 9.5,
           "values": {
-            "damage": 9.5,
-            "range": 125,
-            "arcDeg": 90,
+            "damage": 17,
+            "range": 188,
+            "arcDeg": 113,
             "durationSec": 5,
             "vulnerability": 0.3,
-            "burstDamage": 12,
-            "burstRadius": 32,
+            "burstDamage": 22,
+            "burstRadius": 48,
             "greatChance": 0.1,
             "greatVulnerabilityMultiplier": 2,
             "burstBullets": 9,
-            "burstBulletDamage": 6,
+            "burstBulletDamage": 11,
             "burstBulletSpeed": 170,
-            "burstBulletRange": 150
+            "burstBulletRange": 225
           }
         },
         {
-          "cooldownSec": 6,
+          "cooldownSec": 8.1,
           "values": {
-            "damage": 14,
-            "range": 135,
-            "arcDeg": 100,
+            "damage": 25,
+            "range": 203,
+            "arcDeg": 125,
             "durationSec": 6,
             "vulnerability": 0.35,
-            "burstDamage": 16,
-            "burstRadius": 34,
+            "burstDamage": 29,
+            "burstRadius": 51,
             "greatChance": 0.1,
             "greatVulnerabilityMultiplier": 2,
             "burstBullets": 12,
-            "burstBulletDamage": 8,
+            "burstBulletDamage": 14,
             "burstBulletSpeed": 170,
-            "burstBulletRange": 150
+            "burstBulletRange": 225
           }
         }
       ],
@@ -383,19 +383,19 @@
           "chance",
           "ranged"
         ],
-        "cooldownSec": 6,
+        "cooldownSec": 8.1,
         "values": {
-          "damage": 16,
-          "range": 145,
-          "arcDeg": 110,
+          "damage": 29,
+          "range": 218,
+          "arcDeg": 138,
           "rebelChance": 0.35,
           "rebelSec": 8,
-          "rebelDamage": 8,
+          "rebelDamage": 14,
           "rebelIntervalSec": 0.6,
           "dominateSec": 14,
           "dominateDamageMultiplier": 2,
           "burstBullets": 14,
-          "burstBulletDamage": 9
+          "burstBulletDamage": 16
         }
       },
       "color": "#c83a5a",
@@ -515,78 +515,78 @@
       },
       "levels": [
         {
-          "cooldownSec": 9,
+          "cooldownSec": 12.2,
           "values": {
             "results": 1,
             "greatResults": 1,
             "greatChance": 0.1,
             "greatMultiplier": 1.5,
-            "range": 260,
+            "range": 390,
             "explosionWeight": 3,
-            "explosionDamage": 20,
-            "explosionRadius": 45,
+            "explosionDamage": 36,
+            "explosionRadius": 68,
             "explosionSpeed": 220,
             "barrageWeight": 3,
             "barrageCount": 10,
-            "barrageDamage": 4,
+            "barrageDamage": 7.2,
             "barrageSpeed": 220,
             "dischargeWeight": 3,
-            "dischargeDamage": 12,
+            "dischargeDamage": 22,
             "dischargeCount": 3,
-            "dischargeRange": 126,
+            "dischargeRange": 189,
             "collapseWeight": 1,
-            "collapseDamage": 10,
-            "collapseRadius": 26
+            "collapseDamage": 18,
+            "collapseRadius": 39
           }
         },
         {
-          "cooldownSec": 8,
+          "cooldownSec": 10.8,
           "values": {
             "results": 1,
             "greatResults": 1,
             "greatChance": 0.1,
             "greatMultiplier": 1.5,
-            "range": 260,
+            "range": 390,
             "explosionWeight": 3,
-            "explosionDamage": 31,
-            "explosionRadius": 48,
+            "explosionDamage": 56,
+            "explosionRadius": 72,
             "explosionSpeed": 220,
             "barrageWeight": 3,
             "barrageCount": 12,
-            "barrageDamage": 6,
+            "barrageDamage": 11,
             "barrageSpeed": 220,
             "dischargeWeight": 3,
-            "dischargeDamage": 18,
+            "dischargeDamage": 32,
             "dischargeCount": 4,
-            "dischargeRange": 126,
+            "dischargeRange": 189,
             "collapseWeight": 1,
-            "collapseDamage": 17,
-            "collapseRadius": 29
+            "collapseDamage": 31,
+            "collapseRadius": 44
           }
         },
         {
-          "cooldownSec": 7,
+          "cooldownSec": 9.5,
           "values": {
             "results": 1,
             "greatResults": 1,
             "greatChance": 0.1,
             "greatMultiplier": 1.5,
-            "range": 286,
+            "range": 429,
             "explosionWeight": 3,
-            "explosionDamage": 43,
-            "explosionRadius": 51,
+            "explosionDamage": 77,
+            "explosionRadius": 77,
             "explosionSpeed": 220,
             "barrageWeight": 3,
             "barrageCount": 14,
-            "barrageDamage": 8,
+            "barrageDamage": 14,
             "barrageSpeed": 220,
             "dischargeWeight": 3,
-            "dischargeDamage": 24,
+            "dischargeDamage": 43,
             "dischargeCount": 5,
-            "dischargeRange": 140,
+            "dischargeRange": 210,
             "collapseWeight": 1,
-            "collapseDamage": 24,
-            "collapseRadius": 32
+            "collapseDamage": 43,
+            "collapseRadius": 48
           }
         }
       ],
@@ -599,7 +599,7 @@
           "chance",
           "ranged"
         ],
-        "cooldownSec": 7,
+        "cooldownSec": 9.5,
         "values": {
           "results": 2,
           "greatResults": 3,
@@ -700,24 +700,24 @@
         "bleed": ["physical", "bleed"]
       },
       "levels": [
-        { "cooldownSec": 5, "values": { "damage": 14, "range": 40, "arcDeg": 150 } },
-        { "cooldownSec": 4.5, "values": { "damage": 22, "range": 44, "arcDeg": 150 } },
-        { "cooldownSec": 4, "values": { "damage": 30, "range": 48, "arcDeg": 160 } }
+        { "cooldownSec": 6.8, "values": { "damage": 25, "range": 60, "detectRange": 96, "lungeSec": 0.14, "arcDeg": 188 } },
+        { "cooldownSec": 6.1, "values": { "damage": 40, "range": 66, "detectRange": 106, "lungeSec": 0.14, "arcDeg": 188 } },
+        { "cooldownSec": 5.4, "values": { "damage": 54, "range": 72, "detectRange": 115, "lungeSec": 0.14, "arcDeg": 200 } }
       ],
       "awakening": {
         "nameKey": "skill.purifyingWings.awakened",
         "descKey": "skill.purifyingWings.awakened.desc",
         "requiredItem": "warDiary",
         "tags": ["physical", "melee", "bleed"],
-        "cooldownSec": 4,
+        "cooldownSec": 5.4,
         "values": {
-          "hit1Damage": 21,
-          "hit2Damage": 21,
-          "hit3Damage": 36,
-          "range": 52,
-          "arcDeg": 180,
+          "hit1Damage": 38,
+          "hit2Damage": 38,
+          "hit3Damage": 65,
+          "range": 78, "detectRange": 125, "lungeSec": 0.14,
+          "arcDeg": 220,
           "hitDelaySec": 0.18,
-          "bleedDamage": 4,
+          "bleedDamage": 7.2,
           "bleedStacksPerHit": 1
         }
       },
@@ -757,48 +757,39 @@
       },
       "levels": [
         {
-          "cooldownSec": 14,
+          "cooldownSec": 18.9,
           "values": {
-            "range": 40,
+            "range": 60,
             "durationSec": 6,
             "moveSpeed": 0.2,
             "damageReduction": 0.2,
-            "punchDamage": 8,
+            "punchDamage": 14,
             "punchIntervalSec": 0.5,
-            "fxRadius": 9,
-            "laserDamage": 30,
-            "laserLength": 260,
-            "laserHalfWidth": 9
+            "fxRadius": 14
           }
         },
         {
-          "cooldownSec": 13,
+          "cooldownSec": 17.6,
           "values": {
-            "range": 42,
+            "range": 63,
             "durationSec": 7,
             "moveSpeed": 0.25,
             "damageReduction": 0.25,
-            "punchDamage": 12,
+            "punchDamage": 22,
             "punchIntervalSec": 0.45,
-            "fxRadius": 9,
-            "laserDamage": 45,
-            "laserLength": 260,
-            "laserHalfWidth": 9
+            "fxRadius": 14
           }
         },
         {
-          "cooldownSec": 12,
+          "cooldownSec": 16.2,
           "values": {
-            "range": 44,
+            "range": 66,
             "durationSec": 8,
             "moveSpeed": 0.3,
             "damageReduction": 0.3,
-            "punchDamage": 16,
+            "punchDamage": 29,
             "punchIntervalSec": 0.4,
-            "fxRadius": 9,
-            "laserDamage": 60,
-            "laserLength": 260,
-            "laserHalfWidth": 9
+            "fxRadius": 14
           }
         }
       ],
@@ -809,18 +800,18 @@
         "tags": [
           "buff"
         ],
-        "cooldownSec": 12,
+        "cooldownSec": 16.2,
         "values": {
           "hpCost": 0.15,
           "durationSec": 8,
           "moveSpeed": 0.35,
           "damageReduction": 0.3,
-          "punchDamage": 21,
-          "blastRadius": 24,
-          "fxRadius": 11,
-          "laserDamage": 90,
-          "laserLength": 300,
-          "laserHalfWidth": 12
+          "punchDamage": 38,
+          "blastRadius": 36,
+          "fxRadius": 17,
+          "laserDamage": 162,
+          "laserLength": 450,
+          "laserHalfWidth": 18
         }
       },
       "color": "#d9783b",

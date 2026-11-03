@@ -73,6 +73,8 @@ export interface SkillSlotView {
   gauge: number;
   /** 지금 누르면 발동하는지 (근접: 사거리 안 적, 궁극기: 게이지) */
   usable: boolean;
+  /** 다시 누르면 쓸 추가 스킬이 준비됨 (MK 각성 레이저 등): 쿨타임 동안 노란 테두리가 돈다 */
+  followUp?: boolean;
   color: string;
   /** 아이콘 그림 키 (그림이 있으면 짧은 이름 대신) */
   iconKey: string | null;

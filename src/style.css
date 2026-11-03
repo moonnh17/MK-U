@@ -204,6 +204,32 @@ body {
   box-shadow: 0 0 10px #ff9a3c;
 }
 
+/* 추가 스킬 준비(MK 각성 레이저 등): 노란 테두리가 버튼 둘레를 돈다 */
+.tbtn.tskill.followup::after {
+  content: '';
+  position: absolute;
+  /* 버튼이 overflow: hidden이라 안쪽 가장자리에 그린다 */
+  inset: 0;
+  border-radius: 50%;
+  padding: 3px;
+  background: conic-gradient(#ffd23f 0 22%, transparent 22% 50%, #ffd23f 50% 72%, transparent 72%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: tskill-spin 0.9s linear infinite;
+  pointer-events: none;
+}
+@keyframes tskill-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tbtn.tskill.followup::after {
+    animation: none;
+  }
+}
+
 /* 카드 선택창 · 인벤토리 */
 #card-window,
 #inventory-window,

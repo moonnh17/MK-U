@@ -16,6 +16,7 @@ import { applyBleed, canAutoCast, skillTags } from '../../systems/tags';
 import type { BleedRule, SkillDef, SpaceRule, UltimateDef } from '../../types/data';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
+import { shake } from '../../entities/juice';
 
 export class SkillRuntime {
   /** 피해를 준 스킬 id별 SkillHost (학파 궁극기 게이지가 출처를 본다) */
@@ -242,7 +243,8 @@ export class SkillRuntime {
   /** 근접 스킬은 사거리 안에 적이 있어야 발동한다 */
   skillUsable(def: SkillDef, awakened: boolean, values: Record<string, number>): boolean {
     const targets = this.run.enemies.filter((e) => !e.dead).map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius }));
-    return canAutoCast(skillTags(def, awakened), this.area(values.range ?? 0), this.run.player, targets);
+    // 근접 스킬은 실제 피해 범위보다 넓은 인식 범위(detectRange) 안에 적이 있으면 쓸 수 있다
+    return canAutoCast(skillTags(def, awakened), this.area(values.detectRange ?? values.range ?? 0), this.run.player, targets);
   }
 
   castSlot(i: number): void {
@@ -266,6 +268,9 @@ export class SkillRuntime {
     if (impl.cast(this.hostFor(id), { def, owned, values: sv.values })) {
       p.cooldowns = { ...p.cooldowns, [id]: this.cooldownOf(sv.cooldownSec) };
       sfx('skill');
+      // 스킬을 쓸 때마다 스킬 색 파동과 흔들림
+      this.run.juice.colorBurst({ x: this.run.player.x, y: this.run.player.y }, def.color, this.run.ctx.data.juice.skillCast);
+      shake(this.run, 'light');
     }
   }
 
@@ -316,6 +321,7 @@ export class SkillRuntime {
         cooldownTotal: this.cooldownOf(sv.cooldownSec),
         gauge: 0,
         usable: !active || this.skillUsable(def, owned.awakened, sv.values),
+        followUp: active && (skillImpl(id)?.followUpReady?.(this.hostFor(id)) ?? false),
         color: def.color,
         iconKey: artKeys.skillIcon(id),
       };

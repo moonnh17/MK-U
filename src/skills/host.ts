@@ -119,6 +119,8 @@ export interface SkillImpl {
   cast(host: SkillHost, s: SkillCast): boolean;
   /** 이미 켜진 효과가 있을 때 다시 누름 (쿨타임과 상관없이 먼저 묻는다). 처리했으면 true */
   recast?(host: SkillHost, s: SkillCast): boolean;
+  /** 다시 누르면 쓸 추가 스킬이 지금 준비돼 있는지 (스킬 칸에 노란 테두리가 돈다) */
+  followUpReady?(host: SkillHost): boolean;
 }
 
 /** 패시브: 장착되면 한 번 불려 상시 오브젝트(드론 등)를 깐다. 해제·레벨 변경 시 그 오브젝트를 치우고 다시 부른다 */

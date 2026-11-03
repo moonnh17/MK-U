@@ -321,10 +321,10 @@ describe('조우 칸 수', () => {
 describe('스킬 피해', () => {
   it('레벨이 오를수록, 각성하면 더 세다', () => {
     const sk = D.skills.skills.find((x) => x.id === 'railgun')!;
-    expect(sk.levels[1]!.values.damage).toBe(34);
-    expect(sk.levels[2]!.values.damage).toBe(49);
-    expect(sk.awakening.values.damage).toBe(52);
-    expect(sk.levels[0]!.values.damage).toBe(20);
+    const dmg = [0, 1, 2].map((i) => sk.levels[i]!.values.damage!);
+    expect(dmg[0]).toBeLessThan(dmg[1]!);
+    expect(dmg[1]).toBeLessThan(dmg[2]!);
+    expect(sk.awakening.values.damage).toBeGreaterThan(dmg[2]!);
     expect(D.skills.skills.find((x) => x.id === 'mkPrototype')!.levels[2]!.values.damageReduction).toBe(0.3);
   });
 });

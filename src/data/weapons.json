@@ -96,28 +96,28 @@
     },
     {
       "id": "dagger", "nameKey": "weapon.dagger", "category": "blade", "fxColor": "#9af0d0", "critChance": 0.3, "grade": "common", "classes": ["slash"], "tags": ["physical", "melee"],
-      "baseDamage": 4, "fireIntervalSec": 0.16, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 70, "radius": 28 },
-      "projectileSpeed": 0, "range": 28, "cutsProjectiles": true, "droppable": true,
+      "baseDamage": 4, "fireIntervalSec": 0.16, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 70, "radius": 35 },
+      "projectileSpeed": 0, "range": 35, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_dagger", "color": "#d0d8e8", "size": 6
     },
     {
       "id": "greatsword", "nameKey": "weapon.greatsword", "category": "blade", "fxColor": "#8ab0ff", "critChance": 0.3, "grade": "rare", "classes": ["slash"], "tags": ["physical", "melee", "charging"],
-      "baseDamage": 12, "fireIntervalSec": 0.7, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 220, "radius": 50 },
+      "baseDamage": 12, "fireIntervalSec": 0.7, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 220, "radius": 63 },
       "charge": { "maxSec": 1.0, "damageMul": 2.5, "radiusMul": 1.4 },
-      "projectileSpeed": 0, "range": 50, "cutsProjectiles": true, "droppable": true,
+      "projectileSpeed": 0, "range": 63, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_greatsword", "color": "#b0b8d0", "size": 12
     },
     {
       "id": "spear", "nameKey": "weapon.spear", "category": "blade", "fxColor": "#ffe08a", "grade": "rare", "classes": ["thrust"], "tags": ["physical", "melee"],
-      "baseDamage": 9, "fireIntervalSec": 0.45, "energyCost": 0, "pattern": { "kind": "line", "length": 73, "width": 8 },
-      "projectileSpeed": 0, "range": 73, "cutsProjectiles": false, "droppable": true,
+      "baseDamage": 9, "fireIntervalSec": 0.45, "energyCost": 0, "pattern": { "kind": "line", "length": 91, "width": 8 },
+      "projectileSpeed": 0, "range": 91, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_spear", "color": "#c8b07a", "size": 12
     },
     {
       "id": "hammer", "nameKey": "weapon.hammer", "category": "blade", "fxColor": "#ffb060", "grade": "rare", "classes": ["smash"], "tags": ["physical", "melee"],
-      "baseDamage": 14, "fireIntervalSec": 0.8, "energyCost": 0, "pattern": { "kind": "smash", "reach": 25, "radius": 31 },
+      "baseDamage": 14, "fireIntervalSec": 0.8, "energyCost": 0, "pattern": { "kind": "smash", "reach": 31, "radius": 39 },
       "knockback": { "distance": 30, "sec": 0.15 },
-      "projectileSpeed": 0, "range": 56, "cutsProjectiles": false, "droppable": true,
+      "projectileSpeed": 0, "range": 70, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_hammer", "color": "#8a8a9a", "size": 10
     },
     {
@@ -129,10 +129,10 @@
     },
     {
       "id": "rasalgethiClub", "flavor": "codex.itemFlavor.rasalgethiClub", "nameKey": "weapon.rasalgethiClub", "category": "blade", "fxColor": "#ff8a4a", "grade": "unique", "classes": ["smash"], "tags": ["physical", "melee"],
-      "baseDamage": 16, "fireIntervalSec": 0.75, "energyCost": 0, "pattern": { "kind": "smash", "reach": 25, "radius": 34 },
+      "baseDamage": 16, "fireIntervalSec": 0.75, "energyCost": 0, "pattern": { "kind": "smash", "reach": 31, "radius": 43 },
       "knockback": { "distance": 34, "sec": 0.15 },
       "signature": { "every": 3, "kind": "bigSmash", "nameKey": "weapon.sig.bigSmash", "damageMul": 3, "radiusMul": 1.6 },
-      "projectileSpeed": 0, "range": 59, "cutsProjectiles": false, "droppable": false,
+      "projectileSpeed": 0, "range": 74, "cutsProjectiles": false, "droppable": false,
       "spriteKey": "weapon_rasalgethi_club", "color": "#b0583a", "size": 11
     },
     {
@@ -144,40 +144,40 @@
     },
     {
       "id": "rasalhagueSword", "nameKey": "weapon.rasalhagueSword", "category": "blade", "fxColor": "#ffe85a", "critChance": 0.3, "grade": "unique", "classes": ["slash"], "tags": ["physical", "melee"],
-      "baseDamage": 39, "fireIntervalSec": 1.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 150, "radius": 45 },
+      "baseDamage": 39, "fireIntervalSec": 1.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 150, "radius": 56 },
       "lunge": { "distance": 70, "sec": 0.12 },
       "signature": { "every": 3, "kind": "space", "nameKey": "weapon.sig.rasalhagueSword" },
-      "projectileSpeed": 0, "range": 45, "cutsProjectiles": true, "droppable": false,
+      "projectileSpeed": 0, "range": 56, "cutsProjectiles": true, "droppable": false,
       "spriteKey": "weapon_rasalhague_sword", "color": "#e8d24a", "size": 11
     },
     {
       "id": "brokenBlade", "flavor": "codex.itemFlavor.brokenBlade", "nameKey": "weapon.brokenBlade", "category": "blade", "fxColor": "#c8ccd8", "critChance": 0.3, "grade": "common", "classes": ["slash"], "tags": ["physical", "melee"],
-      "baseDamage": 5, "fireIntervalSec": 0.22, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 90, "radius": 22 },
-      "projectileSpeed": 0, "range": 22, "cutsProjectiles": true, "droppable": true,
+      "baseDamage": 5, "fireIntervalSec": 0.22, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 90, "radius": 28 },
+      "projectileSpeed": 0, "range": 28, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_broken_blade", "color": "#b8bcc8", "size": 6
     },
     {
       "id": "hanabi", "flavor": "codex.itemFlavor.hanabi", "nameKey": "weapon.hanabi", "category": "blade", "fxColor": "#ff9a4a", "critChance": 0.3, "grade": "legendary", "classes": ["slash"], "tags": ["physical", "melee"],
-      "baseDamage": 14, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 140, "radius": 42 },
+      "baseDamage": 14, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 140, "radius": 53 },
       "equipBonus": { "jobDamage": { "barbarian": 0.3 } },
       "signature": { "every": 3, "kind": "bigSmash", "damageMul": 2, "radiusMul": 1.3, "nameKey": "weapon.sig.bigSmash" },
-      "projectileSpeed": 0, "range": 42, "cutsProjectiles": true, "droppable": true,
+      "projectileSpeed": 0, "range": 53, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_hanabi", "color": "#ffb04a", "size": 11
     },
     {
       "id": "alGulBlade", "flavor": "codex.itemFlavor.alGulBlade", "nameKey": "weapon.alGulBlade", "category": "blade", "fxColor": "#d8f0ff", "grade": "unique", "classes": ["slash"], "tags": ["physical", "melee"],
-      "baseDamage": 18, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 120, "radius": 42 },
+      "baseDamage": 18, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 120, "radius": 53 },
       "critChance": 0.3,
       "equipBonus": { "bossDamage": 0.2 },
       "signature": { "every": 3, "kind": "bigSmash", "damageMul": 3, "radiusMul": 2.3, "nameKey": "weapon.sig.alGulBlade", "burst": { "count": 8, "damageMul": 1, "speed": 260, "range": 120, "color": "#d8f0ff" } },
-      "projectileSpeed": 0, "range": 42, "cutsProjectiles": true, "droppable": false,
+      "projectileSpeed": 0, "range": 53, "cutsProjectiles": true, "droppable": false,
       "spriteKey": "weapon_al_gul_blade", "color": "#c8ccd8", "size": 11
     },
     {
       "id": "gihwanArm", "flavor": "codex.itemFlavor.gihwanArm", "nameKey": "weapon.gihwanArm", "category": "blade", "fxColor": "#7ac8ff", "grade": "unique", "classes": ["slash"], "tags": ["physical", "melee"], "bossId": "electricRing",
-      "baseDamage": 11, "fireIntervalSec": 0.45, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 120, "radius": 39 },
+      "baseDamage": 11, "fireIntervalSec": 0.45, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 120, "radius": 49 },
       "signature": { "every": 3, "kind": "chainBolt", "damageMul": 1.5, "jumps": 5, "range": 140, "color": "#7ac8ff", "anyDistance": true, "nameKey": "weapon.sig.gihwanArm" },
-      "projectileSpeed": 0, "range": 39, "cutsProjectiles": true, "droppable": false,
+      "projectileSpeed": 0, "range": 49, "cutsProjectiles": true, "droppable": false,
       "spriteKey": "weapon_gihwan_arm", "color": "#3a7bff", "size": 11
     },
     {
@@ -204,18 +204,18 @@
     },
     {
       "id": "nekkarCleaver", "fxColor": "#e8343a", "nameKey": "weapon.nekkarCleaver", "abilityNameKey": "weapon.ability.nekkarCleaver", "category": "blade", "grade": "unique", "classes": ["slash"], "tags": ["physical", "melee", "bleed"],
-      "baseDamage": 5, "fireIntervalSec": 0.2, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 100, "radius": 34 },
+      "baseDamage": 5, "fireIntervalSec": 0.2, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 100, "radius": 43 },
       "bleed": { "base": 2.5, "stacks": 1 },
-      "projectileSpeed": 0, "range": 34, "cutsProjectiles": true, "droppable": true,
+      "projectileSpeed": 0, "range": 43, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_nekkar_cleaver", "color": "#a03a3a", "size": 9
     },
     {
       "id": "argoBanner", "fxColor": "#ffd8c8", "nameKey": "weapon.argoBanner", "abilityNameKey": "weapon.ability.argoBanner", "category": "blade", "grade": "unique", "classes": ["gust"], "tags": ["physical", "melee"],
-      "baseDamage": 9, "fireIntervalSec": 2.4, "energyCost": 0, "pattern": { "kind": "gust", "radius": 95 },
+      "baseDamage": 9, "fireIntervalSec": 2.4, "energyCost": 0, "pattern": { "kind": "gust", "radius": 119 },
       "knockback": { "distance": 80, "sec": 0.28 },
       "selfBuff": { "sec": 6, "damage": 0.4, "color": "#ff4a4a" },
       "upright": true,
-      "projectileSpeed": 0, "range": 95, "cutsProjectiles": false, "droppable": true,
+      "projectileSpeed": 0, "range": 119, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_argo_banner", "color": "#d02a3a", "size": 14
     },
     {
@@ -260,10 +260,10 @@
     },
     {
       "id": "magiFang", "fxColor": "#ff2a4a", "nameKey": "weapon.magiFang", "abilityNameKey": "weapon.ability.magiFang", "category": "blade", "critChance": 0.3, "grade": "legendary", "classes": ["slash"], "tags": ["physical", "melee"],
-      "baseDamage": 12, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 110, "radius": 40 },
+      "baseDamage": 12, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 110, "radius": 50 },
       "meleeShot": { "damageMul": 0.7, "speed": 300, "range": 200, "energyCost": 1, "color": "#ff2a4a" },
       "attackParticles": { "color": "#ff2a4a" },
-      "projectileSpeed": 0, "range": 40, "cutsProjectiles": true, "droppable": true,
+      "projectileSpeed": 0, "range": 50, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_magi_fang", "color": "#c0202a", "size": 11
     },
     {
@@ -304,9 +304,9 @@
     {
       "id": "debtorArm", "nameKey": "weapon.debtorArm", "category": "blade", "fxColor": "#ffc83a", "grade": "rare", "classes": ["slash"], "tags": ["physical", "melee"],
       "abilityNameKey": "weapon.ability.debtorArm",
-      "baseDamage": 32, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 100, "radius": 38 },
+      "baseDamage": 32, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 100, "radius": 48 },
       "debt": { "coins": 10, "moveSpeed": 0.2, "color": "#4aff7a" },
-      "projectileSpeed": 0, "range": 38, "cutsProjectiles": true, "droppable": true,
+      "projectileSpeed": 0, "range": 48, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_debtor_arm", "color": "#e0b030", "size": 10
     },
     {
@@ -323,8 +323,8 @@
     },
     {
       "id": "fist", "nameKey": "weapon.fist", "category": "blade", "fxColor": "#ffe0c0", "grade": "common", "classes": ["slash"], "tags": ["physical", "melee"],
-      "baseDamage": 3, "fireIntervalSec": 0.35, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 90, "radius": 25 },
-      "projectileSpeed": 0, "range": 25, "cutsProjectiles": false, "droppable": false,
+      "baseDamage": 3, "fireIntervalSec": 0.35, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 90, "radius": 31 },
+      "projectileSpeed": 0, "range": 31, "cutsProjectiles": false, "droppable": false,
       "spriteKey": "weapon_fist", "color": "#e8c8a0", "size": 6
     }
   ]

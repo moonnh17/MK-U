@@ -89,7 +89,7 @@
   "skill.purifyingWings.hit3": "창세",
   "skill.mkPrototype": "MK : 프로토타입",
   "skill.mkPrototype.short": "MK",
-  "skill.mkPrototype.desc": "{durationSec}초 동안 슈트를 장착한다. 이동속도·받는 피해 감소, 가까운 적을 자동으로 펀치(피해 {punchDamage}). 입은 동안 한 번 더 누르면 강력한 레이저({laserDamage})",
+  "skill.mkPrototype.desc": "{durationSec}초 동안 슈트를 장착한다. 이동속도·받는 피해 감소, 가까운 적을 자동으로 펀치(피해 {punchDamage})",
   "skill.mkPrototype.awakened": "MK : 오버드라이브",
   "skill.mkPrototype.awakened.desc": "현재 체력 일부를 소모해 출력을 해제한다. 폭발 펀치(피해 {punchDamage}). 입은 동안 한 번 더 누르면 강력한 레이저({laserDamage})",
   "skill.reductionist": "환원주의자",

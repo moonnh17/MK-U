@@ -2,8 +2,8 @@
  * MK : 프로토타입 (아크로, 버프). 적이 없어도 쓸 수 있다. 입을 때 변신하고, 시간이 다 되면 해제 동작 뒤 벗는다.
  * 지속시간(버프 태그) 동안 슈트를 입는다: 이동속도 증가, 받는 피해 감소,
  * 사거리 안 가장 가까운 적을 자동 펀치(물리·근접).
- * 입은 동안 스킬을 한 번 더 누르면 조준 방향으로 강력한 레이저를 쏜다(슈트마다 한 번, 기술·원거리).
  * 각성 'MK : 오버드라이브': 쓸 때 현재 체력 일부를 소모(죽지 않음). 펀치가 주변까지 터지는 폭발 펀치가 된다.
+ * 각성 슈트만: 입은 동안 스킬을 한 번 더 누르면 조준 방향으로 강력한 레이저를 쏜다(슈트마다 한 번, 기술·원거리).
  */
 import type Phaser from 'phaser';
 import type { Enemy } from '../entities/enemy';
@@ -145,9 +145,14 @@ class Suit implements SkillObject {
     return true;
   }
 
-  /** 입은 동안 다시 누름: 조준 방향 레이저 (슈트마다 한 번). 쐈으면 true */
+  /** 지금 다시 누르면 레이저를 쏠 수 있는지 (각성 슈트, 아직 안 쐈고, 벗는 중이 아님) */
+  laserReady(): boolean {
+    return this.s.owned.awakened && !this.lasered && this.releasing <= 0;
+  }
+
+  /** 입은 동안 다시 누름: 조준 방향 레이저 (각성 슈트마다 한 번). 쐈으면 true */
   laser(host: SkillHost): boolean {
-    if (this.lasered || this.releasing > 0) return false;
+    if (!this.laserReady()) return false;
     this.lasered = true;
     const v = this.s.values;
     const origin = { x: this.body.x, y: this.body.y };
@@ -215,6 +220,9 @@ export const mkPrototype: SkillImpl = {
   recast(host) {
     const suit = host.objects().find((o): o is Suit => o instanceof Suit);
     return suit ? suit.laser(host) : false;
+  },
+  followUpReady(host) {
+    return host.objects().some((o) => o instanceof Suit && o.laserReady());
   },
   cast(host, s) {
     const v = s.values;

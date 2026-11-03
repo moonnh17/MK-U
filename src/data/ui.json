@@ -57,7 +57,9 @@
       "emptyColor": "#4a5562",
       "cooldownColor": "#000000",
       "cooldownAlpha": 0.65,
-      "ultimateReadyColor": "#ff9a3c"
+      "ultimateReadyColor": "#ff9a3c",
+      "followUpColor": "#ffd23f",
+      "followUpSpinSec": 0.9
     },
     "weapons": {
       "mainWidth": 52,

@@ -835,6 +835,9 @@ export interface HudLayoutData {
     cooldownAlpha: number;
     /** 궁극기 게이지가 다 찼을 때 테두리 */
     ultimateReadyColor: string;
+    /** 추가 스킬(다시 누르기)이 준비된 칸: 노란 테두리 조각이 이 주기로 한 바퀴 돈다 */
+    followUpColor: string;
+    followUpSpinSec: number;
   };
   weapons: { mainWidth: number; mainHeight: number; subWidth: number; subHeight: number; gap: number };
 }
@@ -1433,6 +1436,8 @@ export interface JuiceData {
   bulletRim: { player: string; enemy: string; strength: number; distance: number };
   /** 스킬 빛 입자 (실험 병기) */
   skillBurst: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number };
+  /** 스킬을 쓸 때 플레이어 둘레 파동 */
+  skillCast: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number };
   shieldSpawn: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; growSec: number; startScale: number; stacks: { bodyAlpha: number }[] };
   bossPhase: { particles: [number, number]; particleSpeed: [number, number]; particleLifeSec: number; particleSize: number; ringRadiusPx: number; flashMs: number; zoom: number; zoomSec: number; bannerSec: number; bannerSize: number };
   /** 보스 처치: slowSec 동안 slowScale 배속에서 점점 원래대로, 연쇄 폭발 */

@@ -207,7 +207,7 @@ export class Hud {
 
     this.updateBuffs(s);
     this.minimap.render(s.map, s.visited, s.currentRoomId, this.ctx.debugFlags.revealMap, s.encounters);
-    if (this.pcOnly.visible) this.updateSkillbar(s);
+    if (this.pcOnly.visible) this.updateSkillbar(s, now);
   }
 
   /**
@@ -258,7 +258,7 @@ export class Hud {
     return row;
   }
 
-  private updateSkillbar(s: RunSession): void {
+  private updateSkillbar(s: RunSession, now: number): void {
     const sb = this.ctx.data.ui.hud.skillbar;
     const size = sb.slotSize;
     const ultIndex = SKILLBAR.findIndex((x) => x.action === 'ultimate');
@@ -301,6 +301,14 @@ export class Hud {
         ui.cd.slice(size / 2, size / 2, size / 2 - 1, start, start + frac * Math.PI * 2, false);
         ui.cd.fillPath();
         ui.cdText.setText(String(Math.ceil(v.cooldownLeft)));
+      }
+      // 추가 스킬이 준비됨: 노란 테두리 조각이 칸 둘레를 돈다 (다시 누르면 쓸 수 있다)
+      if (v.followUp) {
+        const a = ((now / 1000) / sb.followUpSpinSec) * Math.PI * 2;
+        const r = size / 2 + 1;
+        ui.cd.lineStyle(2, hexColor(sb.followUpColor), 1);
+        ui.cd.beginPath().arc(size / 2, size / 2, r, a, a + Math.PI * 0.6, false).strokePath();
+        ui.cd.beginPath().arc(size / 2, size / 2, r, a + Math.PI, a + Math.PI * 1.6, false).strokePath();
       }
       ui.container.setAlpha(filled && !v.usable && i !== ultIndex ? sb.disabledAlpha : 1);
     });
