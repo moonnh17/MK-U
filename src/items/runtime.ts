@@ -13,7 +13,8 @@ import type { SkillHost, SkillObject } from '../skills/host';
 import { nearestEnemy } from '../skills/host';
 import { skillImpl } from '../skills/registry';
 import type { Rect } from '../entities/hazard';
-import { activeEffects, dodgeValues, itemTotals, pickHeal, roarValues, shieldValues, type ItemTotals } from '../systems/items';
+import { hpStance } from '../systems/vitals';
+import { activeEffects, dodgeValues, healReady, itemTotals, pickHeal, roarValues, shieldValues, type ItemTotals } from '../systems/items';
 import { bounceStep } from '../systems/motion';
 import { findSkill, skillValues } from '../systems/skills';
 import type { ItemEffect, TagId } from '../types/data';
@@ -37,10 +38,17 @@ export interface ItemState {
   empower: number;
   /** 흡수 중 남은 시간 (식광의 핵) */
   absorbLeft: number;
+  /** 회복을 쓴 횟수 (한우촌의 생등심). 예전 저장에는 없다 */
+  healCount?: number;
 }
 
 export function newItemState(): ItemState {
-  return { cd: 0, used: false, stacks: 0, kills: 0, coinAcc: 0, timer: 0, roarLeft: 0, empower: 0, absorbLeft: 0 };
+  return { cd: 0, used: false, stacks: 0, kills: 0, coinAcc: 0, timer: 0, roarLeft: 0, empower: 0, absorbLeft: 0, healCount: 0 };
+}
+
+/** 회복을 쓴 횟수 (healCount가 없던 예전 저장은 used로) */
+function healCount(s: ItemState): number {
+  return s.healCount ?? (s.used ? 1 : 0);
 }
 
 export interface ItemHost {
@@ -454,14 +462,16 @@ export class ItemRuntime {
     const p = this.host.player();
     const cands = this.each('lowHpHeal').map(({ id, e }) => {
       const s = this.state(id);
-      return { itemId: id, threshold: e.threshold, healTo: e.healTo, priority: e.priority, ready: e.cooldownSec > 0 ? s.cd <= 0 : !s.used };
+      return { itemId: id, threshold: e.threshold, healTo: e.healTo, priority: e.priority, ready: healReady(e, s.cd, healCount(s)) };
     });
     const pick = pickHeal(cands, p.hp / p.maxHp);
     if (!pick) return;
     const e = this.each('lowHpHeal').find((x) => x.id === pick.itemId)!.e;
     const s = this.state(pick.itemId);
     if (e.cooldownSec > 0) s.cd = e.cooldownSec;
-    else s.used = true;
+    else s.healCount = healCount(s) + 1;
+    // used: 한 번이라도 썼는지 (스튜 이후 피해 증가)
+    s.used = true;
     // 'healTo까지' — 추가가 아니라 그 비율까지 채운다
     p.hp = Math.max(p.hp, p.maxHp * pick.healTo);
     this.host.toast(this.host.ctx.t('item.healed', { item: this.host.ctx.t(`item.${pick.itemId}`) }));
@@ -511,9 +521,35 @@ export class ItemRuntime {
     }
   }
 
-  /** HUD '현재 버프': 임시 함성 */
+  /** HUD '현재 버프': 회복 아이템(이후 피해·쿨타임·남은 횟수), 태세, 유체화, 임시 함성 */
   buffs(): BuffView[] {
     const out: BuffView[] = [];
+    const t = (key: string) => this.host.ctx.t(key);
+    const color = (id: string) => this.host.ctx.data.items.items.find((x) => x.id === id)?.color ?? '#888888';
+    for (const { id, e } of this.each('lowHpHeal')) {
+      const s = this.state(id);
+      const base = { id: `item.${id}`, label: t(`item.${id}.buff`), color: color(id) };
+      if (e.afterDamage) {
+        if (s.used) out.push(base);
+      } else if (e.cooldownSec > 0) {
+        if (s.cd > 0) out.push({ ...base, cdSec: s.cd });
+      } else if ((e.uses ?? 1) - healCount(s) > 0) {
+        out.push({ ...base, count: (e.uses ?? 1) - healCount(s) });
+      }
+    }
+    for (const { id, e } of this.each('hpStance')) {
+      const p = this.host.player();
+      const up = hpStance(p.hp, p.maxHp, e).damage > 0;
+      out.push({ id: `item.${id}`, label: t(up ? `item.${id}.buff.attack` : `item.${id}.buff.defense`), color: color(id) });
+    }
+    for (const { id, e } of this.each('hurtInvuln')) {
+      const s = this.state(id);
+      // 발동하면 cd가 cooldownSec에서 줄기 시작하므로 처음 sec초가 무적 시간
+      const left = s.cd - (e.cooldownSec - e.sec);
+      const base = { id: `item.${id}`, label: t(`item.${id}.buff`), color: color(id) };
+      if (left > 0) out.push({ ...base, leftSec: left, totalSec: e.sec });
+      else if (s.cd > 0) out.push({ ...base, cdSec: s.cd });
+    }
     for (const { id, e } of this.each('tempRoar')) {
       const s = this.state(id);
       if (s.roarLeft > 0) out.push({ id: `item.${id}`, label: this.host.ctx.t('item.roar'), color: '#6a9a3a', leftSec: s.roarLeft, totalSec: this.host.buffDuration(e.durationSec) });

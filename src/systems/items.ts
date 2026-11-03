@@ -215,6 +215,11 @@ export interface HealCandidate {
   ready: boolean;
 }
 
+/** 회복 아이템을 지금 쓸 수 있는지: 재사용 대기가 있으면 대기로, 없으면 런당 횟수(uses, 기본 1)로 */
+export function healReady(e: { cooldownSec: number; uses?: number }, cd: number, usedCount: number): boolean {
+  return e.cooldownSec > 0 ? cd <= 0 : usedCount < (e.uses ?? 1);
+}
+
 /** 회복 우선순위: 조건을 채운 것 중 우선순위가 가장 높은(숫자가 작은) 하나만 */
 export function pickHeal(cands: readonly HealCandidate[], hpRatio: number): HealCandidate | null {
   return [...cands].filter((c) => c.ready && hpRatio <= c.threshold).sort((a, b) => a.priority - b.priority)[0] ?? null;

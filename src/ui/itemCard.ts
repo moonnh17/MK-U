@@ -33,6 +33,7 @@ export function itemDescParams(def: ItemDef, groups: GroupMultipliersData): Reco
     if (typeof e.threshold === 'number') out[`th${i}`] = num(e.threshold * 100);
     if (typeof e.healTo === 'number') out[`to${i}`] = num(e.healTo * 100);
     if (typeof e.afterDamage === 'number') out[`a${i}`] = num(e.afterDamage * 100);
+    if (typeof e.uses === 'number') out[`u${i}`] = num(e.uses);
     if (typeof e.durationSec === 'number') out[`dur${i}`] = num(e.durationSec);
     if (typeof e.absorbSec === 'number') out[`dur${i}`] = num(e.absorbSec);
     if (typeof e.perCoins === 'number') out[`per${i}`] = num(e.perCoins);

@@ -6,6 +6,7 @@
  */
 import { applyArtIcon } from './artIcon';
 import type { GameContext } from '../core/context';
+import { buffText } from '../core/session';
 import { bus } from '../core/events';
 import { conversionLines } from './cutscenePages';
 import { artKeys } from '../systems/art';
@@ -170,7 +171,7 @@ export class InventoryWindow {
       const fist = d.weapons.weapons.find((w) => w.id === d.weapons.fistWeapon)!;
       el.appendChild(this.line('iw-hint', t('inventory.emptyHands', { fist: t(fist.nameKey) })));
     }
-    el.append(this.line('iw-sub', t('inventory.buffs')), this.line('iw-desc', s.buffs.length ? s.buffs.map((b) => `${b.label} ${Math.ceil(b.leftSec)}`).join(' · ') : t('inventory.noBuffs')));
+    el.append(this.line('iw-sub', t('inventory.buffs')), this.line('iw-desc', s.buffs.length ? s.buffs.map((b) => buffText(b, t)).join(' · ') : t('inventory.noBuffs')));
     return el;
   }
 

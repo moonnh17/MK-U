@@ -4,7 +4,7 @@
  */
 import type { SpriteRef } from '../types/data';
 import { playFx } from './skillFx';
-import type { PassiveImpl, SkillCast, SkillHost, SkillObject } from './host';
+import type { BuffView, PassiveImpl, SkillCast, SkillHost, SkillObject } from './host';
 
 const ID = 'reductionist';
 
@@ -32,6 +32,11 @@ class Reductionist implements SkillObject {
       host.heal(v.killHeal!, false);
       this.smoke(host, this.s.def.sprites.smoke!);
     }
+  }
+
+  /** 상시 버프: 장착해 있는 동안 */
+  buff(host: SkillHost): BuffView {
+    return { id: ID, label: host.ctx.t(this.s.def.nameKey), color: this.s.def.color };
   }
 
   private smoke(host: SkillHost, ref: SpriteRef): void {

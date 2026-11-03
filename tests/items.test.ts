@@ -8,6 +8,7 @@ import {
   effectiveWeights,
   itemDamageMultiplier,
   itemTotals,
+  healReady,
   pickHeal,
   pickItem,
   readySet,
@@ -152,6 +153,13 @@ describe('회복·세트', () => {
     expect(pickHeal(cands, 0.4)?.itemId).toBe('slimeStew');
     expect(pickHeal([c('slimeStew', 0.5, 2, false), c('magicasol', 0.5, 3)], 0.4)?.itemId).toBe('magicasol');
     expect(pickHeal(cands, 0.6)).toBeNull();
+  });
+  it('생등심은 런당 3회, 쿨타임 회복은 대기로만 판정', () => {
+    const steak = item('hanwooSteak').effects[0] as { cooldownSec: number; uses?: number };
+    expect([0, 1, 2, 3].map((n) => healReady(steak, 0, n))).toEqual([true, true, true, false]);
+    expect(healReady({ cooldownSec: 0 }, 0, 1)).toBe(false);
+    expect(healReady({ cooldownSec: 60 }, 5, 9)).toBe(false);
+    expect(healReady({ cooldownSec: 60 }, 0, 9)).toBe(true);
   });
   it('기획서 회복 순서와 데이터가 같다', () => {
     const pr = (id: string) => (item(id).effects[0] as { priority: number }).priority;

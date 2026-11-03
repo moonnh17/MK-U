@@ -51,7 +51,7 @@
       "variants": [{ "job": "barbarian", "effects": [] }],
       "spriteKey": "item_oak_heart", "color": "#6a9a3a", "size": 8 },
     { "id": "hanwooSteak", "flavor": "codex.itemFlavor.hanwooSteak", "nameKey": "item.hanwooSteak", "descKey": "item.hanwooSteak.desc", "grade": "rare", "pool": "normal", "tags": [],
-      "effects": [{ "kind": "lowHpHeal", "threshold": 0.1, "healTo": 1.0, "cooldownSec": 0, "priority": 1 }],
+      "effects": [{ "kind": "lowHpHeal", "threshold": 0.1, "healTo": 0.5, "cooldownSec": 0, "priority": 1, "uses": 3 }],
       "spriteKey": "item_hanwoo_steak", "color": "#c85a5a", "size": 8 },
 
     { "id": "leeSeal", "flavor": "codex.itemFlavor.leeSeal", "nameKey": "item.leeSeal", "descKey": "item.leeSeal.desc", "grade": "legendary", "pool": "normal", "tags": [],

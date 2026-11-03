@@ -215,7 +215,7 @@ export class SkillRuntime {
     const s = this.shield;
     if (s && this.shieldOpts) {
       // 겹 수를 숫자로 보여 준다
-      if (s.hits > 0) out.push({ id: 'magiField', label: this.run.ctx.t('buff.magiField'), color: this.shieldOpts.color, leftSec: s.hits, totalSec: s.maxHits });
+      if (s.hits > 0) out.push({ id: 'magiField', label: this.run.ctx.t('buff.magiField'), color: this.shieldOpts.color, count: s.hits });
       if (s.refractLeftSec > 0) out.push({ id: 'magiFieldRefract', label: this.run.ctx.t('buff.magiField.refract'), color: this.shieldOpts.color, leftSec: s.refractLeftSec, totalSec: s.refractTotalSec });
     }
     for (const o of this.skillObjects) {

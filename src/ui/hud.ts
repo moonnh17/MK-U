@@ -3,7 +3,7 @@ import type { ButtonAction } from '../core/actions';
 import type { GameContext } from '../core/context';
 import { DISABLED_ACTIONS } from '../core/features';
 import { hexColor } from '../core/scale';
-import type { RunSession } from '../core/session';
+import { buffText, type RunSession } from '../core/session';
 import type { UiMode } from '../input/uiMode';
 import { storedSkills } from '../systems/skills';
 import { gradeEnergyMultiplier } from '../systems/damage';
@@ -202,10 +202,10 @@ export class Hud {
     if (this.pcOnly.visible) this.updateSkillbar(s);
   }
 
-  /** 현재 버프: 색 칸에 짧은 이름 + 남은 초 */
+  /** 현재 버프: 왼쪽에 한 줄씩. 지속 중이면 남은 초, 쿨타임이면 흐리게 대기 초, 상시면 이름만 */
   private updateBuffs(s: RunSession): void {
     const h = this.ctx.data.ui.hud;
-    let x = 0;
+    let y = this.buffY;
     s.buffs.forEach((b, i) => {
       let t = this.buffTexts[i];
       if (!t) {
@@ -215,8 +215,8 @@ export class Hud {
         this.buffTexts.push(t);
         this.bars.add(t);
       }
-      t.setVisible(true).setX(x).setBackgroundColor(b.color).setText(`${b.label} ${Math.ceil(b.leftSec)}`);
-      x += t.width + 2;
+      t.setVisible(true).setY(y).setBackgroundColor(b.color).setAlpha(b.cdSec !== undefined ? 0.55 : 1).setText(buffText(b, this.ctx.t));
+      y += t.height + 1;
     });
     for (let i = s.buffs.length; i < this.buffTexts.length; i++) this.buffTexts[i]!.setVisible(false);
   }

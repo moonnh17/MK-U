@@ -913,7 +913,8 @@ export type ItemEffect =
   | { kind: 'area'; value: number; group: 'damagePct' }
   | { kind: 'buffDuration'; value: number; group: 'damagePct' }
   /** 체력이 threshold 이하가 되면 healTo까지(추가가 아니라 그 비율까지) 회복. cooldownSec 0이면 1회. afterDamage: 쓴 뒤 피해 증가 */
-  | { kind: 'lowHpHeal'; threshold: number; healTo: number; cooldownSec: number; priority: number; afterDamage?: number }
+  /** uses: 재사용 대기가 없을 때 런당 쓸 수 있는 횟수 (기본 1) */
+  | { kind: 'lowHpHeal'; threshold: number; healTo: number; cooldownSec: number; priority: number; afterDamage?: number; uses?: number }
   /** 사망 시 완전 회복 + 무적 (school이면 그 학파로 전직했을 때만) */
   | { kind: 'revive'; invulnSec: number; school?: SchoolId }
   /** 특정 스킬 피해 증가 (school이면 그 학파로 전직했을 때만) */

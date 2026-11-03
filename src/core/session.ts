@@ -83,8 +83,21 @@ export interface BuffView {
   id: string;
   label: string;
   color: string;
-  leftSec: number;
-  totalSec: number;
+  /** 남은 지속(초). leftSec·cdSec·count가 모두 없으면 상시 버프 */
+  leftSec?: number;
+  totalSec?: number;
+  /** 재사용 대기(초): 지속이 끝나고 쿨타임이 도는 중 */
+  cdSec?: number;
+  /** 남은 겹·횟수 (역장 겹, 약전한우) */
+  count?: number;
+}
+
+/** 버프 한 줄: 지속 중이면 남은 초, 쿨타임이면 대기 초, 겹·횟수면 ×n, 상시면 이름만 */
+export function buffText(b: BuffView, t: (key: string, vars?: Record<string, string | number>) => string): string {
+  if (b.leftSec !== undefined) return t('hud.buff.timed', { label: b.label, s: Math.ceil(b.leftSec) });
+  if (b.cdSec !== undefined) return t('hud.buff.cooldown', { label: b.label, s: Math.ceil(b.cdSec) });
+  if (b.count !== undefined) return t('hud.buff.count', { label: b.label, n: b.count });
+  return b.label;
 }
 
 /** 현재 런 상태. RunScene이 쓰고 UIScene(HUD·미니맵)이 읽는다. */
