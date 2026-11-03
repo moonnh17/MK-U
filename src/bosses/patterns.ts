@@ -9,6 +9,8 @@ import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import { BouncingDisc, DelayedBlast, Beams, FollowBlast, RectBlast, Ring, SafeZoneBlast, SectorBlast, Zone, type Rect } from '../entities/hazard';
 import { gapBulletAngles, predictPoint } from '../systems/bossGeometry';
+import { playFx } from '../skills/skillFx';
+import type { SpriteRef } from '../types/data';
 import type { BossHost, PatternRun } from './host';
 
 /** 패턴이 다루는 보스 */
@@ -37,6 +39,8 @@ export interface PatternCtx {
   summonId?: string;
   /** 적 무리 소환 (보상 없음). free가 아니면 살아 있는 동안 이 패턴은 다시 쓰지 않는다 */
   summon(enemyIds: readonly string[], free?: boolean): void;
+  /** 이펙트 그림 (없으면 도형) */
+  art(slot: string): SpriteRef | undefined;
   /** 지금 살아 있는 이 보스의 소환수 수 */
   minionCount(enemyId: string): number;
   /** 핵 노출: sec 동안 멈추고 받는 피해 ×mul */
@@ -87,6 +91,11 @@ class Dash extends Timed {
   private hit = false;
   private sinceTrail = 0;
   private readonly line: Phaser.GameObjects.Graphics;
+  private sinceArt = 0;
+
+  bodyPose(): 'dashReady' | 'dash' | 'dashEnd' {
+    return this.dashing ? 'dash' : this.finished ? 'dashEnd' : 'dashReady';
+  }
 
   constructor(
     c: PatternCtx,
@@ -127,6 +136,12 @@ class Dash extends Timed {
     c.boss.setVelocity(this.dir.x * speed, this.dir.y * speed);
     this.traveled += speed * dt;
     const p = c.boss.pos();
+    const trailArt = c.art('dashTrail');
+    this.sinceArt -= dt;
+    if (trailArt && this.sinceArt <= 0) {
+      this.sinceArt = 0.07;
+      playFx(c.host.scene, trailArt, p.x, p.y, { rotation: Math.atan2(this.dir.y, this.dir.x), depth: 2, fadeSec: 0.35 });
+    }
     const pl = c.host.playerPos();
     if (!this.hit && Math.hypot(pl.x - p.x, pl.y - p.y) <= c.boss.radius() + c.host.playerRadius) {
       this.hit = c.host.hurtPlayer(c.v('damage'));
@@ -136,7 +151,7 @@ class Dash extends Timed {
       if (this.sinceTrail >= c.v('trailEvery')) {
         this.sinceTrail = 0;
         c.host.addHazard(
-          new Zone(c.host.scene, p, c.v('trailRadius'), c.v('trailSec'), c.v('trailDamage'), c.v('trailTickSec'), c.boss.color, 0, c.v('trailDelaySec')),
+          new Zone(c.host.scene, p, c.v('trailRadius'), c.v('trailSec'), c.v('trailDamage'), c.v('trailTickSec'), c.boss.color, 0, c.v('trailDelaySec'), c.art('zone')),
         );
       }
     }
@@ -411,7 +426,7 @@ const rad = (deg: number): number => (deg * Math.PI) / 180;
 
 /** 예고 원 → 폭발 (방 안으로 자른다) */
 function blast(c: PatternCtx, at: Vec2, radius: number, delaySec: number, damage: number): void {
-  c.host.addHazard(new DelayedBlast(c.host.scene, clampTo(at, c, radius / 2), radius, delaySec, damage, c.boss.color));
+  c.host.addHazard(new DelayedBlast(c.host.scene, clampTo(at, c, radius / 2), radius, delaySec, damage, c.boss.color, { warn: c.art('blastWarn'), hit: c.art('blastHit') }));
 }
 
 /** 플레이어의 지금 위치·이동으로 sec 뒤 자리를 예측한다. 생성할 때 정해져 예고를 보고 피할 수 있다 */
@@ -435,6 +450,7 @@ interface BeamOpts {
   spinDelaySec?: number;
   tickSec?: number;
   onHit?: () => void;
+  art?: SpriteRef;
 }
 
 const FULL_BEAM = 700;
@@ -456,6 +472,8 @@ function beam(c: PatternCtx, o: BeamOpts): void {
       damage: o.damage,
       tickSec: o.tickSec ?? 1,
       onHit: o.onHit,
+      art: o.art ?? c.art('beam'),
+      warnArt: c.art('beamWarn'),
       color: c.boss.color,
     }),
   );
@@ -476,17 +494,24 @@ interface RingOpts {
 /** 움직이는 고리. gap을 주면 그 각도로 통과할 수 있다 */
 function ring(c: PatternCtx, o: RingOpts): void {
   c.host.addHazard(new Ring(c.host.scene, { telegraphSec: 0, holdSec: 0, tickSec: 0, color: c.boss.color, ...o }));
+  const start = c.art('ringStart');
+  if (start) playFx(c.host.scene, start, o.center.x, o.center.y, { w: Math.max(o.fromR, 30) * 2.4 });
 }
 
 /** 부채꼴 탄막 */
 function fan(c: PatternCtx, from: Vec2, base: number, n: number, spreadDeg: number, speed: number, range: number, damage: number, refractable = true): void {
   const spread = rad(spreadDeg);
-  for (let k = 0; k < n; k++) c.host.fireEnemyBullet(from, n === 1 ? base : base - spread / 2 + (spread * k) / (n - 1), speed, range, damage, refractable);
+  for (let k = 0; k < n; k++) c.host.fireEnemyBullet(from, n === 1 ? base : base - spread / 2 + (spread * k) / (n - 1), speed, range, damage, refractable, c.art('bullet'));
 }
 
 /** 연속된 gap발을 비운 원형 탄막 */
 function gapCircle(c: PatternCtx, from: Vec2, n: number, gap: number, speed: number, range: number, damage: number): void {
-  for (const a of gapBulletAngles(n, c.host.rng.int(0, n - 1), gap)) c.host.fireEnemyBullet(from, a, speed, range, damage, true);
+  for (const a of gapBulletAngles(n, c.host.rng.int(0, n - 1), gap)) c.host.fireEnemyBullet(from, a, speed, range, damage, true, c.art('bullet'));
+}
+
+/** 방을 가로지르는 띠 예고 → 강타. 세로·가로 그림이 다르다 */
+function faultBand(c: PatternCtx, rect: Rect, vertical: boolean, delaySec: number, damage: number): void {
+  c.host.addHazard(new RectBlast(c.host.scene, rect, delaySec, damage, c.boss.color, c.art(vertical ? 'bandV' : 'bandH')));
 }
 
 /** 플레이어를 지나 방을 가로지르는 띠 */
@@ -506,7 +531,7 @@ function safeBlast(c: PatternCtx, circles: number, radius: number, delaySec: num
     if (safe.every((s) => Math.hypot(s.x - at.x, s.y - at.y) > radius * 3)) safe.push(at);
   }
   if (safe.length === 0) safe.push(clampTo(from, c, m));
-  c.host.addHazard(new SafeZoneBlast(c.host.scene, a, safe, radius, delaySec, damage, c.boss.color));
+  c.host.addHazard(new SafeZoneBlast(c.host.scene, a, safe, radius, delaySec, damage, c.boss.color, { safe: c.art('safe'), hit: c.art('safeHit') }));
   shake(c.host.scene, 'rumble', delaySec * 1000);
 }
 
@@ -534,13 +559,14 @@ class Claw extends Timed {
   constructor(c: PatternCtx) {
     super(c);
     const p = c.boss.pos();
-    c.host.addHazard(new SectorBlast(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('radius'), c.v('arcDeg'), c.v('windupSec'), c.v('damage'), c.boss.color));
+    c.host.addHazard(new SectorBlast(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('radius'), c.v('arcDeg'), c.v('windupSec'), c.v('damage'), c.boss.color, c.art('sectorHit')));
   }
 }
 
 /** 원혼 돌진: 돌진하며 양옆·뒤로 탄을 뿌리고 잔류 장판을 남긴 뒤, 핵이 드러난 채 잠깐 멈춘다 */
 class SpiritDash implements PatternRun {
   private readonly dash: Dash;
+  bodyPose = () => this.dash.bodyPose();
   private shot = 0;
   private recovered = false;
 
@@ -560,7 +586,7 @@ class SpiritDash implements PatternRun {
     if (this.shot > 0) return;
     this.shot = c.v('shotEverySec');
     const a = Math.atan2(this.dash.dir.y, this.dash.dir.x);
-    for (const off of [Math.PI / 2, -Math.PI / 2, Math.PI]) c.host.fireEnemyBullet(c.boss.pos(), a + off, c.v('shotSpeed'), c.v('shotRange'), c.v('shotDamage'), true);
+    for (const off of [Math.PI / 2, -Math.PI / 2, Math.PI]) c.host.fireEnemyBullet(c.boss.pos(), a + off, c.v('shotSpeed'), c.v('shotRange'), c.v('shotDamage'), true, c.art('bullet'));
   }
 
   destroy(): void {
@@ -650,6 +676,8 @@ class Prison extends Timed {
         gapDeg: c.v('gapDeg'),
       }),
     );
+    const cage = c.art('cage');
+    if (cage) playFx(c.host.scene, cage, center.x, center.y, { w: r * 2.3, fadeSec: 0.5 });
     for (let i = 0; i < c.v('strikes'); i++) {
       this.at(c.v('telegraphSec') + i * c.v('strikeGapSec'), () => blast(c, c.host.playerPos(), c.v('strikeRadius'), c.v('strikeDelaySec'), c.v('strikeDamage')));
     }
@@ -664,8 +692,8 @@ class LockGrid extends Timed {
     const p = c.host.playerPos();
     const off = c.v('offset');
     for (const s of [-1, 1]) {
-      c.host.addHazard(new RectBlast(c.host.scene, rectAt(a, { x: p.x + s * off, y: p.y }, true, c.v('width')), c.v('delaySec'), c.v('damage'), c.boss.color));
-      c.host.addHazard(new RectBlast(c.host.scene, rectAt(a, { x: p.x, y: p.y + s * off }, false, c.v('width')), c.v('delaySec') + c.v('lagSec'), c.v('damage'), c.boss.color));
+      faultBand(c, rectAt(a, { x: p.x + s * off, y: p.y }, true, c.v('width')), true, c.v('delaySec'), c.v('damage'));
+      faultBand(c, rectAt(a, { x: p.x, y: p.y + s * off }, false, c.v('width')), false, c.v('delaySec') + c.v('lagSec'), c.v('damage'));
     }
   }
 }
@@ -709,6 +737,7 @@ class ChaseField extends Timed {
 /** 청뢰 돌진: 직선 예고 → 돌진 → 도착 지점 폭발 */
 class BlueDash implements PatternRun {
   private readonly dash: Dash;
+  bodyPose = () => this.dash.bodyPose();
   private done = false;
 
   constructor(private readonly c: PatternCtx) {
@@ -739,7 +768,7 @@ class Repulse extends Timed {
 
 /** 드론 협공: 보스 둘레 드론 3기가 시작 때의 플레이어 자리를 조준해 부채꼴 사격 */
 class DroneFire extends Timed {
-  private readonly drones: Phaser.GameObjects.Arc[] = [];
+  private readonly drones: { destroy(): void }[] = [];
   constructor(c: PatternCtx) {
     super(c);
     const b = c.boss.pos();
@@ -749,7 +778,8 @@ class DroneFire extends Timed {
       const a = base + (i * Math.PI * 2) / c.v('drones');
       return clampTo({ x: b.x + Math.cos(a) * c.v('offset'), y: b.y + Math.sin(a) * c.v('offset') }, c, 8);
     });
-    for (const s of spots) this.drones.push(c.host.scene.add.circle(s.x, s.y, 5, c.boss.color, 0.9).setStrokeStyle(1, 0xffffff, 0.8).setDepth(4));
+    const droneArt = c.art('drone');
+    for (const s of spots) this.drones.push(droneArt ? c.host.scene.add.sprite(s.x, s.y, droneArt.spriteKey).setDepth(4) : c.host.scene.add.circle(s.x, s.y, 5, c.boss.color, 0.9).setStrokeStyle(1, 0xffffff, 0.8).setDepth(4));
     for (let r = 0; r < c.v('rounds'); r++) {
       this.at(c.v('windupSec') + r * c.v('roundGapSec'), () => {
         for (const s of spots) fan(c, s, angleTo(s, target), c.v('bullets'), c.v('spreadDeg'), c.v('speed'), c.v('range'), c.v('damage'));
@@ -871,7 +901,7 @@ class RuinBeam extends Timed {
     const a = angleTo(p, c.host.playerPos());
     const o = { center: p, liveSec: c.v('liveSec'), width: c.v('width'), damage: c.v('damage') };
     beam(c, { ...o, angle: a, telegraphSec: c.v('telegraphSec') });
-    for (const s of [-1, 1]) beam(c, { ...o, angle: a + s * rad(c.v('sideDeg')), telegraphSec: c.v('telegraphSec') + c.v('liveSec') + c.v('lagSec') });
+    for (const s of [-1, 1]) beam(c, { ...o, angle: a + s * rad(c.v('sideDeg')), telegraphSec: c.v('telegraphSec') + c.v('liveSec') + c.v('lagSec'), art: c.art('beamSide') });
   }
 }
 
@@ -891,6 +921,7 @@ class RuinLegion extends Timed {
 /** 파성 돌진: 긴 준비 → 돌진(양옆 보조 광선) → 도착 폭발 → 핵 노출 */
 class BreakerDash implements PatternRun {
   private readonly dash: Dash;
+  bodyPose = () => this.dash.bodyPose();
   private done = false;
 
   constructor(private readonly c: PatternCtx) {
@@ -960,14 +991,14 @@ class DoomFault extends Timed {
     const w = c.v('width');
     for (let i = 0; i < n; i++) {
       const at = { x: p.x + (i - (n - 1) / 2) * c.v('gap'), y: p.y };
-      c.host.addHazard(new RectBlast(c.host.scene, rectAt(a, at, true, w), c.v('delaySec') + i * c.v('stepSec'), c.v('damage'), c.boss.color));
+      faultBand(c, rectAt(a, at, true, w), true, c.v('delaySec') + i * c.v('stepSec'), c.v('damage'));
     }
     const rows = c.v('rows');
     const after = c.v('delaySec') + n * c.v('stepSec');
     this.at(after, () => {
       const pl = c.host.playerPos();
       for (let i = 0; i < rows; i++) {
-        c.host.addHazard(new RectBlast(c.host.scene, rectAt(a, { x: pl.x, y: pl.y + (i - (rows - 1) / 2) * c.v('rowGap') }, false, w), c.v('delaySec'), c.v('damage'), c.boss.color));
+        faultBand(c, rectAt(a, { x: pl.x, y: pl.y + (i - (rows - 1) / 2) * c.v('rowGap') }, false, w), false, c.v('delaySec'), c.v('damage'));
       }
     });
   }
@@ -979,7 +1010,7 @@ class DoomFault extends Timed {
 class ShadowChase extends Timed {
   constructor(c: PatternCtx) {
     super(c);
-    c.host.addHazard(new FollowBlast(c.host.scene, c.host.playerPos(), c.v('radius'), c.v('speed'), c.v('followSec') + c.v('lockSec'), c.v('damage'), c.boss.color, c.v('lockSec')));
+    c.host.addHazard(new FollowBlast(c.host.scene, c.host.playerPos(), c.v('radius'), c.v('speed'), c.v('followSec') + c.v('lockSec'), c.v('damage'), c.boss.color, c.v('lockSec'), { track: c.art('followTrack'), lock: c.art('followLock'), hit: c.art('followHit') }));
   }
 }
 
@@ -1006,7 +1037,7 @@ class SafeCircle extends Timed {
 class GravityCollapse extends Timed {
   constructor(c: PatternCtx) {
     super(c);
-    c.host.addHazard(new DelayedBlast(c.host.scene, c.boss.pos(), c.v('radius'), c.v('pullSec'), c.v('damage'), c.boss.color));
+    c.host.addHazard(new DelayedBlast(c.host.scene, c.boss.pos(), c.v('radius'), c.v('pullSec'), c.v('damage'), c.boss.color, { warn: c.art('blastWarn'), hit: c.art('blastHit') }));
   }
 
   protected override tick(dt: number): void {
@@ -1034,7 +1065,7 @@ class HomingMissiles extends Timed {
         const side = i % 2 === 0 ? 1 : -1;
         const a = angleTo(p, c.host.playerPos());
         const from = { x: p.x + Math.cos(a + Math.PI / 2) * side * c.boss.radius(), y: p.y + Math.sin(a + Math.PI / 2) * side * c.boss.radius() };
-        c.host.fireEnemyMissile(from, a + side * rad(c.v('spreadDeg')), c.v('speed'), c.v('range'), c.v('damage'), c.v('turnRate'));
+        c.host.fireEnemyMissile(from, a + side * rad(c.v('spreadDeg')), c.v('speed'), c.v('range'), c.v('damage'), c.v('turnRate'), c.art('missile'));
       });
     }
   }
@@ -1074,6 +1105,7 @@ class Geyser extends Timed {
 /** 고속 돌진: 짧은 예고 뒤 길게 돌진하며 미사일을 흘리고, 끝나면 회복 구간 */
 class KaiserDash implements PatternRun {
   private readonly dash: Dash;
+  bodyPose = () => this.dash.bodyPose();
   private shot = 0;
   private done = false;
 
@@ -1093,7 +1125,7 @@ class KaiserDash implements PatternRun {
     if (this.shot > 0) return;
     this.shot = c.v('missileEverySec');
     const a = Math.atan2(this.dash.dir.y, this.dash.dir.x) + (c.host.rng.chance(0.5) ? 1 : -1) * Math.PI / 2;
-    c.host.fireEnemyMissile(c.boss.pos(), a, c.v('missileSpeed'), c.v('missileRange'), c.v('missileDamage'), c.v('turnRate'));
+    c.host.fireEnemyMissile(c.boss.pos(), a, c.v('missileSpeed'), c.v('missileRange'), c.v('missileDamage'), c.v('turnRate'), c.art('missile'));
   }
 
   destroy(): void {

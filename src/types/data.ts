@@ -439,6 +439,12 @@ export interface BossCore {
   lowHpStrike?: { at: number; afterSec: number; radius: number; delaySec: number; damage: number };
   /** 독립 계승 주기 (마기카이저): 마지막 단계에서 rollSec마다 chance로 시도, 끝난 뒤 minGapSec */
   inherit?: { rollSec: number; chance: number; minGapSec: number };
+  /** 패턴 이펙트 그림: 슬롯 이름 → 그림. '패턴id.슬롯'이 있으면 그 패턴에서 우선. 없으면 도형으로 그린다 */
+  art?: Record<string, SpriteRef>;
+  /** 본체 자세 (art.json anims 이름). dashReady·dash·recover·transition·패턴 id */
+  poses?: Record<string, string | { first: string; sec: number; then: string }>;
+  /** 강화 단계에 몸에 겹치는 그림: 맥동 (alpha ± pulse) */
+  layers?: { sprite: SpriteRef; alpha: number; pulse: number; spin?: number }[];
   /** 일식 어둠 (식광): 방을 어둡게, 플레이어 둘레만 밝게. 보스가 죽으면 걷힌다 */
   darkness?: { lightRadius: number; alpha: number; color: string };
 }
@@ -1250,7 +1256,8 @@ export interface ArtSpriteDef {
   facing?: 'right' | 'left';
 }
 
-export type ArtAnimId = 'idle' | 'move' | 'play' | 'aim';
+/** idle·move·play·aim 또는 보스 자세 이름 */
+export type ArtAnimId = string;
 
 /** 프레임 번호 from~to(0부터, 둘 다 포함)를 초당 fps장으로 반복 */
 export interface ArtAnimDef {

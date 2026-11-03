@@ -230,7 +230,6 @@ const M = (row) => cells('monsters.png', 256, 256, [row * 4, row * 4 + 1, row * 
 
 // ---------- 2장 ----------
 actor('enemy_hectar_trooper', [strip('spires/trooper.png', 4)[0]], strip('spires/trooper.png', 4), 22);
-actor('enemy_hectar_chief', [strip('spires/researcher.png', 4)[0]], strip('spires/researcher.png', 4), 54);
 actor('enemy_magi_beetle', strip('monsters/monster-magi_beetle-idle.png', 4), strip('monsters/monster-magi_beetle-move.png', 6), 24);
 actor('enemy_a_memory', strip('monsters/monster-some_memory-idle.png', 6), strip('monsters/monster-some_memory-move.png', 8), 24);
 
@@ -241,18 +240,8 @@ actor('enemy_executor', gaps('late-elites/executor-idle.png'), gaps('late-elites
 actor('enemy_archon', gaps('late-elites/archon-idle.png'), gaps('late-elites/archon-move.png'), 30);
 
 // ---------- 보스 ----------
-actor('enemy_fusion_akgwi', single('fusion/body-idle.png'), single('fusion/body-move.png'), 72, { independent: true });
-actor('enemy_fusion_akgwi_phase2', single('fusion/body-rage.png'), single('fusion/body-move.png'), 78, { independent: true });
-actor('enemy_electric_ring', single('electric/body-idle.png'), single('electric/body-walk.png'), 75, { independent: true });
-actor('enemy_magi_golem', single('golem/body-idle.png'), single('golem/body-walk.png'), 84, { independent: true });
-actor('enemy_magi_golem_phase2', single('golem/body-rage.png'), single('golem/body-walk.png'), 90, { independent: true });
-actor('enemy_eclipse', strip('eclipse/p1-idle.png', 4), strip('eclipse/p1-move.png', 6), 75);
-actor('enemy_eclipse_phase2', strip('eclipse/p2-idle.png', 4).map(dropTopGlyphs), strip('eclipse/p2-move.png', 6), 84);
 // 마기카이저: 구속(1단계) → 2 → 3단계
 actor('enemy_magi_kaiser', strip('kaiser/idle.png', 4), strip('kaiser/move.png', 6), 99);
-actor('enemy_magi_kaiser_phase1', strip('kaiser/p1-idle.png', 4), [], 99);
-actor('enemy_magi_kaiser_phase2', strip('kaiser/p2-idle.png', 4), strip('kaiser/move.png', 6), 99);
-actor('enemy_magi_kaiser_phase3', strip('kaiser/p3-idle.png', 4), strip('kaiser/move.png', 6), 105);
 // 선조의 잔상: 야만용사 시초 각성자의 전투 기록 → 야만용사 몸체
 actor('enemy_ancestor_echo', single('warrior/barbarian-idle.png'), strip('warrior/barbarian-move.png', 2), 66, { independent: true });
 
@@ -989,6 +978,197 @@ aFx('ult_paradox_replay3', '08', AW, '기록재현100', 38);
 aFx('ult_paradox_crumble', '08', AW, '공간붕괴', 44);
 aFx('ult_paradox_send', '08', AW, '기록전송', 34);
 aFx('ult_paradox_end', '08', AW, '관측종료', 60);
+
+// ---------- 보스 스프라이트 팩 ----------
+const BOSS_DIR = process.argv[5] ?? path.join(REPO, 'MKU-Boss-Sprites-v174');
+const BOSS = JSON.parse(fs.readFileSync(path.join(BOSS_DIR, '목록.json'), 'utf8')).animations;
+const bAnim = (boss, id) => {
+  const a = BOSS.find((x) => x.boss.startsWith(boss) && x.key === id);
+  if (!a) throw new Error(`보스 그림 없음 ${boss} ${id}`);
+  return a;
+};
+/** 프레임 이미지들. 게임표시용 보정본이 있으면 그것 (시트는 등록된 개별 프레임을 쓴다, 등분 금지) */
+const bFrames = (boss, id) => {
+  const a = bAnim(boss, id);
+  const list = a.runtimeImage && a.individualFrames.length === 1 ? [a.runtimeImage] : a.individualFrames;
+  return list.map((f) => k.read(path.join(BOSS_DIR, f)));
+};
+function bFx(boss, id, key, fit, rotate) {
+  const a = bAnim(boss, id);
+  // 큰 반경으로 늘여 그리므로 축소 보정본 대신 원본에서 줄인다
+  let fr = a.individualFrames.map((f) => k.read(path.join(BOSS_DIR, f)));
+  if (rotate) fr = fr.map((f) => k.rotate(f, rotate));
+  fxArt(key, fr, fit, { fps: a.fps > 0 ? a.fps : 10, loop: a.loop });
+}
+const BOSS_SHEET_W = 3600;
+/**
+ * 보스 본체: idle·move·자세를 한 시트에 격자로 놓는다 (프레임이 많아 한 줄이면 텍스처 한계를 넘는다).
+ * height: 자세마다 높이를 맞춘다(단일 포즈 보스). 없으면 시트 칸 그대로 같은 배율로 줄인다(프레임 시트 보스).
+ * poses: { 이름: { frames, fps, loop } }
+ */
+function bossActor(key, states, fit, height) {
+  const all = Object.values(states).flatMap((s) => s.frames);
+  const boxes = all.map((f) => k.bbox(f, 40) ?? { x: 0, y: 0, w: f.w, h: f.h });
+  const scale = (i) => (fit * ART_DENSITY) / (height ? boxes[i].h : Math.max(boxes[0].w, boxes[0].h));
+  let fw, fh, cells;
+  if (height) {
+    fw = even(Math.max(...boxes.map((b, i) => b.w * scale(i))));
+    fh = even(fit * ART_DENSITY);
+    cells = all.map((f, i) => {
+      const b = boxes[i];
+      const s = scale(i);
+      const c = k.blank(fw, fh);
+      const iw = Math.max(1, Math.round(b.w * s));
+      k.paste(c, k.resize(k.crop(f, b.x, b.y, b.w, b.h), iw, fh, 0.5), Math.round((fw - iw) / 2), 0);
+      return c;
+    });
+  } else {
+    // 같은 칸의 시트: 모든 프레임이 칸 안에서 정렬돼 있으므로 합친 영역으로 자른다
+    const x0 = Math.min(...boxes.map((b) => b.x)), y0 = Math.min(...boxes.map((b) => b.y));
+    const x1 = Math.max(...boxes.map((b) => b.x + b.w)), y1 = Math.max(...boxes.map((b) => b.y + b.h));
+    const cx = all[0].w / 2;
+    const half = Math.max(cx - x0, x1 - cx);
+    const s = scale(0);
+    fw = even(half * 2 * s);
+    fh = even((y1 - y0) * s);
+    cells = all.map((f) => k.resize(k.crop(f, Math.max(0, Math.floor(cx - half)), y0, Math.min(f.w, Math.ceil(half * 2)), y1 - y0), fw, fh, 0.5));
+  }
+  const framed = cells.map((c) => outlined(c, fw, fh, 1, ENEMY_OUTLINE));
+  const cw = fw + 2, ch = fh + 2;
+  const cols = Math.max(1, Math.min(framed.length, Math.floor(BOSS_SHEET_W / cw)));
+  const rows = Math.ceil(framed.length / cols);
+  const out = k.blank(cols * cw, rows * ch);
+  framed.forEach((c, i) => k.paste(out, c, (i % cols) * cw, Math.floor(i / cols) * ch));
+  const file = `${OUT_DIR}/${key}.png`;
+  k.write(path.join(REPO, 'public/assets', file), out);
+  const anims = {};
+  let at = 0;
+  for (const [name, st] of Object.entries(states)) {
+    anims[name] = { from: at, to: at + st.frames.length - 1, fps: st.fps ?? 4, ...(st.loop === false ? { loop: false } : {}) };
+    at += st.frames.length;
+  }
+  sprites[key] = { file, frameWidth: cw, frameHeight: ch, frames: framed.length, density: ART_DENSITY, anims };
+}
+const one = (boss, id) => bFrames(boss, id);
+const st = (boss, id, fps, loop) => ({ frames: bFrames(boss, id), fps: fps ?? (bAnim(boss, id).fps || 4), loop: loop ?? bAnim(boss, id).loop });
+// 융합악귀: 단일 포즈, 상태로 고른다
+{
+  const F = '01';
+  const poses = { slash: { frames: one(F, 'body-slash'), loop: false }, dash: { frames: one(F, 'body-dash'), loop: false } };
+  bossActor('enemy_fusion_akgwi', { idle: { frames: one(F, 'body-idle') }, move: { frames: one(F, 'body-move') }, ...poses }, 70, true);
+  bossActor('enemy_fusion_akgwi_phase2', { idle: { frames: one(F, 'body-rage') }, move: { frames: one(F, 'body-move') }, ...poses }, 70, true);
+}
+// 전기환띠: 평상시 idle·walk 교대 (초당 5번)
+{
+  const E = '02';
+  const walk = [...one(E, 'body-idle'), ...one(E, 'body-walk')];
+  bossActor('enemy_electric_ring', { idle: { frames: walk, fps: 5 }, move: { frames: walk, fps: 5 }, cast: { frames: one(E, 'body-cast'), loop: false }, dash: { frames: one(E, 'body-dash'), loop: false } }, 75, true);
+}
+// 마기골렘: idle·walk 교대 (초당 3번), 패턴별 포즈
+{
+  const G = '04';
+  const walk = [...one(G, 'body-idle'), ...one(G, 'body-walk')];
+  const poses = Object.fromEntries(['ready', 'punch', 'slam', 'sweep', 'cast', 'overload'].map((p) => [p, { frames: one(G, `body-${p}`), loop: false }]));
+  bossActor('enemy_magi_golem', { idle: { frames: walk, fps: 3 }, move: { frames: walk, fps: 3 }, ...poses }, 84, true);
+  bossActor('enemy_magi_golem_phase2', { idle: { frames: one(G, 'body-rage') }, move: { frames: walk, fps: 3 }, ...poses }, 84, true);
+}
+// 식광: 페이즈별 시트
+{
+  const C = '03';
+  const p = 'boss.eclipse.';
+  bossActor('enemy_eclipse', { idle: st(C, p + 'p1_idle'), move: st(C, p + 'p1_move'), charge: st(C, p + 'p1_charge'), hurt: st(C, p + 'p1_hurt') }, 75);
+  bossActor('enemy_eclipse_phase2', { idle: st(C, p + 'p2_idle'), move: st(C, p + 'p2_move'), charge: st(C, p + 'p2_charge'), hurt: st(C, p + 'p2_hurt'), transition: st(C, p + 'transition') }, 84);
+}
+// 마기카이저: 구속 → 2 → 3단계
+{
+  const K = '05';
+  const p = 'boss.magi_kaiser.';
+  const moves = (id) => st(K, p + id);
+  const arms = { punchWindup: moves('punch_windup'), punchStrike: moves('punch_strike'), laser: moves('laser'), dashStart: moves('dash_start'), dash: moves('dash'), dashEnd: moves('dash_end'), missile: moves('missile_launch'), cross: moves('cross') };
+  bossActor('enemy_magi_kaiser_phase1', { idle: moves('p1_idle') }, 99);
+  bossActor('enemy_magi_kaiser_phase2', { idle: moves('p2_idle'), move: moves('move'), transition: moves('p1_p2'), ...arms }, 99);
+  bossActor('enemy_magi_kaiser_phase3', { idle: moves('p3_idle'), move: moves('move'), transition: moves('p2_p3'), command: moves('command'), ...arms }, 105);
+}
+// 헥타르 수석 연구원: 2페이즈 이동·대기는 첫 칸 고정
+{
+  const R = '06';
+  const cast = st(R, 'cast');
+  bossActor('enemy_hectar_chief', { idle: st(R, 'p1_idle'), move: st(R, 'p1_move'), cast }, 54);
+  bossActor('enemy_hectar_chief_phase2', { idle: st(R, 'p2_idle'), move: st(R, 'p2_move'), cast }, 54);
+}
+bFx('01', 'vfx-slash', 'fx_fusion_slash', 110);
+bFx('01', 'vfx-charge', 'fx_fusion_charge', 60);
+bFx('01', 'vfx-dash', 'fx_fusion_dash', 60);
+bFx('01', 'vfx-summon', 'fx_fusion_summon', 40);
+bFx('01', 'vfx-bolt', 'fx_fusion_bolt', 16);
+bFx('01', 'vfx-burst', 'fx_fusion_burst', 100);
+bFx('01', 'vfx-smoke', 'fx_fusion_smoke', 40);
+bFx('01', 'vfx-eruption', 'fx_fusion_eruption', 120);
+bFx('01', 'vfx-vortex', 'fx_fusion_vortex', 90);
+bFx('01', 'vfx-explode', 'fx_fusion_explode', 90);
+bFx('01', 'vfx-orb', 'fx_fusion_orb', 40);
+bFx('02', 'vfx-warning', 'fx_electric_warning', 30);
+bFx('02', 'vfx-strike', 'fx_electric_strike', 50);
+bFx('02', 'vfx-strike-heavy', 'fx_electric_strike2', 50);
+bFx('02', 'vfx-radial', 'fx_electric_radial', 70);
+bFx('02', 'vfx-orb', 'fx_electric_orb', 12);
+bFx('02', 'vfx-laser', 'fx_electric_laser', 120);
+bFx('02', 'vfx-line', 'fx_electric_line', 120);
+bFx('02', 'vfx-cage', 'fx_electric_cage', 100);
+bFx('02', 'vfx-ring', 'fx_electric_ring', 90);
+bFx('02', 'vfx-cross', 'fx_electric_cross', 90);
+bFx('02', 'vfx-aura', 'fx_electric_aura', 90);
+bFx('02', 'vfx-dash', 'fx_electric_dash', 60);
+bFx('02', 'vfx-impact', 'fx_electric_impact', 110);
+bFx('06', 'hectar-ring', 'fx_chief_ring', 70);
+bFx('06', 'hectar-burst', 'fx_chief_burst', 60);
+bFx('06', 'hectar-drone', 'fx_chief_drone', 14);
+bFx('04', 'vfx-warning-circle', 'fx_golem_warn', 50);
+bFx('04', 'vfx-artillery', 'fx_golem_artillery', 90);
+bFx('04', 'vfx-shock-ring', 'fx_golem_shock', 90);
+bFx('04', 'vfx-laser-center', 'fx_golem_ruin_beam', 120, 90);
+bFx('04', 'vfx-laser-side', 'fx_golem_laser_side', 120);
+bFx('04', 'vfx-summon', 'fx_golem_summon', 70);
+bFx('04', 'vfx-minion', 'fx_golem_minion', 30);
+bFx('04', 'vfx-dash-trail', 'fx_golem_trail', 50);
+bFx('04', 'vfx-core', 'fx_golem_core', 36);
+bFx('04', 'vfx-crack-hit', 'fx_golem_crack', 120, 90);
+bFx('04', 'vfx-eight-warning', 'fx_golem_eight', 100);
+bFx('04', 'vfx-eruption', 'fx_golem_eruption', 90);
+bFx('04', 'vfx-fault-vertical', 'fx_golem_fault_v', 90);
+bFx('04', 'vfx-fault-horizontal', 'fx_golem_fault_h', 90);
+bFx('04', 'vfx-fault-hit', 'fx_golem_fault_hit', 50);
+bFx('04', 'vfx-rage-aura', 'fx_golem_rage_aura', 90);
+bFx('04', 'vfx-rage-core', 'fx_golem_rage_core', 40);
+bFx('03', 'vfx.eclipse.warning', 'fx_eclipse_warning', 60);
+bFx('03', 'vfx.eclipse.impact', 'fx_eclipse_impact', 100);
+bFx('03', 'vfx.eclipse.blade', 'fx_eclipse_blade', 14);
+bFx('03', 'vfx.eclipse.blade-charge', 'fx_eclipse_charge', 40);
+bFx('03', 'vfx.eclipse.shadow-track', 'fx_eclipse_track', 60);
+bFx('03', 'vfx.eclipse.shadow-lock', 'fx_eclipse_lock', 60);
+bFx('03', 'vfx.eclipse.shadow', 'fx_eclipse_shadow', 70);
+bFx('03', 'vfx.eclipse.field', 'fx_eclipse_field', 110);
+bFx('03', 'vfx.eclipse.safe', 'fx_eclipse_safe', 80);
+bFx('03', 'vfx.eclipse.gravity', 'fx_eclipse_gravity', 110);
+bFx('03', 'vfx.eclipse.totality-warning', 'fx_eclipse_total_warn', 120);
+bFx('03', 'vfx.eclipse.totality-hit', 'fx_eclipse_total_hit', 120);
+bFx('03', 'vfx.boss.eclipse.death', 'fx_eclipse_death', 90);
+bFx('03', 'boss.eclipse.p2_flare', 'fx_eclipse_flare', 110);
+bFx('03', 'vfx.eclipse.residue', 'fx_eclipse_residue', 60);
+bFx('05', 'vfx.kaiser.punch', 'fx_kaiser_punch', 100);
+bFx('05', 'vfx.kaiser.shock', 'fx_kaiser_shock', 90);
+bFx('05', 'vfx.kaiser.missile', 'fx_kaiser_missile', 16);
+bFx('05', 'vfx.kaiser.sweep', 'fx_kaiser_sweep', 120);
+bFx('05', 'vfx.kaiser.laser-warning', 'fx_kaiser_laser_warn', 120);
+bFx('05', 'vfx.kaiser.laser-core', 'fx_kaiser_laser', 120);
+bFx('05', 'vfx.kaiser.laser-muzzle', 'fx_kaiser_muzzle', 40);
+bFx('05', 'vfx.kaiser.dash-impact', 'fx_kaiser_impact', 100);
+bFx('05', 'vfx.kaiser.lock', 'fx_kaiser_lock', 40);
+bFx('05', 'vfx.kaiser.sweep-warning', 'fx_kaiser_sweep_warn', 120);
+bFx('05', 'vfx.kaiser.cross-vfx', 'fx_kaiser_cross', 120);
+bFx('05', 'vfx.kaiser.command-shock', 'fx_kaiser_command', 120);
+bFx('05', 'vfx.kaiser.debris', 'fx_kaiser_debris', 70);
+bFx('05', 'vfx.boss.magi_kaiser.death', 'fx_kaiser_death', 110);
 
 const artPath = path.join(REPO, 'src/data/art.json');
 const json = { basePath: 'assets/', sprites };

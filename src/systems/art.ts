@@ -126,6 +126,10 @@ export function collectAssets(d: GameData): AssetRef[] {
   add('pickup', d.pickups.energyOrb, 'asset.energyOrb');
   add('pickup', d.pickups.coin, 'asset.coin');
   for (const s of d.skills.skills) for (const [part, ref] of Object.entries(s.sprites)) add('skill', ref, s.nameKey, `#${part}`);
+  for (const b of d.bosses.bosses) {
+    for (const [slot, ref] of Object.entries(b.art ?? {})) add('fx', ref, `enemy.${b.id}`, `#${slot}`);
+    for (const l of b.layers ?? []) add('fx', l.sprite, `enemy.${b.id}`, '#layer');
+  }
   for (const u of d.ultimates.ultimates) for (const [part, ref] of Object.entries(u.sprites)) add('skill', ref, u.nameKey, `#${part}`);
   for (const o of d.lab.objects) add('lab', { spriteKey: o.spriteKey, color: o.color, size: o.w, height: o.h }, `lab.object.${o.kind}`);
   for (const it of d.items.items) add('item', it, it.nameKey);
@@ -223,7 +227,6 @@ export function validateArt(art: ArtData, refs: readonly AssetRef[]): string[] {
     if (s.facing !== undefined && s.facing !== 'right' && s.facing !== 'left') errors.push(`${w}.facing: right · left`);
     const frames = s.frames ?? 1;
     for (const [id, a] of Object.entries(s.anims ?? {})) {
-      if (id !== 'idle' && id !== 'move' && id !== 'play' && id !== 'aim') errors.push(`${w}.anims.${id}: idle · move · play · aim`);
       if (!a) continue;
       if (!(Number.isInteger(a.from) && Number.isInteger(a.to) && a.from >= 0 && a.from <= a.to && a.to < frames)) errors.push(`${w}.anims.${id}: 0 ≤ from ≤ to < frames(${frames})`);
       if (!(a.fps > 0)) errors.push(`${w}.anims.${id}.fps: 양수`);

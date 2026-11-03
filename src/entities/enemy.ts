@@ -186,6 +186,13 @@ export class Enemy {
     return effectiveRank(this.def.rank, this.elite);
   }
 
+  /** 보스 컨트롤러가 자세를 잡는 중: idle·move로 되돌리지 않는다 */
+  poseHold = false;
+
+  get exposed(): boolean {
+    return this.stunLeft > 0;
+  }
+
   /** 핵 노출·기절: sec 동안 받는 피해 ×mul (보스 파성 돌진) */
   setExposed(sec: number, mul: number): void {
     this.stunLeft = sec;
@@ -359,6 +366,7 @@ export class Enemy {
 
   /** 조준 중 준비 자세(유령 사수 활 당기기)가 있으면 그것을, 아니면 idle·move */
   private animate(data: ReturnType<typeof getContext>['data']): void {
+    if (this.poseHold) return;
     const aim = animKey(this.def.spriteKey, 'aim');
     if (this.ai.phase !== 'windup' && !(this.ai.phase === 'act' && this.sprite.anims.currentAnim?.key === aim) || !this.scene.anims.exists(aim)) {
       animateArt(data, this.sprite);

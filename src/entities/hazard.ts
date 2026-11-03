@@ -6,7 +6,9 @@ import { bus } from '../core/events';
 import { shake } from './juice';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
+import { loopArt, playFx } from '../skills/skillFx';
 import { inGap } from '../systems/bossGeometry';
+import type { SpriteRef } from '../types/data';
 import { bounceStep } from '../systems/motion';
 import type { Enemy } from './enemy';
 
@@ -51,6 +53,7 @@ export class SectorBlast implements Hazard {
     delaySec: number,
     private readonly damage: number,
     private readonly color: number,
+    private readonly hitArt?: SpriteRef,
   ) {
     this.left = delaySec;
     const half = (arcDeg * Math.PI) / 360;
@@ -68,9 +71,14 @@ export class SectorBlast implements Hazard {
     diff = Math.atan2(Math.sin(diff), Math.cos(diff));
     if (d <= this.radius + host.playerRadius && Math.abs(diff) <= (this.arcDeg * Math.PI) / 360) host.hurtPlayer(this.damage);
     const half = (this.arcDeg * Math.PI) / 360;
+    bus.emit('sfx', { id: 'bossSlam' });
+    if (this.hitArt) {
+      const mid = this.radius * 0.55;
+      playFx(host.scene, this.hitArt, this.at.x + Math.cos(this.angle) * mid, this.at.y + Math.sin(this.angle) * mid, { w: this.radius * 1.3, rotation: this.angle });
+      return false;
+    }
     const f = host.scene.add.graphics().setDepth(6);
     f.fillStyle(this.color, 0.6).slice(this.at.x, this.at.y, this.radius, this.angle - half, this.angle + half, false).fillPath();
-    bus.emit('sfx', { id: 'bossSlam' });
     flash(host, f);
     return false;
   }
@@ -83,6 +91,7 @@ export class SectorBlast implements Hazard {
 /** 남아서 간격마다 피해를 주는 원 (원혼 돌진의 마기 영역) */
 export class Zone implements Hazard {
   private readonly c: Phaser.GameObjects.Arc;
+  private readonly art: Phaser.GameObjects.Sprite | null = null;
   private readonly ticker: Ticker;
   private left: number;
 
@@ -97,21 +106,28 @@ export class Zone implements Hazard {
     private readonly mental = 0,
     /** 이 시간 동안은 흐린 예고만 (피해 없음) */
     private delaySec = 0,
+    art?: SpriteRef,
   ) {
     this.left = liveSec;
     this.ticker = new Ticker(tickSec);
-    this.c = scene.add.circle(at.x, at.y, radius, color, 0.3).setDepth(1);
+    this.c = scene.add.circle(at.x, at.y, radius, color, art ? 0.12 : 0.3).setDepth(1);
+    if (art) {
+      this.art = scene.add.sprite(at.x, at.y, art.spriteKey).setDepth(1).setDisplaySize(radius * 2.4, radius * 2.4);
+      loopArt(this.art, art);
+    }
   }
 
   update(dt: number, host: HazardHost): boolean {
     if (this.delaySec > 0) {
       this.delaySec -= dt;
       this.c.setAlpha(0.35);
+      this.art?.setAlpha(0.35);
       return true;
     }
     this.left -= dt;
     if (this.left <= 0) return false;
     this.c.setAlpha(Math.min(1, this.left));
+    this.art?.setAlpha(Math.min(1, this.left));
     const p = host.playerPos();
     this.ticker.tick(dt, Math.hypot(p.x - this.at.x, p.y - this.at.y) <= this.radius + host.playerRadius, host, this.damage, this.mental);
     return true;
@@ -119,6 +135,7 @@ export class Zone implements Hazard {
 
   destroy(): void {
     this.c.destroy();
+    this.art?.destroy();
   }
 }
 
@@ -219,13 +236,21 @@ export interface BeamsSpec {
   color: number;
   /** 플레이어를 맞혔을 때 (위압) */
   onHit?: () => void;
+  /** 켜진 광선 그림과 예고 그림 (길이·굵기에 맞춰 늘린다) */
+  art?: SpriteRef;
+  warnArt?: SpriteRef;
 }
+
+/** 광선 그림이 판정 굵기보다 이만큼 굵게 보인다 (빛 번짐) */
+const BEAM_ART_WIDTH = 2.4;
 
 /** 중심에서 뻗은 줄기들이 회전 (회전 번개). 대형 레이저라 굴절·탄 베기 불가 */
 export class Beams implements Hazard {
   private readonly g: Phaser.GameObjects.Graphics;
   private t = 0;
   private readonly ticker: Ticker;
+  private sprites: Phaser.GameObjects.Sprite[] = [];
+  private spriteRef: SpriteRef | null = null;
 
   constructor(
     scene: Phaser.Scene,
@@ -244,19 +269,36 @@ export class Beams implements Hazard {
     const c = s.center();
     const p = host.playerPos();
     let inside = false;
-    this.g.clear().lineStyle(live ? s.width : 1, s.color, live ? 0.8 : 0.4);
+    const art = live ? s.art : s.warnArt;
+    this.setSprites(host, art ?? null);
+    this.g.clear().lineStyle(live ? s.width : 1, s.color, art ? (live ? 0.25 : 0.25) : live ? 0.8 : 0.4);
     for (let i = 0; i < s.count; i++) {
       const a = base + (i * Math.PI * 2) / s.count;
       const end = { x: c.x + Math.cos(a) * s.length, y: c.y + Math.sin(a) * s.length };
       this.g.lineBetween(c.x, c.y, end.x, end.y);
+      this.sprites[i]?.setPosition(c.x, c.y).setRotation(a).setDisplaySize(s.length, live ? s.width * BEAM_ART_WIDTH : s.width);
       if (segDist(p, c, end) <= s.width / 2 + host.playerRadius) inside = true;
     }
     if (live && this.ticker.tick(dt, inside, host, s.damage, s.mental)) s.onHit?.();
     return true;
   }
 
+  private setSprites(host: HazardHost, ref: SpriteRef | null): void {
+    if (ref === this.spriteRef) return;
+    this.spriteRef = ref;
+    for (const sp of this.sprites) sp.destroy();
+    this.sprites = ref
+      ? Array.from({ length: this.s.count }, () => {
+          const sp = host.scene.add.sprite(0, 0, ref.spriteKey).setOrigin(0, 0.5).setDepth(3);
+          loopArt(sp, ref);
+          return sp;
+        })
+      : [];
+  }
+
   destroy(): void {
     this.g.destroy();
+    for (const sp of this.sprites) sp.destroy();
   }
 }
 
@@ -277,6 +319,7 @@ export interface Hazard {
 export class DelayedBlast implements Hazard {
   private readonly ring: Phaser.GameObjects.Arc;
   private readonly fill: Phaser.GameObjects.Arc;
+  private readonly warn: Phaser.GameObjects.Sprite | null = null;
   private left: number;
 
   constructor(
@@ -286,10 +329,16 @@ export class DelayedBlast implements Hazard {
     private readonly delaySec: number,
     private readonly damage: number,
     private readonly color: number,
+    private readonly art?: { warn?: SpriteRef; hit?: SpriteRef },
   ) {
     this.left = delaySec;
     this.ring = scene.add.circle(at.x, at.y, radius).setStrokeStyle(1, color, 0.9).setDepth(2);
     this.fill = scene.add.circle(at.x, at.y, 1, color, 0.3).setDepth(2);
+    if (art?.warn) {
+      this.warn = scene.add.sprite(at.x, at.y, art.warn.spriteKey).setDepth(2).setAlpha(0.6);
+      this.warn.setDisplaySize(radius * 2, (radius * 2 * this.warn.height) / Math.max(1, this.warn.width));
+      loopArt(this.warn, art.warn);
+    }
   }
 
   update(dt: number, host: HazardHost): boolean {
@@ -299,6 +348,10 @@ export class DelayedBlast implements Hazard {
     const p = host.playerPos();
     if (Math.hypot(p.x - this.at.x, p.y - this.at.y) <= this.radius + host.playerRadius) host.hurtPlayer(this.damage);
     bus.emit('sfx', { id: 'explosion' });
+    if (this.art?.hit) {
+      playFx(host.scene, this.art.hit, this.at.x, this.at.y, { w: this.radius * 2.4 });
+      return false;
+    }
     const flash = host.scene.add.circle(this.at.x, this.at.y, this.radius, this.color, 0.6).setDepth(6);
     host.scene.time.delayedCall(150, () => flash.destroy());
     return false;
@@ -307,6 +360,7 @@ export class DelayedBlast implements Hazard {
   destroy(): void {
     this.ring.destroy();
     this.fill.destroy();
+    this.warn?.destroy();
   }
 }
 
@@ -365,6 +419,7 @@ export class RectBlast implements Hazard {
     private readonly delaySec: number,
     private readonly damage: number,
     private readonly color: number,
+    private readonly hitArt?: SpriteRef,
   ) {
     this.left = delaySec;
     this.g = scene.add.graphics().setDepth(2);
@@ -380,7 +435,8 @@ export class RectBlast implements Hazard {
     const pr = host.playerRadius;
     if (p.x + pr >= r.x && p.x - pr <= r.x + r.w && p.y + pr >= r.y && p.y - pr <= r.y + r.h) host.hurtPlayer(this.damage);
     bus.emit('sfx', { id: 'explosion' });
-    const flash = host.scene.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, this.color, 0.6).setDepth(6);
+    if (this.hitArt) playFx(host.scene, this.hitArt, r.x + r.w / 2, r.y + r.h / 2, { w: r.w * 1.3, h: r.h, grow: 1 });
+    const flash = host.scene.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, this.color, this.hitArt ? 0.25 : 0.6).setDepth(6);
     host.scene.time.delayedCall(150, () => flash.destroy());
     return false;
   }
@@ -394,6 +450,8 @@ export class RectBlast implements Hazard {
 export class FollowBlast implements Hazard {
   private readonly ring: Phaser.GameObjects.Arc;
   private readonly fill: Phaser.GameObjects.Arc;
+  private readonly mark: Phaser.GameObjects.Sprite | null = null;
+  private locked = false;
   private pos: Vec2;
   private left: number;
 
@@ -407,11 +465,16 @@ export class FollowBlast implements Hazard {
     private readonly color: number,
     /** 터지기 전 이 시간은 자리에 고정된다 */
     private readonly lockSec = 0,
+    private readonly art?: { track?: SpriteRef; lock?: SpriteRef; hit?: SpriteRef },
   ) {
     this.pos = { ...from };
     this.left = followSec;
     this.ring = scene.add.circle(from.x, from.y, radius).setStrokeStyle(1, color, 0.9).setDepth(2);
     this.fill = scene.add.circle(from.x, from.y, radius, color, 0.15).setDepth(2);
+    if (art?.track) {
+      this.mark = scene.add.sprite(from.x, from.y, art.track.spriteKey).setDepth(2).setDisplaySize(radius * 2.2, radius * 2.2);
+      loopArt(this.mark, art.track);
+    }
   }
 
   update(dt: number, host: HazardHost): boolean {
@@ -424,23 +487,33 @@ export class FollowBlast implements Hazard {
     if (d > 0 && this.left > this.lockSec) this.pos = { x: this.pos.x + (dx / d) * step, y: this.pos.y + (dy / d) * step };
     this.ring.setPosition(this.pos.x, this.pos.y);
     this.fill.setPosition(this.pos.x, this.pos.y).setAlpha(0.15 + 0.45 * (1 - Math.max(0, this.left) / this.followSec));
+    this.mark?.setPosition(this.pos.x, this.pos.y);
+    if (!this.locked && this.left <= this.lockSec) {
+      this.locked = true;
+      if (this.art?.lock && this.mark) {
+        this.mark.anims.stop();
+        this.mark.setTexture(this.art.lock.spriteKey, 0).setDisplaySize(this.radius * 2.2, this.radius * 2.2);
+      }
+    }
     if (this.left > 0) return true;
     if (Math.hypot(p.x - this.pos.x, p.y - this.pos.y) <= this.radius + host.playerRadius) host.hurtPlayer(this.damage);
-    const f = host.scene.add.circle(this.pos.x, this.pos.y, this.radius, this.color, 0.6).setDepth(6);
     bus.emit('sfx', { id: 'explosion' });
-    flash(host, f);
+    if (this.art?.hit) playFx(host.scene, this.art.hit, this.pos.x, this.pos.y, { w: this.radius * 2.4 });
+    else flash(host, host.scene.add.circle(this.pos.x, this.pos.y, this.radius, this.color, 0.6).setDepth(6));
     return false;
   }
 
   destroy(): void {
     this.ring.destroy();
     this.fill.destroy();
+    this.mark?.destroy();
   }
 }
 
 /** 방 전체 예고 → 안전지대 몇 곳 밖이면 큰 피해 (마기카이저 종말 명령) */
 export class SafeZoneBlast implements Hazard {
   private readonly g: Phaser.GameObjects.Graphics;
+  private safeMarks: Phaser.GameObjects.Sprite[] = [];
   private left: number;
 
   constructor(
@@ -451,9 +524,11 @@ export class SafeZoneBlast implements Hazard {
     private readonly delaySec: number,
     private readonly damage: number,
     private readonly color: number,
+    private readonly art?: { safe?: SpriteRef; hit?: SpriteRef },
   ) {
     this.left = delaySec;
     this.g = scene.add.graphics().setDepth(2);
+    if (art?.safe) this.safeMarks = safe.map((s) => scene.add.sprite(s.x, s.y, art.safe!.spriteKey).setDepth(2).setAlpha(0.8).setDisplaySize(safeRadius * 2.3, safeRadius * 2.3));
   }
 
   update(dt: number, host: HazardHost): boolean {
@@ -469,13 +544,15 @@ export class SafeZoneBlast implements Hazard {
     const p = host.playerPos();
     const safe = this.safe.some((s) => Math.hypot(p.x - s.x, p.y - s.y) + host.playerRadius <= this.safeRadius);
     if (!safe) host.hurtPlayer(this.damage);
-    const f = host.scene.add.rectangle(a.x + a.w / 2, a.y + a.h / 2, a.w, a.h, this.color, 0.6).setDepth(6);
+    const f = host.scene.add.rectangle(a.x + a.w / 2, a.y + a.h / 2, a.w, a.h, this.color, this.art?.hit ? 0.3 : 0.6).setDepth(6);
     flash(host, f, 250);
+    if (this.art?.hit) playFx(host.scene, this.art.hit, a.x + a.w / 2, a.y + a.h / 2, { w: a.w, fadeSec: 0.45 });
     shake(host.scene, 'medium');
     return false;
   }
 
   destroy(): void {
     this.g.destroy();
+    for (const m of this.safeMarks) m.destroy();
   }
 }

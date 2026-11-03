@@ -56,7 +56,7 @@ import { gainGauge, tickCooldowns } from '../systems/skills';
 import { tickBleed } from '../systems/tags';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
-import type { BleedRule, TagId, WeaponDef } from '../types/data';
+import type { BleedRule, SpriteRef, TagId, WeaponDef } from '../types/data';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -236,9 +236,9 @@ export class RunScene extends Phaser.Scene {
       rng: this.rng,
       t: (key) => this.ctx.t(key),
       addHazard: (h) => this.hazards.push(h),
-      fireEnemyBullet: (from, angle, speed, range, damage, refractable) =>
-        this.fireEnemyBullet(from, angle, speed, range, damage * this.enemyDamageMul(), refractable),
-      fireEnemyMissile: (from, angle, speed, range, damage, turnRate) => this.fireEnemyBullet(from, angle, speed, range, damage * this.enemyDamageMul(), true, turnRate),
+      fireEnemyBullet: (from, angle, speed, range, damage, refractable, sprite) =>
+        this.fireEnemyBullet(from, angle, speed, range, damage * this.enemyDamageMul(), refractable, 0, 0, sprite),
+      fireEnemyMissile: (from, angle, speed, range, damage, turnRate, sprite) => this.fireEnemyBullet(from, angle, speed, range, damage * this.enemyDamageMul(), true, turnRate, 0, sprite),
       pushPlayer: (v) => {
         const body = this.player.body as Phaser.Physics.Arcade.Body;
         body.velocity.x += v.x;
@@ -1183,15 +1183,20 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 적 탄. refractable=false면 굴절·탄 베기 불가(보스 대형 레이저 등). homing: 플레이어 쪽으로 휘는 속도(rad/s, 유도 미사일) */
-  fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, homing = 0, mental = 0): void {
+  fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, homing = 0, mental = 0, sprite?: SpriteRef): void {
     const ep = this.ctx.data.enemies.projectile;
-    const b = this.enemyBullets.create(from.x, from.y, ep.spriteKey) as Phaser.Physics.Arcade.Image;
+    const b = this.enemyBullets.create(from.x, from.y, sprite?.spriteKey ?? ep.spriteKey) as Phaser.Physics.Arcade.Sprite;
     fitArt(this.ctx.data, b, ep.size, ep.height ?? ep.size);
+    // 보스 전용 탄: 날아가는 쪽을 보고 프레임이 돈다
+    if (sprite) {
+      b.setRotation(angle);
+      loopArt(b, sprite);
+    }
     b.setDepth(5);
     b.setData({ damage, mental, refractable, cuttable: refractable, range, ox: from.x, oy: from.y, homing });
     // 굴절 불가 탄은 붉게, 유도 미사일은 크게
-    if (!refractable) b.setTint(0xff2a2a);
-    if (homing > 0) b.setScale(1.5);
+    if (!refractable && !sprite) b.setTint(0xff2a2a);
+    if (homing > 0 && !sprite) b.setScale(1.5);
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
   }
 

@@ -5,15 +5,16 @@ import type { Vec2 } from '../core/actions';
 import type { Rng } from '../core/rng';
 import type { Enemy } from '../entities/enemy';
 import type { Hazard, HazardHost, Rect } from '../entities/hazard';
+import type { SpriteRef } from '../types/data';
 
 export interface BossHost extends HazardHost {
   readonly rng: Rng;
   t(key: string): string;
   addHazard(h: Hazard): void;
   /** 적 탄. refractable=false면 벡터굴절역장·칼 탄 베기로 지울 수 없다 */
-  fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean): void;
+  fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, sprite?: SpriteRef): void;
   /** 유도 미사일: 플레이어 쪽으로 초당 turnRate(rad)까지 휜다. 일반 탄처럼 굴절·탄 베기 가능 */
-  fireEnemyMissile(from: Vec2, angle: number, speed: number, range: number, damage: number, turnRate: number): void;
+  fireEnemyMissile(from: Vec2, angle: number, speed: number, range: number, damage: number, turnRate: number, sprite?: SpriteRef): void;
   /** 플레이어 속도 (이동 예측) */
   playerVel(): Vec2;
   /** 지금 정신력 (위압) */
@@ -39,4 +40,6 @@ export interface BossHost extends HazardHost {
 export interface PatternRun {
   update(dt: number): void;
   destroy(): void;
+  /** 돌진 패턴이 지금 원하는 본체 자세 */
+  bodyPose?(): 'dashReady' | 'dash' | 'dashEnd' | null;
 }

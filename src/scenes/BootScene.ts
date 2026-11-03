@@ -53,6 +53,7 @@ export class BootScene extends Phaser.Scene {
       data.mapgen.vending.potion,
       ...data.skills.skills.flatMap((s) => Object.values(s.sprites)),
       ...data.ultimates.ultimates.flatMap((u) => Object.values(u.sprites)),
+      ...data.bosses.bosses.flatMap((b) => [...Object.values(b.art ?? {}), ...(b.layers ?? []).map((l) => l.sprite)]),
     ];
     // 파일이 없거나 깨져서 못 불러온 그림은 그 키만 색 사각형으로 남긴다
     for (const [key, s] of Object.entries(data.art.sprites)) {

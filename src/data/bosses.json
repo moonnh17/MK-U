@@ -114,7 +114,78 @@
         "count": 2,
         "countEnraged": 3,
         "maxAlive": 8
-      }
+      },
+      "art": {
+        "sectorHit": {
+          "spriteKey": "fx_fusion_slash",
+          "color": "#8c3ad9",
+          "size": 40
+        },
+        "blastHit": {
+          "spriteKey": "fx_fusion_burst",
+          "color": "#8c3ad9",
+          "size": 30
+        },
+        "eruption.blastHit": {
+          "spriteKey": "fx_fusion_eruption",
+          "color": "#8c3ad9",
+          "size": 40
+        },
+        "blastWarn": {
+          "spriteKey": "fx_fusion_charge",
+          "color": "#8c3ad9",
+          "size": 30
+        },
+        "bullet": {
+          "spriteKey": "fx_fusion_bolt",
+          "color": "#8c3ad9",
+          "size": 8
+        },
+        "dashTrail": {
+          "spriteKey": "fx_fusion_dash",
+          "color": "#8c3ad9",
+          "size": 30
+        },
+        "zone": {
+          "spriteKey": "fx_fusion_smoke",
+          "color": "#8c3ad9",
+          "size": 20
+        },
+        "summon": {
+          "spriteKey": "fx_fusion_summon",
+          "color": "#8c3ad9",
+          "size": 20
+        },
+        "spiritBlast.cast": {
+          "spriteKey": "fx_fusion_orb",
+          "color": "#8c3ad9",
+          "size": 20
+        },
+        "death": {
+          "spriteKey": "fx_fusion_explode",
+          "color": "#8c3ad9",
+          "size": 45
+        }
+      },
+      "poses": {
+        "dashReady": "slash",
+        "dash": "dash",
+        "claw": "slash",
+        "eruption": "slash",
+        "spiritBlast": "slash"
+      },
+      "layers": [
+        {
+          "sprite": {
+            "spriteKey": "fx_fusion_vortex",
+            "color": "#8c3ad9",
+            "size": 45
+          },
+          "alpha": 0.22,
+          "pulse": 0.1,
+          "spin": 0.45
+        }
+      ]
     },
     {
       "id": "electricRing",
@@ -301,7 +372,96 @@
         "radius": 18,
         "delaySec": 0.65,
         "damage": 12
-      }
+      },
+      "art": {
+        "blastWarn": {
+          "spriteKey": "fx_electric_warning",
+          "color": "#3a7aff",
+          "size": 15
+        },
+        "blastHit": {
+          "spriteKey": "fx_electric_strike",
+          "color": "#3a7aff",
+          "size": 25
+        },
+        "prison.blastHit": {
+          "spriteKey": "fx_electric_strike2",
+          "color": "#3a7aff",
+          "size": 25
+        },
+        "beam": {
+          "spriteKey": "fx_electric_laser",
+          "color": "#3a7aff",
+          "size": 60
+        },
+        "crossCut.beam": {
+          "spriteKey": "fx_electric_line",
+          "color": "#3a7aff",
+          "size": 60
+        },
+        "bullet": {
+          "spriteKey": "fx_electric_orb",
+          "color": "#3a7aff",
+          "size": 6
+        },
+        "dashTrail": {
+          "spriteKey": "fx_electric_dash",
+          "color": "#3a7aff",
+          "size": 30
+        },
+        "cage": {
+          "spriteKey": "fx_electric_cage",
+          "color": "#3a7aff",
+          "size": 50
+        },
+        "shockRipple.cast": {
+          "spriteKey": "fx_electric_radial",
+          "color": "#3a7aff",
+          "size": 35
+        },
+        "crossCut.cast": {
+          "spriteKey": "fx_electric_cross",
+          "color": "#3a7aff",
+          "size": 45
+        },
+        "blueDash.blastHit": {
+          "spriteKey": "fx_electric_impact",
+          "color": "#3a7aff",
+          "size": 40
+        }
+      },
+      "poses": {
+        "dashReady": "cast",
+        "dash": "dash",
+        "lightningChase": "cast",
+        "shockRipple": "cast",
+        "spinLightning": "cast",
+        "prison": "cast",
+        "edgeLock": "cast",
+        "shrinkCurrent": "cast",
+        "crossCut": "cast",
+        "chaseField": "cast"
+      },
+      "layers": [
+        {
+          "sprite": {
+            "spriteKey": "fx_electric_ring",
+            "color": "#3a7aff",
+            "size": 45
+          },
+          "alpha": 0.25,
+          "pulse": 0.08
+        },
+        {
+          "sprite": {
+            "spriteKey": "fx_electric_aura",
+            "color": "#3a7aff",
+            "size": 45
+          },
+          "alpha": 0.3,
+          "pulse": 0.08
+        }
+      ]
     },
     {
       "id": "hectarChief",
@@ -453,7 +613,49 @@
           "summon": "hectarTrooper"
         }
       ],
-      "gapSecEnraged": 0.64
+      "gapSecEnraged": 0.64,
+      "art": {
+        "blastHit": {
+          "spriteKey": "fx_chief_burst",
+          "color": "#3a7aff",
+          "size": 30
+        },
+        "blastWarn": {
+          "spriteKey": "fx_chief_ring",
+          "color": "#3a7aff",
+          "size": 35
+        },
+        "repulse.cast": {
+          "spriteKey": "fx_chief_ring",
+          "color": "#3a7aff",
+          "size": 35
+        },
+        "vectorField.cast": {
+          "spriteKey": "fx_chief_ring",
+          "color": "#3a7aff",
+          "size": 35
+        },
+        "boltProof.blastHit": {
+          "spriteKey": "fx_chief_burst",
+          "color": "#3a7aff",
+          "size": 30
+        },
+        "drone": {
+          "spriteKey": "fx_chief_drone",
+          "color": "#3a7aff",
+          "size": 7
+        }
+      },
+      "poses": {
+        "repulse": "cast",
+        "droneFire": "cast",
+        "antimatter": "cast",
+        "railCross": "cast",
+        "mineSiege": "cast",
+        "vectorField": "cast",
+        "boltProof": "cast",
+        "callTroopers": "cast"
+      }
     },
     {
       "id": "magiGolem",
@@ -645,7 +847,117 @@
         "radius": 26,
         "delaySec": 0.7,
         "damage": 18
-      }
+      },
+      "art": {
+        "blastWarn": {
+          "spriteKey": "fx_golem_warn",
+          "color": "#a03ae0",
+          "size": 25
+        },
+        "blastHit": {
+          "spriteKey": "fx_golem_artillery",
+          "color": "#a03ae0",
+          "size": 30
+        },
+        "ringStart": {
+          "spriteKey": "fx_golem_shock",
+          "color": "#a03ae0",
+          "size": 45
+        },
+        "beam": {
+          "spriteKey": "fx_golem_ruin_beam",
+          "color": "#a03ae0",
+          "size": 60
+        },
+        "ruinBeam.beamSide": {
+          "spriteKey": "fx_golem_laser_side",
+          "color": "#a03ae0",
+          "size": 60
+        },
+        "crustCrack.beam": {
+          "spriteKey": "fx_golem_crack",
+          "color": "#a03ae0",
+          "size": 60
+        },
+        "ruinLegion.cast": {
+          "spriteKey": "fx_golem_summon",
+          "color": "#a03ae0",
+          "size": 35
+        },
+        "summon": {
+          "spriteKey": "fx_golem_minion",
+          "color": "#a03ae0",
+          "size": 15
+        },
+        "dashTrail": {
+          "spriteKey": "fx_golem_trail",
+          "color": "#a03ae0",
+          "size": 25
+        },
+        "core": {
+          "spriteKey": "fx_golem_core",
+          "color": "#a03ae0",
+          "size": 18
+        },
+        "collapseZone.cast": {
+          "spriteKey": "fx_golem_eight",
+          "color": "#a03ae0",
+          "size": 50
+        },
+        "collapseZone.blastHit": {
+          "spriteKey": "fx_golem_eruption",
+          "color": "#a03ae0",
+          "size": 30
+        },
+        "bandV": {
+          "spriteKey": "fx_golem_fault_v",
+          "color": "#a03ae0",
+          "size": 45
+        },
+        "bandH": {
+          "spriteKey": "fx_golem_fault_h",
+          "color": "#a03ae0",
+          "size": 45
+        },
+        "doomFault.blastHit": {
+          "spriteKey": "fx_golem_fault_hit",
+          "color": "#a03ae0",
+          "size": 25
+        }
+      },
+      "poses": {
+        "dashReady": "ready",
+        "dash": "ready",
+        "recover": "overload",
+        "earthCrush": "slam",
+        "bombard": "cast",
+        "ruinBeam": "cast",
+        "ruinLegion": "cast",
+        "crustCrack": "sweep",
+        "collapseZone": "slam",
+        "doomFault": "punch",
+        "golemIntimidate": "cast"
+      },
+      "layers": [
+        {
+          "sprite": {
+            "spriteKey": "fx_golem_rage_aura",
+            "color": "#a03ae0",
+            "size": 45
+          },
+          "alpha": 0.34,
+          "pulse": 0.07
+        },
+        {
+          "sprite": {
+            "spriteKey": "fx_golem_rage_core",
+            "color": "#a03ae0",
+            "size": 20
+          },
+          "alpha": 0.65,
+          "pulse": 0.12
+        }
+      ]
     },
     {
       "id": "eclipse",
@@ -781,7 +1093,100 @@
           "hpBelow": 0.2
         }
       ],
-      "gapSecEnraged": 0.55
+      "gapSecEnraged": 0.55,
+      "art": {
+        "blastWarn": {
+          "spriteKey": "fx_eclipse_warning",
+          "color": "#ff3a4a",
+          "size": 30
+        },
+        "blastHit": {
+          "spriteKey": "fx_eclipse_impact",
+          "color": "#ff3a4a",
+          "size": 35
+        },
+        "bullet": {
+          "spriteKey": "fx_eclipse_blade",
+          "color": "#ff3a4a",
+          "size": 7
+        },
+        "orbitCut.cast": {
+          "spriteKey": "fx_eclipse_charge",
+          "color": "#ff3a4a",
+          "size": 20
+        },
+        "followTrack": {
+          "spriteKey": "fx_eclipse_track",
+          "color": "#ff3a4a",
+          "size": 30
+        },
+        "followLock": {
+          "spriteKey": "fx_eclipse_lock",
+          "color": "#ff3a4a",
+          "size": 30
+        },
+        "followHit": {
+          "spriteKey": "fx_eclipse_shadow",
+          "color": "#ff3a4a",
+          "size": 35
+        },
+        "safe": {
+          "spriteKey": "fx_eclipse_safe",
+          "color": "#ff3a4a",
+          "size": 40
+        },
+        "safeHit": {
+          "spriteKey": "fx_eclipse_field",
+          "color": "#ff3a4a",
+          "size": 55
+        },
+        "totalEclipse.safeHit": {
+          "spriteKey": "fx_eclipse_total_hit",
+          "color": "#ff3a4a",
+          "size": 60
+        },
+        "totalEclipse.cast": {
+          "spriteKey": "fx_eclipse_total_warn",
+          "color": "#ff3a4a",
+          "size": 60
+        },
+        "gravityCollapse.blastWarn": {
+          "spriteKey": "fx_eclipse_gravity",
+          "color": "#ff3a4a",
+          "size": 55
+        },
+        "zone": {
+          "spriteKey": "fx_eclipse_residue",
+          "color": "#ff3a4a",
+          "size": 30
+        },
+        "death": {
+          "spriteKey": "fx_eclipse_death",
+          "color": "#ff3a4a",
+          "size": 45
+        }
+      },
+      "poses": {
+        "transition": "transition",
+        "sunspotFall": "charge",
+        "orbitCut": "charge",
+        "shadowChase": "charge",
+        "eclipseShards": "charge",
+        "wideErosion": "charge",
+        "gravityCollapse": "charge",
+        "totalEclipse": "charge"
+      },
+      "layers": [
+        {
+          "sprite": {
+            "spriteKey": "fx_eclipse_flare",
+            "color": "#ff3a4a",
+            "size": 55
+          },
+          "alpha": 0.3,
+          "pulse": 0.08
+        }
+      ]
     },
     {
       "id": "magiKaiser",
@@ -1099,7 +1504,109 @@
         "rollSec": 0.75,
         "chance": 0.35,
         "minGapSec": 8
-      }
+      },
+      "art": {
+        "sectorHit": {
+          "spriteKey": "fx_kaiser_punch",
+          "color": "#ff2a2a",
+          "size": 50
+        },
+        "blastHit": {
+          "spriteKey": "fx_kaiser_impact",
+          "color": "#ff2a2a",
+          "size": 35
+        },
+        "blastWarn": {
+          "spriteKey": "fx_kaiser_lock",
+          "color": "#ff2a2a",
+          "size": 20
+        },
+        "beam": {
+          "spriteKey": "fx_kaiser_laser",
+          "color": "#ff2a2a",
+          "size": 60
+        },
+        "beamWarn": {
+          "spriteKey": "fx_kaiser_laser_warn",
+          "color": "#ff2a2a",
+          "size": 60
+        },
+        "spinLaser.beam": {
+          "spriteKey": "fx_kaiser_sweep",
+          "color": "#ff2a2a",
+          "size": 60
+        },
+        "unstableLaser.beam": {
+          "spriteKey": "fx_kaiser_sweep",
+          "color": "#ff2a2a",
+          "size": 60
+        },
+        "spinLaser.beamWarn": {
+          "spriteKey": "fx_kaiser_sweep_warn",
+          "color": "#ff2a2a",
+          "size": 60
+        },
+        "unstableLaser.beamWarn": {
+          "spriteKey": "fx_kaiser_sweep_warn",
+          "color": "#ff2a2a",
+          "size": 60
+        },
+        "missile": {
+          "spriteKey": "fx_kaiser_missile",
+          "color": "#ff2a2a",
+          "size": 8
+        },
+        "ringStart": {
+          "spriteKey": "fx_kaiser_shock",
+          "color": "#ff2a2a",
+          "size": 45
+        },
+        "lineLaser.cast": {
+          "spriteKey": "fx_kaiser_muzzle",
+          "color": "#ff2a2a",
+          "size": 20
+        },
+        "safeHit": {
+          "spriteKey": "fx_kaiser_command",
+          "color": "#ff2a2a",
+          "size": 60
+        },
+        "geyser.blastHit": {
+          "spriteKey": "fx_kaiser_debris",
+          "color": "#ff2a2a",
+          "size": 35
+        },
+        "doomCommand.cast": {
+          "spriteKey": "fx_kaiser_cross",
+          "color": "#ff2a2a",
+          "size": 60
+        },
+        "death": {
+          "spriteKey": "fx_kaiser_death",
+          "color": "#ff2a2a",
+          "size": 55
+        }
+      },
+      "poses": {
+        "transition": "transition",
+        "dashReady": "dashStart",
+        "dash": "dash",
+        "dashEnd": "dashEnd",
+        "kaiserPunch": {
+          "first": "punchWindup",
+          "sec": 0.55,
+          "then": "punchStrike"
+        },
+        "lineLaser": "laser",
+        "spinLaser": "laser",
+        "unstableLaser": "laser",
+        "kaiserIntimidate": "laser",
+        "homingMissiles": "missile",
+        "doomCommand": "command",
+        "redBarrage": "cross",
+        "groundShock": "cross"
+      },
+      "layers": []
     }
   ],
   "hiddenChapterMul": {

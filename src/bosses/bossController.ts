@@ -11,7 +11,8 @@ import { getContext } from '../core/context';
 import { hexColor } from '../core/scale';
 import { fitArt } from '../entities/art';
 import { shake } from '../entities/juice';
-import { artKeys, bossArtPhase } from '../systems/art';
+import { animKey, artKeys, bossArtPhase } from '../systems/art';
+import { loopArt, playFx } from '../skills/skillFx';
 import type { Enemy } from '../entities/enemy';
 import { initialBoss, stepBoss, type BossBrainState } from '../systems/bossBrain';
 import { DelayedBlast } from '../entities/hazard';
@@ -28,6 +29,13 @@ interface Minion {
   pattern: string;
   left: number | null;
   shot: number | null;
+}
+
+/** 자세 동안의 좌우: 움직이는 쪽을 보고, 멈춰 있으면 그대로. 몸이 없으면 null */
+function poseFlip(e: Enemy): boolean | null {
+  const body = e.sprite.body as Phaser.Physics.Arcade.Body | null;
+  if (!body) return null;
+  return body.velocity.x !== 0 ? body.velocity.x < 0 : e.sprite.flipX;
 }
 
 /** 부른 패턴을 막지 않는 소환수 */
@@ -47,7 +55,7 @@ export class BossController {
   private rubble: { destroy(): void }[] = [];
   private host: BossHost | null = null;
   /** 파성 돌진: 핵이 드러난 동안의 표시 */
-  private coreFx: Phaser.GameObjects.Arc | null = null;
+  private coreFx: Phaser.GameObjects.Arc | Phaser.GameObjects.Sprite | null = null;
   /** 구속구 (시간 단계 보스, 첫 단계 전) */
   private restraint: Phaser.GameObjects.Graphics | null = null;
   /** 지금 입은 단계 그림 (0 = 기본 그림) */
@@ -59,6 +67,14 @@ export class BossController {
   private inheritGap = 0;
   /** 저체력 추가 공격까지 남은 시간 */
   private lowStrike: number | null = null;
+  /** 본체 자세: 지금 패턴과 시작 후 시간, 단계 전환 자세 남은 시간 */
+  private patternId: string | null = null;
+  private patternAge = 0;
+  private transitionLeft = 0;
+  private pose: string | null = null;
+  /** 강화 단계에 몸에 겹치는 그림 */
+  private layers: { sp: Phaser.GameObjects.Sprite; alpha: number; pulse: number; spin: number }[] = [];
+  private layerT = 0;
 
   constructor(
     readonly enemy: Enemy,
@@ -117,10 +133,15 @@ export class BossController {
       if (ev.type === 'end') {
         this.run?.destroy();
         this.run = null;
+        this.patternId = null;
       } else if (ev.type === 'unlock') {
         this.unlock(host, ev.stage);
       } else if (ev.type === 'start') {
         this.run = makePattern(ev.id, this.patternCtx(host, ev.id, this.body));
+        this.patternId = ev.id;
+        this.patternAge = 0;
+        const cast = this.def.art?.[`${ev.id}.cast`];
+        if (cast) playFx(host.scene, cast, e.sprite.x, e.sprite.y, { depth: 5 });
         this.label(host, host.t(`boss.pattern.${ev.id}`));
         this.spawnCompanions(host);
         if (this.def.lowHpStrike && hp <= this.def.lowHpStrike.at) this.lowStrike = this.def.lowHpStrike.afterSec;
@@ -130,6 +151,8 @@ export class BossController {
     }
     this.updateLowStrike(dt, host);
     this.updateInherit(dt, host);
+    this.updatePose(dt);
+    this.updateLayers(dt);
     if (this.run) this.run.update(dt);
     else if (this.restrained) e.sprite.setVelocity(0, 0);
     else this.approach(dist, p);
@@ -148,6 +171,7 @@ export class BossController {
       boss,
       host,
       v: (k) => this.value(id, k),
+      art: (slot) => this.def.art?.[`${id}.${slot}`] ?? this.def.art?.[slot],
       summonId: this.def.patterns.find((x) => x.id === id)?.summon,
       buff: (sec, dmg, speed) => this.startBuff(host, sec, dmg, speed),
       summonClones: () => this.summonClones(host),
@@ -156,6 +180,50 @@ export class BossController {
       expose: (sec, mul) => this.expose(host, sec, mul),
       rubble: (at, radius) => this.addRubble(host, at, radius),
     };
+  }
+
+  /** 본체 자세: 단계 전환 → 핵 노출 → 돌진 → 패턴 자세. 없으면 평소 idle·move로 돌아간다 */
+  private updatePose(dt: number): void {
+    this.patternAge += dt;
+    this.transitionLeft -= dt;
+    const poses = this.def.poses;
+    if (!poses) return;
+    const e = this.enemy;
+    let want: string | null = null;
+    const pick = (entry: NonNullable<BossCore['poses']>[string] | undefined): string | null => {
+      if (!entry) return null;
+      return typeof entry === 'string' ? entry : this.patternAge < entry.sec ? entry.first : entry.then;
+    };
+    if (this.transitionLeft > 0) want = 'transition';
+    else if (e.exposed) want = pick(poses.recover);
+    else if (this.run) want = pick(poses[this.run.bodyPose?.() ?? '']) ?? (this.patternId ? pick(poses[this.patternId]) : null);
+    const key = animKey(e.sprite.texture.key, want ?? '');
+    if (want && e.sprite.scene.anims.exists(key)) {
+      e.poseHold = true;
+      const p = poseFlip(e);
+      if (p !== null) e.sprite.setFlipX(p);
+      if (this.pose !== key) e.sprite.play(key);
+      this.pose = key;
+      return;
+    }
+    e.poseHold = false;
+    this.pose = null;
+  }
+
+  /** 강화 단계 겹침 그림: 몸을 따라다니며 맥동한다 */
+  private updateLayers(dt: number): void {
+    if (this.layers.length === 0) return;
+    this.layerT += dt;
+    const { x, y } = this.enemy.sprite.getCenter();
+    for (const l of this.layers) l.sp.setPosition(x, y).setAlpha(l.alpha + Math.sin(this.layerT * 10) * l.pulse).setRotation(this.layerT * l.spin);
+  }
+
+  private showLayers(host: BossHost): void {
+    for (const l of this.def.layers ?? []) {
+      const sp = host.scene.add.sprite(0, 0, l.sprite.spriteKey).setDepth(2).setAlpha(l.alpha);
+      loopArt(sp, l.sprite);
+      this.layers.push({ sp, alpha: l.alpha, pulse: l.pulse, spin: l.spin ?? 0 });
+    }
   }
 
   /** 패턴에 따라 나오는 소환수 (상한까지만) */
@@ -274,6 +342,8 @@ export class BossController {
         y: Math.min(a.y + a.h - 12, Math.max(a.y + 12, e.sprite.y + Math.sin(ang) * r)),
       };
       this.minions.push({ e: host.spawnMinion(id, at), pattern, left: null, shot: null });
+      const fx = this.def.art?.summon;
+      if (fx) playFx(host.scene, fx, at.x, at.y);
     });
   }
 
@@ -282,7 +352,8 @@ export class BossController {
     const e = this.enemy;
     e.setExposed(sec, mul);
     this.coreFx?.destroy();
-    this.coreFx = host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius * 0.45, 0xff5a3a, 0.9).setDepth(4);
+    const core = this.def.art?.core;
+    this.coreFx = core ? host.scene.add.sprite(e.sprite.x, e.sprite.y, core.spriteKey).setDepth(4) : host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius * 0.45, 0xff5a3a, 0.9).setDepth(4);
     host.scene.tweens.add({ targets: this.coreFx, alpha: 0.3, duration: 200, yoyo: true, repeat: -1 });
     host.scene.time.delayedCall(sec * 1000, () => {
       this.coreFx?.destroy();
@@ -357,6 +428,8 @@ export class BossController {
     this.applyPhaseArt();
     e.invuln = this.def.enrageSec;
     e.sprite.setVelocity(0, 0);
+    this.transitionLeft = this.def.enrageSec;
+    if (stage === (this.def.unlocks?.length ?? 0)) this.showLayers(host);
     if (stage === 1) {
       this.restraint?.destroy();
       this.restraint = null;
@@ -373,6 +446,8 @@ export class BossController {
     const e = this.enemy;
     this.applyPhaseArt();
     const en = this.def.enraged;
+    this.transitionLeft = this.def.enrageSec;
+    this.showLayers(host);
     e.invuln = this.def.enrageSec;
     e.sprite.setVelocity(0, 0);
     if (en.scale !== 1) e.setExtraScale(en.scale);
@@ -392,6 +467,13 @@ export class BossController {
 
   /** 보스가 사라질 때: 패턴·분신·잔해도 함께 치운다 */
   destroy(): void {
+    const death = this.def.art?.death;
+    if (death && this.enemy.dead && this.host) {
+      const { x, y } = this.enemy.sprite;
+      playFx(this.host.scene, death, x, y, { fadeSec: 0.6 });
+    }
+    for (const l of this.layers) l.sp.destroy();
+    this.layers = [];
     this.run?.destroy();
     this.run = null;
     this.inheritRun?.destroy();

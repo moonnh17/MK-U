@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 383개 · 그림 있음 367개
+전체 456개 · 그림 있음 441개
 
 ## player (3)
 
@@ -93,29 +93,29 @@
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
-| `enemy_fusion_akgwi` | 융합악귀 | 39×39 | feet | #7a1f3a | mku/enemy_fusion_akgwi.png (2프레임) |
-| `enemy_electric_ring` | 전기환띠 | 42×42 | feet | #3a9ad9 | mku/enemy_electric_ring.png (2프레임) |
+| `enemy_fusion_akgwi` | 융합악귀 | 39×39 | feet | #7a1f3a | mku/enemy_fusion_akgwi.png (4프레임) |
+| `enemy_electric_ring` | 전기환띠 | 42×42 | feet | #3a9ad9 | mku/enemy_electric_ring.png (6프레임) |
 | `enemy_training_dummy` | 보스 자리(임시 표적) | 24×24 | feet | #8a5ad9 | mku/enemy_training_dummy.png (1프레임) |
 | `enemy_ancestor_echo` | 선조의 잔상 | 42×42 | feet | #b0583a | mku/enemy_ancestor_echo.png (3프레임) |
 | `enemy_royal_mage` | 왕실특무마기법사 외 1곳 | 33×33 | feet | #6a4ad9 | mku/enemy_royal_mage.png (4프레임) |
 | `enemy_orion_crusader` | 오리온의 성전사 | 42×42 | feet | #d9c25a | mku/enemy_orion_crusader.png (9프레임) |
-| `enemy_hectar_chief` | 헥타르 수석 연구원 | 36×36 | feet | #3a9aff | mku/enemy_hectar_chief.png (5프레임) |
-| `enemy_magi_golem` | 마기골렘 | 48×48 | feet | #8a6a4a | mku/enemy_magi_golem.png (2프레임) |
-| `enemy_eclipse` | 식광 | 42×42 | feet | #c8a8ff | mku/enemy_eclipse.png (10프레임) |
+| `enemy_hectar_chief` | 헥타르 수석 연구원 | 36×36 | feet | #3a9aff | mku/enemy_hectar_chief.png (9프레임) |
+| `enemy_magi_golem` | 마기골렘 | 48×48 | feet | #8a6a4a | mku/enemy_magi_golem.png (10프레임) |
+| `enemy_eclipse` | 식광 | 42×42 | feet | #c8a8ff | mku/enemy_eclipse.png (16프레임) |
 | `enemy_magi_kaiser` | 마기카이저 | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser.png (10프레임) |
 | `enemy_fusion_akgwi_phase1` | 융합악귀 (1단계) | 39×39 | feet | #7a1f3a | — |
-| `enemy_fusion_akgwi_phase2` | 융합악귀 (2단계) | 39×39 | feet | #7a1f3a | mku/enemy_fusion_akgwi_phase2.png (2프레임) |
+| `enemy_fusion_akgwi_phase2` | 융합악귀 (2단계) | 39×39 | feet | #7a1f3a | mku/enemy_fusion_akgwi_phase2.png (4프레임) |
 | `enemy_electric_ring_phase1` | 전기환띠 (1단계) | 42×42 | feet | #3a9ad9 | — |
 | `enemy_electric_ring_phase2` | 전기환띠 (2단계) | 42×42 | feet | #3a9ad9 | — |
 | `enemy_hectar_chief_phase1` | 헥타르 수석 연구원 (1단계) | 36×36 | feet | #3a9aff | — |
-| `enemy_hectar_chief_phase2` | 헥타르 수석 연구원 (2단계) | 36×36 | feet | #3a9aff | — |
+| `enemy_hectar_chief_phase2` | 헥타르 수석 연구원 (2단계) | 36×36 | feet | #3a9aff | mku/enemy_hectar_chief_phase2.png (5프레임) |
 | `enemy_magi_golem_phase1` | 마기골렘 (1단계) | 48×48 | feet | #8a6a4a | — |
-| `enemy_magi_golem_phase2` | 마기골렘 (2단계) | 48×48 | feet | #8a6a4a | mku/enemy_magi_golem_phase2.png (2프레임) |
+| `enemy_magi_golem_phase2` | 마기골렘 (2단계) | 48×48 | feet | #8a6a4a | mku/enemy_magi_golem_phase2.png (9프레임) |
 | `enemy_eclipse_phase1` | 식광 (1단계) | 42×42 | feet | #c8a8ff | — |
-| `enemy_eclipse_phase2` | 식광 (2단계) | 42×42 | feet | #c8a8ff | mku/enemy_eclipse_phase2.png (10프레임) |
+| `enemy_eclipse_phase2` | 식광 (2단계) | 42×42 | feet | #c8a8ff | mku/enemy_eclipse_phase2.png (24프레임) |
 | `enemy_magi_kaiser_phase1` | 마기카이저 (1단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase1.png (4프레임) |
-| `enemy_magi_kaiser_phase2` | 마기카이저 (2단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase2.png (10프레임) |
-| `enemy_magi_kaiser_phase3` | 마기카이저 (3단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase3.png (10프레임) |
+| `enemy_magi_kaiser_phase2` | 마기카이저 (2단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase2.png (45프레임) |
+| `enemy_magi_kaiser_phase3` | 마기카이저 (3단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase3.png (50프레임) |
 | `enemy_ancestor_echo_phase1` | 선조의 잔상 (1단계) | 42×42 | feet | #b0583a | — |
 | `enemy_ancestor_echo_phase2` | 선조의 잔상 (2단계) | 42×42 | feet | #b0583a | — |
 | `enemy_royal_mage_phase1` | 왕실특무마기법사 (1단계) | 33×33 | feet | #6a4ad9 | — |
@@ -447,10 +447,83 @@
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
-## fx (6)
+## fx (79)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
+| `fx_fusion_slash` | 융합악귀 (sectorHit) | 40×40 | center | #8c3ad9 | mku/fx_fusion_slash.png (1프레임) |
+| `fx_fusion_burst` | 융합악귀 (blastHit) | 30×30 | center | #8c3ad9 | mku/fx_fusion_burst.png (1프레임) |
+| `fx_fusion_eruption` | 융합악귀 (eruption.blastHit) | 40×40 | center | #8c3ad9 | mku/fx_fusion_eruption.png (1프레임) |
+| `fx_fusion_charge` | 융합악귀 (blastWarn) | 30×30 | center | #8c3ad9 | mku/fx_fusion_charge.png (1프레임) |
+| `fx_fusion_bolt` | 융합악귀 (bullet) | 8×8 | center | #8c3ad9 | mku/fx_fusion_bolt.png (1프레임) |
+| `fx_fusion_dash` | 융합악귀 (dashTrail) | 30×30 | center | #8c3ad9 | mku/fx_fusion_dash.png (1프레임) |
+| `fx_fusion_smoke` | 융합악귀 (zone) | 20×20 | center | #8c3ad9 | mku/fx_fusion_smoke.png (1프레임) |
+| `fx_fusion_summon` | 융합악귀 (summon) | 20×20 | center | #8c3ad9 | mku/fx_fusion_summon.png (1프레임) |
+| `fx_fusion_orb` | 융합악귀 (spiritBlast.cast) | 20×20 | center | #8c3ad9 | mku/fx_fusion_orb.png (1프레임) |
+| `fx_fusion_explode` | 융합악귀 (death) | 45×45 | center | #8c3ad9 | mku/fx_fusion_explode.png (1프레임) |
+| `fx_fusion_vortex` | 융합악귀 (layer) | 45×45 | center | #8c3ad9 | mku/fx_fusion_vortex.png (1프레임) |
+| `fx_electric_warning` | 전기환띠 (blastWarn) | 15×15 | center | #3a7aff | mku/fx_electric_warning.png (1프레임) |
+| `fx_electric_strike` | 전기환띠 (blastHit) | 25×25 | center | #3a7aff | mku/fx_electric_strike.png (1프레임) |
+| `fx_electric_strike2` | 전기환띠 (prison.blastHit) | 25×25 | center | #3a7aff | mku/fx_electric_strike2.png (1프레임) |
+| `fx_electric_laser` | 전기환띠 (beam) | 60×60 | center | #3a7aff | mku/fx_electric_laser.png (1프레임) |
+| `fx_electric_line` | 전기환띠 (crossCut.beam) | 60×60 | center | #3a7aff | mku/fx_electric_line.png (1프레임) |
+| `fx_electric_orb` | 전기환띠 (bullet) | 6×6 | center | #3a7aff | mku/fx_electric_orb.png (1프레임) |
+| `fx_electric_dash` | 전기환띠 (dashTrail) | 30×30 | center | #3a7aff | mku/fx_electric_dash.png (1프레임) |
+| `fx_electric_cage` | 전기환띠 (cage) | 50×50 | center | #3a7aff | mku/fx_electric_cage.png (1프레임) |
+| `fx_electric_radial` | 전기환띠 (shockRipple.cast) | 35×35 | center | #3a7aff | mku/fx_electric_radial.png (1프레임) |
+| `fx_electric_cross` | 전기환띠 (crossCut.cast) | 45×45 | center | #3a7aff | mku/fx_electric_cross.png (1프레임) |
+| `fx_electric_impact` | 전기환띠 (blueDash.blastHit) | 40×40 | center | #3a7aff | mku/fx_electric_impact.png (1프레임) |
+| `fx_electric_ring` | 전기환띠 (layer) | 45×45 | center | #3a7aff | mku/fx_electric_ring.png (1프레임) |
+| `fx_electric_aura` | 전기환띠 (layer) | 45×45 | center | #3a7aff | mku/fx_electric_aura.png (1프레임) |
+| `fx_chief_burst` | 헥타르 수석 연구원 (blastHit) 외 1곳 | 30×30 | center | #3a7aff | mku/fx_chief_burst.png (1프레임) |
+| `fx_chief_ring` | 헥타르 수석 연구원 (blastWarn) 외 2곳 | 35×35 | center | #3a7aff | mku/fx_chief_ring.png (1프레임) |
+| `fx_chief_drone` | 헥타르 수석 연구원 (drone) | 7×7 | center | #3a7aff | mku/fx_chief_drone.png (1프레임) |
+| `fx_golem_warn` | 마기골렘 (blastWarn) | 25×25 | center | #a03ae0 | mku/fx_golem_warn.png (1프레임) |
+| `fx_golem_artillery` | 마기골렘 (blastHit) | 30×30 | center | #a03ae0 | mku/fx_golem_artillery.png (1프레임) |
+| `fx_golem_shock` | 마기골렘 (ringStart) | 45×45 | center | #a03ae0 | mku/fx_golem_shock.png (1프레임) |
+| `fx_golem_ruin_beam` | 마기골렘 (beam) | 60×60 | center | #a03ae0 | mku/fx_golem_ruin_beam.png (1프레임) |
+| `fx_golem_laser_side` | 마기골렘 (ruinBeam.beamSide) | 60×60 | center | #a03ae0 | mku/fx_golem_laser_side.png (1프레임) |
+| `fx_golem_crack` | 마기골렘 (crustCrack.beam) | 60×60 | center | #a03ae0 | mku/fx_golem_crack.png (1프레임) |
+| `fx_golem_summon` | 마기골렘 (ruinLegion.cast) | 35×35 | center | #a03ae0 | mku/fx_golem_summon.png (1프레임) |
+| `fx_golem_minion` | 마기골렘 (summon) | 15×15 | center | #a03ae0 | mku/fx_golem_minion.png (1프레임) |
+| `fx_golem_trail` | 마기골렘 (dashTrail) | 25×25 | center | #a03ae0 | mku/fx_golem_trail.png (1프레임) |
+| `fx_golem_core` | 마기골렘 (core) | 18×18 | center | #a03ae0 | mku/fx_golem_core.png (1프레임) |
+| `fx_golem_eight` | 마기골렘 (collapseZone.cast) | 50×50 | center | #a03ae0 | mku/fx_golem_eight.png (1프레임) |
+| `fx_golem_eruption` | 마기골렘 (collapseZone.blastHit) | 30×30 | center | #a03ae0 | mku/fx_golem_eruption.png (1프레임) |
+| `fx_golem_fault_v` | 마기골렘 (bandV) | 45×45 | center | #a03ae0 | mku/fx_golem_fault_v.png (1프레임) |
+| `fx_golem_fault_h` | 마기골렘 (bandH) | 45×45 | center | #a03ae0 | mku/fx_golem_fault_h.png (1프레임) |
+| `fx_golem_fault_hit` | 마기골렘 (doomFault.blastHit) | 25×25 | center | #a03ae0 | mku/fx_golem_fault_hit.png (1프레임) |
+| `fx_golem_rage_aura` | 마기골렘 (layer) | 45×45 | center | #a03ae0 | mku/fx_golem_rage_aura.png (1프레임) |
+| `fx_golem_rage_core` | 마기골렘 (layer) | 20×20 | center | #a03ae0 | mku/fx_golem_rage_core.png (1프레임) |
+| `fx_eclipse_warning` | 식광 (blastWarn) | 30×30 | center | #ff3a4a | mku/fx_eclipse_warning.png (3프레임) |
+| `fx_eclipse_impact` | 식광 (blastHit) | 35×35 | center | #ff3a4a | mku/fx_eclipse_impact.png (2프레임) |
+| `fx_eclipse_blade` | 식광 (bullet) | 7×7 | center | #ff3a4a | mku/fx_eclipse_blade.png (4프레임) |
+| `fx_eclipse_charge` | 식광 (orbitCut.cast) | 20×20 | center | #ff3a4a | mku/fx_eclipse_charge.png (1프레임) |
+| `fx_eclipse_track` | 식광 (followTrack) | 30×30 | center | #ff3a4a | mku/fx_eclipse_track.png (4프레임) |
+| `fx_eclipse_lock` | 식광 (followLock) | 30×30 | center | #ff3a4a | mku/fx_eclipse_lock.png (1프레임) |
+| `fx_eclipse_shadow` | 식광 (followHit) | 35×35 | center | #ff3a4a | mku/fx_eclipse_shadow.png (4프레임) |
+| `fx_eclipse_safe` | 식광 (safe) | 40×40 | center | #ff3a4a | mku/fx_eclipse_safe.png (1프레임) |
+| `fx_eclipse_field` | 식광 (safeHit) | 55×55 | center | #ff3a4a | mku/fx_eclipse_field.png (4프레임) |
+| `fx_eclipse_total_hit` | 식광 (totalEclipse.safeHit) | 60×60 | center | #ff3a4a | mku/fx_eclipse_total_hit.png (2프레임) |
+| `fx_eclipse_total_warn` | 식광 (totalEclipse.cast) | 60×60 | center | #ff3a4a | mku/fx_eclipse_total_warn.png (1프레임) |
+| `fx_eclipse_gravity` | 식광 (gravityCollapse.blastWarn) | 55×55 | center | #ff3a4a | mku/fx_eclipse_gravity.png (3프레임) |
+| `fx_eclipse_residue` | 식광 (zone) | 30×30 | center | #ff3a4a | mku/fx_eclipse_residue.png (1프레임) |
+| `fx_eclipse_death` | 식광 (death) | 45×45 | center | #ff3a4a | mku/fx_eclipse_death.png (4프레임) |
+| `fx_eclipse_flare` | 식광 (layer) | 55×55 | center | #ff3a4a | mku/fx_eclipse_flare.png (2프레임) |
+| `fx_kaiser_punch` | 마기카이저 (sectorHit) | 50×50 | center | #ff2a2a | mku/fx_kaiser_punch.png (4프레임) |
+| `fx_kaiser_impact` | 마기카이저 (blastHit) | 35×35 | center | #ff2a2a | mku/fx_kaiser_impact.png (4프레임) |
+| `fx_kaiser_lock` | 마기카이저 (blastWarn) | 20×20 | center | #ff2a2a | mku/fx_kaiser_lock.png (4프레임) |
+| `fx_kaiser_laser` | 마기카이저 (beam) | 60×60 | center | #ff2a2a | mku/fx_kaiser_laser.png (3프레임) |
+| `fx_kaiser_laser_warn` | 마기카이저 (beamWarn) | 60×60 | center | #ff2a2a | mku/fx_kaiser_laser_warn.png (7프레임) |
+| `fx_kaiser_sweep` | 마기카이저 (spinLaser.beam) 외 1곳 | 60×60 | center | #ff2a2a | mku/fx_kaiser_sweep.png (4프레임) |
+| `fx_kaiser_sweep_warn` | 마기카이저 (spinLaser.beamWarn) 외 1곳 | 60×60 | center | #ff2a2a | mku/fx_kaiser_sweep_warn.png (5프레임) |
+| `fx_kaiser_missile` | 마기카이저 (missile) | 8×8 | center | #ff2a2a | mku/fx_kaiser_missile.png (4프레임) |
+| `fx_kaiser_shock` | 마기카이저 (ringStart) | 45×45 | center | #ff2a2a | mku/fx_kaiser_shock.png (2프레임) |
+| `fx_kaiser_muzzle` | 마기카이저 (lineLaser.cast) | 20×20 | center | #ff2a2a | mku/fx_kaiser_muzzle.png (3프레임) |
+| `fx_kaiser_command` | 마기카이저 (safeHit) | 60×60 | center | #ff2a2a | mku/fx_kaiser_command.png (4프레임) |
+| `fx_kaiser_debris` | 마기카이저 (geyser.blastHit) | 35×35 | center | #ff2a2a | mku/fx_kaiser_debris.png (4프레임) |
+| `fx_kaiser_cross` | 마기카이저 (doomCommand.cast) | 60×60 | center | #ff2a2a | mku/fx_kaiser_cross.png (4프레임) |
+| `fx_kaiser_death` | 마기카이저 (death) | 55×55 | center | #ff2a2a | mku/fx_kaiser_death.png (4프레임) |
 | `fx_hit_tech` | 타격 불꽃(기술) | 10×10 | center | #5ad0ff | mku/fx_hit_tech.png (1프레임) |
 | `fx_hit_magic` | 타격 불꽃(마기) | 10×10 | center | #c08aff | mku/fx_hit_magic.png (1프레임) |
 | `fx_hit_physical` | 타격 불꽃(물리) | 10×10 | center | #ffffff | mku/fx_hit_physical.png (1프레임) |
