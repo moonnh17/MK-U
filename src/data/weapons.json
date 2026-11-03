@@ -131,14 +131,14 @@
       "id": "rasalgethiClub", "flavor": "codex.itemFlavor.rasalgethiClub", "nameKey": "weapon.rasalgethiClub", "category": "blade", "fxColor": "#ff8a4a", "grade": "unique", "classes": ["smash"], "tags": ["physical", "melee"],
       "baseDamage": 16, "fireIntervalSec": 0.75, "energyCost": 0, "pattern": { "kind": "smash", "reach": 25, "radius": 34 },
       "knockback": { "distance": 34, "sec": 0.15 },
-      "signature": { "every": 3, "kind": "bigSmash", "damageMul": 3, "radiusMul": 1.6 },
+      "signature": { "every": 3, "kind": "bigSmash", "nameKey": "weapon.sig.bigSmash", "damageMul": 3, "radiusMul": 1.6 },
       "projectileSpeed": 0, "range": 59, "cutsProjectiles": false, "droppable": false,
       "spriteKey": "weapon_rasalgethi_club", "color": "#b0583a", "size": 11
     },
     {
       "id": "aviorStaff", "nameKey": "weapon.aviorStaff", "category": "staff", "grade": "unique", "classes": ["homing"], "tags": ["magic", "ranged"],
       "baseDamage": 6, "fireIntervalSec": 0.25, "energyCost": 1, "pattern": { "kind": "homing", "turnRate": 5 },
-      "signature": { "every": 5, "kind": "laser", "damageMul": 2.5, "length": 240, "width": 8 },
+      "signature": { "every": 5, "kind": "laser", "nameKey": "weapon.sig.aviorStaff", "damageMul": 2.5, "length": 240, "width": 8 },
       "projectileSpeed": 260, "range": 300, "cutsProjectiles": false, "droppable": false,
       "spriteKey": "weapon_avior_staff", "color": "#8a6aff", "size": 11
     },
@@ -195,7 +195,7 @@
       "spriteKey": "weapon_eclipse_core", "color": "#ff3a4a", "size": 8
     },
     {
-      "id": "algiebaSling", "sfx": "shotSniper", "nameKey": "weapon.algiebaSling", "category": "gun", "grade": "unique", "classes": ["single"], "tags": ["tech", "ranged"],
+      "id": "algiebaSling", "sfx": "shotSniper", "nameKey": "weapon.algiebaSling", "abilityNameKey": "weapon.ability.algiebaSling", "category": "gun", "grade": "unique", "classes": ["single"], "tags": ["tech", "ranged"],
       "baseDamage": 16, "fireIntervalSec": 0.7, "energyCost": 2, "pattern": { "kind": "single" },
       "critChance": 1,
       "ricochet": { "bounces": 3, "range": 160 },
@@ -203,14 +203,14 @@
       "spriteKey": "weapon_algieba_sling", "color": "#5ad0f0", "size": 11
     },
     {
-      "id": "nekkarCleaver", "fxColor": "#e8343a", "nameKey": "weapon.nekkarCleaver", "category": "blade", "grade": "unique", "classes": ["slash"], "tags": ["physical", "melee", "bleed"],
+      "id": "nekkarCleaver", "fxColor": "#e8343a", "nameKey": "weapon.nekkarCleaver", "abilityNameKey": "weapon.ability.nekkarCleaver", "category": "blade", "grade": "unique", "classes": ["slash"], "tags": ["physical", "melee", "bleed"],
       "baseDamage": 5, "fireIntervalSec": 0.2, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 100, "radius": 34 },
       "bleed": { "base": 2.5, "stacks": 1 },
       "projectileSpeed": 0, "range": 34, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_nekkar_cleaver", "color": "#a03a3a", "size": 9
     },
     {
-      "id": "argoBanner", "fxColor": "#ffd8c8", "nameKey": "weapon.argoBanner", "category": "blade", "grade": "unique", "classes": ["gust"], "tags": ["physical", "melee"],
+      "id": "argoBanner", "fxColor": "#ffd8c8", "nameKey": "weapon.argoBanner", "abilityNameKey": "weapon.ability.argoBanner", "category": "blade", "grade": "unique", "classes": ["gust"], "tags": ["physical", "melee"],
       "baseDamage": 9, "fireIntervalSec": 2.4, "energyCost": 0, "pattern": { "kind": "gust", "radius": 95 },
       "knockback": { "distance": 80, "sec": 0.28 },
       "selfBuff": { "sec": 6, "damage": 0.4, "color": "#ff4a4a" },
@@ -227,7 +227,7 @@
       "spriteKey": "weapon_curved_bow", "color": "#a0784a", "size": 9
     },
     {
-      "id": "mg70", "nameKey": "weapon.mg70", "category": "gun", "grade": "rare", "classes": ["rapid"], "tags": ["tech", "ranged"],
+      "id": "mg70", "nameKey": "weapon.mg70", "abilityNameKey": "weapon.ability.mg70", "category": "gun", "grade": "rare", "classes": ["rapid"], "tags": ["tech", "ranged"],
       "baseDamage": 2.5, "fireIntervalSec": 0.2, "energyCost": 0.5, "pattern": { "kind": "single", "jitterDeg": 6 },
       "spinUp": { "perShot": 0.08, "maxMul": 2.8, "resetSec": 0.7 },
       "projectileSpeed": 340, "range": 280, "cutsProjectiles": false, "droppable": true,
@@ -241,7 +241,7 @@
       "spriteKey": "weapon_flame_staff", "color": "#ff7a2a", "size": 10
     },
     {
-      "id": "zephyr", "nameKey": "weapon.zephyr", "category": "bow", "grade": "legendary", "classes": ["single"], "tags": ["physical", "ranged", "charging"],
+      "id": "zephyr", "nameKey": "weapon.zephyr", "abilityNameKey": "weapon.ability.zephyr", "category": "bow", "grade": "legendary", "classes": ["single"], "tags": ["physical", "ranged", "charging"],
       "baseDamage": 8, "fireIntervalSec": 0.45, "energyCost": 1, "pattern": { "kind": "single" },
       "charge": { "maxSec": 0.6, "damageMul": 3, "radiusMul": 1, "critAtMax": 0.7 },
       "chargeMoveSpeed": 0.35,
@@ -259,7 +259,7 @@
       "spriteKey": "weapon_soul_calibur", "color": "#7a4ad0", "size": 12
     },
     {
-      "id": "magiFang", "fxColor": "#ff2a4a", "nameKey": "weapon.magiFang", "category": "blade", "critChance": 0.3, "grade": "legendary", "classes": ["slash"], "tags": ["physical", "melee"],
+      "id": "magiFang", "fxColor": "#ff2a4a", "nameKey": "weapon.magiFang", "abilityNameKey": "weapon.ability.magiFang", "category": "blade", "critChance": 0.3, "grade": "legendary", "classes": ["slash"], "tags": ["physical", "melee"],
       "baseDamage": 12, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 110, "radius": 40 },
       "meleeShot": { "damageMul": 0.7, "speed": 300, "range": 200, "energyCost": 1, "color": "#ff2a4a" },
       "attackParticles": { "color": "#ff2a4a" },
@@ -277,7 +277,7 @@
       "spriteKey": "weapon_antimatter_pistol", "color": "#3a7bff", "size": 9
     },
     {
-      "id": "orbitalDisc", "nameKey": "weapon.orbitalDisc", "category": "gun", "grade": "rare", "classes": ["spread"], "tags": ["tech", "ranged"],
+      "id": "orbitalDisc", "nameKey": "weapon.orbitalDisc", "abilityNameKey": "weapon.ability.orbitalDisc", "category": "gun", "grade": "rare", "classes": ["spread"], "tags": ["tech", "ranged"],
       "baseDamage": 6.5, "fireIntervalSec": 0.3, "energyCost": 1, "pattern": { "kind": "single" },
       "boomerang": { "charges": 3, "maxExtraCharges": 1, "range": 150, "returnSpeed": 300, "catchPx": 12, "maxSec": 5, "spinPerSec": 18, "shot": { "spriteKey": "proj_orbital_disc", "color": "#5ad9ff", "size": 10 } },
       "attackParticles": { "color": "#5ad9ff" },

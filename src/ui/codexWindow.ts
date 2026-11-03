@@ -629,12 +629,16 @@ export class CodexWindow {
       this.rateView(box, def.pool === 'normal' ? null : source, itemSources(d), (r) => itemChance(d, id, r), 'codex.rate.noteItem');
       return;
     }
-    // 버프 이름(화면 왼쪽 버프 목록과 같은 이름)을 효과 위 굵은 제목으로. 태세처럼 둘이면 '/'로
-    const bk = `item.${id}.buff`;
-    // 추가 능력 이름도 같은 제목으로 (아크룩스의 십자가 '부활과 대속' 등)
-    const buffNames = [...(def.abilityNameKey ? [t(def.abilityNameKey)] : []), ...[bk, `${bk}.attack`, `${bk}.defense`].filter((k) => t(k) !== k).map((k) => t(k))];
-    if (buffNames.length) box.appendChild(this.el('b', 'cx-buff-name', buffNames.join(' / ')));
-    box.appendChild(this.el('p', 'cx-desc', t(def.descKey, itemDescParams(def, d.groupMultipliers))));
+    // 무기처럼: 일반 능력은 기록에, 그 아래 추가 능력을 굵은 제목과 함께
+    const params = itemDescParams(def, d.groupMultipliers);
+    if (def.descKey) box.appendChild(this.el('p', 'cx-desc', t(def.descKey, params)));
+    if (def.abilityDescKey) {
+      // 제목: 능력 이름, 없으면 버프 이름(화면 왼쪽 버프 목록과 같은 이름). 태세처럼 둘이면 '/'로
+      const bk = `item.${id}.buff`;
+      const names = def.abilityNameKey ? [t(def.abilityNameKey)] : [bk, `${bk}.attack`, `${bk}.defense`].filter((k) => t(k) !== k).map((k) => t(k));
+      if (names.length) box.appendChild(this.el('b', 'cx-buff-name', names.join(' / ')));
+      box.appendChild(this.el('p', 'cx-desc', t(def.abilityDescKey, params)));
+    }
     this.flavor(box, def.flavor, 'cx-flavor small');
     const links: string[] = [];
     for (const s of d.skills.skills.filter((x) => x.awakening.requiredItem === id)) links.push(t('codex.link.skill', { skill: t(s.nameKey), name: t(s.awakening.nameKey) }));

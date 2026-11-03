@@ -26,27 +26,34 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
     const odef = d.weapons.options.find((x) => x.id === o.id);
     if (odef) out.push({ text: t(odef.nameKey, { value: o.id === 'energyCost' ? o.value : Math.round(o.value * 100) }) });
   }
-  if (def.pattern.kind === 'meteor') out.push({ text: t('weapon.sigDesc.meteor'), sig: true });
-  if (def.pierce) out.push({ text: t('weapon.sigDesc.pierce'), sig: true });
-  if (def.flame) out.push({ text: t('weapon.sigDesc.flame'), sig: true });
-  if (def.spinUp) out.push({ text: t('weapon.sigDesc.spinUp', { n: def.spinUp.maxMul }), sig: true });
-  if (def.charge) out.push({ text: t('weapon.sigDesc.charge', { n: def.charge.damageMul }), sig: true });
-  if (def.charge?.critAtMax) out.push({ text: t('weapon.sigDesc.chargeCrit', { v: Math.round(def.charge.critAtMax * 100) }), sig: true });
-  if (def.charge?.minRatio) out.push({ text: t('weapon.sigDesc.minCharge'), sig: true });
-  if (def.category !== 'blade' && def.pattern.kind === 'lob') out.push({ text: t('weapon.sigDesc.explosive'), sig: true });
-  if (def.chargeMoveSpeed) out.push({ text: t('weapon.sigDesc.chargeMove', { v: Math.round(def.chargeMoveSpeed * 100) }), sig: true });
-  if (def.meleeShot) out.push({ text: t('weapon.sigDesc.meleeShot', { n: def.meleeShot.damageMul, e: Math.round(def.meleeShot.energyCost * gradeEnergyMultiplier(item.grade, d.groupMultipliers) * 100) / 100 }), sig: true });
-  if (def.ricochet) out.push({ text: t('weapon.sigDesc.ricochet', { n: def.ricochet.bounces }), sig: true });
-  if (def.bleed) out.push({ text: t('weapon.sigDesc.bleed'), sig: true });
-  if (def.selfBuff) out.push({ text: t('weapon.sigDesc.gust', { dmg: Math.round(def.selfBuff.damage * 100), sec: def.selfBuff.sec }), sig: true });
-  const sig = def.signature;
-  if (def.lunge) out.push({ text: t('weapon.sigDesc.lunge'), sig: true });
   // 이름 있는 고유 능력·특수공격은 제목을 붙인다 (도감은 굵은 제목으로 따로)
   const titled = (desc: string): WeaponInfoLine => {
     const title = def.abilityNameKey ? t(def.abilityNameKey) : undefined;
     return { text: title ? t('weapon.sigLine', { title, desc }) : desc, sig: true, title, desc };
   };
-  if (def.boomerang) out.push({ text: t('weapon.sigDesc.boomerang', { n: def.boomerang.charges }), sig: true });
+  // 능력 이름이 아래 전용 특수 능력(회수·질 낮은 가품·징수·옛 명령)의 것이 아니면, 처음 나오는 고유 능력 줄에 붙인다
+  let nameFree = !!def.abilityNameKey && !(def.needle || def.energyRange || def.debt || def.beam);
+  const main = (desc: string): WeaponInfoLine => {
+    if (!nameFree) return { text: desc, sig: true };
+    nameFree = false;
+    return titled(desc);
+  };
+  if (def.pattern.kind === 'meteor') out.push({ text: t('weapon.sigDesc.meteor'), sig: true });
+  if (def.pierce) out.push({ text: t('weapon.sigDesc.pierce'), sig: true });
+  if (def.flame) out.push({ text: t('weapon.sigDesc.flame'), sig: true });
+  if (def.spinUp) out.push(main(t('weapon.sigDesc.spinUp', { n: def.spinUp.maxMul })));
+  if (def.charge) out.push({ text: t('weapon.sigDesc.charge', { n: def.charge.damageMul }), sig: true });
+  if (def.charge?.critAtMax) out.push({ text: t('weapon.sigDesc.chargeCrit', { v: Math.round(def.charge.critAtMax * 100) }), sig: true });
+  if (def.charge?.minRatio) out.push({ text: t('weapon.sigDesc.minCharge'), sig: true });
+  if (def.category !== 'blade' && def.pattern.kind === 'lob') out.push({ text: t('weapon.sigDesc.explosive'), sig: true });
+  if (def.chargeMoveSpeed) out.push(main(t('weapon.sigDesc.chargeMove', { v: Math.round(def.chargeMoveSpeed * 100) })));
+  if (def.meleeShot) out.push(main(t('weapon.sigDesc.meleeShot', { n: def.meleeShot.damageMul, e: Math.round(def.meleeShot.energyCost * gradeEnergyMultiplier(item.grade, d.groupMultipliers) * 100) / 100 })));
+  if (def.ricochet) out.push(main(t('weapon.sigDesc.ricochet', { n: def.ricochet.bounces })));
+  if (def.bleed) out.push(main(t('weapon.sigDesc.bleed')));
+  if (def.selfBuff) out.push(main(t('weapon.sigDesc.gust', { dmg: Math.round(def.selfBuff.damage * 100), sec: def.selfBuff.sec })));
+  const sig = def.signature;
+  if (def.lunge) out.push({ text: t('weapon.sigDesc.lunge'), sig: true });
+  if (def.boomerang) out.push(main(t('weapon.sigDesc.boomerang', { n: def.boomerang.charges })));
   if (def.needle) {
     const n = def.needle;
     out.push({ text: t('weapon.sigDesc.needle', { tick: n.tickSec, line: n.lineDamageMul, max: n.max, life: n.lifeSec }), sig: true });

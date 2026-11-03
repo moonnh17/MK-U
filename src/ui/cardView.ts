@@ -4,7 +4,7 @@ import type { PlayerState } from '../core/session';
 import type { AnyCard } from '../systems/cards';
 import { findSkill, skillValues } from '../systems/skills';
 import { skillTags, tagBadges, type TagBadge } from '../systems/tags';
-import { itemDescParams } from './itemCard';
+import { itemDescText } from './itemCard';
 import { artKeys } from '../systems/art';
 
 export interface CardView {
@@ -61,7 +61,7 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
       name: t(def.nameKey),
       subName: '',
       levelText: grade ? t(grade.nameKey) : '',
-      desc: t(def.descKey, itemDescParams(def, d.groupMultipliers)),
+      desc: itemDescText(def, d.groupMultipliers, t),
       badges: tagBadges(def.tags, d.tags),
       accent: grade?.color ?? '#ffffff',
       school: '',

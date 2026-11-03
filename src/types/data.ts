@@ -1046,11 +1046,14 @@ export type ItemPool = 'normal' | 'boss' | 'hiddenBoss' | 'set';
 export interface ItemDef extends SpriteRef {
   id: string;
   nameKey: string;
-  descKey: string;
+  /** 일반 능력(늘 켜진 수치 등). 능력만 있는 아이템은 없다 */
+  descKey?: string;
   /** 도감 효과 아래 플레이버 문구 (ko.json 키) */
   flavor?: string;
   /** 추가 능력의 이름 (도감 굵은 제목) */
   abilityNameKey?: string;
+  /** 추가 능력 설명 (도감은 일반 능력 아래 제목과 함께, 카드·가방은 일반 능력 뒤에 이어서) */
+  abilityDescKey?: string;
   grade: GradeId;
   /** normal: 상자·첨탑 / boss: 그 보스 처치로만 / hiddenBoss: 히든보스 처치로만 / set: 세트 합성으로만 */
   pool: ItemPool;

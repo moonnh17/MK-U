@@ -301,7 +301,10 @@ export function validateGameData(d: GameData): Errors {
     const w = `items.${x.id}`;
     checkSprite(errors, w, x);
     needText(w, x.nameKey);
-    needText(w, x.descKey);
+    if (!x.descKey && !x.abilityDescKey) errors.push(`${w}: descKey나 abilityDescKey 중 하나는 있어야 함`);
+    if (x.descKey) needText(w, x.descKey);
+    if (x.abilityDescKey) needText(w, x.abilityDescKey);
+    if (x.abilityNameKey) needText(w, x.abilityNameKey);
     if (!gradeIds.has(x.grade)) errors.push(`${w}: 알 수 없는 등급`);
     if (!['normal', 'boss', 'hiddenBoss', 'set'].includes(x.pool)) errors.push(`${w}: pool 잘못됨`);
     for (const t of x.tags) if (!tagIds.has(t)) errors.push(`${w}: 알 수 없는 태그 '${t}'`);

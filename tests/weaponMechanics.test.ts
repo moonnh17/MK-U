@@ -93,3 +93,16 @@ describe('스넬의 법칙·LK-99', () => {
     expect(item('lk99').effects).toContainEqual({ kind: 'chargeTime', value: 0.1, group: 'damagePct' });
   });
 });
+
+describe('능력 이름', () => {
+  it('능력 이름이 있는 아이템은 능력 설명이 따로 있다 (도감: 일반 능력 아래)', () => {
+    const named = gameData.items.items.filter((x) => x.abilityNameKey);
+    expect(named.length).toBe(12);
+    for (const x of named) expect(x.abilityDescKey, x.id).toBeDefined();
+  });
+  it('이름 받은 무기 능력', () => {
+    for (const id of ['algiebaSling', 'nekkarCleaver', 'argoBanner', 'magiFang', 'zephyr', 'mg70', 'orbitalDisc']) expect(W(id).abilityNameKey, id).toBeDefined();
+    expect(W('aviorStaff').signature!.nameKey).toBeDefined();
+    expect(W('rasalgethiClub').signature!.nameKey).toBe('weapon.sig.bigSmash');
+  });
+});

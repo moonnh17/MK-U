@@ -15,7 +15,7 @@ import { findSkill, skillValues, storedSkills } from '../systems/skills';
 import { skillTags, tagBadges } from '../systems/tags';
 import { emptyHanded, type WeaponItem } from '../systems/weapons';
 import type { TagId } from '../types/data';
-import { itemDescParams } from './itemCard';
+import { itemDescText } from './itemCard';
 
 type Target = number | 'passive';
 type Tab = 'character' | 'skill' | 'items';
@@ -369,7 +369,7 @@ export class InventoryWindow {
       const def = d.items.items.find((x) => x.id === id.slice(5));
       if (!def) return;
       const grade = d.groupMultipliers.grades.find((g) => g.id === def.grade);
-      box.append(this.line('iw-dname', t(def.nameKey), grade?.color), this.line('iw-dmeta', grade ? t(grade.nameKey) : ''), this.line('iw-desc', t(def.descKey, itemDescParams(def, d.groupMultipliers))));
+      box.append(this.line('iw-dname', t(def.nameKey), grade?.color), this.line('iw-dmeta', grade ? t(grade.nameKey) : ''), this.line('iw-desc', itemDescText(def, d.groupMultipliers, t)));
       return;
     }
     if (id === 'ultimate') {

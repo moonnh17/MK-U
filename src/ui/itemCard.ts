@@ -17,6 +17,12 @@ function num(v: number): string {
 }
 
 /** 설명 문구의 자리: v{i} 주 값(%는 100배) · d{i} 피해 · r{i} 반경 · s{i} 주기·재사용 · th/to/a{i} 회복 · dur/per/n{i} · pd/pm/b/c/g{i} */
+/** 아이템 설명 전체 (일반 능력, 추가 능력 순으로 잇는다): 카드·가방용 */
+export function itemDescText(def: ItemDef, groups: GroupMultipliersData, t: (key: string, vars?: Record<string, string>) => string): string {
+  const p = itemDescParams(def, groups);
+  return [def.descKey, def.abilityDescKey].filter((k): k is string => !!k).map((k) => t(k, p)).join(', ');
+}
+
 export function itemDescParams(def: ItemDef, groups: GroupMultipliersData): Record<string, string> {
   const out: Record<string, string> = {};
   def.effects.forEach((raw, i) => {
@@ -104,7 +110,7 @@ export class ItemCard {
       ? weaponInfoLines(this.ctx, plainWeapon(weapon))
           .map((l) => l.text)
           .join('\n')
-      : t((def as ItemDef).descKey, itemDescParams(def as ItemDef, d.groupMultipliers));
+      : itemDescText(def as ItemDef, d.groupMultipliers, t);
     const grade = d.groupMultipliers.grades.find((g) => g.id === def.grade);
     const color = grade?.color ?? '#ffffff';
     this.root.style.setProperty('--grade', color);
