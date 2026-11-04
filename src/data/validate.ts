@@ -234,7 +234,12 @@ export function validateGameData(d: GameData): Errors {
   }
   for (const s of d.mapgen.bossStages) if (!lt.weaponChest[String(s)]) errors.push(`loot.weaponChest: ${s} 스테이지 가중치 없음`);
   if (!(lt.combatDrop.chance >= 0 && lt.combatDrop.chance <= 1)) errors.push('loot.combatDrop.chance: 0~1');
-  for (const [ch, w] of Object.entries(lt.combatDrop.weights)) checkWeights(`loot.combatDrop.weights.${ch}`, w);
+  for (const [id, t] of Object.entries(lt.weaponChestTiers)) checkWeights(`loot.weaponChestTiers.${id}`, t.weights);
+  for (const [ch, w] of Object.entries(lt.combatChestTiers)) {
+    if (Object.values(w).reduce((s, v) => s + (v ?? 0), 0) <= 0) errors.push(`loot.combatChestTiers.${ch}: 가중치 합이 0`);
+    for (const id of Object.keys(w)) if (!(id in lt.weaponChestTiers)) errors.push(`loot.combatChestTiers.${ch}: 없는 상자 '${id}'`);
+  }
+  for (const [ch, p] of Object.entries(lt.raidLegendaryChestChance)) if (!(p >= 0 && p <= 1)) errors.push(`loot.raidLegendaryChestChance.${ch}: 0~1`);
   checkWeights('loot.startChest', lt.startChest);
   if (!(lt.bossWeaponChance >= 0 && lt.bossWeaponChance <= 1)) errors.push('loot.bossWeaponChance: 0~1');
   checkPositive(errors, 'loot.merchant.count', lt.merchant.count);

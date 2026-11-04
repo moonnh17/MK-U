@@ -1485,6 +1485,36 @@
       "frameHeight": 10,
       "frames": 1
     },
+    "chest_weapon_basic": {
+      "file": "mku/chest_weapon_basic.png",
+      "frameWidth": 18,
+      "frameHeight": 10,
+      "frames": 1
+    },
+    "chest_weapon_advanced": {
+      "file": "mku/chest_weapon_advanced.png",
+      "frameWidth": 18,
+      "frameHeight": 10,
+      "frames": 1
+    },
+    "chest_weapon_supreme": {
+      "file": "mku/chest_weapon_supreme.png",
+      "frameWidth": 18,
+      "frameHeight": 10,
+      "frames": 1
+    },
+    "chest_weapon_legendary": {
+      "file": "mku/chest_weapon_legendary.png",
+      "frameWidth": 20,
+      "frameHeight": 11,
+      "frames": 1
+    },
+    "chest_weapon_boss": {
+      "file": "mku/chest_weapon_boss.png",
+      "frameWidth": 20,
+      "frameHeight": 12,
+      "frames": 1
+    },
     "merchant_stand": {
       "file": "mku/merchant_stand.png",
       "frameWidth": 20,

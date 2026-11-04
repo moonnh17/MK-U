@@ -176,26 +176,27 @@ export class Encounters {
     const hb = this.hiddenBossRooms.get(roomId)!;
     const c = roomCenter(this.run.session.map.rooms[roomId]!, this.run.m);
     this.run.progression.queueOffers([{ kind: this.run.ctx.data.cards.bossBonus, boss: true }], () => {
-      this.run.loot.addChest('weapon', c.x - 40, c.y, {}, hb.weaponId);
-      if (!this.run.session.player.itemsObtained.includes(hb.itemId)) this.run.loot.addChest('item', c.x + 40, c.y, {}, hb.itemId);
+      this.run.loot.addBossChest(c.x - 40, c.y, {}, hb.weaponId);
+      if (!this.run.session.player.itemsObtained.includes(hb.itemId)) this.run.loot.addChest('item', c.x + 40, c.y, {}, { fixedItem: hb.itemId });
     });
   }
 
-  /** 전투 칸을 깼을 때 낮은 확률로 무기 */
+  /** 전투 칸을 깼을 때 낮은 확률로 무기 상자 */
   combatRoomDrop(roomId: number): void {
     const d = this.run.ctx.data;
     const { stage } = this.run.session;
     const rng = Rng.derive(this.run.ctx.config.seed, `drop-${stage.chapter}-${stage.stage}-${roomId}`);
     if (!rng.chance(d.loot.combatDrop.chance)) return;
-    // 방 가운데는 장애물일 수 있어 플레이어 발밑에 떨어뜨린다
-    this.run.loot.dropWeapon(this.run.loot.rollWeaponItem(chapterWeights(d.loot.combatDrop.weights, stage.chapter), 'drop'), this.run.player.x, this.run.player.y);
+    // 방 가운데는 장애물일 수 있어 플레이어 곁에 떨어뜨린다
+    this.run.loot.addCombatChest(this.run.player.x, this.run.player.y + 16, 'drop');
   }
 
-  /** 대규모 습격 보상: 아이템 상자(레어 이상, M4-B) + 코인 다량 */
+  /** 대규모 습격 보상: 아이템 상자(레어 이상) + 무기 상자(챕터가 오를수록 전설 상자 확률↑) + 코인 다량 */
   raidReward(roomId: number): void {
     const d = this.run.ctx.data;
     const c = roomCenter(this.run.session.map.rooms[roomId]!, this.run.m);
-    this.run.loot.addChest('item', c.x, c.y, d.items.raidWeights);
+    this.run.loot.addChest('item', c.x - 20, c.y, d.items.raidWeights);
+    this.run.loot.addCombatChest(c.x + 20, c.y, 'raid', chapterWeights(d.loot.raidLegendaryChestChance, this.run.session.stage.chapter));
     const n = rollCoinDrops(this.run.rng, this.run.rng.int(d.loot.raid.coins[0], d.loot.raid.coins[1]), d.pickups.coin.dropRate);
     for (let i = 0; i < n; i++) {
       const a = this.run.rng.range(0, Math.PI * 2);

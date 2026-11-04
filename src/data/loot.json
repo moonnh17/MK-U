@@ -2,20 +2,25 @@
   "mythicChance": 0.001,
   "uniqueWeaponFallback": "legendary",
   "bossWeaponChance": 0.2,
-  "startChest": { "common": 77, "rare": 19, "legendary": 3, "unique": 1 },
+  "startChest": { "common": 77, "rare": 20, "legendary": 3 },
   "startChestExclude": ["brokenBlade"],
   "weaponChest": {
     "2": { "rare": 80, "legendary": 18, "unique": 2 },
     "5": { "rare": 47, "legendary": 44, "unique": 9 }
   },
-  "combatDrop": {
-    "chance": 0.03,
-    "weights": {
-      "1": { "common": 77, "rare": 20, "legendary": 2, "unique": 1 },
-      "2": { "common": 77, "rare": 20, "legendary": 2, "unique": 1 },
-      "3": { "common": 57, "rare": 30, "legendary": 10, "unique": 3 }
-    }
+  "combatDrop": { "chance": 0.03 },
+  "weaponChestTiers": {
+    "basic": { "nameKey": "chest.weapon.basic", "weights": { "common": 64, "rare": 26, "legendary": 8, "unique": 2 }, "sprite": { "spriteKey": "chest_weapon_basic", "color": "#8a6a4a", "size": 14 } },
+    "advanced": { "nameKey": "chest.weapon.advanced", "weights": { "common": 49, "rare": 37, "legendary": 11, "unique": 3 }, "sprite": { "spriteKey": "chest_weapon_advanced", "color": "#4a8ac0", "size": 14 } },
+    "supreme": { "nameKey": "chest.weapon.supreme", "weights": { "common": 34, "rare": 49, "legendary": 13, "unique": 4 }, "sprite": { "spriteKey": "chest_weapon_supreme", "color": "#e8be46", "size": 15 } },
+    "legendary": { "nameKey": "chest.weapon.legendary", "weights": { "rare": 40, "legendary": 45, "unique": 15 }, "sprite": { "spriteKey": "chest_weapon_legendary", "color": "#b070ff", "size": 16 } }
   },
+  "combatChestTiers": {
+    "1": { "basic": 90, "advanced": 10 },
+    "2": { "basic": 10, "advanced": 80, "supreme": 10 },
+    "3": { "basic": 10, "supreme": 90 }
+  },
+  "raidLegendaryChestChance": { "1": 0.05, "2": 0.1, "3": 0.15 },
   "merchant": {
     "count": 3,
     "weights": { "common": 59, "rare": 35, "legendary": 5, "unique": 1 },
@@ -27,6 +32,7 @@
   "chest": {
     "weapon": { "spriteKey": "chest_weapon", "color": "#a07a3a", "size": 14 },
     "item": { "spriteKey": "chest_item", "color": "#5a8ad9", "size": 14 },
+    "boss": { "spriteKey": "chest_weapon_boss", "color": "#8a1a24", "size": 16 },
     "openRadius": 18
   },
   "merchantStand": { "spriteKey": "merchant_stand", "color": "#4a5a6a", "size": 12 },

@@ -44,7 +44,6 @@ describe('챕터3 적 (기획서 로스터)', () => {
       expect(e.coins[0]).toBeGreaterThan(c.bonusCoins[1]);
     }
     expect(CH.weaponChestChance).toBe(0.05);
-    expect(CH.weaponChestWeights).toEqual({ rare: 67, legendary: 27, unique: 6 });
   });
 });
 

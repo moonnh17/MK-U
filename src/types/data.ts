@@ -677,8 +677,8 @@ export interface ChampionRules {
   /** 대규모 습격: 한 웨이브에 정예가 나오고, 이 확률로 둘이 함께 */
   raidBothChance: number;
   /** 처치 시 무기 상자 확률과 그 등급 가중치 */
+  /** 정예 처치 때 무기 상자(전투 상자 등급표)가 떨어질 확률 */
   weaponChestChance: number;
-  weaponChestWeights: Partial<Record<GradeId, number>>;
 }
 
 export interface WavesData {
@@ -1091,6 +1091,8 @@ export interface ItemsData {
 
 // ---------- 전리품·조우 ----------
 
+export type WeaponChestTierId = 'basic' | 'advanced' | 'supreme' | 'legendary';
+
 export type EncounterKindId = 'treasure' | 'merchant' | 'skillShop' | 'raid' | 'magiSpire' | 'hiddenBoss';
 
 export interface LootData {
@@ -1100,8 +1102,14 @@ export interface LootData {
   uniqueWeaponFallback: GradeId;
   /** 보스 무기 상자 등급 가중치 (스테이지 번호별) */
   weaponChest: Record<string, Partial<Record<GradeId, number>>>;
-  /** 전투 칸을 깼을 때 무기가 떨어질 확률과 등급 */
-  combatDrop: { chance: number; weights: Record<string, Partial<Record<GradeId, number>>> };
+  /** 전투 칸을 깼을 때 무기 상자(전투 상자 등급표)가 떨어질 확률 */
+  combatDrop: { chance: number };
+  /** 무기 상자 등급: 이름·무기 등급 가중치·그림 */
+  weaponChestTiers: Record<WeaponChestTierId, { nameKey: string; weights: Partial<Record<GradeId, number>>; sprite: SpriteRef }>;
+  /** 전투에서 떨어지는 무기 상자(전투 칸·정예·습격)의 등급 가중치 (챕터별) */
+  combatChestTiers: Record<string, Partial<Record<WeaponChestTierId, number>>>;
+  /** 대규모 습격 무기 상자가 전설 무기 상자일 확률 (챕터별) */
+  raidLegendaryChestChance: Record<string, number>;
   merchant: { count: number; weights: Partial<Record<GradeId, number>>; prices: Record<GradeId, number> };
   /** 런 시작 방의 무기 상자 등급 가중치 */
   startChest: Partial<Record<GradeId, number>>;
@@ -1115,7 +1123,8 @@ export interface LootData {
   skillShop: { count: number; prices: { skillNew: number; skillLevelUp: number } };
   encounter: { weights: Record<EncounterKindId, number> };
   raid: { waves: IntRange; sizeMul: number; elitesPerWave: number; coins: IntRange };
-  chest: { weapon: SpriteRef; item: SpriteRef; openRadius: number };
+  /** weapon = 시작 무기 상자, boss = 보스·히든보스 무기 상자 */
+  chest: { weapon: SpriteRef; item: SpriteRef; boss: SpriteRef; openRadius: number };
   merchantStand: SpriteRef;
   /** 상인 진열대 간격(px) */
   standSpacing: number;

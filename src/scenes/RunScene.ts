@@ -997,7 +997,7 @@ export class RunScene extends Phaser.Scene {
     if (e.rank === 'champion' && !e.noReward) {
       const { stage } = this.session;
       const chestRng = Rng.derive(this.ctx.config.seed, `champion-chest-${stage.chapter}-${stage.stage}-${this.loot.lootSeq++}`);
-      if (chestRng.chance(d.waves.champions.weaponChestChance)) this.loot.addChest('weapon', x, y, d.waves.champions.weaponChestWeights);
+      if (chestRng.chance(d.waves.champions.weaponChestChance)) this.loot.addCombatChest(x, y, 'champion');
     }
     // 궁극기 게이지는 적 처치로 충전
     const ult = this.session.player.ultimate;

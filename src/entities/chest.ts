@@ -20,10 +20,12 @@ export class Chest {
     ref: SpriteRef,
     x: number,
     y: number,
-    /** 등급 가중치 (무기 상자: 보스 스테이지별 / 아이템 상자: 보물·습격) */
+    /** 등급 가중치 (무기 상자: 상자 등급·보스 스테이지별 / 아이템 상자: 보물·습격) */
     readonly weights: Partial<Record<GradeId, number>>,
     /** 정해진 것: 아이템 상자 = 아이템 id(보스 전용), 무기 상자 = 무기 id(히든보스 전용) */
-    readonly fixedItem?: string,
+    readonly fixedItem: string | undefined,
+    /** 다가가면 머리 위에 띄우는 상자 이름 */
+    readonly nameKey: string,
   ) {
     this.sprite = scene.add.image(x, y, ref.spriteKey).setDepth(2);
     fitArt(getContext().data, this.sprite, ref.size, ref.height ?? ref.size);

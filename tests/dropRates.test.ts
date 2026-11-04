@@ -3,7 +3,8 @@ import { Rng } from '../src/core/rng';
 import { gameData as D } from '../src/data/index';
 import { gradeRates, itemChance, itemSources, pct, weaponChance, weaponSources } from '../src/systems/dropRates';
 import { rollItem } from '../src/systems/items';
-import { rollGrade, rollWeapon } from '../src/systems/loot';
+import { rollChestTier, rollGrade, rollWeapon } from '../src/systems/loot';
+import { chapterWeights } from '../src/systems/items';
 
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 
@@ -58,5 +59,35 @@ describe('등급표', () => {
   it('모든 출처의 등급표 몫은 정수 %', () => {
     for (const s of [...itemSources(D), ...weaponSources(D)])
       for (const v of Object.values(s.shares)) expect(Number.isInteger(Math.round(v * 1e6) / 1e4), s.key).toBe(true);
+  });
+});
+
+describe('무기 상자 등급', () => {
+  const L = D.loot;
+  const share = (ch: number, legendary = 0) => {
+    const rng = new Rng(ch * 31 + 1);
+    const n: Record<string, number> = {};
+    for (let i = 0; i < 20000; i++) {
+      const t = rollChestTier(rng, chapterWeights(L.combatChestTiers, ch), legendary);
+      n[t] = (n[t] ?? 0) + 1;
+    }
+    return (t: string) => (n[t] ?? 0) / 20000;
+  };
+  it('1장 일반 90·고급 10 / 2장 고급 80·일반 10·최고급 10 / 3장 최고급 90·일반 10', () => {
+    expect(L.combatChestTiers).toEqual({ '1': { basic: 90, advanced: 10 }, '2': { basic: 10, advanced: 80, supreme: 10 }, '3': { basic: 10, supreme: 90 } });
+    const s1 = share(1);
+    expect(s1('basic')).toBeCloseTo(0.9, 1);
+    expect(s1('supreme')).toBe(0);
+  });
+  it('일반·고급·최고급 상자의 무기 등급은 보물 상자 1·2·3장 표', () => {
+    const t = L.weaponChestTiers;
+    expect([t.basic.weights, t.advanced.weights, t.supreme.weights]).toEqual([1, 2, 3].map((ch) => chapterWeights(D.items.treasureWeights, ch)));
+  });
+  it('전설 상자: 전설·유니크가 최고급보다 높다, 습격 확률은 장마다 오른다', () => {
+    const { legendary, supreme } = L.weaponChestTiers;
+    expect(legendary.weights.legendary!).toBeGreaterThan(supreme.weights.legendary!);
+    expect(legendary.weights.unique!).toBeGreaterThan(supreme.weights.unique!);
+    expect([1, 2, 3].map((ch) => chapterWeights(L.raidLegendaryChestChance, ch))).toEqual([0.05, 0.1, 0.15]);
+    expect(share(1, 0.05)('legendary')).toBeCloseTo(0.05, 1);
   });
 });

@@ -3,7 +3,7 @@
  * 신화는 어떤 가중치 표에도 넣지 않고, 얻을 때마다 고정 확률로 따로 판정한다.
  */
 import type { Rng } from '../core/rng';
-import type { EncounterKindId, GradeId, GroupMultipliersData, LootData, WeaponDef, WeaponOptionDef } from '../types/data';
+import type { EncounterKindId, GradeId, WeaponChestTierId, GroupMultipliersData, LootData, WeaponDef, WeaponOptionDef } from '../types/data';
 import type { Card } from './cards';
 import type { WeaponItem, WeaponOption } from './weapons';
 
@@ -125,4 +125,11 @@ export function collectCoins(carry: number, amount: number): { whole: number; ca
   const total = carry + amount;
   const whole = Math.floor(total + 1e-9);
   return { whole, carry: Math.max(0, total - whole) };
+}
+
+/** 전투에서 떨어지는 무기 상자 등급: legendaryChance(습격)면 전설 상자, 아니면 챕터 표에서 하나 */
+export function rollChestTier(rng: Rng, tiers: Partial<Record<WeaponChestTierId, number>>, legendaryChance = 0): WeaponChestTierId {
+  if (legendaryChance > 0 && rng.chance(legendaryChance)) return 'legendary';
+  const pool = (Object.entries(tiers) as [WeaponChestTierId, number][]).filter(([, w]) => w > 0).map(([item, weight]) => ({ item, weight }));
+  return rng.weighted(pool);
 }

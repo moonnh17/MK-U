@@ -7,11 +7,11 @@ import { FloorWeapon } from '../../entities/pickup';
 import { describeCard } from '../../ui/cardView';
 import { artKeys } from '../../systems/art';
 import { cardStillValid, type Card } from '../../systems/cards';
-import { effectiveWeights, readySet, readyWeaponSet, rollItem, transferWeight } from '../../systems/items';
-import { canBuy, cardStock, rollGrade, rollWeapon } from '../../systems/loot';
+import { chapterWeights, effectiveWeights, readySet, readyWeaponSet, rollItem, transferWeight } from '../../systems/items';
+import { canBuy, cardStock, rollChestTier, rollGrade, rollWeapon } from '../../systems/loot';
 import { heal } from '../../systems/vitals';
 import { dropWeaponAt, pickUpWeapon, plainWeapon, type WeaponItem } from '../../systems/weapons';
-import type { GradeId } from '../../types/data';
+import type { GradeId, SpriteRef } from '../../types/data';
 import type { RunScene } from '../RunScene';
 import { sfx, type ItemGet, type Prop, type Vending } from './shared';
 
@@ -276,9 +276,25 @@ export class LootInteract {
     this.checkWeaponSet();
   }
 
-  addChest(kind: ChestKind, x: number, y: number, weights: Partial<Record<GradeId, number>>, fixedItem?: string): void {
-    const ref = kind === 'weapon' ? this.run.ctx.data.loot.chest.weapon : this.run.ctx.data.loot.chest.item;
-    this.chests.push(new Chest(this.run, kind, ref, x, y, weights, fixedItem));
+  /** ref·nameKey가 없으면 시작 무기 상자 / 아이템 상자 모습 */
+  addChest(kind: ChestKind, x: number, y: number, weights: Partial<Record<GradeId, number>>, opts: { fixedItem?: string; ref?: SpriteRef; nameKey?: string } = {}): void {
+    const c = this.run.ctx.data.loot.chest;
+    const ref = opts.ref ?? (kind === 'weapon' ? c.weapon : c.item);
+    this.chests.push(new Chest(this.run, kind, ref, x, y, weights, opts.fixedItem, opts.nameKey ?? (kind === 'weapon' ? 'chest.weapon' : 'chest.item')));
+  }
+
+  /** 보스·히든보스 무기 상자 */
+  addBossChest(x: number, y: number, weights: Partial<Record<GradeId, number>>, fixedItem?: string): void {
+    this.addChest('weapon', x, y, weights, { fixedItem, ref: this.run.ctx.data.loot.chest.boss, nameKey: 'chest.weapon.boss' });
+  }
+
+  /** 전투에서 떨어지는 무기 상자: 챕터 표로 등급을 정한다 (습격은 전설 상자 확률을 더한다) */
+  addCombatChest(x: number, y: number, label: string, legendaryChance = 0): void {
+    const d = this.run.ctx.data.loot;
+    const { stage } = this.run.session;
+    const rng = Rng.derive(this.run.ctx.config.seed, `${label}-tier-${stage.chapter}-${stage.stage}-${this.lootSeq++}`);
+    const tier = d.weaponChestTiers[rollChestTier(rng, chapterWeights(d.combatChestTiers, stage.chapter), legendaryChance)];
+    this.addChest('weapon', x, y, tier.weights, { ref: tier.sprite, nameKey: tier.nameKey });
   }
 
   updateInteractHint(): void {
@@ -296,16 +312,17 @@ export class LootInteract {
     const vending = this.nearVending();
     const portal = this.nearPortal();
     const statue = this.run.roomProps.nearStatue();
-    const kind = this.nearestFloorWeapon() ? 'weapon' : this.nearChest() ? 'chest' : this.nearStand() || this.nearCardStand() ? 'merchant' : vending ? 'vending' : portal ? 'portal' : statue ? 'statue' : null;
+    const chest = this.nearChest();
+    const kind = this.nearestFloorWeapon() ? 'weapon' : chest ? 'chest' : this.nearStand() || this.nearCardStand() ? 'merchant' : vending ? 'vending' : portal ? 'portal' : statue ? 'statue' : null;
     if (kind !== this.interactKind) this.setInteractHint(kind);
     // 포탈·자판기: 머리 위에 조작 안내
-    const at = kind === 'vending' ? vending : kind === 'statue' ? statue : kind === 'portal' ? { x: portal!.sprite.x, y: portal!.sprite.y } : null;
+    const at = kind === 'vending' ? vending : kind === 'statue' ? statue : kind === 'portal' ? { x: portal!.sprite.x, y: portal!.sprite.y } : kind === 'chest' ? chest : null;
     if (!at) {
       this.interactPrompt?.setVisible(false);
       return;
     }
     const mode = this.run.ctx.uiMode === 'mobile' ? 'mobile' : 'pc';
-    const text = this.run.ctx.t(`interact.${kind}.${mode}`, { price: this.run.ctx.data.mapgen.vending.price, what: statue ? this.run.ctx.t(`statue.${statue.kind}`) : '' });
+    const text = this.run.ctx.t(`interact.${kind}.${mode}`, { price: this.run.ctx.data.mapgen.vending.price, what: statue ? this.run.ctx.t(`statue.${statue.kind}`) : chest ? this.run.ctx.t(chest.nameKey) : '' });
     this.interactPrompt ??= this.run.add.text(0, 0, '', { fontFamily: 'sans-serif', fontSize: '9px', color: '#ffffff', stroke: '#000000', strokeThickness: 3 }).setOrigin(0.5, 1).setDepth(9);
     if (this.interactPrompt.text !== text) this.interactPrompt.setText(text);
     this.interactPrompt.setPosition(at.x, at.y - 22).setVisible(true);

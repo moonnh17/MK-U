@@ -106,7 +106,7 @@ export class WorldBuilder {
     }
   }
 
-  /** 물약 자판기: 방 모서리 중 지형지물이 없는 곳 */
+  /** 물약 자판기: 방 모서리 중 지형지물이 없는 곳 → 벽 가운데 → 아무 모서리. 방 가운데는 상자 자리라 쓰지 않는다 */
   addVending(node: RoomNode, obs: readonly Rect[], rng: Rng): void {
     const v = this.run.ctx.data.mapgen.vending;
     const inner = interiorRect(node, this.run.m, v.cornerInsetPx);
@@ -115,8 +115,16 @@ export class WorldBuilder {
       { x: inner.x + inner.w, y: inner.y },
       { x: inner.x, y: inner.y + inner.h },
       { x: inner.x + inner.w, y: inner.y + inner.h },
-    ].filter((p) => !obs.some((o) => contains({ x: o.x - 24, y: o.y - 24, w: o.w + 48, h: o.h + 48 }, p.x, p.y)));
-    const at = corners.length > 0 ? rng.pick(corners) : roomCenter(node, this.run.m);
+    ];
+    const edges = [
+      { x: inner.x + inner.w / 2, y: inner.y },
+      { x: inner.x + inner.w / 2, y: inner.y + inner.h },
+      { x: inner.x, y: inner.y + inner.h / 2 },
+      { x: inner.x + inner.w, y: inner.y + inner.h / 2 },
+    ];
+    const free = (ps: { x: number; y: number }[]) => ps.filter((p) => !obs.some((o) => contains({ x: o.x - 24, y: o.y - 24, w: o.w + 48, h: o.h + 48 }, p.x, p.y)));
+    const pool = [free(corners), free(edges), corners].find((ps) => ps.length > 0)!;
+    const at = rng.pick(pool);
     const sprite = this.run.add.image(at.x, at.y, v.spriteKey).setDepth(2);
     fitArt(this.run.ctx.data, sprite, v.size, v.height ?? v.size);
     this.run.loot.vendings.push({ x: at.x, y: at.y, stock: v.stock, sprite });

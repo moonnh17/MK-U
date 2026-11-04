@@ -50,13 +50,11 @@ export function itemSources(d: GameData): DropSource[] {
 /** 무기 출처 */
 export function weaponSources(d: GameData): DropSource[] {
   const m = d.loot.mythicChance;
-  const chapters = Array.from({ length: d.mapgen.chapters }, (_, i) => i + 1);
-  const ch = d.waves.champions;
   return [
     { ...source('drop.src.start', d.loot.startChest, m), exclude: d.loot.startChestExclude },
     ...Object.entries(d.loot.weaponChest).map(([stage, w]) => source('drop.src.bossChest', w, m, { stage })),
-    ...chapters.map((n) => source('drop.src.combat', chapterWeights(d.loot.combatDrop.weights, n), m, { n, pct: d.loot.combatDrop.chance * 100 })),
-    source('drop.src.champion', ch.weaponChestWeights, m, { pct: ch.weaponChestChance * 100 }),
+    // 전투 칸·정예·습격 무기 상자는 등급별로
+    ...Object.values(d.loot.weaponChestTiers).map((t) => source(t.nameKey, t.weights, m)),
     source('drop.src.merchant', d.loot.merchant.weights, m, { n: d.loot.merchant.count }),
   ];
 }
