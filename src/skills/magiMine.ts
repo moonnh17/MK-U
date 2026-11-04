@@ -82,7 +82,7 @@ class Mine implements SkillObject {
   }
 
   destroy(): void {
-    this.img.scene.tweens.killTweensOf(this.img);
+    this.img.scene?.tweens.killTweensOf(this.img); // 씬 종료 때는 그림이 먼저 지워져 scene이 없다
     this.img.destroy();
   }
 }

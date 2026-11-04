@@ -12,6 +12,7 @@ describe('공간봉합침 연결', () => {
   });
   it('침이 하나면 선이 없다', () => {
     expect(needleLinks([{ x: 0, y: 0 }])).toEqual([]);
+    expect(needleLinks([{ x: 0, y: 0 }, { x: NaN, y: 0 }])).toEqual([]); // NaN 좌표에도 멈추지 않는다
   });
 });
 

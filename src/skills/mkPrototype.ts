@@ -219,7 +219,7 @@ class Suit implements SkillObject {
   }
 
   destroy(): void {
-    this.body.scene.tweens.killTweensOf(this.body);
+    this.body.scene?.tweens.killTweensOf(this.body); // 씬 종료 때는 그림이 먼저 지워져 scene이 없다
     this.body.destroy();
     this.player.setVisible(true);
   }

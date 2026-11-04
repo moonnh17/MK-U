@@ -24,6 +24,7 @@ export function needleLinks(points: readonly Vec2[]): [number, number][] {
         bestD = d;
       }
     }
+    if (best < 0) break; // 좌표가 NaN이면 아무것도 못 고른다: 무한 루프 방지
     out.push([at, best]);
     left.delete(best);
     at = best;

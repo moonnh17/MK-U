@@ -22,6 +22,11 @@ describe('배경 음악', () => {
     const id = pickTrack(M, { place: 'run', chapter: 1, facingBoss: true, hiddenBoss: true, inCombat: true });
     expect(M.tracks[id]).toMatchObject({ file: M.tracks[M.bossTracks['2']!]!.file, startSec: 79 });
   });
+  it('조우 칸에서 싸우는 동안은 2장 보스 곡 (전투 곡보다 먼저, 보스보다는 나중)', () => {
+    expect(pickTrack(M, { place: 'run', chapter: 1, facingBoss: false, inEncounter: true })).toBe(M.bossTracks['2']);
+    expect(pickTrack(M, { place: 'run', chapter: 3, facingBoss: false, inEncounter: true, inCombat: true })).toBe(M.bossTracks['2']);
+    expect(pickTrack(M, { place: 'run', chapter: 1, facingBoss: true, hiddenBoss: true, inEncounter: true })).toBe(M.hiddenBossTrack);
+  });
   it('보스 곡이 없는 챕터면 런 곡', () => {
     expect(pickTrack(M, { place: 'run', chapter: 9, facingBoss: true })).toBe(M.runTrack);
   });

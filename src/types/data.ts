@@ -1490,6 +1490,8 @@ export interface MusicData {
   combatTracks: Record<string, string>;
   /** 히든보스와 마주한 동안의 곡 id */
   hiddenBossTrack: string;
+  /** 조우 칸에서 싸우는 동안의 곡 id */
+  encounterTrack: string;
   /** startSec: 처음 틀 때 이 초부터 (반복은 처음부터) */
   tracks: Record<string, { file: string; volume: number; startSec?: number }>;
 }

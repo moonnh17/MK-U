@@ -717,7 +717,7 @@ MKU를 뱀서식 웨이브 생존에서 소울나이트식 방 탐색 던전 슈
 
 ## 음악과 설정
 
-- 곡: 실험장 = The Architecture of Doubt / 런 = ruins-loop / 1막 보스 = Corrupted Technology / 2막 보스 = Corrupted Simulation / 3막 보스 = 절망의 웅장함. 1·2장 일반 전투 칸에서 싸우는 동안 = Anc Ruins Pulse. 히든보스 = 2막 보스 곡(Corrupted Simulation)을 1분 19초부터.
+- 곡: 실험장 = The Architecture of Doubt / 런 = ruins-loop / 1막 보스 = Corrupted Technology / 2막 보스 = Corrupted Simulation / 3막 보스 = 절망의 웅장함. 1·2장 일반 전투 칸에서 싸우는 동안 = Anc Ruins Pulse. 히든보스 = 2막 보스 곡(Corrupted Simulation)을 1분 19초부터. 조우 칸에서 싸우는 동안(히든보스 제외) = 2막 보스 곡 처음부터.
 - 일시정지 창에서 음악·효과음 음량을 따로 조절한다. 첫 런 시작 방에 조작 안내가 나온다.
 
 ## 방 소품
