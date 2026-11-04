@@ -41,6 +41,12 @@ describe('획득 확률', () => {
     }
     expect(wh / n).toBeCloseTo(weaponChance(D, w, rates), 2);
   });
+  it('시작 무기 상자에서는 부러진 칼날이 나오지 않는다', () => {
+    const start = weaponSources(D)[0]!;
+    expect(weaponChance(D, 'brokenBlade', start.rates, start.exclude)).toBe(0);
+    const rng = new Rng(3);
+    for (let i = 0; i < 300; i++) expect(rollWeapon(rng, 'common', D.weapons.weapons, D.weapons.options, D.groupMultipliers, D.loot.uniqueWeaponFallback, D.loot.startChestExclude).defId).not.toBe('brokenBlade');
+  });
   it('퍼센트 표기는 작은 값도 0으로 보이지 않는다', () => {
     expect(pct(0.25)).toBe('25%');
     expect(pct(0.0123)).toBe('1.23%');

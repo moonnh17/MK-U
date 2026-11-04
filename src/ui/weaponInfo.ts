@@ -71,14 +71,7 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
     const params: Record<string, string | number> = { every: sig.every };
     let key: string = sig.kind === 'laser' && sig.every === 1 ? 'weapon.sigDesc.beam' : `weapon.sigDesc.${sig.kind}`;
     if (sig.kind !== 'space') params.dmg = sig.damageMul;
-    if (sig.kind === 'bigSmash') {
-      params.rad = sig.radiusMul;
-      if (sig.burst) {
-        key = 'weapon.sigDesc.bigSmash.burst';
-        params.n = sig.burst.count;
-        params.bdmg = sig.burst.damageMul;
-      }
-    }
+    if (sig.kind === 'bigSmash') params.rad = sig.radiusMul;
     if (sig.kind === 'chainBolt') {
       params.jumps = sig.jumps;
       if (sig.anyDistance) key = 'weapon.sigDesc.chainBolt.far';

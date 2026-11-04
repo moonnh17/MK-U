@@ -509,6 +509,29 @@ export class WeaponCombat {
    * sig: 이번 공격에 발동한 유니크 고유 효과(네메아의 종말 = 피해·범위 증가, 공간 가르기 = 공간격) / emp: 피해 배율(특무 인장)
    * 강화 평타(고유 효과 발동·완전 차지)는 다른 이펙트를 쓴다.
    */
+  /** 알 굴 참마검 '참수': 참격 호를 따라 흰 빛줄기가 바깥으로 뻗고 불티가 흩어진다 */
+  private slashSparks(origin: Vec2, aim: number, arcDeg: number, radius: number, s: { streaks: number; dots: number; color: string; lifeSec: number; speed: [number, number] }): void {
+    const rng = this.run.rng;
+    const color = hexColor(s.color);
+    const half = (arcDeg * Math.PI) / 360;
+    const spawn = (n: number, make: (x: number, y: number, a: number) => Phaser.GameObjects.Rectangle, grow: number) => {
+      for (let i = 0; i < n; i++) {
+        const a = aim + rng.range(-half, half);
+        const r = radius * rng.range(0.45, 1.05);
+        const x = origin.x + Math.cos(a) * r;
+        const y = origin.y + Math.sin(a) * r;
+        const v = rng.range(s.speed[0], s.speed[1]);
+        const life = s.lifeSec * rng.range(0.6, 1.2);
+        const obj = make(x, y, a).setDepth(8).setBlendMode(Phaser.BlendModes.ADD);
+        this.run.tweens.add({ targets: obj, x: x + Math.cos(a) * v * life, y: y + Math.sin(a) * v * life, alpha: 0, scaleX: grow, duration: life * 1000, delay: rng.range(0, 60), ease: 'Cubic.easeOut', onComplete: () => obj.destroy() });
+      }
+    };
+    // 빛줄기: 바깥 방향으로 길게, 날아가며 늘어난다
+    spawn(s.streaks, (x, y, a) => this.run.add.rectangle(x, y, rng.range(6, 12), 1, color).setRotation(a), 1.8);
+    // 불티: 작은 점
+    spawn(s.dots, (x, y) => this.run.add.rectangle(x, y, rng.int(1, 2), rng.int(1, 2), color), 1);
+  }
+
   melee(w: WeaponDef, st: WeaponStats, aimAngle: number, chargeRatio: number, sig: WeaponSignature | null, emp: number): void {
     const origin = { x: this.run.player.x, y: this.run.player.y };
     const dir = { x: Math.cos(aimAngle), y: Math.sin(aimAngle) };
@@ -519,13 +542,7 @@ export class WeaponCombat {
     if (big) {
       shake(this.run, 'light');
       this.run.floatLabel(origin, this.run.ctx.t(big.nameKey ?? 'weapon.sig.bigSmash'), w.color);
-      // 알 굴 참마검 '참수': 사방으로 참격
-      const b = big.burst;
-      if (b) {
-        for (let i = 0; i < b.count; i++) {
-          this.fireBullet(origin, aimAngle + (i * Math.PI * 2) / b.count, b.speed, b.range, st.damage * b.damageMul * emp, w.tags, null, { pierce: 99, crit: st.critChance, tint: b.color, trail: b.color });
-        }
-      }
+      if (big.sparks && w.pattern.kind === 'arc') this.slashSparks(origin, aimAngle, w.pattern.arcDeg, w.pattern.radius * radMul, big.sparks);
     }
     const p = w.pattern;
     const enemies = [...this.run.enemies];

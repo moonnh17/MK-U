@@ -28,6 +28,8 @@ export interface DropSource {
   key: string;
   vars?: Record<string, string | number>;
   rates: GradeRates;
+  /** 이 출처에서 나오지 않는 무기 id */
+  exclude?: readonly string[];
   shares: GradeRates;
 }
 
@@ -51,7 +53,7 @@ export function weaponSources(d: GameData): DropSource[] {
   const chapters = Array.from({ length: d.mapgen.chapters }, (_, i) => i + 1);
   const ch = d.waves.champions;
   return [
-    source('drop.src.start', d.loot.startChest, m),
+    { ...source('drop.src.start', d.loot.startChest, m), exclude: d.loot.startChestExclude },
     ...Object.entries(d.loot.weaponChest).map(([stage, w]) => source('drop.src.bossChest', w, m, { stage })),
     ...chapters.map((n) => source('drop.src.combat', chapterWeights(d.loot.combatDrop.weights, n), m, { n, pct: d.loot.combatDrop.chance * 100 })),
     source('drop.src.champion', ch.weaponChestWeights, m, { pct: ch.weaponChestChance * 100 }),
@@ -68,24 +70,24 @@ export function itemChance(d: GameData, itemId: string, rates: GradeRates): numb
 }
 
 /** 굴린 등급이 실제로 어느 무기 목록이 되는지 (rollWeapon과 같은 대체 규칙) */
-function weaponPool(d: GameData, grade: GradeId): WeaponDef[] {
+function weaponPool(d: GameData, grade: GradeId, exclude: readonly string[]): WeaponDef[] {
   const ws = d.weapons.weapons;
   if (grade === 'mythic') {
     const mythic = ws.filter((w) => w.grade === 'mythic');
     if (mythic.length > 0) return mythic;
     grade = 'legendary';
   }
-  const droppable = (g: GradeId) => ws.filter((w) => w.droppable && w.grade === g);
+  const droppable = (g: GradeId) => ws.filter((w) => w.droppable && w.grade === g && !exclude.includes(w.id));
   if (grade === 'unique' && droppable('unique').length === 0) grade = d.loot.uniqueWeaponFallback;
   while (droppable(grade).length === 0 && GRADE_IDS.indexOf(grade) > 0) grade = GRADE_IDS[GRADE_IDS.indexOf(grade) - 1]!;
   return droppable(grade);
 }
 
 /** 무기 하나가 한 번 뽑을 때 나올 확률 */
-export function weaponChance(d: GameData, weaponId: string, rates: GradeRates): number {
+export function weaponChance(d: GameData, weaponId: string, rates: GradeRates, exclude: readonly string[] = []): number {
   let p = 0;
   for (const g of GRADE_IDS) {
-    const pool = weaponPool(d, g);
+    const pool = weaponPool(d, g, exclude);
     if (pool.some((w) => w.id === weaponId)) p += rates[g] / pool.length;
   }
   return p;

@@ -130,8 +130,8 @@ export type WeaponCategory = 'gun' | 'blade' | 'staff' | 'bow';
  */
 /** nameKey: 특수공격 이름 (설명 제목·발동 글씨) */
 export type WeaponSignature = { nameKey?: string } & (
-  /** burst: 함께 사방으로 날리는 참격(관통탄) */
-  | { every: number; kind: 'bigSmash'; damageMul: number; radiusMul: number; burst?: { count: number; damageMul: number; speed: number; range: number; color: string } }
+  /** sparks: 참격 호를 따라 튀는 빛줄기(streaks)·불티(dots) 연출 */
+  | { every: number; kind: 'bigSmash'; damageMul: number; radiusMul: number; sparks?: { streaks: number; dots: number; color: string; lifeSec: number; speed: [number, number] } }
   /** beam: 레이저 그림 (없으면 선) */
   | { every: number; kind: 'laser'; damageMul: number; length: number; width: number; beam?: SpriteRef }
   /** 튕기는 번개: 가까운 적에서 적으로 jumps번. anyDistance면 첫 적은 거리 제한 없이 가장 가까운 적 */
@@ -1105,6 +1105,8 @@ export interface LootData {
   merchant: { count: number; weights: Partial<Record<GradeId, number>>; prices: Record<GradeId, number> };
   /** 런 시작 방의 무기 상자 등급 가중치 */
   startChest: Partial<Record<GradeId, number>>;
+  /** 시작 무기 상자에서 나오지 않는 무기 id */
+  startChestExclude: string[];
   /** 스테이지 보스 처치 시 그 보스의 유니크 무기가 나올 확률 (아니면 무기 상자 가중치대로) */
   bossWeaponChance: number;
   /** 상점 진열대 위 아이콘 크기(px) */

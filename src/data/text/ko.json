@@ -877,7 +877,6 @@
   "weaponOpt.attackSpeed": "공격속도 +{value}%",
   "weapon.fist": "주먹",
   "weapon.sigDesc.bigSmash": "{every}타째마다 피해 ×{dmg}, 범위 ×{rad}",
-  "weapon.sigDesc.bigSmash.burst": "{every}타째마다 피해 ×{dmg}, 범위 ×{rad}, 사방으로 참격 {n}개를 날린다 (참격 피해 ×{bdmg})",
   "weapon.sigDesc.laser": "{every}발째마다 직선 레이저 (피해 ×{dmg})",
   "weapon.sigDesc.chainBolt": "{every}타째마다 적을 튕겨 다니는 번개 (피해 ×{dmg}, 최대 {jumps}마리)",
   "weapon.sigDesc.chainBolt.far": "{every}타째마다 적을 튕겨 다니는 번개. 아무리 멀어도 가장 가까운 적에게 닿는다 (피해 ×{dmg}, 최대 {jumps}마리)",

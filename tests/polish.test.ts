@@ -274,8 +274,8 @@ describe('포탑·역장', () => {
     for (const l of sk('magiField').levels) expect(l.values.maxHits).toBe(1);
     expect(sk('magiField').awakening.values.maxHits).toBe(1);
   });
-  it('런 시작은 빈손, 시작 상자는 낮은 등급 + 전설 1%', () => {
-    expect(D.loot.startChest).toEqual({ common: 80, rare: 19, legendary: 1 });
+  it('런 시작은 빈손, 시작 상자는 낮은 등급 + 전설 3%·유니크 1%', () => {
+    expect(D.loot.startChest).toEqual({ common: 77, rare: 19, legendary: 3, unique: 1 });
   });
 });
 

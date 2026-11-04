@@ -169,7 +169,7 @@
       "baseDamage": 18, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 120, "radius": 53 },
       "critChance": 0.3,
       "equipBonus": { "bossDamage": 0.2 },
-      "signature": { "every": 3, "kind": "bigSmash", "damageMul": 3, "radiusMul": 2.3, "nameKey": "weapon.sig.alGulBlade", "burst": { "count": 8, "damageMul": 1, "speed": 260, "range": 120, "color": "#d8f0ff" } },
+      "signature": { "every": 3, "kind": "bigSmash", "damageMul": 3, "radiusMul": 1.6, "nameKey": "weapon.sig.alGulBlade", "sparks": { "streaks": 22, "dots": 26, "color": "#ffffff", "lifeSec": 0.45, "speed": [60, 150] } },
       "projectileSpeed": 0, "range": 53, "cutsProjectiles": true, "droppable": false,
       "spriteKey": "weapon_al_gul_blade", "color": "#c8ccd8", "size": 11
     },

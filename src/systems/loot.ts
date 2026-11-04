@@ -40,13 +40,14 @@ export function rollWeapon(
   options: readonly WeaponOptionDef[],
   groups: GroupMultipliersData,
   uniqueFallback: GradeId,
+  exclude: readonly string[] = [],
 ): WeaponItem {
   if (grade === 'mythic') {
     const mythic = weapons.filter((w) => w.grade === 'mythic');
     if (mythic.length > 0) return { defId: rng.pick(mythic).id, grade: 'mythic', options: [] };
     grade = 'legendary';
   }
-  const droppable = (g: GradeId) => weapons.filter((w) => w.droppable && w.grade === g);
+  const droppable = (g: GradeId) => weapons.filter((w) => w.droppable && w.grade === g && !exclude.includes(w.id));
   if (grade === 'unique' && droppable('unique').length === 0) grade = uniqueFallback;
   while (droppable(grade).length === 0 && GRADE_RANK.indexOf(grade) > 0) grade = GRADE_RANK[GRADE_RANK.indexOf(grade) - 1]!;
   const def = rng.pick(droppable(grade));

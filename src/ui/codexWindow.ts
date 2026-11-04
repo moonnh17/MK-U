@@ -474,7 +474,7 @@ export class CodexWindow {
    * 획득 확률 보기: 이 칸이 한 번 뽑을 때 나올 확률(출처별) + 출처별 등급 확률표.
    * fixed: 상자에서 나오지 않고 정해진 곳에서만 얻는 경우 그 출처 문구
    */
-  private rateView(box: HTMLElement, fixed: string | null, sources: DropSource[], chanceOf: (r: GradeRates) => number, noteKey: string): void {
+  private rateView(box: HTMLElement, fixed: string | null, sources: DropSource[], chanceOf: (r: GradeRates, s: DropSource) => number, noteKey: string): void {
     const t = this.ctx.t;
     const d = this.ctx.data;
     const sub = box.querySelector('.cx-sub')!;
@@ -491,7 +491,7 @@ export class CodexWindow {
       const list = this.el('div', 'cx-rates');
       for (const s of sources) {
         const row = this.el('div', 'cx-rate');
-        row.append(this.el('span', '', src(s)), this.el('b', '', pct(chanceOf(s.rates))));
+        row.append(this.el('span', '', src(s)), this.el('b', '', pct(chanceOf(s.rates, s))));
         list.appendChild(row);
       }
       box.append(this.el('div', 'cx-group', t('codex.rate.this')), list);
@@ -682,7 +682,7 @@ export class CodexWindow {
     if (this.altView) {
       // 상자·상인에서 나오지 않는 무기(보스·히든보스·합성 전용)는 얻는 곳만 보인다. 신화 무기는 신화 판정으로 나온다
       const fixed = !w.droppable && w.grade !== 'mythic' ? source : null;
-      this.rateView(box, fixed, weaponSources(d), (r) => weaponChance(d, id, r), 'codex.rate.noteWeapon');
+      this.rateView(box, fixed, weaponSources(d), (r, s) => weaponChance(d, id, r, s.exclude), 'codex.rate.noteWeapon');
       return;
     }
     // 무기는 설명 문구가 없어 '기록' 머리말 없이 성능만 보인다

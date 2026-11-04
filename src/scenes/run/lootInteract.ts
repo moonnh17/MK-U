@@ -175,11 +175,11 @@ export class LootInteract {
     });
   }
 
-  rollWeaponItem(weights: Partial<Record<GradeId, number>>, label: string): WeaponItem {
+  rollWeaponItem(weights: Partial<Record<GradeId, number>>, label: string, exclude: readonly string[] = []): WeaponItem {
     const d = this.run.ctx.data;
     const rng = Rng.derive(this.run.ctx.config.seed, `${label}-${this.run.session.stage.chapter}-${this.run.session.stage.stage}-${this.lootSeq++}`);
     const grade = rollGrade(rng, weights, d.loot.mythicChance);
-    return rollWeapon(rng, grade, d.weapons.weapons, d.weapons.options, d.groupMultipliers, d.loot.uniqueWeaponFallback);
+    return rollWeapon(rng, grade, d.weapons.weapons, d.weapons.options, d.groupMultipliers, d.loot.uniqueWeaponFallback, exclude);
   }
 
   interact(): void {
@@ -233,7 +233,7 @@ export class LootInteract {
     chest.open();
     if (chest.kind === 'weapon') {
       // 히든보스 전용 무기는 정해진 유니크 (무작위 옵션 없음)
-      const item = chest.fixedItem ? plainWeapon(this.run.weaponDefOf(chest.fixedItem)) : this.rollWeaponItem(chest.weights, 'chest');
+      const item = chest.fixedItem ? plainWeapon(this.run.weaponDefOf(chest.fixedItem)) : this.rollWeaponItem(chest.weights, 'chest', chest.weights === this.run.ctx.data.loot.startChest ? this.run.ctx.data.loot.startChestExclude : []);
       this.dropWeapon(item, chest.x, chest.y + 14);
       return;
     }
