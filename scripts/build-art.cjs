@@ -1269,13 +1269,20 @@ packFx('fx_kaiser_barrage_net', '05_마기카이저/02_광역공격_이펙트/01
 packFx('fx_kaiser_unbound', '05_마기카이저/02_광역공격_이펙트/02_구속해제 황제 전선', 140, 12);
 packFx('fx_bit_rail_slug', '90_공용_소형스프라이트/03_소형_탄체/01_레일건 분리 탄자', 12, 12, true);
 packFx('fx_bit_casing', '90_공용_소형스프라이트/04_잔재_보조비트/02_헥타르 방출 탄피', 10, 10, true);
+packFx('fx_chief_muzzle', '06_헥타르_수석_연구원/01_추가공격_이펙트/01_드론 레일건 발사광', 40, 18);
+packFx('fx_chief_am_burst', '06_헥타르_수석_연구원/01_추가공격_이펙트/02_반물질 시험탄 파열', 60, 16);
+packFx('fx_chief_vector_cage', '06_헥타르_수석_연구원/02_광역공격_이펙트/01_광역 벡터 격리 시험', 140, 12);
+packFx('fx_chief_am_chain', '06_헥타르_수석_연구원/02_광역공격_이펙트/02_반물질 연쇄 격폭진', 140, 14);
+packFx('fx_bit_canister', '90_공용_소형스프라이트/03_소형_탄체/02_반물질 용기탄', 12, 10, true);
+packFx('fx_bit_mine', '90_공용_소형스프라이트/01_헥타르_소형기체/04_접이식 감응 지뢰', 14, 8, true);
+packFx('fx_bit_scout', '90_공용_소형스프라이트/01_헥타르_소형기체/01_정찰 드론', 16, 8, true);
 packFx('fx_eclipse_blade_bloom', '03_식광/01_추가공격_이펙트/01_식광 칼날 개화', 80, 14);
 packFx('fx_eclipse_core_collapse', '03_식광/01_추가공격_이펙트/02_흑일 핵 붕괴', 90, 12);
 packFx('fx_eclipse_light_rain', '03_식광/02_광역공격_이펙트/01_흑일의 낙광우', 90, 10);
 packFx('fx_eclipse_erosion_ring', '03_식광/02_광역공격_이펙트/02_개기식 침식권', 160, 10);
 bFx('06', 'hectar-ring', 'fx_chief_ring', 70);
 bFx('06', 'hectar-burst', 'fx_chief_burst', 60);
-bFx('06', 'hectar-drone', 'fx_chief_drone', 14);
+// hectar-drone(정지 그림)은 정찰 드론(fx_bit_scout, 움직임)으로 바꿨다
 bFx('04', 'vfx-warning-circle', 'fx_golem_warn', 50);
 bFx('04', 'vfx-artillery', 'fx_golem_artillery', 90);
 bFx('04', 'vfx-shock-ring', 'fx_golem_shock', 90);

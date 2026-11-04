@@ -4612,6 +4612,111 @@
         }
       }
     },
+    "fx_chief_muzzle": {
+      "file": "mku/fx_chief_muzzle.png",
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_chief_am_burst": {
+      "file": "mku/fx_chief_am_burst.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "fx_chief_vector_cage": {
+      "file": "mku/fx_chief_vector_cage.png",
+      "frameWidth": 280,
+      "frameHeight": 280,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_chief_am_chain": {
+      "file": "mku/fx_chief_am_chain.png",
+      "frameWidth": 280,
+      "frameHeight": 280,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_bit_canister": {
+      "file": "mku/fx_bit_canister.png",
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "fx_bit_mine": {
+      "file": "mku/fx_bit_mine.png",
+      "frameWidth": 28,
+      "frameHeight": 28,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 8,
+          "loop": true
+        }
+      }
+    },
+    "fx_bit_scout": {
+      "file": "mku/fx_bit_scout.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 8,
+          "loop": true
+        }
+      }
+    },
     "fx_eclipse_blade_bloom": {
       "file": "mku/fx_eclipse_blade_bloom.png",
       "frameWidth": 160,
@@ -4683,13 +4788,6 @@
       "file": "mku/fx_chief_burst.png",
       "frameWidth": 106,
       "frameHeight": 120,
-      "frames": 1,
-      "density": 2
-    },
-    "fx_chief_drone": {
-      "file": "mku/fx_chief_drone.png",
-      "frameWidth": 28,
-      "frameHeight": 26,
       "frames": 1,
       "density": 2
     },

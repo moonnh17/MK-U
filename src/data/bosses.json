@@ -620,6 +620,12 @@
       ],
       "gapSecEnraged": 0.64,
       "art": {
+        "muzzle": { "spriteKey": "fx_chief_muzzle", "color": "#3a7aff", "size": 20 },
+        "antimatter.blastHit": { "spriteKey": "fx_chief_am_burst", "color": "#3a7aff", "size": 30 },
+        "canister": { "spriteKey": "fx_bit_canister", "color": "#3a7aff", "size": 6 },
+        "chain": { "spriteKey": "fx_chief_am_chain", "color": "#3a7aff", "size": 70 },
+        "mine": { "spriteKey": "fx_bit_mine", "color": "#3a7aff", "size": 7 },
+        "cage": { "spriteKey": "fx_chief_vector_cage", "color": "#3a7aff", "size": 70 },
         "blastHit": {
           "spriteKey": "fx_chief_burst",
           "color": "#3a7aff",
@@ -646,7 +652,7 @@
           "size": 30
         },
         "drone": {
-          "spriteKey": "fx_chief_drone",
+          "spriteKey": "fx_bit_scout",
           "color": "#3a7aff",
           "size": 7
         }
