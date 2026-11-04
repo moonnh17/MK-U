@@ -4432,6 +4432,96 @@
         }
       }
     },
+    "fx_golem_crystal_crack": {
+      "file": "mku/fx_golem_crystal_crack.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_golem_core_shock": {
+      "file": "mku/fx_golem_core_shock.png",
+      "frameWidth": 200,
+      "frameHeight": 200,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_golem_strata": {
+      "file": "mku/fx_golem_strata.png",
+      "frameWidth": 240,
+      "frameHeight": 240,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_golem_eight_lock": {
+      "file": "mku/fx_golem_eight_lock.png",
+      "frameWidth": 280,
+      "frameHeight": 280,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_bit_gear": {
+      "file": "mku/fx_bit_gear.png",
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 6,
+          "loop": true
+        }
+      }
+    },
+    "fx_bit_crystal": {
+      "file": "mku/fx_bit_crystal.png",
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 7,
+          "loop": true
+        }
+      }
+    },
     "fx_chief_ring": {
       "file": "mku/fx_chief_ring.png",
       "frameWidth": 140,

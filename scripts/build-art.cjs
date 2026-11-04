@@ -1150,6 +1150,12 @@ packFx('fx_electric_branch_bolt', '02_전기환띠/01_추가공격_이펙트/01_
 packFx('fx_electric_ring_collapse', '02_전기환띠/01_추가공격_이펙트/02_붕괴하는 전격 고리', 90, 14);
 packFx('fx_electric_grid', '02_전기환띠/02_광역공격_이펙트/01_기숲 뇌전 격자', 140, 12);
 packFx('fx_electric_wave', '02_전기환띠/02_광역공격_이펙트/02_절규의 전격 해일', 110, 12);
+packFx('fx_golem_crystal_crack', '04_마기골렘/01_추가공격_이펙트/01_지반 결정 균열', 60, 12);
+packFx('fx_golem_core_shock', '04_마기골렘/01_추가공격_이펙트/02_노출 코어 충격파', 100, 14);
+packFx('fx_golem_strata', '04_마기골렘/02_광역공격_이펙트/01_과기전쟁 지층 파쇄', 120, 10);
+packFx('fx_golem_eight_lock', '04_마기골렘/02_광역공격_이펙트/02_고대 병기 팔방 봉쇄', 140, 10);
+packFx('fx_bit_gear', '90_공용_소형스프라이트/04_잔재_보조비트/01_고대병기 톱니편', 12, 6, true);
+packFx('fx_bit_crystal', '90_공용_소형스프라이트/04_잔재_보조비트/03_마기 결정 잔편', 12, 7, true);
 bFx('06', 'hectar-ring', 'fx_chief_ring', 70);
 bFx('06', 'hectar-burst', 'fx_chief_burst', 60);
 bFx('06', 'hectar-drone', 'fx_chief_drone', 14);

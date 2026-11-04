@@ -5,6 +5,7 @@
 import type { Vec2 } from '../core/actions';
 import type { Rng } from '../core/rng';
 import type Phaser from 'phaser';
+import type { SpriteRef } from '../types/data';
 import type { BossBody } from './patterns';
 
 export const clamp01 = (k: number): number => Math.min(1, Math.max(0, k));
@@ -98,4 +99,41 @@ export function sparkAround(scene: Phaser.Scene, rng: Rng, at: Vec2, radius: num
   const r1 = radius * rng.range(1.1, 1.5);
   const b = a + rng.range(-0.5, 0.5);
   crackle(scene, rng, { x: at.x + Math.cos(a) * r0, y: at.y + Math.sin(a) * r0 }, { x: at.x + Math.cos(b) * r1, y: at.y + Math.sin(b) * r1 }, color, 0.1);
+}
+
+/** 포물선으로 날아가는 그림 하나 (sec초, 꼭대기 높이 h). 도착하면 onLand. trail을 주면 지나간 자리에 빛 꼬리 */
+export function lob(scene: Phaser.Scene, ref: SpriteRef, from: Vec2, to: Vec2, sec: number, h: number, size: number, onLand?: () => void, spin = 8, trail?: number): void {
+  const img = scene.add.sprite(from.x, from.y, ref.spriteKey).setDepth(6);
+  img.setDisplaySize(size, (size * img.height) / Math.max(1, img.width));
+  const anim = `${ref.spriteKey}.play`;
+  if (scene.anims.exists(anim)) img.play(anim);
+  let n = 0;
+  scene.tweens.addCounter({
+    from: 0,
+    to: 1,
+    duration: sec * 1000,
+    onUpdate: (tw) => {
+      const k = tw.getValue() ?? 0;
+      img.setPosition(from.x + (to.x - from.x) * k, from.y + (to.y - from.y) * k - h * 4 * k * (1 - k)).setRotation(k * spin);
+      if (trail !== undefined && n++ % 2 === 0) {
+        const d = scene.add.circle(img.x, img.y, size * 0.3, trail, 0.8).setDepth(5).setBlendMode('ADD');
+        scene.tweens.add({ targets: d, alpha: 0, scale: 0.3, duration: 260, onComplete: () => d.destroy() });
+      }
+    },
+    onComplete: () => {
+      img.destroy();
+      onLand?.();
+    },
+  });
+}
+
+/** 바위·결정 파편이 포물선으로 흩어져 떨어진다 */
+export function debris(scene: Phaser.Scene, rng: Rng, at: Vec2, refs: readonly SpriteRef[], n: number, reach: [number, number], size = 7): void {
+  if (refs.length === 0) return;
+  for (let i = 0; i < n; i++) {
+    const a = rng.range(0, Math.PI * 2);
+    const d = rng.range(reach[0], reach[1]);
+    const to = { x: at.x + Math.cos(a) * d, y: at.y + Math.sin(a) * d * 0.6 };
+    lob(scene, refs[i % refs.length]!, at, to, rng.range(0.35, 0.6), rng.range(14, 30), size * rng.range(0.7, 1.2), undefined, rng.range(-10, 10));
+  }
 }

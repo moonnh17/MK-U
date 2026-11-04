@@ -854,6 +854,13 @@
         "damage": 18
       },
       "art": {
+        "debris": { "spriteKey": "fx_bit_gear", "color": "#a03ae0", "size": 6 },
+        "debris2": { "spriteKey": "fx_bit_crystal", "color": "#a03ae0", "size": 6 },
+        "shell": { "spriteKey": "fx_bit_crystal", "color": "#a03ae0", "size": 6 },
+        "breakerDash.coreShock": { "spriteKey": "fx_golem_core_shock", "color": "#a03ae0", "size": 50 },
+        "crustCrack.strata": { "spriteKey": "fx_golem_strata", "color": "#a03ae0", "size": 60 },
+        "crustCrack.blastHit": { "spriteKey": "fx_golem_crystal_crack", "color": "#a03ae0", "size": 30 },
+        "collapseZone.lock": { "spriteKey": "fx_golem_eight_lock", "color": "#a03ae0", "size": 70 },
         "blastWarn": {
           "spriteKey": "fx_golem_warn",
           "color": "#a03ae0",
@@ -934,13 +941,13 @@
         "dashReady": "ready",
         "dash": "ready",
         "recover": "overload",
-        "earthCrush": "slam",
+        "earthCrush": { "first": "ready", "sec": 0.6, "then": "slam" },
         "bombard": "cast",
-        "ruinBeam": "cast",
-        "ruinLegion": "cast",
-        "crustCrack": "sweep",
-        "collapseZone": "slam",
-        "doomFault": "punch",
+        "ruinBeam": { "first": "ready", "sec": 0.9, "then": "cast" },
+        "ruinLegion": { "first": "ready", "sec": 0.6, "then": "slam" },
+        "crustCrack": { "first": "ready", "sec": 0.8, "then": "sweep" },
+        "collapseZone": { "first": "cast", "sec": 0.8, "then": "slam" },
+        "doomFault": { "first": "ready", "sec": 0.8, "then": "punch" },
         "golemIntimidate": "cast"
       },
       "layers": [
