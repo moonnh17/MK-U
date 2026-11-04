@@ -310,6 +310,10 @@ export interface EnemyDef extends SpriteRef {
   nameKey: string;
   /** 도감 설명 아래 플레이버 문구 (ko.json 키). 없으면 그 칸을 보이지 않는다 */
   flavor?: string;
+  /** 도감 번호 (도감에 나오는 몬스터만) */
+  codexNo?: number;
+  /** 위협 등급 1~6문 (1문이 가장 강함). null = 미분류 */
+  mun?: number | null;
   chapter: number;
   rank: EnemyRank;
   ai: EnemyAi;
@@ -543,6 +547,15 @@ export interface EnemiesData {
   /** 디버그 '적 탄막': 플레이어 주위에서 플레이어를 향해 일반 탄을 쏜다(벡터굴절역장 확인용) */
   debugBarrage: { count: number; distance: number; speed: number; damage: number };
   enemies: EnemyDef[];
+  /** 도감 등급 문양: "1"~"6", "unknown"(미분류) */
+  munGrades: Record<string, MunGradeArt>;
+}
+
+export interface MunGradeArt {
+  color: string;
+  /** 테두리 색 */
+  rim: string;
+  shape: 'star8' | 'star6' | 'pentagon' | 'diamond' | 'triangle' | 'circle' | 'broken';
 }
 
 // ---------- 스테이지·방 생성 ----------

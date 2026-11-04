@@ -13,6 +13,10 @@ describe('도감', () => {
     for (const b of [...D.bosses.bosses, ...D.bosses.hiddenBosses]) expect(ids).toContain(b.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
+  it('도감 몬스터는 모두 도감 번호가 있고 1부터 빈틈없다', () => {
+    const nos = codexSections(D, 'monsters').flatMap((s) => s.entries.map((e) => D.enemies.enemies.find((x) => x.id === e.id)!.codexNo));
+    expect([...nos].sort((a, b) => a! - b!)).toEqual(nos.map((_, i) => i + 1));
+  });
   it('모든 몬스터·직업·학파에 도감 설명이 있다', () => {
     for (const e of codexSections(D, 'monsters').flatMap((s) => s.entries)) expect(D.text[`codex.enemy.${e.id}`], e.id).toBeTypeOf('string');
     for (const j of D.jobs.jobs) expect(D.text[`codex.job.${j.id}`], j.id).toBeTypeOf('string');

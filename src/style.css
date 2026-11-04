@@ -2188,6 +2188,45 @@ body {
   letter-spacing: 0.5px;
   color: var(--cx-ink);
 }
+/* 위협 등급 문양 (1~6문) */
+.cx-mun {
+  display: inline-flex;
+  vertical-align: middle;
+}
+.cx-name .cx-mun {
+  margin-left: 8px;
+  filter: drop-shadow(0 1px 1px rgba(40, 20, 0, 0.45));
+}
+.cx-cell small .cx-mun {
+  margin-right: 2px;
+  vertical-align: -2px;
+}
+.cx-mun-label {
+  margin-left: 4px;
+  font-size: 13px;
+  vertical-align: middle;
+  color: #6a5434;
+}
+/* 1·2문: 문양이 천천히 빛난다 */
+.cx-mun.mun-1 svg,
+.cx-mun.mun-2 svg {
+  animation: cx-mun-glow 2.4s ease-in-out infinite;
+}
+.cx-mun.mun-1 svg {
+  --mun-glow: #ff3040;
+}
+.cx-mun.mun-2 svg {
+  --mun-glow: #ffb020;
+}
+@keyframes cx-mun-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    filter: drop-shadow(0 0 4px var(--mun-glow));
+  }
+}
 .cx-hero {
   display: flex;
   gap: 16px;

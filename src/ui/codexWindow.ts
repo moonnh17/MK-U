@@ -17,6 +17,7 @@ import { tagBadges } from '../systems/tags';
 import { plainWeapon, weaponStats } from '../systems/weapons';
 import type { BossCore, ItemDef, TagId } from '../types/data';
 import { applyArtIcon } from './artIcon';
+import { munEmblemSvg } from './munEmblem';
 import { itemDescParams } from './itemCard';
 import { weaponInfoLines } from './weaponInfo';
 
@@ -216,7 +217,10 @@ export class CodexWindow {
     const icon = this.el('span', 'cx-icon');
     const a = this.art(e);
     applyArtIcon(icon, this.ctx, a.key, a.color);
-    c.append(icon, this.el('i', '', String(i + 1).padStart(3, '0')), this.el('small', '', known ? this.name(e) : '???'));
+    const name = this.el('small', '', known ? this.name(e) : '???');
+    const mun = known ? this.mun(e, 14) : null;
+    if (mun) name.prepend(mun);
+    c.append(icon, this.el('i', '', this.no(e, i)), name);
     if (a.ring) c.style.setProperty('--ring', a.ring);
     if (a.grade && SPARK_GRADES.has(a.grade)) {
       // 전설·유니크: 테두리에서 등급 색 불꽃이 피어오른다 (왼쪽 변·오른쪽 변·아랫변을 돌아가며)
@@ -261,6 +265,25 @@ export class CodexWindow {
     return { key: w.spriteKey, color: w.color, ring: grade(w.grade), grade: w.grade };
   }
 
+  /** 도감 번호: 몬스터는 데이터의 codexNo, 나머지는 목록 순서 */
+  private no(e: CodexEntry, i: number): string {
+    const n = e.kind === 'enemy' ? this.ctx.data.enemies.enemies.find((x) => x.id === e.id)?.codexNo : undefined;
+    return String(n ?? i + 1).padStart(3, '0');
+  }
+
+  /** 몬스터 위협 등급 문양 (1~6문, 미분류). title에 '2문급' 같은 이름 */
+  private mun(e: CodexEntry, size: number): HTMLElement | null {
+    if (e.kind !== 'enemy') return null;
+    const d = this.ctx.data;
+    const def = d.enemies.enemies.find((x) => x.id === e.id);
+    if (def?.codexNo === undefined) return null;
+    const grade = def.mun ? String(def.mun) : 'unknown';
+    const span = this.el('span', `cx-mun mun-${grade}`);
+    span.innerHTML = munEmblemSvg(grade, d.enemies.munGrades[grade]!, size);
+    span.title = def.mun ? this.ctx.t('codex.mun', { n: def.mun }) : this.ctx.t('codex.mun.unknown');
+    return span;
+  }
+
   private name(e: CodexEntry): string {
     const d = this.ctx.data;
     const t = this.ctx.t;
@@ -281,7 +304,7 @@ export class CodexWindow {
     if (!e) return box;
     const known = this.known(e);
     const chips = this.el('div', 'cx-chips');
-    chips.appendChild(this.el('span', 'cx-no', t('codex.no', { n: String(index + 1).padStart(3, '0') })));
+    chips.appendChild(this.el('span', 'cx-no', t('codex.no', { n: this.no(e, index) })));
     const hero = this.el('div', 'cx-hero');
     const icon = this.el('span', `cx-big${known ? '' : ' unknown'}`);
     const a = this.art(e);
@@ -292,7 +315,10 @@ export class CodexWindow {
     hero.append(stage, this.side);
     const record = this.el('div', 'cx-record');
     record.appendChild(this.el('div', 'cx-sub', t('codex.record')));
-    box.append(chips, this.el('b', 'cx-name', known ? this.name(e) : '???'), hero, record);
+    const name = this.el('b', 'cx-name', known ? this.name(e) : '???');
+    const mun = known ? this.mun(e, 26) : null;
+    if (mun) name.append(mun, this.el('span', 'cx-mun-label', mun.title));
+    box.append(chips, name, hero, record);
     if (!known) {
       record.appendChild(this.el('p', 'cx-desc dim', t(e.kind === 'enemy' ? 'codex.unknown.enemy' : 'codex.unknown.item')));
       return box;

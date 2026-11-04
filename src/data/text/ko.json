@@ -245,6 +245,8 @@
   "codex.needItem": "각성 재료: {item}",
   "codex.list": "{tab} 목록",
   "codex.no": "No. {n}",
+  "codex.mun": "{n}문급",
+  "codex.mun.unknown": "미분류",
   "codex.record": "기록",
   "codex.section.chapter1": "1장 · 마기전쟁 폐허",
   "codex.section.chapter2": "2장 · 헥타르 연구구역",

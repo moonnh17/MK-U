@@ -3,9 +3,18 @@
   "hpScale": { "2": { "base": 1.6, "perStage": 0.2 }, "3": { "base": 2.8, "perStage": 0.4 } },
   "damageScale": { "1": { "base": 1.05, "perStage": 0.05 }, "2": { "base": 1.3, "perStage": 0.1 }, "3": { "base": 1.75, "perStage": 0.15 } },
   "debugBarrage": { "count": 12, "distance": 90, "speed": 90, "damage": 5 },
+  "munGrades": {
+    "1": { "color": "#b0101e", "rim": "#f0c040", "shape": "star8" },
+    "2": { "color": "#d08a10", "rim": "#7a4a00", "shape": "star6" },
+    "3": { "color": "#7a3ab0", "rim": "#3a1060", "shape": "pentagon" },
+    "4": { "color": "#2a5fb0", "rim": "#10305a", "shape": "diamond" },
+    "5": { "color": "#2e8b57", "rim": "#104a28", "shape": "triangle" },
+    "6": { "color": "#8a8070", "rim": "#4a4438", "shape": "circle" },
+    "unknown": { "color": "#3a3a40", "rim": "#101014", "shape": "broken" }
+  },
   "enemies": [
     {
-      "id": "tomakki",
+      "id": "tomakki", "codexNo": 1, "mun": 6,
       "flavor": "codex.flavor.tomakki",
       "nameKey": "enemy.tomakki",
       "chapter": 1,
@@ -23,7 +32,7 @@
       "size": 8
     },
     {
-      "id": "gaedeulgae",
+      "id": "gaedeulgae", "codexNo": 2, "mun": 6,
       "flavor": "codex.flavor.gaedeulgae",
       "nameKey": "enemy.gaedeulgae",
       "chapter": 1,
@@ -43,7 +52,7 @@
       "size": 11
     },
     {
-      "id": "akgwi",
+      "id": "akgwi", "codexNo": 3, "mun": 5,
       "flavor": "codex.flavor.akgwi",
       "nameKey": "enemy.akgwi",
       "chapter": 1,
@@ -64,7 +73,7 @@
       "size": 15
     },
     {
-      "id": "ghostShooter", "flavor": "codex.flavor.ghostShooter", "nameKey": "enemy.ghostShooter", "chapter": 1, "rank": "normal", "ai": "chase", "mentalRatio": 1,
+      "id": "ghostShooter", "codexNo": 4, "mun": null, "flavor": "codex.flavor.ghostShooter", "nameKey": "enemy.ghostShooter", "chapter": 1, "rank": "normal", "ai": "chase", "mentalRatio": 1,
       "maxHp": 16, "moveSpeed": 38, "contactDamage": 4, "contactIntervalSec": 1.0,
       "energyOrbs": [1, 2], "coins": [1, 2], "keepDistance": 100,
       "attacks": [
@@ -75,7 +84,7 @@
       "spriteKey": "enemy_ghost_shooter", "color": "#c0303a", "size": 11
     },
     {
-      "id": "fusionAkgwi",
+      "id": "fusionAkgwi", "codexNo": 5, "mun": 4,
       "flavor": "codex.flavor.fusionAkgwi",
       "nameKey": "enemy.fusionAkgwi",
       "chapter": 1,
@@ -92,7 +101,7 @@
       "size": 39
     },
     {
-      "id": "electricRing",
+      "id": "electricRing", "codexNo": 6, "mun": 3,
       "flavor": "codex.flavor.electricRing",
       "nameKey": "enemy.electricRing",
       "chapter": 1,
@@ -124,13 +133,13 @@
       "size": 24
     },
     {
-      "id": "ancestorEcho", "nameKey": "enemy.ancestorEcho", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
+      "id": "ancestorEcho", "codexNo": 18, "mun": null, "nameKey": "enemy.ancestorEcho", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
       "maxHp": 1920, "moveSpeed": 45, "contactDamage": 12, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
       "spriteKey": "enemy_ancestor_echo", "color": "#b0583a", "size": 42
     },
     {
-      "id": "royalMage", "nameKey": "enemy.royalMage", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
+      "id": "royalMage", "codexNo": 19, "mun": null, "nameKey": "enemy.royalMage", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
       "maxHp": 1680, "moveSpeed": 35, "contactDamage": 10, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
       "spriteKey": "enemy_royal_mage", "color": "#6a4ad9", "size": 33
@@ -142,13 +151,13 @@
       "spriteKey": "enemy_royal_mage", "color": "#6a4ad9", "size": 33
     },
     {
-      "id": "orionCrusader", "nameKey": "enemy.orionCrusader", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
+      "id": "orionCrusader", "codexNo": 20, "mun": null, "nameKey": "enemy.orionCrusader", "chapter": 1, "rank": "hiddenBoss", "ai": "boss",
       "maxHp": 2160, "moveSpeed": 32, "contactDamage": 12, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
       "spriteKey": "enemy_orion_crusader", "color": "#d9c25a", "size": 42
     },
     {
-      "id": "hectarTrooper", "flavor": "codex.flavor.hectarTrooper", "nameKey": "enemy.hectarTrooper", "chapter": 2, "rank": "normal", "ai": "chase",
+      "id": "hectarTrooper", "codexNo": 16, "mun": null, "flavor": "codex.flavor.hectarTrooper", "nameKey": "enemy.hectarTrooper", "chapter": 2, "rank": "normal", "ai": "chase",
       "maxHp": 30, "moveSpeed": 45, "contactDamage": 6, "contactIntervalSec": 1.0,
       "energyOrbs": [1, 2], "coins": [1, 3], "keepDistance": 90,
       "attacks": [
@@ -158,7 +167,7 @@
       "spriteKey": "enemy_hectar_trooper", "color": "#3a7bff", "size": 12
     },
     {
-      "id": "magiBeetle", "flavor": "codex.flavor.magiBeetle", "nameKey": "enemy.magiBeetle", "chapter": 2, "rank": "normal", "ai": "chase",
+      "id": "magiBeetle", "codexNo": 8, "mun": 5, "flavor": "codex.flavor.magiBeetle", "nameKey": "enemy.magiBeetle", "chapter": 2, "rank": "normal", "ai": "chase",
       "maxHp": 60, "moveSpeed": 35, "contactDamage": 8, "contactIntervalSec": 1.0,
       "energyOrbs": [2, 3], "coins": [1, 3],
       "attacks": [
@@ -168,7 +177,7 @@
       "spriteKey": "enemy_magi_beetle", "color": "#5a8a3a", "size": 15
     },
     {
-      "id": "aMemory", "flavor": "codex.flavor.aMemory", "nameKey": "enemy.aMemory", "chapter": 2, "rank": "normal", "ai": "chase",
+      "id": "aMemory", "codexNo": 9, "mun": 5, "flavor": "codex.flavor.aMemory", "nameKey": "enemy.aMemory", "chapter": 2, "rank": "normal", "ai": "chase",
       "maxHp": 45, "moveSpeed": 45, "contactDamage": 5, "contactIntervalSec": 1.0,
       "energyOrbs": [1, 3], "coins": [1, 2],
       "trail": { "everyPx": 18, "radius": 9, "liveSec": 2.5, "damage": 4, "mentalDamage": 4, "tickSec": 0.5 },
@@ -179,19 +188,19 @@
       "spriteKey": "enemy_a_memory", "color": "#8a7ab0", "size": 13
     },
     {
-      "id": "hectarChief", "flavor": "codex.flavor.hectarChief", "nameKey": "enemy.hectarChief", "chapter": 2, "rank": "boss", "ai": "boss",
+      "id": "hectarChief", "codexNo": 17, "mun": null, "flavor": "codex.flavor.hectarChief", "nameKey": "enemy.hectarChief", "chapter": 2, "rank": "boss", "ai": "boss",
       "maxHp": 5400, "moveSpeed": 34, "contactDamage": 12, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
       "spriteKey": "enemy_hectar_chief", "color": "#3a9aff", "size": 36
     },
     {
-      "id": "magiGolem", "flavor": "codex.flavor.magiGolem", "nameKey": "enemy.magiGolem", "chapter": 2, "rank": "boss", "ai": "boss",
+      "id": "magiGolem", "codexNo": 7, "mun": 2, "flavor": "codex.flavor.magiGolem", "nameKey": "enemy.magiGolem", "chapter": 2, "rank": "boss", "ai": "boss",
       "maxHp": 9000, "moveSpeed": 26, "contactDamage": 14, "contactIntervalSec": 1.0,
       "energyOrbs": [12, 14], "coins": [14, 18],
       "spriteKey": "enemy_magi_golem", "color": "#8a6a4a", "size": 48
     },
     {
-      "id": "ancientOne", "flavor": "codex.flavor.ancientOne", "nameKey": "enemy.ancientOne", "chapter": 3, "rank": "normal", "ai": "chase", "mentalRatio": 1,
+      "id": "ancientOne", "codexNo": 11, "mun": null, "flavor": "codex.flavor.ancientOne", "nameKey": "enemy.ancientOne", "chapter": 3, "rank": "normal", "ai": "chase", "mentalRatio": 1,
       "maxHp": 50, "moveSpeed": 30, "contactDamage": 7, "contactIntervalSec": 1.0,
       "energyOrbs": [1, 3], "coins": [1, 3], "keepDistance": 120,
       "attacks": [
@@ -201,7 +210,7 @@
       "spriteKey": "enemy_ancient_one", "color": "#c8b8a0", "size": 18
     },
     {
-      "id": "hatredShard", "flavor": "codex.flavor.hatredShard", "nameKey": "enemy.hatredShard", "chapter": 3, "rank": "normal", "ai": "chase", "mentalRatio": 1,
+      "id": "hatredShard", "codexNo": 10, "mun": null, "flavor": "codex.flavor.hatredShard", "nameKey": "enemy.hatredShard", "chapter": 3, "rank": "normal", "ai": "chase", "mentalRatio": 1,
       "maxHp": 28, "moveSpeed": 70, "contactDamage": 7, "contactIntervalSec": 0.8,
       "energyOrbs": [1, 2], "coins": [1, 2],
       "attacks": [
@@ -211,7 +220,7 @@
       "spriteKey": "enemy_hatred_shard", "color": "#ff3a4a", "size": 11
     },
     {
-      "id": "executor", "flavor": "codex.flavor.executor", "nameKey": "enemy.executor", "chapter": 3, "rank": "champion", "ai": "chase",
+      "id": "executor", "codexNo": 14, "mun": null, "flavor": "codex.flavor.executor", "nameKey": "enemy.executor", "chapter": 3, "rank": "champion", "ai": "chase",
       "maxHp": 260, "moveSpeed": 38, "contactDamage": 10, "contactIntervalSec": 1.0,
       "energyOrbs": [5, 7], "coins": [5, 8],
       "attacks": [
@@ -223,7 +232,7 @@
       "spriteKey": "enemy_executor", "color": "#a0a8b8", "size": 24
     },
     {
-      "id": "archon", "flavor": "codex.flavor.archon", "nameKey": "enemy.archon", "chapter": 3, "rank": "champion", "ai": "chase", "mentalRatio": 1,
+      "id": "archon", "codexNo": 15, "mun": null, "flavor": "codex.flavor.archon", "nameKey": "enemy.archon", "chapter": 3, "rank": "champion", "ai": "chase", "mentalRatio": 1,
       "maxHp": 200, "moveSpeed": 28, "contactDamage": 8, "contactIntervalSec": 1.0,
       "energyOrbs": [5, 7], "coins": [5, 8], "keepDistance": 150,
       "attacks": [
@@ -242,13 +251,13 @@
       "spriteKey": "enemy_archon", "color": "#e8c860", "size": 22
     },
     {
-      "id": "eclipse", "flavor": "codex.flavor.eclipse", "nameKey": "enemy.eclipse", "chapter": 3, "rank": "boss", "ai": "boss",
+      "id": "eclipse", "codexNo": 12, "mun": 2, "flavor": "codex.flavor.eclipse", "nameKey": "enemy.eclipse", "chapter": 3, "rank": "boss", "ai": "boss",
       "maxHp": 13200, "moveSpeed": 32, "contactDamage": 14, "contactIntervalSec": 1.0,
       "energyOrbs": [12, 14], "coins": [14, 18],
       "spriteKey": "enemy_eclipse", "color": "#c8a8ff", "size": 42
     },
     {
-      "id": "magiKaiser", "flavor": "codex.flavor.magiKaiser", "nameKey": "enemy.magiKaiser", "chapter": 3, "rank": "boss", "ai": "boss",
+      "id": "magiKaiser", "codexNo": 13, "mun": null, "flavor": "codex.flavor.magiKaiser", "nameKey": "enemy.magiKaiser", "chapter": 3, "rank": "boss", "ai": "boss",
       "maxHp": 31200, "moveSpeed": 40, "contactDamage": 16, "contactIntervalSec": 1.0,
       "energyOrbs": [14, 16], "coins": [16, 20],
       "spriteKey": "enemy_magi_kaiser", "color": "#d02828", "size": 51
