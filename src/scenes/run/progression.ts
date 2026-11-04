@@ -274,24 +274,18 @@ export class Progression {
     const d = this.run.ctx.data;
     const { stage } = this.run.session;
     const last = stage.stage === d.mapgen.stagesPerChapter && stage.chapter === d.jobs.advanceAfterChapter;
-    // 보스 처치: 무기 상자 확정 (포털 옆)
+    // 보스 처치: 보스 보물 상자 1 + 보스 무기 상자 1 확정 (포털 양옆)
     const c = roomCenter(node, this.run.m);
-    const weights = d.loot.weaponChest[String(stage.stage)];
     const bossId = d.bosses.bosses.find((b) => b.chapter === stage.chapter && b.stage === stage.stage)?.id;
-    const bossItemDef = d.items.items.find((x) => x.pool === 'boss' && x.bossId === bossId && !this.run.session.player.itemsObtained.includes(x.id));
-    const itemRng = Rng.derive(this.run.ctx.config.seed, `boss-item-${stage.chapter}-${stage.stage}`);
-    const bossItem = bossItemDef && (bossItemDef.dropChance === undefined || itemRng.chance(bossItemDef.dropChance)) ? bossItemDef : undefined;
+    // 전용 아이템이 아직 남아 있으면 보물 상자에서 그 아이템 확정
+    const bossItem = d.items.items.find((x) => x.pool === 'boss' && x.bossId === bossId && !this.run.session.player.itemsObtained.includes(x.id));
+    // 전용 무기가 있으면 bossWeaponChance(20%)로 그 무기, 아니면 보스 무기 상자 가중치
+    const bossWeapon = d.weapons.weapons.find((w) => w.bossId === bossId);
+    const unique = !!bossWeapon && Rng.derive(this.run.ctx.config.seed, `boss-weapon-${stage.chapter}-${stage.stage}`).chance(d.loot.bossWeaponChance);
     const reward = () => {
       this.run.world.addPortal(node);
-      if (weights) this.run.loot.addBossChest(c.x - 40, c.y, weights);
-      // 보스 전용 아이템 확정 (무기 상자와 별도)
-      if (bossItem) this.run.loot.addChest('item', c.x + 40, c.y, {}, { fixedItem: bossItem.id });
-      // 보스 전용 무기: 확률로, 아니면 다른 무기
-      const bossWeapon = d.weapons.weapons.find((w) => w.bossId === bossId);
-      if (bossWeapon && weights) {
-        const unique = Rng.derive(this.run.ctx.config.seed, `boss-weapon-${stage.chapter}-${stage.stage}`).chance(d.loot.bossWeaponChance);
-        this.run.loot.addBossChest(c.x + 40, c.y + (bossItem ? 28 : 0), weights, unique ? bossWeapon.id : undefined);
-      }
+      this.run.loot.addChest('item', c.x - 40, c.y, d.loot.bossItemChest, { fixedItem: bossItem?.id, ref: d.loot.chest.bossItem, nameKey: 'chest.item.boss' });
+      this.run.loot.addBossChest(c.x + 40, c.y, d.loot.bossWeaponChest, unique ? bossWeapon!.id : undefined);
     };
     if (last && this.run.session.player.advancement === null) this.advance(reward);
     else reward();

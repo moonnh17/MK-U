@@ -2,7 +2,7 @@
   "treasureWeights": {
     "1": { "common": 64, "rare": 26, "legendary": 8, "unique": 2 },
     "2": { "common": 49, "rare": 37, "legendary": 11, "unique": 3 },
-    "3": { "common": 34, "rare": 49, "legendary": 13, "unique": 4 }
+    "3": { "common": 30, "rare": 49, "legendary": 15, "unique": 6 }
   },
   "raidWeights": { "rare": 77, "legendary": 17, "unique": 6 },
   "transferPerPickup": 2,

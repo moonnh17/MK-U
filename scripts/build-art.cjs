@@ -674,6 +674,8 @@ const CHEST = [
 ];
 dots('chest_weapon', CHEST);
 dots('chest_item', CHEST, { pal: { B: PAL.C, b: PAL.n, g: PAL.c, G: PAL.C } });
+// 보스 보물 상자: 남보라 몸통 · 금테 · 붉은 보석 왕관 장식
+dots('chest_item_boss', ["....Y....YY....Y....", "...KYK..KrrK..KYK...", "..KKKKKKKKKKKKKKKK..", ".KgNNNNNgNNgNNNNNgK.", ".KgNnnnNgNNgNnnnNgK.", "KggggggggggggggggggK", "KgNNNNNNKrrKNNNNNNgK", "KgNNNNNNKrYKNNNNNNgK", "KgnNNNNNKKKKNNNNNngK", "KgnnnnnNgNNgNnnnnngK", ".KKKKKKKKKKKKKKKKKK."], { pal: { N: [52, 36, 104], n: [30, 22, 64] } });
 // 아이템 조합기: 위 깔때기 두 개(넣는 곳) · 가운데 빛나는 창 · 아래 받침
 dots('prop_combiner', ["KKKKK.....KKKKK", "KYYYK.....KYYYK", ".KYK.......KYK.", ".KmK.......KmK.", "KKmKKKKKKKKKmKK", "KmmmmmmmmmmmmmK", "KmdddddddddddmK", "KmdKKKKKKKKKdmK", "KmdKcccccccKdmK", "KmdKcCwwwCcKdmK", "KmdKcccccccKdmK", "KmdKKKKKKKKKdmK", "KmdddddddddddmK", "KmmmmmmmmmmmmmK", "KmdgdgdgdgdgdmK", "KKKKKKKKKKKKKKK", ".KlllllllllllK.", "..KKKKKKKKKKK.."]);
 // 무기 상자 등급별: 일반(쇠띠) · 고급(초록·은) · 최고급(금) · 전설(보라·금, 반짝임) · 보스(검붉은 쇠·해골·뿔)

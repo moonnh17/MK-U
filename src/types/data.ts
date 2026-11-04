@@ -1073,10 +1073,8 @@ export interface ItemDef extends SpriteRef {
   effects: ItemEffect[];
   /** 직업·학파별 추가 효과 (아직 없는 직업은 데이터만) */
   variants?: { job: string; effects: ItemEffect[] }[];
-  /** boss: 이 보스 처치 시 확정 (dropChance가 있으면 그 확률) */
+  /** boss: 이 보스 처치 시 보스 보물 상자에서 확정 */
   bossId?: string;
-  /** 보스 전용 아이템이 나올 확률 (헥타르 RAM 20%). 없으면 확정 */
-  dropChance?: number;
 }
 
 export interface ItemsData {
@@ -1105,8 +1103,10 @@ export interface LootData {
   mythicChance: number;
   /** 유니크 무기 목록이 없을 때 대신 줄 등급 */
   uniqueWeaponFallback: GradeId;
-  /** 보스 무기 상자 등급 가중치 (스테이지 번호별) */
-  weaponChest: Record<string, Partial<Record<GradeId, number>>>;
+  /** 보스 무기 상자 등급 가중치 (모든 보스 같은 표) */
+  bossWeaponChest: Partial<Record<GradeId, number>>;
+  /** 보스 보물 상자(아이템) 등급 가중치. 전용 아이템이 남은 보스면 그 아이템 확정 */
+  bossItemChest: Partial<Record<GradeId, number>>;
   /** 전투 칸을 깼을 때 무기 상자(전투 상자 등급표)가 떨어질 확률 */
   combatDrop: { chance: number };
   /** 무기 상자 등급: 이름·무기 등급 가중치·그림 */
@@ -1129,7 +1129,7 @@ export interface LootData {
   encounter: { weights: Record<EncounterKindId, number> };
   raid: { waves: IntRange; sizeMul: number; elitesPerWave: number; coins: IntRange };
   /** weapon = 시작 무기 상자, boss = 보스·히든보스 무기 상자 */
-  chest: { weapon: SpriteRef; item: SpriteRef; boss: SpriteRef; openRadius: number };
+  chest: { weapon: SpriteRef; item: SpriteRef; boss: SpriteRef; bossItem: SpriteRef; openRadius: number };
   merchantStand: SpriteRef;
   /** 아이템 조합기 (조우 칸): 같은 등급 2개 → 한 등급 위 1개, 한 대에 한 번 */
   combiner: SpriteRef;

@@ -33,7 +33,7 @@ describe('획득 확률', () => {
     expect(hit / n).toBeCloseTo(itemChance(D, target, src.rates), 2);
 
     const w = D.weapons.weapons.find((x) => x.droppable && x.grade === 'rare')!.id;
-    const weights = D.loot.weaponChest['5']!;
+    const weights = D.loot.bossWeaponChest;
     const rates = gradeRates(weights, D.loot.mythicChance);
     let wh = 0;
     for (let i = 0; i < n; i++) {
@@ -79,9 +79,12 @@ describe('무기 상자 등급', () => {
     expect(s1('basic')).toBeCloseTo(0.9, 1);
     expect(s1('supreme')).toBe(0);
   });
-  it('일반·고급·최고급 상자의 무기 등급은 보물 상자 1·2·3장 표', () => {
+  it('일반·고급 상자는 보물 상자 1·2장 표, 최고급은 3장 표보다 전설·유니크가 높다', () => {
     const t = L.weaponChestTiers;
-    expect([t.basic.weights, t.advanced.weights, t.supreme.weights]).toEqual([1, 2, 3].map((ch) => chapterWeights(D.items.treasureWeights, ch)));
+    expect([t.basic.weights, t.advanced.weights]).toEqual([1, 2].map((ch) => chapterWeights(D.items.treasureWeights, ch)));
+    const ch3 = chapterWeights(D.items.treasureWeights, 3);
+    expect(t.supreme.weights.legendary!).toBeGreaterThan(ch3.legendary!);
+    expect(t.supreme.weights.unique!).toBeGreaterThan(ch3.unique!);
   });
   it('전설 상자: 전설·유니크가 최고급보다 높다, 습격 확률은 장마다 오른다', () => {
     const { legendary, supreme } = L.weaponChestTiers;

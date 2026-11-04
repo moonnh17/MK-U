@@ -113,8 +113,8 @@ describe('등급 가중치', () => {
     expect(s).toEqual({ common: -2, rare: 0, legendary: 2 });
     expect(transferWeight(s, 'unique', 2)).toBe(s);
   });
-  it('보물 상자 표는 챕터별, 유니크 2·3·4%, 모두 합 100인 정수', () => {
-    expect([1, 2, 3].map((ch) => chapterWeights(I.treasureWeights, ch).unique)).toEqual([2, 3, 4]);
+  it('보물 상자 표는 챕터별, 유니크 2·3·6%, 모두 합 100인 정수', () => {
+    expect([1, 2, 3].map((ch) => chapterWeights(I.treasureWeights, ch).unique)).toEqual([2, 3, 6]);
     for (const ch of [1, 2, 3]) {
       const w = chapterWeights(I.treasureWeights, ch);
       expect(Object.values(w).every((v) => Number.isInteger(v))).toBe(true);

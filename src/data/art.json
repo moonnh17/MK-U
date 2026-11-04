@@ -1485,6 +1485,12 @@
       "frameHeight": 10,
       "frames": 1
     },
+    "chest_item_boss": {
+      "file": "mku/chest_item_boss.png",
+      "frameWidth": 20,
+      "frameHeight": 11,
+      "frames": 1
+    },
     "prop_combiner": {
       "file": "mku/prop_combiner.png",
       "frameWidth": 15,

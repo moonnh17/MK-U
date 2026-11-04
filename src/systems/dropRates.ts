@@ -44,6 +44,7 @@ export function itemSources(d: GameData): DropSource[] {
   return [
     ...chapters.map((n) => source('drop.src.treasure', chapterWeights(d.items.treasureWeights, n), m, { n })),
     source('drop.src.raid', d.items.raidWeights, m),
+    source('drop.src.bossItemChest', d.loot.bossItemChest, m),
   ];
 }
 
@@ -52,7 +53,7 @@ export function weaponSources(d: GameData): DropSource[] {
   const m = d.loot.mythicChance;
   return [
     { ...source('drop.src.start', d.loot.startChest, m), exclude: d.loot.startChestExclude },
-    ...Object.entries(d.loot.weaponChest).map(([stage, w]) => source('drop.src.bossChest', w, m, { stage })),
+    source('drop.src.bossChest', d.loot.bossWeaponChest, m),
     // 전투 칸·정예·습격 무기 상자는 등급별로
     ...Object.values(d.loot.weaponChestTiers).map((t) => source(t.nameKey, t.weights, m)),
     source('drop.src.merchant', d.loot.merchant.weights, m, { n: d.loot.merchant.count }),

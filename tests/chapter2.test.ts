@@ -41,7 +41,6 @@ describe('챕터2 보스 (기획서 표)', () => {
 describe('챕터2 보스 전용 아이템', () => {
   it('헥타르 RAM: 레어, 2-2 처치 시 확정, 기술 피해 +8%', () => {
     expect(item('hectarRam')).toMatchObject({ grade: 'rare', pool: 'boss', bossId: 'hectarChief' });
-    expect(item('hectarRam').dropChance).toBeUndefined();
     expect(item('hectarRam').effects).toContainEqual(expect.objectContaining({ kind: 'damage', scope: 'tech', value: 0.08 }));
   });
   it('고대병기의 코어: 마기골렘 전용 전설(특별) 레이저 무기', () => {

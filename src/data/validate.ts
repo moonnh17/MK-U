@@ -228,11 +228,8 @@ export function validateGameData(d: GameData): Errors {
     }
     if (sum <= 0) errors.push(`${where}: 가중치 합이 0`);
   };
-  for (const [stage, w] of Object.entries(lt.weaponChest)) {
-    if (!d.mapgen.bossStages.includes(Number(stage))) errors.push(`loot.weaponChest.${stage}: 보스 스테이지가 아님`);
-    checkWeights(`loot.weaponChest.${stage}`, w);
-  }
-  for (const s of d.mapgen.bossStages) if (!lt.weaponChest[String(s)]) errors.push(`loot.weaponChest: ${s} 스테이지 가중치 없음`);
+  checkWeights('loot.bossWeaponChest', lt.bossWeaponChest);
+  checkWeights('loot.bossItemChest', lt.bossItemChest);
   if (!(lt.combatDrop.chance >= 0 && lt.combatDrop.chance <= 1)) errors.push('loot.combatDrop.chance: 0~1');
   for (const [id, t] of Object.entries(lt.weaponChestTiers)) checkWeights(`loot.weaponChestTiers.${id}`, t.weights);
   for (const [ch, w] of Object.entries(lt.combatChestTiers)) {
