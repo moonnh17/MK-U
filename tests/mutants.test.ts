@@ -18,3 +18,14 @@ describe('검보라 마기 변이체', () => {
     }
   });
 });
+
+describe('마기 군락체', () => {
+  it('3장 4문급, 공격 두 개는 각자 준비 자세 그림이 있다', () => {
+    const e = gameData.enemies.enemies.find((x) => x.id === 'magiColonyFusion')!;
+    expect([e.chapter, e.mun, e.munClass]).toEqual([3, 4, true]);
+    const anims = gameData.art.sprites[e.spriteKey]!.anims!;
+    for (const a of e.attacks!) expect(anims[a.pose!], a.id).toBeDefined();
+    expect(e.attacks!.find((a) => a.id === 'gazePulse')!.perpOffsets).toEqual([0, -18, 18]);
+    expect(e.attacks!.find((a) => a.id === 'veinBarrage')!.volley!.bursts).toBe(3);
+  });
+});

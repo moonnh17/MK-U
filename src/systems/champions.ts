@@ -5,6 +5,11 @@
 import type { Rng } from '../core/rng';
 import type { ArchonAbsorbDef, ChampionRules, StageScaleTable } from '../types/data';
 
+/** 이 챕터의 정예 id (1장 유령 사수, 2장 어느 기억, 3장 집행자·집정관) */
+export function championIds(chapter: number, rules: ChampionRules): string[] {
+  return rules.ids[String(chapter)] ?? [];
+}
+
 /** 이 챕터·스테이지 전투 칸에 정예가 나오는지 */
 export function championStage(chapter: number, stage: number, rules: ChampionRules): boolean {
   return (rules.stages[String(chapter)] ?? []).includes(stage);
@@ -13,11 +18,11 @@ export function championStage(chapter: number, stage: number, rules: ChampionRul
 /** 전투 칸 웨이브마다 섞일 정예 id (없으면 null). 웨이브마다 waveChance, 방 하나에 maxPerRoom까지 */
 export function championWaves(rng: Rng, chapter: number, stage: number, waveCount: number, rules: ChampionRules): (string | null)[] {
   const out: (string | null)[] = Array.from({ length: waveCount }, () => null);
-  if (!championStage(chapter, stage, rules)) return out;
+  if (!championStage(chapter, stage, rules) || !championIds(chapter, rules).length) return out;
   let placed = 0;
   for (let i = 0; i < waveCount && placed < rules.maxPerRoom; i++) {
     if (!rng.chance(rules.waveChance)) continue;
-    out[i] = rng.pick(rules.ids);
+    out[i] = rng.pick(championIds(chapter, rules));
     placed++;
   }
   return out;
@@ -26,9 +31,10 @@ export function championWaves(rng: Rng, chapter: number, stage: number, waveCoun
 /** 대규모 습격: 정예가 나오는 챕터면 한 웨이브에 하나, raidBothChance로 둘 다 */
 export function raidChampions(rng: Rng, chapter: number, waveCount: number, rules: ChampionRules): string[][] {
   const out: string[][] = Array.from({ length: waveCount }, () => []);
-  if (!rules.stages[String(chapter)] || waveCount === 0) return out;
+  if (!rules.stages[String(chapter)] || !championIds(chapter, rules).length || waveCount === 0) return out;
   const i = rng.int(0, waveCount - 1);
-  out[i] = rng.chance(rules.raidBothChance) ? [...rules.ids] : [rng.pick(rules.ids)];
+  const ids = championIds(chapter, rules);
+  out[i] = rng.chance(rules.raidBothChance) ? [...ids] : [rng.pick(ids)];
   return out;
 }
 

@@ -402,7 +402,12 @@ export function validateGameData(d: GameData): Errors {
   }
   // 정예
   const ch = d.waves.champions;
-  for (const id of ch.ids) if (d.enemies.enemies.find((x) => x.id === id)?.rank !== 'champion') errors.push(`waves.champions.ids: '${id}'는 rank champion인 적이어야 함`);
+  for (const [c, ids] of Object.entries(ch.ids))
+    for (const id of ids) {
+      const e = d.enemies.enemies.find((x) => x.id === id);
+      if (e?.rank !== 'champion') errors.push(`waves.champions.ids.${c}: '${id}'는 rank champion인 적이어야 함`);
+      else if (String(e.chapter) !== c) errors.push(`waves.champions.ids.${c}: '${id}'는 ${c}장 적이어야 함`);
+    }
   for (const [c, stages] of Object.entries(ch.stages)) {
     for (const s of stages) if (!Number.isInteger(s) || s < 1 || s > d.mapgen.stagesPerChapter) errors.push(`waves.champions.stages.${c}: 스테이지 범위 밖 (${s})`);
   }

@@ -207,15 +207,22 @@ function actor(key, idle, move, fit, opts = {}) {
   if (key.startsWith('enemy_')) opts = { ...opts, outline: ENEMY_OUTLINE };
   const pose = opts.pose ?? null;
   const death = opts.death ?? null;
-  const s = sheet(key, [...idle, ...move, ...(pose ? pose.frames : []), ...(death ? death.frames : [])].map((f) => (key.startsWith('enemy_') ? cleanFrame(f) : f)), fit, opts);
+  // extra: 공격마다 다른 준비 자세 { 이름: { frames, fps } } (마기 군락체)
+  const extra = Object.entries(opts.extra ?? {});
+  const s = sheet(key, [...idle, ...move, ...(pose ? pose.frames : []), ...extra.flatMap(([, x]) => x.frames), ...(death ? death.frames : [])].map((f) => (key.startsWith('enemy_') ? cleanFrame(f) : f)), fit, opts);
   const anims = {};
   if (idle.length) anims.idle = anim(0, idle.length - 1, opts.idleFps ?? 4);
   if (move.length) anims.move = anim(idle.length, idle.length + move.length - 1, opts.moveFps ?? 8);
   // 공격 준비 자세: 한 번 돌고 마지막 칸에서 멈춘다
   if (pose) anims.aim = { ...anim(idle.length + move.length, idle.length + move.length + pose.frames.length - 1, pose.fps), loop: false };
   // 사망: 쓰러질 때 한 번 (있으면)
+  let at0 = idle.length + move.length + (pose ? pose.frames.length : 0);
+  for (const [name, x] of extra) {
+    anims[name] = { ...anim(at0, at0 + x.frames.length - 1, x.fps), loop: false };
+    at0 += x.frames.length;
+  }
   if (death) {
-    const at = idle.length + move.length + (pose ? pose.frames.length : 0);
+    const at = at0;
     anims.death = { ...anim(at, at + death.frames.length - 1, death.fps), loop: false };
   }
   sprites[key] = { ...s, anims, ...(opts.facing ? { facing: opts.facing } : {}) };
@@ -235,7 +242,7 @@ const M = (row) => cells('monsters.png', 256, 256, [row * 4, row * 4 + 1, row * 
 { const r = M(2); actor('enemy_akgwi', [r[0], r[1]], r, 24); }
 
 // 유령 사수: 6번째 줄. 화살을 잡고(1) 시위에 걸어(2) 끝까지 당긴다(3)
-{ const r = M(5); actor('enemy_ghost_shooter', [r[0]], [r[0], r[1]], 26, { moveFps: 4, pose: { frames: [r[1], r[2], r[3]], fps: 5 } }); }
+{ const r = M(5); actor('enemy_ghost_shooter', [r[0]], [r[0], r[1]], 32, { moveFps: 4, pose: { frames: [r[1], r[2], r[3]], fps: 5 } }); }
 
 // ---------- 2장 ----------
 // 헥타르 전투원: v141 시트 (3열×4행 = 방향 4 × 프레임 3). 0행 정면, 2행 오른쪽으로 걷기
@@ -244,7 +251,7 @@ const M = (row) => cells('monsters.png', 256, 256, [row * 4, row * 4 + 1, row * 
   actor('enemy_hectar_trooper', [t[0], t[1], t[2]], [t[6], t[7], t[8]], 26, { density: 4 });
 }
 actor('enemy_magi_beetle', strip('monsters/monster-magi_beetle-idle.png', 4), strip('monsters/monster-magi_beetle-move.png', 6), 24);
-actor('enemy_a_memory', strip('monsters/monster-some_memory-idle.png', 6), strip('monsters/monster-some_memory-move.png', 8), 24);
+actor('enemy_a_memory', strip('monsters/monster-some_memory-idle.png', 6), strip('monsters/monster-some_memory-move.png', 8), 30);
 
 // ---------- 3장 ----------
 // 3장 적: 1·2장보다 크게, 4배 밀도로 (원본이 잔조각이 많아 2배로 줄이면 깨진다)
@@ -292,6 +299,30 @@ actor('enemy_archon', gaps('late-elites/archon-idle.png'), gaps('late-elites/arc
   warnHit('fx_vessel_root', '02_마기_혈관수/04_fx_예고와타격', 80, true);
   warnHit('fx_gaze_spike', '03_응시종/04_fx_예고와타격', 44);
   fxArt('fx_spore_shot', strip4('04_군집_폐포/04_fx_마기포자탄').frames, 12, { fps: 12, loop: true });
+}
+
+// ---------- 마기 군락체 (사종 융합형 v2, 3장 일반 적): 대기·뿌리 보행·응시맥동·관맥포격·사망 + 이펙트 ----------
+{
+  const CF = path.join(SRC, '..', '..', 'MKU_마기군락체_사종융합형_v2_2026-11-05');
+  const st = (dir) => {
+    const d = path.join(CF, dir), m = JSON.parse(fs.readFileSync(path.join(d, 'metadata.json'), 'utf8'));
+    const img = k.read(path.join(d, 'strip.png'));
+    for (let p = 3; p < img.px.length; p += 4) if (img.px[p] <= 24) img.px[p] = 0;
+    return { m, frames: Array.from({ length: m.frames }, (_, i) => k.crop(img, i * m.frameWidth, 0, m.frameWidth, m.frameHeight)) };
+  };
+  actor('enemy_magi_colony_fusion', st('01_idle_대기').frames, st('02_move_뿌리보행').frames, 52, {
+    density: 4, idleFps: 7, moveFps: 8,
+    extra: { gaze: { frames: st('03_gazePulse_응시맥동_본체').frames, fps: 3 }, vein: { frames: st('04_veinBarrage_관맥포격_본체').frames, fps: 3 } },
+    death: { frames: st('05_death_사망').frames, fps: 10 },
+  });
+  const warnHit2 = (base, dir, fit) => {
+    const { m, frames } = st(dir);
+    const seg = (s) => frames.slice(s.from, s.to + 1);
+    fxArt(`${base}_warn`, seg(m.segments.warning), fit, { fps: 4, loop: true });
+    fxArt(`${base}_hit`, seg(m.segments.strike), fit, { fps: 14 });
+  };
+  warnHit2('fx_colony_gaze', '06_gazePulseFx_응시맥동_예고와가시', 30);
+  warnHit2('fx_colony_root', '07_rootVeinFx_관맥포격_뿌리경로', 80);
 }
 
 // ---------- 보스 ----------

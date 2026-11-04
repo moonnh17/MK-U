@@ -1,4 +1,5 @@
 /** 조우 칸: 유형 결정, 마기수집첨탑, 습격·히든보스 보상. */
+import { championIds } from '../../systems/champions';
 import { bus } from '../../core/events';
 import { Rng } from '../../core/rng';
 import { MerchantStand } from '../../entities/chest';
@@ -153,11 +154,11 @@ export class Encounters {
     for (let i = 0; i < n; i++) this.run.spawnEnemy(tr.enemy, sp.roomId, rng, true);
   }
 
-  /** 중형 첨탑 강적: 정예가 나오는 챕터(3장)는 집행자 또는 집정관, 그 전에는 엘리트 2종이 겹친 지금 챕터 일반 적 */
+  /** 중형 첨탑 강적: 정예가 나오는 챕터면 그 챕터 정예, 아니면 엘리트 2종이 겹친 지금 챕터 일반 적 */
   spawnSpireStrong(sp: Spire, rng: Rng): void {
     const d = this.run.ctx.data;
     if (d.waves.champions.stages[String(this.run.session.stage.chapter)]) {
-      this.run.spawnEnemy(rng.pick(d.waves.champions.ids), sp.roomId, rng, true);
+      this.run.spawnEnemy(rng.pick(championIds(this.run.session.stage.chapter, d.waves.champions)), sp.roomId, rng, true);
       this.run.progression.say('championMet');
       return;
     }

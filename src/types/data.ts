@@ -422,6 +422,27 @@ export interface EnemyAttackDef {
   /** spikes·roots: 예고·타격 그림 */
   warnArt?: SpriteRef;
   hitArt?: SpriteRef;
+  /** 준비 동안의 본체 자세 (그림의 애니메이션 이름, 없으면 aim) */
+  pose?: string;
+  /** spikes: 정하면 공격 시작 때 플레이어 자리를 고정하고, 조준 방향에 수직으로 이만큼 벌린 자리들에 차례로 (scatter 대신) */
+  perpOffsets?: number[];
+  /** roots: 뿌리가 솟은 뒤 이어 쏘는 부채꼴 탄막 (같은 방향, 다시 조준하지 않는다) */
+  volley?: EnemyVolleyDef;
+}
+
+export interface EnemyVolleyDef {
+  afterSec: number;
+  shots: number;
+  spreadDeg: number;
+  speed: number;
+  range: number;
+  damage: number;
+  bursts: number;
+  burstGapSec: number;
+  /** 첫 탄막 중심이 조준에서 벌어진 각도, 한 번마다 더해지는 각도 */
+  burstStartDeg?: number;
+  burstTurnDeg: number;
+  shot?: SpriteRef;
 }
 
 /** 지나간 자리에 남기는 장판 (어느 기억) */
@@ -702,7 +723,8 @@ export interface WaveTemplate {
 
 /** 정예(집행자·집정관) 등장 규칙. 엘리트 효과는 붙지 않는다 */
 export interface ChampionRules {
-  ids: string[];
+  /** 챕터 → 그 챕터의 정예 id */
+  ids: Record<string, string[]>;
   /** 챕터 → 전투 칸에 나오는 스테이지 */
   stages: Record<string, number[]>;
   /** 전투 칸 웨이브 하나에 정예 1마리가 섞일 확률, 방 하나의 상한 */

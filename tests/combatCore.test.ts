@@ -141,11 +141,12 @@ describe('1장 일반 적의 탄', () => {
   it('토마끼는 탄을 쏘지 않는다', () => {
     expect(def('tomakki').attacks ?? []).toHaveLength(0);
   });
-  it('유령 사수는 거리를 두고 활을 쏘고, 1장 웨이브에 나온다', () => {
+  it('유령 사수는 거리를 두고 활을 쏘고, 1장 정예로 나온다 (일반 웨이브에는 없다)', () => {
     const g = def('ghostShooter');
     expect(g.keepDistance).toBeGreaterThan(0);
     expect(g.attacks!.some((x) => x.kind === 'burst')).toBe(true);
-    expect(gameData.waves.waves.some((w) => w.chapter === 1 && w.spawns.some((s) => s.enemy === 'ghostShooter'))).toBe(true);
+    expect(gameData.waves.champions.ids['1']).toEqual(['ghostShooter']);
+    expect(gameData.waves.waves.some((w) => w.spawns.some((s) => s.enemy === 'ghostShooter'))).toBe(false);
   });
   it('악귀는 강타 때 충격 탄이 퍼진다', () => {
     const a = def('akgwi').attacks!.find((x) => x.kind === 'slam')!;

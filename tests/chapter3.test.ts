@@ -17,18 +17,18 @@ const enemy = (id: string) => gameData.enemies.enemies.find((e) => e.id === id)!
 const CH = gameData.waves.champions;
 
 describe('챕터3 적 (기획서 로스터)', () => {
-  it('일반 적: 고대인(원거리 탄막)·증오의 파편(초고속 돌격), 3장 웨이브는 이 둘로', () => {
+  it('일반 적: 고대인(원거리 탄막)·증오의 파편(초고속 돌격)·마기 군락체, 3장 웨이브는 이 셋으로', () => {
     const ids = new Set(gameData.waves.waves.filter((w) => w.chapter === 3).flatMap((w) => w.spawns.map((s) => s.enemy)));
-    expect([...ids].sort()).toEqual(['ancientOne', 'hatredShard']);
+    expect([...ids].sort()).toEqual(['ancientOne', 'hatredShard', 'magiColonyFusion']);
     expect(enemy('ancientOne').attacks![0]!.kind).toBe('fan');
     expect(enemy('hatredShard').attacks![0]).toMatchObject({ kind: 'lunge', chain: [2, 3] });
   });
   it('3장까지 플레이할 수 있다 (3-5가 런 클리어)', () => {
     expect(playableChapters(gameData.waves, gameData.mapgen)).toBe(3);
   });
-  it('정예: 집행자(밧줄)·집정관(저격·흡수)은 champion 등급이고 엘리트가 붙지 않는다', () => {
-    expect(CH.ids).toEqual(['executor', 'archon']);
-    for (const id of CH.ids) {
+  it('정예: 1장 유령 사수, 2장 어느 기억, 3장 집행자(밧줄)·집정관(저격·흡수). champion 등급이고 엘리트가 붙지 않는다', () => {
+    expect(CH.ids).toEqual({ '1': ['ghostShooter'], '2': ['aMemory'], '3': ['executor', 'archon'] });
+    for (const id of Object.values(CH.ids).flat()) {
       expect(enemy(id).rank).toBe('champion');
       expect(canBeElite(enemy(id).rank)).toBe(false);
     }
@@ -38,7 +38,7 @@ describe('챕터3 적 (기획서 로스터)', () => {
   });
   it('정예 처치 보상은 일반 엘리트보다 많고, 10% 아이템 상자', () => {
     const c = gameData.elites.common;
-    for (const id of CH.ids) {
+    for (const id of Object.values(CH.ids).flat()) {
       const e = enemy(id);
       expect(e.energyOrbs[0]).toBeGreaterThan(c.bonusEnergyOrbs[1]);
       expect(e.coins[0]).toBeGreaterThan(c.bonusCoins[1]);
@@ -51,10 +51,14 @@ describe('정예 등장 규칙', () => {
   it('3-1·3-3·3-4 전투 칸에만 (보스 스테이지·다른 챕터 제외)', () => {
     const at = [1, 2, 3, 4, 5].filter((s) => championStage(3, s, CH));
     expect(at).toEqual([1, 3, 4]);
-    expect(championStage(2, 1, CH)).toBe(false);
     for (let seed = 1; seed < 50; seed++) {
       expect(championWaves(new Rng(seed), 3, 2, 3, CH)).toEqual([null, null, null]);
-      expect(championWaves(new Rng(seed), 1, 1, 3, CH)).toEqual([null, null, null]);
+      expect(championWaves(new Rng(seed), 1, 5, 3, CH)).toEqual([null, null, null]);
+    }
+    // 장마다 그 장의 정예만
+    for (let seed = 1; seed < 100; seed++) {
+      for (const x of championWaves(new Rng(seed), 1, 1, 3, CH)) if (x) expect(x).toBe('ghostShooter');
+      for (const x of championWaves(new Rng(seed), 2, 3, 3, CH)) if (x) expect(x).toBe('aMemory');
     }
   });
   it('웨이브마다 1마리까지, 방 하나에 상한까지', () => {
@@ -63,14 +67,14 @@ describe('정예 등장 규칙', () => {
       const w = championWaves(new Rng(seed), 3, 3, 3, CH);
       const n = w.filter((x) => x !== null).length;
       expect(n).toBeLessThanOrEqual(CH.maxPerRoom);
-      for (const x of w) if (x) expect(CH.ids).toContain(x);
+      for (const x of w) if (x) expect(CH.ids['3']).toContain(x);
       if (n > 0) some++;
     }
     // 일부 웨이브에만: 대부분의 방에 나오지만 전부는 아니다
     expect(some).toBeGreaterThan(100);
     expect(some).toBeLessThan(299);
   });
-  it('대규모 습격: 3장에서 한 웨이브에 하나 또는 둘이 함께, 다른 챕터는 없음', () => {
+  it('대규모 습격: 한 웨이브에 정예 하나, 3장은 둘이 함께일 수 있다', () => {
     let both = 0;
     for (let seed = 1; seed < 200; seed++) {
       const r = raidChampions(new Rng(seed), 3, 3, CH);
@@ -78,9 +82,9 @@ describe('정예 등장 규칙', () => {
       expect(filled).toHaveLength(1);
       if (filled[0]!.length === 2) both++;
     }
-    expect(both).toBeGreaterThan(50);
-    expect(both).toBeLessThan(150);
-    expect(raidChampions(new Rng(1), 2, 3, CH)).toEqual([[], [], []]);
+    expect(both).toBeGreaterThan(30);
+    expect(both).toBeLessThan(100);
+    expect(raidChampions(new Rng(1), 2, 3, CH).flat()).toEqual(['aMemory']);
   });
   it('같은 시드면 같은 배치', () => {
     expect(championWaves(new Rng(9), 3, 4, 3, CH)).toEqual(championWaves(new Rng(9), 3, 4, 3, CH));

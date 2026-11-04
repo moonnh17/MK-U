@@ -118,8 +118,8 @@
     },
     "enemy_ghost_shooter": {
       "file": "mku/enemy_ghost_shooter.png",
-      "frameWidth": 52,
-      "frameHeight": 54,
+      "frameWidth": 64,
+      "frameHeight": 66,
       "frames": 6,
       "density": 2,
       "anims": {
@@ -181,8 +181,8 @@
     },
     "enemy_a_memory": {
       "file": "mku/enemy_a_memory.png",
-      "frameWidth": 44,
-      "frameHeight": 50,
+      "frameWidth": 54,
+      "frameHeight": 62,
       "frames": 14,
       "density": 2,
       "anims": {
@@ -489,6 +489,101 @@
           "to": 3,
           "fps": 12,
           "loop": true
+        }
+      }
+    },
+    "enemy_magi_colony_fusion": {
+      "file": "mku/enemy_magi_colony_fusion.png",
+      "frameWidth": 206,
+      "frameHeight": 210,
+      "frames": 20,
+      "density": 4,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 7
+        },
+        "move": {
+          "from": 4,
+          "to": 7,
+          "fps": 8
+        },
+        "gaze": {
+          "from": 8,
+          "to": 11,
+          "fps": 3,
+          "loop": false
+        },
+        "vein": {
+          "from": 12,
+          "to": 15,
+          "fps": 3,
+          "loop": false
+        },
+        "death": {
+          "from": 16,
+          "to": 19,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_colony_gaze_warn": {
+      "file": "mku/fx_colony_gaze_warn.png",
+      "frameWidth": 60,
+      "frameHeight": 60,
+      "frames": 2,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 1,
+          "fps": 4,
+          "loop": true
+        }
+      }
+    },
+    "fx_colony_gaze_hit": {
+      "file": "mku/fx_colony_gaze_hit.png",
+      "frameWidth": 60,
+      "frameHeight": 60,
+      "frames": 2,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 1,
+          "fps": 14
+        }
+      }
+    },
+    "fx_colony_root_warn": {
+      "file": "mku/fx_colony_root_warn.png",
+      "frameWidth": 160,
+      "frameHeight": 80,
+      "frames": 2,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 1,
+          "fps": 4,
+          "loop": true
+        }
+      }
+    },
+    "fx_colony_root_hit": {
+      "file": "mku/fx_colony_root_hit.png",
+      "frameWidth": 160,
+      "frameHeight": 80,
+      "frames": 2,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 1,
+          "fps": 14
         }
       }
     },

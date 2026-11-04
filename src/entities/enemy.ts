@@ -383,7 +383,8 @@ export class Enemy {
   /** 조준 중 준비 자세(유령 사수 활 당기기)가 있으면 그것을, 아니면 idle·move */
   private animate(data: ReturnType<typeof getContext>['data']): void {
     if (this.poseHold) return;
-    const aim = animKey(this.def.spriteKey, 'aim');
+    const atk = this.attacks.find((a) => a.id === this.ai.attackId);
+    const aim = animKey(this.def.spriteKey, atk?.pose ?? 'aim');
     if (this.ai.phase !== 'windup' && !(this.ai.phase === 'act' && this.sprite.anims.currentAnim?.key === aim) || !this.scene.anims.exists(aim)) {
       animateArt(data, this.sprite);
       return;
@@ -530,21 +531,20 @@ export class Enemy {
         const spread = (a.spreadDeg! * Math.PI) / 180;
         const n = a.shots!;
         const from = { x: this.sprite.x, y: this.sprite.y };
-        const volley = (center: number) => {
-          for (let k = 0; k < n; k++) {
-            const ang = n === 1 ? center : center - spread / 2 + (spread * k) / (n - 1);
-            host.fireEnemyBullet(from, ang, a.speed!, a.range!, a.damage * this.damageMul, true, a.damage * this.damageMul * (this.def.mentalRatio ?? 0), a.shot, a.shotTint);
-          }
-        };
-        for (let b = 0; b < (a.bursts ?? 1); b++) this.later(b * (a.burstGapSec ?? 0), () => volley(burstAngle(base, b, ((a.burstTurnDeg ?? 0) * Math.PI) / 180)));
+        for (let b = 0; b < (a.bursts ?? 1); b++)
+          this.later(b * (a.burstGapSec ?? 0), () => this.fan(host, from, burstAngle(base, b, ((a.burstTurnDeg ?? 0) * Math.PI) / 180), n, spread, a.speed!, a.range!, a.damage, a.shot, a.shotTint));
       } else if (a.kind === 'spikes') {
         // 플레이어 자리부터 차례로 가시 예고 (두 번째부터는 둘레 scatter 안). 쓰러지면 남은 가시는 나오지 않는다
+        // perpOffsets: 지금 플레이어 자리를 고정하고 조준에 수직으로 벌린 자리들 (군락체 응시맥동)
+        const lock = host.playerPos();
+        const nx = -this.aim.y, ny = this.aim.x;
         for (let i = 0; i < a.strikes!; i++) {
           this.later(i * (a.strikeGapSec ?? 0), () => {
-            const p = host.playerPos();
-            const r = i === 0 ? 0 : host.rng.range(0, a.scatter ?? 0);
+            const off = a.perpOffsets?.[i];
+            const p = off === undefined ? host.playerPos() : lock;
+            const r = off !== undefined || i === 0 ? 0 : host.rng.range(0, a.scatter ?? 0);
             const ang = host.rng.range(0, Math.PI * 2);
-            const at = { x: p.x + Math.cos(ang) * r, y: p.y + Math.sin(ang) * r };
+            const at = { x: p.x + Math.cos(ang) * r + nx * (off ?? 0), y: p.y + Math.sin(ang) * r + ny * (off ?? 0) };
             host.addHazard(new DelayedBlast(this.scene, at, a.radius!, a.warnSec!, a.damage * this.damageMul, hexColor(this.def.color), { warn: a.warnArt, hit: a.hitArt }));
           });
         }
@@ -573,6 +573,15 @@ export class Enemy {
               }),
             );
           });
+        }
+        // 뿌리가 솟은 뒤 같은 방향으로 포자 탄막 (군락체 관맥포격)
+        const v = a.volley;
+        if (v) {
+          const base = Math.atan2(this.aim.y, this.aim.x) + ((v.burstStartDeg ?? 0) * Math.PI) / 180;
+          for (let b = 0; b < v.bursts; b++)
+            this.later(a.warnSec! + v.afterSec + b * v.burstGapSec, () =>
+              this.fan(host, from, burstAngle(base, b, (v.burstTurnDeg * Math.PI) / 180), v.shots, (v.spreadDeg * Math.PI) / 180, v.speed, v.range, v.damage, v.shot),
+            );
         }
       } else if (a.kind === 'rope') {
         this.ropeLen = 0;
@@ -632,6 +641,15 @@ export class Enemy {
     if (this.elites.some((e) => e.look === 'blink') && this.warn <= 0) {
       this.blinkT += dt;
       this.sprite.setAlpha(0.6 + 0.4 * Math.abs(Math.sin(this.blinkT * 8)));
+    }
+  }
+
+  /** 부채꼴 탄 n발 (일반 탄: 굴절·탄 베기 가능) */
+  private fan(host: EnemyHost, from: Vec2, center: number, n: number, spread: number, speed: number, range: number, damage: number, shot?: SpriteRef, tint?: string): void {
+    const dmg = damage * this.damageMul;
+    for (let k = 0; k < n; k++) {
+      const ang = n === 1 ? center : center - spread / 2 + (spread * k) / (n - 1);
+      host.fireEnemyBullet(from, ang, speed, range, dmg, true, dmg * (this.def.mentalRatio ?? 0), shot, tint);
     }
   }
 
