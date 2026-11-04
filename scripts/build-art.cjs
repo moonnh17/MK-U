@@ -1022,10 +1022,11 @@ const BOSS_SHEET_W = 3600;
  * height: 자세마다 높이를 맞춘다(단일 포즈 보스). 없으면 시트 칸 그대로 같은 배율로 줄인다(프레임 시트 보스).
  * poses: { 이름: { frames, fps, loop } }
  */
-function bossActor(key, states, fit, height) {
+function bossActor(key, states, fit, height, refSize) {
   const all = Object.values(states).flatMap((s) => s.frames);
   const boxes = all.map((f) => k.bbox(f, 40) ?? { x: 0, y: 0, w: f.w, h: f.h });
-  const scale = (i) => (fit * ART_DENSITY) / (height ? boxes[i].h : Math.max(boxes[0].w, boxes[0].h));
+  // refSize: 다듬기 전 그림 크기로 배율을 고정한다 (찌꺼기를 지워도 몸 크기가 그대로)
+  const scale = (i) => (fit * ART_DENSITY) / (height ? boxes[i].h : refSize ?? Math.max(boxes[0].w, boxes[0].h));
   let fw, fh, cells;
   if (height) {
     fw = even(Math.max(...boxes.map((b, i) => b.w * scale(i))));
@@ -1146,15 +1147,60 @@ function cleanBossFrame(img, cut = 40) {
   return img;
 }
 let edgeDropped = 0;
+/**
+ * 원본이 네모(box)로 잘려 파편·빛이 일직선으로 끊긴 그림 다듬기:
+ * 잘린 선에 걸친 파편(본체 아님)은 통째로 지우고, 본체가 선에 닿은 곳은 band px 안에서 들쭉날쭉하게 흐려진다.
+ */
+function unclip(img, box, band = 12) {
+  const { w, px } = img;
+  let n = 0;
+  const comps = k.components(img, 8);
+  if (comps.length > 1) {
+    const main = comps.reduce((p, c) => (c.area > p.area ? c : p));
+    for (const c of comps) {
+      if (c === main) continue;
+      if (c.x0 <= box.x0 + 1 || c.y0 <= box.y0 + 1 || c.x1 >= box.x1 - 1 || c.y1 >= box.y1 - 1) {
+        for (const q of c.pts) px[q * 4 + 3] = 0;
+        n += c.area;
+      }
+    }
+  }
+  // 정해진 잡음 (같은 그림이면 같은 결과)
+  const noise = (x, y) => (((x * 73856093) ^ (y * 19349663)) >>> 0) % 1000 / 1000;
+  for (let y = box.y0; y <= box.y1; y++) {
+    for (let x = box.x0; x <= box.x1; x++) {
+      const o = (y * w + x) * 4 + 3;
+      if (px[o] === 0) continue;
+      const d = Math.min(x - box.x0, y - box.y0, box.x1 - x, box.y1 - y);
+      if (d >= band) continue;
+      const k2 = Math.max(0, Math.min(1, (d + (noise(x, y) - 0.5) * band * 0.9) / band));
+      px[o] = Math.round(px[o] * k2);
+    }
+  }
+  unclipped += n;
+  return img;
+}
+let unclipped = 0;
+/** 여러 프레임을 함께 다듬는다: 잘린 네모는 모든 프레임 그림 영역을 합친 것 */
+function unclipAll(states) {
+  const all = Object.values(states).flatMap((s) => s.frames);
+  const bs = all.map((f) => k.bbox(f, 1)).filter(Boolean);
+  const box = { x0: Math.min(...bs.map((b) => b.x)), y0: Math.min(...bs.map((b) => b.y)), x1: Math.max(...bs.map((b) => b.x + b.w - 1)), y1: Math.max(...bs.map((b) => b.y + b.h - 1)) };
+  const ref = Math.max(...all.slice(0, 1).map((f) => { const b = k.bbox(f, 40); return b ? Math.max(b.w, b.h) : 0; }));
+  for (const f of all) unclip(f, box);
+  return { states, ref };
+}
 const cleanSt = (s) => ({ ...s, frames: s.frames.map((f) => cleanBossFrame(f)) });
 // 식광: 페이즈별 시트 (찌꺼기를 지운 뒤)
 {
   const C = '03';
   const p = 'boss.eclipse.';
   const e = (id) => cleanSt(st(C, p + id));
-  bossActor('enemy_eclipse', { idle: e('p1_idle'), move: e('p1_move'), charge: e('p1_charge'), hurt: e('p1_hurt') }, 75);
-  bossActor('enemy_eclipse_phase2', { idle: e('p2_idle'), move: e('p2_move'), charge: e('p2_charge'), hurt: e('p2_hurt'), transition: e('transition') }, 84);
-  console.log(`식광 찌꺼기 ${edgeDropped}px 지움`);
+  const p1 = unclipAll({ idle: e('p1_idle'), move: e('p1_move'), charge: e('p1_charge'), hurt: e('p1_hurt') });
+  bossActor('enemy_eclipse', p1.states, 75, false, p1.ref);
+  const p2 = unclipAll({ idle: e('p2_idle'), move: e('p2_move'), charge: e('p2_charge'), hurt: e('p2_hurt'), transition: e('transition') });
+  bossActor('enemy_eclipse_phase2', p2.states, 84, false, p2.ref);
+  console.log(`식광 찌꺼기 ${edgeDropped}px, 잘린 파편 ${unclipped}px 지움`);
 }
 // 마기카이저: 구속 → 2 → 3단계
 {
