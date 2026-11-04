@@ -69,3 +69,33 @@ export function shockRing(scene: Phaser.Scene, at: Vec2, radius: number, color: 
   const ring = scene.add.circle(at.x, at.y, Math.max(2, radius * 0.25)).setStrokeStyle(width, color, 1).setDepth(6).setBlendMode('ADD');
   scene.tweens.add({ targets: ring, radius, alpha: 0, duration: sec * 1000, ease: 'Cubic.easeOut', onComplete: () => ring.destroy() });
 }
+
+/** 두 점 사이 지그재그 번개 한 줄기 (번쩍 하고 사라진다) */
+export function crackle(scene: Phaser.Scene, rng: Rng, from: Vec2, to: Vec2, color: number, sec = 0.14, width = 1): void {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len;
+  const ny = dx / len;
+  const n = Math.max(3, Math.round(len / 10));
+  const pts: Vec2[] = [from];
+  for (let i = 1; i < n; i++) {
+    const k = i / n;
+    const j = rng.range(-1, 1) * Math.min(10, len * 0.15);
+    pts.push({ x: from.x + dx * k + nx * j, y: from.y + dy * k + ny * j });
+  }
+  pts.push(to);
+  const g = scene.add.graphics().setDepth(6).setBlendMode('ADD');
+  g.lineStyle(width + 2, color, 0.5).strokePoints(pts);
+  g.lineStyle(width, 0xffffff, 1).strokePoints(pts);
+  scene.tweens.add({ targets: g, alpha: 0, duration: sec * 1000, onComplete: () => g.destroy() });
+}
+
+/** 몸 둘레에 튀는 짧은 전기 (radius 근처에서 바깥으로) */
+export function sparkAround(scene: Phaser.Scene, rng: Rng, at: Vec2, radius: number, color: number): void {
+  const a = rng.range(0, Math.PI * 2);
+  const r0 = radius * rng.range(0.4, 0.9);
+  const r1 = radius * rng.range(1.1, 1.5);
+  const b = a + rng.range(-0.5, 0.5);
+  crackle(scene, rng, { x: at.x + Math.cos(a) * r0, y: at.y + Math.sin(a) * r0 }, { x: at.x + Math.cos(b) * r1, y: at.y + Math.sin(b) * r1 }, color, 0.1);
+}

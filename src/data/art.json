@@ -4327,6 +4327,111 @@
       "frames": 1,
       "density": 2
     },
+    "fx_fusion_triple_claw": {
+      "file": "mku/fx_fusion_triple_claw.png",
+      "frameWidth": 220,
+      "frameHeight": 220,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "fx_fusion_core_burst": {
+      "file": "mku/fx_fusion_core_burst.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_fusion_spirit_bolt": {
+      "file": "mku/fx_fusion_spirit_bolt.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "fx_electric_branch_bolt": {
+      "file": "mku/fx_electric_branch_bolt.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_electric_ring_collapse": {
+      "file": "mku/fx_electric_ring_collapse.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_electric_grid": {
+      "file": "mku/fx_electric_grid.png",
+      "frameWidth": 280,
+      "frameHeight": 280,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_electric_wave": {
+      "file": "mku/fx_electric_wave.png",
+      "frameWidth": 220,
+      "frameHeight": 220,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
     "fx_chief_ring": {
       "file": "mku/fx_chief_ring.png",
       "frameWidth": 140,

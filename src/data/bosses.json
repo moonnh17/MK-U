@@ -135,9 +135,9 @@
           "size": 30
         },
         "bullet": {
-          "spriteKey": "fx_fusion_bolt",
+          "spriteKey": "fx_fusion_spirit_bolt",
           "color": "#8c3ad9",
-          "size": 8
+          "size": 10
         },
         "dashTrail": {
           "spriteKey": "fx_fusion_dash",
@@ -154,6 +154,9 @@
           "color": "#8c3ad9",
           "size": 20
         },
+        "spiritDash.bullet": { "spriteKey": "fx_fusion_bolt", "color": "#8c3ad9", "size": 8 },
+        "claw.strike": { "spriteKey": "fx_fusion_triple_claw", "color": "#8c3ad9", "size": 40 },
+        "spiritBlast.release": { "spriteKey": "fx_fusion_core_burst", "color": "#8c3ad9", "size": 40 },
         "spiritBlast.orb": {
           "spriteKey": "fx_fusion_orb",
           "color": "#8c3ad9",
@@ -378,7 +381,7 @@
           "size": 15
         },
         "blastHit": {
-          "spriteKey": "fx_electric_strike",
+          "spriteKey": "fx_electric_branch_bolt",
           "color": "#3a7aff",
           "size": 25
         },
@@ -412,6 +415,10 @@
           "color": "#3a7aff",
           "size": 50
         },
+        "chaseField.blastHit": { "spriteKey": "fx_electric_strike", "color": "#3a7aff", "size": 25 },
+        "shockRipple.ring": { "spriteKey": "fx_electric_ring_collapse", "color": "#3a7aff", "size": 45 },
+        "edgeLock.grid": { "spriteKey": "fx_electric_grid", "color": "#3a7aff", "size": 70 },
+        "blueDash.wave": { "spriteKey": "fx_electric_wave", "color": "#3a7aff", "size": 55 },
         "shockRipple.cast": {
           "spriteKey": "fx_electric_radial",
           "color": "#3a7aff",
@@ -429,16 +436,16 @@
         }
       },
       "poses": {
-        "dashReady": "cast",
+        "dashReady": "idle",
         "dash": "dash",
-        "lightningChase": "cast",
-        "shockRipple": "cast",
-        "spinLightning": "cast",
-        "prison": "cast",
-        "edgeLock": "cast",
-        "shrinkCurrent": "cast",
-        "crossCut": "cast",
-        "chaseField": "cast"
+        "lightningChase": { "first": "idle", "sec": 0.12, "then": "cast" },
+        "shockRipple": { "first": "idle", "sec": 0.12, "then": "cast" },
+        "spinLightning": { "first": "idle", "sec": 0.12, "then": "cast" },
+        "prison": { "first": "idle", "sec": 0.12, "then": "cast" },
+        "edgeLock": { "first": "idle", "sec": 0.12, "then": "cast" },
+        "shrinkCurrent": { "first": "idle", "sec": 0.12, "then": "cast" },
+        "crossCut": { "first": "idle", "sec": 0.12, "then": "cast" },
+        "chaseField": { "first": "idle", "sec": 0.12, "then": "cast" }
       },
       "layers": [
         {

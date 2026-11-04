@@ -12,7 +12,7 @@ import { gapBulletAngles, predictPoint } from '../systems/bossGeometry';
 import { playFx } from '../skills/skillFx';
 import type { SpriteRef } from '../types/data';
 import type { BossHost, PatternRun } from './host';
-import { burst, coil, land, lunge, motes, shockRing } from './bossFx';
+import { burst, clamp01, coil, crackle, easeOut, land, lunge, motes, shockRing, sparkAround } from './bossFx';
 
 /** 패턴이 다루는 보스 */
 export interface BossBody {
@@ -82,6 +82,45 @@ abstract class Timed implements PatternRun {
   destroy(): void {
     this.c.boss.setVelocity(0, 0);
   }
+}
+
+/**
+ * 주문형 패턴 바탕 (전기환띠): 잠깐 웅크렸다(0.12초) 팔을 치켜들며 솟고, 그 뒤로는 몸이 떨리며 둘레에 전기가 튄다.
+ * pulse()를 부르면 그 순간 몸이 한 번 부풀었다 돌아온다 (파문·낙뢰 한 발마다).
+ */
+abstract class Channeled extends Timed {
+  private crackT = 0;
+  private pulseAt = -1;
+
+  protected pulse(): void {
+    this.pulseAt = this.t;
+  }
+
+  protected override tick(dt: number): void {
+    const c = this.c;
+    c.boss.setVelocity(0, 0);
+    const t = this.t;
+    const hum = Math.sin(t * 48) * 0.025;
+    const p = this.pulseAt >= 0 ? 1 - easeOut((t - this.pulseAt) / 0.25) : 0;
+    if (t < 0.12) {
+      const e = t / 0.12;
+      c.boss.shape(1 + 0.1 * e, 1 - 0.1 * e, 0);
+    } else {
+      const r = 1 - easeOut((t - 0.12) / 0.35);
+      c.boss.shape(1 - 0.08 * r + hum + 0.1 * p, 1 + 0.14 * r - hum - 0.08 * p, 0);
+    }
+    this.crackT -= dt;
+    if (t >= 0.12 && this.crackT <= 0) {
+      this.crackT = 0.09;
+      sparkAround(c.host.scene, c.host.rng, c.boss.pos(), c.boss.radius(), c.boss.fxColor);
+    }
+  }
+}
+
+/** 보스에서 목표까지 번개가 이어진다 (낙뢰가 어디로 떨어질지 잇는 연출) */
+function zap(c: PatternCtx, to: Vec2): void {
+  const p = c.boss.pos();
+  crackle(c.host.scene, c.host.rng, { x: p.x, y: p.y - c.boss.radius() * 0.6 }, to, c.boss.fxColor, 0.16, 1);
 }
 
 function angleTo(a: Vec2, b: Vec2): number {
@@ -619,7 +658,10 @@ class Claw extends Timed {
     const a = this.angle;
     c.host.addHazard(new SectorBlast(c.host.scene, p, a, c.v('radius'), c.v('arcDeg'), c.v('windupSec'), c.v('damage'), c.boss.color, c.art('sectorHit')));
     this.at(c.v('windupSec'), () => {
-      // 휘두름: 잔상 + 호를 따라 바깥으로 튀는 불티
+      // 휘두름: 원혼 세 줄기 할퀴기 + 잔상 + 호를 따라 바깥으로 튀는 불티
+      const strike = c.art('strike');
+      const mid = c.v('radius') * 0.55;
+      if (strike) playFx(c.host.scene, strike, p.x + Math.cos(a) * mid, p.y + Math.sin(a) * mid, { w: c.v('radius') * 1.2, rotation: a, depth: 7 });
       c.boss.ghost(0.5, 0.3);
       burst(c.host.scene, c.host.rng, p, c.boss.fxColor, 26, [90, 180], 0.35, { angle: a, spread: rad(c.v('arcDeg')) }, c.v('radius') * 0.9);
       shake(c.host.scene, 'light');
@@ -750,6 +792,8 @@ class SpiritBurst extends Timed {
       const orb = this.orb;
       this.orb = null;
       if (orb) c.host.scene.tweens.add({ targets: orb, scale: this.orbScale * 2.4, alpha: 0, duration: 220, ease: 'Cubic.easeOut', onComplete: () => orb.destroy() });
+      const core = c.art('release');
+      if (core) playFx(c.host.scene, core, p.x, p.y, { w: c.boss.radius() * 3.2, depth: 6 });
       shockRing(c.host.scene, p, c.boss.radius() * 2.4, c.boss.fxColor, 0.35, 2);
       burst(c.host.scene, c.host.rng, p, c.boss.fxColor, 18, [90, 170], 0.35);
       shake(c.host.scene, 'light');
@@ -785,31 +829,50 @@ class SpiritBurst extends Timed {
 // ---------- 전기환띠 ----------
 
 /** 낙뢰 추적: 예상 이동 경로를 따라 순차 낙뢰. 자리는 시작할 때 정해진다 */
-class LightningChase extends Timed {
+class LightningChase extends Channeled {
   constructor(c: PatternCtx) {
     super(c);
     for (let i = 0; i < c.v('strikes'); i++) {
       const step = i * c.v('intervalSec');
       const at = predict(c, step + c.v('delaySec'));
-      this.at(step, () => blast(c, at, c.v('radius'), c.v('delaySec'), c.v('damage')));
+      this.at(step, () => {
+        blast(c, at, c.v('radius'), c.v('delaySec'), c.v('damage'));
+        zap(c, at);
+        this.pulse();
+      });
     }
   }
 }
 
 /** 전격 파문: 틈이 있는 원형 탄막을 탄속을 바꿔 반복 */
-class ShockRipple extends Timed {
+class ShockRipple extends Channeled {
   constructor(c: PatternCtx) {
     super(c);
     for (let i = 0; i < c.v('rings'); i++) {
-      this.at(i * c.v('ringGapSec'), () => gapCircle(c, c.boss.pos(), c.v('bullets'), c.v('gap'), c.v('speed') + i * c.v('speedStep'), c.v('range'), c.v('damage')));
+      this.at(0.12 + i * c.v('ringGapSec'), () => {
+        const p = c.boss.pos();
+        gapCircle(c, p, c.v('bullets'), c.v('gap'), c.v('speed') + i * c.v('speedStep'), c.v('range'), c.v('damage'));
+        // 몸에서 전격 고리가 터져 나가며 탄막이 퍼진다
+        const ring = c.art('ring');
+        if (ring) playFx(c.host.scene, ring, p.x, p.y, { w: c.boss.radius() * 4 });
+        shockRing(c.host.scene, p, c.boss.radius() * 3, c.boss.fxColor, 0.35, 2);
+        burst(c.host.scene, c.host.rng, p, c.boss.fxColor, 14, [90, 170], 0.3, undefined, c.boss.radius() * 0.6);
+        shake(c.host.scene, 'light');
+        this.pulse();
+      });
     }
   }
 }
 
 /** 회전 번개: 플레이어 쪽 긴 광선 예고 → 회전. 강화 시 반대쪽 광선 추가 */
-class SpinBeam extends Timed {
+class SpinBeam extends Channeled {
   constructor(c: PatternCtx) {
     super(c);
+    this.at(c.v('telegraphSec'), () => {
+      shockRing(c.host.scene, c.boss.pos(), c.boss.radius() * 2.5, c.boss.fxColor, 0.3, 2);
+      shake(c.host.scene, 'light');
+      this.pulse();
+    });
     beam(c, {
       angle: angleTo(c.boss.pos(), c.host.playerPos()),
       count: c.v('beams'),
@@ -824,11 +887,12 @@ class SpinBeam extends Timed {
 }
 
 /** 전격 감옥: 플레이어 둘레 틈 있는 고리 + 안쪽 낙뢰. 열린 쪽으로 나가야 한다 */
-class Prison extends Timed {
+class Prison extends Channeled {
   constructor(c: PatternCtx) {
     super(c);
     const center = c.host.playerPos();
     const r = c.v('radius');
+    zap(c, center);
     c.host.addHazard(
       new Ring(c.host.scene, {
         center,
@@ -847,55 +911,106 @@ class Prison extends Timed {
     );
     const cage = c.art('cage');
     if (cage) playFx(c.host.scene, cage, center.x, center.y, { w: r * 2.3, fadeSec: 0.5 });
+    // 고리가 닫히는 순간 가장자리를 따라 전기가 돈다
+    this.at(c.v('telegraphSec'), () => {
+      for (let k = 0; k < 8; k++) {
+        const a = (k / 8) * Math.PI * 2;
+        const b = a + Math.PI / 5;
+        crackle(c.host.scene, c.host.rng, { x: center.x + Math.cos(a) * r, y: center.y + Math.sin(a) * r }, { x: center.x + Math.cos(b) * r, y: center.y + Math.sin(b) * r }, c.boss.fxColor, 0.25);
+      }
+      this.pulse();
+    });
     for (let i = 0; i < c.v('strikes'); i++) {
-      this.at(c.v('telegraphSec') + i * c.v('strikeGapSec'), () => blast(c, c.host.playerPos(), c.v('strikeRadius'), c.v('strikeDelaySec'), c.v('strikeDamage')));
+      this.at(c.v('telegraphSec') + i * c.v('strikeGapSec'), () => {
+        const at = c.host.playerPos();
+        blast(c, at, c.v('strikeRadius'), c.v('strikeDelaySec'), c.v('strikeDamage'));
+        zap(c, at);
+      });
     }
   }
 }
 
 /** 뇌전 봉쇄: 플레이어 양옆 세로 광선 2개, 시차를 두고 위아래 가로 광선 2개 */
-class LockGrid extends Timed {
+class LockGrid extends Channeled {
   constructor(c: PatternCtx) {
     super(c);
     const a = c.host.arena();
     const p = c.host.playerPos();
     const off = c.v('offset');
+    zap(c, p);
+    // 띠가 칠 때 띠를 따라 번개가 내리친다
+    const bolts = (r: Rect, vertical: boolean) => {
+      for (let k = 0; k < 3; k++) {
+        const j = (k - 1) * r.w * 0.25 * (vertical ? 1 : 0);
+        const i = (k - 1) * r.h * 0.25 * (vertical ? 0 : 1);
+        const from = vertical ? { x: r.x + r.w / 2 + j, y: r.y } : { x: r.x, y: r.y + r.h / 2 + i };
+        const to = vertical ? { x: r.x + r.w / 2 + j, y: r.y + r.h } : { x: r.x + r.w, y: r.y + r.h / 2 + i };
+        crackle(c.host.scene, c.host.rng, from, to, c.boss.fxColor, 0.22, k === 1 ? 2 : 1);
+      }
+    };
     for (const s of [-1, 1]) {
-      faultBand(c, rectAt(a, { x: p.x + s * off, y: p.y }, true, c.v('width')), true, c.v('delaySec'), c.v('damage'));
-      faultBand(c, rectAt(a, { x: p.x, y: p.y + s * off }, false, c.v('width')), false, c.v('delaySec') + c.v('lagSec'), c.v('damage'));
+      const v = rectAt(a, { x: p.x + s * off, y: p.y }, true, c.v('width'));
+      const h = rectAt(a, { x: p.x, y: p.y + s * off }, false, c.v('width'));
+      faultBand(c, v, true, c.v('delaySec'), c.v('damage'));
+      faultBand(c, h, false, c.v('delaySec') + c.v('lagSec'), c.v('damage'));
+      this.at(c.v('delaySec'), () => bolts(v, true));
+      this.at(c.v('delaySec') + c.v('lagSec'), () => bolts(h, false));
     }
+    // 세로 띠가 칠 때 바닥에 뇌전 격자가 번진다, 가로 띠 때 한 번 더 울린다
+    this.at(c.v('delaySec'), () => {
+      const grid = c.art('grid');
+      if (grid) playFx(c.host.scene, grid, p.x, p.y, { w: off * 3.4, depth: 2 });
+      shake(c.host.scene, 'light');
+      this.pulse();
+    });
+    this.at(c.v('delaySec') + c.v('lagSec'), () => {
+      shake(c.host.scene, 'light');
+      this.pulse();
+    });
   }
 }
 
 /** 수축 전류: 큰 고리가 틈을 남긴 채 줄어든다. 강화 시 직선 광선이 겹친다 */
-class ShrinkCurrent extends Timed {
+class ShrinkCurrent extends Channeled {
   constructor(c: PatternCtx) {
     super(c);
     const p = c.boss.pos();
+    this.at(0.12, () => this.pulse());
     ring(c, { center: p, fromR: c.v('startRadius'), toR: c.boss.radius(), moveSec: c.v('shrinkSec'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: c.host.rng.range(0, Math.PI * 2), gapDeg: c.v('gapDeg') });
     if (c.v('extraBeam') > 0) beam(c, { angle: angleTo(p, c.host.playerPos()), telegraphSec: c.v('beamTelegraphSec'), liveSec: c.v('beamLiveSec'), width: c.v('beamWidth'), damage: c.v('damage') });
   }
 }
 
 /** 교차 절단: 대각선 광선 뒤 십자 광선. 첫 안전 자리가 다음엔 위험해진다 */
-class CrossCut extends Timed {
+class CrossCut extends Channeled {
   constructor(c: PatternCtx) {
     super(c);
     const o = { count: 4, telegraphSec: c.v('telegraphSec'), liveSec: c.v('liveSec'), width: c.v('width'), damage: c.v('damage') };
+    const fire = () => {
+      shockRing(c.host.scene, c.boss.pos(), c.boss.radius() * 2.2, c.boss.fxColor, 0.25, 2);
+      shake(c.host.scene, 'light');
+      this.pulse();
+    };
     beam(c, { ...o, angle: Math.PI / 4 });
+    this.at(c.v('telegraphSec'), fire);
     this.at(c.v('lagSec'), () => beam(c, { ...o, angle: 0 }));
+    this.at(c.v('lagSec') + c.v('telegraphSec'), fire);
   }
 }
 
 /** 뇌전 추격진: 경로 낙뢰 뒤 플레이어 둘레 수축 고리의 틈으로 빠져나온다 (적뢰 추격진도 같다) */
-class ChaseField extends Timed {
+class ChaseField extends Channeled {
   constructor(c: PatternCtx) {
     super(c);
     const n = c.v('strikes');
     for (let i = 0; i < n; i++) {
       const step = i * c.v('intervalSec');
       const at = predict(c, step + c.v('delaySec'));
-      this.at(step, () => blast(c, at, c.v('radius'), c.v('delaySec'), c.v('damage')));
+      this.at(step, () => {
+        blast(c, at, c.v('radius'), c.v('delaySec'), c.v('damage'));
+        zap(c, at);
+        this.pulse();
+      });
     }
     this.at(n * c.v('intervalSec') + c.v('delaySec'), () =>
       ring(c, { center: c.host.playerPos(), fromR: c.v('ringRadius'), toR: c.v('ringEndRadius'), moveSec: c.v('ringSec'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: c.host.rng.range(0, Math.PI * 2), gapDeg: c.v('gapDeg') }),
@@ -917,7 +1032,12 @@ class BlueDash implements PatternRun {
     this.dash.update(dt);
     if (!this.dash.finished || this.done) return;
     this.done = true;
-    blast(this.c, this.c.boss.pos(), this.c.v('radius'), this.c.v('delaySec'), this.c.v('damage'));
+    const c = this.c;
+    const p = c.boss.pos();
+    blast(c, p, c.v('radius'), c.v('delaySec'), c.v('damage'));
+    // 멈춘 자리에서 진행 방향으로 전격 해일이 밀려 나간다
+    const wave = c.art('wave');
+    if (wave) playFx(c.host.scene, wave, p.x + this.dash.dir.x * 20, p.y + this.dash.dir.y * 20, { w: c.v('radius') * 2.4, rotation: Math.atan2(this.dash.dir.y, this.dash.dir.x) + Math.PI }); // 그림이 왼쪽을 향한다
   }
 
   destroy(): void {

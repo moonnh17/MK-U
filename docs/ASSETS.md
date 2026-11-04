@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 479개 · 그림 있음 466개
+전체 486개 · 그림 있음 473개
 
 ## player (3)
 
@@ -471,7 +471,7 @@
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
-## fx (78)
+## fx (85)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -479,21 +479,28 @@
 | `fx_fusion_burst` | 융합악귀 (blastHit) | 30×30 | center | #8c3ad9 | mku/fx_fusion_burst.png (1프레임) |
 | `fx_fusion_eruption` | 융합악귀 (eruption.blastHit) | 40×40 | center | #8c3ad9 | mku/fx_fusion_eruption.png (1프레임) |
 | `fx_fusion_charge` | 융합악귀 (blastWarn) | 30×30 | center | #8c3ad9 | mku/fx_fusion_charge.png (1프레임) |
-| `fx_fusion_bolt` | 융합악귀 (bullet) | 8×8 | center | #8c3ad9 | mku/fx_fusion_bolt.png (1프레임) |
+| `fx_fusion_spirit_bolt` | 융합악귀 (bullet) | 10×10 | center | #8c3ad9 | mku/fx_fusion_spirit_bolt.png (4프레임) |
 | `fx_fusion_dash` | 융합악귀 (dashTrail) | 30×30 | center | #8c3ad9 | mku/fx_fusion_dash.png (1프레임) |
 | `fx_fusion_smoke` | 융합악귀 (zone) | 20×20 | center | #8c3ad9 | mku/fx_fusion_smoke.png (1프레임) |
 | `fx_fusion_summon` | 융합악귀 (summon) | 20×20 | center | #8c3ad9 | mku/fx_fusion_summon.png (1프레임) |
+| `fx_fusion_bolt` | 융합악귀 (spiritDash.bullet) | 8×8 | center | #8c3ad9 | mku/fx_fusion_bolt.png (1프레임) |
+| `fx_fusion_triple_claw` | 융합악귀 (claw.strike) | 40×40 | center | #8c3ad9 | mku/fx_fusion_triple_claw.png (4프레임) |
+| `fx_fusion_core_burst` | 융합악귀 (spiritBlast.release) | 40×40 | center | #8c3ad9 | mku/fx_fusion_core_burst.png (4프레임) |
 | `fx_fusion_orb` | 융합악귀 (spiritBlast.orb) | 20×20 | center | #8c3ad9 | mku/fx_fusion_orb.png (1프레임) |
 | `fx_fusion_explode` | 융합악귀 (death) | 45×45 | center | #8c3ad9 | mku/fx_fusion_explode.png (1프레임) |
 | `fx_fusion_vortex` | 융합악귀 (layer) | 45×45 | center | #8c3ad9 | mku/fx_fusion_vortex.png (1프레임) |
 | `fx_electric_warning` | 전기환띠 (blastWarn) | 15×15 | center | #3a7aff | mku/fx_electric_warning.png (1프레임) |
-| `fx_electric_strike` | 전기환띠 (blastHit) | 25×25 | center | #3a7aff | mku/fx_electric_strike.png (1프레임) |
+| `fx_electric_branch_bolt` | 전기환띠 (blastHit) | 25×25 | center | #3a7aff | mku/fx_electric_branch_bolt.png (4프레임) |
 | `fx_electric_strike2` | 전기환띠 (prison.blastHit) | 25×25 | center | #3a7aff | mku/fx_electric_strike2.png (1프레임) |
 | `fx_electric_laser` | 전기환띠 (beam) | 60×60 | center | #3a7aff | mku/fx_electric_laser.png (1프레임) |
 | `fx_electric_line` | 전기환띠 (crossCut.beam) | 60×60 | center | #3a7aff | mku/fx_electric_line.png (1프레임) |
 | `fx_electric_orb` | 전기환띠 (bullet) | 6×6 | center | #3a7aff | mku/fx_electric_orb.png (1프레임) |
 | `fx_electric_dash` | 전기환띠 (dashTrail) | 30×30 | center | #3a7aff | mku/fx_electric_dash.png (1프레임) |
 | `fx_electric_cage` | 전기환띠 (cage) | 50×50 | center | #3a7aff | mku/fx_electric_cage.png (1프레임) |
+| `fx_electric_strike` | 전기환띠 (chaseField.blastHit) | 25×25 | center | #3a7aff | mku/fx_electric_strike.png (1프레임) |
+| `fx_electric_ring_collapse` | 전기환띠 (shockRipple.ring) | 45×45 | center | #3a7aff | mku/fx_electric_ring_collapse.png (4프레임) |
+| `fx_electric_grid` | 전기환띠 (edgeLock.grid) | 70×70 | center | #3a7aff | mku/fx_electric_grid.png (4프레임) |
+| `fx_electric_wave` | 전기환띠 (blueDash.wave) | 55×55 | center | #3a7aff | mku/fx_electric_wave.png (4프레임) |
 | `fx_electric_radial` | 전기환띠 (shockRipple.cast) | 35×35 | center | #3a7aff | mku/fx_electric_radial.png (1프레임) |
 | `fx_electric_cross` | 전기환띠 (crossCut.cast) | 45×45 | center | #3a7aff | mku/fx_electric_cross.png (1프레임) |
 | `fx_electric_impact` | 전기환띠 (blueDash.blastHit) | 40×40 | center | #3a7aff | mku/fx_electric_impact.png (1프레임) |
