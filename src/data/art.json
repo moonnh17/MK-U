@@ -143,19 +143,19 @@
     },
     "enemy_hectar_trooper": {
       "file": "mku/enemy_hectar_trooper.png",
-      "frameWidth": 24,
-      "frameHeight": 46,
-      "frames": 5,
-      "density": 2,
+      "frameWidth": 86,
+      "frameHeight": 106,
+      "frames": 6,
+      "density": 4,
       "anims": {
         "idle": {
           "from": 0,
-          "to": 0,
+          "to": 2,
           "fps": 4
         },
         "move": {
-          "from": 1,
-          "to": 4,
+          "from": 3,
+          "to": 5,
           "fps": 8
         }
       }
@@ -200,10 +200,10 @@
     },
     "enemy_ancient_one": {
       "file": "mku/enemy_ancient_one.png",
-      "frameWidth": 54,
-      "frameHeight": 54,
+      "frameWidth": 142,
+      "frameHeight": 146,
       "frames": 12,
-      "density": 2,
+      "density": 4,
       "anims": {
         "idle": {
           "from": 0,
@@ -219,10 +219,10 @@
     },
     "enemy_hatred_shard": {
       "file": "mku/enemy_hatred_shard.png",
-      "frameWidth": 46,
-      "frameHeight": 26,
+      "frameWidth": 130,
+      "frameHeight": 74,
       "frames": 10,
-      "density": 2,
+      "density": 4,
       "anims": {
         "idle": {
           "from": 0,
@@ -238,10 +238,10 @@
     },
     "enemy_executor": {
       "file": "mku/enemy_executor.png",
-      "frameWidth": 78,
-      "frameHeight": 72,
+      "frameWidth": 202,
+      "frameHeight": 186,
       "frames": 13,
-      "density": 2,
+      "density": 4,
       "anims": {
         "idle": {
           "from": 0,
@@ -257,10 +257,10 @@
     },
     "enemy_archon": {
       "file": "mku/enemy_archon.png",
-      "frameWidth": 46,
-      "frameHeight": 62,
+      "frameWidth": 122,
+      "frameHeight": 170,
       "frames": 13,
-      "density": 2,
+      "density": 4,
       "anims": {
         "idle": {
           "from": 0,

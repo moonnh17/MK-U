@@ -115,9 +115,12 @@ function sheet(key, frames, fit, opts = {}) {
   const cut = opts.cut ?? 40;
   const boxes = frames.map((f) => k.bbox(f, cut) ?? { x: 0, y: 0, w: f.w, h: f.h });
   const cw = Math.max(...boxes.map((b) => b.w)), ch = Math.max(...boxes.map((b) => b.h));
-  const s = (fit * ART_DENSITY) / Math.max(cw, ch);
+  // density: 3장 적처럼 잔조각이 많은 원본은 더 촘촘히 담아야 덜 깨진다 (화면 배율 최대 4)
+  const D = opts.density ?? ART_DENSITY;
+  const s = (fit * D) / Math.max(cw, ch);
   // independent: 원본마다 그린 배율이 달라(보스 단일 자세) 프레임마다 따로 fit에 맞춘다
-  const fw = even(cw * s), fh = even(ch * s);
+  const evenD = (v) => Math.max(D, Math.round(v / D) * D);
+  const fw = evenD(cw * s), fh = evenD(ch * s);
   const outImg = k.blank(fw * frames.length, fh);
   frames.forEach((f, i) => {
     const b = boxes[i];
@@ -138,10 +141,10 @@ function sheet(key, frames, fit, opts = {}) {
   if (opts.outline) {
     const framed = outlined(outImg, fw, fh, frames.length, opts.outline);
     k.write(path.join(REPO, 'public/assets', file), framed);
-    return { file, frameWidth: fw + 2, frameHeight: fh + 2, frames: frames.length, density: ART_DENSITY };
+    return { file, frameWidth: fw + 2, frameHeight: fh + 2, frames: frames.length, density: D };
   }
   k.write(path.join(REPO, 'public/assets', file), outImg);
-  return { file, frameWidth: fw, frameHeight: fh, frames: frames.length, density: ART_DENSITY };
+  return { file, frameWidth: fw, frameHeight: fh, frames: frames.length, density: D };
 }
 /** 불투명 정사각형 그림(아이콘): 정사각형으로 채운 뒤 size로 */
 function icon(key, f, size, crop) {
@@ -229,15 +232,21 @@ const M = (row) => cells('monsters.png', 256, 256, [row * 4, row * 4 + 1, row * 
 { const r = M(5); actor('enemy_ghost_shooter', [r[0]], [r[0], r[1]], 26, { moveFps: 4, pose: { frames: [r[1], r[2], r[3]], fps: 5 } }); }
 
 // ---------- 2장 ----------
-actor('enemy_hectar_trooper', [strip('spires/trooper.png', 4)[0]], strip('spires/trooper.png', 4), 22);
+// 헥타르 전투원: v141 시트 (3열×4행 = 방향 4 × 프레임 3). 0행 정면, 2행 오른쪽으로 걷기
+{
+  const t = cells('spires/trooper-v141.png', 128, 192);
+  actor('enemy_hectar_trooper', [t[0], t[1], t[2]], [t[6], t[7], t[8]], 26, { density: 4 });
+}
 actor('enemy_magi_beetle', strip('monsters/monster-magi_beetle-idle.png', 4), strip('monsters/monster-magi_beetle-move.png', 6), 24);
 actor('enemy_a_memory', strip('monsters/monster-some_memory-idle.png', 6), strip('monsters/monster-some_memory-move.png', 8), 24);
 
 // ---------- 3장 ----------
-actor('enemy_ancient_one', strip('monsters/monster-nameless-idle.png', 5), strip('monsters/monster-nameless-move.png', 7), 26);
-actor('enemy_hatred_shard', strip('monsters/monster-hatred_fragment-idle.png', 4), strip('monsters/monster-hatred_fragment-move.png', 6), 22, { cut: 120 });
-actor('enemy_executor', gaps('late-elites/executor-idle.png'), gaps('late-elites/executor-move.png'), 38);
-actor('enemy_archon', gaps('late-elites/archon-idle.png'), gaps('late-elites/archon-move.png'), 30);
+// 3장 적: 1·2장보다 크게, 4배 밀도로 (원본이 잔조각이 많아 2배로 줄이면 깨진다)
+const C3 = { density: 4 };
+actor('enemy_ancient_one', strip('monsters/monster-nameless-idle.png', 5), strip('monsters/monster-nameless-move.png', 7), 36, C3);
+actor('enemy_hatred_shard', strip('monsters/monster-hatred_fragment-idle.png', 4), strip('monsters/monster-hatred_fragment-move.png', 6), 32, { ...C3, cut: 120 });
+actor('enemy_executor', gaps('late-elites/executor-idle.png'), gaps('late-elites/executor-move.png'), 50, C3);
+actor('enemy_archon', gaps('late-elites/archon-idle.png'), gaps('late-elites/archon-move.png'), 42, C3);
 
 // ---------- 보스 ----------
 // 마기카이저: 구속(1단계) → 2 → 3단계

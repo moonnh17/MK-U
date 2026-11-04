@@ -198,7 +198,7 @@
         { "id": "fan", "kind": "fan", "triggerRange": 200, "windupSec": 0.7, "actSec": 0.1, "recoverSec": 0.6, "cooldownSec": 2.8,
           "damage": 7, "shots": 5, "spreadDeg": 50, "speed": 120, "range": 280 }
       ],
-      "spriteKey": "enemy_ancient_one", "color": "#c8b8a0", "size": 13
+      "spriteKey": "enemy_ancient_one", "color": "#c8b8a0", "size": 18
     },
     {
       "id": "hatredShard", "flavor": "codex.flavor.hatredShard", "nameKey": "enemy.hatredShard", "chapter": 3, "rank": "normal", "ai": "chase", "mentalRatio": 1,
@@ -208,7 +208,7 @@
         { "id": "rush", "kind": "lunge", "triggerRange": 140, "windupSec": 0.35, "actSec": 0.2, "recoverSec": 0.5, "cooldownSec": 2.6,
           "damage": 9, "speed": 440, "chain": [2, 3], "chainWindupSec": 0.18 }
       ],
-      "spriteKey": "enemy_hatred_shard", "color": "#ff3a4a", "size": 8
+      "spriteKey": "enemy_hatred_shard", "color": "#ff3a4a", "size": 11
     },
     {
       "id": "executor", "flavor": "codex.flavor.executor", "nameKey": "enemy.executor", "chapter": 3, "rank": "champion", "ai": "chase",
@@ -220,7 +220,7 @@
         { "id": "rope", "kind": "rope", "triggerRange": 170, "windupSec": 0.7, "actSec": 0.5, "recoverSec": 0.3, "cooldownSec": 4.5,
           "damage": 4, "speed": 420, "range": 170, "pullSpeed": 360, "axeDelaySec": 0.6, "radius": 36, "arcDeg": 110, "axeDamage": 22 }
       ],
-      "spriteKey": "enemy_executor", "color": "#a0a8b8", "size": 18
+      "spriteKey": "enemy_executor", "color": "#a0a8b8", "size": 24
     },
     {
       "id": "archon", "flavor": "codex.flavor.archon", "nameKey": "enemy.archon", "chapter": 3, "rank": "champion", "ai": "chase", "mentalRatio": 1,
@@ -239,7 +239,7 @@
         ],
         "haloColor": "#ffe08a"
       },
-      "spriteKey": "enemy_archon", "color": "#e8c860", "size": 16
+      "spriteKey": "enemy_archon", "color": "#e8c860", "size": 22
     },
     {
       "id": "eclipse", "flavor": "codex.flavor.eclipse", "nameKey": "enemy.eclipse", "chapter": 3, "rank": "boss", "ai": "boss",
