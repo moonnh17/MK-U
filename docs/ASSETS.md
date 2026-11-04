@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 497개 · 그림 있음 484개
+전체 501개 · 그림 있음 488개
 
 ## player (3)
 
@@ -64,7 +64,7 @@
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `fx_golem_laser` | 고대병기의 코어 (fx) | 12×12 | center | #a05aff | mku/fx_golem_laser.png (1프레임) |
-| `fx_eclipse_meteor` | 식광의 핵 (fx) | 10×10 | center | #ff3a4a | mku/fx_eclipse_meteor.png (1프레임) |
+| `fx_eclipse_meteor` | 식광의 핵 (fx) 외 1곳 | 10×10 | center | #ff3a4a | mku/fx_eclipse_meteor.png (1프레임) |
 | `projectile_arrow` | 곡궁 (fx) | 3×3 | center | #c8a070 | mku/projectile_arrow.png (1프레임) |
 | `projectile_zephyr_arrow` | 서풍 (fx) | 3×3 | center | #7ae8f0 | mku/projectile_zephyr_arrow.png (1프레임) |
 | `fx_soul_burst` | 소울 칼리버 (fx) | 20×20 | center | #c060ff | mku/fx_soul_burst.png (1프레임) |
@@ -471,7 +471,7 @@
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
-## fx (96)
+## fx (100)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -532,6 +532,10 @@
 | `fx_golem_fault_hit` | 마기골렘 (doomFault.blastHit) | 25×25 | center | #a03ae0 | mku/fx_golem_fault_hit.png (1프레임) |
 | `fx_golem_rage_aura` | 마기골렘 (layer) | 45×45 | center | #a03ae0 | mku/fx_golem_rage_aura.png (1프레임) |
 | `fx_golem_rage_core` | 마기골렘 (layer) | 20×20 | center | #a03ae0 | mku/fx_golem_rage_core.png (1프레임) |
+| `fx_eclipse_light_rain` | 식광 (sunspotFall.blastHit) | 40×40 | center | #ff3a4a | mku/fx_eclipse_light_rain.png (4프레임) |
+| `fx_eclipse_blade_bloom` | 식광 (orbitCut.release) 외 1곳 | 40×40 | center | #ff3a4a | mku/fx_eclipse_blade_bloom.png (4프레임) |
+| `fx_eclipse_core_collapse` | 식광 (gravityCollapse.collapse) | 45×45 | center | #ff3a4a | mku/fx_eclipse_core_collapse.png (4프레임) |
+| `fx_eclipse_erosion_ring` | 식광 (wideErosion.safeHit) | 80×80 | center | #ff3a4a | mku/fx_eclipse_erosion_ring.png (4프레임) |
 | `fx_eclipse_warning` | 식광 (blastWarn) | 30×30 | center | #ff3a4a | mku/fx_eclipse_warning.png (3프레임) |
 | `fx_eclipse_impact` | 식광 (blastHit) | 35×35 | center | #ff3a4a | mku/fx_eclipse_impact.png (2프레임) |
 | `fx_eclipse_blade` | 식광 (bullet) | 7×7 | center | #ff3a4a | mku/fx_eclipse_blade.png (4프레임) |

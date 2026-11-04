@@ -1108,6 +1108,12 @@
       ],
       "gapSecEnraged": 0.55,
       "art": {
+        "meteor": { "spriteKey": "fx_eclipse_meteor", "color": "#ff3a4a", "size": 10 },
+        "sunspotFall.blastHit": { "spriteKey": "fx_eclipse_light_rain", "color": "#ff3a4a", "size": 40 },
+        "orbitCut.release": { "spriteKey": "fx_eclipse_blade_bloom", "color": "#ff3a4a", "size": 40 },
+        "eclipseShards.release": { "spriteKey": "fx_eclipse_blade_bloom", "color": "#ff3a4a", "size": 40 },
+        "gravityCollapse.collapse": { "spriteKey": "fx_eclipse_core_collapse", "color": "#ff3a4a", "size": 45 },
+        "wideErosion.safeHit": { "spriteKey": "fx_eclipse_erosion_ring", "color": "#ff3a4a", "size": 80 },
         "blastWarn": {
           "spriteKey": "fx_eclipse_warning",
           "color": "#ff3a4a",

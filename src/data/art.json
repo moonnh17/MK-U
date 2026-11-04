@@ -3911,8 +3911,8 @@
     },
     "enemy_eclipse_phase2": {
       "file": "mku/enemy_eclipse_phase2.png",
-      "frameWidth": 172,
-      "frameHeight": 172,
+      "frameWidth": 174,
+      "frameHeight": 174,
       "frames": 24,
       "density": 2,
       "anims": {
@@ -4609,6 +4609,66 @@
           "to": 3,
           "fps": 10,
           "loop": true
+        }
+      }
+    },
+    "fx_eclipse_blade_bloom": {
+      "file": "mku/fx_eclipse_blade_bloom.png",
+      "frameWidth": 160,
+      "frameHeight": 160,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_eclipse_core_collapse": {
+      "file": "mku/fx_eclipse_core_collapse.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_eclipse_light_rain": {
+      "file": "mku/fx_eclipse_light_rain.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_eclipse_erosion_ring": {
+      "file": "mku/fx_eclipse_erosion_ring.png",
+      "frameWidth": 320,
+      "frameHeight": 320,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
         }
       }
     },

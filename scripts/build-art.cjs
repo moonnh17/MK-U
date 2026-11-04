@@ -1088,12 +1088,73 @@ const st = (boss, id, fps, loop) => ({ frames: bFrames(boss, id), fps: fps ?? (b
   bossActor('enemy_magi_golem', { idle: { frames: walk, fps: 3 }, move: { frames: walk, fps: 3 }, ...poses }, 84, true);
   bossActor('enemy_magi_golem_phase2', { idle: { frames: one(G, 'body-rage') }, move: { frames: walk, fps: 3 }, ...poses }, 84, true);
 }
-// 식광: 페이즈별 시트
+/**
+ * 식광 원본 프레임의 찌꺼기 지우기 (본체 둘레의 일부러 그린 파편은 둔다):
+ * 1) 1~2px 굵기로 길게 뻗은 세로·가로 직선 (몸 옆에 붙은 선 포함)
+ * 2) 본체가 아닌 가늘고 긴 조각 (가로세로비 8 이상, 굵기 2px 이하)
+ * 3) 같은 줄(y)에 늘어선 작은 점 무리 (글자 찌꺼기)
+ */
+function cleanBossFrame(img, cut = 40) {
+  const { w, h, px } = img;
+  const a = (x, y) => (x < 0 || y < 0 || x >= w || y >= h ? 0 : px[(y * w + x) * 4 + 3]);
+  let n = 0;
+  const erase = (x, y) => {
+    if (px[(y * w + x) * 4 + 3] > 0) n++;
+    px[(y * w + x) * 4 + 3] = 0;
+  };
+  // 1) 세로선: 한 열에 긴 불투명 줄, 양옆 2px 바깥 열은 거의 비어 있음
+  for (let x = 0; x < w; x++) {
+    let run = 0, best = 0, end = 0;
+    for (let y = 0; y < h; y++) {
+      run = a(x, y) > cut ? run + 1 : 0;
+      if (run > best) { best = run; end = y; }
+    }
+    if (best < h * 0.3) continue;
+    let side = 0;
+    for (let y = end - best + 1; y <= end; y++) side += (a(x - 3, y) > cut ? 1 : 0) + (a(x + 3, y) > cut ? 1 : 0);
+    if (side > best * 0.3) continue;
+    for (let y = end - best + 1; y <= end; y++) for (let dx = -1; dx <= 1; dx++) if (x + dx >= 0 && x + dx < w) erase(x + dx, y);
+  }
+  // 가로선
+  for (let y = 0; y < h; y++) {
+    let run = 0, best = 0, end = 0;
+    for (let x = 0; x < w; x++) {
+      run = a(x, y) > cut ? run + 1 : 0;
+      if (run > best) { best = run; end = x; }
+    }
+    if (best < w * 0.3) continue;
+    let side = 0;
+    for (let x = end - best + 1; x <= end; x++) side += (a(x, y - 3) > cut ? 1 : 0) + (a(x, y + 3) > cut ? 1 : 0);
+    if (side > best * 0.3) continue;
+    for (let x = end - best + 1; x <= end; x++) for (let dy = -1; dy <= 1; dy++) if (y + dy >= 0 && y + dy < h) erase(x, y + dy);
+  }
+  const comps = k.components(img, cut);
+  if (comps.length > 1) {
+    const main = comps.reduce((p, c) => (c.area > p.area ? c : p));
+    // 2) 가늘고 긴 조각
+    for (const c of comps) {
+      if (c === main) continue;
+      const cw = c.x1 - c.x0 + 1, ch = c.y1 - c.y0 + 1;
+      if (Math.min(cw, ch) <= 2 && Math.max(cw, ch) / Math.min(cw, ch) >= 8) for (const q of c.pts) erase(q % w, (q - (q % w)) / w);
+    }
+    // 3) 같은 y에서 시작하는 작은 점 5개 이상
+    const rows = new Map();
+    for (const c of comps) if (c !== main && c.area < 40 && c.y1 - c.y0 <= 5) rows.set(c.y0, [...(rows.get(c.y0) ?? []), c]);
+    for (const list of rows.values()) if (list.length >= 5) for (const c of list) for (const q of c.pts) erase(q % w, (q - (q % w)) / w);
+  }
+  edgeDropped += n;
+  return img;
+}
+let edgeDropped = 0;
+const cleanSt = (s) => ({ ...s, frames: s.frames.map((f) => cleanBossFrame(f)) });
+// 식광: 페이즈별 시트 (찌꺼기를 지운 뒤)
 {
   const C = '03';
   const p = 'boss.eclipse.';
-  bossActor('enemy_eclipse', { idle: st(C, p + 'p1_idle'), move: st(C, p + 'p1_move'), charge: st(C, p + 'p1_charge'), hurt: st(C, p + 'p1_hurt') }, 75);
-  bossActor('enemy_eclipse_phase2', { idle: st(C, p + 'p2_idle'), move: st(C, p + 'p2_move'), charge: st(C, p + 'p2_charge'), hurt: st(C, p + 'p2_hurt'), transition: st(C, p + 'transition') }, 84);
+  const e = (id) => cleanSt(st(C, p + id));
+  bossActor('enemy_eclipse', { idle: e('p1_idle'), move: e('p1_move'), charge: e('p1_charge'), hurt: e('p1_hurt') }, 75);
+  bossActor('enemy_eclipse_phase2', { idle: e('p2_idle'), move: e('p2_move'), charge: e('p2_charge'), hurt: e('p2_hurt'), transition: e('transition') }, 84);
+  console.log(`식광 찌꺼기 ${edgeDropped}px 지움`);
 }
 // 마기카이저: 구속 → 2 → 3단계
 {
@@ -1162,6 +1223,10 @@ packFx('fx_kaiser_barrage_net', '05_마기카이저/02_광역공격_이펙트/01
 packFx('fx_kaiser_unbound', '05_마기카이저/02_광역공격_이펙트/02_구속해제 황제 전선', 140, 12);
 packFx('fx_bit_rail_slug', '90_공용_소형스프라이트/03_소형_탄체/01_레일건 분리 탄자', 12, 12, true);
 packFx('fx_bit_casing', '90_공용_소형스프라이트/04_잔재_보조비트/02_헥타르 방출 탄피', 10, 10, true);
+packFx('fx_eclipse_blade_bloom', '03_식광/01_추가공격_이펙트/01_식광 칼날 개화', 80, 14);
+packFx('fx_eclipse_core_collapse', '03_식광/01_추가공격_이펙트/02_흑일 핵 붕괴', 90, 12);
+packFx('fx_eclipse_light_rain', '03_식광/02_광역공격_이펙트/01_흑일의 낙광우', 90, 10);
+packFx('fx_eclipse_erosion_ring', '03_식광/02_광역공격_이펙트/02_개기식 침식권', 160, 10);
 bFx('06', 'hectar-ring', 'fx_chief_ring', 70);
 bFx('06', 'hectar-burst', 'fx_chief_burst', 60);
 bFx('06', 'hectar-drone', 'fx_chief_drone', 14);
