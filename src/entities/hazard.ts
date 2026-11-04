@@ -43,6 +43,7 @@ function flash(host: HazardHost, obj: Phaser.GameObjects.GameObject, ms = 150): 
 export class SectorBlast implements Hazard {
   private readonly g: Phaser.GameObjects.Graphics;
   private left: number;
+  private readonly delaySec: number;
 
   constructor(
     scene: Phaser.Scene,
@@ -56,15 +57,28 @@ export class SectorBlast implements Hazard {
     private readonly hitArt?: SpriteRef,
   ) {
     this.left = delaySec;
-    const half = (arcDeg * Math.PI) / 360;
+    this.delaySec = Math.max(0.01, delaySec);
     this.g = scene.add.graphics().setDepth(2);
-    this.g.fillStyle(color, 0.22).slice(at.x, at.y, radius, angle - half, angle + half, false).fillPath();
-    this.g.lineStyle(1, color, 0.9).slice(at.x, at.y, radius, angle - half, angle + half, false).strokePath();
+    this.draw();
+  }
+
+  /** 예고: 테두리는 처음부터, 안쪽은 칠 때까지 중심에서 차오른다 */
+  private draw(): void {
+    const half = (this.arcDeg * Math.PI) / 360;
+    const k = 1 - Math.max(0, this.left) / this.delaySec;
+    const { at, angle, radius, color } = this;
+    this.g.clear();
+    this.g.fillStyle(color, 0.12).slice(at.x, at.y, radius, angle - half, angle + half, false).fillPath();
+    this.g.fillStyle(color, 0.18 + 0.12 * k).slice(at.x, at.y, Math.max(1, radius * k), angle - half, angle + half, false).fillPath();
+    this.g.lineStyle(1, color, 0.6 + 0.4 * k).slice(at.x, at.y, radius, angle - half, angle + half, false).strokePath();
   }
 
   update(dt: number, host: HazardHost): boolean {
     this.left -= dt;
-    if (this.left > 0) return true;
+    if (this.left > 0) {
+      this.draw();
+      return true;
+    }
     const p = host.playerPos();
     const d = Math.hypot(p.x - this.at.x, p.y - this.at.y);
     let diff = Math.atan2(p.y - this.at.y, p.x - this.at.x) - this.angle;

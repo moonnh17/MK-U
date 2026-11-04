@@ -12,6 +12,7 @@ import { gapBulletAngles, predictPoint } from '../systems/bossGeometry';
 import { playFx } from '../skills/skillFx';
 import type { SpriteRef } from '../types/data';
 import type { BossHost, PatternRun } from './host';
+import { burst, coil, land, lunge, motes, shockRing } from './bossFx';
 
 /** 패턴이 다루는 보스 */
 export interface BossBody {
@@ -23,7 +24,13 @@ export interface BossBody {
   /** 순간이동 */
   teleport(x: number, y: number): void;
   setAlpha(a: number): void;
+  /** 몸짓: 가로·세로 배율과 기울기(rad, +는 시계 방향). 패턴이 끝나면 컨트롤러가 되돌린다 */
+  shape(sx: number, sy: number, lean: number): void;
+  /** 지금 모습 그대로 잔상을 남긴다 (보스 색으로 빛나며 사라짐) */
+  ghost(alpha: number, sec: number): void;
   color: number;
+  /** 이펙트 그림의 색 (불티·충격파·잔상). 그림이 없으면 color */
+  fxColor: number;
 }
 
 export interface PatternCtx {
@@ -92,6 +99,10 @@ class Dash extends Timed {
   private sinceTrail = 0;
   private readonly line: Phaser.GameObjects.Graphics;
   private sinceArt = 0;
+  private sinceGhost = 0;
+  /** 멈춘 뒤 지난 시간 (착지 몸짓) */
+  private sinceStop = -1;
+  private readonly angle: number;
 
   bodyPose(): 'dashReady' | 'dash' | 'dashEnd' {
     return this.dashing ? 'dash' : this.finished ? 'dashEnd' : 'dashReady';
@@ -106,21 +117,52 @@ class Dash extends Timed {
     super(c);
     const p = c.boss.pos();
     const a = angleTo(p, c.host.playerPos());
+    this.angle = a;
     this.dir = { x: Math.cos(a), y: Math.sin(a) };
-    const len = c.v('length');
     this.line = c.host.scene.add.graphics().setDepth(2);
-    this.line.lineStyle(c.boss.radius() * 2, c.boss.color, 0.25).lineBetween(p.x, p.y, p.x + this.dir.x * len, p.y + this.dir.y * len);
+    this.drawLine(0);
     this.at(c.v('windupSec'), () => {
       this.line.clear();
       this.dashing = true;
       bus.emit('sfx', { id: 'dash' });
+      // 박차고 나간다: 뒤로 튀는 불티 + 발밑 충격파
+      const b = c.boss.pos();
+      burst(c.host.scene, c.host.rng, b, c.boss.fxColor, 14, [80, 160], 0.35, { angle: a + Math.PI, spread: 1.6 }, c.boss.radius() * 0.6);
+      shockRing(c.host.scene, b, c.boss.radius() * 1.6, c.boss.fxColor, 0.3);
+      shake(c.host.scene, 'light');
     });
+  }
+
+  /** 돌진 예고선: 준비 동안 끝까지 뻗어 나가며 진해진다 */
+  private drawLine(k: number): void {
+    const c = this.c;
+    const p = c.boss.pos();
+    const len = c.v('length') * Math.min(1, k * 1.6);
+    const end = { x: p.x + this.dir.x * len, y: p.y + this.dir.y * len };
+    this.line.clear();
+    this.line.lineStyle(c.boss.radius() * 2, c.boss.color, 0.1 + 0.18 * k).lineBetween(p.x, p.y, end.x, end.y);
+    this.line.lineStyle(1, c.boss.color, 0.4 + 0.5 * k).lineBetween(p.x, p.y, end.x, end.y);
   }
 
   protected override tick(dt: number): void {
     const c = this.c;
     if (!this.dashing) {
       c.boss.setVelocity(0, 0);
+      if (!this.finished) {
+        // 준비: 예고선이 뻗고, 몸을 웅크려 뒤로 젖히며 기를 모은다
+        const k = this.t / c.v('windupSec');
+        this.drawLine(k);
+        coil(c.boss, k, this.angle, 1.3);
+        this.sinceArt -= dt;
+        if (this.sinceArt <= 0) {
+          this.sinceArt = 0.08;
+          motes(c.host.scene, c.host.rng, c.boss.pos(), c.boss.fxColor, 3, c.boss.radius() * 2.2, 0.3);
+        }
+      } else {
+        // 멈춘 뒤: 납작하게 내려앉았다가 일어난다
+        this.sinceStop += dt;
+        land(c.boss, this.sinceStop, 0.35, 1.2);
+      }
       return;
     }
     const speed = c.v('speed');
@@ -130,10 +172,21 @@ class Dash extends Timed {
     if (this.traveled >= c.v('length') || (this.traveled > 4 && c.boss.blocked()) || near) {
       this.dashing = false;
       this.finished = true;
+      this.sinceStop = 0;
       c.boss.setVelocity(0, 0);
+      // 미끄러지며 멈춤: 앞으로 흩어지는 먼지
+      burst(c.host.scene, c.host.rng, b0, c.boss.fxColor, 12, [50, 110], 0.4, { angle: this.angle, spread: 2.2 }, c.boss.radius() * 0.5);
+      shake(c.host.scene, 'light');
       return;
     }
     c.boss.setVelocity(this.dir.x * speed, this.dir.y * speed);
+    // 달리는 동안: 진행 방향으로 늘어나고 잔상을 남긴다
+    c.boss.shape(1.14, 0.9, (Math.abs(this.dir.x) < 0.2 ? 0 : Math.sign(this.dir.x)) * 0.12);
+    this.sinceGhost -= dt;
+    if (this.sinceGhost <= 0) {
+      this.sinceGhost = 0.05;
+      c.boss.ghost(0.35, 0.25);
+    }
     this.traveled += speed * dt;
     const p = c.boss.pos();
     const trailArt = c.art('dashTrail');
@@ -556,10 +609,43 @@ class Intimidate extends Timed {
 
 /** 악귀 할퀴기: 플레이어 쪽 넓은 부채꼴. 뒤로보다 옆으로 빠져야 한다 */
 class Claw extends Timed {
+  private readonly angle: number;
+  private moteT = 0;
+
   constructor(c: PatternCtx) {
     super(c);
     const p = c.boss.pos();
-    c.host.addHazard(new SectorBlast(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('radius'), c.v('arcDeg'), c.v('windupSec'), c.v('damage'), c.boss.color, c.art('sectorHit')));
+    this.angle = angleTo(p, c.host.playerPos());
+    const a = this.angle;
+    c.host.addHazard(new SectorBlast(c.host.scene, p, a, c.v('radius'), c.v('arcDeg'), c.v('windupSec'), c.v('damage'), c.boss.color, c.art('sectorHit')));
+    this.at(c.v('windupSec'), () => {
+      // 휘두름: 잔상 + 호를 따라 바깥으로 튀는 불티
+      c.boss.ghost(0.5, 0.3);
+      burst(c.host.scene, c.host.rng, p, c.boss.fxColor, 26, [90, 180], 0.35, { angle: a, spread: rad(c.v('arcDeg')) }, c.v('radius') * 0.9);
+      shake(c.host.scene, 'light');
+    });
+  }
+
+  protected override tick(dt: number): void {
+    const c = this.c;
+    const w = c.v('windupSec');
+    if (this.t < w) {
+      // 준비: 웅크려 뒤로 젖히며 손끝에 기를 모은다
+      c.boss.setVelocity(0, 0);
+      coil(c.boss, this.t / w, this.angle);
+      this.moteT -= dt;
+      if (this.moteT <= 0) {
+        this.moteT = 0.07;
+        const p = c.boss.pos();
+        motes(c.host.scene, c.host.rng, { x: p.x + Math.cos(this.angle) * 10, y: p.y + Math.sin(this.angle) * 10 }, c.boss.fxColor, 3, c.boss.radius() * 1.8, 0.3);
+      }
+      return;
+    }
+    // 내지른 직후 0.08초 앞으로 밀고 나가며 늘어났다가 돌아온다
+    const since = this.t - w;
+    const push = since < 0.08 ? 110 : 0;
+    c.boss.setVelocity(Math.cos(this.angle) * push, Math.sin(this.angle) * push);
+    lunge(c.boss, since, this.angle);
   }
 }
 
@@ -596,9 +682,20 @@ class SpiritDash implements PatternRun {
 
 /** 악귀 분출: 보스 중심 폭발과 함께 둘레에 악귀가 튀어나온다. 바짝 붙은 플레이어를 밀어낸다 */
 class Eruption extends Timed {
+  private moteT = 0;
+
   constructor(c: PatternCtx) {
     super(c);
     blast(c, c.boss.pos(), c.v('radius'), c.v('delaySec'), c.v('damage'));
+    shake(c.host.scene, 'rumble', c.v('delaySec') * 1000);
+    this.at(c.v('delaySec'), () => {
+      // 터짐: 충격파 두 겹 + 사방으로 튀는 불티
+      const p = c.boss.pos();
+      shockRing(c.host.scene, p, c.v('radius') * 1.1, c.boss.fxColor, 0.4, 3);
+      shockRing(c.host.scene, p, c.v('radius') * 0.7, 0xffffff, 0.25, 1);
+      burst(c.host.scene, c.host.rng, p, c.boss.fxColor, 30, [100, 200], 0.45, undefined, c.boss.radius() * 0.5);
+      shake(c.host.scene, 'medium');
+    });
     this.at(c.v('delaySec'), () => {
       if (!c.summonId) return;
       // 따라 나오는 소환수와 합쳐 상한을 넘지 않는다
@@ -606,13 +703,82 @@ class Eruption extends Timed {
       if (n > 0) c.summon(Array.from({ length: n }, () => c.summonId!), true);
     });
   }
+
+  protected override tick(dt: number): void {
+    const c = this.c;
+    c.boss.setVelocity(0, 0);
+    const d = c.v('delaySec');
+    if (this.t >= d) {
+      // 솟구쳤다가 내려앉는다
+      lunge(c.boss, this.t - d, -Math.PI / 2, 0.4, 1.4);
+      return;
+    }
+    // 준비: 땅으로 꺼지듯 납작해지며 떨고, 바닥의 기가 몸으로 빨려 든다
+    const k = this.t / d;
+    c.boss.shape(1 + 0.12 * k, 1 - 0.16 * k, Math.sin(this.t * 70) * 0.03 * k);
+    this.moteT -= dt;
+    if (this.moteT <= 0) {
+      this.moteT = 0.05;
+      motes(c.host.scene, c.host.rng, c.boss.pos(), c.boss.fxColor, 4, c.v('radius'), 0.35);
+    }
+  }
 }
 
 /** 원혼 폭발: 연속 두 발이 빈 원형 탄막. 틈을 찾아 지나간다 */
 class SpiritBurst extends Timed {
+  /** 몸 앞에서 커지는 원혼 구슬 (그림이 없으면 없음) */
+  private orb: Phaser.GameObjects.Sprite | null = null;
+  private orbScale = 1;
+  private moteT = 0;
+
   constructor(c: PatternCtx) {
     super(c);
-    this.at(c.v('windupSec'), () => gapCircle(c, c.boss.pos(), c.v('bullets'), c.v('gap'), c.v('speed'), c.v('range'), c.v('damage')));
+    const art = c.art('orb');
+    if (art) {
+      const p = c.boss.pos();
+      this.orb = c.host.scene.add.sprite(p.x, p.y, art.spriteKey).setDepth(5).setBlendMode('ADD');
+      // 보스 몸집만큼 커져야 몸의 빛에 묻히지 않는다
+      const px = Math.max(art.size, c.boss.radius() * 1.8);
+      this.orb.setDisplaySize(px, px);
+      this.orbScale = this.orb.scaleX;
+      this.orb.setScale(this.orbScale * 0.2);
+    }
+    this.at(c.v('windupSec'), () => {
+      const p = c.boss.pos();
+      gapCircle(c, p, c.v('bullets'), c.v('gap'), c.v('speed'), c.v('range'), c.v('damage'));
+      // 구슬이 터지며 탄막이 퍼진다
+      const orb = this.orb;
+      this.orb = null;
+      if (orb) c.host.scene.tweens.add({ targets: orb, scale: this.orbScale * 2.4, alpha: 0, duration: 220, ease: 'Cubic.easeOut', onComplete: () => orb.destroy() });
+      shockRing(c.host.scene, p, c.boss.radius() * 2.4, c.boss.fxColor, 0.35, 2);
+      burst(c.host.scene, c.host.rng, p, c.boss.fxColor, 18, [90, 170], 0.35);
+      shake(c.host.scene, 'light');
+    });
+  }
+
+  protected override tick(dt: number): void {
+    const c = this.c;
+    c.boss.setVelocity(0, 0);
+    const w = c.v('windupSec');
+    if (this.t >= w) {
+      land(c.boss, this.t - w, 0.3, 0.8);
+      return;
+    }
+    // 준비: 숨을 들이켜듯 부풀고, 구슬이 커지며 기가 모인다
+    const k = this.t / w;
+    c.boss.shape(1 - 0.05 * k, 1 + 0.08 * k, 0);
+    const p = c.boss.pos();
+    this.orb?.setPosition(p.x, p.y).setScale(this.orbScale * (0.2 + 0.9 * k)).setRotation(this.t * 6);
+    this.moteT -= dt;
+    if (this.moteT <= 0) {
+      this.moteT = 0.05;
+      motes(c.host.scene, c.host.rng, p, c.boss.fxColor, 3, c.boss.radius() * 2.5, 0.25);
+    }
+  }
+
+  override destroy(): void {
+    super.destroy();
+    this.orb?.destroy();
   }
 }
 

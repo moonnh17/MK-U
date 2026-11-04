@@ -65,6 +65,9 @@ export class Enemy {
   private kbVel: Vec2 = { x: 0, y: 0 };
   /** 보스 거대화 등 추가 크기 배율 */
   private extraScale = 1;
+  /** 보스 패턴 몸짓: 가로·세로 배율과 기울기(rad). 패턴이 매 프레임 정하고, 끝나면 1·1·0 */
+  shape = { sx: 1, sy: 1, lean: 0 };
+  private shaped = false;
   /** 반역 개체가 되어 사라졌다(폭발 엘리트도 터지지 않음) */
   converted = false;
   /** 걸려 있는 출혈 */
@@ -223,12 +226,15 @@ export class Enemy {
     const data = getContext().data;
     this.animate(data);
     // 맞은 직후: 가로로 넓고 세로로 낮게 찌그러졌다 돌아온다
-    if (this.squashLeft > 0) {
+    const g = this.shape;
+    const shaping = g.sx !== 1 || g.sy !== 1 || g.lean !== 0;
+    if (this.squashLeft > 0 || shaping || this.shaped) {
       const hf = data.juice.hitFlash;
       this.squashLeft = Math.max(0, this.squashLeft - dt);
       const k = hf.squash * (this.squashLeft / hf.squashSec);
       const b = this.mods.scale * this.extraScale;
-      this.sprite.setScale(b * (1 + k), b * (1 - k));
+      this.sprite.setScale(b * (1 + k) * g.sx, b * (1 - k) * g.sy).setRotation(g.lean);
+      this.shaped = shaping;
     }
     this.updateLook(dt);
     if (this.kbLeft > 0) {

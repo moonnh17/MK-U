@@ -483,7 +483,7 @@
 | `fx_fusion_dash` | 융합악귀 (dashTrail) | 30×30 | center | #8c3ad9 | mku/fx_fusion_dash.png (1프레임) |
 | `fx_fusion_smoke` | 융합악귀 (zone) | 20×20 | center | #8c3ad9 | mku/fx_fusion_smoke.png (1프레임) |
 | `fx_fusion_summon` | 융합악귀 (summon) | 20×20 | center | #8c3ad9 | mku/fx_fusion_summon.png (1프레임) |
-| `fx_fusion_orb` | 융합악귀 (spiritBlast.cast) | 20×20 | center | #8c3ad9 | mku/fx_fusion_orb.png (1프레임) |
+| `fx_fusion_orb` | 융합악귀 (spiritBlast.orb) | 20×20 | center | #8c3ad9 | mku/fx_fusion_orb.png (1프레임) |
 | `fx_fusion_explode` | 융합악귀 (death) | 45×45 | center | #8c3ad9 | mku/fx_fusion_explode.png (1프레임) |
 | `fx_fusion_vortex` | 융합악귀 (layer) | 45×45 | center | #8c3ad9 | mku/fx_fusion_vortex.png (1프레임) |
 | `fx_electric_warning` | 전기환띠 (blastWarn) | 15×15 | center | #3a7aff | mku/fx_electric_warning.png (1프레임) |

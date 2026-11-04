@@ -154,7 +154,7 @@
           "color": "#8c3ad9",
           "size": 20
         },
-        "spiritBlast.cast": {
+        "spiritBlast.orb": {
           "spriteKey": "fx_fusion_orb",
           "color": "#8c3ad9",
           "size": 20
@@ -166,11 +166,11 @@
         }
       },
       "poses": {
-        "dashReady": "slash",
+        "dashReady": "idle",
         "dash": "dash",
-        "claw": "slash",
-        "eruption": "slash",
-        "spiritBlast": "slash"
+        "claw": { "first": "idle", "sec": 0.72, "then": "slash" },
+        "eruption": { "first": "idle", "sec": 0.7, "then": "slash" },
+        "spiritBlast": { "first": "idle", "sec": 0.4, "then": "slash" }
       },
       "layers": [
         {

@@ -85,6 +85,8 @@ export class BossController {
     this.brain = initialBoss(def.firstDelaySec);
     this.applyPhaseArt();
     const sprite = enemy.sprite;
+    const firstArt = Object.values(this.def.art ?? {})[0];
+    const fxColor = hexColor(firstArt?.color ?? enemy.def.color);
     this.body = {
       pos: () => ({ x: sprite.x, y: sprite.y }),
       radius: () => enemy.radius,
@@ -102,7 +104,24 @@ export class BossController {
       setAlpha: (a) => {
         sprite.setAlpha(a);
       },
+      shape: (sx, sy, lean) => {
+        enemy.shape = { sx, sy, lean };
+      },
+      ghost: (alpha, sec) => {
+        const g = sprite.scene.add
+          .image(sprite.x, sprite.y, sprite.texture.key, sprite.frame.name)
+          .setOrigin(sprite.originX, sprite.originY)
+          .setScale(sprite.scaleX, sprite.scaleY)
+          .setRotation(sprite.rotation)
+          .setFlipX(sprite.flipX)
+          .setDepth(sprite.depth - 0.1)
+          .setAlpha(alpha)
+          .setTintFill(fxColor)
+          .setBlendMode('ADD');
+        sprite.scene.tweens.add({ targets: g, alpha: 0, scale: g.scale * 1.06, duration: sec * 1000, onComplete: () => g.destroy() });
+      },
       color: hexColor(enemy.def.color),
+      fxColor,
     };
   }
 
@@ -134,6 +153,7 @@ export class BossController {
         this.run?.destroy();
         this.run = null;
         this.patternId = null;
+        e.shape = { sx: 1, sy: 1, lean: 0 };
       } else if (ev.type === 'unlock') {
         this.unlock(host, ev.stage);
       } else if (ev.type === 'start') {
