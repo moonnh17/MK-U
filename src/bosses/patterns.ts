@@ -586,12 +586,25 @@ interface RingOpts {
   gapDeg?: number;
   /** 번개 고리로 그린다 (전기환띠·적뢰) */
   bolt?: boolean;
+  /** 지진 고리로 그린다 (마기골렘). 튀는 조각은 debris·debris2 그림 */
+  quake?: boolean;
 }
 
 /** 움직이는 고리. gap을 주면 그 각도로 통과할 수 있다 */
 function ring(c: PatternCtx, o: RingOpts): void {
-  const { bolt, ...spec } = o;
-  c.host.addHazard(new Ring(c.host.scene, { telegraphSec: 0, holdSec: 0, tickSec: 0, color: c.boss.color, ...spec, bolt: bolt ? { rng: c.host.rng, color: c.boss.fxColor } : undefined }));
+  const { bolt, quake, ...spec } = o;
+  const bits = [c.art('debris'), c.art('debris2')].filter((x): x is SpriteRef => !!x);
+  c.host.addHazard(
+    new Ring(c.host.scene, {
+      telegraphSec: 0,
+      holdSec: 0,
+      tickSec: 0,
+      color: c.boss.color,
+      ...spec,
+      bolt: bolt ? { rng: c.host.rng, color: c.boss.fxColor } : undefined,
+      quake: quake ? { rng: c.host.rng, color: c.boss.fxColor, bits } : undefined,
+    }),
+  );
   const start = c.art('ringStart');
   if (start) playFx(c.host.scene, start, o.center.x, o.center.y, { w: Math.max(o.fromR, 30) * 2.4 });
 }
@@ -1223,7 +1236,7 @@ class EarthCrush extends Heavy {
       const g = gap;
       gap += rad(c.v('gapStepDeg')) * (c.host.rng.chance(0.5) ? 1 : -1);
       this.at(c.v('windupSec') + i * c.v('intervalSec'), () => {
-        ring(c, { center: c.boss.pos(), fromR: from, toR: to, moveSec: (to - from) / c.v('speed'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: g, gapDeg: c.v('gapDeg') });
+        ring(c, { center: c.boss.pos(), fromR: from, toR: to, moveSec: (to - from) / c.v('speed'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: g, gapDeg: c.v('gapDeg'), quake: true });
         this.impact(i === 0 ? 1.3 : 1);
       });
     }
@@ -1302,7 +1315,7 @@ class RuinLegion extends Heavy {
       const roster = c.host.chapterRoster();
       if (roster.length > 0) c.summon(Array.from({ length: c.v('count') }, () => c.host.rng.pick(roster)));
       const from = c.boss.radius();
-      ring(c, { center: c.boss.pos(), fromR: from, toR: c.v('maxRadius'), moveSec: (c.v('maxRadius') - from) / c.v('speed'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: c.host.rng.range(0, Math.PI * 2), gapDeg: c.v('gapDeg') });
+      ring(c, { center: c.boss.pos(), fromR: from, toR: c.v('maxRadius'), moveSec: (c.v('maxRadius') - from) / c.v('speed'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: c.host.rng.range(0, Math.PI * 2), gapDeg: c.v('gapDeg'), quake: true });
       this.impact(1.3);
     });
   }
@@ -1399,7 +1412,7 @@ class CollapseZone extends Heavy {
     }
     const from = c.boss.radius();
     this.at(c.v('waveAtSec'), () => {
-      ring(c, { center: c.boss.pos(), fromR: from, toR: c.v('maxRadius'), moveSec: (c.v('maxRadius') - from) / c.v('speed'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: angleTo(c.boss.pos(), c.host.playerPos()), gapDeg: c.v('gapDeg') });
+      ring(c, { center: c.boss.pos(), fromR: from, toR: c.v('maxRadius'), moveSec: (c.v('maxRadius') - from) / c.v('speed'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: angleTo(c.boss.pos(), c.host.playerPos()), gapDeg: c.v('gapDeg'), quake: true });
       this.impact(1.3);
     });
   }

@@ -174,6 +174,8 @@ export interface RingSpec {
   gapDeg?: number;
   /** 번개 고리: 지글거리는 번개 선 + 빛 번짐 + 튀는 불티 (판정은 그대로) */
   bolt?: { rng: Rng; color: number };
+  /** 지진 고리: 갈라진 땅 띠 + 빛나는 균열 + 앞머리에서 솟구치는 바위·먼지 (판정은 그대로) */
+  quake?: { rng: Rng; color: number; bits: SpriteRef[] };
 }
 
 /** 고리: 퍼지는 고리(충격파) · 줄어드는 고리(수축 전류) · 고정 고리(전격 감옥). 틈이 있으면 그 각도는 지나갈 수 있다 */
@@ -186,6 +188,8 @@ export class Ring implements Hazard {
   private jitter: number[] = [];
   private jitterLeft = 0;
   private sparkLeft = 0;
+  /** 지진 고리: 각도마다 정해진 균열 모양 (퍼져도 같은 금이 따라간다) */
+  private crack: number[] = [];
 
   constructor(
     scene: Phaser.Scene,
@@ -210,6 +214,7 @@ export class Ring implements Hazard {
     const live = this.t >= s.telegraphSec;
     const gapHalf = ((s.gapDeg ?? 0) * Math.PI) / 360;
     if (s.bolt) this.drawBolt(dt, host, r, live, gapHalf);
+    else if (s.quake) this.drawQuake(dt, host, r, live, gapHalf);
     else if (gapHalf > 0) {
       this.g.clear().lineStyle(live ? s.thickness : 1, s.color, live ? 0.75 : 0.5);
       this.g.beginPath();
@@ -223,6 +228,87 @@ export class Ring implements Hazard {
     if (s.tickSec > 0) this.ticker.tick(dt, inside, host, s.damage);
     else if (inside && !this.hitOnce && host.hurtPlayer(s.damage)) this.hitOnce = true;
     return true;
+  }
+
+  /** 지진 고리: 빛 번짐 → 검은 지각 띠 → 빛나는 균열(흰 심) → 틈 양끝 빛기둥, 켜진 동안 앞머리에서 바위·결정이 튀고 먼지가 인다 */
+  private drawQuake(dt: number, host: HazardHost, r: number, live: boolean, gapHalf: number): void {
+    const s = this.s;
+    const q = s.quake!;
+    const c = s.center;
+    const rr = Math.max(1, r);
+    const from = gapHalf > 0 ? s.gapAngle! + gapHalf : 0;
+    const span = Math.PI * 2 - gapHalf * 2;
+    const N = 96;
+    if (this.crack.length === 0) this.crack = Array.from({ length: N }, () => q.rng.range(-1, 1));
+    const n = Math.max(12, Math.round((rr * span) / 6));
+    const TAU = Math.PI * 2;
+    const line = (amp: number) =>
+      Array.from({ length: n + 1 }, (_, i) => {
+        const a = from + (span * i) / n;
+        const j = this.crack[Math.floor((((a % TAU) + TAU) % TAU) / TAU * N) % N]!;
+        const rad = rr + j * amp;
+        return { x: c.x + Math.cos(a) * rad, y: c.y + Math.sin(a) * rad };
+      });
+    const g = this.g.clear();
+    if (!live) {
+      g.lineStyle(1, q.color, 0.45).strokePoints(line(2));
+      return;
+    }
+    const th = s.thickness;
+    g.lineStyle(th + 16, q.color, 0.16);
+    g.beginPath();
+    g.arc(c.x, c.y, rr, from, from + span, false);
+    g.strokePath();
+    // 솟아오른 지각: 회갈색 바위 띠 + 바깥 모서리 밝은 선
+    g.lineStyle(th * 1.5, 0x4a3c46, 0.95).strokePoints(line(th * 0.3));
+    g.lineStyle(1, 0x9a8a96, 0.8).strokePoints(line(th * 0.3).map((p) => ({ x: c.x + (p.x - c.x) * (1 + (th * 0.7) / rr), y: c.y + (p.y - c.y) * (1 + (th * 0.7) / rr) })));
+    const crack = line(th * 0.6);
+    g.lineStyle(Math.max(3, th * 0.45), q.color, 0.95).strokePoints(crack);
+    g.lineStyle(1, 0xffe8ff, 0.95).strokePoints(crack);
+    if (gapHalf > 0) {
+      for (const a of [from, from + span]) {
+        const x = c.x + Math.cos(a) * rr;
+        const y = c.y + Math.sin(a) * rr;
+        g.fillStyle(q.color, 0.85).fillCircle(x, y, th * 0.45 + 2);
+        g.fillStyle(0xffffff, 0.9).fillCircle(x, y, 1.5);
+      }
+    }
+    this.sparkLeft -= dt;
+    if (this.sparkLeft > 0) return;
+    this.sparkLeft = 0.03;
+    const scene = host.scene;
+    for (let i = 0; i < 4; i++) {
+      const a = from + q.rng.range(0, span);
+      const x = c.x + Math.cos(a) * rr;
+      const y = c.y + Math.sin(a) * rr;
+      // 먼지
+      const dust = scene.add.circle(x, y, 3, 0xb0a090, 0.4).setDepth(2.5);
+      scene.tweens.add({ targets: dust, scale: 2.3, alpha: 0, y: y - 6, duration: 420, ease: 'Quad.easeOut', onComplete: () => dust.destroy() });
+      // 균열에서 솟는 마기 불티
+      const sp = scene.add.rectangle(x, y, 1, q.rng.range(4, 8), i % 2 ? 0xffffff : q.color).setDepth(6).setBlendMode('ADD');
+      scene.tweens.add({ targets: sp, y: y - q.rng.range(10, 22), alpha: 0, duration: 320, ease: 'Cubic.easeOut', onComplete: () => sp.destroy() });
+      if (i > 1 || q.bits.length === 0) continue;
+      // 바위·결정 조각이 앞머리에서 튀어 오른다
+      const ref = q.rng.pick(q.bits);
+      const rock = scene.add.sprite(x, y, ref.spriteKey).setDepth(5);
+      const size = q.rng.range(7, 12);
+      rock.setDisplaySize(size, (size * rock.height) / Math.max(1, rock.width));
+      const out = q.rng.range(4, 14);
+      const tx = x + Math.cos(a) * out;
+      const ty = y + Math.sin(a) * out;
+      const h = q.rng.range(14, 26);
+      const spin = q.rng.range(-8, 8);
+      scene.tweens.addCounter({
+        from: 0,
+        to: 1,
+        duration: 380,
+        onUpdate: (tw) => {
+          const k = tw.getValue() ?? 0;
+          rock.setPosition(x + (tx - x) * k, y + (ty - y) * k - h * 4 * k * (1 - k)).setRotation(k * spin).setAlpha(k > 0.7 ? (1 - k) / 0.3 : 1);
+        },
+        onComplete: () => rock.destroy(),
+      });
+    }
   }
 
   /** 번개 고리: 빛 번짐 → 지글거리는 번개 두 겹(색·흰 심) → 틈 양끝 빛 마디, 켜진 동안 고리에서 불티가 튄다 */
