@@ -4522,6 +4522,96 @@
         }
       }
     },
+    "fx_kaiser_cluster": {
+      "file": "mku/fx_kaiser_cluster.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_kaiser_cross_burst": {
+      "file": "mku/fx_kaiser_cross_burst.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_kaiser_barrage_net": {
+      "file": "mku/fx_kaiser_barrage_net.png",
+      "frameWidth": 280,
+      "frameHeight": 280,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_kaiser_unbound": {
+      "file": "mku/fx_kaiser_unbound.png",
+      "frameWidth": 280,
+      "frameHeight": 280,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_bit_rail_slug": {
+      "file": "mku/fx_bit_rail_slug.png",
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
+    "fx_bit_casing": {
+      "file": "mku/fx_bit_casing.png",
+      "frameWidth": 20,
+      "frameHeight": 20,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
     "fx_chief_ring": {
       "file": "mku/fx_chief_ring.png",
       "frameWidth": 140,

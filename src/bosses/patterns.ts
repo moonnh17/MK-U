@@ -1457,12 +1457,38 @@ class ShadowChase extends Timed {
 
 /** 조준 부채꼴 탄막 (궤도 절단·일식의 파편·붉은 탄막) */
 class AimFan extends Timed {
+  private angle = 0;
+  private moteT = 0;
+
   constructor(c: PatternCtx) {
     super(c);
+    this.angle = angleTo(c.boss.pos(), c.host.playerPos());
     this.at(c.v('windupSec'), () => {
       const p = c.boss.pos();
-      fan(c, p, angleTo(p, c.host.playerPos()), c.v('bullets'), c.v('spreadDeg'), c.v('speed'), c.v('range'), c.v('damage'), c.v('refractable') > 0);
+      const a = angleTo(p, c.host.playerPos());
+      this.angle = a;
+      fan(c, p, a, c.v('bullets'), c.v('spreadDeg'), c.v('speed'), c.v('range'), c.v('damage'), c.v('refractable') > 0);
+      // 부채꼴로 쏟아지는 순간: 그 방향 불티 + 충격파
+      burst(c.host.scene, c.host.rng, p, c.boss.fxColor, 14, [100, 190], 0.3, { angle: a, spread: rad(c.v('spreadDeg')) }, c.boss.radius() * 0.6);
+      shockRing(c.host.scene, p, c.boss.radius() * 1.8, c.boss.fxColor, 0.25, 2);
+      shake(c.host.scene, 'light');
     });
+  }
+
+  protected override tick(dt: number): void {
+    const c = this.c;
+    c.boss.setVelocity(0, 0);
+    const w = c.v('windupSec');
+    if (this.t >= w) {
+      lunge(c.boss, this.t - w, this.angle + Math.PI, 0.25, 0.8);
+      return;
+    }
+    coil(c.boss, this.t / w, this.angle, 0.7);
+    this.moteT -= dt;
+    if (this.moteT <= 0) {
+      this.moteT = 0.05;
+      motes(c.host.scene, c.host.rng, c.boss.pos(), c.boss.fxColor, 3, c.boss.radius() * 2, 0.22);
+    }
   }
 }
 
@@ -1495,8 +1521,22 @@ class GravityCollapse extends Timed {
 
 // ---------- 마기카이저 ----------
 
+/** 발사구 불꽃: 쏘는 방향으로 불티 + 작은 충격파. 탄피 그림이 있으면 옆으로 튕겨 나간다 */
+function muzzle(c: PatternCtx, at: Vec2, angle: number, size = 1): void {
+  burst(c.host.scene, c.host.rng, at, c.boss.fxColor, Math.round(6 * size), [80, 150], 0.22, { angle, spread: 0.9 });
+  shockRing(c.host.scene, at, 7 * size, c.boss.fxColor, 0.18, 1);
+  const casing = c.art('casing');
+  if (casing) {
+    const side = angle + (c.host.rng.chance(0.5) ? 1 : -1) * (Math.PI / 2 + c.host.rng.range(-0.4, 0.4));
+    const d = c.host.rng.range(14, 26);
+    lob(c.host.scene, casing, at, { x: at.x + Math.cos(side) * d, y: at.y + Math.sin(side) * d + 6 }, 0.35, 12, 6, undefined, c.host.rng.range(-12, 12));
+  }
+}
+
 /** 어깨 유도 미사일: 양쪽 어깨에서 번갈아 */
 class HomingMissiles extends Timed {
+  private kickAt = -1;
+
   constructor(c: PatternCtx) {
     super(c);
     const n = c.v('count');
@@ -1506,29 +1546,74 @@ class HomingMissiles extends Timed {
         const side = i % 2 === 0 ? 1 : -1;
         const a = angleTo(p, c.host.playerPos());
         const from = { x: p.x + Math.cos(a + Math.PI / 2) * side * c.boss.radius(), y: p.y + Math.sin(a + Math.PI / 2) * side * c.boss.radius() };
-        c.host.fireEnemyMissile(from, a + side * rad(c.v('spreadDeg')), c.v('speed'), c.v('range'), c.v('damage'), c.v('turnRate'), c.art('missile'));
+        const fa = a + side * rad(c.v('spreadDeg'));
+        c.host.fireEnemyMissile(from, fa, c.v('speed'), c.v('range'), c.v('damage'), c.v('turnRate'), c.art('missile'));
+        muzzle(c, from, fa);
+        this.kickAt = this.t;
       });
+    }
+  }
+
+  protected override tick(): void {
+    const c = this.c;
+    c.boss.setVelocity(0, 0);
+    // 쏠 때마다 어깨가 들썩인다
+    const r = this.kickAt >= 0 ? 1 - easeOut((this.t - this.kickAt) / 0.12) : 0;
+    c.boss.shape(1 + 0.04 * r, 1 - 0.04 * r, 0);
+  }
+}
+
+/** 직선 레이저: 예고 뒤 고정된 방향으로 발사 (계속 쫓아오는 광선이 아니다). 포구로 기가 모였다가 쏘는 반동으로 젖힌다 */
+class LineLaser extends Timed {
+  private readonly angle: number;
+  private moteT = 0;
+
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    const a = angleTo(p, c.host.playerPos());
+    this.angle = a;
+    beam(c, { center: p, angle: a, telegraphSec: c.v('telegraphSec'), liveSec: c.v('liveSec'), width: c.v('width'), damage: c.v('damage') });
+    this.at(c.v('telegraphSec'), () => {
+      const m = this.muzzlePos();
+      shockRing(c.host.scene, m, c.boss.radius() * 1.6, c.boss.fxColor, 0.3, 3);
+      burst(c.host.scene, c.host.rng, m, c.boss.fxColor, 16, [120, 220], 0.3, { angle: a, spread: 0.6 });
+      shake(c.host.scene, 'medium');
+    });
+  }
+
+  private muzzlePos(): Vec2 {
+    const p = this.c.boss.pos();
+    const r = this.c.boss.radius() * 0.7;
+    return { x: p.x + Math.cos(this.angle) * r, y: p.y + Math.sin(this.angle) * r };
+  }
+
+  protected override tick(dt: number): void {
+    const c = this.c;
+    c.boss.setVelocity(0, 0);
+    const w = c.v('telegraphSec');
+    if (this.t >= w) {
+      lunge(c.boss, this.t - w, this.angle + Math.PI, 0.35, 1.2);
+      return;
+    }
+    coil(c.boss, this.t / w, this.angle, 0.6);
+    this.moteT -= dt;
+    if (this.moteT <= 0) {
+      this.moteT = 0.05;
+      motes(c.host.scene, c.host.rng, this.muzzlePos(), c.boss.fxColor, 3, c.boss.radius() * 1.6, 0.25);
     }
   }
 }
 
-/** 직선 레이저: 예고 뒤 고정된 방향으로 발사 (계속 쫓아오는 광선이 아니다) */
-class LineLaser extends Timed {
+/** 지면 충격파: 틈은 플레이어 반대쪽. 보스를 돌아가야 지난다. 일어섰다 내려찍는다 */
+class GroundShock extends Heavy {
   constructor(c: PatternCtx) {
-    super(c);
-    const p = c.boss.pos();
-    beam(c, { center: p, angle: angleTo(p, c.host.playerPos()), telegraphSec: c.v('telegraphSec'), liveSec: c.v('liveSec'), width: c.v('width'), damage: c.v('damage') });
-  }
-}
-
-/** 지면 충격파: 틈은 플레이어 반대쪽. 보스를 돌아가야 지난다 */
-class GroundShock extends Timed {
-  constructor(c: PatternCtx) {
-    super(c);
+    super(c, c.v('windupSec'));
     this.at(c.v('windupSec'), () => {
       const p = c.boss.pos();
       const from = c.boss.radius();
-      ring(c, { center: p, fromR: from, toR: c.v('maxRadius'), moveSec: (c.v('maxRadius') - from) / c.v('speed'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: angleTo(p, c.host.playerPos()) + Math.PI, gapDeg: c.v('gapDeg') });
+      ring(c, { center: p, fromR: from, toR: c.v('maxRadius'), moveSec: (c.v('maxRadius') - from) / c.v('speed'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: angleTo(p, c.host.playerPos()) + Math.PI, gapDeg: c.v('gapDeg'), quake: true });
+      this.impact(1.3);
     });
   }
 }
@@ -1538,7 +1623,16 @@ class Geyser extends Timed {
   constructor(c: PatternCtx) {
     super(c);
     for (let i = 0; i < c.v('count'); i++) {
-      this.at(i * c.v('stepSec'), () => blast(c, predict(c, c.v('delaySec'), i === 0 ? 0 : c.v('spread')), c.v('radius'), c.v('delaySec'), c.v('damage')));
+      this.at(i * c.v('stepSec'), () => {
+        const at = predict(c, c.v('delaySec'), i === 0 ? 0 : c.v('spread'));
+        blast(c, at, c.v('radius'), c.v('delaySec'), c.v('damage'));
+        // 터질 자리 밑에서 열기가 끓어오른다
+        this.at(this.t + c.v('delaySec') * 0.5, () => motes(c.host.scene, c.host.rng, at, c.boss.fxColor, 6, c.v('radius'), 0.3));
+        this.at(this.t + c.v('delaySec'), () => {
+          const bits = [c.art('debris'), c.art('debris2')].filter((x): x is SpriteRef => !!x);
+          debris(c.host.scene, c.host.rng, at, bits, 5, [15, 40]);
+        });
+      });
     }
   }
 }
@@ -1567,6 +1661,7 @@ class KaiserDash implements PatternRun {
     this.shot = c.v('missileEverySec');
     const a = Math.atan2(this.dash.dir.y, this.dash.dir.x) + (c.host.rng.chance(0.5) ? 1 : -1) * Math.PI / 2;
     c.host.fireEnemyMissile(c.boss.pos(), a, c.v('missileSpeed'), c.v('missileRange'), c.v('missileDamage'), c.v('turnRate'), c.art('missile'));
+    muzzle(c, c.boss.pos(), a, 0.7);
   }
 
   destroy(): void {
@@ -1574,8 +1669,8 @@ class KaiserDash implements PatternRun {
   }
 }
 
-/** 불안정 레이저: 5방향 전개, 잠시 뒤 50% 확률로 회전 (방향도 무작위) */
-class UnstableLaser extends Timed {
+/** 불안정 레이저: 5방향 전개, 잠시 뒤 50% 확률로 회전 (방향도 무작위). 몸이 떨리며 붉은 전기가 튄다 */
+class UnstableLaser extends Channeled {
   constructor(c: PatternCtx) {
     super(c);
     const spins = c.host.rng.chance(c.v('spinChance'));
@@ -1590,25 +1685,60 @@ class UnstableLaser extends Timed {
       spin: spins ? c.v('spinSpeed') * (c.host.rng.chance(0.5) ? 1 : -1) : 0,
       spinDelaySec: c.v('spinDelaySec'),
     });
+    this.at(c.v('telegraphSec'), () => {
+      shockRing(c.host.scene, c.boss.pos(), c.boss.radius() * 2.4, c.boss.fxColor, 0.35, 3);
+      burst(c.host.scene, c.host.rng, c.boss.pos(), c.boss.fxColor, 20, [100, 200], 0.35, undefined, c.boss.radius() * 0.5);
+      shake(c.host.scene, 'medium');
+      this.pulse();
+    });
   }
 }
 
 /** 종말 명령: 중앙으로 가 끌어당기며 직선 → 교차 → 충격파 → 초광역 포격. 끝나면 과열로 핵 노출 */
 class DoomCommand extends Timed {
   private readonly center: Vec2;
+  private moteT = 0;
   constructor(c: PatternCtx) {
     super(c);
     const a = c.host.arena();
     this.center = { x: a.x + a.w / 2, y: a.y + a.h / 2 };
     const o = () => ({ telegraphSec: c.v('beamTelegraphSec'), liveSec: c.v('beamLiveSec'), width: c.v('beamWidth'), damage: c.v('beamDamage') });
     this.at(c.v('lineAtSec'), () => beam(c, { ...o(), center: this.center, angle: angleTo(this.center, c.host.playerPos()) }));
+    this.at(c.v('lineAtSec') + c.v('beamTelegraphSec'), () => this.flare(1));
     this.at(c.v('crossAtSec'), () => beam(c, { ...o(), center: this.center, count: 4, angle: angleTo(this.center, c.host.playerPos()) + Math.PI / 4 }));
-    this.at(c.v('waveAtSec'), () => ring(c, { center: this.center, fromR: c.boss.radius(), toR: c.v('maxRadius'), moveSec: (c.v('maxRadius') - c.boss.radius()) / c.v('speed'), thickness: c.v('thickness'), damage: c.v('beamDamage'), gapAngle: angleTo(this.center, c.host.playerPos()) + Math.PI, gapDeg: c.v('gapDeg') }));
+    // 교차 광선이 터지는 순간 몸에서 교차 방출
+    this.at(c.v('crossAtSec') + c.v('beamTelegraphSec'), () => {
+      const cross = c.art('cross');
+      if (cross) playFx(c.host.scene, cross, this.center.x, this.center.y, { w: c.boss.radius() * 4, depth: 7 });
+      this.flare(1.3);
+    });
+    this.at(c.v('waveAtSec'), () => {
+      ring(c, { center: this.center, fromR: c.boss.radius(), toR: c.v('maxRadius'), moveSec: (c.v('maxRadius') - c.boss.radius()) / c.v('speed'), thickness: c.v('thickness'), damage: c.v('beamDamage'), gapAngle: angleTo(this.center, c.host.playerPos()) + Math.PI, gapDeg: c.v('gapDeg'), quake: true });
+      this.flare(1.3);
+    });
     this.at(c.v('blastAtSec'), () => safeBlast(c, c.v('safeZones'), c.v('safeRadius'), c.v('delaySec'), c.v('damage')));
+    // 초광역 포격: 방 곳곳에 포격망이 연달아 터진다
+    const net = c.art('net');
+    if (net) {
+      for (let i = 0; i < 6; i++) {
+        this.at(c.v('blastAtSec') + c.v('delaySec') + i * 0.08, () => {
+          const at = { x: c.host.rng.range(a.x + 40, a.x + a.w - 40), y: c.host.rng.range(a.y + 40, a.y + a.h - 40) };
+          playFx(c.host.scene, net, at.x, at.y, { w: 150, depth: 6 });
+        });
+      }
+    }
     this.at(c.v('blastAtSec') + c.v('delaySec'), () => c.expose(c.v('exposeSec'), c.v('exposeMul')));
   }
 
-  protected override tick(_dt: number): void {
+  /** 명령을 내리는 순간: 몸에서 충격파·불티 */
+  private flare(k: number): void {
+    const c = this.c;
+    shockRing(c.host.scene, c.boss.pos(), c.boss.radius() * 2 * k, c.boss.fxColor, 0.3, 3);
+    burst(c.host.scene, c.host.rng, c.boss.pos(), c.boss.fxColor, Math.round(14 * k), [100, 190], 0.3, undefined, c.boss.radius() * 0.5);
+    shake(c.host.scene, k > 1 ? 'medium' : 'light');
+  }
+
+  protected override tick(dt: number): void {
     const c = this.c;
     const b = c.boss.pos();
     const d = Math.hypot(this.center.x - b.x, this.center.y - b.y);
@@ -1618,6 +1748,12 @@ class DoomCommand extends Timed {
     const p = c.host.playerPos();
     const dp = Math.hypot(this.center.x - p.x, this.center.y - p.y);
     if (dp > 1) c.host.pushPlayer({ x: ((this.center.x - p.x) / dp) * c.v('pullSpeed'), y: ((this.center.y - p.y) / dp) * c.v('pullSpeed') });
+    // 끌어당기는 동안 방 안의 기가 보스에게 빨려 든다
+    this.moteT -= dt;
+    if (this.moteT <= 0) {
+      this.moteT = 0.05;
+      motes(c.host.scene, c.host.rng, b, c.boss.fxColor, 4, 140, 0.45);
+    }
   }
 }
 

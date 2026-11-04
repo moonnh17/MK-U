@@ -1156,6 +1156,12 @@ packFx('fx_golem_strata', '04_마기골렘/02_광역공격_이펙트/01_과기�
 packFx('fx_golem_eight_lock', '04_마기골렘/02_광역공격_이펙트/02_고대 병기 팔방 봉쇄', 140, 10);
 packFx('fx_bit_gear', '90_공용_소형스프라이트/04_잔재_보조비트/01_고대병기 톱니편', 12, 6, true);
 packFx('fx_bit_crystal', '90_공용_소형스프라이트/04_잔재_보조비트/03_마기 결정 잔편', 12, 7, true);
+packFx('fx_kaiser_cluster', '05_마기카이저/01_추가공격_이펙트/01_어깨 미사일 집속 폭발', 70, 18);
+packFx('fx_kaiser_cross_burst', '05_마기카이저/01_추가공격_이펙트/02_종말 명령 교차 방출', 90, 14);
+packFx('fx_kaiser_barrage_net', '05_마기카이저/02_광역공격_이펙트/01_종말 명령 포격망', 140, 14);
+packFx('fx_kaiser_unbound', '05_마기카이저/02_광역공격_이펙트/02_구속해제 황제 전선', 140, 12);
+packFx('fx_bit_rail_slug', '90_공용_소형스프라이트/03_소형_탄체/01_레일건 분리 탄자', 12, 12, true);
+packFx('fx_bit_casing', '90_공용_소형스프라이트/04_잔재_보조비트/02_헥타르 방출 탄피', 10, 10, true);
 bFx('06', 'hectar-ring', 'fx_chief_ring', 70);
 bFx('06', 'hectar-burst', 'fx_chief_burst', 60);
 bFx('06', 'hectar-drone', 'fx_chief_drone', 14);

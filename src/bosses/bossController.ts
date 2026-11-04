@@ -462,6 +462,9 @@ export class BossController {
     this.aura?.destroy();
     this.aura = host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius + 4).setStrokeStyle(stage, hexColor(this.def.enraged.auraColor), 0.8).setDepth(2);
     shake(host.scene, 'heavy');
+    // 구속 해제 그림 (있으면): 몸을 가로지르는 붉은 전선
+    const unbound = this.def.art?.unlock;
+    if (unbound) playFx(host.scene, unbound, e.sprite.x, e.sprite.y, { w: e.radius * 5, depth: 7 });
     host.bossPhaseFx(host.t(`boss.unlock.${this.def.id}.${stage}`), this.def.enraged.auraColor, { x: e.sprite.x, y: e.sprite.y });
   }
 

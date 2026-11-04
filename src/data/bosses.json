@@ -1518,6 +1518,14 @@
         "minGapSec": 8
       },
       "art": {
+        "debris": { "spriteKey": "fx_bit_gear", "color": "#ff2a2a", "size": 6 },
+        "debris2": { "spriteKey": "fx_bit_casing", "color": "#ff2a2a", "size": 6 },
+        "casing": { "spriteKey": "fx_bit_casing", "color": "#ff2a2a", "size": 6 },
+        "redSunspots.shell": { "spriteKey": "fx_bit_rail_slug", "color": "#ff2a2a", "size": 6 },
+        "redSunspots.blastHit": { "spriteKey": "fx_kaiser_cluster", "color": "#ff2a2a", "size": 35 },
+        "doomCommand.cross": { "spriteKey": "fx_kaiser_cross_burst", "color": "#ff2a2a", "size": 45 },
+        "doomCommand.net": { "spriteKey": "fx_kaiser_barrage_net", "color": "#ff2a2a", "size": 70 },
+        "unlock": { "spriteKey": "fx_kaiser_unbound", "color": "#ff2a2a", "size": 70 },
         "sectorHit": {
           "spriteKey": "fx_kaiser_punch",
           "color": "#ff2a2a",

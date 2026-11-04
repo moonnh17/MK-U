@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 492개 · 그림 있음 479개
+전체 498개 · 그림 있음 485개
 
 ## player (3)
 
@@ -471,7 +471,7 @@
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
-## fx (91)
+## fx (97)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -509,7 +509,7 @@
 | `fx_chief_burst` | 헥타르 수석 연구원 (blastHit) 외 1곳 | 30×30 | center | #3a7aff | mku/fx_chief_burst.png (1프레임) |
 | `fx_chief_ring` | 헥타르 수석 연구원 (blastWarn) 외 2곳 | 35×35 | center | #3a7aff | mku/fx_chief_ring.png (1프레임) |
 | `fx_chief_drone` | 헥타르 수석 연구원 (drone) | 7×7 | center | #3a7aff | mku/fx_chief_drone.png (1프레임) |
-| `fx_bit_gear` | 마기골렘 (debris) | 6×6 | center | #a03ae0 | mku/fx_bit_gear.png (4프레임) |
+| `fx_bit_gear` | 마기골렘 (debris) 외 1곳 | 6×6 | center | #a03ae0 | mku/fx_bit_gear.png (4프레임) |
 | `fx_bit_crystal` | 마기골렘 (debris2) 외 1곳 | 6×6 | center | #a03ae0 | mku/fx_bit_crystal.png (4프레임) |
 | `fx_golem_core_shock` | 마기골렘 (breakerDash.coreShock) | 50×50 | center | #a03ae0 | mku/fx_golem_core_shock.png (4프레임) |
 | `fx_golem_strata` | 마기골렘 (crustCrack.strata) | 60×60 | center | #a03ae0 | mku/fx_golem_strata.png (4프레임) |
@@ -547,6 +547,12 @@
 | `fx_eclipse_residue` | 식광 (zone) | 30×30 | center | #ff3a4a | mku/fx_eclipse_residue.png (1프레임) |
 | `fx_eclipse_death` | 식광 (death) | 45×45 | center | #ff3a4a | mku/fx_eclipse_death.png (4프레임) |
 | `fx_eclipse_flare` | 식광 (layer) | 55×55 | center | #ff3a4a | mku/fx_eclipse_flare.png (2프레임) |
+| `fx_bit_casing` | 마기카이저 (debris2) 외 1곳 | 6×6 | center | #ff2a2a | mku/fx_bit_casing.png (4프레임) |
+| `fx_bit_rail_slug` | 마기카이저 (redSunspots.shell) | 6×6 | center | #ff2a2a | mku/fx_bit_rail_slug.png (4프레임) |
+| `fx_kaiser_cluster` | 마기카이저 (redSunspots.blastHit) | 35×35 | center | #ff2a2a | mku/fx_kaiser_cluster.png (4프레임) |
+| `fx_kaiser_cross_burst` | 마기카이저 (doomCommand.cross) | 45×45 | center | #ff2a2a | mku/fx_kaiser_cross_burst.png (4프레임) |
+| `fx_kaiser_barrage_net` | 마기카이저 (doomCommand.net) | 70×70 | center | #ff2a2a | mku/fx_kaiser_barrage_net.png (4프레임) |
+| `fx_kaiser_unbound` | 마기카이저 (unlock) | 70×70 | center | #ff2a2a | mku/fx_kaiser_unbound.png (4프레임) |
 | `fx_kaiser_punch` | 마기카이저 (sectorHit) | 50×50 | center | #ff2a2a | mku/fx_kaiser_punch.png (4프레임) |
 | `fx_kaiser_impact` | 마기카이저 (blastHit) | 35×35 | center | #ff2a2a | mku/fx_kaiser_impact.png (4프레임) |
 | `fx_kaiser_lock` | 마기카이저 (blastWarn) | 20×20 | center | #ff2a2a | mku/fx_kaiser_lock.png (4프레임) |
