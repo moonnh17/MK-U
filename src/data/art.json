@@ -274,6 +274,224 @@
         }
       }
     },
+    "enemy_pulse_sac": {
+      "file": "mku/enemy_pulse_sac.png",
+      "frameWidth": 178,
+      "frameHeight": 134,
+      "frames": 16,
+      "density": 4,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 8
+        },
+        "move": {
+          "from": 4,
+          "to": 7,
+          "fps": 8
+        },
+        "aim": {
+          "from": 8,
+          "to": 11,
+          "fps": 6,
+          "loop": false
+        },
+        "death": {
+          "from": 12,
+          "to": 15,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "enemy_vessel_tree": {
+      "file": "mku/enemy_vessel_tree.png",
+      "frameWidth": 174,
+      "frameHeight": 210,
+      "frames": 16,
+      "density": 4,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 8
+        },
+        "move": {
+          "from": 4,
+          "to": 7,
+          "fps": 8
+        },
+        "aim": {
+          "from": 8,
+          "to": 11,
+          "fps": 6,
+          "loop": false
+        },
+        "death": {
+          "from": 12,
+          "to": 15,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "enemy_gaze_bell": {
+      "file": "mku/enemy_gaze_bell.png",
+      "frameWidth": 150,
+      "frameHeight": 178,
+      "frames": 16,
+      "density": 4,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 8
+        },
+        "move": {
+          "from": 4,
+          "to": 7,
+          "fps": 8
+        },
+        "aim": {
+          "from": 8,
+          "to": 11,
+          "fps": 6,
+          "loop": false
+        },
+        "death": {
+          "from": 12,
+          "to": 15,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "enemy_cluster_alveoli": {
+      "file": "mku/enemy_cluster_alveoli.png",
+      "frameWidth": 142,
+      "frameHeight": 154,
+      "frames": 16,
+      "density": 4,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 8
+        },
+        "move": {
+          "from": 4,
+          "to": 7,
+          "fps": 8
+        },
+        "aim": {
+          "from": 8,
+          "to": 11,
+          "fps": 6,
+          "loop": false
+        },
+        "death": {
+          "from": 12,
+          "to": 15,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_pulse_spike_warn": {
+      "file": "mku/fx_pulse_spike_warn.png",
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "frames": 1,
+      "density": 2
+    },
+    "fx_pulse_spike_hit": {
+      "file": "mku/fx_pulse_spike_hit.png",
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "frames": 3,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 2,
+          "fps": 14
+        }
+      }
+    },
+    "fx_vessel_root_warn": {
+      "file": "mku/fx_vessel_root_warn.png",
+      "frameWidth": 160,
+      "frameHeight": 70,
+      "frames": 2,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 1,
+          "fps": 4,
+          "loop": true
+        }
+      }
+    },
+    "fx_vessel_root_hit": {
+      "file": "mku/fx_vessel_root_hit.png",
+      "frameWidth": 160,
+      "frameHeight": 70,
+      "frames": 2,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 1,
+          "fps": 14
+        }
+      }
+    },
+    "fx_gaze_spike_warn": {
+      "file": "mku/fx_gaze_spike_warn.png",
+      "frameWidth": 88,
+      "frameHeight": 88,
+      "frames": 2,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 1,
+          "fps": 4,
+          "loop": true
+        }
+      }
+    },
+    "fx_gaze_spike_hit": {
+      "file": "mku/fx_gaze_spike_hit.png",
+      "frameWidth": 88,
+      "frameHeight": 88,
+      "frames": 2,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 1,
+          "fps": 14
+        }
+      }
+    },
+    "fx_spore_shot": {
+      "file": "mku/fx_spore_shot.png",
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
     "enemy_magi_kaiser": {
       "file": "mku/enemy_magi_kaiser.png",
       "frameWidth": 200,

@@ -102,3 +102,13 @@ export function keepDistanceStep(dist: number, keep: number, band: number): -1 |
   if (dist < keep) return -1;
   return 0;
 }
+
+/** 혈관수 뿌리 i번째 줄기의 각도: 플레이어 방향 → +turn → −turn → +turn … */
+export function rootAngle(base: number, i: number, turnRad: number): number {
+  return i === 0 ? base : base + (i % 2 ? turnRad : -turnRad);
+}
+
+/** 군집 폐포 b번째 탄막의 중심 각도: 한 번마다 시계 방향으로 turn씩 */
+export function burstAngle(base: number, b: number, turnRad: number): number {
+  return base + b * turnRad;
+}

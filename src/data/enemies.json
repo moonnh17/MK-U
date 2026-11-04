@@ -14,7 +14,7 @@
   },
   "enemies": [
     {
-      "id": "tomakki", "codexNo": 1, "mun": 6,
+      "id": "tomakki", "codexNo": 1, "mun": 6, "munClass": true,
       "flavor": "codex.flavor.tomakki",
       "nameKey": "enemy.tomakki",
       "chapter": 1,
@@ -52,7 +52,7 @@
       "size": 11
     },
     {
-      "id": "akgwi", "codexNo": 3, "mun": 5,
+      "id": "akgwi", "codexNo": 3, "mun": 5, "munClass": true,
       "flavor": "codex.flavor.akgwi",
       "nameKey": "enemy.akgwi",
       "chapter": 1,
@@ -73,7 +73,7 @@
       "size": 15
     },
     {
-      "id": "ghostShooter", "codexNo": 4, "mun": null, "flavor": "codex.flavor.ghostShooter", "nameKey": "enemy.ghostShooter", "chapter": 1, "rank": "normal", "ai": "chase", "mentalRatio": 1,
+      "id": "ghostShooter", "codexNo": 4, "mun": "unknown", "flavor": "codex.flavor.ghostShooter", "nameKey": "enemy.ghostShooter", "chapter": 1, "rank": "normal", "ai": "chase", "mentalRatio": 1,
       "maxHp": 16, "moveSpeed": 38, "contactDamage": 4, "contactIntervalSec": 1.0,
       "energyOrbs": [1, 2], "coins": [1, 2], "keepDistance": 100,
       "attacks": [
@@ -101,7 +101,7 @@
       "size": 39
     },
     {
-      "id": "electricRing", "codexNo": 6, "mun": 3,
+      "id": "electricRing", "codexNo": 6, "mun": 3, "munClass": true,
       "flavor": "codex.flavor.electricRing",
       "nameKey": "enemy.electricRing",
       "chapter": 1,
@@ -167,7 +167,7 @@
       "spriteKey": "enemy_hectar_trooper", "color": "#3a7bff", "size": 12
     },
     {
-      "id": "magiBeetle", "codexNo": 8, "mun": 5, "flavor": "codex.flavor.magiBeetle", "nameKey": "enemy.magiBeetle", "chapter": 2, "rank": "normal", "ai": "chase",
+      "id": "magiBeetle", "codexNo": 8, "mun": 5, "munClass": true, "flavor": "codex.flavor.magiBeetle", "nameKey": "enemy.magiBeetle", "chapter": 2, "rank": "normal", "ai": "chase",
       "maxHp": 60, "moveSpeed": 35, "contactDamage": 8, "contactIntervalSec": 1.0,
       "energyOrbs": [2, 3], "coins": [1, 3],
       "attacks": [
@@ -194,13 +194,13 @@
       "spriteKey": "enemy_hectar_chief", "color": "#3a9aff", "size": 36
     },
     {
-      "id": "magiGolem", "codexNo": 7, "mun": 2, "flavor": "codex.flavor.magiGolem", "nameKey": "enemy.magiGolem", "chapter": 2, "rank": "boss", "ai": "boss",
+      "id": "magiGolem", "codexNo": 7, "mun": 2, "munClass": true, "flavor": "codex.flavor.magiGolem", "nameKey": "enemy.magiGolem", "chapter": 2, "rank": "boss", "ai": "boss",
       "maxHp": 9000, "moveSpeed": 26, "contactDamage": 14, "contactIntervalSec": 1.0,
       "energyOrbs": [12, 14], "coins": [14, 18],
       "spriteKey": "enemy_magi_golem", "color": "#8a6a4a", "size": 48
     },
     {
-      "id": "ancientOne", "codexNo": 11, "mun": null, "flavor": "codex.flavor.ancientOne", "nameKey": "enemy.ancientOne", "chapter": 3, "rank": "normal", "ai": "chase", "mentalRatio": 1,
+      "id": "ancientOne", "codexNo": 11, "mun": "unknown", "flavor": "codex.flavor.ancientOne", "nameKey": "enemy.ancientOne", "chapter": 3, "rank": "normal", "ai": "chase", "mentalRatio": 1,
       "maxHp": 50, "moveSpeed": 30, "contactDamage": 7, "contactIntervalSec": 1.0,
       "energyOrbs": [1, 3], "coins": [1, 3], "keepDistance": 120,
       "attacks": [
@@ -210,7 +210,7 @@
       "spriteKey": "enemy_ancient_one", "color": "#c8b8a0", "size": 18
     },
     {
-      "id": "hatredShard", "codexNo": 10, "mun": null, "flavor": "codex.flavor.hatredShard", "nameKey": "enemy.hatredShard", "chapter": 3, "rank": "normal", "ai": "chase", "mentalRatio": 1,
+      "id": "hatredShard", "codexNo": 10, "mun": "unknown", "flavor": "codex.flavor.hatredShard", "nameKey": "enemy.hatredShard", "chapter": 3, "rank": "normal", "ai": "chase", "mentalRatio": 1,
       "maxHp": 28, "moveSpeed": 70, "contactDamage": 7, "contactIntervalSec": 0.8,
       "energyOrbs": [1, 2], "coins": [1, 2],
       "attacks": [
@@ -261,6 +261,50 @@
       "maxHp": 31200, "moveSpeed": 40, "contactDamage": 16, "contactIntervalSec": 1.0,
       "energyOrbs": [14, 16], "coins": [16, 20],
       "spriteKey": "enemy_magi_kaiser", "color": "#d02828", "size": 51
+    },
+    {
+      "id": "vesselTree", "codexNo": 21, "mun": 5, "munClass": true, "flavor": "codex.flavor.vesselTree", "nameKey": "enemy.vesselTree", "chapter": 1, "rank": "normal", "ai": "chase", "rooted": true,
+      "maxHp": 40, "moveSpeed": 0, "contactDamage": 6, "contactIntervalSec": 1.0,
+      "energyOrbs": [2, 3], "coins": [1, 3],
+      "attacks": [
+        { "id": "roots", "kind": "roots", "triggerRange": 170, "windupSec": 0.8, "actSec": 0.25, "recoverSec": 1.2, "cooldownSec": 5.2, "firstDelayJitterSec": 1.5,
+          "damage": 8, "strikes": 3, "strikeGapSec": 0.45, "warnSec": 0.75, "range": 150, "width": 10, "turnDeg": 35,
+          "warnArt": { "spriteKey": "fx_vessel_root_warn", "color": "#b05aff", "size": 40 }, "hitArt": { "spriteKey": "fx_vessel_root_hit", "color": "#b05aff", "size": 40 } }
+      ],
+      "spriteKey": "enemy_vessel_tree", "color": "#8a3ad0", "size": 16
+    },
+    {
+      "id": "pulseSac", "codexNo": 22, "mun": 5, "munClass": true, "flavor": "codex.flavor.pulseSac", "nameKey": "enemy.pulseSac", "chapter": 2, "rank": "normal", "ai": "chase", "rooted": true,
+      "maxHp": 70, "moveSpeed": 0, "contactDamage": 6, "contactIntervalSec": 1.0,
+      "energyOrbs": [2, 3], "coins": [1, 3],
+      "attacks": [
+        { "id": "spikes", "kind": "spikes", "triggerRange": 180, "windupSec": 1.0, "actSec": 0.1, "recoverSec": 0.8, "cooldownSec": 4.5, "firstDelayJitterSec": 1.5,
+          "damage": 9, "strikes": 3, "strikeGapSec": 0.25, "warnSec": 0.65, "radius": 16, "scatter": 36,
+          "warnArt": { "spriteKey": "fx_pulse_spike_warn", "color": "#b05aff", "size": 32 }, "hitArt": { "spriteKey": "fx_pulse_spike_hit", "color": "#b05aff", "size": 32 } }
+      ],
+      "spriteKey": "enemy_pulse_sac", "color": "#8a3ad0", "size": 18
+    },
+    {
+      "id": "gazeBell", "codexNo": 23, "mun": 5, "munClass": true, "flavor": "codex.flavor.gazeBell", "nameKey": "enemy.gazeBell", "chapter": 2, "rank": "normal", "ai": "chase", "rooted": true,
+      "maxHp": 50, "moveSpeed": 0, "contactDamage": 5, "contactIntervalSec": 1.0,
+      "energyOrbs": [2, 3], "coins": [1, 3],
+      "attacks": [
+        { "id": "gaze", "kind": "spikes", "triggerRange": 220, "windupSec": 1.2, "actSec": 0.1, "recoverSec": 0.8, "cooldownSec": 3.8, "firstDelayJitterSec": 1.5,
+          "damage": 12, "strikes": 1, "strikeGapSec": 0, "warnSec": 0.7, "radius": 18,
+          "warnArt": { "spriteKey": "fx_gaze_spike_warn", "color": "#b05aff", "size": 36 }, "hitArt": { "spriteKey": "fx_gaze_spike_hit", "color": "#b05aff", "size": 36 } }
+      ],
+      "spriteKey": "enemy_gaze_bell", "color": "#8a3ad0", "size": 13
+    },
+    {
+      "id": "clusterAlveoli", "codexNo": 24, "mun": 5, "munClass": true, "flavor": "codex.flavor.clusterAlveoli", "nameKey": "enemy.clusterAlveoli", "chapter": 2, "rank": "normal", "ai": "chase", "rooted": true,
+      "maxHp": 65, "moveSpeed": 0, "contactDamage": 6, "contactIntervalSec": 1.0,
+      "energyOrbs": [2, 3], "coins": [1, 3],
+      "attacks": [
+        { "id": "spores", "kind": "fan", "triggerRange": 200, "windupSec": 0.9, "actSec": 0.1, "recoverSec": 1.0, "cooldownSec": 4.2, "firstDelayJitterSec": 1.5,
+          "damage": 6, "shots": 5, "spreadDeg": 40, "speed": 110, "range": 240, "bursts": 3, "burstGapSec": 0.35, "burstTurnDeg": 30,
+          "shot": { "spriteKey": "fx_spore_shot", "color": "#c080ff", "size": 5 } }
+      ],
+      "spriteKey": "enemy_cluster_alveoli", "color": "#8a3ad0", "size": 16
     }
   ]
 }

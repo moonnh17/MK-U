@@ -206,12 +206,18 @@ function actor(key, idle, move, fit, opts = {}) {
   // 적은 빨간 테두리로 배경과 확실히 구분한다
   if (key.startsWith('enemy_')) opts = { ...opts, outline: ENEMY_OUTLINE };
   const pose = opts.pose ?? null;
-  const s = sheet(key, [...idle, ...move, ...(pose ? pose.frames : [])].map((f) => (key.startsWith('enemy_') ? cleanFrame(f) : f)), fit, opts);
+  const death = opts.death ?? null;
+  const s = sheet(key, [...idle, ...move, ...(pose ? pose.frames : []), ...(death ? death.frames : [])].map((f) => (key.startsWith('enemy_') ? cleanFrame(f) : f)), fit, opts);
   const anims = {};
   if (idle.length) anims.idle = anim(0, idle.length - 1, opts.idleFps ?? 4);
   if (move.length) anims.move = anim(idle.length, idle.length + move.length - 1, opts.moveFps ?? 8);
   // 공격 준비 자세: 한 번 돌고 마지막 칸에서 멈춘다
   if (pose) anims.aim = { ...anim(idle.length + move.length, idle.length + move.length + pose.frames.length - 1, pose.fps), loop: false };
+  // 사망: 쓰러질 때 한 번 (있으면)
+  if (death) {
+    const at = idle.length + move.length + (pose ? pose.frames.length : 0);
+    anims.death = { ...anim(at, at + death.frames.length - 1, death.fps), loop: false };
+  }
   sprites[key] = { ...s, anims, ...(opts.facing ? { facing: opts.facing } : {}) };
 }
 
@@ -247,6 +253,46 @@ actor('enemy_ancient_one', strip('monsters/monster-nameless-idle.png', 5), strip
 actor('enemy_hatred_shard', strip('monsters/monster-hatred_fragment-idle.png', 4), strip('monsters/monster-hatred_fragment-move.png', 6), 32, { ...C3, cut: 120 });
 actor('enemy_executor', gaps('late-elites/executor-idle.png'), gaps('late-elites/executor-move.png'), 50, C3);
 actor('enemy_archon', gaps('late-elites/archon-idle.png'), gaps('late-elites/archon-move.png'), 42, C3);
+
+// ---------- 검보라 마기 변이체 4종 (2026-11-05 팩): 뿌리박은 고정형. 대기·공격(준비 자세)·사망 + 공격 이펙트 ----------
+{
+  const MV = path.join(SRC, '..', '..', 'MKU_검보라_마기변이체_4종_2026-11-05');
+  const strip4 = (dir) => {
+    const d = path.join(MV, dir), m = JSON.parse(fs.readFileSync(path.join(d, 'metadata.json'), 'utf8'));
+    const img = k.read(path.join(d, 'strip.png'));
+    for (let p = 3; p < img.px.length; p += 4) if (img.px[p] <= 24) img.px[p] = 0;
+    return { m, frames: Array.from({ length: m.frames }, (_, i) => k.crop(img, i * m.frameWidth, 0, m.frameWidth, m.frameHeight)) };
+  };
+  /** 몸: 대기(=이동, 움직이지 않는다), 공격 준비 자세, 사망 */
+  const mutant = (key, dir, fit) => {
+    const idle = strip4(`${dir}/01_idle_대기`).frames;
+    const atk = strip4(`${dir}/02_attack_공격`).frames;
+    const die = strip4(`${dir}/03_death_사망`).frames;
+    actor(key, idle, idle, fit, { density: 4, idleFps: 8, moveFps: 8, pose: { frames: atk, fps: 6 }, death: { frames: die, fps: 10 } });
+  };
+  mutant('enemy_pulse_sac', '01_마기_맥동낭', 44);
+  mutant('enemy_vessel_tree', '02_마기_혈관수', 52);
+  mutant('enemy_gaze_bell', '03_응시종', 44);
+  mutant('enemy_cluster_alveoli', '04_군집_폐포', 38);
+  /** 예고·타격 이펙트를 metadata의 segments로 나눈다. crop: 줄기 그림은 그림 있는 영역만 */
+  const warnHit = (base, dir, fit, crop) => {
+    const { m, frames } = strip4(dir);
+    let fr = frames;
+    if (crop) {
+      const bs = fr.map((f) => k.bbox(f, 24)).filter(Boolean);
+      const x0 = Math.min(...bs.map((b) => b.x)), y0 = Math.min(...bs.map((b) => b.y));
+      const x1 = Math.max(...bs.map((b) => b.x + b.w)), y1 = Math.max(...bs.map((b) => b.y + b.h));
+      fr = fr.map((f) => k.crop(f, x0, y0, x1 - x0, y1 - y0));
+    }
+    const seg = (s) => fr.slice(s.from, s.to + 1);
+    fxArt(`${base}_warn`, seg(m.segments.warning), fit, { fps: 4, loop: true });
+    fxArt(`${base}_hit`, seg(m.segments.strike), fit, { fps: 14 });
+  };
+  warnHit('fx_pulse_spike', '01_마기_맥동낭/04_fx_예고와타격', 40);
+  warnHit('fx_vessel_root', '02_마기_혈관수/04_fx_예고와타격', 80, true);
+  warnHit('fx_gaze_spike', '03_응시종/04_fx_예고와타격', 44);
+  fxArt('fx_spore_shot', strip4('04_군집_폐포/04_fx_마기포자탄').frames, 12, { fps: 12, loop: true });
+}
 
 // ---------- 보스 ----------
 // 마기카이저: 구속(1단계) → 2 → 3단계

@@ -102,6 +102,13 @@ export class Juice {
   death(sprite: Phaser.GameObjects.Sprite, color: string, big: boolean): void {
     const d = this.j.death;
     const at = { x: sprite.x, y: sprite.y };
+    // 사망 동작 그림이 있으면 쓰러지는 몸을 잠깐 남긴다
+    const dk = `${sprite.texture.key}.death`;
+    if (this.scene.anims.exists(dk)) {
+      const body = this.scene.add.sprite(at.x, at.y, sprite.texture.key).setOrigin(sprite.originX, sprite.originY).setScale(sprite.scaleX, sprite.scaleY).setFlipX(sprite.flipX).setDepth(2);
+      body.play(dk);
+      body.once('animationcomplete', () => this.scene.tweens.add({ targets: body, alpha: 0, duration: 400, onComplete: () => body.destroy() }));
+    }
     const ghost = this.scene.add
       .image(at.x, at.y, sprite.texture.key, sprite.frame.name)
       .setOrigin(sprite.originX, sprite.originY)

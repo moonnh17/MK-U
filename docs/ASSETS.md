@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 560개 · 그림 있음 548개
+전체 571개 · 그림 있음 559개
 
 ## player (3)
 
@@ -59,13 +59,13 @@
 | `weapon_hwan_remnant` | 환국의 잔명 | 12×12 | center | #6a5030 | mku/weapon_hwan_remnant.png (1프레임) |
 | `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | mku/weapon_fist.png (1프레임) |
 
-## projectile (17)
+## projectile (24)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `fx_golem_laser` | 고대병기의 코어 (fx) | 12×12 | center | #a05aff | mku/fx_golem_laser.png (1프레임) |
 | `fx_eclipse_meteor` | 식광의 핵 (fx) 외 1곳 | 10×10 | center | #ff3a4a | mku/fx_eclipse_meteor.png (1프레임) |
-| `projectile_arrow` | 곡궁 (fx) | 3×3 | center | #c8a070 | mku/projectile_arrow.png (1프레임) |
+| `projectile_arrow` | 곡궁 (fx) 외 1곳 | 3×3 | center | #c8a070 | mku/projectile_arrow.png (1프레임) |
 | `projectile_zephyr_arrow` | 서풍 (fx) | 3×3 | center | #7ae8f0 | mku/projectile_zephyr_arrow.png (1프레임) |
 | `fx_soul_burst` | 소울 칼리버 (fx) | 20×20 | center | #c060ff | mku/fx_soul_burst.png (1프레임) |
 | `skill_antimatter_shellA` | 반물질 권총 (fx) 외 1곳 | 9×9 | center | #5ab0ff | mku/skill_antimatter_shellA.png (6프레임) |
@@ -80,8 +80,15 @@
 | `fx_melee_slam_big` | 근접 이펙트 (fx) | 24×24 | center | #ffffff | mku/fx_melee_slam_big.png (5프레임) |
 | `fx_buff_aura` | 근접 이펙트 (fx) | 22×22 | center | #ffffff | mku/fx_buff_aura.png (8프레임) |
 | `enemy_bullet` | 적 탄 | 4×4 | center | #ff5a5a | mku/enemy_bullet.png (1프레임) |
+| `fx_vessel_root_warn` | 마기 혈관수 (fx) | 40×40 | center | #b05aff | mku/fx_vessel_root_warn.png (2프레임) |
+| `fx_vessel_root_hit` | 마기 혈관수 (fx) | 40×40 | center | #b05aff | mku/fx_vessel_root_hit.png (2프레임) |
+| `fx_pulse_spike_warn` | 마기 맥동낭 (fx) | 32×32 | center | #b05aff | mku/fx_pulse_spike_warn.png (1프레임) |
+| `fx_pulse_spike_hit` | 마기 맥동낭 (fx) | 32×32 | center | #b05aff | mku/fx_pulse_spike_hit.png (3프레임) |
+| `fx_gaze_spike_warn` | 응시종 (fx) | 36×36 | center | #b05aff | mku/fx_gaze_spike_warn.png (2프레임) |
+| `fx_gaze_spike_hit` | 응시종 (fx) | 36×36 | center | #b05aff | mku/fx_gaze_spike_hit.png (2프레임) |
+| `fx_spore_shot` | 군집 폐포 (fx) | 5×5 | center | #c080ff | mku/fx_spore_shot.png (4프레임) |
 
-## enemy (11)
+## enemy (15)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -96,6 +103,10 @@
 | `enemy_hatred_shard` | 증오의 파편 | 11×11 | feet | #ff3a4a | mku/enemy_hatred_shard.png (10프레임) |
 | `enemy_executor` | 집행자 | 24×24 | feet | #a0a8b8 | mku/enemy_executor.png (13프레임) |
 | `enemy_archon` | 집정관 | 22×22 | feet | #e8c860 | mku/enemy_archon.png (13프레임) |
+| `enemy_vessel_tree` | 마기 혈관수 | 16×16 | feet | #8a3ad0 | mku/enemy_vessel_tree.png (16프레임) |
+| `enemy_pulse_sac` | 마기 맥동낭 | 18×18 | feet | #8a3ad0 | mku/enemy_pulse_sac.png (16프레임) |
+| `enemy_gaze_bell` | 응시종 | 13×13 | feet | #8a3ad0 | mku/enemy_gaze_bell.png (16프레임) |
+| `enemy_cluster_alveoli` | 군집 폐포 | 16×16 | feet | #8a3ad0 | mku/enemy_cluster_alveoli.png (16프레임) |
 
 ## boss (29)
 

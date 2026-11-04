@@ -327,7 +327,7 @@ export function validateGameData(d: GameData): Errors {
   checkUnique(errors, 'enemies', enemyIds);
   checkUnique(errors, 'enemies.codexNo', d.enemies.enemies.filter((e) => e.codexNo !== undefined).map((e) => String(e.codexNo)));
   for (const g of ['1', '2', '3', '4', '5', '6', 'unknown']) if (!d.enemies.munGrades[g]) errors.push(`enemies.munGrades: ${g} 없음`);
-  for (const e of d.enemies.enemies) if (e.mun !== undefined && e.mun !== null && !(Number.isInteger(e.mun) && e.mun >= 1 && e.mun <= 6)) errors.push(`enemies.${e.id}.mun: 1~6 또는 null`);
+  for (const e of d.enemies.enemies) if (e.mun !== undefined && e.mun !== null && e.mun !== 'unknown' && !(Number.isInteger(e.mun) && e.mun >= 1 && e.mun <= 6)) errors.push(`enemies.${e.id}.mun: 1~6, 'unknown' 또는 null`);
   for (const e of d.enemies.enemies) {
     const w = `enemies.${e.id}`;
     checkSprite(errors, w, e);
@@ -348,7 +348,7 @@ export function validateGameData(d: GameData): Errors {
     checkUnique(errors, `${where}.attacks`, (attacks ?? []).map((a) => a.id));
     for (const a of attacks ?? []) {
       const w = `${where}.attacks.${a.id}`;
-      if (!['lunge', 'slam', 'burst', 'puddle', 'fan', 'rope', 'snipe'].includes(a.kind)) errors.push(`${w}: kind는 lunge · slam · burst · puddle · fan · rope · snipe`);
+      if (!['lunge', 'slam', 'burst', 'puddle', 'fan', 'rope', 'snipe', 'spikes', 'roots'].includes(a.kind)) errors.push(`${w}: kind는 lunge · slam · burst · puddle · fan · rope · snipe · spikes · roots`);
       for (const k of ['triggerRange', 'windupSec', 'actSec', 'damage'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
       for (const k of ['recoverSec', 'cooldownSec'] as const) checkPositive(errors, `${w}.${k}`, a[k], true);
       if (a.kind === 'lunge') checkPositive(errors, `${w}.speed`, a.speed);
@@ -375,6 +375,15 @@ export function validateGameData(d: GameData): Errors {
         if ((a.shots ?? 1) > 1 && (a.shotGapSec ?? 0) * ((a.shots ?? 1) - 1) > a.actSec) errors.push(`${w}: 마지막 발이 actSec 안에 나가야 함`);
       }
       if (a.kind === 'puddle') for (const k of ['radius', 'liveSec', 'tickSec'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
+      if (a.kind === 'spikes') {
+        for (const k of ['strikes', 'warnSec', 'radius'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
+        checkPositive(errors, `${w}.strikeGapSec`, a.strikeGapSec, true);
+      }
+      if (a.kind === 'roots') {
+        for (const k of ['strikes', 'warnSec', 'range', 'width'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
+        checkPositive(errors, `${w}.strikeGapSec`, a.strikeGapSec, true);
+      }
+      for (const k of ['shot', 'warnArt', 'hitArt'] as const) if (a[k]) checkSprite(errors, `${w}.${k}`, a[k]!);
     }
   };
   for (const e of d.enemies.enemies) {

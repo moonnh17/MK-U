@@ -277,10 +277,12 @@ export class CodexWindow {
     const d = this.ctx.data;
     const def = d.enemies.enemies.find((x) => x.id === e.id);
     if (def?.codexNo === undefined) return null;
-    const grade = def.mun ? String(def.mun) : 'unknown';
+    // 문양: 숫자 등급은 1~6, unknown과 미분류는 같은 문양 / 이름은 N문·N문급·unknown·미분류를 구별한다
+    const grade = typeof def.mun === 'number' ? String(def.mun) : 'unknown';
     const span = this.el('span', `cx-mun mun-${grade}`);
     span.innerHTML = munEmblemSvg(grade, d.enemies.munGrades[grade]!, size);
-    span.title = def.mun ? this.ctx.t('codex.mun', { n: def.mun }) : this.ctx.t('codex.mun.unknown');
+    const t = this.ctx.t;
+    span.title = typeof def.mun === 'number' ? t(def.munClass ? 'codex.munClass' : 'codex.mun', { n: def.mun }) : t(def.mun === 'unknown' ? 'codex.mun.unknown' : 'codex.mun.unclassified');
     return span;
   }
 

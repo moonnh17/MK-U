@@ -312,8 +312,12 @@ export interface EnemyDef extends SpriteRef {
   flavor?: string;
   /** 도감 번호 (도감에 나오는 몬스터만) */
   codexNo?: number;
-  /** 위협 등급 1~6문 (1문이 가장 강함). null = 미분류 */
-  mun?: number | null;
+  /** 위협 등급 1~6 (1이 가장 강함). 'unknown' = unknown, null = 미분류 */
+  mun?: number | 'unknown' | null;
+  /** true면 'N문급', 아니면 'N문' */
+  munClass?: boolean;
+  /** 땅에 뿌리박은 고정형: 밀려나지 않는다 */
+  rooted?: boolean;
   chapter: number;
   rank: EnemyRank;
   ai: EnemyAi;
@@ -353,10 +357,11 @@ export interface ArchonAbsorbDef {
  * lunge: 예고선 방향으로 돌진, 돌진 중 닿으면 피해 / slam: 예고 원 자리에 강타
  * burst: 조준선 → 조준탄 여러 발 (헥타르 전투원) / puddle: 플레이어 자리 예고 원 → 지속 피해 장판 (어느 기억)
  * fan: 부채꼴 탄막 (고대인) / rope: 밧줄 → 끌어당김 → 도끼 강타 (집행자) / snipe: 따라오는 조준선 → 고정 → 직선 레이저 (집정관)
+ * spikes: 플레이어 자리(와 주변)에 차례로 가시 예고 → 분출 (맥동낭·응시종) / roots: 몸에서 뻗는 뿌리 줄기 예고 → 솟음 (혈관수)
  */
 export interface EnemyAttackDef {
   id: string;
-  kind: 'lunge' | 'slam' | 'burst' | 'puddle' | 'fan' | 'rope' | 'snipe';
+  kind: 'lunge' | 'slam' | 'burst' | 'puddle' | 'fan' | 'rope' | 'snipe' | 'spikes' | 'roots';
   triggerRange: number;
   windupSec: number;
   actSec: number;
@@ -403,6 +408,20 @@ export interface EnemyAttackDef {
   /** snipe: 예고 끝 이 시간 동안 조준선이 고정된다, 레이저 폭 (길이는 range) */
   lockSec?: number;
   width?: number;
+  /** spikes·roots: 가시 수, 가시 사이 간격, 각 가시의 예고 시간 / fan: 탄막을 몇 번, 간격, 한 번마다 돌아가는 각도 */
+  strikes?: number;
+  strikeGapSec?: number;
+  warnSec?: number;
+  /** spikes: 두 번째 가시부터 플레이어 둘레 이 거리 안 아무 데나 */
+  scatter?: number;
+  /** roots: 줄기마다 플레이어 방향에서 번갈아 벌어지는 각도 (0, +turn, −turn …) */
+  turnDeg?: number;
+  bursts?: number;
+  burstGapSec?: number;
+  burstTurnDeg?: number;
+  /** spikes·roots: 예고·타격 그림 */
+  warnArt?: SpriteRef;
+  hitArt?: SpriteRef;
 }
 
 /** 지나간 자리에 남기는 장판 (어느 기억) */

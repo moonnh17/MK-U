@@ -8,10 +8,10 @@ import { animKey, facingFlip } from '../systems/art';
 import { spawnRise } from '../systems/juice';
 import type { CorruptionState } from '../systems/acro';
 import { effectiveRank, eliteMods, type EliteMods } from '../systems/elites';
-import { aimLocked, chainWindup, forceWindup, initialAi, keepDistanceStep, stepAi, type AiEvent, type AiState } from '../systems/enemyAi';
+import { aimLocked, burstAngle, chainWindup, forceWindup, initialAi, keepDistanceStep, rootAngle, stepAi, type AiEvent, type AiState } from '../systems/enemyAi';
 import type { BleedState } from '../systems/tags';
 import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank, SpriteRef } from '../types/data';
-import { Beams, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
+import { Beams, DelayedBlast, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
 import { animateArt, fitArt } from './art';
 import { getContext } from '../core/context';
 
@@ -489,8 +489,8 @@ export class Enemy {
         for (const s of [-half, 0, half]) g.lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + Math.cos(base + s) * 40, this.sprite.y + Math.sin(base + s) * 40);
       } else if (a.kind === 'rope') {
         g.lineStyle(1, TELEGRAPH_COLOR, 0.8).lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + dir.x * a.range!, this.sprite.y + dir.y * a.range!);
-      } else if (a.kind === 'snipe') {
-        // 조준선은 update에서 그린다
+      } else if (a.kind === 'snipe' || a.kind === 'spikes' || a.kind === 'roots') {
+        // snipe 조준선은 update에서 그린다 / spikes·roots는 본체 준비 자세가 예고, 가시마다 바닥 예고가 따로 뜬다
       } else if (a.kind === 'burst') {
         g.lineStyle(1, TELEGRAPH_COLOR, 0.7).lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + dir.x * dist, this.sprite.y + dir.y * dist);
         if (link) host.linkWindup(this, a.id);
@@ -525,14 +525,54 @@ export class Enemy {
       } else if (a.kind === 'puddle') {
         host.addHazard(new Zone(this.scene, this.slamAt, a.radius!, a.liveSec!, a.damage, a.tickSec!, hexColor(this.def.color), a.mentalDamage ?? 0));
       } else if (a.kind === 'fan') {
-        // 부채꼴 탄막: 예고 때 정한 방향으로 (일반 탄: 굴절·탄 베기 가능)
+        // 부채꼴 탄막: 예고 때 정한 방향으로 (일반 탄: 굴절·탄 베기 가능). bursts면 간격을 두고 돌아가며 여러 번 (군집 폐포)
         const base = Math.atan2(this.aim.y, this.aim.x);
         const spread = (a.spreadDeg! * Math.PI) / 180;
         const n = a.shots!;
         const from = { x: this.sprite.x, y: this.sprite.y };
-        for (let k = 0; k < n; k++) {
-          const ang = n === 1 ? base : base - spread / 2 + (spread * k) / (n - 1);
-          host.fireEnemyBullet(from, ang, a.speed!, a.range!, a.damage * this.damageMul, true, a.damage * this.damageMul * (this.def.mentalRatio ?? 0));
+        const volley = (center: number) => {
+          for (let k = 0; k < n; k++) {
+            const ang = n === 1 ? center : center - spread / 2 + (spread * k) / (n - 1);
+            host.fireEnemyBullet(from, ang, a.speed!, a.range!, a.damage * this.damageMul, true, a.damage * this.damageMul * (this.def.mentalRatio ?? 0), a.shot, a.shotTint);
+          }
+        };
+        for (let b = 0; b < (a.bursts ?? 1); b++) this.later(b * (a.burstGapSec ?? 0), () => volley(burstAngle(base, b, ((a.burstTurnDeg ?? 0) * Math.PI) / 180)));
+      } else if (a.kind === 'spikes') {
+        // 플레이어 자리부터 차례로 가시 예고 (두 번째부터는 둘레 scatter 안). 쓰러지면 남은 가시는 나오지 않는다
+        for (let i = 0; i < a.strikes!; i++) {
+          this.later(i * (a.strikeGapSec ?? 0), () => {
+            const p = host.playerPos();
+            const r = i === 0 ? 0 : host.rng.range(0, a.scatter ?? 0);
+            const ang = host.rng.range(0, Math.PI * 2);
+            const at = { x: p.x + Math.cos(ang) * r, y: p.y + Math.sin(ang) * r };
+            host.addHazard(new DelayedBlast(this.scene, at, a.radius!, a.warnSec!, a.damage * this.damageMul, hexColor(this.def.color), { warn: a.warnArt, hit: a.hitArt }));
+          });
+        }
+      } else if (a.kind === 'roots') {
+        // 몸에서 뻗는 뿌리 줄기: 예고 뒤 솟는다. 줄기마다 방향이 번갈아 벌어진다
+        const from = { x: this.sprite.x, y: this.sprite.y };
+        for (let i = 0; i < a.strikes!; i++) {
+          this.later(i * (a.strikeGapSec ?? 0), () => {
+            const p = host.playerPos();
+            const base = Math.atan2(p.y - from.y, p.x - from.x);
+            host.addHazard(
+              new Beams(this.scene, {
+                center: () => from,
+                count: 1,
+                length: a.range!,
+                width: a.width!,
+                spin: 0,
+                startAngle: rootAngle(base, i, ((a.turnDeg ?? 0) * Math.PI) / 180),
+                telegraphSec: a.warnSec!,
+                liveSec: a.actSec,
+                damage: a.damage * this.damageMul,
+                tickSec: a.actSec + 1,
+                color: hexColor(this.def.color),
+                art: a.hitArt,
+                warnArt: a.warnArt,
+              }),
+            );
+          });
         }
       } else if (a.kind === 'rope') {
         this.ropeLen = 0;
@@ -595,6 +635,12 @@ export class Enemy {
     }
   }
 
+  /** sec 뒤에 한 번 (쓰러졌으면 하지 않는다) */
+  private later(sec: number, fn: () => void): void {
+    if (sec <= 0) fn();
+    else this.scene.time.delayedCall(sec * 1000, () => !this.dead && fn());
+  }
+
   private clearTelegraph(): void {
     this.telegraph?.destroy();
     this.telegraph = null;
@@ -602,7 +648,7 @@ export class Enemy {
 
   /** 넉백: 거대 엘리트·보스는 면역 */
   get knockbackImmune(): boolean {
-    return this.elites.some((e) => e.knockbackImmune) || this.def.rank === 'boss' || this.def.rank === 'hiddenBoss';
+    return this.elites.some((e) => e.knockbackImmune) || !!this.def.rooted || this.def.rank === 'boss' || this.def.rank === 'hiddenBoss';
   }
 
   knockback(dir: Vec2, distance: number, sec: number): void {
