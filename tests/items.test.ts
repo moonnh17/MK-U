@@ -16,6 +16,8 @@ import {
   rollItem,
   scaleEffect,
   transferWeight,
+  combineGrade,
+  combinableItems,
 } from '../src/systems/items';
 
 const I = gameData.items;
@@ -201,3 +203,16 @@ describe('샹트포레의 기운', () => {
     expect(def.effects).toEqual([{ kind: 'maxHp', value: 10, group: 'hpFlat' }, { kind: 'regen', value: 1, everySec: 2 }]);
   });
 });
+
+describe('아이템 조합기', () => {
+  it('일반→레어→전설→유니크, 유니크·신화는 조합 불가(신화는 못 만든다)', () => {
+    expect(['common', 'rare', 'legendary', 'unique', 'mythic'].map((g) => combineGrade(g as never))).toEqual(['rare', 'legendary', 'unique', null, null]);
+  });
+  it('같은 등급이 2개 이상인 것만 넣을 수 있다', () => {
+    const commons = I.items.filter((x) => x.pool === 'normal' && x.grade === 'common').map((x) => x.id);
+    const legendary = I.items.find((x) => x.pool === 'normal' && x.grade === 'legendary')!.id;
+    const owned = [commons[0]!, commons[1]!, legendary];
+    expect(combinableItems(owned, I, new Set(owned)).sort()).toEqual([commons[0]!, commons[1]!].sort());
+  });
+});
+

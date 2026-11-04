@@ -1485,6 +1485,12 @@
       "frameHeight": 10,
       "frames": 1
     },
+    "prop_combiner": {
+      "file": "mku/prop_combiner.png",
+      "frameWidth": 15,
+      "frameHeight": 18,
+      "frames": 1
+    },
     "chest_weapon_basic": {
       "file": "mku/chest_weapon_basic.png",
       "frameWidth": 18,

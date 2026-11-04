@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 507개 · 그림 있음 494개
+전체 508개 · 그림 있음 495개
 
 ## player (3)
 
@@ -131,7 +131,7 @@
 | `enemy_orion_crusader_phase1` | 오리온의 성전사 (1단계) | 42×42 | feet | #d9c25a | — |
 | `enemy_orion_crusader_phase2` | 오리온의 성전사 (2단계) | 42×42 | feet | #d9c25a | — |
 
-## prop (57)
+## prop (58)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -143,6 +143,7 @@
 | `chest_weapon_supreme` | 최고급 무기 상자 | 15×15 | feet | #e8be46 | mku/chest_weapon_supreme.png (1프레임) |
 | `chest_weapon_legendary` | 전설 무기 상자 | 16×16 | feet | #b070ff | mku/chest_weapon_legendary.png (1프레임) |
 | `merchant_stand` | 상인 진열대 | 12×12 | feet | #4a5a6a | mku/merchant_stand.png (1프레임) |
+| `prop_combiner` | 아이템 조합기 | 16×20 | feet | #3a9ad9 | mku/prop_combiner.png (1프레임) |
 | `spire_small` | 마기수집첨탑(소형) | 10×44 | feet | #15151c | mku/spire_small.png (1프레임) |
 | `spire_medium` | 마기수집첨탑(중형) 외 1곳 | 16×48 | feet | #3a0e12 | mku/spire_medium.png (1프레임) |
 | `prop_exit_portal` | 출구 포털 | 20×20 | feet | #5ae0ff | mku/prop_exit_portal.png (1프레임) |

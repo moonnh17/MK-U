@@ -998,7 +998,8 @@ export type ItemEffect =
   /** uses: 재사용 대기가 없을 때 런당 쓸 수 있는 횟수 (기본 1). maxEnergyPerUse: 쓸 때마다 최대 에너지 + */
   | { kind: 'lowHpHeal'; threshold: number; healTo: number; cooldownSec: number; priority: number; afterDamage?: number; uses?: number; maxEnergyPerUse?: number }
   /** 사망 시 완전 회복 + 무적 (school이면 그 학파로 전직했을 때만) */
-  | { kind: 'revive'; invulnSec: number; school?: SchoolId }
+  /** look: 부활 연출 (hectar = 헥타르 기술식 재구성, holy = 노란 빛) */
+  | { kind: 'revive'; invulnSec: number; school?: SchoolId; look?: 'hectar' | 'holy' }
   /** 특정 스킬 피해 증가 (school이면 그 학파로 전직했을 때만) */
   | { kind: 'skillDamage'; skillId: string; value: number; group: 'damagePct'; school?: SchoolId }
   /** 주기적으로 스킬 자동 발동 (notSchool로 전직했으면 꺼짐) */
@@ -1097,7 +1098,7 @@ export interface ItemsData {
 
 export type WeaponChestTierId = 'basic' | 'advanced' | 'supreme' | 'legendary';
 
-export type EncounterKindId = 'treasure' | 'merchant' | 'skillShop' | 'raid' | 'magiSpire' | 'hiddenBoss';
+export type EncounterKindId = 'treasure' | 'merchant' | 'skillShop' | 'raid' | 'magiSpire' | 'hiddenBoss' | 'combiner';
 
 export interface LootData {
   /** 아이템·무기를 얻을 때마다 신화로 바뀌는 고정 확률 */
@@ -1130,6 +1131,8 @@ export interface LootData {
   /** weapon = 시작 무기 상자, boss = 보스·히든보스 무기 상자 */
   chest: { weapon: SpriteRef; item: SpriteRef; boss: SpriteRef; openRadius: number };
   merchantStand: SpriteRef;
+  /** 아이템 조합기 (조우 칸): 같은 등급 2개 → 한 등급 위 1개, 한 대에 한 번 */
+  combiner: SpriteRef;
   /** 상인 진열대 간격(px) */
   standSpacing: number;
   spire: SpireData;

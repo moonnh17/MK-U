@@ -10,6 +10,7 @@ import { bossIntroStage, bossIntroTotal, type IntroStage } from '../../systems/j
 import { roomCenter } from '../../systems/worldLayout';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
+import { burst, motes, shockRing } from '../../bosses/bossFx';
 
 export class StageFx {
   /** 보스 등장 컷 (그동안 게임은 멈춘다) */
@@ -119,6 +120,80 @@ export class StageFx {
     r.tweens.add({ targets: pl, alpha: 0.35, delay: ms * 0.45, duration: ms * 0.5 });
     r.tweens.add({ targets: r.cameras.main, zoom: r.cameras.main.zoom * c.zoom, duration: ms, ease: 'Sine.easeInOut' });
     r.time.delayedCall(ms, then);
+  }
+
+  /**
+   * 부활 연출 (쓰러진 뒤). hectar: 헥타르 기술식 — 바닥 진, 몸을 훑는 스캔선, 데이터 조각이 모여 재구성, 푸른 섬광.
+   * holy: 하늘에서 노란 빛기둥과 십자가, 금빛 알갱이가 솟고 몸이 금빛으로 빛나며 일어난다.
+   */
+  playRevive(look: 'hectar' | 'holy', then: () => void): void {
+    const r = this.run;
+    const pl = r.player;
+    const at = { x: pl.x, y: pl.y - 6 };
+    const holy = look === 'holy';
+    const color = holy ? 0xffd23f : 0x3a8aff;
+    const glow = holy ? 0xfff2b0 : 0x9fe0ff;
+    const sec = 1.6;
+    const temp: Phaser.GameObjects.GameObject[] = [];
+    const add = <T extends Phaser.GameObjects.GameObject>(o: T): T => {
+      temp.push(o);
+      return o;
+    };
+    sfx('warning');
+    if (holy) {
+      // 하늘에서 내려오는 빛기둥
+      const pillar = add(r.add.rectangle(at.x, at.y - 150, 22, 320, color, 0).setDepth(8).setBlendMode('ADD'));
+      r.tweens.add({ targets: pillar, fillAlpha: 0.55, duration: 400, yoyo: true, hold: 700 });
+      // 머리 위 십자가
+      const v = add(r.add.rectangle(at.x, at.y - 30, 5, 30, glow, 1).setDepth(9).setBlendMode('ADD').setScale(0));
+      const h = add(r.add.rectangle(at.x, at.y - 36, 20, 5, glow, 1).setDepth(9).setBlendMode('ADD').setScale(0));
+      r.tweens.add({ targets: [v, h], scale: 1, duration: 450, ease: 'Back.easeOut', delay: 200 });
+      // 몸 둘레를 도는 빛살
+      for (let i = 0; i < 8; i++) {
+        const ray = add(r.add.rectangle(at.x, at.y, 1, 40, color, 0.7).setOrigin(0.5, 1).setDepth(8).setBlendMode('ADD').setRotation((i / 8) * Math.PI * 2).setAlpha(0));
+        r.tweens.add({ targets: ray, alpha: 0.8, rotation: ray.rotation + 1.2, duration: sec * 1000, ease: 'Sine.easeInOut' });
+      }
+      // 금빛 알갱이가 바닥에서 솟는다
+      r.time.addEvent({
+        delay: 60,
+        repeat: Math.floor((sec * 1000) / 60) - 2,
+        callback: () => {
+          for (let i = 0; i < 2; i++) {
+            const x = at.x + r.rng.range(-22, 22);
+            const m = r.add.rectangle(x, at.y + 12, 2, 2, i ? glow : color).setDepth(9).setBlendMode('ADD');
+            r.tweens.add({ targets: m, y: at.y - r.rng.range(30, 60), alpha: 0, duration: 700, ease: 'Quad.easeOut', onComplete: () => m.destroy() });
+          }
+        },
+      });
+      pl.setTintFill(0xffe28a);
+    } else {
+      // 바닥의 헥타르 진
+      const ring = add(r.add.image(at.x, at.y + 8, 'fx_chief_ring').setDepth(1.5).setAlpha(0).setScale(0.4).setBlendMode('ADD'));
+      r.tweens.add({ targets: ring, alpha: 0.9, scale: 1.1, rotation: 2, duration: sec * 1000, ease: 'Sine.easeOut' });
+      // 몸을 위아래로 훑는 스캔선 두 번
+      const scan = add(r.add.rectangle(at.x, at.y - 18, 34, 2, glow, 0.9).setDepth(9).setBlendMode('ADD'));
+      r.tweens.add({ targets: scan, y: at.y + 14, duration: 450, yoyo: true, repeat: 1, ease: 'Sine.easeInOut' });
+      // 데이터 조각이 몸으로 모인다
+      r.time.addEvent({ delay: 50, repeat: Math.floor((sec * 1000) / 50) - 3, callback: () => motes(r, r.rng, at, color, 3, 60, 0.35) });
+      pl.setTintFill(0x6ab0ff);
+    }
+    // 쓰러진 몸이 일어선다
+    r.tweens.add({ targets: pl, angle: 0, alpha: 1, delay: sec * 300, duration: sec * 600, ease: 'Back.easeOut' });
+    r.time.delayedCall(sec * 1000, () => {
+      for (const o of temp) o.destroy();
+      r.cameras.main.flash(260, holy ? 255 : 80, holy ? 220 : 160, holy ? 120 : 255);
+      shockRing(r, at, 46, color, 0.45, 3);
+      shockRing(r, at, 28, 0xffffff, 0.3, 1);
+      burst(r, r.rng, at, color, 26, [90, 180], 0.45, undefined, 6);
+      if (!holy && r.textures.exists('fx_chief_burst')) {
+        const b = r.add.image(at.x, at.y, 'fx_chief_burst').setDepth(9).setBlendMode('ADD');
+        r.tweens.add({ targets: b, alpha: 0, scale: 1.4, duration: 400, onComplete: () => b.destroy() });
+      }
+      shake(r, 'medium');
+      sfx('warp');
+      pl.clearTint();
+      then();
+    });
   }
 
   warpOut(then: () => void): void {

@@ -232,6 +232,7 @@ body {
 
 /* 카드 선택창 · 인벤토리 */
 #card-window,
+#combiner-window,
 #inventory-window,
 #job-window,
 #archive-window,
@@ -2871,4 +2872,65 @@ body {
   .cx-cell::after {
     animation: none;
   }
+}
+
+/* 아이템 조합기 */
+.cb-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: min(92vw, 640px);
+  max-height: 56vh;
+  overflow-y: auto;
+}
+
+.cb-item {
+  width: 104px;
+  padding: 6px;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  background: #141c26;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.cb-item.selected {
+  background: #24384c;
+  box-shadow: 0 0 0 3px #ffd23f;
+}
+
+.cb-item.off {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.cb-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-block;
+}
+
+.cb-name {
+  font-size: 12px;
+  text-align: center;
+}
+
+.cb-grade {
+  font-size: 11px;
+}
+
+.cb-status {
+  color: #ffd23f;
+  font-size: 13px;
+  min-height: 16px;
+}
+
+.cb-buttons {
+  display: flex;
+  gap: 10px;
 }

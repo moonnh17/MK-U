@@ -292,3 +292,24 @@ export function shieldValues(effects: readonly ItemEffect[]): Eff<'shieldThrow'>
   if (!base) return null;
   return { ...base, bounces: base.bounces + effects.reduce((s, e) => s + (e.kind === 'shieldBounces' ? e.value : 0), 0) };
 }
+
+/** 아이템 조합기: 이 등급 2개를 넣으면 나오는 등급 (신화는 만들 수 없어 유니크·신화는 null) */
+export function combineGrade(grade: GradeId): GradeId | null {
+  return grade === 'common' ? 'rare' : grade === 'rare' ? 'legendary' : grade === 'legendary' ? 'unique' : null;
+}
+
+/** 조합 결과 후보: 그 등급의 일반 풀 아이템 중 아직 얻지 않은 것 */
+export function combineCandidates(grade: GradeId, data: ItemsData, obtained: ReadonlySet<string>): string[] {
+  return data.items.filter((x) => x.pool === 'normal' && x.grade === grade && !obtained.has(x.id)).map((x) => x.id);
+}
+
+/** 조합기에 넣을 수 있는 가진 아이템: 위 등급이 있고 결과 후보가 남았으며, 같은 등급이 2개 이상 */
+export function combinableItems(owned: readonly string[], data: ItemsData, obtained: ReadonlySet<string>): string[] {
+  const gradeOf = (id: string) => data.items.find((x) => x.id === id)?.grade;
+  const ok = owned.filter((id) => {
+    const g = gradeOf(id);
+    const to = g ? combineGrade(g) : null;
+    return !!to && combineCandidates(to, data, obtained).length > 0;
+  });
+  return ok.filter((id) => ok.filter((o) => gradeOf(o) === gradeOf(id)).length >= 2);
+}

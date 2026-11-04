@@ -4,4 +4,4 @@
  */
 import type { EncounterKindId } from '../types/data';
 
-export const IMPLEMENTED_ENCOUNTERS: ReadonlySet<EncounterKindId> = new Set<EncounterKindId>(['treasure', 'merchant', 'skillShop', 'raid', 'magiSpire', 'hiddenBoss']);
+export const IMPLEMENTED_ENCOUNTERS: ReadonlySet<EncounterKindId> = new Set<EncounterKindId>(['treasure', 'merchant', 'skillShop', 'raid', 'magiSpire', 'hiddenBoss', 'combiner']);

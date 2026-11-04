@@ -674,6 +674,8 @@ const CHEST = [
 ];
 dots('chest_weapon', CHEST);
 dots('chest_item', CHEST, { pal: { B: PAL.C, b: PAL.n, g: PAL.c, G: PAL.C } });
+// 아이템 조합기: 위 깔때기 두 개(넣는 곳) · 가운데 빛나는 창 · 아래 받침
+dots('prop_combiner', ["KKKKK.....KKKKK", "KYYYK.....KYYYK", ".KYK.......KYK.", ".KmK.......KmK.", "KKmKKKKKKKKKmKK", "KmmmmmmmmmmmmmK", "KmdddddddddddmK", "KmdKKKKKKKKKdmK", "KmdKcccccccKdmK", "KmdKcCwwwCcKdmK", "KmdKcccccccKdmK", "KmdKKKKKKKKKdmK", "KmdddddddddddmK", "KmmmmmmmmmmmmmK", "KmdgdgdgdgdgdmK", "KKKKKKKKKKKKKKK", ".KlllllllllllK.", "..KKKKKKKKKKK.."]);
 // 무기 상자 등급별: 일반(쇠띠) · 고급(초록·은) · 최고급(금) · 전설(보라·금, 반짝임) · 보스(검붉은 쇠·해골·뿔)
 dots('chest_weapon_basic', ["..KKKKKKKKKKKKKK..", ".KBBBBmBBBBmBBBBK.", "KBBBBBmBBBBmBBBBBK", "KbbbbbdbbbbdbbbbbK", "KKKKKKKKKKKKKKKKKK", "KBBBBBmKmmKmBBBBBK", "KBBBBBmKmdKmBBBBBK", "KbBBBBmKKKKmBBBBbK", "KbbbbbdbbbbdbbbbbK", ".KKKKKKKKKKKKKKKK."], { pal: {} });
 dots('chest_weapon_advanced', ["..KKKKKKKKKKKKKK..", ".KwBBBgBBBBgBBBwK.", "KBBBBBgBBBBgBBBBBK", "KbbbbbgbbbbgbbbbbK", "KggggggggggggggggK", "KBBBBBgKggKgBBBBBK", "KBBBBBgKgcKgBBBBBK", "KwBBBBgKKKKgBBBBwK", "KbbbbbgbbbbgbbbbbK", ".KKKKKKKKKKKKKKKK."], { pal: { B: [60, 124, 82], b: [36, 78, 54], g: PAL.l, G: PAL.m } });

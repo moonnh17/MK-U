@@ -46,7 +46,7 @@ export interface ItemGet {
   from?: { key: string; color: string }[];
 }
 
-export type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | 'intro' | 'pause' | 'portal' | 'itemGet' | null;
+export type Modal = 'cards' | 'inventory' | 'cutscene' | 'story' | 'intro' | 'pause' | 'portal' | 'itemGet' | 'combiner' | null;
 
 /** 조우 칸 물약 자판기 */
 export interface Vending {

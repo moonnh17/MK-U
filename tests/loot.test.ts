@@ -98,8 +98,8 @@ describe('무기 수치', () => {
 
 describe('조우 칸', () => {
   const all = new Set<EncounterKindId>(['treasure', 'merchant', 'skillShop', 'raid', 'magiSpire', 'hiddenBoss']);
-  it('기획서 확률: 보물 25·상인 21·스킬 상점 10·습격 31.5·첨탑 12·히든보스 0.5', () => {
-    expect(L.encounter.weights).toEqual({ treasure: 25, merchant: 21, skillShop: 10, raid: 31.5, magiSpire: 12, hiddenBoss: 0.5 });
+  it('기획서 가중치: 보물 25·상인 21·스킬 상점 10·조합기 12·습격 31.5·첨탑 12·히든보스 0.5', () => {
+    expect(L.encounter.weights).toEqual({ treasure: 25, merchant: 21, skillShop: 10, combiner: 12, raid: 31.5, magiSpire: 12, hiddenBoss: 0.5 });
     const count: Record<string, number> = {};
     const r = new Rng(9);
     for (let i = 0; i < 5000; i++) {

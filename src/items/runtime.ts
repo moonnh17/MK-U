@@ -485,19 +485,15 @@ export class ItemRuntime {
     this.host.toast(this.host.ctx.t('item.healed', { item: this.host.ctx.t(`item.${pick.itemId}`) }));
   }
 
-  /** 사망 직전: 부활 아이템 하나 소모 (아이템마다 따로, 한 번 사망에 하나만) */
-  tryRevive(): boolean {
+  /** 사망: 부활 아이템 하나를 소모해 그 효과를 돌려준다 (아이템마다 따로, 한 번 사망에 하나만). 회복은 부활 연출 뒤 씬이 한다 */
+  takeRevive(): { invulnSec: number; look?: 'hectar' | 'holy' } | null {
     for (const { id, e } of this.each('revive')) {
       const s = this.state(id);
       if (s.used) continue;
       s.used = true;
-      const p = this.host.player();
-      p.hp = p.maxHp;
-      this.host.setInvuln(e.invulnSec, false);
-      this.host.toast(this.host.ctx.t('item.revived'));
-      return true;
+      return e;
     }
-    return false;
+    return null;
   }
 
   onKill(elite: boolean): void {

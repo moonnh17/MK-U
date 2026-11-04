@@ -17,7 +17,7 @@ export interface GameEvents {
   /** 화면 가운데 짧은 알림 */
   toast: { text: string };
   /** 근처에 상호작용 대상이 생기거나 사라짐 (모바일 공격 버튼 → 줍기/조사) */
-  interactHint: { kind: 'weapon' | 'chest' | 'merchant' | 'lab' | 'vending' | 'portal' | 'statue' | null };
+  interactHint: { kind: 'weapon' | 'chest' | 'merchant' | 'lab' | 'vending' | 'portal' | 'statue' | 'combiner' | null };
   /** 전투 시작·방 클리어 띠 */
   combatBanner: { kind: 'start' | 'clear' };
   /** 아이템 획득 창을 닫았다 */
@@ -28,7 +28,7 @@ export interface GameEvents {
   restartRequested: Record<string, never>;
 
   /** 게임을 멈추는 창(카드 선택·인벤토리)이 열리거나 닫힘 */
-  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | 'archive' | 'codex' | 'story' | 'intro' | 'pause' | 'portal' | 'itemGet' | null };
+  modal: { kind: 'cards' | 'inventory' | 'cutscene' | 'job' | 'archive' | 'codex' | 'story' | 'intro' | 'pause' | 'portal' | 'itemGet' | 'combiner' | null };
   /** 포탈 이동 화면을 덮거나(on) 걷는다 */
   warp: { on: boolean };
   /** 효과음 하나 */
@@ -79,6 +79,11 @@ export interface GameEvents {
   itemGot: { itemId: string; set: boolean; weapon?: boolean; from?: { key: string; color: string }[] };
   /** 카드 선택창 → 이 카드를 골랐다 */
   cardPick: { index: number };
+  /** 아이템 조합기 창: 넣을 수 있는 아이템 id */
+  combinerShow: { items: string[] };
+  /** 조합기에서 고른 두 아이템 */
+  combinerPick: { a: string; b: string };
+  combinerClose: Record<string, never>;
   /** 인벤토리 → 스킬을 칸에 넣는다 */
   inventoryEquip: { skillId: string; target: number | 'passive' };
   /** 실험장: 직업 선택 창 열기·고르기·닫기 */

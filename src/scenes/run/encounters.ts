@@ -60,6 +60,8 @@ export class Encounters {
         const label = `${this.run.loot.weaponName(s.weapon)}\n${this.run.ctx.t('merchant.price', { price: s.price })}`;
         this.run.loot.stands.push(new MerchantStand(this.run, s, d.loot.merchantStand, def.spriteKey, x, c.y, label, this.run.loot.gradeColor(s.weapon.grade)));
       });
+    } else if (kind === 'combiner') {
+      this.run.loot.addCombiner(c.x, c.y);
     } else if (kind === 'skillShop') {
       this.run.loot.openCardShop(this.run.progression.drawShopCards(rng), c);
     } else if (kind === 'raid') {
@@ -122,7 +124,7 @@ export class Encounters {
       } else {
         this.run.setRoomLocked(sp.roomId, false);
         this.run.session.player.record.spires++;
-        this.offerSpireSkills(sp);
+        this.offerSpireItems(sp);
       }
     }
   }
@@ -165,10 +167,10 @@ export class Encounters {
     this.run.spawnEnemy(rng.pick(roster), sp.roomId, rng, true, a, b);
   }
 
-  /** 충전 완료 보상: 크기별 횟수만큼 스킬 카드 3장 중 1장 */
-  offerSpireSkills(sp: Spire): void {
+  /** 충전 완료 보상: 크기별 횟수만큼 아이템 카드 3장 중 1장 (보물 상자 가중치) */
+  offerSpireItems(sp: Spire): void {
     const n = this.run.ctx.data.loot.spire[sp.size].picks;
-    this.run.progression.queueOffers(Array.from({ length: n }, () => ({ kind: 'skill' as const, boss: false, spire: true })));
+    this.run.progression.queueOffers(Array.from({ length: n }, () => ({ kind: 'item' as const, boss: false, spire: true })));
   }
 
   /** 히든보스 처치: 보스 스킬 카드 1장 → 전용 무기 상자(왼쪽)·전용 아이템 상자(오른쪽) */

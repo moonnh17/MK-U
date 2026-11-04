@@ -341,6 +341,8 @@ export class RunScene extends Phaser.Scene {
       bus.on('debugClearRoom', () => this.debugTools.debugClearRoom()),
       bus.on('restartRequested', () => this.restartRun()),
       bus.on('cardPick', ({ index }) => this.progression.pickCard(index)),
+      bus.on('combinerPick', ({ a, b }) => this.loot.combine(a, b)),
+      bus.on('combinerClose', () => this.loot.closeCombiner()),
       bus.on('inventoryEquip', ({ skillId, target }) => this.progression.equip(skillId, target)),
       bus.on('inventoryDropWeapon', ({ slot }) => this.loot.dropFromSlot(slot)),
       bus.on('inventoryOpenRequest', () => this.progression.openInventory()),
@@ -424,6 +426,7 @@ export class RunScene extends Phaser.Scene {
     this.roomProps.doorIcons = [];
     this.portals = [];
     this.loot.vendings = [];
+    this.loot.combiners = [];
     this.loot.potions = [];
     this.loot.interactPrompt = null;
     // 이동 화면에서 고른 아이템(세트 합성 포함)의 획득 카드는 다음 스테이지에서
@@ -1159,8 +1162,8 @@ export class RunScene extends Phaser.Scene {
     // 아이템: 피격 효과 → 낮은 체력 회복 → 부활
     this.itemRt.onHurt(taken, attacker);
     if (p.hp > 0) this.itemRt.tryHeal();
-    else if (this.itemRt.tryRevive()) this.cameras.main.flash(200, 255, 255, 255);
-    if (p.hp <= 0) this.beginDeath();
+    // 부활 아이템이 있으면 죽는 연출 뒤 부활 연출로 일어난다
+    if (p.hp <= 0) this.beginDeath(this.itemRt.takeRevive());
     return true;
   }
 
@@ -1419,7 +1422,7 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** 사망: 연출을 보여 준 뒤 결산으로 */
-  beginDeath(): void {
+  beginDeath(revive: { invulnSec: number; look?: 'hectar' | 'holy' } | null = null): void {
     if (this.dying) return;
     this.dying = true;
     this.loot.setInteractHint(null);
@@ -1427,7 +1430,24 @@ export class RunScene extends Phaser.Scene {
     bus.emit('cardTip', { card: null });
     this.physics.pause();
     this.dropSuit();
-    this.stageFx.playDeath(() => this.endRun({ type: 'dead' }));
+    this.stageFx.playDeath(() => {
+      if (!revive) return this.endRun({ type: 'dead' });
+      this.stageFx.playRevive(revive.look ?? 'holy', () => this.finishRevive(revive.invulnSec));
+    });
+  }
+
+  /** 부활 연출이 끝나면: 체력 가득, 쓰러진 모습·카메라를 되돌리고 잠깐 무적 */
+  private finishRevive(invulnSec: number): void {
+    const p = this.session.player;
+    p.hp = p.maxHp;
+    this.dying = false;
+    this.physics.resume();
+    this.tweens.killTweensOf(this.player);
+    this.player.setAngle(0).setAlpha(1).clearTint();
+    this.weaponSprite.setVisible(true);
+    this.cameras.main.zoomTo(this.ctx.data.ui.camera.zoom * this.ctx.renderScale, 300, 'Sine.easeOut');
+    this.invuln = Math.max(this.invuln, invulnSec);
+    bus.emit('toast', { text: this.ctx.t('item.revived') });
   }
 
   endRun(outcome: NonNullable<RunSession['outcome']>): void {

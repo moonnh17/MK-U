@@ -123,6 +123,7 @@ export function collectAssets(d: GameData): AssetRef[] {
   add('prop', d.loot.chest.boss, 'chest.weapon.boss');
   for (const t of Object.values(d.loot.weaponChestTiers)) add('prop', t.sprite, t.nameKey);
   add('prop', d.loot.merchantStand, 'asset.merchantStand');
+  add('prop', d.loot.combiner, 'encounter.combiner');
   add('prop', d.loot.spire.small.sprite, 'asset.spireSmall');
   add('prop', d.loot.spire.medium.sprite, 'asset.spireMedium');
   add('prop', d.loot.spire.large.sprite, 'asset.spireMedium');

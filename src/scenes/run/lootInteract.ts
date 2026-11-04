@@ -4,10 +4,11 @@ import { bus } from '../../core/events';
 import { Rng } from '../../core/rng';
 import { CardStand, Chest, MerchantStand, type ChestKind } from '../../entities/chest';
 import { FloorWeapon } from '../../entities/pickup';
+import { fitArt } from '../../entities/art';
 import { describeCard } from '../../ui/cardView';
 import { artKeys } from '../../systems/art';
 import { cardStillValid, type Card } from '../../systems/cards';
-import { chapterWeights, effectiveWeights, readySet, readyWeaponSet, rollItem, transferWeight } from '../../systems/items';
+import { chapterWeights, combinableItems, combineCandidates, combineGrade, effectiveWeights, readySet, readyWeaponSet, rollItem, transferWeight } from '../../systems/items';
 import { canBuy, cardStock, rollChestTier, rollGrade, rollWeapon } from '../../systems/loot';
 import { heal } from '../../systems/vitals';
 import { dropWeaponAt, pickUpWeapon, plainWeapon, type WeaponItem } from '../../systems/weapons';
@@ -23,12 +24,16 @@ export class LootInteract {
   cardStands: CardStand[] = [];
   private tipCard: Card | null = null;
   vendings: Vending[] = [];
+  /** 아이템 조합기 (한 대에 한 번) */
+  combiners: { x: number; y: number; sprite: Phaser.GameObjects.Image; used: boolean }[] = [];
+  /** 지금 열린 조합기 */
+  private activeCombiner: LootInteract['combiners'][number] | null = null;
   potions: Phaser.GameObjects.Image[] = [];
   /** 포탈·자판기 앞에 뜨는 조작 안내 */
   interactPrompt: Phaser.GameObjects.Text | null = null;
   /** 아직 보여주지 않은 아이템 획득 창 */
   itemGets: ItemGet[] = [];
-  interactKind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | null = null;
+  interactKind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | 'combiner' | null = null;
   /** 상자·드롭 무기 시드 순번 */
   lootSeq = 0;
 
@@ -226,7 +231,66 @@ export class LootInteract {
       this.buyPotion(vending);
       return;
     }
+    const combiner = this.nearCombiner();
+    if (combiner) {
+      this.openCombiner(combiner);
+      return;
+    }
     if (this.nearPortal()) this.run.nextStage();
+  }
+
+  /** 아이템 조합기를 방 가운데에 놓는다 */
+  addCombiner(x: number, y: number): void {
+    const ref = this.run.ctx.data.loot.combiner;
+    const sprite = this.run.add.image(x, y, ref.spriteKey).setDepth(2);
+    fitArt(this.run.ctx.data, sprite, ref.size, ref.height ?? ref.size);
+    this.run.tweens.add({ targets: sprite, y: y - 2, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.combiners.push({ x, y, sprite, used: false });
+  }
+
+  nearCombiner(): LootInteract['combiners'][number] | null {
+    return this.run.nearest(
+      this.combiners.filter((c) => !c.used),
+      this.run.ctx.data.pickups.interactRadius + this.run.ctx.data.loot.combiner.size / 2,
+    );
+  }
+
+  private openCombiner(c: LootInteract['combiners'][number]): void {
+    const p = this.run.session.player;
+    this.activeCombiner = c;
+    this.run.setModal('combiner');
+    bus.emit('combinerShow', { items: combinableItems(p.items, this.run.ctx.data.items, new Set(p.itemsObtained)) });
+  }
+
+  closeCombiner(): void {
+    this.activeCombiner = null;
+    if (this.run.modal === 'combiner') this.run.setModal(null);
+  }
+
+  /** 같은 등급 두 아이템을 넣어 한 등급 위 아이템 하나를 얻는다 (넣은 아이템은 사라진다) */
+  combine(a: string, b: string): void {
+    const d = this.run.ctx.data;
+    const p = this.run.session.player;
+    const c = this.activeCombiner;
+    const da = d.items.items.find((x) => x.id === a);
+    const db = d.items.items.find((x) => x.id === b);
+    const to = da ? combineGrade(da.grade) : null;
+    const obtained = new Set(p.itemsObtained);
+    if (!c || c.used || !da || !db || a === b || da.grade !== db.grade || !to || !p.items.includes(a) || !p.items.includes(b)) return;
+    const pool = combineCandidates(to, d.items, obtained);
+    if (pool.length === 0) return;
+    const { stage } = this.run.session;
+    const rng = Rng.derive(this.run.ctx.config.seed, `combine-${stage.chapter}-${stage.stage}-${this.lootSeq++}`);
+    p.items = p.items.filter((x) => x !== a && x !== b);
+    this.run.itemRt.refresh();
+    c.used = true;
+    this.run.tweens.killTweensOf(c.sprite);
+    c.sprite.setAlpha(0.45);
+    this.closeCombiner();
+    sfx('warp');
+    this.giveItem(rng.pick(pool));
+    this.run.progression.checkAwakenings();
+    bus.emit('inventoryChanged', {});
   }
 
   openChest(chest: Chest): void {
@@ -313,10 +377,11 @@ export class LootInteract {
     const portal = this.nearPortal();
     const statue = this.run.roomProps.nearStatue();
     const chest = this.nearChest();
-    const kind = this.nearestFloorWeapon() ? 'weapon' : chest ? 'chest' : this.nearStand() || this.nearCardStand() ? 'merchant' : vending ? 'vending' : portal ? 'portal' : statue ? 'statue' : null;
+    const combiner = this.nearCombiner();
+    const kind = this.nearestFloorWeapon() ? 'weapon' : chest ? 'chest' : this.nearStand() || this.nearCardStand() ? 'merchant' : vending ? 'vending' : combiner ? 'combiner' : portal ? 'portal' : statue ? 'statue' : null;
     if (kind !== this.interactKind) this.setInteractHint(kind);
     // 포탈·자판기: 머리 위에 조작 안내
-    const at = kind === 'vending' ? vending : kind === 'statue' ? statue : kind === 'portal' ? { x: portal!.sprite.x, y: portal!.sprite.y } : kind === 'chest' ? chest : null;
+    const at = kind === 'vending' ? vending : kind === 'statue' ? statue : kind === 'portal' ? { x: portal!.sprite.x, y: portal!.sprite.y } : kind === 'chest' ? chest : kind === 'combiner' ? combiner : null;
     if (!at) {
       this.interactPrompt?.setVisible(false);
       return;
@@ -328,7 +393,7 @@ export class LootInteract {
     this.interactPrompt.setPosition(at.x, at.y - 22).setVisible(true);
   }
 
-  setInteractHint(kind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | null): void {
+  setInteractHint(kind: 'weapon' | 'chest' | 'merchant' | 'vending' | 'portal' | 'statue' | 'combiner' | null): void {
     this.interactKind = kind;
     bus.emit('interactHint', { kind });
   }

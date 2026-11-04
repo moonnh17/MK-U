@@ -89,7 +89,7 @@
         { "kind": "damage", "scope": "tech", "value": 0.2, "group": "damagePct" },
         { "kind": "coinGain", "value": 0.2, "group": "damagePct" },
         { "kind": "coinShots", "perCoins": 30, "shots": 5, "damage": 700, "range": 300, "tags": ["tech", "ranged"] },
-        { "kind": "revive", "invulnSec": 3, "school": "hectar" }
+        { "kind": "revive", "invulnSec": 3, "school": "hectar", "look": "hectar" }
       ],
       "spriteKey": "item_regulus_shard", "color": "#8a6aff", "size": 8 },
     { "id": "caesarCrown", "abilityNameKey": "item.caesarCrown.ability", "flavor": "codex.itemFlavor.caesarCrown", "nameKey": "item.caesarCrown", "descKey": "item.caesarCrown.desc", "abilityDescKey": "item.caesarCrown.abilityDesc", "grade": "unique", "pool": "normal", "tags": [],
@@ -103,7 +103,7 @@
       "effects": [
         { "kind": "maxSanity", "value": 20, "group": "hpFlat" },
         { "kind": "damage", "scope": "all", "value": 0.1, "group": "damagePct" },
-        { "kind": "revive", "invulnSec": 3 },
+        { "kind": "revive", "invulnSec": 3, "look": "holy" },
         { "kind": "reflect", "ratio": 1.0 },
         { "kind": "greatSuccess", "bonus": 0.2, "noFailure": true, "school": "acro" }
       ],

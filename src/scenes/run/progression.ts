@@ -45,6 +45,8 @@ export class Progression {
       if (frame.pressed.has('inventory') || frame.pressed.has('pause')) this.closeInventory();
     } else if (this.run.modal === 'pause') {
       if (frame.pressed.has('pause')) this.run.setModal(null);
+    } else if (this.run.modal === 'combiner') {
+      if (frame.pressed.has('pause')) this.run.loot.closeCombiner();
     }
   }
 

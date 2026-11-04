@@ -247,7 +247,7 @@ export function validateGameData(d: GameData): Errors {
   for (const g of GRADE_IDS) checkPositive(errors, `loot.merchant.prices.${g}`, lt.merchant.prices[g]);
   checkPositive(errors, 'loot.skillShop.count', lt.skillShop.count);
   for (const [k, v] of Object.entries(lt.skillShop.prices)) checkPositive(errors, `loot.skillShop.prices.${k}`, v);
-  for (const k of ['treasure', 'merchant', 'skillShop', 'raid', 'magiSpire', 'hiddenBoss'] as const) {
+  for (const k of ['treasure', 'merchant', 'skillShop', 'combiner', 'raid', 'magiSpire', 'hiddenBoss'] as const) {
     checkPositive(errors, `loot.encounter.weights.${k}`, lt.encounter.weights[k], true);
     needText(`loot.encounter.${k}`, `encounter.${k}`);
   }

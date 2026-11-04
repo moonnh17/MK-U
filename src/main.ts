@@ -20,6 +20,7 @@ import { LabScene } from './scenes/LabScene';
 import { RunScene } from './scenes/RunScene';
 import { UIScene } from './scenes/UIScene';
 import { CardWindow } from './ui/cardWindow';
+import { CombinerWindow } from './ui/combinerWindow';
 import { CutsceneWindow } from './ui/cutsceneWindow';
 import { InventoryWindow } from './ui/inventoryWindow';
 import { ItemCard } from './ui/itemCard';
@@ -148,7 +149,7 @@ bus.on('interactHint', ({ kind }) => {
   else if (kind === 'chest') touch.setAttackOverride('interact', t('mobile.open'));
   else if (kind === 'merchant' || kind === 'vending') touch.setAttackOverride('interact', t('mobile.buy'));
   else if (kind === 'portal') touch.setAttackOverride('interact', t('mobile.enter'));
-  else if (kind === 'statue') touch.setAttackOverride('interact', t('mobile.use'));
+  else if (kind === 'statue' || kind === 'combiner') touch.setAttackOverride('interact', t('mobile.use'));
   else if (kind === 'lab') touch.setAttackOverride('interact', t('mobile.check'));
   else touch.setAttackOverride(null, t('mobile.attack'));
 });
@@ -165,6 +166,7 @@ bus.on('modal', ({ kind }) => {
   refreshTouch();
 });
 new CardWindow(ctx);
+new CombinerWindow(ctx);
 new InventoryWindow(ctx);
 new CutsceneWindow(ctx);
 new ItemCard(ctx);
