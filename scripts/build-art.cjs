@@ -1023,15 +1023,16 @@ const BOSS_SHEET_W = 3600;
  * height: 자세마다 높이를 맞춘다(단일 포즈 보스). 없으면 시트 칸 그대로 같은 배율로 줄인다(프레임 시트 보스).
  * poses: { 이름: { frames, fps, loop } }
  */
-function bossActor(key, states, fit, height, refSize) {
+function bossActor(key, states, fit, height, refSize, density = ART_DENSITY) {
+  const even = (v) => Math.max(density, Math.round(v / density) * density);
   const all = Object.values(states).flatMap((s) => s.frames);
   const boxes = all.map((f) => k.bbox(f, 40) ?? { x: 0, y: 0, w: f.w, h: f.h });
   // refSize: 다듬기 전 그림 크기로 배율을 고정한다 (찌꺼기를 지워도 몸 크기가 그대로)
-  const scale = (i) => (fit * ART_DENSITY) / (height ? boxes[i].h : refSize ?? Math.max(boxes[0].w, boxes[0].h));
+  const scale = (i) => (fit * density) / (height ? boxes[i].h : refSize ?? Math.max(boxes[0].w, boxes[0].h));
   let fw, fh, cells;
   if (height) {
     fw = even(Math.max(...boxes.map((b, i) => b.w * scale(i))));
-    fh = even(fit * ART_DENSITY);
+    fh = even(fit * density);
     cells = all.map((f, i) => {
       const b = boxes[i];
       const s = scale(i);
@@ -1065,7 +1066,7 @@ function bossActor(key, states, fit, height, refSize) {
     anims[name] = { from: at, to: at + st.frames.length - 1, fps: st.fps ?? 4, ...(st.loop === false ? { loop: false } : {}) };
     at += st.frames.length;
   }
-  sprites[key] = { file, frameWidth: cw, frameHeight: ch, frames: framed.length, density: ART_DENSITY, anims };
+  sprites[key] = { file, frameWidth: cw, frameHeight: ch, frames: framed.length, density: density, anims };
 }
 const one = (boss, id) => bFrames(boss, id);
 const st = (boss, id, fps, loop) => ({ frames: bFrames(boss, id), fps: fps ?? (bAnim(boss, id).fps || 4), loop: loop ?? bAnim(boss, id).loop });
@@ -1289,6 +1290,37 @@ function denoise(img, cut = 24) {
   for (let p = 3; p < img.px.length; p += 4) if (img.px[p] <= cut) img.px[p] = 0;
   return img;
 }
+/**
+ * 프레임 사이가 붙은 가로 원본에서 몸 하나씩 잘라낸다 (같은 칸으로 자르면 옆 프레임 지팡이가 묻고 몸이 잘린다).
+ * 큰 덩어리 = 몸, 나머지 조각은 가로로 가장 가까운 몸에 붙인다. 발 가운데를 칸 가운데에 두고 같은 크기 칸으로 낸다.
+ */
+function figures(img) {
+  const comps = k.components(img, 24).sort((a, b) => b.area - a.area);
+  const bodies = comps.filter((c) => c.area >= comps[0].area * 0.4).sort((a, b) => a.x0 - b.x0);
+  const parts = bodies.map(() => []);
+  for (const c of comps) {
+    const cx = (c.x0 + c.x1) / 2;
+    const gap = (b) => (cx < b.x0 ? b.x0 - cx : cx > b.x1 ? cx - b.x1 : 0);
+    parts[bodies.reduce((bi, b, i) => (gap(b) < gap(bodies[bi]) ? i : bi), 0)].push(c);
+  }
+  // 발: 몸 덩어리 아래 12% 픽셀의 가로 무게중심
+  const feet = bodies.map((b) => {
+    let sx = 0, n = 0;
+    for (const p of b.pts) { const y = Math.floor(p / img.w); if (y >= b.y1 - (b.y1 - b.y0) * 0.12) { sx += p % img.w; n++; } }
+    return sx / n;
+  });
+  // 칸 폭 고정: 같은 보스의 모든 동작이 같은 칸이어야 bossActor가 한 영역으로 자른다
+  const half = 520;
+  return parts.map((ps, i) => {
+    const out = k.blank(half * 2, img.h);
+    const dx = half - Math.round(feet[i]);
+    for (const c of ps) for (const p of c.pts) {
+      const x = (p % img.w) + dx, y = Math.floor(p / img.w);
+      if (x >= 0 && x < out.w) img.px.copy(out.px, (y * out.w + x) * 4, p * 4, p * 4 + 4);
+    }
+    return out;
+  });
+}
 /** 폴더 안 '…프레임01~04.png' */
 const hbFrames = (dir) => {
   const d = path.join(HB_DIR, dir);
@@ -1319,10 +1351,28 @@ const hbFx = (key, dir, fit, fps, loop = false) => fxArt(key, hbFrames(dir), fit
     idle: st4(`${EO}/02_오리온_성기사/01_본체/대기`, 6), move: st4(`${EO}/02_오리온_성기사/01_본체/이동`, 8),
     attack: st4(`${EO}/02_오리온_성기사/01_본체/메이스 공격`, 12, false), cast: st4(`${EO}/02_오리온_성기사/01_본체/성좌 시전`, 10, false),
   }, 60);
-  bossActor('enemy_royal_mage', {
-    idle: st4(`${RM}/01_본체/대기`, 6), move: st4(`${RM}/01_본체/이동`, 8),
-    attack: st4(`${RM}/01_본체/지팡이 사격`, 12, false), cast: st4(`${RM}/01_본체/칙령 시전`, 10, false),
-  }, 56);
+  // 왕실특무마기법사: 맨얼굴 v2 팩. 1단계 인간, 마기화(2단계)는 반신 마기족
+  {
+    const RV = path.join(path.dirname(HB_DIR), 'MKU_왕실특무마기법사_검붉은마기화_맨얼굴_v2_2026-11-05');
+    const src = (slot) => figures(denoise(k.read(path.join(RV, '00_원본', `${slot}.png`))));
+    const st = (slot, fps, loop = true) => ({ frames: src(slot), fps, loop });
+    const human = st('human.idle', 6);
+    const hb = k.bbox(human.frames[0], 40);
+    const ref = Math.max(hb.w, hb.h);
+    bossActor('enemy_royal_mage', { idle: human, move: { ...human, fps: 10 } }, 56, false, ref, 4);
+    const magi = st('magiForm.idle', 6);
+    bossActor('enemy_royal_mage_phase2', {
+      idle: magi, move: { ...magi, fps: 10 }, transition: st('magiForm.transition', 6, false),
+      dash: st('magiStrike.dashBody', 12), hit1: st('magiStrike.hit1Body', 12, false), hit2: st('magiStrike.hit2Body', 12, false), hit3: st('magiStrike.hit3Body', 12, false),
+    }, 56, false, ref, 4);
+    const fxStrip = (dir) => {
+      const d = path.join(RV, dir), m = JSON.parse(fs.readFileSync(path.join(d, 'metadata.json'), 'utf8'));
+      const img = denoise(k.read(path.join(d, 'strip.png')));
+      return Array.from({ length: m.frames }, (_, i) => k.crop(img, i * m.frameWidth, 0, m.frameWidth, m.frameHeight));
+    };
+    fxArt('fx_royal_claw', fxStrip('08_근접이펙트_삼중발톱'), 70, { fps: 16 });
+    fxArt('fx_royal_finisher', fxStrip('09_근접이펙트_변이강타충격'), 70, { fps: 16 });
+  }
 
   // 패턴 이펙트 26칸
   const AE = '01_선조의_잔상', RMS = '02_왕실특무마기법사', OC = '03_오리온의_성전사';

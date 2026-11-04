@@ -541,9 +541,14 @@ class MagiStrike implements PatternRun {
     this.t = c.v('swipeGapSec');
     this.swipes++;
     const p = c.boss.pos();
-    c.host.addHazard(
-      new SectorBlast(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('radius'), c.v('arcDeg'), c.v('swipeWindupSec'), c.v('swipeDamage'), c.boss.color, c.art('sectorHit')),
-    );
+    // 마기화 그림: 1·2타 삼중 발톱, 마지막 타 변이 강타 충격 (없으면 공용 부채꼴)
+    const art = (this.swipes === c.v('swipes') ? c.art('finisher') : c.art('claw')) ?? c.art('sectorHit');
+    c.host.addHazard(new SectorBlast(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('radius'), c.v('arcDeg'), c.v('swipeWindupSec'), c.v('swipeDamage'), c.boss.color, art));
+  }
+
+  /** 돌진 중엔 돌진 자세, 이후엔 n번째 타격 자세 (strike1~3) */
+  bodyPose(): string {
+    return this.swipes > 0 ? `strike${Math.min(this.swipes, 3)}` : this.dash.bodyPose();
   }
 
   destroy(): void {

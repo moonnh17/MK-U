@@ -40,6 +40,6 @@ export interface BossHost extends HazardHost {
 export interface PatternRun {
   update(dt: number): void;
   destroy(): void;
-  /** 돌진 패턴이 지금 원하는 본체 자세 */
-  bodyPose?(): 'dashReady' | 'dash' | 'dashEnd' | null;
+  /** 돌진 패턴이 지금 원하는 본체 자세 (poses의 키) */
+  bodyPose?(): string | null;
 }

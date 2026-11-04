@@ -4796,10 +4796,10 @@
     },
     "enemy_royal_mage": {
       "file": "mku/enemy_royal_mage.png",
-      "frameWidth": 130,
-      "frameHeight": 114,
-      "frames": 16,
-      "density": 2,
+      "frameWidth": 150,
+      "frameHeight": 230,
+      "frames": 8,
+      "density": 4,
       "anims": {
         "idle": {
           "from": 0,
@@ -4809,19 +4809,83 @@
         "move": {
           "from": 4,
           "to": 7,
-          "fps": 8
+          "fps": 10
+        }
+      }
+    },
+    "enemy_royal_mage_phase2": {
+      "file": "mku/enemy_royal_mage_phase2.png",
+      "frameWidth": 178,
+      "frameHeight": 234,
+      "frames": 36,
+      "density": 4,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 6
         },
-        "attack": {
+        "move": {
+          "from": 4,
+          "to": 7,
+          "fps": 10
+        },
+        "transition": {
           "from": 8,
-          "to": 11,
+          "to": 13,
+          "fps": 6,
+          "loop": false
+        },
+        "dash": {
+          "from": 14,
+          "to": 17,
+          "fps": 12
+        },
+        "hit1": {
+          "from": 18,
+          "to": 23,
           "fps": 12,
           "loop": false
         },
-        "cast": {
-          "from": 12,
-          "to": 15,
-          "fps": 10,
+        "hit2": {
+          "from": 24,
+          "to": 29,
+          "fps": 12,
           "loop": false
+        },
+        "hit3": {
+          "from": 30,
+          "to": 35,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_claw": {
+      "file": "mku/fx_royal_claw.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16
+        }
+      }
+    },
+    "fx_royal_finisher": {
+      "file": "mku/fx_royal_finisher.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16
         }
       }
     },
