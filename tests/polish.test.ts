@@ -71,12 +71,12 @@ describe('전투 없는 방', () => {
     expect(D.mapgen.roomProps.rules.startRoom).toBeUndefined();
     expect(D.mapgen.roomProps.rules.exitRoom).toBeUndefined();
   });
-  it('평화로운 칸 확률은 보물·상인 가중치와 맞는다', () => {
+  it('평화로운 칸 확률은 아이템 상자·상인 가중치와 맞는다', () => {
     const w = D.loot.encounter.weights;
     const sum = Object.values(w).reduce((a, b) => a + b, 0);
     expect(D.mapgen.encounterPeaceful.chance).toBeCloseTo((w.treasure + w.merchant + w.skillShop + w.combiner) / sum, 2);
   });
-  it('평화로운 칸은 보물·상점만, 아니면 전투 유형만', () => {
+  it('평화로운 칸은 아이템 상자·상점만, 아니면 전투 유형만', () => {
     const all = new Set(Object.keys(D.loot.encounter.weights) as (keyof typeof D.loot.encounter.weights)[]);
     expect([...encounterPool(all, true)].sort()).toEqual(['combiner', 'merchant', 'skillShop', 'treasure']);
     expect(encounterPool(all, false).has('merchant')).toBe(false);

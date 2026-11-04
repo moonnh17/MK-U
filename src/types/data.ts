@@ -637,7 +637,7 @@ export interface MapgenData {
   /** otherRooms: 전투 칸 밖의 방에 장애물이 나올 확률 (open 틀만: 가운데가 비어 포털·코어·진열대를 가리지 않는다) */
   obstacles: { chance: number; doorLaneTiles: number; otherRooms: Partial<Record<RoomKind, number>>; layouts: { id: string; weight: number; open?: boolean; blocks: { x: number; y: number; w: number; h: number }[] }[] };
   roomProps: RoomPropsData;
-  /** 전투 없는 조우 칸(보물·상인)이 될 확률과 그 방 크기 */
+  /** 전투 없는 조우 칸(아이템 상자·상인)이 될 확률과 그 방 크기 */
   encounterPeaceful: { chance: number; size: string };
 }
 
@@ -679,7 +679,7 @@ export interface ChampionRules {
   /** 대규모 습격: 한 웨이브에 정예가 나오고, 이 확률로 둘이 함께 */
   raidBothChance: number;
   /** 처치 시 무기 상자 확률과 그 등급 가중치 */
-  /** 정예 처치 때 무기 상자(전투 상자 등급표)가 떨어질 확률 */
+  /** 정예·엘리트 처치 때 무기 상자(전투 상자 등급표)가 떨어질 확률 */
   weaponChestChance: number;
 }
 
@@ -1073,12 +1073,12 @@ export interface ItemDef extends SpriteRef {
   effects: ItemEffect[];
   /** 직업·학파별 추가 효과 (아직 없는 직업은 데이터만) */
   variants?: { job: string; effects: ItemEffect[] }[];
-  /** boss: 이 보스 처치 시 보스 보물 상자에서 확정 */
+  /** boss: 이 보스 처치 시 보스 아이템 상자에서 확정 */
   bossId?: string;
 }
 
 export interface ItemsData {
-  /** 등급 가중치 (보물 상자·아이템 카드), 챕터 번호별 */
+  /** 등급 가중치 (아이템 상자·아이템 카드), 챕터 번호별 */
   treasureWeights: Record<string, Partial<Record<GradeId, number>>>;
   /** 대규모 습격 상자 (레어 이상) */
   raidWeights: Partial<Record<GradeId, number>>;
@@ -1105,7 +1105,7 @@ export interface LootData {
   uniqueWeaponFallback: GradeId;
   /** 보스 무기 상자 등급 가중치 (모든 보스 같은 표) */
   bossWeaponChest: Partial<Record<GradeId, number>>;
-  /** 보스 보물 상자(아이템) 등급 가중치. 전용 아이템이 남은 보스면 그 아이템 확정 */
+  /** 보스 아이템 상자(아이템) 등급 가중치. 전용 아이템이 남은 보스면 그 아이템 확정 */
   bossItemChest: Partial<Record<GradeId, number>>;
   /** 전투 칸을 깼을 때 무기 상자(전투 상자 등급표)가 떨어질 확률 */
   combatDrop: { chance: number };

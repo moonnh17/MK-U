@@ -27,7 +27,7 @@ export interface RoomNode {
   size?: { w: number; h: number };
   /** 장애물 배치 틀 id (없으면 null) */
   layout?: string | null;
-  /** 조우 칸: 전투 없는 유형(보물·상점)만 나온다. 작고 소품이 없다 */
+  /** 조우 칸: 전투 없는 유형(아이템 상자·상점)만 나온다. 작고 소품이 없다 */
   peaceful?: boolean;
   /** 방 가운데 월드 좌표 (compactRooms). 없으면 격자 칸 가운데 */
   center?: { x: number; y: number };

@@ -109,7 +109,7 @@ export class Progression {
     return drawSkillCards(rng, p.loadout, d.skills, d.cards, (id) => isSkillImplemented(id) && skillAllowed(findSkill(d.skills, id), p.advancement));
   }
 
-  /** 아이템 카드: 보물 상자와 같은 가중치 */
+  /** 아이템 카드: 아이템 상자와 같은 가중치 */
   private drawItems(rng: Rng): AnyCard[] {
     const d = this.run.ctx.data;
     const p = this.run.session.player;
@@ -274,10 +274,10 @@ export class Progression {
     const d = this.run.ctx.data;
     const { stage } = this.run.session;
     const last = stage.stage === d.mapgen.stagesPerChapter && stage.chapter === d.jobs.advanceAfterChapter;
-    // 보스 처치: 보스 보물 상자 1 + 보스 무기 상자 1 확정 (포털 양옆)
+    // 보스 처치: 보스 아이템 상자 1 + 보스 무기 상자 1 확정 (포털 양옆)
     const c = roomCenter(node, this.run.m);
     const bossId = d.bosses.bosses.find((b) => b.chapter === stage.chapter && b.stage === stage.stage)?.id;
-    // 전용 아이템이 아직 남아 있으면 보물 상자에서 그 아이템 확정
+    // 전용 아이템이 아직 남아 있으면 아이템 상자에서 그 아이템 확정
     const bossItem = d.items.items.find((x) => x.pool === 'boss' && x.bossId === bossId && !this.run.session.player.itemsObtained.includes(x.id));
     // 전용 무기가 있으면 bossWeaponChance(20%)로 그 무기, 아니면 보스 무기 상자 가중치
     const bossWeapon = d.weapons.weapons.find((w) => w.bossId === bossId);

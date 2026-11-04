@@ -98,7 +98,7 @@ describe('무기 수치', () => {
 
 describe('조우 칸', () => {
   const all = new Set<EncounterKindId>(['treasure', 'merchant', 'skillShop', 'raid', 'magiSpire', 'hiddenBoss']);
-  it('기획서 가중치: 보물 24.5·상인 21·스킬 상점 10·조합기 15·습격 28.5·첨탑 12·히든보스 1', () => {
+  it('기획서 가중치: 아이템 상자 24.5·상인 21·스킬 상점 10·조합기 15·습격 28.5·첨탑 12·히든보스 1', () => {
     expect(L.encounter.weights).toEqual({ treasure: 24.5, merchant: 21, skillShop: 10, combiner: 15, raid: 28.5, magiSpire: 12, hiddenBoss: 1 });
     const count: Record<string, number> = {};
     const r = new Rng(9);

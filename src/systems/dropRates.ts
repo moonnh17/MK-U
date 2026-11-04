@@ -37,7 +37,7 @@ function source(key: string, weights: Partial<Record<GradeId, number>>, mythicCh
   return { key, vars, rates: gradeRates(weights, mythicChance), shares: gradeShares(weights) };
 }
 
-/** 아이템 출처: 보물 상자·아이템 카드는 챕터마다 표가 다르다 */
+/** 아이템 출처: 아이템 상자·아이템 카드는 챕터마다 표가 다르다 */
 export function itemSources(d: GameData): DropSource[] {
   const m = d.loot.mythicChance;
   const chapters = Array.from({ length: d.mapgen.chapters }, (_, i) => i + 1);

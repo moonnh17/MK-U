@@ -9,7 +9,7 @@
     "waveChance": 0.4,
     "maxPerRoom": 2,
     "raidBothChance": 0.5,
-    "weaponChestChance": 0.05
+    "weaponChestChance": 0.03
   },
   "waves": [
     { "id": "c1_swarm", "chapter": 1, "weight": 2, "spawns": [{ "enemy": "tomakki", "count": [5, 7] }] },

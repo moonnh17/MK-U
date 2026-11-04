@@ -167,7 +167,7 @@ export class Encounters {
     this.run.spawnEnemy(rng.pick(roster), sp.roomId, rng, true, a, b);
   }
 
-  /** 충전 완료 보상: 크기별 횟수만큼 아이템 카드 3장 중 1장 (보물 상자 가중치) */
+  /** 충전 완료 보상: 크기별 횟수만큼 아이템 카드 3장 중 1장 (아이템 상자 가중치) */
   offerSpireItems(sp: Spire): void {
     const n = this.run.ctx.data.loot.spire[sp.size].picks;
     this.run.progression.queueOffers(Array.from({ length: n }, () => ({ kind: 'item' as const, boss: false, spire: true })));

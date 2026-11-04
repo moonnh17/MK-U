@@ -138,7 +138,7 @@
 | `chest_weapon` | 무기 상자 | 14×14 | feet | #a07a3a | mku/chest_weapon.png (1프레임) |
 | `chest_item` | 아이템 상자 | 14×14 | feet | #5a8ad9 | mku/chest_item.png (1프레임) |
 | `chest_weapon_boss` | 보스 무기 상자 | 16×16 | feet | #8a1a24 | mku/chest_weapon_boss.png (1프레임) |
-| `chest_item_boss` | 보스 보물 상자 | 16×16 | feet | #4a2a8a | mku/chest_item_boss.png (1프레임) |
+| `chest_item_boss` | 보스 아이템 상자 | 16×16 | feet | #4a2a8a | mku/chest_item_boss.png (1프레임) |
 | `chest_weapon_basic` | 일반 무기 상자 | 14×14 | feet | #8a6a4a | mku/chest_weapon_basic.png (1프레임) |
 | `chest_weapon_advanced` | 고급 무기 상자 | 14×14 | feet | #4a8ac0 | mku/chest_weapon_advanced.png (1프레임) |
 | `chest_weapon_supreme` | 최고급 무기 상자 | 15×15 | feet | #e8be46 | mku/chest_weapon_supreme.png (1프레임) |
