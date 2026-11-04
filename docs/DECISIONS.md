@@ -683,3 +683,5 @@
 - AimFan(붉은 탄막·궤도 절단, 식광 공용): 준비 동안 기를 모으고 젖혔다가, 쏠 때 부채꼴 방향 불티·충격파·반동.
 - 자세 크기 보정(BossCore.poseScale, "그림키.자세" → 배율): 원본에서 작게 그려진 자세를 키운다. 마기카이저 2단계 missile 1.9·cross 1.3, 3단계 missile 1.8·command 1.9·cross 1.35, 헥타르 수석 연구원 1단계 cast 1.5·move 1.15 (그림 높이를 재서 눈대중으로 맞춤). 겉모습 배율(자세 보정·몸짓·맞은 찌그러짐)이 바뀌어도 판정 몸은 기본 크기·자리 그대로 둔다(Enemy.keepBody).
 - 마기카이저 회전·불안정 레이저: 광선 그림이 초승달 베기(fx_kaiser_sweep)·부채꼴(fx_kaiser_sweep_warn)이라 길게 늘이면 보이지 않았다. 기본 레이저 그림(fx_kaiser_laser·laser_warn)을 쓰고, 두 그림은 시작할 때 보스 자리 이펙트(.cast)로 옮겼다.
+- 적 유도 미사일: 휘는 동안 그림 방향을 속도 방향에 맞춘다(전에는 쏜 방향 그대로라 옆으로 날아가 보였다).
+- 마기카이저 지열 분출 폭발: 원본 vfx.kaiser.debris가 네모로 잘린 조각이라 빼고 어깨 미사일 집속 폭발(fx_kaiser_cluster)을 쓴다. public/assets/mku/fx_kaiser_debris.png 파일은 남아 있다(어디서도 쓰지 않음).

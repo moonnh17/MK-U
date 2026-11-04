@@ -1193,6 +1193,8 @@ export class RunScene extends Phaser.Scene {
       if (turn > 0) {
         const v = steerToward((b.body as Phaser.Physics.Arcade.Body).velocity, b, this.player, turn, dt);
         b.setVelocity(v.x, v.y);
+        // 휘는 동안에도 머리가 날아가는 쪽을 본다
+        b.setRotation(Math.atan2(v.y, v.x));
       }
     }
   }

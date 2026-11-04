@@ -1209,7 +1209,7 @@ bFx('05', 'vfx.kaiser.lock', 'fx_kaiser_lock', 40);
 bFx('05', 'vfx.kaiser.sweep-warning', 'fx_kaiser_sweep_warn', 120);
 bFx('05', 'vfx.kaiser.cross-vfx', 'fx_kaiser_cross', 120);
 bFx('05', 'vfx.kaiser.command-shock', 'fx_kaiser_command', 120);
-bFx('05', 'vfx.kaiser.debris', 'fx_kaiser_debris', 70);
+// vfx.kaiser.debris는 원본이 네모로 잘린 조각이라 쓰지 않는다 (지열 분출은 어깨 미사일 집속 폭발)
 bFx('05', 'vfx.boss.magi_kaiser.death', 'fx_kaiser_death', 110);
 
 const artPath = path.join(REPO, 'src/data/art.json');

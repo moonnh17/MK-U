@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 498개 · 그림 있음 485개
+전체 497개 · 그림 있음 484개
 
 ## player (3)
 
@@ -471,7 +471,7 @@
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
-## fx (97)
+## fx (96)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -549,7 +549,7 @@
 | `fx_eclipse_flare` | 식광 (layer) | 55×55 | center | #ff3a4a | mku/fx_eclipse_flare.png (2프레임) |
 | `fx_bit_casing` | 마기카이저 (debris2) 외 1곳 | 6×6 | center | #ff2a2a | mku/fx_bit_casing.png (4프레임) |
 | `fx_bit_rail_slug` | 마기카이저 (redSunspots.shell) | 6×6 | center | #ff2a2a | mku/fx_bit_rail_slug.png (4프레임) |
-| `fx_kaiser_cluster` | 마기카이저 (redSunspots.blastHit) | 35×35 | center | #ff2a2a | mku/fx_kaiser_cluster.png (4프레임) |
+| `fx_kaiser_cluster` | 마기카이저 (redSunspots.blastHit) 외 1곳 | 35×35 | center | #ff2a2a | mku/fx_kaiser_cluster.png (4프레임) |
 | `fx_kaiser_cross_burst` | 마기카이저 (doomCommand.cross) | 45×45 | center | #ff2a2a | mku/fx_kaiser_cross_burst.png (4프레임) |
 | `fx_kaiser_barrage_net` | 마기카이저 (doomCommand.net) | 70×70 | center | #ff2a2a | mku/fx_kaiser_barrage_net.png (4프레임) |
 | `fx_kaiser_unbound` | 마기카이저 (unlock) | 70×70 | center | #ff2a2a | mku/fx_kaiser_unbound.png (4프레임) |
@@ -563,7 +563,6 @@
 | `fx_kaiser_shock` | 마기카이저 (ringStart) | 45×45 | center | #ff2a2a | mku/fx_kaiser_shock.png (2프레임) |
 | `fx_kaiser_muzzle` | 마기카이저 (lineLaser.cast) | 20×20 | center | #ff2a2a | mku/fx_kaiser_muzzle.png (3프레임) |
 | `fx_kaiser_command` | 마기카이저 (safeHit) | 60×60 | center | #ff2a2a | mku/fx_kaiser_command.png (4프레임) |
-| `fx_kaiser_debris` | 마기카이저 (geyser.blastHit) | 35×35 | center | #ff2a2a | mku/fx_kaiser_debris.png (4프레임) |
 | `fx_kaiser_cross` | 마기카이저 (doomCommand.cast) | 60×60 | center | #ff2a2a | mku/fx_kaiser_cross.png (4프레임) |
 | `fx_kaiser_death` | 마기카이저 (death) | 55×55 | center | #ff2a2a | mku/fx_kaiser_death.png (4프레임) |
 | `fx_hit_tech` | 타격 불꽃(기술) | 10×10 | center | #5ad0ff | mku/fx_hit_tech.png (1프레임) |

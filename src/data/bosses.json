@@ -1575,7 +1575,7 @@
           "size": 60
         },
         "geyser.blastHit": {
-          "spriteKey": "fx_kaiser_debris",
+          "spriteKey": "fx_kaiser_cluster",
           "color": "#ff2a2a",
           "size": 35
         },

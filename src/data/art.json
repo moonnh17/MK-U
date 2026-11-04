@@ -5117,21 +5117,6 @@
         }
       }
     },
-    "fx_kaiser_debris": {
-      "file": "mku/fx_kaiser_debris.png",
-      "frameWidth": 140,
-      "frameHeight": 140,
-      "frames": 4,
-      "density": 2,
-      "anims": {
-        "play": {
-          "from": 0,
-          "to": 3,
-          "fps": 12,
-          "loop": true
-        }
-      }
-    },
     "fx_kaiser_death": {
       "file": "mku/fx_kaiser_death.png",
       "frameWidth": 220,
