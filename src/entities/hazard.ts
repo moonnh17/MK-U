@@ -11,6 +11,7 @@ import { inGap } from '../systems/bossGeometry';
 import type { SpriteRef } from '../types/data';
 import { bounceStep } from '../systems/motion';
 import type { Enemy } from './enemy';
+import type { Rng } from '../core/rng';
 
 export interface HazardHost {
   readonly scene: Phaser.Scene;
@@ -171,6 +172,8 @@ export interface RingSpec {
   /** 통과할 수 있는 틈: 중심 각도와 벌어진 정도 */
   gapAngle?: number;
   gapDeg?: number;
+  /** 번개 고리: 지글거리는 번개 선 + 빛 번짐 + 튀는 불티 (판정은 그대로) */
+  bolt?: { rng: Rng; color: number };
 }
 
 /** 고리: 퍼지는 고리(충격파) · 줄어드는 고리(수축 전류) · 고정 고리(전격 감옥). 틈이 있으면 그 각도는 지나갈 수 있다 */
@@ -179,6 +182,10 @@ export class Ring implements Hazard {
   private t = 0;
   private hitOnce = false;
   private readonly ticker: Ticker;
+  /** 번개 고리: 꺾임 오프셋(각 점의 반지름 흔들림)을 잠깐씩 유지해 너무 떨리지 않게 */
+  private jitter: number[] = [];
+  private jitterLeft = 0;
+  private sparkLeft = 0;
 
   constructor(
     scene: Phaser.Scene,
@@ -201,13 +208,14 @@ export class Ring implements Hazard {
     if (this.t > s.telegraphSec + s.moveSec + s.holdSec) return false;
     const r = this.radius();
     const live = this.t >= s.telegraphSec;
-    this.g.clear().lineStyle(live ? s.thickness : 1, s.color, live ? 0.75 : 0.5);
     const gapHalf = ((s.gapDeg ?? 0) * Math.PI) / 360;
-    if (gapHalf > 0) {
+    if (s.bolt) this.drawBolt(dt, host, r, live, gapHalf);
+    else if (gapHalf > 0) {
+      this.g.clear().lineStyle(live ? s.thickness : 1, s.color, live ? 0.75 : 0.5);
       this.g.beginPath();
       this.g.arc(s.center.x, s.center.y, Math.max(1, r), s.gapAngle! + gapHalf, s.gapAngle! - gapHalf + Math.PI * 2, false);
       this.g.strokePath();
-    } else this.g.strokeCircle(s.center.x, s.center.y, Math.max(1, r));
+    } else this.g.clear().lineStyle(live ? s.thickness : 1, s.color, live ? 0.75 : 0.5).strokeCircle(s.center.x, s.center.y, Math.max(1, r));
     if (!live) return true;
     const p = host.playerPos();
     const onLine = Math.abs(Math.hypot(p.x - s.center.x, p.y - s.center.y) - r) <= s.thickness / 2 + host.playerRadius;
@@ -215,6 +223,55 @@ export class Ring implements Hazard {
     if (s.tickSec > 0) this.ticker.tick(dt, inside, host, s.damage);
     else if (inside && !this.hitOnce && host.hurtPlayer(s.damage)) this.hitOnce = true;
     return true;
+  }
+
+  /** 번개 고리: 빛 번짐 → 지글거리는 번개 두 겹(색·흰 심) → 틈 양끝 빛 마디, 켜진 동안 고리에서 불티가 튄다 */
+  private drawBolt(dt: number, host: HazardHost, r: number, live: boolean, gapHalf: number): void {
+    const s = this.s;
+    const b = s.bolt!;
+    const c = s.center;
+    const rr = Math.max(1, r);
+    const from = gapHalf > 0 ? s.gapAngle! + gapHalf : 0;
+    const span = Math.PI * 2 - gapHalf * 2;
+    const n = Math.max(8, Math.round((rr * span) / 7));
+    this.jitterLeft -= dt;
+    if (this.jitterLeft <= 0 || this.jitter.length !== n + 1) {
+      this.jitterLeft = 0.05;
+      this.jitter = Array.from({ length: n + 1 }, (_, i) => (i === 0 || i === n ? 0 : b.rng.range(-1, 1)));
+    }
+    const amp = live ? Math.max(2, s.thickness * 0.6) : 1.5;
+    const pts = this.jitter.map((j, i) => {
+      const a = from + (span * i) / n;
+      const rad = rr + j * amp;
+      return { x: c.x + Math.cos(a) * rad, y: c.y + Math.sin(a) * rad };
+    });
+    const g = this.g.clear();
+    if (!live) {
+      // 예고: 흐린 번개 선
+      g.lineStyle(1, b.color, 0.35 + 0.25 * Math.sin(this.t * 30)).strokePoints(pts);
+      return;
+    }
+    g.lineStyle(s.thickness + 6, b.color, 0.12);
+    g.beginPath();
+    g.arc(c.x, c.y, rr, from, from + span, false);
+    g.strokePath();
+    g.lineStyle(Math.max(2, s.thickness * 0.6), b.color, 0.85).strokePoints(pts);
+    g.lineStyle(1, 0xffffff, 0.95).strokePoints(pts);
+    if (gapHalf > 0) {
+      for (const a of [from, from + span]) g.fillStyle(0xffffff, 0.9).fillCircle(c.x + Math.cos(a) * rr, c.y + Math.sin(a) * rr, 2.5);
+    }
+    this.sparkLeft -= dt;
+    if (this.sparkLeft > 0) return;
+    this.sparkLeft = 0.04;
+    for (let i = 0; i < 4; i++) {
+      const a = from + b.rng.range(0, span);
+      const x = c.x + Math.cos(a) * rr;
+      const y = c.y + Math.sin(a) * rr;
+      const out = b.rng.chance(0.5) ? 1 : -1;
+      const d = b.rng.range(10, 26) * out;
+      const sp = host.scene.add.rectangle(x, y, b.rng.range(5, 10), 1, i % 2 === 0 ? 0xffffff : b.color).setDepth(6).setRotation(a).setBlendMode('ADD');
+      host.scene.tweens.add({ targets: sp, x: x + Math.cos(a) * d, y: y + Math.sin(a) * d, alpha: 0, scaleX: 0.3, duration: 280, ease: 'Cubic.easeOut', onComplete: () => sp.destroy() });
+    }
   }
 
   destroy(): void {
@@ -253,6 +310,8 @@ export interface BeamsSpec {
   /** 켜진 광선 그림과 예고 그림 (길이·굵기에 맞춰 늘린다) */
   art?: SpriteRef;
   warnArt?: SpriteRef;
+  /** 번개 광선: 예고선이 지글거리는 번개로 그려진다 */
+  bolt?: { rng: Rng; color: number };
 }
 
 /** 광선 그림이 판정 굵기보다 이만큼 굵게 보인다 (빛 번짐) */
@@ -285,11 +344,27 @@ export class Beams implements Hazard {
     let inside = false;
     const art = live ? s.art : s.warnArt;
     this.setSprites(host, art ?? null);
-    this.g.clear().lineStyle(live ? s.width : 1, s.color, art ? (live ? 0.25 : 0.25) : live ? 0.8 : 0.4);
+    // 예고(그림 없음): 굵기만큼 흐린 띠가 칠 때까지 진해지고, 가운데 선이 맥박치며 밝아진다
+    const k = live ? 1 : Math.min(1, this.t / Math.max(0.01, s.telegraphSec));
+    const warnPlain = !live && !art;
+    this.g.clear().lineStyle(live ? s.width : 1, s.color, art ? 0.25 : live ? 0.8 : 0.4 + 0.5 * k * (0.7 + 0.3 * Math.sin(this.t * 40)));
     for (let i = 0; i < s.count; i++) {
       const a = base + (i * Math.PI * 2) / s.count;
       const end = { x: c.x + Math.cos(a) * s.length, y: c.y + Math.sin(a) * s.length };
-      this.g.lineBetween(c.x, c.y, end.x, end.y);
+      if (warnPlain) {
+        this.g.lineStyle(s.width, s.color, 0.06 + 0.16 * k).lineBetween(c.x, c.y, end.x, end.y);
+        this.g.lineStyle(1, k > 0.75 ? 0xffffff : s.color, 0.4 + 0.5 * k * (0.7 + 0.3 * Math.sin(this.t * 40)));
+      }
+      if (warnPlain && s.bolt) {
+        const n = Math.max(6, Math.round(s.length / 14));
+        const nx = -Math.sin(a);
+        const ny = Math.cos(a);
+        const pts = Array.from({ length: n + 1 }, (_, j) => {
+          const off = j === 0 || j === n ? 0 : s.bolt!.rng.range(-1, 1) * s.width * 0.45;
+          return { x: c.x + ((end.x - c.x) * j) / n + nx * off, y: c.y + ((end.y - c.y) * j) / n + ny * off };
+        });
+        this.g.strokePoints(pts);
+      } else this.g.lineBetween(c.x, c.y, end.x, end.y);
       this.sprites[i]?.setPosition(c.x, c.y).setRotation(a).setDisplaySize(s.length, live ? s.width * BEAM_ART_WIDTH : s.width);
       if (segDist(p, c, end) <= s.width / 2 + host.playerRadius) inside = true;
     }
@@ -434,6 +509,8 @@ export class RectBlast implements Hazard {
     private readonly damage: number,
     private readonly color: number,
     private readonly hitArt?: SpriteRef,
+    /** 번개 띠: 예고 동안 띠 가운데로 번개가 지글거리며 점점 밝아진다 */
+    private readonly bolt?: { rng: Rng; color: number },
   ) {
     this.left = delaySec;
     this.g = scene.add.graphics().setDepth(2);
@@ -444,6 +521,17 @@ export class RectBlast implements Hazard {
     const r = this.rect;
     const k = 1 - Math.max(0, this.left) / this.delaySec;
     this.g.clear().lineStyle(1, this.color, 0.9).strokeRect(r.x, r.y, r.w, r.h).fillStyle(this.color, 0.1 + 0.25 * k).fillRect(r.x, r.y, r.w, r.h);
+    if (this.bolt && this.left > 0) {
+      const vertical = r.h > r.w;
+      const len = vertical ? r.h : r.w;
+      const n = Math.max(4, Math.round(len / 9));
+      const amp = (vertical ? r.w : r.h) * 0.35;
+      const pts = Array.from({ length: n + 1 }, (_, i) => {
+        const j = i === 0 || i === n ? 0 : this.bolt!.rng.range(-1, 1) * amp;
+        return vertical ? { x: r.x + r.w / 2 + j, y: r.y + (r.h * i) / n } : { x: r.x + (r.w * i) / n, y: r.y + r.h / 2 + j };
+      });
+      this.g.lineStyle(1, k > 0.6 ? 0xffffff : this.bolt.color, 0.25 + 0.6 * k).strokePoints(pts);
+    }
     if (this.left > 0) return true;
     const p = host.playerPos();
     const pr = host.playerRadius;

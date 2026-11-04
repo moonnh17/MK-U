@@ -543,6 +543,8 @@ interface BeamOpts {
   tickSec?: number;
   onHit?: () => void;
   art?: SpriteRef;
+  /** 예고선을 번개로 (전기환띠) */
+  bolt?: boolean;
 }
 
 const FULL_BEAM = 700;
@@ -567,6 +569,7 @@ function beam(c: PatternCtx, o: BeamOpts): void {
       art: o.art ?? c.art('beam'),
       warnArt: c.art('beamWarn'),
       color: c.boss.color,
+      bolt: o.bolt ? { rng: c.host.rng, color: c.boss.fxColor } : undefined,
     }),
   );
 }
@@ -581,11 +584,14 @@ interface RingOpts {
   telegraphSec?: number;
   gapAngle?: number;
   gapDeg?: number;
+  /** 번개 고리로 그린다 (전기환띠·적뢰) */
+  bolt?: boolean;
 }
 
 /** 움직이는 고리. gap을 주면 그 각도로 통과할 수 있다 */
 function ring(c: PatternCtx, o: RingOpts): void {
-  c.host.addHazard(new Ring(c.host.scene, { telegraphSec: 0, holdSec: 0, tickSec: 0, color: c.boss.color, ...o }));
+  const { bolt, ...spec } = o;
+  c.host.addHazard(new Ring(c.host.scene, { telegraphSec: 0, holdSec: 0, tickSec: 0, color: c.boss.color, ...spec, bolt: bolt ? { rng: c.host.rng, color: c.boss.fxColor } : undefined }));
   const start = c.art('ringStart');
   if (start) playFx(c.host.scene, start, o.center.x, o.center.y, { w: Math.max(o.fromR, 30) * 2.4 });
 }
@@ -601,9 +607,9 @@ function gapCircle(c: PatternCtx, from: Vec2, n: number, gap: number, speed: num
   for (const a of gapBulletAngles(n, c.host.rng.int(0, n - 1), gap)) c.host.fireEnemyBullet(from, a, speed, range, damage, true, c.art('bullet'));
 }
 
-/** 방을 가로지르는 띠 예고 → 강타. 세로·가로 그림이 다르다 */
-function faultBand(c: PatternCtx, rect: Rect, vertical: boolean, delaySec: number, damage: number): void {
-  c.host.addHazard(new RectBlast(c.host.scene, rect, delaySec, damage, c.boss.color, c.art(vertical ? 'bandV' : 'bandH')));
+/** 방을 가로지르는 띠 예고 → 강타. 세로·가로 그림이 다르다. bolt면 예고 동안 띠에 번개가 지글거린다 */
+function faultBand(c: PatternCtx, rect: Rect, vertical: boolean, delaySec: number, damage: number, bolt = false): void {
+  c.host.addHazard(new RectBlast(c.host.scene, rect, delaySec, damage, c.boss.color, c.art(vertical ? 'bandV' : 'bandH'), bolt ? { rng: c.host.rng, color: c.boss.fxColor } : undefined));
 }
 
 /** 플레이어를 지나 방을 가로지르는 띠 */
@@ -882,6 +888,7 @@ class SpinBeam extends Channeled {
       spin: c.v('spinSpeed') * (c.host.rng.chance(0.5) ? 1 : -1),
       damage: c.v('damage'),
       tickSec: c.v('tickSec'),
+      bolt: true,
     });
   }
 }
@@ -907,6 +914,7 @@ class Prison extends Channeled {
         color: c.boss.color,
         gapAngle: c.host.rng.range(0, Math.PI * 2),
         gapDeg: c.v('gapDeg'),
+        bolt: { rng: c.host.rng, color: c.boss.fxColor },
       }),
     );
     const cage = c.art('cage');
@@ -951,8 +959,8 @@ class LockGrid extends Channeled {
     for (const s of [-1, 1]) {
       const v = rectAt(a, { x: p.x + s * off, y: p.y }, true, c.v('width'));
       const h = rectAt(a, { x: p.x, y: p.y + s * off }, false, c.v('width'));
-      faultBand(c, v, true, c.v('delaySec'), c.v('damage'));
-      faultBand(c, h, false, c.v('delaySec') + c.v('lagSec'), c.v('damage'));
+      faultBand(c, v, true, c.v('delaySec'), c.v('damage'), true);
+      faultBand(c, h, false, c.v('delaySec') + c.v('lagSec'), c.v('damage'), true);
       this.at(c.v('delaySec'), () => bolts(v, true));
       this.at(c.v('delaySec') + c.v('lagSec'), () => bolts(h, false));
     }
@@ -976,8 +984,8 @@ class ShrinkCurrent extends Channeled {
     super(c);
     const p = c.boss.pos();
     this.at(0.12, () => this.pulse());
-    ring(c, { center: p, fromR: c.v('startRadius'), toR: c.boss.radius(), moveSec: c.v('shrinkSec'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: c.host.rng.range(0, Math.PI * 2), gapDeg: c.v('gapDeg') });
-    if (c.v('extraBeam') > 0) beam(c, { angle: angleTo(p, c.host.playerPos()), telegraphSec: c.v('beamTelegraphSec'), liveSec: c.v('beamLiveSec'), width: c.v('beamWidth'), damage: c.v('damage') });
+    ring(c, { center: p, fromR: c.v('startRadius'), toR: c.boss.radius(), moveSec: c.v('shrinkSec'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: c.host.rng.range(0, Math.PI * 2), gapDeg: c.v('gapDeg'), bolt: true });
+    if (c.v('extraBeam') > 0) beam(c, { angle: angleTo(p, c.host.playerPos()), telegraphSec: c.v('beamTelegraphSec'), liveSec: c.v('beamLiveSec'), width: c.v('beamWidth'), damage: c.v('damage'), bolt: true });
   }
 }
 
@@ -985,7 +993,7 @@ class ShrinkCurrent extends Channeled {
 class CrossCut extends Channeled {
   constructor(c: PatternCtx) {
     super(c);
-    const o = { count: 4, telegraphSec: c.v('telegraphSec'), liveSec: c.v('liveSec'), width: c.v('width'), damage: c.v('damage') };
+    const o = { count: 4, telegraphSec: c.v('telegraphSec'), liveSec: c.v('liveSec'), width: c.v('width'), damage: c.v('damage'), bolt: true };
     const fire = () => {
       shockRing(c.host.scene, c.boss.pos(), c.boss.radius() * 2.2, c.boss.fxColor, 0.25, 2);
       shake(c.host.scene, 'light');
@@ -1013,7 +1021,7 @@ class ChaseField extends Channeled {
       });
     }
     this.at(n * c.v('intervalSec') + c.v('delaySec'), () =>
-      ring(c, { center: c.host.playerPos(), fromR: c.v('ringRadius'), toR: c.v('ringEndRadius'), moveSec: c.v('ringSec'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: c.host.rng.range(0, Math.PI * 2), gapDeg: c.v('gapDeg') }),
+      ring(c, { center: c.host.playerPos(), fromR: c.v('ringRadius'), toR: c.v('ringEndRadius'), moveSec: c.v('ringSec'), thickness: c.v('thickness'), damage: c.v('damage'), gapAngle: c.host.rng.range(0, Math.PI * 2), gapDeg: c.v('gapDeg'), bolt: true }),
     );
   }
 }
