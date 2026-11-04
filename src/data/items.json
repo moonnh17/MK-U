@@ -149,7 +149,7 @@
       "effects": [{ "kind": "damage", "scope": "all", "value": 0.3, "group": "damagePct" }, { "kind": "damageTaken", "value": -0.1, "group": "damagePct" }],
       "spriteKey": "item_forbidden_gift", "color": "#ffd23f", "size": 8 },
     { "id": "warDiary", "nameKey": "item.warDiary", "descKey": "item.warDiary.desc", "grade": "legendary", "pool": "normal", "tags": [],
-      "effects": [{ "kind": "skillCooldown", "value": 0.1, "group": "damagePct" }, { "kind": "damage", "scope": "magic", "value": 0.15, "group": "damagePct" }, { "kind": "damage", "scope": "tech", "value": 0.15, "group": "damagePct" }],
+      "effects": [{ "kind": "skillCooldown", "value": 0.1, "group": "damagePct" }, { "kind": "lifesteal", "value": 0.005, "group": "damagePct" }],
       "spriteKey": "item_war_diary", "color": "#ffd23f", "size": 8 },
     { "id": "steelCastleFigure", "nameKey": "item.steelCastleFigure", "descKey": "item.steelCastleFigure.desc", "grade": "rare", "pool": "normal", "tags": [],
       "effects": [{ "kind": "maxHp", "value": 20, "group": "hpFlat" }, { "kind": "damageTaken", "value": 0.05, "group": "damagePct" }, { "kind": "maxEnergy", "value": 20, "group": "hpFlat" }],

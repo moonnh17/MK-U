@@ -987,6 +987,8 @@ export type ItemEffect =
   | { kind: 'regen'; value: number; everySec: number }
   /** 차징 시간 감소 (무기 차징·차징 스킬) */
   | { kind: 'chargeTime'; value: number; group: 'damagePct' }
+  /** 피해 흡혈: 준 피해의 value만큼 체력 회복 */
+  | { kind: 'lifesteal'; value: number; group: 'damagePct' }
   /** 공격 범위(스킬 범위·근접 무기 범위·폭발 반지름) */
   | { kind: 'area'; value: number; group: 'damagePct' }
   | { kind: 'buffDuration'; value: number; group: 'damagePct' }

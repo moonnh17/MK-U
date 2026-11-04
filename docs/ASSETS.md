@@ -275,9 +275,9 @@
 | `skill_swarm_charge` | 전투 드론 (swarmCharge) | 8×8 | center | #5ad9c0 | mku/skill_swarm_charge.png (8프레임) |
 | `skill_swarm_laser` | 전투 드론 (swarmLaser) | 8×8 | center | #5ad9c0 | mku/skill_swarm_laser.png (5프레임) |
 | `skill_swarm_shot` | 전투 드론 (shot) | 3×3 | center | #5ad9c0 | mku/skill_swarm_shot.png (3프레임) |
-| `skill_subject1` | 불안정 실험체 (subject1) | 7×7 | center | #9ad94a | mku/skill_subject1.png (1프레임) |
-| `skill_subject2` | 불안정 실험체 (subject2) | 7×7 | center | #9ad94a | mku/skill_subject2.png (1프레임) |
-| `skill_subject3` | 불안정 실험체 (subject3) | 7×7 | center | #9ad94a | mku/skill_subject3.png (1프레임) |
+| `skill_subject1` | 불안정 실험체 (subject1) | 10×10 | center | #9ad94a | mku/skill_subject1.png (1프레임) |
+| `skill_subject2` | 불안정 실험체 (subject2) | 10×10 | center | #9ad94a | mku/skill_subject2.png (1프레임) |
+| `skill_subject3` | 불안정 실험체 (subject3) | 10×10 | center | #9ad94a | mku/skill_subject3.png (1프레임) |
 | `skill_corrupt_mark2` | 불안정 실험체 (aura2) 외 1곳 | 12×12 | center | #9ad94a | mku/skill_corrupt_mark2.png (1프레임) |
 | `skill_corrupt_mark3` | 불안정 실험체 (aura3) 외 1곳 | 12×12 | center | #9ad94a | mku/skill_corrupt_mark3.png (1프레임) |
 | `skill_acro_spawn` | 불안정 실험체 (spawn) 외 1곳 | 13×13 | center | #9ad94a | mku/skill_acro_spawn.png (4프레임) |
@@ -286,8 +286,8 @@
 | `skill_acro_blast` | 불안정 실험체 (blast) 외 4곳 | 20×20 | center | #9ad94a | mku/skill_acro_blast.png (7프레임) |
 | `skill_acro_flash` | 불안정 실험체 (flash) 외 4곳 | 8×8 | center | #9ad94a | mku/skill_acro_flash.png (3프레임) |
 | `skill_specimen_spawn` | 불안정 실험체 (spawnA) | 14×14 | center | #9ad94a | mku/skill_specimen_spawn.png (7프레임) |
-| `skill_specimen_idle` | 불안정 실험체 (idleA) | 7×7 | center | #9ad94a | mku/skill_specimen_idle.png (7프레임) |
-| `skill_specimen_move` | 불안정 실험체 (moveA) | 7×7 | center | #9ad94a | mku/skill_specimen_move.png (6프레임) |
+| `skill_specimen_idle` | 불안정 실험체 (idleA) | 10×10 | center | #9ad94a | mku/skill_specimen_idle.png (7프레임) |
+| `skill_specimen_move` | 불안정 실험체 (moveA) | 10×10 | center | #9ad94a | mku/skill_specimen_move.png (6프레임) |
 | `skill_specimen_attack` | 불안정 실험체 (attackA) | 12×12 | center | #9ad94a | mku/skill_specimen_attack.png (4프레임) |
 | `skill_specimen_power` | 불안정 실험체 (powerA) | 11×11 | center | #9ad94a | mku/skill_specimen_power.png (1프레임) |
 | `skill_specimen_variant` | 불안정 실험체 (variantA) | 14×14 | center | #9ad94a | mku/skill_specimen_variant.png (3프레임) |

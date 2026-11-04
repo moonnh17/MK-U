@@ -69,6 +69,7 @@ describe('효과 합산', () => {
     expect(totals(['magnetResonator'])).toMatchObject({ damage: { tech: 0.07, magic: 0.07 }, moveSpeed: 0.1 });
     expect(totals(['magowikiCodex']).energyGain).toBeCloseTo(0.05);
     expect(totals(['lk99', 'warDiary', 'helaCell']).skillCooldown).toBeCloseTo(0.28);
+    expect(totals(['warDiary'])).toMatchObject({ lifesteal: 0.005, damage: { magic: 0, tech: 0 } });
     expect(totals(['helaCell']).maxSanity).toBe(15);
     expect(totals(['extraArms']).pellets).toBe(1);
     expect(totals(['forbiddenVirus']).damage.magic).toBeCloseTo(0.05);

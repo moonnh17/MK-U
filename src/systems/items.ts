@@ -54,6 +54,8 @@ export interface ItemTotals {
   energyGain: number;
   /** 차징 시간 감소 비율 */
   chargeTime: number;
+  /** 피해 흡혈 비율 */
+  lifesteal: number;
   /** 무기 레이저가 벽에서 튕기는 횟수 */
   laserBounce: number;
   area: number;
@@ -104,6 +106,7 @@ export function itemTotals(
     maxEnergy: 0,
     energyGain: 0,
     chargeTime: 0,
+    lifesteal: 0,
     laserBounce: 0,
     area: 0,
     buffDuration: 0,
@@ -149,6 +152,9 @@ export function itemTotals(
           break;
         case 'chargeTime':
           t.chargeTime += e.value;
+          break;
+        case 'lifesteal':
+          t.lifesteal += e.value;
           break;
         case 'laserBounce':
           t.laserBounce += e.bounces;

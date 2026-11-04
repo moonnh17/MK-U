@@ -590,7 +590,7 @@ export class RunScene extends Phaser.Scene {
       frame = { ...frame, move: { x: 0, y: 0 }, pressed };
     }
     this.condition.updateDodge(dt, frame);
-    const speed = d.player.moveSpeed * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus()) * (1 + this.combat.chargeMoveBonus()) * (1 + this.special.moveBonus());
+    const speed = mods.rooted ? 0 : d.player.moveSpeed * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus()) * (1 + this.combat.chargeMoveBonus()) * (1 + this.special.moveBonus());
     if (this.dashLeft > 0) {
       // MK 돌진: 입력 대신 돌진 방향으로
       this.dashLeft -= dt;

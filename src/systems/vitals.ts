@@ -35,6 +35,8 @@ export interface PlayerMods {
   moveSpeed: number;
   /** 받는 피해 감소 비율 (0~1) */
   damageReduction: number;
+  /** 움직일 수 없음 (MK 레이저 집중 사격) */
+  rooted?: boolean;
 }
 
 export const NO_MODS: PlayerMods = { moveSpeed: 0, damageReduction: 0 };
@@ -43,9 +45,11 @@ export const NO_MODS: PlayerMods = { moveSpeed: 0, damageReduction: 0 };
 export function combineMods(list: readonly Partial<PlayerMods>[]): PlayerMods {
   let moveSpeed = 0;
   let keep = 1;
+  let rooted = false;
   for (const m of list) {
     moveSpeed += m.moveSpeed ?? 0;
     keep *= 1 - Math.min(1, Math.max(0, m.damageReduction ?? 0));
+    rooted ||= m.rooted ?? false;
   }
-  return { moveSpeed, damageReduction: 1 - keep };
+  return { moveSpeed, damageReduction: 1 - keep, rooted };
 }

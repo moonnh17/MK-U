@@ -784,6 +784,8 @@ export class WeaponCombat {
       if (fx.crit) this.run.hitStop.request(hs.crit);
     }
     for (const o of [...this.run.skillRt.skillObjects]) o.onDamageDealt?.(this.run.host, dealt, enemy);
+    // 아이템 피해 흡혈 (과기전쟁의 일기)
+    if (this.run.itemRt.sums.lifesteal > 0 && dealt > 0) this.run.host.heal(dealt * this.run.itemRt.sums.lifesteal, false);
     // 학파 궁극기: 정해진 스킬의 피해로 데이터 축적
     const ult = this.run.session.player.ultimate;
     const udef = this.run.skillRt.ultimateDef();

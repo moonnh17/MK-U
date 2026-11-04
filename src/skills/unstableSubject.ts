@@ -2,7 +2,7 @@
  * 불안정 실험체 (아크로, 기술·확률·원거리). 무작위로 행동하는 실험체를 소환한다.
  * 행동은 소환 순간 정해진다: 돌진(닿은 적을 반복 타격) · 자폭(닿으면 폭발하고 사라짐) · 사격(플레이어 곁에서 쏨).
  * 대성공(확률 태그, 지능 보정, 상한 60%)이면 실험체가 2배로 나온다.
- * 각성 '증식하는 실패작': 실험체가 모두 집단 돌진해 자폭하고, 자폭으로 처치하면 확률(실험 성공, 상한 98%)로
+ * 각성 '증식하는 실패작': 실험체가 모두 집단 돌진해 자폭하고, 자폭할 때마다 확률(실험 성공, 상한 98%)로
  * 그 자리에서 증식해 연쇄 자폭한다. 실험체는 적에게 맞지 않는 아군이고, 지속시간이 끝나면 사라진다.
  */
 import type Phaser from 'phaser';
@@ -95,7 +95,7 @@ class Subject implements SkillObject {
       const sp = this.s.def.sprites;
       playFx(host.scene, sp.flash!, tp.x, tp.y);
       playFx(host.scene, sp.shard!, tp.x, tp.y, { w: 20 });
-      if (host.hit(target, v.rushDamage!, this.tags())) this.onKilled(host, tp);
+      host.hit(target, v.rushDamage!, this.tags());
       this.timer = v.rushIntervalSec!;
     }
     return true;
@@ -113,13 +113,15 @@ class Subject implements SkillObject {
     for (const e of [...host.enemies()]) {
       const p = { x: e.sprite.x, y: e.sprite.y };
       if (Math.hypot(p.x - this.pos.x, p.y - this.pos.y) > r + e.radius) continue;
-      if (host.hit(e, v.blastDamage!, this.tags())) this.onKilled(host, p);
+      host.hit(e, v.blastDamage!, this.tags());
     }
+    this.multiply(host);
   }
 
-  /** 각성: 처치하면 확률로 그 자리에 새 실험체 */
-  private onKilled(host: SkillHost, at: Vec2): void {
+  /** 각성: 자폭할 때마다 확률로 그 자리에 새 실험체 */
+  private multiply(host: SkillHost): void {
     const v = this.s.values;
+    const at = { ...this.pos };
     if (!this.s.owned.awakened) return;
     if (host.objects().filter((o) => o.owner === ID).length >= v.maxSubjects!) return;
     if (!rollChance(host.rng, host.chance(v.multiplyChance!, 'success', this.tags()))) return;

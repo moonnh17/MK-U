@@ -1,6 +1,7 @@
 /**
  * 환원주의자 (아크로 패시브, 버프). 장착하면 적을 처치할 때 체력을 회복한다.
  * 각성 '제1원리': 처치하면 기초 단위만큼 회복하고, 최대 체력을 넘는 양은 정신력을 회복한다.
+ * 모든 단계: 준 피해의 lifesteal만큼 흡혈 (각성은 넘치는 양이 정신력).
  */
 import type { SpriteRef } from '../types/data';
 import { playFx } from './skillFx';
@@ -32,6 +33,10 @@ class Reductionist implements SkillObject {
       host.heal(v.killHeal!, false);
       this.smoke(host, this.s.def.sprites.smoke!);
     }
+  }
+
+  onDamageDealt(host: SkillHost, dealt: number): void {
+    if (dealt > 0) host.heal(dealt * this.s.values.lifesteal!, this.s.owned.awakened);
   }
 
   /** 상시 버프: 장착해 있는 동안 */
