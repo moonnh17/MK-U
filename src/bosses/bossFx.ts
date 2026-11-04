@@ -137,3 +137,24 @@ export function debris(scene: Phaser.Scene, rng: Rng, at: Vec2, refs: readonly S
     lob(scene, refs[i % refs.length]!, at, to, rng.range(0.35, 0.6), rng.range(14, 30), size * rng.range(0.7, 1.2), undefined, rng.range(-10, 10));
   }
 }
+
+/** 하늘에서 곧장 떨어지는 그림 (성검·별): sec초 뒤 at에 닿는다. 빛 꼬리를 남긴다 */
+export function fallSprite(scene: Phaser.Scene, ref: SpriteRef, at: Vec2, sec: number, height: number, trail: number, fromY = 150): void {
+  const img = scene.add.sprite(at.x, at.y - fromY, ref.spriteKey).setDepth(7);
+  img.setDisplaySize((height * img.width) / Math.max(1, img.height), height).setOrigin(0.5, 1);
+  const anim = `${ref.spriteKey}.play`;
+  if (scene.anims.exists(anim)) img.play(anim);
+  let n = 0;
+  scene.tweens.add({
+    targets: img,
+    y: at.y + height * 0.15,
+    duration: sec * 1000,
+    ease: 'Quad.easeIn',
+    onUpdate: () => {
+      if (n++ % 2) return;
+      const d = scene.add.circle(img.x, img.y - height * 0.6, 2.5, trail, 0.7).setDepth(6).setBlendMode('ADD');
+      scene.tweens.add({ targets: d, alpha: 0, scale: 0.3, duration: 200, onComplete: () => d.destroy() });
+    },
+    onComplete: () => img.destroy(),
+  });
+}

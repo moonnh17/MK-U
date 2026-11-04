@@ -1662,6 +1662,8 @@
         "scale": 1.15,
         "auraColor": "#ff5a2a"
       },
+      "art": {"warCry.spirits": {"spriteKey": "fx_echo_spirits", "color": "#ff7a3a", "size": 45}, "warCry.burst": {"spriteKey": "fx_echo_cry_burst", "color": "#ff7a3a", "size": 45}, "warCry.heart": {"spriteKey": "fx_echo_heart", "color": "#ff7a3a", "size": 25}, "buffAura": {"spriteKey": "fx_echo_cry_aura", "color": "#ff7a3a", "size": 35}, "whirlDash.stomp": {"spriteKey": "fx_echo_whirl_stomp", "color": "#ff7a3a", "size": 35}, "whirlDash.vortex": {"spriteKey": "fx_echo_vortex", "color": "#ff7a3a", "size": 45}, "whirlDash.dashTrail": {"spriteKey": "fx_echo_whirl_trail", "color": "#ff7a3a", "size": 60}, "bleedField.warn": {"spriteKey": "fx_echo_bleed_warn", "color": "#ff7a3a", "size": 30}, "bleedField.zone": {"spriteKey": "fx_echo_bleed_loop", "color": "#ff7a3a", "size": 30}, "groundBreak.blastHit": {"spriteKey": "fx_echo_break_impact", "color": "#ff7a3a", "size": 35}, "groundBreak.tomb": {"spriteKey": "fx_echo_tomb", "color": "#ff7a3a", "size": 45}, "groundBreak.rubble": {"spriteKey": "fx_echo_rubble", "color": "#ff7a3a", "size": 18}, "earthShatter.blastHit": {"spriteKey": "fx_echo_shatter_impact", "color": "#ff7a3a", "size": 30}, "echoSlash.sectorHit": {"spriteKey": "fx_echo_echo_slash", "color": "#ff7a3a", "size": 45}, "echoSlash.finish": {"spriteKey": "fx_echo_twin_moon", "color": "#ff7a3a", "size": 45}, "deadChain.chain": {"spriteKey": "fx_echo_chain", "color": "#ff7a3a", "size": 55}, "tombBreak.blastHit": {"spriteKey": "fx_echo_tomb", "color": "#ff7a3a", "size": 45}, "ancestorsReturn.vortex": {"spriteKey": "fx_echo_vortex", "color": "#ff7a3a", "size": 45}, "ancestorsReturn.blastHit": {"spriteKey": "fx_echo_return", "color": "#ff7a3a", "size": 55}, "death": {"spriteKey": "fx_echo_return", "color": "#ff7a3a", "size": 55}},
+      "poses": {"dashReady": "idle", "dash": "attack", "warCry": "cast", "bleedField": "cast", "groundBreak": {"first": "cast", "sec": 0.55, "then": "attack"}, "earthShatter": "attack", "echoSlash": {"first": "idle", "sec": 0.25, "then": "attack"}, "deadChain": {"first": "cast", "sec": 0.55, "then": "attack"}, "tombBreak": {"first": "cast", "sec": 0.6, "then": "attack"}, "ancestorsReturn": "cast"},
       "patterns": [
         {
           "id": "warCry",
@@ -1743,7 +1745,11 @@
             "radius": 22,
             "damage": 18
           }
-        }
+        },
+        {"id": "echoSlash", "reach": "melee", "maxRange": 90, "weight": 3, "cooldownSec": 3.5, "durationSec": 1.2, "phase": 1, "values": {"hits": 2, "hitsEnraged": 3, "gapSec": 0.3, "windupSec": 0.4, "radius": 48, "arcDeg": 140, "damage": 16}},
+        {"id": "deadChain", "reach": "ranged", "weight": 2, "cooldownSec": 6, "durationSec": 1.3, "phase": 1, "values": {"chains": 3, "chainsEnraged": 5, "spreadDeg": 40, "length": 230, "telegraphSec": 0.7, "liveSec": 0.25, "width": 10, "damage": 14, "rootSec": 0.8}},
+        {"id": "tombBreak", "reach": "ranged", "weight": 2, "cooldownSec": 7, "durationSec": 1.8, "phase": 1, "values": {"count": 6, "ring1": 60, "ring2": 110, "radius": 24, "delaySec": 0.8, "lagSec": 0.45, "damage": 18}},
+        {"id": "ancestorsReturn", "reach": "ranged", "weight": 2, "cooldownSec": 8, "durationSec": 1.8, "phase": 2, "values": {"pillars": 3, "pillarsEnraged": 4, "stepSec": 0.25, "delaySec": 1.1, "spread": 60, "radius": 32, "damage": 24}}
       ]
     },
     {
@@ -1760,6 +1766,8 @@
         "scale": 1,
         "auraColor": "#b05aff"
       },
+      "art": {"blinkBarrage.shift": {"spriteKey": "fx_royal_silent_shift", "color": "#b05aff", "size": 40}, "blinkBarrage.flash": {"spriteKey": "fx_royal_blink_flash", "color": "#b05aff", "size": 35}, "blinkBarrage.ring": {"spriteKey": "fx_royal_blink_ring", "color": "#b05aff", "size": 40}, "bullet": {"spriteKey": "fx_royal_bullet", "color": "#b05aff", "size": 6}, "greatLaser.beam": {"spriteKey": "fx_royal_laser", "color": "#b05aff", "size": 80}, "greatLaser.beamWarn": {"spriteKey": "fx_royal_laser_warn", "color": "#b05aff", "size": 80}, "greatLaser.muzzle": {"spriteKey": "fx_royal_laser_muzzle", "color": "#b05aff", "size": 30}, "clones.shatter": {"spriteKey": "fx_royal_clone_shatter", "color": "#b05aff", "size": 30}, "magiStrike.dashTrail": {"spriteKey": "fx_royal_strike_trail", "color": "#b05aff", "size": 50}, "magiStrike.sectorHit": {"spriteKey": "fx_royal_strike_swipe", "color": "#b05aff", "size": 40}, "royalMark.mark": {"spriteKey": "fx_royal_mark", "color": "#b05aff", "size": 25}, "royalMark.seeker": {"spriteKey": "fx_royal_seeker", "color": "#b05aff", "size": 7}, "piercingLine.pierce": {"spriteKey": "fx_royal_pierce", "color": "#b05aff", "size": 60}, "sealEdict.seal": {"spriteKey": "fx_royal_seal_edict", "color": "#b05aff", "size": 45}, "sealEdict.blastHit": {"spriteKey": "fx_royal_black_lance", "color": "#b05aff", "size": 45}, "finalDecree.confiscate": {"spriteKey": "fx_royal_confiscate", "color": "#b05aff", "size": 45}, "finalDecree.decree": {"spriteKey": "fx_royal_final_decree", "color": "#b05aff", "size": 60}, "death": {"spriteKey": "fx_royal_clone_shatter", "color": "#b05aff", "size": 30}},
+      "poses": {"dashReady": "cast", "dash": "move", "blinkBarrage": "cast", "greatLaser": {"first": "cast", "sec": 0.8, "then": "attack"}, "clones": "cast", "magiStrike": "attack", "royalMark": {"first": "cast", "sec": 0.5, "then": "attack"}, "piercingLine": "attack", "sealEdict": "cast", "finalDecree": "cast"},
       "patterns": [
         {
           "id": "blinkBarrage",
@@ -1834,7 +1842,11 @@
             "swipeWindupSec": 0.3,
             "swipeDamage": 14
           }
-        }
+        },
+        {"id": "royalMark", "reach": "ranged", "weight": 3, "cooldownSec": 5, "durationSec": 1.6, "phase": 1, "values": {"markSec": 0.6, "seekers": 4, "seekersEnraged": 6, "stepSec": 0.12, "spreadDeg": 25, "speed": 90, "range": 420, "damage": 9, "turnRate": 2.2}},
+        {"id": "piercingLine", "reach": "ranged", "weight": 2, "cooldownSec": 5, "durationSec": 1.6, "phase": 1, "values": {"lines": 3, "linesEnraged": 4, "stepSec": 0.35, "telegraphSec": 0.45, "liveSec": 0.12, "length": 420, "width": 8, "damage": 16}},
+        {"id": "sealEdict", "reach": "ranged", "weight": 2, "cooldownSec": 8, "durationSec": 2.2, "phase": 1, "values": {"offset": 50, "width": 16, "delaySec": 1, "damage": 18, "lances": 3, "stepSec": 0.25, "lanceDelaySec": 0.8, "spread": 35, "lanceRadius": 22, "lanceDamage": 20}},
+        {"id": "finalDecree", "reach": "ranged", "weight": 2, "cooldownSec": 11, "durationSec": 3, "phase": 2, "values": {"windupSec": 1.1, "lanes": 6, "delaySec": 1.3, "damage": 26}}
       ]
     },
     {
@@ -1851,6 +1863,8 @@
         "scale": 1.1,
         "auraColor": "#fff2a0"
       },
+      "art": {"holySwords.prayer": {"spriteKey": "fx_orion_prayer", "color": "#ffd23f", "size": 45}, "holySwords.sword": {"spriteKey": "fx_orion_sword", "color": "#ffd23f", "size": 20}, "holySwords.blastWarn": {"spriteKey": "fx_orion_sword_warn", "color": "#ffd23f", "size": 25}, "holySwords.blastHit": {"spriteKey": "fx_orion_sword_impact", "color": "#ffd23f", "size": 30}, "maceSmash.sectorHit": {"spriteKey": "fx_orion_mace_fan", "color": "#ffd23f", "size": 40}, "maceSmash.starMace": {"spriteKey": "fx_orion_star_mace", "color": "#ffd23f", "size": 45}, "shieldThrow.barrier": {"spriteKey": "fx_orion_barrier", "color": "#ffd23f", "size": 45}, "shieldThrow.shield": {"spriteKey": "fx_orion_shield", "color": "#ffd23f", "size": 9}, "shieldThrow.spark": {"spriteKey": "fx_orion_shield_spark", "color": "#ffd23f", "size": 15}, "judgment.cross": {"spriteKey": "fx_orion_judgment", "color": "#ffd23f", "size": 80}, "judgment.sword": {"spriteKey": "fx_orion_sword", "color": "#ffd23f", "size": 20}, "judgment.blastHit": {"spriteKey": "fx_orion_sword_impact", "color": "#ffd23f", "size": 30}, "fallingStar.blastWarn": {"spriteKey": "fx_orion_sword_warn", "color": "#ffd23f", "size": 25}, "fallingStar.blastHit": {"spriteKey": "fx_orion_falling_star", "color": "#ffd23f", "size": 45}, "beltSanctuary.zone": {"spriteKey": "fx_orion_belt", "color": "#ffd23f", "size": 45}, "hunterOath.oath": {"spriteKey": "fx_orion_oath", "color": "#ffd23f", "size": 35}, "hunterOath.blastHit": {"spriteKey": "fx_orion_star_swords", "color": "#ffd23f", "size": 45}, "starHunt.prayer": {"spriteKey": "fx_orion_prayer", "color": "#ffd23f", "size": 45}, "starHunt.sectorHit": {"spriteKey": "fx_orion_star_hunt", "color": "#ffd23f", "size": 60}, "death": {"spriteKey": "fx_orion_falling_star", "color": "#ffd23f", "size": 45}},
+      "poses": {"holySwords": "cast", "maceSmash": {"first": "idle", "sec": 0.35, "then": "attack"}, "shieldThrow": "attack", "judgment": "cast", "fallingStar": "cast", "beltSanctuary": "cast", "hunterOath": "cast", "starHunt": {"first": "cast", "sec": 0.75, "then": "attack"}},
       "patterns": [
         {
           "id": "holySwords",
@@ -1914,7 +1928,11 @@
             "damage": 18,
             "stepSec": 0.04
           }
-        }
+        },
+        {"id": "fallingStar", "reach": "ranged", "weight": 3, "cooldownSec": 5, "durationSec": 1.6, "phase": 1, "values": {"stars": 4, "starsEnraged": 6, "stepSec": 0.2, "delaySec": 0.9, "spread": 55, "radius": 22, "damage": 18}},
+        {"id": "beltSanctuary", "reach": "ranged", "weight": 2, "cooldownSec": 7, "durationSec": 1.2, "phase": 1, "values": {"gap": 44, "radius": 24, "delaySec": 0.8, "liveSec": 3.5, "damage": 7, "tickSec": 0.5}},
+        {"id": "hunterOath", "reach": "ranged", "weight": 2, "cooldownSec": 6, "durationSec": 1.3, "phase": 1, "values": {"radius": 30, "delaySec": 1, "damage": 24}},
+        {"id": "starHunt", "reach": "melee", "maxRange": 130, "weight": 2, "cooldownSec": 8, "durationSec": 1.5, "phase": 2, "values": {"windupSec": 1, "radius": 110, "arcDeg": 200, "damage": 28}}
       ]
     }
   ]

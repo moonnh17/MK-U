@@ -133,7 +133,7 @@ export function collectAssets(d: GameData): AssetRef[] {
   add('pickup', d.pickups.energyOrb, 'asset.energyOrb');
   add('pickup', d.pickups.coin, 'asset.coin');
   for (const s of d.skills.skills) for (const [part, ref] of Object.entries(s.sprites)) add('skill', ref, s.nameKey, `#${part}`);
-  for (const b of d.bosses.bosses) {
+  for (const b of [...d.bosses.bosses, ...d.bosses.hiddenBosses]) {
     for (const [slot, ref] of Object.entries(b.art ?? {})) add('fx', ref, `enemy.${b.id}`, `#${slot}`);
     for (const l of b.layers ?? []) add('fx', l.sprite, `enemy.${b.id}`, '#layer');
   }

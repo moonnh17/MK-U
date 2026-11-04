@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 509개 · 그림 있음 496개
+전체 558개 · 그림 있음 545개
 
 ## player (3)
 
@@ -104,9 +104,9 @@
 | `enemy_fusion_akgwi` | 융합악귀 | 39×39 | feet | #7a1f3a | mku/enemy_fusion_akgwi.png (4프레임) |
 | `enemy_electric_ring` | 전기환띠 | 42×42 | feet | #3a9ad9 | mku/enemy_electric_ring.png (6프레임) |
 | `enemy_training_dummy` | 보스 자리(임시 표적) | 24×24 | feet | #8a5ad9 | mku/enemy_training_dummy.png (1프레임) |
-| `enemy_ancestor_echo` | 선조의 잔상 | 42×42 | feet | #b0583a | mku/enemy_ancestor_echo.png (3프레임) |
-| `enemy_royal_mage` | 왕실특무마기법사 외 1곳 | 33×33 | feet | #6a4ad9 | mku/enemy_royal_mage.png (4프레임) |
-| `enemy_orion_crusader` | 오리온의 성전사 | 42×42 | feet | #d9c25a | mku/enemy_orion_crusader.png (9프레임) |
+| `enemy_ancestor_echo` | 선조의 잔상 | 42×42 | feet | #b0583a | mku/enemy_ancestor_echo.png (16프레임) |
+| `enemy_royal_mage` | 왕실특무마기법사 외 1곳 | 33×33 | feet | #6a4ad9 | mku/enemy_royal_mage.png (16프레임) |
+| `enemy_orion_crusader` | 오리온의 성전사 | 42×42 | feet | #d9c25a | mku/enemy_orion_crusader.png (16프레임) |
 | `enemy_hectar_chief` | 헥타르 수석 연구원 | 36×36 | feet | #3a9aff | mku/enemy_hectar_chief.png (9프레임) |
 | `enemy_magi_golem` | 마기골렘 | 48×48 | feet | #8a6a4a | mku/enemy_magi_golem.png (10프레임) |
 | `enemy_eclipse` | 식광 | 42×42 | feet | #c8a8ff | mku/enemy_eclipse.png (16프레임) |
@@ -473,7 +473,7 @@
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
-## fx (106)
+## fx (155)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -577,6 +577,55 @@
 | `fx_kaiser_command` | 마기카이저 (safeHit) | 60×60 | center | #ff2a2a | mku/fx_kaiser_command.png (4프레임) |
 | `fx_kaiser_cross` | 마기카이저 (doomCommand.cast) | 60×60 | center | #ff2a2a | mku/fx_kaiser_cross.png (4프레임) |
 | `fx_kaiser_death` | 마기카이저 (death) | 55×55 | center | #ff2a2a | mku/fx_kaiser_death.png (4프레임) |
+| `fx_echo_spirits` | 선조의 잔상 (warCry.spirits) | 45×45 | center | #ff7a3a | mku/fx_echo_spirits.png (4프레임) |
+| `fx_echo_cry_burst` | 선조의 잔상 (warCry.burst) | 45×45 | center | #ff7a3a | mku/fx_echo_cry_burst.png (4프레임) |
+| `fx_echo_heart` | 선조의 잔상 (warCry.heart) | 25×25 | center | #ff7a3a | mku/fx_echo_heart.png (4프레임) |
+| `fx_echo_cry_aura` | 선조의 잔상 (buffAura) | 35×35 | center | #ff7a3a | mku/fx_echo_cry_aura.png (4프레임) |
+| `fx_echo_whirl_stomp` | 선조의 잔상 (whirlDash.stomp) | 35×35 | center | #ff7a3a | mku/fx_echo_whirl_stomp.png (4프레임) |
+| `fx_echo_vortex` | 선조의 잔상 (whirlDash.vortex) 외 1곳 | 45×45 | center | #ff7a3a | mku/fx_echo_vortex.png (4프레임) |
+| `fx_echo_whirl_trail` | 선조의 잔상 (whirlDash.dashTrail) | 60×60 | center | #ff7a3a | mku/fx_echo_whirl_trail.png (4프레임) |
+| `fx_echo_bleed_warn` | 선조의 잔상 (bleedField.warn) | 30×30 | center | #ff7a3a | mku/fx_echo_bleed_warn.png (4프레임) |
+| `fx_echo_bleed_loop` | 선조의 잔상 (bleedField.zone) | 30×30 | center | #ff7a3a | mku/fx_echo_bleed_loop.png (4프레임) |
+| `fx_echo_break_impact` | 선조의 잔상 (groundBreak.blastHit) | 35×35 | center | #ff7a3a | mku/fx_echo_break_impact.png (4프레임) |
+| `fx_echo_tomb` | 선조의 잔상 (groundBreak.tomb) 외 1곳 | 45×45 | center | #ff7a3a | mku/fx_echo_tomb.png (4프레임) |
+| `fx_echo_rubble` | 선조의 잔상 (groundBreak.rubble) | 18×18 | center | #ff7a3a | mku/fx_echo_rubble.png (1프레임) |
+| `fx_echo_shatter_impact` | 선조의 잔상 (earthShatter.blastHit) | 30×30 | center | #ff7a3a | mku/fx_echo_shatter_impact.png (4프레임) |
+| `fx_echo_echo_slash` | 선조의 잔상 (echoSlash.sectorHit) | 45×45 | center | #ff7a3a | mku/fx_echo_echo_slash.png (4프레임) |
+| `fx_echo_twin_moon` | 선조의 잔상 (echoSlash.finish) | 45×45 | center | #ff7a3a | mku/fx_echo_twin_moon.png (4프레임) |
+| `fx_echo_chain` | 선조의 잔상 (deadChain.chain) | 55×55 | center | #ff7a3a | mku/fx_echo_chain.png (4프레임) |
+| `fx_echo_return` | 선조의 잔상 (ancestorsReturn.blastHit) 외 1곳 | 55×55 | center | #ff7a3a | mku/fx_echo_return.png (4프레임) |
+| `fx_royal_silent_shift` | 왕실특무마기법사 (blinkBarrage.shift) | 40×40 | center | #b05aff | mku/fx_royal_silent_shift.png (4프레임) |
+| `fx_royal_blink_flash` | 왕실특무마기법사 (blinkBarrage.flash) | 35×35 | center | #b05aff | mku/fx_royal_blink_flash.png (4프레임) |
+| `fx_royal_blink_ring` | 왕실특무마기법사 (blinkBarrage.ring) | 40×40 | center | #b05aff | mku/fx_royal_blink_ring.png (4프레임) |
+| `fx_royal_bullet` | 왕실특무마기법사 (bullet) | 6×6 | center | #b05aff | mku/fx_royal_bullet.png (4프레임) |
+| `fx_royal_laser` | 왕실특무마기법사 (greatLaser.beam) | 80×80 | center | #b05aff | mku/fx_royal_laser.png (3프레임) |
+| `fx_royal_laser_warn` | 왕실특무마기법사 (greatLaser.beamWarn) | 80×80 | center | #b05aff | mku/fx_royal_laser_warn.png (4프레임) |
+| `fx_royal_laser_muzzle` | 왕실특무마기법사 (greatLaser.muzzle) | 30×30 | center | #b05aff | mku/fx_royal_laser_muzzle.png (4프레임) |
+| `fx_royal_clone_shatter` | 왕실특무마기법사 (clones.shatter) 외 1곳 | 30×30 | center | #b05aff | mku/fx_royal_clone_shatter.png (4프레임) |
+| `fx_royal_strike_trail` | 왕실특무마기법사 (magiStrike.dashTrail) | 50×50 | center | #b05aff | mku/fx_royal_strike_trail.png (4프레임) |
+| `fx_royal_strike_swipe` | 왕실특무마기법사 (magiStrike.sectorHit) | 40×40 | center | #b05aff | mku/fx_royal_strike_swipe.png (4프레임) |
+| `fx_royal_mark` | 왕실특무마기법사 (royalMark.mark) | 25×25 | center | #b05aff | mku/fx_royal_mark.png (4프레임) |
+| `fx_royal_seeker` | 왕실특무마기법사 (royalMark.seeker) | 7×7 | center | #b05aff | mku/fx_royal_seeker.png (4프레임) |
+| `fx_royal_pierce` | 왕실특무마기법사 (piercingLine.pierce) | 60×60 | center | #b05aff | mku/fx_royal_pierce.png (4프레임) |
+| `fx_royal_seal_edict` | 왕실특무마기법사 (sealEdict.seal) | 45×45 | center | #b05aff | mku/fx_royal_seal_edict.png (4프레임) |
+| `fx_royal_black_lance` | 왕실특무마기법사 (sealEdict.blastHit) | 45×45 | center | #b05aff | mku/fx_royal_black_lance.png (4프레임) |
+| `fx_royal_confiscate` | 왕실특무마기법사 (finalDecree.confiscate) | 45×45 | center | #b05aff | mku/fx_royal_confiscate.png (4프레임) |
+| `fx_royal_final_decree` | 왕실특무마기법사 (finalDecree.decree) | 60×60 | center | #b05aff | mku/fx_royal_final_decree.png (4프레임) |
+| `fx_orion_prayer` | 오리온의 성전사 (holySwords.prayer) 외 1곳 | 45×45 | center | #ffd23f | mku/fx_orion_prayer.png (4프레임) |
+| `fx_orion_sword` | 오리온의 성전사 (holySwords.sword) 외 1곳 | 20×20 | center | #ffd23f | mku/fx_orion_sword.png (3프레임) |
+| `fx_orion_sword_warn` | 오리온의 성전사 (holySwords.blastWarn) 외 1곳 | 25×25 | center | #ffd23f | mku/fx_orion_sword_warn.png (4프레임) |
+| `fx_orion_sword_impact` | 오리온의 성전사 (holySwords.blastHit) 외 1곳 | 30×30 | center | #ffd23f | mku/fx_orion_sword_impact.png (4프레임) |
+| `fx_orion_mace_fan` | 오리온의 성전사 (maceSmash.sectorHit) | 40×40 | center | #ffd23f | mku/fx_orion_mace_fan.png (4프레임) |
+| `fx_orion_star_mace` | 오리온의 성전사 (maceSmash.starMace) | 45×45 | center | #ffd23f | mku/fx_orion_star_mace.png (4프레임) |
+| `fx_orion_barrier` | 오리온의 성전사 (shieldThrow.barrier) | 45×45 | center | #ffd23f | mku/fx_orion_barrier.png (4프레임) |
+| `fx_orion_shield` | 오리온의 성전사 (shieldThrow.shield) | 9×9 | center | #ffd23f | mku/fx_orion_shield.png (4프레임) |
+| `fx_orion_shield_spark` | 오리온의 성전사 (shieldThrow.spark) | 15×15 | center | #ffd23f | mku/fx_orion_shield_spark.png (3프레임) |
+| `fx_orion_judgment` | 오리온의 성전사 (judgment.cross) | 80×80 | center | #ffd23f | mku/fx_orion_judgment.png (4프레임) |
+| `fx_orion_falling_star` | 오리온의 성전사 (fallingStar.blastHit) 외 1곳 | 45×45 | center | #ffd23f | mku/fx_orion_falling_star.png (4프레임) |
+| `fx_orion_belt` | 오리온의 성전사 (beltSanctuary.zone) | 45×45 | center | #ffd23f | mku/fx_orion_belt.png (4프레임) |
+| `fx_orion_oath` | 오리온의 성전사 (hunterOath.oath) | 35×35 | center | #ffd23f | mku/fx_orion_oath.png (4프레임) |
+| `fx_orion_star_swords` | 오리온의 성전사 (hunterOath.blastHit) | 45×45 | center | #ffd23f | mku/fx_orion_star_swords.png (4프레임) |
+| `fx_orion_star_hunt` | 오리온의 성전사 (starHunt.sectorHit) | 60×60 | center | #ffd23f | mku/fx_orion_star_hunt.png (4프레임) |
 | `fx_hit_tech` | 타격 불꽃(기술) | 10×10 | center | #5ad0ff | mku/fx_hit_tech.png (1프레임) |
 | `fx_hit_magic` | 타격 불꽃(마기) | 10×10 | center | #c08aff | mku/fx_hit_magic.png (1프레임) |
 | `fx_hit_physical` | 타격 불꽃(물리) | 10×10 | center | #ffffff | mku/fx_hit_physical.png (1프레임) |

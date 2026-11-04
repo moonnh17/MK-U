@@ -265,7 +265,7 @@ export class RunScene extends Phaser.Scene {
       removeMinion: (e) => {
         if (!e.dead) this.removeEnemy(e);
       },
-      addObstacle: (at, radius, doorClear) => this.world.addObstacle(at, radius, doorClear),
+      addObstacle: (at, radius, doorClear, art) => this.world.addObstacle(at, radius, doorClear, art),
       chapterRoster: () => this.chapterRoster(),
       arena: () => this.currentArena(),
       bossPhaseFx: (text, color, at) => this.stageFx.bossPhaseFx(text, color, at),

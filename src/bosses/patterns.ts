@@ -12,7 +12,7 @@ import { gapBulletAngles, predictPoint } from '../systems/bossGeometry';
 import { loopArt, playFx, stretchFx } from '../skills/skillFx';
 import type { SpriteRef } from '../types/data';
 import type { BossHost, PatternRun } from './host';
-import { burst, clamp01, coil, crackle, debris, easeOut, land, lob, lunge, motes, shockRing, sparkAround } from './bossFx';
+import { burst, clamp01, coil, crackle, debris, easeOut, fallSprite, land, lob, lunge, motes, shockRing, sparkAround } from './bossFx';
 
 /** 패턴이 다루는 보스 */
 export interface BossBody {
@@ -272,28 +272,48 @@ function around(c: PatternCtx, i: number, spread: number, margin: number): Vec2 
   return clampTo({ x: p.x + Math.cos(a) * r, y: p.y + Math.sin(a) * r }, c, margin);
 }
 
+/** 그림 한 번 (그림이 없으면 아무것도 안 함) */
+function fx(c: PatternCtx, slot: string, at: Vec2, o: Parameters<typeof playFx>[4] = {}): void {
+  const art = c.art(slot);
+  if (art) playFx(c.host.scene, art, at.x, at.y, o);
+}
+
+/** 예고 원 → 폭발, 그 패턴의 그림(blastWarn·blastHit)으로 */
+function hblast(c: PatternCtx, at: Vec2, radius: number, delaySec: number, damage: number): void {
+  c.host.addHazard(new DelayedBlast(c.host.scene, at, radius, delaySec, damage, c.boss.color, { warn: c.art('blastWarn'), hit: c.art('blastHit') }));
+}
+
 /** 전장의 함성 (선조의 잔상): 포효 후 자기 강화 */
 class WarCry extends Timed {
   constructor(c: PatternCtx) {
     super(c);
+    fx(c, 'spirits', c.boss.pos(), { w: c.boss.radius() * 4, depth: 7 });
     this.at(c.v('windupSec'), () => {
       c.buff(c.v('buffSec'), c.v('damageMul'), c.v('speedMul'));
       const p = c.boss.pos();
-      const ring = c.host.scene.add.circle(p.x, p.y, c.boss.radius()).setStrokeStyle(3, c.boss.color, 0.9).setDepth(6);
-      c.host.scene.tweens.add({ targets: ring, scale: 4, alpha: 0, duration: 400, onComplete: () => ring.destroy() });
+      fx(c, 'burst', p, { w: c.boss.radius() * 6, depth: 7 });
+      fx(c, 'heart', { x: p.x, y: p.y - c.boss.radius() * 0.4 }, { w: c.boss.radius() * 1.8, depth: 8 });
+      shockRing(c.host.scene, p, c.boss.radius() * 4, c.boss.fxColor, 0.4, 3);
       shake(c.host.scene, 'medium');
     });
   }
 }
 
-/** 소용돌이 돌진 (선조의 잔상): 다시 조준하며 여러 번 돌진 */
+/** 소용돌이 돌진 (선조의 잔상): 다시 조준하며 여러 번 돌진. 출발마다 발 구르기·잔혼 소용돌이 */
 class WhirlDash implements PatternRun {
   private cur: Dash;
   private n = 1;
   private spin = 0;
 
   constructor(private readonly c: PatternCtx) {
-    this.cur = new Dash(c, false);
+    this.cur = this.start();
+  }
+
+  private start(): Dash {
+    const p = this.c.boss.pos();
+    fx(this.c, 'stomp', { x: p.x, y: p.y + this.c.boss.radius() * 0.5 }, { w: this.c.boss.radius() * 3, depth: 2 });
+    fx(this.c, 'vortex', p, { w: this.c.boss.radius() * 3.5, depth: 6 });
+    return new Dash(this.c, false);
   }
 
   update(dt: number): void {
@@ -302,7 +322,7 @@ class WhirlDash implements PatternRun {
     this.c.boss.setAlpha(0.75 + 0.25 * Math.sin(this.spin));
     if (this.cur.finished && this.n < this.c.v('dashes')) {
       this.cur.destroy();
-      this.cur = new Dash(this.c, false);
+      this.cur = this.start();
       this.n++;
     }
   }
@@ -313,35 +333,33 @@ class WhirlDash implements PatternRun {
   }
 }
 
-/** 출혈 장판 (선조의 잔상): 예고 원 → 지속 피해 장판 */
+/** 출혈 장판 (선조의 잔상): 예고 → 지속 피해 장판 */
 class BleedField extends Timed {
-  private readonly marks: Phaser.GameObjects.Arc[] = [];
   constructor(c: PatternCtx) {
     super(c);
     const r = c.v('radius');
     const spots = Array.from({ length: c.v('fields') }, (_, i) => around(c, i, c.v('spread'), r));
-    for (const s of spots) this.marks.push(c.host.scene.add.circle(s.x, s.y, r).setStrokeStyle(1, c.boss.color, 0.8).setDepth(2));
+    for (const s of spots) {
+      const warn = c.art('warn');
+      if (warn) playFx(c.host.scene, warn, s.x, s.y, { w: r * 2.6, depth: 2 });
+      else c.host.addHazard(new DelayedBlast(c.host.scene, s, r, c.v('delaySec'), 0, c.boss.color));
+    }
     this.at(c.v('delaySec'), () => {
-      for (const m of this.marks) m.destroy();
-      this.marks.length = 0;
-      for (const s of spots) c.host.addHazard(new Zone(c.host.scene, s, r, c.v('liveSec'), c.v('damage'), c.v('tickSec'), c.boss.color));
+      for (const s of spots) c.host.addHazard(new Zone(c.host.scene, s, r, c.v('liveSec'), c.v('damage'), c.v('tickSec'), c.boss.color, 0, 0, c.art('zone')));
     });
-  }
-  override destroy(): void {
-    super.destroy();
-    for (const m of this.marks) m.destroy();
   }
 }
 
-/** 지면 파괴 (선조의 잔상): 플레이어 자리 내려찍기 → 지나갈 수 없는 잔해 */
+/** 지면 파괴 (선조의 잔상): 플레이어 자리 내려찍기 → 지나갈 수 없는 잔해 (무덤이 깨지며 솟는다) */
 class GroundBreak extends Timed {
   constructor(c: PatternCtx) {
     super(c);
     const at = clampTo(c.host.playerPos(), c, c.v('radius'));
-    c.host.addHazard(new DelayedBlast(c.host.scene, at, c.v('radius'), c.v('delaySec'), c.v('damage'), c.boss.color));
+    hblast(c, at, c.v('radius'), c.v('delaySec'), c.v('damage'));
     this.at(c.v('delaySec'), () => {
+      fx(c, 'tomb', at, { w: c.v('radius') * 3, depth: 6 });
       c.rubble(at, c.v('rubbleRadius'));
-      shake(c.host.scene, 'light');
+      shake(c.host.scene, 'medium');
     });
   }
 }
@@ -354,16 +372,77 @@ class EarthShatter extends Timed {
     const a = angleTo(from, c.host.playerPos());
     for (let i = 0; i < c.v('count'); i++) {
       const at = clampTo({ x: from.x + Math.cos(a) * c.v('gap') * (i + 1), y: from.y + Math.sin(a) * c.v('gap') * (i + 1) }, c, c.v('radius'));
-      this.at(i * c.v('stepSec'), () => c.host.addHazard(new DelayedBlast(c.host.scene, at, c.v('radius'), c.v('delaySec'), c.v('damage'), c.boss.color)));
+      this.at(i * c.v('stepSec'), () => hblast(c, at, c.v('radius'), c.v('delaySec'), c.v('damage')));
     }
   }
 }
 
-/** 순간이동 탄막 (왕실특무마기법사): 사라졌다가 떨어진 곳에 나타나 원형 탄막 */
+/** 잔향 연참 (선조의 잔상): 가까이에서 두 번 베고, 마지막에 쌍월이 교차한다 */
+class EchoSlash extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    for (let i = 0; i < c.v('hits'); i++) {
+      this.at(i * c.v('gapSec'), () => {
+        const p = c.boss.pos();
+        const a = angleTo(p, c.host.playerPos()) + (i % 2 ? 0.25 : -0.25);
+        c.host.addHazard(new SectorBlast(c.host.scene, p, a, c.v('radius'), c.v('arcDeg'), c.v('windupSec'), c.v('damage'), c.boss.color, c.art(i === c.v('hits') - 1 ? 'finish' : 'sectorHit')));
+      });
+    }
+  }
+}
+
+/** 망자의 철쇄 (선조의 잔상): 사슬 세 줄을 부채꼴로 던진다. 맞으면 잠시 묶인다 */
+class DeadChain extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    const base = angleTo(p, c.host.playerPos());
+    const n = c.v('chains');
+    for (let i = 0; i < n; i++) {
+      const a = base + rad(c.v('spreadDeg')) * (i / Math.max(1, n - 1) - 0.5);
+      beam(c, { center: p, angle: a, length: c.v('length'), telegraphSec: c.v('telegraphSec'), liveSec: c.v('liveSec'), width: c.v('width'), damage: c.v('damage'), bare: !!c.art('chain'), onHit: () => c.host.rootPlayer(c.v('rootSec')) });
+    }
+    this.at(c.v('telegraphSec'), () => {
+      fx(c, 'chain', p, { w: c.v('length'), rotation: base, originX: 0, depth: 6 });
+      shake(c.host.scene, 'light');
+    });
+  }
+}
+
+/** 고분 파쇄 (선조의 잔상): 보스 둘레 두 겹으로 무덤이 깨지며 솟는다 */
+class TombBreak extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    const base = c.host.rng.range(0, Math.PI * 2);
+    for (const [k, ring] of [c.v('ring1'), c.v('ring2')].entries()) {
+      const n = c.v('count');
+      for (let i = 0; i < n; i++) {
+        const a = base + ((i + k * 0.5) * Math.PI * 2) / n;
+        hblast(c, clampTo({ x: p.x + Math.cos(a) * ring, y: p.y + Math.sin(a) * ring }, c, c.v('radius')), c.v('radius'), c.v('delaySec') + k * c.v('lagSec'), c.v('damage'));
+      }
+    }
+    this.at(c.v('delaySec'), () => shake(c.host.scene, 'medium'));
+  }
+}
+
+/** 선조들의 귀환 (선조의 잔상 광폭): 플레이어가 갈 자리에 선조의 혼 기둥이 솟는다 */
+class AncestorsReturn extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    fx(c, 'vortex', c.boss.pos(), { w: c.boss.radius() * 4, depth: 6 });
+    for (let i = 0; i < c.v('pillars'); i++) {
+      this.at(i * c.v('stepSec'), () => hblast(c, predict(c, c.v('delaySec'), i === 0 ? 0 : c.v('spread')), c.v('radius'), c.v('delaySec'), c.v('damage')));
+    }
+  }
+}
+
+/** 순간이동 탄막 (왕실특무마기법사): 소리 없이 사라졌다가 떨어진 곳에 나타나 원형 탄막 */
 class BlinkBarrage extends Timed {
   constructor(c: PatternCtx) {
     super(c);
     const fade = c.v('fadeSec');
+    fx(c, 'shift', c.boss.pos(), { w: c.boss.radius() * 3.5, depth: 6 });
     c.boss.setAlpha(0.2);
     this.at(fade, () => {
       const a = c.host.arena();
@@ -385,14 +464,16 @@ class BlinkBarrage extends Timed {
       }
       c.boss.teleport(best.x, best.y);
       c.boss.setAlpha(1);
+      fx(c, 'flash', best, { w: c.boss.radius() * 3.5, depth: 7 });
     });
     for (let i = 0; i < c.v('rings'); i++) {
       this.at(fade + i * c.v('ringGapSec'), () => {
         const p = c.boss.pos();
+        fx(c, 'ring', p, { w: c.boss.radius() * 4.5, depth: 6 });
         const n = c.v('bullets');
         for (let k = 0; k < n; k++) {
           const ang = ((k + (i % 2) * 0.5) * Math.PI * 2) / n;
-          c.host.fireEnemyBullet(p, ang, c.v('speed'), c.v('range'), c.v('damage'), true);
+          c.host.fireEnemyBullet(p, ang, c.v('speed'), c.v('range'), c.v('damage'), true, c.art('bullet'));
         }
       });
     }
@@ -408,6 +489,7 @@ class GreatLaser extends Timed {
   constructor(c: PatternCtx) {
     super(c);
     const p = c.boss.pos();
+    const a = angleTo(p, c.host.playerPos());
     c.host.addHazard(
       new Beams(c.host.scene, {
         center: () => p,
@@ -415,14 +497,20 @@ class GreatLaser extends Timed {
         length: c.v('length'),
         width: c.v('width'),
         spin: 0,
-        startAngle: angleTo(p, c.host.playerPos()),
+        startAngle: a,
         telegraphSec: c.v('telegraphSec'),
         liveSec: c.v('liveSec'),
         damage: c.v('damage'),
         tickSec: c.v('tickSec'),
         color: c.boss.color,
+        art: c.art('beam'),
+        warnArt: c.art('beamWarn'),
       }),
     );
+    this.at(c.v('telegraphSec'), () => {
+      fx(c, 'muzzle', { x: p.x + Math.cos(a) * 10, y: p.y + Math.sin(a) * 10 }, { w: 44, depth: 7 });
+      shake(c.host.scene, 'medium');
+    });
   }
 }
 
@@ -454,7 +542,7 @@ class MagiStrike implements PatternRun {
     this.swipes++;
     const p = c.boss.pos();
     c.host.addHazard(
-      new SectorBlast(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('radius'), c.v('arcDeg'), c.v('swipeWindupSec'), c.v('swipeDamage'), c.boss.color),
+      new SectorBlast(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('radius'), c.v('arcDeg'), c.v('swipeWindupSec'), c.v('swipeDamage'), c.boss.color, c.art('sectorHit')),
     );
   }
 
@@ -463,34 +551,115 @@ class MagiStrike implements PatternRun {
   }
 }
 
-/** 성검 낙하 (오리온의 성전사): 플레이어 둘레에 차례로 떨어지는 예고 원 */
-class HolySwords extends Timed {
+/** 왕인 각인 → 왕실 추적구 (왕실특무마기법사): 플레이어에게 왕인을 새긴 뒤 추적구를 날린다 */
+class RoyalMark extends Timed {
   constructor(c: PatternCtx) {
     super(c);
-    for (let i = 0; i < c.v('swords'); i++) {
-      this.at(i * c.v('stepSec'), () =>
-        c.host.addHazard(new DelayedBlast(c.host.scene, around(c, i, c.v('spread'), c.v('radius')), c.v('radius'), c.v('delaySec'), c.v('damage'), c.boss.color)),
-      );
+    fx(c, 'mark', c.host.playerPos(), { w: 36, depth: 7 });
+    for (let i = 0; i < c.v('seekers'); i++) {
+      this.at(c.v('markSec') + i * c.v('stepSec'), () => {
+        const p = c.boss.pos();
+        const a = angleTo(p, c.host.playerPos()) + rad(c.v('spreadDeg')) * (i % 2 ? 1 : -1) * (1 + Math.floor(i / 2));
+        c.host.fireEnemyMissile(p, a, c.v('speed'), c.v('range'), c.v('damage'), c.v('turnRate'), c.art('seeker'));
+      });
     }
   }
 }
 
-/** 메이스 강타 (오리온의 성전사): 가까울 때 앞쪽 큰 부채꼴 */
+/** 특무 관통선 (왕실특무마기법사): 다시 조준하며 빠르고 좁은 관통선을 연달아 */
+class PiercingLine extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const pierce = c.art('pierce');
+    for (let i = 0; i < c.v('lines'); i++) {
+      this.at(i * c.v('stepSec'), () => {
+        const p = c.boss.pos();
+        const a = angleTo(p, c.host.playerPos());
+        beam(c, { center: p, angle: a, length: c.v('length'), telegraphSec: c.v('telegraphSec'), liveSec: c.v('liveSec'), width: c.v('width'), damage: c.v('damage'), bare: !!pierce });
+        this.at(this.t + c.v('telegraphSec'), () => {
+          if (pierce) stretchFx(c.host.scene, pierce, p, { x: p.x + Math.cos(a) * c.v('length'), y: p.y + Math.sin(a) * c.v('length') }, c.v('width') * 3, 0.25);
+        });
+      });
+    }
+  }
+}
+
+/** 봉쇄 칙령 → 집행의 흑창 (왕실특무마기법사): 플레이어 양옆을 봉인판으로 막고, 그 안으로 흑창이 떨어진다 */
+class SealEdict extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const a = c.host.arena();
+    const p = c.host.playerPos();
+    for (const s of [-1, 1]) {
+      const at = { x: p.x + s * c.v('offset'), y: p.y };
+      faultBand(c, rectAt(a, at, true, c.v('width')), true, c.v('delaySec'), c.v('damage'));
+      fx(c, 'seal', at, { w: c.v('width') * 4, depth: 6 });
+    }
+    for (let i = 0; i < c.v('lances'); i++) {
+      this.at(c.v('delaySec') * 0.6 + i * c.v('stepSec'), () => hblast(c, predict(c, c.v('lanceDelaySec'), i === 0 ? 0 : c.v('spread')), c.v('lanceRadius'), c.v('lanceDelaySec'), c.v('lanceDamage')));
+    }
+  }
+}
+
+/** 왕명·최종 집행 (왕실특무마기법사 마기화): 마기를 거둬들인 뒤 방을 세로 집행선으로 가른다. 한 줄만 비어 있다 */
+class FinalDecree extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    fx(c, 'confiscate', c.boss.pos(), { w: c.boss.radius() * 5, depth: 7 });
+    const a = c.host.arena();
+    const n = c.v('lanes');
+    const lane = a.w / n;
+    const safe = c.host.rng.int(0, n - 1);
+    this.at(c.v('windupSec'), () => {
+      for (let i = 0; i < n; i++) {
+        if (i === safe) continue;
+        const cx = a.x + lane * (i + 0.5);
+        faultBand(c, { x: cx - lane * 0.45, y: a.y, w: lane * 0.9, h: a.h }, true, c.v('delaySec'), c.v('damage'));
+        this.at(c.v('windupSec') + c.v('delaySec'), () => fx(c, 'decree', { x: cx, y: a.y + a.h / 2 }, { w: lane * 1.4, depth: 7 }));
+      }
+    });
+    this.at(c.v('windupSec') + c.v('delaySec'), () => shake(c.host.scene, 'heavy'));
+  }
+}
+
+/** 성검 낙하 (오리온의 성전사): 플레이어 둘레에 차례로 성검이 떨어진다 */
+class HolySwords extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    fx(c, 'prayer', c.boss.pos(), { w: c.boss.radius() * 3.5, depth: 7 });
+    for (let i = 0; i < c.v('swords'); i++) {
+      this.at(i * c.v('stepSec'), () => {
+        const at = around(c, i, c.v('spread'), c.v('radius'));
+        hblast(c, at, c.v('radius'), c.v('delaySec'), c.v('damage'));
+        const sword = c.art('sword');
+        if (sword) fallSprite(c.host.scene, sword, at, c.v('delaySec'), c.v('radius') * 3, c.boss.fxColor);
+      });
+    }
+  }
+}
+
+/** 메이스 강타 (오리온의 성전사): 가까울 때 앞쪽 큰 부채꼴, 별빛이 터진다 */
 class MaceSmash extends Timed {
   constructor(c: PatternCtx) {
     super(c);
     const p = c.boss.pos();
-    c.host.addHazard(new SectorBlast(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('radius'), c.v('arcDeg'), c.v('windupSec'), c.v('damage'), c.boss.color));
+    const a = angleTo(p, c.host.playerPos());
+    c.host.addHazard(new SectorBlast(c.host.scene, p, a, c.v('radius'), c.v('arcDeg'), c.v('windupSec'), c.v('damage'), c.boss.color, c.art('sectorHit')));
+    this.at(c.v('windupSec'), () => {
+      fx(c, 'starMace', { x: p.x + Math.cos(a) * c.v('radius') * 0.6, y: p.y + Math.sin(a) * c.v('radius') * 0.6 }, { w: c.v('radius') * 1.6, depth: 7 });
+      shake(c.host.scene, 'medium');
+    });
   }
 }
 
-/** 방패 투척 (오리온의 성전사): 방 벽에 튕기는 방패 */
+/** 방패 투척 (오리온의 성전사): 방벽을 펼친 뒤 방 벽에 튕기는 방패를 던진다 */
 class ShieldThrow extends Timed {
   constructor(c: PatternCtx) {
     super(c);
     const p = c.boss.pos();
+    fx(c, 'barrier', p, { w: c.boss.radius() * 3.2, depth: 7 });
     c.host.addHazard(
-      new BouncingDisc(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('speed'), c.host.arena(), c.v('bounces'), c.v('radius'), c.v('damage'), c.v('maxSec'), c.boss.color),
+      new BouncingDisc(c.host.scene, p, angleTo(p, c.host.playerPos()), c.v('speed'), c.host.arena(), c.v('bounces'), c.v('radius'), c.v('damage'), c.v('maxSec'), c.boss.color, { body: c.art('shield'), spark: c.art('spark') }),
     );
   }
 }
@@ -503,12 +672,63 @@ class Judgment extends Timed {
     const p = c.host.playerPos();
     const gap = c.v('gap');
     const r = c.v('radius');
+    fx(c, 'cross', p, { w: Math.min(a.w, a.h) * 0.9, depth: 2 });
     const spots: Vec2[] = [];
     for (let x = a.x + r; x <= a.x + a.w - r; x += gap) spots.push({ x, y: p.y });
     for (let y = a.y + r; y <= a.y + a.h - r; y += gap) spots.push({ x: p.x, y });
     // 플레이어에게서 가까운 것부터
     spots.sort((u, v) => Math.hypot(u.x - p.x, u.y - p.y) - Math.hypot(v.x - p.x, v.y - p.y));
-    spots.forEach((s, i) => this.at(i * c.v('stepSec'), () => c.host.addHazard(new DelayedBlast(c.host.scene, s, r, c.v('delaySec'), c.v('damage'), c.boss.color))));
+    const sword = c.art('sword');
+    spots.forEach((s, i) =>
+      this.at(i * c.v('stepSec'), () => {
+        c.host.addHazard(new DelayedBlast(c.host.scene, s, r, c.v('delaySec'), c.v('damage'), c.boss.color, { hit: c.art('blastHit') }));
+        if (sword && i % 2 === 0) fallSprite(c.host.scene, sword, s, c.v('delaySec'), r * 3, c.boss.fxColor);
+      }),
+    );
+  }
+}
+
+/** 추락성 강타 (오리온의 성전사): 플레이어가 갈 자리에 별이 떨어진다 */
+class FallingStar extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    for (let i = 0; i < c.v('stars'); i++) {
+      this.at(i * c.v('stepSec'), () => hblast(c, predict(c, c.v('delaySec'), i === 0 ? 0 : c.v('spread')), c.v('radius'), c.v('delaySec'), c.v('damage')));
+    }
+  }
+}
+
+/** 삼연성 성역 (오리온의 성전사): 플레이어를 지나는 한 줄에 별 셋의 성역이 깔린다 */
+class BeltSanctuary extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.host.playerPos();
+    const side = angleTo(c.boss.pos(), p) + Math.PI / 2;
+    const r = c.v('radius');
+    const spots = [-1, 0, 1].map((k) => clampTo({ x: p.x + Math.cos(side) * k * c.v('gap'), y: p.y + Math.sin(side) * k * c.v('gap') }, c, r));
+    for (const s of spots) c.host.addHazard(new Zone(c.host.scene, s, r, c.v('liveSec'), c.v('damage'), c.v('tickSec'), c.boss.color, 0, c.v('delaySec'), c.art('zone')));
+  }
+}
+
+/** 사냥꾼의 서약 (오리온의 성전사): 플레이어에게 표식을 남기고, 잠시 뒤 그 자리에 성검 셋이 꽂힌다 */
+class HunterOath extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const at = clampTo(c.host.playerPos(), c, c.v('radius'));
+    fx(c, 'oath', at, { w: c.v('radius') * 2.6, depth: 7 });
+    hblast(c, at, c.v('radius'), c.v('delaySec'), c.v('damage'));
+  }
+}
+
+/** 별사냥의 심판 (오리온의 성전사 성광): 크게 숨을 고른 뒤 넓은 별빛 초승달로 앞을 벤다 */
+class StarHunt extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    const a = angleTo(p, c.host.playerPos());
+    fx(c, 'prayer', p, { w: c.boss.radius() * 3.5, depth: 7 });
+    c.host.addHazard(new SectorBlast(c.host.scene, p, a, c.v('radius'), c.v('arcDeg'), c.v('windupSec'), c.v('damage'), c.boss.color, c.art('sectorHit')));
+    this.at(c.v('windupSec'), () => shake(c.host.scene, 'heavy'));
   }
 }
 
@@ -2036,6 +2256,18 @@ const PATTERNS: Readonly<Record<string, (c: PatternCtx) => PatternRun>> = {
   maceSmash: (c) => new MaceSmash(c),
   shieldThrow: (c) => new ShieldThrow(c),
   judgment: (c) => new Judgment(c),
+  echoSlash: (c) => new EchoSlash(c),
+  deadChain: (c) => new DeadChain(c),
+  tombBreak: (c) => new TombBreak(c),
+  ancestorsReturn: (c) => new AncestorsReturn(c),
+  royalMark: (c) => new RoyalMark(c),
+  piercingLine: (c) => new PiercingLine(c),
+  sealEdict: (c) => new SealEdict(c),
+  finalDecree: (c) => new FinalDecree(c),
+  fallingStar: (c) => new FallingStar(c),
+  beltSanctuary: (c) => new BeltSanctuary(c),
+  hunterOath: (c) => new HunterOath(c),
+  starHunt: (c) => new StarHunt(c),
 };
 
 export function makePattern(id: string, c: PatternCtx): PatternRun | null {

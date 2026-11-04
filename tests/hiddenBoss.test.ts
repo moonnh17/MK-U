@@ -34,9 +34,9 @@ describe('히든보스 데이터 (기획서 표)', () => {
   });
   it('기획서 핵심 패턴', () => {
     const pats = (id: string) => H.find((h) => h.id === id)!.patterns.filter((p) => p.phase === 1).map((p) => p.id);
-    expect(pats('ancestorEcho')).toEqual(['warCry', 'whirlDash', 'bleedField', 'groundBreak']);
-    expect(pats('royalMage')).toEqual(['blinkBarrage', 'greatLaser', 'clones']);
-    expect(pats('orionCrusader')).toEqual(['holySwords', 'maceSmash', 'shieldThrow']);
+    expect(pats('ancestorEcho')).toEqual(['warCry', 'whirlDash', 'bleedField', 'groundBreak', 'echoSlash', 'deadChain', 'tombBreak']);
+    expect(pats('royalMage')).toEqual(['blinkBarrage', 'greatLaser', 'clones', 'royalMark', 'piercingLine', 'sealEdict']);
+    expect(pats('orionCrusader')).toEqual(['holySwords', 'maceSmash', 'shieldThrow', 'fallingStar', 'beltSanctuary', 'hunterOath']);
   });
   it('데이터 검증 통과', () => {
     expect(validateGameData(gameData)).toEqual([]);

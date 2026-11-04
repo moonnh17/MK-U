@@ -5,7 +5,7 @@
  * 체력 단계(마기카이저): 첫 단계가 열리기 전에는 구속구에 갇혀 움직이지 않고, 단계가 열릴 때마다 연출한다.
  * 마지막 단계에서는 일반 패턴과 별개로 독립 계승 패턴이 겹쳐 돈다.
  */
-import type Phaser from 'phaser';
+import Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import { getContext } from '../core/context';
 import { hexColor } from '../core/scale';
@@ -50,7 +50,7 @@ export class BossController {
   private buffLeft = 0;
   private buffDamage = 1;
   private buffSpeed = 1;
-  private buffFx: Phaser.GameObjects.Arc | null = null;
+  private buffFx: Phaser.GameObjects.Arc | Phaser.GameObjects.Sprite | null = null;
   private minions: Minion[] = [];
   private rubble: { destroy(): void }[] = [];
   private host: BossHost | null = null;
@@ -180,7 +180,8 @@ export class BossController {
     this.drawRestraint(host);
     this.aura?.setPosition(e.sprite.x, e.sprite.y).setRadius(e.radius + 4);
     this.coreFx?.setPosition(e.sprite.x, e.sprite.y);
-    this.buffFx?.setPosition(e.sprite.x, e.sprite.y).setRadius(e.radius + 7);
+    if (this.buffFx instanceof Phaser.GameObjects.Arc) this.buffFx.setPosition(e.sprite.x, e.sprite.y).setRadius(e.radius + 7);
+    else this.buffFx?.setPosition(e.sprite.x, e.sprite.y);
   }
 
   private get rules(): BossCore['patterns'] {
@@ -316,6 +317,14 @@ export class BossController {
     this.buffSpeed = speed;
     // 접촉 피해도 함께
     this.enemy.damageMul = this.damageMul * damage;
+    const aura = this.def.art?.buffAura;
+    if (!this.buffFx && aura) {
+      // 강화 오라 그림: 몸 뒤에서 일렁인다
+      const sp = host.scene.add.sprite(this.enemy.sprite.x, this.enemy.sprite.y, aura.spriteKey).setDepth(2.5).setAlpha(0.85);
+      sp.setDisplaySize(this.enemy.radius * 3.4, this.enemy.radius * 3.4);
+      loopArt(sp, aura);
+      this.buffFx = sp;
+    }
     this.buffFx ??= host.scene.add.circle(0, 0, this.enemy.radius + 7).setStrokeStyle(2, 0xff3a2a, 0.9).setDepth(2);
   }
 
@@ -389,10 +398,18 @@ export class BossController {
     if (this.minions.length === 0) return;
     const v = (k: string) => this.value('clones', k);
     const p = host.playerPos();
+    const shatter = (m: (typeof this.minions)[number]) => {
+      const art = this.def.art?.[`${m.pattern}.shatter`];
+      if (art) playFx(host.scene, art, m.e.sprite.x, m.e.sprite.y, { w: m.e.radius * 3.5 });
+    };
     this.minions = this.minions.filter((m) => {
-      if (m.e.dead) return false;
+      if (m.e.dead) {
+        shatter(m);
+        return false;
+      }
       if (m.left !== null) m.left -= dt;
       if ((m.left !== null && m.left <= 0) || this.enemy.dead) {
+        shatter(m);
         host.removeMinion(m.e);
         return false;
       }
@@ -401,7 +418,7 @@ export class BossController {
       if (m.shot <= 0) {
         m.shot = v('shotSec');
         const from = { x: m.e.sprite.x, y: m.e.sprite.y };
-        host.fireEnemyBullet(from, Math.atan2(p.y - from.y, p.x - from.x), v('shotSpeed'), v('shotRange'), v('shotDamage'), true);
+        host.fireEnemyBullet(from, Math.atan2(p.y - from.y, p.x - from.x), v('shotSpeed'), v('shotRange'), v('shotDamage'), true, this.def.art?.bullet);
       }
       return true;
     });
@@ -410,7 +427,7 @@ export class BossController {
   /** 지면 파괴 잔해: 상한(maxRubble)을 넘으면 가장 오래된 것부터 치운다 */
   private addRubble(host: BossHost, at: Vec2, radius: number): void {
     const v = (k: string) => this.value('groundBreak', k);
-    const r = host.addObstacle(at, radius, v('doorClear'));
+    const r = host.addObstacle(at, radius, v('doorClear'), this.def.art?.['groundBreak.rubble']);
     if (!r) return;
     this.rubble.push(r);
     while (this.rubble.length > v('maxRubble')) this.rubble.shift()!.destroy();

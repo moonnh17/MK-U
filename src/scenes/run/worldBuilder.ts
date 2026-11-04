@@ -14,6 +14,7 @@ import { RoomState, wavesForRoom } from '../../systems/roomState';
 import { plainWeapon } from '../../systems/weapons';
 import { contains, corridors, doorRect, interiorRect, roomCenter, roomRect, obstacleRects, wallRects, type Rect } from '../../systems/worldLayout';
 import type { RunScene } from '../RunScene';
+import type { SpriteRef } from '../../types/data';
 
 export class WorldBuilder {
   constructor(private readonly run: RunScene) {}
@@ -158,7 +159,7 @@ export class WorldBuilder {
   }
 
   /** 지면 파괴 잔해: 벽처럼 막는다. 플레이어 자리·문 근처에는 만들지 않는다(갇힘 방지) */
-  addObstacle(at: Vec2, radius: number, doorClear: number): { destroy(): void } | null {
+  addObstacle(at: Vec2, radius: number, doorClear: number, art?: SpriteRef): { destroy(): void } | null {
     const d = this.run.ctx.data;
     if (Math.hypot(this.run.player.x - at.x, this.run.player.y - at.y) <= radius + d.player.size / 2 + 2) return null;
     const rid = this.run.session.currentRoomId;
@@ -167,7 +168,18 @@ export class WorldBuilder {
     }
     const rect = this.run.add.rectangle(at.x, at.y, radius * 2, radius * 2, hexColor(d.bosses.rubbleColor)).setDepth(1);
     this.run.walls.add(rect);
-    return { destroy: () => this.run.walls.remove(rect, true, true) };
+    // 그림이 있으면 그 그림으로 (판정은 사각형 그대로)
+    const img = art && this.run.textures.exists(art.spriteKey) ? this.run.add.image(at.x, at.y, art.spriteKey).setDepth(1.2) : null;
+    if (img) {
+      img.setDisplaySize(radius * 2.8, (radius * 2.8 * img.height) / Math.max(1, img.width));
+      rect.setFillStyle(0x000000, 0);
+    }
+    return {
+      destroy: () => {
+        img?.destroy();
+        this.run.walls.remove(rect, true, true);
+      },
+    };
   }
 
   spawnPoint(node: RoomNode, rng: Rng, radius: number): Vec2 {

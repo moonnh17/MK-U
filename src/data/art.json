@@ -293,25 +293,6 @@
         }
       }
     },
-    "enemy_ancestor_echo": {
-      "file": "mku/enemy_ancestor_echo.png",
-      "frameWidth": 96,
-      "frameHeight": 134,
-      "frames": 3,
-      "density": 2,
-      "anims": {
-        "idle": {
-          "from": 0,
-          "to": 0,
-          "fps": 4
-        },
-        "move": {
-          "from": 1,
-          "to": 2,
-          "fps": 8
-        }
-      }
-    },
     "spire_small": {
       "file": "mku/spire_small.png",
       "frameWidth": 28,
@@ -1588,44 +1569,6 @@
       "frameWidth": 9,
       "frameHeight": 9,
       "frames": 1
-    },
-    "enemy_orion_crusader": {
-      "file": "mku/enemy_orion_crusader.png",
-      "frameWidth": 106,
-      "frameHeight": 114,
-      "frames": 9,
-      "density": 2,
-      "anims": {
-        "idle": {
-          "from": 0,
-          "to": 2,
-          "fps": 4
-        },
-        "move": {
-          "from": 3,
-          "to": 8,
-          "fps": 8
-        }
-      }
-    },
-    "enemy_royal_mage": {
-      "file": "mku/enemy_royal_mage.png",
-      "frameWidth": 50,
-      "frameHeight": 94,
-      "frames": 4,
-      "density": 2,
-      "anims": {
-        "idle": {
-          "from": 0,
-          "to": 0,
-          "fps": 4
-        },
-        "move": {
-          "from": 1,
-          "to": 3,
-          "fps": 8
-        }
-      }
     },
     "item_orion_shield": {
       "file": "mku/item_orion_shield.png",
@@ -4785,6 +4728,826 @@
           "from": 0,
           "to": 3,
           "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "enemy_ancestor_echo": {
+      "file": "mku/enemy_ancestor_echo.png",
+      "frameWidth": 162,
+      "frameHeight": 148,
+      "frames": 16,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 6
+        },
+        "move": {
+          "from": 4,
+          "to": 7,
+          "fps": 8
+        },
+        "attack": {
+          "from": 8,
+          "to": 11,
+          "fps": 12,
+          "loop": false
+        },
+        "cast": {
+          "from": 12,
+          "to": 15,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "enemy_orion_crusader": {
+      "file": "mku/enemy_orion_crusader.png",
+      "frameWidth": 152,
+      "frameHeight": 142,
+      "frames": 16,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 6
+        },
+        "move": {
+          "from": 4,
+          "to": 7,
+          "fps": 8
+        },
+        "attack": {
+          "from": 8,
+          "to": 11,
+          "fps": 12,
+          "loop": false
+        },
+        "cast": {
+          "from": 12,
+          "to": 15,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "enemy_royal_mage": {
+      "file": "mku/enemy_royal_mage.png",
+      "frameWidth": 130,
+      "frameHeight": 114,
+      "frames": 16,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 6
+        },
+        "move": {
+          "from": 4,
+          "to": 7,
+          "fps": 8
+        },
+        "attack": {
+          "from": 8,
+          "to": 11,
+          "fps": 12,
+          "loop": false
+        },
+        "cast": {
+          "from": 12,
+          "to": 15,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_cry_burst": {
+      "file": "mku/fx_echo_cry_burst.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_cry_aura": {
+      "file": "mku/fx_echo_cry_aura.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "fx_echo_whirl_trail": {
+      "file": "mku/fx_echo_whirl_trail.png",
+      "frameWidth": 240,
+      "frameHeight": 60,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_whirl_stomp": {
+      "file": "mku/fx_echo_whirl_stomp.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_bleed_warn": {
+      "file": "mku/fx_echo_bleed_warn.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 8,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_bleed_loop": {
+      "file": "mku/fx_echo_bleed_loop.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "fx_echo_break_impact": {
+      "file": "mku/fx_echo_break_impact.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_rubble": {
+      "file": "mku/fx_echo_rubble.png",
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "frames": 1,
+      "density": 2
+    },
+    "fx_echo_shatter_impact": {
+      "file": "mku/fx_echo_shatter_impact.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_blink_flash": {
+      "file": "mku/fx_royal_blink_flash.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_blink_ring": {
+      "file": "mku/fx_royal_blink_ring.png",
+      "frameWidth": 160,
+      "frameHeight": 160,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_bullet": {
+      "file": "mku/fx_royal_bullet.png",
+      "frameWidth": 24,
+      "frameHeight": 24,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
+    "fx_royal_laser_warn": {
+      "file": "mku/fx_royal_laser_warn.png",
+      "frameWidth": 320,
+      "frameHeight": 40,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "fx_royal_laser": {
+      "file": "mku/fx_royal_laser.png",
+      "frameWidth": 320,
+      "frameHeight": 40,
+      "frames": 3,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 2,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_royal_laser_muzzle": {
+      "file": "mku/fx_royal_laser_muzzle.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_clone_shatter": {
+      "file": "mku/fx_royal_clone_shatter.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_strike_trail": {
+      "file": "mku/fx_royal_strike_trail.png",
+      "frameWidth": 200,
+      "frameHeight": 50,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_strike_swipe": {
+      "file": "mku/fx_royal_strike_swipe.png",
+      "frameWidth": 160,
+      "frameHeight": 160,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "fx_orion_sword": {
+      "file": "mku/fx_orion_sword.png",
+      "frameWidth": 32,
+      "frameHeight": 80,
+      "frames": 3,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 2,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
+    "fx_orion_sword_impact": {
+      "file": "mku/fx_orion_sword_impact.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "fx_orion_sword_warn": {
+      "file": "mku/fx_orion_sword_warn.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "fx_orion_mace_fan": {
+      "file": "mku/fx_orion_mace_fan.png",
+      "frameWidth": 160,
+      "frameHeight": 160,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_orion_shield": {
+      "file": "mku/fx_orion_shield.png",
+      "frameWidth": 36,
+      "frameHeight": 36,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": true
+        }
+      }
+    },
+    "fx_orion_shield_spark": {
+      "file": "mku/fx_orion_shield_spark.png",
+      "frameWidth": 60,
+      "frameHeight": 60,
+      "frames": 3,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 2,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "fx_orion_judgment": {
+      "file": "mku/fx_orion_judgment.png",
+      "frameWidth": 320,
+      "frameHeight": 320,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_tomb": {
+      "file": "mku/fx_echo_tomb.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_heart": {
+      "file": "mku/fx_echo_heart.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 8,
+          "loop": true
+        }
+      }
+    },
+    "fx_echo_chain": {
+      "file": "mku/fx_echo_chain.png",
+      "frameWidth": 220,
+      "frameHeight": 220,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_return": {
+      "file": "mku/fx_echo_return.png",
+      "frameWidth": 220,
+      "frameHeight": 220,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_twin_moon": {
+      "file": "mku/fx_echo_twin_moon.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_echo_slash": {
+      "file": "mku/fx_echo_echo_slash.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_vortex": {
+      "file": "mku/fx_echo_vortex.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_echo_spirits": {
+      "file": "mku/fx_echo_spirits.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_orion_prayer": {
+      "file": "mku/fx_orion_prayer.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 8,
+          "loop": false
+        }
+      }
+    },
+    "fx_orion_star_hunt": {
+      "file": "mku/fx_orion_star_hunt.png",
+      "frameWidth": 240,
+      "frameHeight": 240,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_orion_oath": {
+      "file": "mku/fx_orion_oath.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_orion_belt": {
+      "file": "mku/fx_orion_belt.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "fx_orion_star_swords": {
+      "file": "mku/fx_orion_star_swords.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_orion_star_mace": {
+      "file": "mku/fx_orion_star_mace.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_orion_barrier": {
+      "file": "mku/fx_orion_barrier.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_orion_falling_star": {
+      "file": "mku/fx_orion_falling_star.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_silent_shift": {
+      "file": "mku/fx_royal_silent_shift.png",
+      "frameWidth": 160,
+      "frameHeight": 160,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_seal_edict": {
+      "file": "mku/fx_royal_seal_edict.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_confiscate": {
+      "file": "mku/fx_royal_confiscate.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_final_decree": {
+      "file": "mku/fx_royal_final_decree.png",
+      "frameWidth": 240,
+      "frameHeight": 240,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_seeker": {
+      "file": "mku/fx_royal_seeker.png",
+      "frameWidth": 28,
+      "frameHeight": 28,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "fx_royal_mark": {
+      "file": "mku/fx_royal_mark.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_black_lance": {
+      "file": "mku/fx_royal_black_lance.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_royal_pierce": {
+      "file": "mku/fx_royal_pierce.png",
+      "frameWidth": 240,
+      "frameHeight": 240,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
           "loop": false
         }
       }

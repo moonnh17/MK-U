@@ -545,7 +545,7 @@ export class DelayedBlast implements Hazard {
 
 /** 방 벽에 bounces번 튕기는 원반 (성전사 방패 투척). 닿으면 피해, 튕김을 다 쓰면 사라진다 */
 export class BouncingDisc implements Hazard {
-  private readonly img: Phaser.GameObjects.Arc;
+  private readonly img: Phaser.GameObjects.Arc | Phaser.GameObjects.Sprite;
   private pos: Vec2;
   private vel: Vec2;
   private left: number;
@@ -562,12 +562,19 @@ export class BouncingDisc implements Hazard {
     private readonly damage: number,
     maxSec: number,
     color: number,
+    /** 그림: 회전하는 몸체와 벽에 튕길 때 불꽃 (없으면 원) */
+    private readonly art?: { body?: SpriteRef; spark?: SpriteRef },
   ) {
     this.pos = { ...from };
     this.vel = { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed };
     this.left = bounces;
     this.life = maxSec;
-    this.img = scene.add.circle(from.x, from.y, radius, color, 0.9).setStrokeStyle(1, 0xffffff, 0.8).setDepth(5);
+    if (art?.body) {
+      const sp = scene.add.sprite(from.x, from.y, art.body.spriteKey).setDepth(5);
+      sp.setDisplaySize(radius * 3.2, radius * 3.2);
+      loopArt(sp, art.body);
+      this.img = sp;
+    } else this.img = scene.add.circle(from.x, from.y, radius, color, 0.9).setStrokeStyle(1, 0xffffff, 0.8).setDepth(5);
   }
 
   update(dt: number, host: HazardHost): boolean {
@@ -576,7 +583,10 @@ export class BouncingDisc implements Hazard {
     this.pos = r.pos;
     this.vel = r.vel;
     this.left -= r.bounces;
-    this.img.setPosition(this.pos.x, this.pos.y).setRotation(this.img.rotation + dt * 12);
+    if (r.bounces > 0 && this.art?.spark) playFx(host.scene, this.art.spark, this.pos.x, this.pos.y, { w: this.radius * 5 });
+    // 그림이 있으면 그림 자체가 돈다
+    if (this.art?.body) this.img.setPosition(this.pos.x, this.pos.y);
+    else this.img.setPosition(this.pos.x, this.pos.y).setRotation(this.img.rotation + dt * 12);
     const p = host.playerPos();
     if (Math.hypot(p.x - this.pos.x, p.y - this.pos.y) <= this.radius + host.playerRadius) host.hurtPlayer(this.damage);
     return this.left >= 0 && this.life > 0;

@@ -243,7 +243,7 @@ actor('enemy_archon', gaps('late-elites/archon-idle.png'), gaps('late-elites/arc
 // 마기카이저: 구속(1단계) → 2 → 3단계
 actor('enemy_magi_kaiser', strip('kaiser/idle.png', 4), strip('kaiser/move.png', 6), 99);
 // 선조의 잔상: 야만용사 시초 각성자의 전투 기록 → 야만용사 몸체
-actor('enemy_ancestor_echo', single('warrior/barbarian-idle.png'), strip('warrior/barbarian-move.png', 2), 66, { independent: true });
+// enemy_ancestor_echo: 히든보스 팩 본체로 (아래 '히든보스 팩')
 
 // ---------- 첨탑 ----------
 sprites.spire_small = sheet('spire_small', single('spires/small-0.png'), 44);
@@ -725,19 +725,7 @@ sprites.prop_encounter_core = sheet('prop_encounter_core', single('mimosa/frames
 // 스킬 오브젝트 (탄은 오른쪽을 본다)
 dots('ult_first_law', ['...EEE...', '.EEeeeEE.', '.EeeyyeE.', 'EeeywyyeE', 'EeywwwyeE', 'EeeywyyeE', '.EeeyyeE.', '.EEeeeEE.', '...EEE...']);
 
-// 히든보스: 오리온의 성전사 = 성기사 몸체. 왕실특무마기법사는 원본에 없어 연구원을 보라색으로 물들여 쓴다 (임시)
-actor('enemy_orion_crusader', gaps('warrior/paladin-idle.png'), gaps('warrior/paladin-move.png'), 56);
-{
-  const solid = (f) => (k.components(f).reduce((a, c) => Math.max(a, c.area), 0));
-  const allFr = cells('spires/researcher-v141.png', 96, 192);
-  const biggest = Math.max(...allFr.map(solid));
-  const fr = allFr.filter((f) => solid(f) > biggest * 0.5).slice(0, 4).map((f) => {
-    const t = k.crop(f, 0, 0, f.w, f.h);
-    for (let p = 0; p < t.px.length; p += 4) { t.px[p] = Math.round(t.px[p] * 0.62); t.px[p + 1] = Math.round(t.px[p + 1] * 0.45); }
-    return t;
-  });
-  actor('enemy_royal_mage', [fr[0]], fr.slice(0, 3), 46);
-}
+// 히든보스 세 명의 본체는 아래 '히든보스 팩'에서 만든다
 
 // 아이템 아이콘 (원본에 맞는 것이 없는 것은 직접 찍는다)
 sprites.item_orion_shield = icon('item_orion_shield', 'warrior/icon-p-shield.png', CARD_ICON);
@@ -1284,6 +1272,104 @@ packFx('fx_eclipse_blade_bloom', '03_식광/01_추가공격_이펙트/01_식광 
 packFx('fx_eclipse_core_collapse', '03_식광/01_추가공격_이펙트/02_흑일 핵 붕괴', 90, 12);
 packFx('fx_eclipse_light_rain', '03_식광/02_광역공격_이펙트/01_흑일의 낙광우', 90, 10);
 packFx('fx_eclipse_erosion_ring', '03_식광/02_광역공격_이펙트/02_개기식 침식권', 160, 10);
+
+// ---------- 히든보스 팩 (2026-11-05): 본체 4자세 + 패턴 이펙트 26칸 + 추가 스킬 이펙트 ----------
+const HB_DIR = process.argv[6] ?? 'C:/Users/USER/Documents/Codex/2026-10-21/project-mk-ultra-sites-project-appgprj-5/outputs/MKU_현재히든보스_스킬스프라이트_2026-11-05';
+/** 생성 원본에 깔린 희미한 알파 잡음(1~24)을 지운다 */
+function denoise(img, cut = 24) {
+  for (let p = 3; p < img.px.length; p += 4) if (img.px[p] <= cut) img.px[p] = 0;
+  return img;
+}
+/** 폴더 안 '…프레임01~04.png' */
+const hbFrames = (dir) => {
+  const d = path.join(HB_DIR, dir);
+  return fs.readdirSync(d).filter((f) => /프레임0\d\.png$/.test(f)).sort().map((f) => denoise(k.read(path.join(d, f))));
+};
+/** 패턴 칸: 보스 폴더 안 '슬롯_이름/strip.png'를 같은 칸으로 자른다 */
+function hbSlot(key, bossDir, slot, fit, fps, loop = false) {
+  const d = path.join(HB_DIR, bossDir);
+  const sub = fs.readdirSync(d).find((x) => x.startsWith(slot + '_'));
+  if (!sub) throw new Error(`히든보스 칸 없음 ${bossDir} ${slot}`);
+  const meta = JSON.parse(fs.readFileSync(path.join(d, sub, 'metadata.json'), 'utf8'));
+  const img = denoise(k.read(path.join(d, sub, 'strip.png')));
+  const fw = meta.frameWidth, fh = meta.frameHeight, n = meta.frames ?? Math.round(img.w / fw);
+  const fr = Array.from({ length: n }, (_, i) => k.crop(img, i * fw, 0, fw, fh));
+  fxArt(key, fr, fit, { fps, loop });
+}
+const hbFx = (key, dir, fit, fps, loop = false) => fxArt(key, hbFrames(dir), fit, { fps, loop });
+{
+  const EO = 'MGTRPG-Ancestral-Echo-Orion-Paladin-2026-11-05';
+  const RM = 'MGTRPG-Royal-Special-Magi-2026-11-05/01_왕실특무마기법사';
+  const st4 = (dir, fps, loop = true) => ({ frames: hbFrames(dir), fps, loop });
+  // 본체: 대기·이동은 반복, 공격·시전은 1회
+  bossActor('enemy_ancestor_echo', {
+    idle: st4(`${EO}/01_선조의_메아리/01_본체/대기`, 6), move: st4(`${EO}/01_선조의_메아리/01_본체/이동`, 8),
+    attack: st4(`${EO}/01_선조의_메아리/01_본체/도끼 공격`, 12, false), cast: st4(`${EO}/01_선조의_메아리/01_본체/원혼 시전`, 10, false),
+  }, 66);
+  bossActor('enemy_orion_crusader', {
+    idle: st4(`${EO}/02_오리온_성기사/01_본체/대기`, 6), move: st4(`${EO}/02_오리온_성기사/01_본체/이동`, 8),
+    attack: st4(`${EO}/02_오리온_성기사/01_본체/메이스 공격`, 12, false), cast: st4(`${EO}/02_오리온_성기사/01_본체/성좌 시전`, 10, false),
+  }, 60);
+  bossActor('enemy_royal_mage', {
+    idle: st4(`${RM}/01_본체/대기`, 6), move: st4(`${RM}/01_본체/이동`, 8),
+    attack: st4(`${RM}/01_본체/지팡이 사격`, 12, false), cast: st4(`${RM}/01_본체/칙령 시전`, 10, false),
+  }, 56);
+
+  // 패턴 이펙트 26칸
+  const AE = '01_선조의_잔상', RMS = '02_왕실특무마기법사', OC = '03_오리온의_성전사';
+  hbSlot('fx_echo_cry_burst', AE, 'warCry.burst', 90, 14);
+  hbSlot('fx_echo_cry_aura', AE, 'warCry.aura', 70, 10, true);
+  hbSlot('fx_echo_whirl_trail', AE, 'whirlDash.trail', 120, 16);
+  hbSlot('fx_echo_whirl_stomp', AE, 'whirlDash.stomp', 70, 16);
+  hbSlot('fx_echo_bleed_warn', AE, 'bleedField.warning', 60, 8);
+  hbSlot('fx_echo_bleed_loop', AE, 'bleedField.loop', 60, 10, true);
+  hbSlot('fx_echo_break_impact', AE, 'groundBreak.impact', 70, 14);
+  hbSlot('fx_echo_rubble', AE, 'groundBreak.rubble', 36, 1);
+  hbSlot('fx_echo_shatter_impact', AE, 'earthShatter.impact', 60, 16);
+  hbSlot('fx_royal_blink_flash', RMS, 'blinkBarrage.flash', 70, 14);
+  hbSlot('fx_royal_blink_ring', RMS, 'blinkBarrage.ring', 80, 14);
+  hbSlot('fx_royal_bullet', RMS, 'blinkBarrage.bullet', 12, 12, true);
+  hbSlot('fx_royal_laser_warn', RMS, 'greatLaser.warning', 160, 10, true);
+  hbSlot('fx_royal_laser', RMS, 'greatLaser.beam', 160, 18, true);
+  hbSlot('fx_royal_laser_muzzle', RMS, 'greatLaser.muzzle', 60, 16);
+  hbSlot('fx_royal_clone_shatter', RMS, 'clones.shatter', 60, 14);
+  hbSlot('fx_royal_strike_trail', RMS, 'magiStrike.trail', 100, 16);
+  hbSlot('fx_royal_strike_swipe', RMS, 'magiStrike.swipe', 80, 16);
+  hbSlot('fx_orion_sword', OC, 'holySwords.sword', 40, 12, true);
+  hbSlot('fx_orion_sword_impact', OC, 'holySwords.impact', 60, 16);
+  hbSlot('fx_orion_sword_warn', OC, 'holySwords.warning', 50, 10, true);
+  hbSlot('fx_orion_mace_fan', OC, 'maceSmash.fan', 80, 14);
+  hbSlot('fx_orion_shield', OC, 'shieldThrow.shield', 18, 16, true);
+  hbSlot('fx_orion_shield_spark', OC, 'shieldThrow.spark', 30, 16);
+  hbSlot('fx_orion_judgment', OC, 'judgment.cross', 160, 12);
+
+  // 본체 팩의 추가 스킬 이펙트
+  const ES = `${EO}/01_선조의_메아리/02_보스스킬`, OS = `${EO}/02_오리온_성기사/02_보스스킬`, RS = `${RM}/02_보스스킬`;
+  hbFx('fx_echo_tomb', `${ES}/고분 파쇄`, 90, 12);
+  hbFx('fx_echo_heart', `${ES}/꺼지지 않는 심장`, 50, 8, true);
+  hbFx('fx_echo_chain', `${ES}/망자의 철쇄`, 110, 12);
+  hbFx('fx_echo_return', `${ES}/선조들의 귀환`, 110, 10);
+  hbFx('fx_echo_twin_moon', `${ES}/선조의 쌍월`, 90, 14);
+  hbFx('fx_echo_echo_slash', `${ES}/잔향 연참`, 90, 16);
+  hbFx('fx_echo_vortex', `${ES}/잔혼 소용돌이`, 90, 14);
+  hbFx('fx_echo_spirits', `${ES}/전장의 잔혼`, 90, 10);
+  hbFx('fx_orion_prayer', `${OS}/먼 별의 기도`, 90, 8);
+  hbFx('fx_orion_star_hunt', `${OS}/별사냥의 심판`, 120, 10);
+  hbFx('fx_orion_oath', `${OS}/사냥꾼의 서약`, 70, 10);
+  hbFx('fx_orion_belt', `${OS}/삼연성 성역`, 90, 10, true);
+  hbFx('fx_orion_star_swords', `${OS}/성좌 낙검`, 90, 12);
+  hbFx('fx_orion_star_mace', `${OS}/성좌의 메이스`, 90, 14);
+  hbFx('fx_orion_barrier', `${OS}/오리온의 방벽`, 90, 10);
+  hbFx('fx_orion_falling_star', `${OS}/추락성 강타`, 90, 14);
+  hbFx('fx_royal_silent_shift', `${RS}/무음 전위`, 80, 12);
+  hbFx('fx_royal_seal_edict', `${RS}/봉쇄 칙령`, 90, 10);
+  hbFx('fx_royal_confiscate', `${RS}/압수 역장`, 90, 10);
+  hbFx('fx_royal_final_decree', `${RS}/왕명·최종 집행`, 120, 10);
+  hbFx('fx_royal_seeker', `${RS}/왕실 추적구`, 14, 10, true);
+  hbFx('fx_royal_mark', `${RS}/왕인 각인`, 50, 10);
+  hbFx('fx_royal_black_lance', `${RS}/집행의 흑창`, 90, 12);
+  hbFx('fx_royal_pierce', `${RS}/특무 관통선`, 120, 16);
+}
 bFx('06', 'hectar-ring', 'fx_chief_ring', 70);
 bFx('06', 'hectar-burst', 'fx_chief_burst', 60);
 // hectar-drone(정지 그림)은 정찰 드론(fx_bit_scout, 움직임)으로 바꿨다
