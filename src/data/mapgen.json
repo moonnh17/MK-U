@@ -718,7 +718,7 @@
   "extraEncounterChance": 0.35,
   "startChestOffsetPx": 30,
   "encounterPeaceful": {
-    "chance": 0.607,
+    "chance": 0.629,
     "size": "starter"
   }
 }

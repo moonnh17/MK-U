@@ -27,7 +27,7 @@
     "prices": { "common": 15, "rare": 30, "legendary": 60, "unique": 120, "mythic": 300 }
   },
   "skillShop": { "count": 3, "prices": { "skillNew": 100, "skillLevelUp": 100 } },
-  "encounter": { "weights": { "treasure": 25, "merchant": 21, "skillShop": 10, "combiner": 12, "raid": 31.5, "magiSpire": 12, "hiddenBoss": 0.5 } },
+  "encounter": { "weights": { "treasure": 24.5, "merchant": 21, "skillShop": 10, "combiner": 15, "raid": 28.5, "magiSpire": 12, "hiddenBoss": 1 } },
   "raid": { "waves": [3, 4], "sizeMul": 1.5, "elitesPerWave": 2, "coins": [15, 20] },
   "chest": {
     "weapon": { "spriteKey": "chest_weapon", "color": "#a07a3a", "size": 14 },
