@@ -9,7 +9,7 @@ import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import { BouncingDisc, DelayedBlast, Beams, FollowBlast, RectBlast, Ring, SafeZoneBlast, SectorBlast, Zone, type Rect } from '../entities/hazard';
 import { gapBulletAngles, predictPoint } from '../systems/bossGeometry';
-import { loopArt, playFx } from '../skills/skillFx';
+import { loopArt, playFx, stretchFx } from '../skills/skillFx';
 import type { SpriteRef } from '../types/data';
 import type { BossHost, PatternRun } from './host';
 import { burst, clamp01, coil, crackle, debris, easeOut, land, lob, lunge, motes, shockRing, sparkAround } from './bossFx';
@@ -545,6 +545,8 @@ interface BeamOpts {
   art?: SpriteRef;
   /** 예고선을 번개로 (전기환띠) */
   bolt?: boolean;
+  /** 켜진 광선은 패턴이 따로 그린다 (판정만) */
+  bare?: boolean;
 }
 
 const FULL_BEAM = 700;
@@ -570,6 +572,7 @@ function beam(c: PatternCtx, o: BeamOpts): void {
       warnArt: c.art('beamWarn'),
       color: c.boss.color,
       bolt: o.bolt ? { rng: c.host.rng, color: c.boss.fxColor } : undefined,
+      bare: o.bare,
     }),
   );
 }
@@ -1159,20 +1162,37 @@ class Antimatter extends Channeled {
   }
 }
 
-/** 레일건 교차 사격: 고정 각도 광선 여러 줄, 시차를 두고 발동. 줄 사이 통로로 간다. 줄마다 발사광 */
+/** 방 안에서 from이 angle 방향으로 벽에 닿는 점 */
+function wallHit(c: PatternCtx, from: Vec2, angle: number): Vec2 {
+  const a = c.host.arena();
+  const dx = Math.cos(angle);
+  const dy = Math.sin(angle);
+  const tx = dx > 0 ? (a.x + a.w - from.x) / dx : dx < 0 ? (a.x - from.x) / dx : Infinity;
+  const ty = dy > 0 ? (a.y + a.h - from.y) / dy : dy < 0 ? (a.y - from.y) / dy : Infinity;
+  const t = Math.max(0, Math.min(tx, ty, FULL_BEAM));
+  return { x: from.x + dx * t, y: from.y + dy * t };
+}
+
+/** 레일건 교차 사격: 고정 각도 광선 여러 줄, 시차를 두고 발동. 줄 사이 통로로 간다. 쏘는 모습은 플레이어 레일건 Lv3과 같다 */
 class RailCross extends Channeled {
   constructor(c: PatternCtx) {
     super(c);
-    const base = angleTo(c.boss.pos(), c.host.playerPos());
+    const from = c.boss.pos();
+    const base = angleTo(from, c.host.playerPos());
     const n = c.v('lines');
-    const muzzle = c.art('muzzle');
+    const rail = { beam: c.art('railBeam'), charge: c.art('railCharge'), end: c.art('railEnd'), wave: c.art('railWave') };
     for (let i = 0; i < n; i++) {
       const a = base + rad(c.v('spreadDeg')) * (i / (n - 1) - 0.5);
-      beam(c, { center: c.boss.pos(), angle: a, telegraphSec: c.v('telegraphSec') + i * c.v('stepSec'), liveSec: c.v('liveSec'), width: c.v('width'), damage: c.v('damage') });
+      beam(c, { center: from, angle: a, telegraphSec: c.v('telegraphSec') + i * c.v('stepSec'), liveSec: c.v('liveSec'), width: c.v('width'), damage: c.v('damage'), bare: !!rail.beam });
       this.at(c.v('telegraphSec') + i * c.v('stepSec'), () => {
-        const p = c.boss.pos();
-        if (muzzle) playFx(c.host.scene, muzzle, p.x + Math.cos(a) * 14, p.y + Math.sin(a) * 14, { w: 34, rotation: a, depth: 6 });
-        shake(c.host.scene, 'light');
+        const scene = c.host.scene;
+        const end = wallHit(c, from, a);
+        // 플레이어 레일건 Lv3: 충전 빛 → 늘인 광선(굵기 = 반폭 × 3) → 끝점 폭발·파동
+        if (rail.beam) stretchFx(scene, rail.beam, from, end, (c.v('width') / 2) * 3);
+        if (rail.charge) playFx(scene, rail.charge, from.x, from.y);
+        if (rail.end) playFx(scene, rail.end, end.x, end.y);
+        if (rail.wave) playFx(scene, rail.wave, end.x, end.y, { rotation: a });
+        shake(scene, 'light');
         this.pulse();
       });
     }

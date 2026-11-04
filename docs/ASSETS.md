@@ -256,11 +256,11 @@
 | `skill_fieldA_deflect` | 마기역장 (deflectA) | 10×10 | center | #8aa4c8 | mku/skill_fieldA_deflect.png (5프레임) |
 | `skill_rail_beam1` | 레일건 (beam1) | 8×8 | center | #6a9cff | mku/skill_rail_beam1.png (1프레임) |
 | `skill_rail_beam2` | 레일건 (beam2) | 8×8 | center | #6a9cff | mku/skill_rail_beam2.png (1프레임) |
-| `skill_rail_beam3` | 레일건 (beam3) | 8×8 | center | #6a9cff | mku/skill_rail_beam3.png (1프레임) |
+| `skill_rail_beam3` | 레일건 (beam3) 외 1곳 | 8×8 | center | #6a9cff | mku/skill_rail_beam3.png (1프레임) |
 | `skill_rail_hit` | 레일건 (hit) | 10×10 | center | #6a9cff | mku/skill_rail_hit.png (1프레임) |
-| `skill_rail_charge` | 레일건 (charge) | 8×8 | center | #6a9cff | mku/skill_rail_charge.png (1프레임) |
-| `skill_rail_end` | 레일건 (end) | 10×10 | center | #6a9cff | mku/skill_rail_end.png (1프레임) |
-| `skill_rail_wave` | 레일건 (wave) | 12×12 | center | #6a9cff | mku/skill_rail_wave.png (1프레임) |
+| `skill_rail_charge` | 레일건 (charge) 외 1곳 | 8×8 | center | #6a9cff | mku/skill_rail_charge.png (1프레임) |
+| `skill_rail_end` | 레일건 (end) 외 1곳 | 10×10 | center | #6a9cff | mku/skill_rail_end.png (1프레임) |
+| `skill_rail_wave` | 레일건 (wave) 외 1곳 | 12×12 | center | #6a9cff | mku/skill_rail_wave.png (1프레임) |
 | `skill_rail_mark` | 레일건 (mark) | 8×8 | center | #6a9cff | mku/skill_rail_mark.png (1프레임) |
 | `skill_railA_charge` | 레일건 (chargeA) | 10×10 | center | #6a9cff | mku/skill_railA_charge.png (8프레임) |
 | `skill_railA_muzzle` | 레일건 (muzzleA) | 12×12 | center | #6a9cff | mku/skill_railA_muzzle.png (7프레임) |

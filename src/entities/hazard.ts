@@ -398,6 +398,8 @@ export interface BeamsSpec {
   warnArt?: SpriteRef;
   /** 번개 광선: 예고선이 지글거리는 번개로 그려진다 */
   bolt?: { rng: Rng; color: number };
+  /** 켜진 광선은 그리지 않는다 (패턴이 따로 그린다, 판정만) */
+  bare?: boolean;
 }
 
 /** 광선 그림이 판정 굵기보다 이만큼 굵게 보인다 (빛 번짐) */
@@ -429,7 +431,7 @@ export class Beams implements Hazard {
     const p = host.playerPos();
     let inside = false;
     const art = live ? s.art : s.warnArt;
-    this.setSprites(host, art ?? null);
+    this.setSprites(host, live && s.bare ? null : (art ?? null));
     // 예고(그림 없음): 굵기만큼 흐린 띠가 칠 때까지 진해지고, 가운데 선이 맥박치며 밝아진다
     const k = live ? 1 : Math.min(1, this.t / Math.max(0.01, s.telegraphSec));
     const warnPlain = !live && !art;
@@ -441,7 +443,9 @@ export class Beams implements Hazard {
         this.g.lineStyle(s.width, s.color, 0.06 + 0.16 * k).lineBetween(c.x, c.y, end.x, end.y);
         this.g.lineStyle(1, k > 0.75 ? 0xffffff : s.color, 0.4 + 0.5 * k * (0.7 + 0.3 * Math.sin(this.t * 40)));
       }
-      if (warnPlain && s.bolt) {
+      if (live && s.bare) {
+        // 그림은 패턴이 그렸다
+      } else if (warnPlain && s.bolt) {
         const n = Math.max(6, Math.round(s.length / 14));
         const nx = -Math.sin(a);
         const ny = Math.cos(a);

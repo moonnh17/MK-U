@@ -621,6 +621,10 @@
       "gapSecEnraged": 0.64,
       "art": {
         "muzzle": { "spriteKey": "fx_chief_muzzle", "color": "#3a7aff", "size": 20 },
+        "railCross.railBeam": { "spriteKey": "skill_rail_beam3", "color": "#6a9cff", "size": 8 },
+        "railCross.railCharge": { "spriteKey": "skill_rail_charge", "color": "#6a9cff", "size": 8 },
+        "railCross.railEnd": { "spriteKey": "skill_rail_end", "color": "#6a9cff", "size": 10 },
+        "railCross.railWave": { "spriteKey": "skill_rail_wave", "color": "#6a9cff", "size": 12 },
         "antimatter.blastHit": { "spriteKey": "fx_chief_am_burst", "color": "#3a7aff", "size": 30 },
         "canister": { "spriteKey": "fx_bit_canister", "color": "#3a7aff", "size": 6 },
         "chain": { "spriteKey": "fx_chief_am_chain", "color": "#3a7aff", "size": 70 },
@@ -657,7 +661,13 @@
           "size": 7
         }
       },
-      "poseScale": { "enemy_hectar_chief.cast": 1.5, "enemy_hectar_chief.move": 1.15 },
+      "poseScale": {
+        "enemy_hectar_chief.move": 1.22,
+        "enemy_hectar_chief.cast": 1.9,
+        "enemy_hectar_chief_phase2.idle": 1.5,
+        "enemy_hectar_chief_phase2.move": 1.09,
+        "enemy_hectar_chief_phase2.cast": 1.2
+      },
       "poses": {
         "repulse": "cast",
         "droneFire": "cast",
