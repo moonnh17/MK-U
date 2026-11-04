@@ -296,7 +296,7 @@
       "spriteKey": "enemy_gaze_bell", "color": "#8a3ad0", "size": 13
     },
     {
-      "id": "clusterAlveoli", "codexNo": 24, "mun": 5, "munClass": true, "flavor": "codex.flavor.clusterAlveoli", "nameKey": "enemy.clusterAlveoli", "chapter": 2, "rank": "normal", "ai": "chase", "rooted": true,
+      "id": "clusterAlveoli", "codexNo": 24, "mun": 5, "munClass": true, "flavor": "codex.flavor.clusterAlveoli", "nameKey": "enemy.clusterAlveoli", "chapter": 1, "rank": "normal", "ai": "chase", "rooted": true,
       "maxHp": 65, "moveSpeed": 0, "contactDamage": 6, "contactIntervalSec": 1.0,
       "energyOrbs": [2, 3], "coins": [1, 3],
       "attacks": [

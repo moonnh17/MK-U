@@ -46,7 +46,7 @@
     { "id": "c1_vessel", "chapter": 1, "weight": 1, "spawns": [{ "enemy": "vesselTree", "count": [1, 1] }, { "enemy": "tomakki", "count": [2, 3] }, { "enemy": "gaedeulgae", "count": [1, 1] }] },
     { "id": "c2_pulse", "chapter": 2, "weight": 1, "spawns": [{ "enemy": "pulseSac", "count": [1, 1] }, { "enemy": "magiBeetle", "count": [1, 2] }] },
     { "id": "c2_gaze", "chapter": 2, "weight": 1, "spawns": [{ "enemy": "gazeBell", "count": [2, 2] }, { "enemy": "hectarTrooper", "count": [1, 2] }] },
-    { "id": "c2_spore", "chapter": 2, "weight": 1, "spawns": [{ "enemy": "clusterAlveoli", "count": [1, 1] }, { "enemy": "aMemory", "count": [1, 1] }] },
+    { "id": "c1_spore", "chapter": 1, "weight": 1, "spawns": [{ "enemy": "clusterAlveoli", "count": [1, 1] }, { "enemy": "akgwi", "count": [1, 1] }, { "enemy": "tomakki", "count": [1, 2] }] },
     { "id": "c2_squad", "chapter": 2, "weight": 3, "spawns": [{ "enemy": "hectarTrooper", "count": [3, 4] }] },
     { "id": "c2_charge", "chapter": 2, "weight": 2, "spawns": [{ "enemy": "magiBeetle", "count": [2, 3] }, { "enemy": "hectarTrooper", "count": [1, 2] }] },
     { "id": "c2_haunt", "chapter": 2, "weight": 2, "spawns": [{ "enemy": "aMemory", "count": [2, 2] }, { "enemy": "magiBeetle", "count": [1, 1] }] },

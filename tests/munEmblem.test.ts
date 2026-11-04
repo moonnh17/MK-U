@@ -12,4 +12,10 @@ describe('위협 등급 문양', () => {
     for (const k of ['1', '2', '3', '4', '5', '6']) expect(munEmblemSvg(k, g[k]!, 20)).toContain(`>${k}</text>`);
     expect(munEmblemSvg('unknown', g.unknown!, 20)).toContain('>?</text>');
   });
+  it('N문은 인장 테가 있고 N문급은 없다', () => {
+    const g = gameData.enemies.munGrades;
+    expect(munEmblemSvg('5', g['5']!, 20, true).length).toBeGreaterThan(munEmblemSvg('5', g['5']!, 20, false).length);
+    expect(munEmblemSvg('5', g['5']!, 20, true)).toContain('r="55"');
+    expect(munEmblemSvg('5', g['5']!, 20, false)).not.toContain('r="55"');
+  });
 });

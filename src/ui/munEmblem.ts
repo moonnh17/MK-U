@@ -1,6 +1,7 @@
 /**
  * 도감 위협 등급(1~6문) 문양: 등급마다 색과 도형이 다른 작은 SVG 인장.
  * 1문(가장 강함)일수록 꼭짓점이 많고 화려하다. 미분류는 금 간 원에 물음표.
+ * 'N문'(정식 등급)은 바깥에 인장 테(고리 + 네 방위 뿔 + 사이 구슬)가 둘러지고, 'N문급'은 테 없이 본 문양만.
  */
 import type { MunGradeArt } from '../types/data';
 
@@ -26,8 +27,21 @@ const SHAPES: Record<Exclude<MunGradeArt['shape'], 'circle' | 'broken'>, [number
   triangle: [3],
 };
 
-/** grade: '1'~'6' 또는 'unknown' */
-export function munEmblemSvg(grade: string, art: MunGradeArt, size: number): string {
+/** 'N문' 인장 테: 고리 + 네 방위 뿔 + 사이 구슬 (문양 뒤에 깐다) */
+function sealFrame(art: MunGradeArt): string {
+  let g = `<circle cx="50" cy="50" r="55" fill="none" stroke="${art.rim}" stroke-width="3"/><circle cx="50" cy="50" r="51" fill="none" stroke="${art.color}" stroke-width="1.5" stroke-opacity="0.8"/>`;
+  for (let i = 0; i < 4; i++) {
+    const a = (i * Math.PI) / 2 - Math.PI / 2;
+    const tip = (r: number, da = 0) => `${f(50 + Math.cos(a + da) * r)},${f(50 + Math.sin(a + da) * r)}`;
+    g += `<polygon points="${tip(64)} ${tip(52, 0.13)} ${tip(52, -0.13)}" fill="${art.color}" stroke="${art.rim}" stroke-width="1.5"/>`;
+    const b = a + Math.PI / 4;
+    g += `<circle cx="${f(50 + Math.cos(b) * 55)}" cy="${f(50 + Math.sin(b) * 55)}" r="3.4" fill="${art.color}" stroke="${art.rim}" stroke-width="1.2"/>`;
+  }
+  return g;
+}
+
+/** grade: '1'~'6' 또는 'unknown'. sealed: 정식 'N문'이면 인장 테를 두른다 ('N문급'·unknown·미분류는 없음) */
+export function munEmblemSvg(grade: string, art: MunGradeArt, size: number, sealed = false): string {
   const id = `mun-g${grade}`;
   const defs =
     `<defs><radialGradient id="${id}" cx="40%" cy="35%" r="70%">` +
@@ -51,5 +65,6 @@ export function munEmblemSvg(grade: string, art: MunGradeArt, size: number): str
   const label = grade === 'unknown' ? '?' : grade;
   const ty = art.shape === 'triangle' ? 66 : 63;
   const text = `<text x="50" y="${ty}" text-anchor="middle" font-family="serif" font-weight="bold" font-size="${art.shape === 'triangle' ? 30 : 36}" fill="#fff" stroke="${art.rim}" stroke-width="3" paint-order="stroke">${label}</text>`;
-  return `<svg class="mun-emblem" viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true">${defs}${body}${text}</svg>`;
+  // 테가 들어갈 자리는 둘 다 비워 둬서 N문과 N문급의 본 문양 크기가 같다
+  return `<svg class="mun-emblem" viewBox="-16 -16 132 132" width="${size}" height="${size}" aria-hidden="true">${defs}${sealed ? sealFrame(art) : ''}${body}${text}</svg>`;
 }

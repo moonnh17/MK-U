@@ -218,7 +218,7 @@ export class CodexWindow {
     const a = this.art(e);
     applyArtIcon(icon, this.ctx, a.key, a.color);
     const name = this.el('small', '', known ? this.name(e) : '???');
-    const mun = known ? this.mun(e, 14) : null;
+    const mun = known ? this.mun(e, 18) : null;
     if (mun) name.prepend(mun);
     c.append(icon, this.el('i', '', this.no(e, i)), name);
     if (a.ring) c.style.setProperty('--ring', a.ring);
@@ -280,7 +280,7 @@ export class CodexWindow {
     // 문양: 숫자 등급은 1~6, unknown과 미분류는 같은 문양 / 이름은 N문·N문급·unknown·미분류를 구별한다
     const grade = typeof def.mun === 'number' ? String(def.mun) : 'unknown';
     const span = this.el('span', `cx-mun mun-${grade}`);
-    span.innerHTML = munEmblemSvg(grade, d.enemies.munGrades[grade]!, size);
+    span.innerHTML = munEmblemSvg(grade, d.enemies.munGrades[grade]!, size, typeof def.mun === 'number' && !def.munClass);
     const t = this.ctx.t;
     span.title = typeof def.mun === 'number' ? t(def.munClass ? 'codex.munClass' : 'codex.mun', { n: def.mun }) : t(def.mun === 'unknown' ? 'codex.mun.unknown' : 'codex.mun.unclassified');
     return span;
@@ -318,7 +318,7 @@ export class CodexWindow {
     const record = this.el('div', 'cx-record');
     record.appendChild(this.el('div', 'cx-sub', t('codex.record')));
     const name = this.el('b', 'cx-name', known ? this.name(e) : '???');
-    const mun = known ? this.mun(e, 26) : null;
+    const mun = known ? this.mun(e, 34) : null;
     if (mun) name.append(mun, this.el('span', 'cx-mun-label', mun.title));
     box.append(chips, name, hero, record);
     if (!known) {
