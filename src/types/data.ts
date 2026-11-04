@@ -498,6 +498,8 @@ export interface BossCore {
   art?: Record<string, SpriteRef>;
   /** 본체 자세 (art.json anims 이름). dashReady·dash·recover·transition·패턴 id */
   poses?: Record<string, string | { first: string; sec: number; then: string }>;
+  /** 원본 그림에서 작게 그려진 자세를 키운다: 애니메이션 키("그림키.자세") → 배율 */
+  poseScale?: Record<string, number>;
   /** 강화 단계에 몸에 겹치는 그림: 맥동 (alpha ± pulse) */
   layers?: { sprite: SpriteRef; alpha: number; pulse: number; spin?: number }[];
   /** 일식 어둠 (식광): 방을 어둡게, 플레이어 둘레만 밝게. 보스가 죽으면 걷힌다 */

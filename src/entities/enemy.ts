@@ -68,6 +68,11 @@ export class Enemy {
   /** 보스 패턴 몸짓: 가로·세로 배율과 기울기(rad). 패턴이 매 프레임 정하고, 끝나면 1·1·0 */
   shape = { sx: 1, sy: 1, lean: 0 };
   private shaped = false;
+  /** 애니메이션 키 → 크기 배율 (원본에서 작게 그려진 자세 보정, 보스 데이터) */
+  animScale: Record<string, number> | null = null;
+  /** 겉모습만 커지고 줄 때 판정 몸은 그대로: 원래 몸 크기·오프셋과 마지막으로 넣은 크기 */
+  private bodyBase: { sw: number; sh: number; ox: number; oy: number } | null = null;
+  private bodySet: { sw: number; sh: number } | null = null;
   /** 반역 개체가 되어 사라졌다(폭발 엘리트도 터지지 않음) */
   converted = false;
   /** 걸려 있는 출혈 */
@@ -227,13 +232,17 @@ export class Enemy {
     this.animate(data);
     // 맞은 직후: 가로로 넓고 세로로 낮게 찌그러졌다 돌아온다
     const g = this.shape;
-    const shaping = g.sx !== 1 || g.sy !== 1 || g.lean !== 0;
+    const pose = this.animScale?.[this.sprite.anims.currentAnim?.key ?? ''] ?? 1;
+    const shaping = g.sx !== 1 || g.sy !== 1 || g.lean !== 0 || pose !== 1;
     if (this.squashLeft > 0 || shaping || this.shaped) {
       const hf = data.juice.hitFlash;
       this.squashLeft = Math.max(0, this.squashLeft - dt);
       const k = hf.squash * (this.squashLeft / hf.squashSec);
-      const b = this.mods.scale * this.extraScale;
-      this.sprite.setScale(b * (1 + k) * g.sx, b * (1 - k) * g.sy).setRotation(g.lean);
+      const base = this.mods.scale * this.extraScale;
+      const kx = pose * (1 + k) * g.sx;
+      const ky = pose * (1 - k) * g.sy;
+      this.sprite.setScale(base * kx, base * ky).setRotation(g.lean);
+      this.keepBody(shaping || k > 0 ? kx : 1, shaping || k > 0 ? ky : 1);
       this.shaped = shaping;
     }
     this.updateLook(dt);
@@ -630,6 +639,36 @@ export class Enemy {
     this.spawnRing = null;
     this.spawnSmoke?.destroy();
     this.spawnSmoke = null;
+  }
+
+  /**
+   * 그림 배율이 기본에서 kx·ky배일 때 판정 몸은 기본 크기·자리 그대로 둔다
+   * (Phaser는 몸 크기 = sourceWidth × scale, 자리 = x + scale × (offset − 원점)).
+   */
+  private keepBody(kx: number, ky: number): void {
+    const body = this.sprite.body as Phaser.Physics.Arcade.Body | null;
+    if (!body) return;
+    if (kx === 1 && ky === 1) {
+      if (this.bodyBase && this.bodySet) {
+        body.setSize(this.bodyBase.sw, this.bodyBase.sh, false);
+        body.setOffset(this.bodyBase.ox, this.bodyBase.oy);
+      }
+      this.bodyBase = null;
+      this.bodySet = null;
+      return;
+    }
+    // 처음이거나 그사이 그림이 바뀌어(fitArt) 몸이 새로 정해졌으면 지금 몸을 기준으로
+    if (!this.bodyBase || !this.bodySet || body.sourceWidth !== this.bodySet.sw || body.sourceHeight !== this.bodySet.sh) {
+      this.bodyBase = { sw: body.sourceWidth, sh: body.sourceHeight, ox: body.offset.x, oy: body.offset.y };
+    }
+    const b = this.bodyBase;
+    const dox = this.sprite.displayOriginX;
+    const doy = this.sprite.displayOriginY;
+    const sw = b.sw / kx;
+    const sh = b.sh / ky;
+    body.setSize(sw, sh, false);
+    body.setOffset(dox + (b.ox - dox) / kx, doy + (b.oy - doy) / ky);
+    this.bodySet = { sw: body.sourceWidth, sh: body.sourceHeight };
   }
 
   /** 엘리트·거대화를 더한 기본 크기 */

@@ -553,12 +553,12 @@
 | `fx_kaiser_cross_burst` | 마기카이저 (doomCommand.cross) | 45×45 | center | #ff2a2a | mku/fx_kaiser_cross_burst.png (4프레임) |
 | `fx_kaiser_barrage_net` | 마기카이저 (doomCommand.net) | 70×70 | center | #ff2a2a | mku/fx_kaiser_barrage_net.png (4프레임) |
 | `fx_kaiser_unbound` | 마기카이저 (unlock) | 70×70 | center | #ff2a2a | mku/fx_kaiser_unbound.png (4프레임) |
+| `fx_kaiser_sweep_warn` | 마기카이저 (spinLaser.cast) | 60×60 | center | #ff2a2a | mku/fx_kaiser_sweep_warn.png (5프레임) |
+| `fx_kaiser_sweep` | 마기카이저 (unstableLaser.cast) | 45×45 | center | #ff2a2a | mku/fx_kaiser_sweep.png (4프레임) |
 | `fx_kaiser_punch` | 마기카이저 (sectorHit) | 50×50 | center | #ff2a2a | mku/fx_kaiser_punch.png (4프레임) |
 | `fx_kaiser_impact` | 마기카이저 (blastHit) | 35×35 | center | #ff2a2a | mku/fx_kaiser_impact.png (4프레임) |
 | `fx_kaiser_lock` | 마기카이저 (blastWarn) | 20×20 | center | #ff2a2a | mku/fx_kaiser_lock.png (4프레임) |
 | `fx_kaiser_laser_warn` | 마기카이저 (beamWarn) | 60×60 | center | #ff2a2a | mku/fx_kaiser_laser_warn.png (7프레임) |
-| `fx_kaiser_sweep` | 마기카이저 (spinLaser.beam) 외 1곳 | 60×60 | center | #ff2a2a | mku/fx_kaiser_sweep.png (4프레임) |
-| `fx_kaiser_sweep_warn` | 마기카이저 (spinLaser.beamWarn) 외 1곳 | 60×60 | center | #ff2a2a | mku/fx_kaiser_sweep_warn.png (5프레임) |
 | `fx_kaiser_missile` | 마기카이저 (missile) | 8×8 | center | #ff2a2a | mku/fx_kaiser_missile.png (4프레임) |
 | `fx_kaiser_shock` | 마기카이저 (ringStart) | 45×45 | center | #ff2a2a | mku/fx_kaiser_shock.png (2프레임) |
 | `fx_kaiser_muzzle` | 마기카이저 (lineLaser.cast) | 20×20 | center | #ff2a2a | mku/fx_kaiser_muzzle.png (3프레임) |

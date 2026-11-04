@@ -83,6 +83,7 @@ export class BossController {
     private readonly damageMul = 1,
   ) {
     this.brain = initialBoss(def.firstDelaySec);
+    enemy.animScale = def.poseScale ?? null;
     this.applyPhaseArt();
     const sprite = enemy.sprite;
     const firstArt = Object.values(this.def.art ?? {})[0];

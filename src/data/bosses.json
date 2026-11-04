@@ -651,6 +651,7 @@
           "size": 7
         }
       },
+      "poseScale": { "enemy_hectar_chief.cast": 1.5, "enemy_hectar_chief.move": 1.15 },
       "poses": {
         "repulse": "cast",
         "droneFire": "cast",
@@ -1526,6 +1527,8 @@
         "doomCommand.cross": { "spriteKey": "fx_kaiser_cross_burst", "color": "#ff2a2a", "size": 45 },
         "doomCommand.net": { "spriteKey": "fx_kaiser_barrage_net", "color": "#ff2a2a", "size": 70 },
         "unlock": { "spriteKey": "fx_kaiser_unbound", "color": "#ff2a2a", "size": 70 },
+        "spinLaser.cast": { "spriteKey": "fx_kaiser_sweep_warn", "color": "#ff2a2a", "size": 60 },
+        "unstableLaser.cast": { "spriteKey": "fx_kaiser_sweep", "color": "#ff2a2a", "size": 45 },
         "sectorHit": {
           "spriteKey": "fx_kaiser_punch",
           "color": "#ff2a2a",
@@ -1548,26 +1551,6 @@
         },
         "beamWarn": {
           "spriteKey": "fx_kaiser_laser_warn",
-          "color": "#ff2a2a",
-          "size": 60
-        },
-        "spinLaser.beam": {
-          "spriteKey": "fx_kaiser_sweep",
-          "color": "#ff2a2a",
-          "size": 60
-        },
-        "unstableLaser.beam": {
-          "spriteKey": "fx_kaiser_sweep",
-          "color": "#ff2a2a",
-          "size": 60
-        },
-        "spinLaser.beamWarn": {
-          "spriteKey": "fx_kaiser_sweep_warn",
-          "color": "#ff2a2a",
-          "size": 60
-        },
-        "unstableLaser.beamWarn": {
-          "spriteKey": "fx_kaiser_sweep_warn",
           "color": "#ff2a2a",
           "size": 60
         },
@@ -1606,6 +1589,13 @@
           "color": "#ff2a2a",
           "size": 55
         }
+      },
+      "poseScale": {
+        "enemy_magi_kaiser_phase2.missile": 1.9,
+        "enemy_magi_kaiser_phase2.cross": 1.3,
+        "enemy_magi_kaiser_phase3.missile": 1.8,
+        "enemy_magi_kaiser_phase3.command": 1.9,
+        "enemy_magi_kaiser_phase3.cross": 1.35
       },
       "poses": {
         "transition": "transition",
