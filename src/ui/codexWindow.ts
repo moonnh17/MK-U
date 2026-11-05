@@ -9,7 +9,7 @@ import { bus } from '../core/events';
 import type { GameData } from '../data/index';
 import { artKeys } from '../systems/art';
 import { gradeEnergyMultiplier, gradeMultiplier } from '../systems/damage';
-import { codexProgress, codexSections, isKnown, type CodexEntry, type CodexSection, type CodexTab } from '../systems/codex';
+import { CODEX_SORTS, codexLore, codexProgress, codexSections, isKnown, sortedCodexSections, type CodexEntry, type CodexSection, type CodexSort, type CodexTab } from '../systems/codex';
 import { itemChance, itemSources, pct, weaponChance, weaponSources, type DropSource, type GradeRates } from '../systems/dropRates';
 import { scaleEffect } from '../systems/items';
 import { findSkill, skillValues } from '../systems/skills';
@@ -69,6 +69,10 @@ function flatNumbers(o: object, prefix = ''): Record<string, number> {
 export class CodexWindow {
   private readonly root: HTMLDivElement;
   private tab: CodexTab = 'monsters';
+  /** 목록 정렬 (탭을 바꿔도 유지) */
+  private sort: CodexSort = 'default';
+  /** 기본 정렬에서의 순서 = 도감 번호 (몬스터는 데이터의 codexNo) */
+  private baseNo = new Map<string, number>();
   private selected: CodexEntry | null = null;
   /** 지금 그리는 기록의 그림 옆 칸 */
   private side!: HTMLElement;
@@ -101,7 +105,8 @@ export class CodexWindow {
     this.root.dataset.tab = this.tab;
     this.root.className = this.ctx.uiMode;
     this.root.replaceChildren();
-    const sections = codexSections(this.ctx.data, this.tab);
+    this.baseNo = new Map(codexSections(this.ctx.data, this.tab).flatMap((s) => s.entries).map((e, i) => [`${e.kind}:${e.id}`, i + 1]));
+    const sections = sortedCodexSections(this.ctx.data, this.tab, this.sort, (e) => Number(this.no(e)), (e) => this.name(e));
     const flat = sections.flatMap((s) => s.entries);
     this.selected ??= flat[0] ?? null;
     const index = flat.findIndex((e) => e.kind === this.selected?.kind && e.id === this.selected.id);
@@ -139,7 +144,21 @@ export class CodexWindow {
       for (const e of s.entries) grid.appendChild(this.cell(e, flat.indexOf(e)));
       scroll.appendChild(grid);
     }
-    list.append(this.el('div', 'cx-list-title', t('codex.list', { tab: t(`codex.tab.${this.tab}`) })), scroll);
+    list.append(this.el('div', 'cx-list-title', t('codex.list', { tab: t(`codex.tab.${this.tab}`) })));
+    // 정렬: 기본 / 도감 번호순 / 이름순 / 세계관 분류 (캐릭터 탭은 없음)
+    if (codexLore(this.ctx.data, this.tab)) {
+      const bar = this.el('div', 'cx-sort');
+      for (const id of CODEX_SORTS) {
+        const b = this.el('button', `cx-sort-btn${this.sort === id ? ' on' : ''}`, t(`codex.sort.${id}`));
+        b.addEventListener('click', () => {
+          this.sort = id;
+          this.render();
+        });
+        bar.appendChild(b);
+      }
+      list.appendChild(bar);
+    }
+    list.appendChild(scroll);
     const body = this.el('div', 'cx-body');
     body.append(this.detail(index), list);
 
@@ -220,7 +239,7 @@ export class CodexWindow {
     const name = this.el('small', '', known ? this.name(e) : '???');
     const mun = known ? this.mun(e, 18) : null;
     if (mun) name.prepend(mun);
-    c.append(icon, this.el('i', '', this.no(e, i)), name);
+    c.append(icon, this.el('i', '', this.no(e)), name);
     if (a.ring) c.style.setProperty('--ring', a.ring);
     if (a.grade && SPARK_GRADES.has(a.grade)) {
       // 전설·유니크: 테두리에서 등급 색 불꽃이 피어오른다 (왼쪽 변·오른쪽 변·아랫변을 돌아가며)
@@ -265,10 +284,10 @@ export class CodexWindow {
     return { key: w.spriteKey, color: w.color, ring: grade(w.grade), grade: w.grade };
   }
 
-  /** 도감 번호: 몬스터는 데이터의 codexNo, 나머지는 목록 순서 */
-  private no(e: CodexEntry, i: number): string {
+  /** 도감 번호: 몬스터는 데이터의 codexNo, 나머지는 기본 정렬 순서 (정렬을 바꿔도 그대로) */
+  private no(e: CodexEntry): string {
     const n = e.kind === 'enemy' ? this.ctx.data.enemies.enemies.find((x) => x.id === e.id)?.codexNo : undefined;
-    return String(n ?? i + 1).padStart(3, '0');
+    return String(n ?? this.baseNo.get(`${e.kind}:${e.id}`) ?? 0).padStart(3, '0');
   }
 
   /** 몬스터 위협 등급 문양 (1~6문, 미분류). title에 '2문급' 같은 이름 */
@@ -306,7 +325,7 @@ export class CodexWindow {
     if (!e) return box;
     const known = this.known(e);
     const chips = this.el('div', 'cx-chips');
-    chips.appendChild(this.el('span', 'cx-no', t('codex.no', { n: this.no(e, index) })));
+    chips.appendChild(this.el('span', 'cx-no', t('codex.no', { n: this.no(e) })));
     const hero = this.el('div', 'cx-hero');
     const icon = this.el('span', `cx-big${known ? '' : ' unknown'}`);
     const a = this.art(e);

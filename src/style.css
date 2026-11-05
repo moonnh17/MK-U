@@ -2465,6 +2465,30 @@ body {
   font-weight: bold;
   color: var(--cx-ink-soft);
 }
+/* 도감 목록 정렬 단추 */
+.cx-sort {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0 2px;
+}
+.cx-sort-btn {
+  padding: 2px 9px;
+  border: 1px solid var(--cx-line);
+  border-radius: 999px;
+  background: #fffaf0;
+  color: #6a4a1a;
+  font: bold 11px sans-serif;
+  cursor: pointer;
+}
+.cx-sort-btn:hover {
+  background: #f3e3bf;
+}
+.cx-sort-btn.on {
+  background: #26314d;
+  border-color: #26314d;
+  color: var(--cx-gold-hi);
+}
 .cx-scroll {
   flex: 1;
   min-height: 0;

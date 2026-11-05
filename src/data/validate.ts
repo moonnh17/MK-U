@@ -323,6 +323,22 @@ export function validateGameData(d: GameData): Errors {
   if (!it.items.some((x) => x.pool === 'normal' && x.grade === 'mythic')) errors.push('items: 신화 아이템이 없음');
 
   // --- 적 ---
+  // 도감 세계관 분류: 있는 id만, 한 번씩
+  for (const [w, lore, ids] of [
+    ['enemies', d.enemies.codexLore, d.enemies.enemies.map((e) => e.id)],
+    ['items', d.items.codexLore, d.items.items.map((x) => x.id)],
+    ['weapons', d.weapons.codexLore, d.weapons.weapons.map((x) => x.id)],
+  ] as const) {
+    const seen = new Set<string>();
+    for (const [g, list] of Object.entries(lore)) {
+      needText(`${w}.codexLore.${g}`, `codex.lore.${w === 'enemies' ? 'monsters' : w}.${g}`);
+      for (const id of list) {
+        if (!(ids as readonly string[]).includes(id)) errors.push(`${w}.codexLore.${g}: 없는 id '${id}'`);
+        if (seen.has(id)) errors.push(`${w}.codexLore: '${id}'가 두 분류에 있음`);
+        seen.add(id);
+      }
+    }
+  }
   const enemyIds = d.enemies.enemies.map((e) => e.id);
   checkUnique(errors, 'enemies', enemyIds);
   checkUnique(errors, 'enemies.codexNo', d.enemies.enemies.filter((e) => e.codexNo !== undefined).map((e) => String(e.codexNo)));

@@ -280,6 +280,7 @@ export interface WeaponDef extends SpriteRef {
 }
 
 export interface WeaponsData {
+  codexLore: CodexLore;
   /** 맨손일 때 나가는 공격 (슬롯에 들지 않고 버릴 수 없다) */
   fistWeapon: string;
   /** 총알 모양 (공통) */
@@ -577,7 +578,11 @@ export interface BossesData {
 
 export type StageScaleTable = Record<string, { base: number; perStage: number }>;
 
+/** 도감 '세계관 분류' 정렬: 분류 id → 그 분류의 id들 (적은 순서대로 묶음이 된다, 이름은 ko.json codex.lore.<탭>.<분류>) */
+export type CodexLore = Record<string, string[]>;
+
 export interface EnemiesData {
+  codexLore: CodexLore;
   /** 챕터별 일반 적·정예 체력 배율: base + perStage × (스테이지 − 1). 없는 챕터는 1 */
   hpScale: StageScaleTable;
   /** 챕터별 모든 적·보스의 피해 배율 (식은 hpScale과 같다) */
@@ -1173,6 +1178,7 @@ export interface ItemDef extends SpriteRef {
 }
 
 export interface ItemsData {
+  codexLore: CodexLore;
   /** 등급 가중치 (아이템 상자·아이템 카드), 챕터 번호별 */
   treasureWeights: Record<string, Partial<Record<GradeId, number>>>;
   /** 대규모 습격 상자 (레어 이상) */

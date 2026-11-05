@@ -7,10 +7,11 @@
     "runTrack": "run",
     "combatTracks": {
       "1": "combat",
-      "2": "combat"
+      "2": "combat",
+      "3": "combat"
     },
     "hiddenBossTrack": "hiddenBoss",
-    "encounterTrack": "boss2",
+    "encounterTrack": "combat",
     "bossTracks": {
       "1": "boss1",
       "2": "boss2",

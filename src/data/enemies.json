@@ -1,4 +1,14 @@
 {
+  "codexLore": {
+    "magiCreature": ["tomakki", "gaedeulgae", "akgwi", "fusionAkgwi", "magiBeetle"],
+    "mutant": ["vesselTree", "pulseSac", "gazeBell", "clusterAlveoli", "magiColonyFusion"],
+    "hectar": ["hectarTrooper", "hectarChief"],
+    "acro": ["executor", "archon"],
+    "remnant": ["ghostShooter", "aMemory", "ancientOne", "hatredShard", "ancestorEcho"],
+    "warMachine": ["magiGolem", "magiKaiser"],
+    "royalStar": ["royalMage", "orionCrusader"],
+    "unknownOrigin": ["electricRing", "eclipse"]
+  },
   "projectile": { "spriteKey": "enemy_bullet", "color": "#ff5a5a", "size": 4 },
   "hpScale": { "2": { "base": 1.6, "perStage": 0.2 }, "3": { "base": 2.8, "perStage": 0.4 } },
   "damageScale": { "1": { "base": 1.05, "perStage": 0.05 }, "2": { "base": 1.3, "perStage": 0.1 }, "3": { "base": 1.75, "perStage": 0.15 } },

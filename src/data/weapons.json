@@ -1,4 +1,13 @@
 {
+  "codexLore": {
+    "issueGun": ["pistol", "shotgun", "smg", "rifle", "sniper", "grenadeLauncher", "flameStaff"],
+    "issueMelee": ["dagger", "greatsword", "spear", "hammer", "curvedBow", "brokenBlade"],
+    "school": ["mg70", "antimatterPistol", "orbitalDisc", "spaceNeedle"],
+    "starArms": ["rasalgethiClub", "aviorStaff", "rasalhagueSword", "algiebaSling", "nekkarCleaver", "argoBanner", "alGulBlade"],
+    "bossRemains": ["ancientCore", "eclipseCore", "magiFang", "gihwanArm"],
+    "legend": ["handi", "hanabi", "soulCalibur", "zephyr", "hwanRemnant"],
+    "street": ["bootlegGun", "debtorArm"]
+  },
   "fistWeapon": "fist",
   "projectile": { "spriteKey": "projectile_player", "color": "#fff3a0", "size": 3 },
   "critMultiplier": 1.5,

@@ -1,4 +1,12 @@
 {
+  "codexLore": {
+    "commoner": ["slimeStew", "magicasol", "hanwooSteak", "steelCastleFigure", "elegantMagi"],
+    "books": ["combatTheory", "magowikiCodex", "atrosCodex", "gisupStone", "warDiary", "snellLaw"],
+    "warRelic": ["namelessSword", "namelessHelm", "brokenHilt", "extraArms", "warriorMemory", "wonhonLump"],
+    "lab": ["antimatterSample", "lk99", "magnetResonator", "helaCell", "forbiddenVirus", "hectarRam"],
+    "token": ["leeSeal", "afroBelt", "chantforetSpirit", "oakHeart", "forbiddenGift", "royalSeal", "deathWhistle"],
+    "starRelic": ["regulusShard", "caesarCrown", "acruxCross", "orionBelt", "orionShield", "divineSword"]
+  },
   "treasureWeights": {
     "1": { "common": 64, "rare": 26, "legendary": 8, "unique": 2 },
     "2": { "common": 49, "rare": 37, "legendary": 11, "unique": 3 },

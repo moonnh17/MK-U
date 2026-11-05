@@ -76,3 +76,37 @@ export function codexProgress(d: GameData, save: SaveData, tab: CodexTab): { kno
   const known = tab === 'characters' ? all.filter((e) => e.kind !== 'job' || d.jobs.jobs.find((j) => j.id === e.id)?.enabled).length : all.filter((e) => isKnown(save, e)).length;
   return { known, total: all.length };
 }
+
+export type CodexSort = 'default' | 'number' | 'name' | 'lore';
+export const CODEX_SORTS: readonly CodexSort[] = ['default', 'number', 'name', 'lore'];
+
+/** 탭의 세계관 분류 표 (캐릭터 탭은 없음) */
+export function codexLore(d: GameData, tab: CodexTab): Record<string, string[]> | null {
+  if (tab === 'monsters') return d.enemies.codexLore;
+  if (tab === 'items') return d.items.codexLore;
+  if (tab === 'weapons') return d.weapons.codexLore;
+  return null;
+}
+
+/**
+ * 정렬된 목록. default: 기본 묶음 그대로 / number: 도감 번호순 한 묶음 / name: 이름순 한 묶음
+ * / lore: 세계관 분류 묶음(표 순서, 표에 없는 것은 맨 끝 '분류 없음').
+ * no: 칸의 도감 번호, name: 칸의 이름 (부른 쪽이 정한다)
+ */
+export function sortedCodexSections(d: GameData, tab: CodexTab, sort: CodexSort, no: (e: CodexEntry) => number, name: (e: CodexEntry) => string): CodexSection[] {
+  const base = codexSections(d, tab);
+  const lore = codexLore(d, tab);
+  if (sort === 'default' || !lore) return base;
+  const all = base.flatMap((s) => s.entries);
+  if (sort === 'number') return [{ titleKey: 'codex.section.all', entries: [...all].sort((a, b) => no(a) - no(b)) }];
+  if (sort === 'name') return [{ titleKey: 'codex.section.all', entries: [...all].sort((a, b) => name(a).localeCompare(name(b), 'ko') || no(a) - no(b)) }];
+  const byNo = (a: CodexEntry, b: CodexEntry) => no(a) - no(b);
+  const placed = new Set<string>();
+  const out: CodexSection[] = Object.entries(lore).map(([g, ids]) => {
+    const entries = all.filter((e) => ids.includes(e.id)).sort(byNo);
+    for (const e of entries) placed.add(e.id);
+    return { titleKey: `codex.lore.${tab}.${g}`, entries };
+  });
+  out.push({ titleKey: 'codex.lore.none', entries: all.filter((e) => !placed.has(e.id)).sort(byNo) });
+  return out.filter((s) => s.entries.length > 0);
+}

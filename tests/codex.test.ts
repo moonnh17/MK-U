@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { defaultSave, parseSave } from '../src/core/save';
 import { gameData } from '../src/data/index';
-import { codexProgress, codexSections, isKnown, recordCodex } from '../src/systems/codex';
+import { codexProgress, codexSections, isKnown, recordCodex, sortedCodexSections } from '../src/systems/codex';
 
 const D = gameData;
 
@@ -67,5 +67,30 @@ describe('도감', () => {
     const s = parseSave(JSON.stringify({ version: 1, codex: { enemies: ['akgwi', 3], items: 'x', weapons: ['pistol'] } }));
     expect(s.codex).toEqual({ enemies: ['akgwi'], items: [], weapons: ['pistol'] });
     expect(parseSave(JSON.stringify({ version: 1 })).codex).toEqual({ enemies: [], items: [], weapons: [] });
+  });
+});
+
+describe('도감 정렬', () => {
+  const no = (e: { id: string }) => D.enemies.enemies.find((x) => x.id === e.id)?.codexNo ?? 0;
+  const name = (e: { id: string }) => D.text[D.enemies.enemies.find((x) => x.id === e.id)!.nameKey]!;
+  it('도감 번호순: 한 묶음, 1부터 차례대로', () => {
+    const s = sortedCodexSections(D, 'monsters', 'number', no, name);
+    expect(s).toHaveLength(1);
+    expect(s[0]!.entries.map(no)).toEqual(s[0]!.entries.map((_, i) => i + 1));
+  });
+  it('이름순: 가나다', () => {
+    const names = sortedCodexSections(D, 'monsters', 'name', no, name)[0]!.entries.map(name);
+    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b, 'ko')));
+  });
+  it('세계관 분류: 모든 칸이 한 번씩, 묶음은 분류 표 순서', () => {
+    for (const tab of ['monsters', 'items', 'weapons'] as const) {
+      const base = codexSections(D, tab).flatMap((s) => s.entries.map((e) => e.id)).sort();
+      const lore = sortedCodexSections(D, tab, 'lore', () => 0, (e) => e.id);
+      expect(lore.flatMap((s) => s.entries.map((e) => e.id)).sort(), tab).toEqual(base);
+      expect(lore.some((s) => s.titleKey === 'codex.lore.none'), tab).toBe(false);
+    }
+  });
+  it('캐릭터 탭은 정렬이 없다 (기본 그대로)', () => {
+    expect(sortedCodexSections(D, 'characters', 'name', () => 0, (e) => e.id)).toEqual(codexSections(D, 'characters'));
   });
 });
