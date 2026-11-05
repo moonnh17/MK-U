@@ -1,6 +1,7 @@
 /**
  * 벼락 (헥타르 학파 궁극기, 기술·원거리·공간격). 조준 방향으로 두 공간 사이를 직선으로 절단한다.
- * 공간격 규칙: 일반 몬스터 즉사, 엘리트·정예는 최대 체력 비율. 보스는 공간격 ×2.4 대신 최대 체력의 일정 비율(벼락 전용).
+ * 공간격 규칙: 일반 몬스터 즉사, 엘리트·정예는 최대 체력 비율. 보스는 공간격 배율 대신 최대 체력의 일정 비율(벼락 전용).
+ * 절단 연출: 화면 자체가 절단선에서 갈라져 어긋났다가 닫힌다(spaceCutFx 셰이더). 절단 그림은 균열·잔상 보조로만 옅게.
  * 각성 '케라우노스': 푸른 벼락 강림 → 절단선 → 사선 참격 연속 → 주변 추가 타격 → 공간 균열 붕괴.
  * 보스에게는 절단선(최대 체력 비례)만 들어가고, 나머지 타격은 보스에게 피해가 없다.
  */
@@ -32,15 +33,41 @@ function line(host: SkillHost, color: number, a: Vec2, b: Vec2, width: number, s
   host.fx(g, sec);
 }
 
-/** 공간 절단 그림 4단계: 시작점 소용돌이 → 찢어짐 → 잦아듦 */
+/**
+ * 공간 절단 연출. 셰이더가 되면 화면이 갈라지고, 절단 그림은 닫힐 무렵 옅은 균열로만 남는다 + 푸른 파편.
+ * 셰이더가 없으면(캔버스 렌더러) 예전처럼 절단 그림 4단계를 밝게.
+ */
 function cutFx(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: number): void {
   const sp = u.def.sprites;
-  const mid = { x: from.x + (dir.x * length) / 2, y: from.y + (dir.y * length) / 2 };
+  const sc = u.def.spaceCut;
+  const end = { x: from.x + dir.x * length, y: from.y + dir.y * length };
+  const mid = { x: (from.x + end.x) / 2, y: (from.y + end.y) / 2 };
   const angle = Math.atan2(dir.y, dir.x);
-  playFx(host.scene, sp.cut1!, from.x, from.y, { w: CUT_VORTEX_PX, fadeSec: 0.3 });
-  [sp.cut2!, sp.cut3!, sp.cut4!].forEach((ref, i) => {
-    host.scene.time.delayedCall(i * CUT_STEP_MS, () => playFx(host.scene, ref, mid.x, mid.y, { w: length, h: u.values.width! * CUT_THICK, rotation: angle, fadeSec: 0.2 }));
+  const split = !!sc && !!host.spaceCut?.(sc, from, end, 0);
+  if (!split || !sc) {
+    playFx(host.scene, sp.cut1!, from.x, from.y, { w: CUT_VORTEX_PX, fadeSec: 0.3 });
+    [sp.cut2!, sp.cut3!, sp.cut4!].forEach((ref, i) => {
+      host.scene.time.delayedCall(i * CUT_STEP_MS, () => playFx(host.scene, ref, mid.x, mid.y, { w: length, h: u.values.width! * CUT_THICK, rotation: angle, fadeSec: 0.2 }));
+    });
+    line(host, hexColor(u.def.color), from, end, u.values.width! / 3);
+    return;
+  }
+  host.hitStop?.(sc.hitStopSec);
+  // 잔상: 틈이 거의 닫힐 때 얇은 균열(절단 그림, 옅고 가늘게)이 잠깐 남는다
+  host.scene.time.delayedCall(sc.closeSec * 600, () => {
+    for (const ref of [sp.cut3!, sp.cut4!]) playFx(host.scene, ref, mid.x, mid.y, { w: length, h: u.values.width! * 1.2, rotation: angle, fadeSec: sc.afterSec, depth: 3 }).setAlpha(0.45);
   });
+  // 작은 푸른 파편: 선을 따라 흩어져 양쪽으로 튀었다가 사라진다
+  const n = { x: -dir.y, y: dir.x };
+  const color = hexColor(u.def.color);
+  for (let i = 0; i < sc.shards; i++) {
+    const t = host.rng.range(0.08, 0.92) * length;
+    const side = i % 2 ? 1 : -1;
+    const at = { x: from.x + dir.x * t, y: from.y + dir.y * t };
+    const r = host.scene.add.rectangle(at.x, at.y, host.rng.range(1, 2.5), host.rng.range(1, 2.5), i % 3 ? color : 0xdff2ff).setDepth(6);
+    const dist = host.rng.range(4, 12) * side;
+    host.scene.tweens.add({ targets: r, x: at.x + n.x * dist, y: at.y + n.y * dist, alpha: 0, duration: (sc.closeSec + sc.afterSec) * 1000, ease: 'Quad.easeOut', onComplete: () => r.destroy() });
+  }
 }
 
 /** 절단선: from에서 dir로 length. 보스는 최대 체력 비례 */
@@ -49,7 +76,6 @@ function cut(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: nu
   const enemies = [...host.enemies()];
   const hits = lineHits(from, dir, length, v.width! / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
   cutFx(host, u, from, dir, length);
-  line(host, hexColor(u.def.color), from, { x: from.x + dir.x * length, y: from.y + dir.y * length }, v.width! / 3);
   for (const i of hits) {
     const e = enemies[i]!;
     if (isBoss(e)) host.hitTrue(e, e.maxHp * v.bossMaxHpRatio!, false);
@@ -72,6 +98,7 @@ class Telegraph implements SkillObject {
   readonly createdAt: number;
   private readonly g: Phaser.GameObjects.Graphics;
   private left: number;
+  private split = false;
 
   constructor(
     host: SkillHost,
@@ -84,13 +111,16 @@ class Telegraph implements SkillObject {
     const len = u.values.length!;
     this.g = host.scene.add.graphics().setDepth(5);
     this.g.lineStyle(1, hexColor(u.def.color), 0.8).lineBetween(from.x, from.y, from.x + dir.x * len, from.y + dir.y * len);
+    // 예고 동안 선 주변 화면이 조금씩 압축된다
+    this.split = !!u.def.spaceCut && !!host.spaceCut?.(u.def.spaceCut, from, { x: from.x + dir.x * len, y: from.y + dir.y * len }, this.left);
   }
 
   update(dt: number, host: SkillHost): boolean {
     this.left -= dt;
     if (this.left > 0) return true;
     cut(host, this.u, this.from, this.dir, this.u.values.length!);
-    host.scene.cameras.main.flash(80, 120, 180, 255);
+    // 화면 분할이 안 되는 렌더러만 번쩍임으로 대신한다
+    if (!this.split) host.scene.cameras.main.flash(80, 120, 180, 255);
     return false;
   }
 

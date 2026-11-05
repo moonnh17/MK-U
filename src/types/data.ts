@@ -1005,6 +1005,28 @@ export interface UltimateDef {
   awakening?: { requiredItem: string; nameKey: string; shortKey: string; descKey: string; tags: TagId[]; values: Record<string, number> };
   color: string;
   sprites: Record<string, SpriteRef>;
+  /** 벼락: 화면 자체가 절단선에서 갈라지는 연출 (기준 해상도 px) */
+  spaceCut?: SpaceCutDef;
+}
+
+export interface SpaceCutDef {
+  /** 예고 동안 선 쪽으로 압축되는 최대 변위 */
+  compressPx: number;
+  /** 절단 순간 양쪽이 밀려나는 변위 (= 검은 틈의 반폭) */
+  shiftPx: number;
+  /** 벌어진 틈이 닫히는 시간 */
+  closeSec: number;
+  /** 변위가 미치는 띠의 반폭 (선에서 이만큼 떨어지면 원래 화면) */
+  bandPx: number;
+  /** 선 양끝에서 약해지는 구간 */
+  edgeFadePx: number;
+  /** 틈 가장자리 청백색 빛의 굵기 */
+  rimPx: number;
+  /** 절단 순간 히트스톱 */
+  hitStopSec: number;
+  /** 잔상: 푸른 파편 수, 균열 그림이 남는 시간 */
+  shards: number;
+  afterSec: number;
 }
 
 export interface UltimatesData {

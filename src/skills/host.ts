@@ -12,7 +12,7 @@ import type { CorruptionState } from '../systems/acro';
 import type { ShieldState } from '../systems/shield';
 import type { OwnedSkill } from '../systems/skills';
 import type { PlayerMods } from '../systems/vitals';
-import type { SkillDef, SpriteRef, TagId, UltimateDef } from '../types/data';
+import type { SkillDef, SpaceCutDef, SpriteRef, TagId, UltimateDef } from '../types/data';
 
 export interface SkillHost {
   readonly scene: Phaser.Scene;
@@ -31,6 +31,10 @@ export interface SkillHost {
   hit(enemy: Enemy, base: number, tags: readonly TagId[]): boolean;
   /** 태그 보정 없는 그대로의 피해(벼락의 보스 최대 체력 비례, 역설 재현). space면 공간격 규칙만 건다 */
   hitTrue(enemy: Enemy, amount: number, space: boolean): boolean;
+  /** 아주 잠깐 물리·적을 멈춘다 (연출은 계속) */
+  hitStop?(sec: number): void;
+  /** 화면 자체가 a→b 선에서 갈라지는 연출 (telegraphSec 동안 압축 예고 뒤). 할 수 없는 렌더러면 false */
+  spaceCut?(def: SpaceCutDef, a: Vec2, b: Vec2, telegraphSec: number): boolean;
   /** 플레이어 자신이 받는 피해(특이점 실험 대실패) */
   hurtSelf(amount: number): void;
   /** 이 스킬이 대성공했다(아크로 궁극기 게이지 보너스) */

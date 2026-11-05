@@ -1,4 +1,5 @@
 /** 스킬 실행: SkillHost, 슬롯 발동, 궁극기, 패시브, 마기역장, 스킬바 표시. */
+import { startSpaceCut } from '../../entities/spaceCutFx';
 import { loopArt, playFx } from '../../skills/skillFx';
 import Phaser from 'phaser';
 import { hexColor } from '../../core/scale';
@@ -84,6 +85,8 @@ export class SkillRuntime {
       chance: (base, capKey, tags) =>
         Math.min(1, skillChance(base, capKey, tags, ctx.data.tags) + (capKey === 'greatSuccess' ? this.run.itemRt.greatSuccess().bonus : 0)),
       noGreatFailure: () => this.run.itemRt.greatSuccess().noFailure,
+      hitStop: (sec) => this.run.hitStop.request(sec),
+      spaceCut: (def, a, b, telegraphSec) => startSpaceCut(this.run, def, a, b, telegraphSec),
       corrupt: (e, state) => {
         // 보스에게는 변질이 걸리지 않는다
         if (!e.dead && e.rank !== 'boss' && e.rank !== 'hiddenBoss') e.corruption = applyCorruption(e.corruption, state);
