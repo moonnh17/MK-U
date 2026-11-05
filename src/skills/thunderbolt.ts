@@ -34,7 +34,7 @@ function line(host: SkillHost, color: number, a: Vec2, b: Vec2, width: number, s
 }
 
 /**
- * 공간 절단 연출. 셰이더가 되면 화면이 갈라지고, 절단 그림은 닫힐 무렵 옅은 균열로만 남는다 + 푸른 파편.
+ * 공간 절단 연출. 셰이더가 되면 발사한 선에서 화면이 갈라지며 선을 따라 어긋나고, 그 위에 절단 그림 3단계 → 닫힐 무렵 옅은 균열 + 푸른 파편.
  * 셰이더가 없으면(캔버스 렌더러) 예전처럼 절단 그림 4단계를 밝게.
  */
 function cutFx(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: number): void {
@@ -53,12 +53,9 @@ function cutFx(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: 
     return;
   }
   host.hitStop?.(sc.hitStopSec);
-  // 사선 베기 그림: 기존 절단 그림 3단계를 화면 가운데를 가로지르는 사선 위에 (셰이더의 사선과 같은 선)
-  const view = host.scene.cameras.main.worldView;
-  const reach = Math.hypot(view.width, view.height);
-  const sa = (sc.slashAngleDeg * Math.PI) / 180;
+  // 절단 그림 3단계를 발사한 선 위에 (틈이 보이게 약간 옅게)
   [sp.cut2!, sp.cut3!, sp.cut4!].forEach((ref, i) => {
-    host.scene.time.delayedCall(i * CUT_STEP_MS, () => playFx(host.scene, ref, view.centerX, view.centerY, { w: reach, h: u.values.width! * CUT_THICK * 0.8, rotation: sa, fadeSec: 0.2, depth: 6 }));
+    host.scene.time.delayedCall(i * CUT_STEP_MS, () => playFx(host.scene, ref, mid.x, mid.y, { w: length, h: u.values.width! * CUT_THICK, rotation: angle, fadeSec: 0.2 }).setAlpha(0.8));
   });
   // 잔상: 틈이 거의 닫힐 때 얇은 균열(절단 그림, 옅고 가늘게)이 잠깐 남는다
   host.scene.time.delayedCall(sc.closeSec * 600, () => {

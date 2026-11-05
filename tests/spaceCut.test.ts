@@ -16,10 +16,10 @@ describe('벼락 공간 절단 시간표', () => {
     const open = spaceCutFrame(0, 0.25, C);
     expect(open.shift).toBe(C.shiftPx);
     expect(open.gap).toBe(C.shiftPx);
-    // 사선 베기도 같은 순간 가장 크게, 같이 닫힌다
-    expect(open.slide).toBe(C.slashSlidePx);
+    // 선을 따라 미끄러짐도 같은 순간 가장 크게, 같이 닫힌다
+    expect(open.slide).toBe(C.slidePx);
     expect(spaceCutFrame(-0.1, 0.25, C).slide).toBe(0);
-    expect(spaceCutFrame(C.closeSec / 2, 0.25, C).slide).toBeLessThan(C.slashSlidePx);
+    expect(spaceCutFrame(C.closeSec / 2, 0.25, C).slide).toBeLessThan(C.slidePx);
     expect(C.shiftPx).toBeGreaterThanOrEqual(4);
     expect(C.shiftPx).toBeLessThanOrEqual(8);
     expect(spaceCutFrame(C.closeSec / 2, 0.25, C).shift).toBeLessThan(C.shiftPx);
