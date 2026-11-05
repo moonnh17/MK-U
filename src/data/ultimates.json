@@ -26,9 +26,7 @@
       "sources": {
         "cut": ["tech", "ranged", "space"],
         "strike": ["tech", "ranged", "space"],
-        "slash": ["tech", "ranged", "space"],
-        "surround": ["tech", "ranged", "space"],
-        "collapse": ["tech", "ranged", "space"]
+        "seal": ["tech", "ranged", "space"]
       },
       "gaugeMax": 100,
       "gauge": { "kind": "damage", "skills": ["magiTurret", "magiMine", "combatDrone"], "perDamage": 0.15 },
@@ -39,10 +37,11 @@
         "shortKey": "ultimate.thunderbolt.awakened.short",
         "descKey": "ultimate.thunderbolt.awakened.desc",
         "tags": ["tech", "ranged", "space"],
-        "values": { "range": 200, "strikeRadius": 30, "slashLength": 120, "slashCount": 3, "slashDelaySec": 0.12, "surroundRadius": 70, "collapseRadius": 90, "collapseDelaySec": 0.4 }
+        "values": { "range": 200, "strikeRadius": 30, "riftDelaySec": 0.12, "sealWidth": 24 }
       },
       "color": "#4ab0ff",
       "spaceCut": { "compressPx": 1.5, "shiftPx": 6, "closeSec": 0.3, "bandPx": 30, "edgeFadePx": 40, "rimPx": 1.2, "hitStopSec": 0.05, "shards": 12, "afterSec": 0.35, "slidePx": 8 },
+      "rift": { "angleDeg": 40, "openSec": 0.06, "slideSec": 0.4, "sealSec": 0.22, "gapPx": 5, "slideStartPx": 6, "slideMaxPx": 20, "rimPx": 1.5, "boltSec": 0.25 },
       "sprites": {
         "cut1": { "spriteKey": "ult_cut1", "color": "#6a9cff", "size": 20 },
         "cut2": { "spriteKey": "ult_cut2", "color": "#6a9cff", "size": 20 },

@@ -8,8 +8,8 @@
 import Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import { getContext } from '../core/context';
-import { spaceCutFrame } from '../systems/spaceCut';
-import type { SpaceCutDef } from '../types/data';
+import { riftFrame, spaceCutFrame } from '../systems/spaceCut';
+import type { RiftDef, SpaceCutDef } from '../types/data';
 
 const FRAG = `
 precision mediump float;
@@ -68,6 +68,8 @@ interface Cut {
   /** 절단 순간 (game.loop.time, ms). 예고 중이면 미래 */
   at: number;
   telegraphSec: number;
+  /** 있으면 케라우노스 균열: 화면 전체를 가르고(띠 제한 없음) 이 시간표로 */
+  rift?: RiftDef;
 }
 
 export class SpaceCutPipeline extends Phaser.Renderer.WebGL.Pipelines.PostFXPipeline {
@@ -83,7 +85,8 @@ export class SpaceCutPipeline extends Phaser.Renderer.WebGL.Pipelines.PostFXPipe
     const def = this.def;
     const cam = this.gameObject as Phaser.Cameras.Scene2D.Camera;
     const r = this.renderer;
-    const f = c && def ? spaceCutFrame((this.game.loop.time - c.at) / 1000, c.telegraphSec, def) : null;
+    const t = c ? (this.game.loop.time - c.at) / 1000 : 0;
+    const f = c && def ? (c.rift ? riftFrame(t, c.rift) : spaceCutFrame(t, c.telegraphSec, def)) : null;
     // 끝났으면 비운다 (다음 프레임부터 그대로 통과)
     if (c && f && !f.on && this.game.loop.time > c.at) this.cut = null;
     // 기준 해상도 1px = 캔버스 renderScale px. 카메라 좌표는 캔버스 px, 렌더 타깃은 아래가 0 (WebGL)
@@ -102,9 +105,10 @@ export class SpaceCutPipeline extends Phaser.Renderer.WebGL.Pipelines.PostFXPipe
     this.set2f('uB', bx, by);
     this.set1f('uShift', f.shift * px);
     this.set1f('uGap', f.gap * px);
-    this.set1f('uBand', def.bandPx * px);
-    this.set1f('uEdge', def.edgeFadePx * px);
-    this.set1f('uRim', def.rimPx * px);
+    // 균열은 화면 전체 (띠·끝 약해짐 없음: 선 끝은 화면 밖)
+    this.set1f('uBand', c.rift ? 1e5 : def.bandPx * px);
+    this.set1f('uEdge', c.rift ? 1 : def.edgeFadePx * px);
+    this.set1f('uRim', (c.rift ? c.rift.rimPx : def.rimPx) * px);
     this.set1f('uSlide', f.slide * px);
   }
 }
@@ -130,5 +134,17 @@ export function startSpaceCut(scene: Phaser.Scene, def: SpaceCutDef, a: Vec2, b:
   if (!p) return false;
   p.def = def;
   p.cut = { a: { ...a }, b: { ...b }, at: scene.game.loop.time + telegraphSec * 1000, telegraphSec };
+  return true;
+}
+
+/** 케라우노스 균열: at을 지나 angle(라디안)로 화면 전체를 가른다 */
+export function startSpaceRift(scene: Phaser.Scene, def: SpaceCutDef, rift: RiftDef, at: Vec2, angle: number): boolean {
+  const p = spaceCutPipe(scene);
+  if (!p) return false;
+  const v = scene.cameras.main.worldView;
+  const reach = Math.hypot(v.width, v.height) * 2;
+  const d = { x: Math.cos(angle) * reach, y: Math.sin(angle) * reach };
+  p.def = def;
+  p.cut = { a: { x: at.x - d.x, y: at.y - d.y }, b: { x: at.x + d.x, y: at.y + d.y }, at: scene.game.loop.time, telegraphSec: 0, rift };
   return true;
 }

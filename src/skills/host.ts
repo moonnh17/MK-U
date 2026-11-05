@@ -12,7 +12,7 @@ import type { CorruptionState } from '../systems/acro';
 import type { ShieldState } from '../systems/shield';
 import type { OwnedSkill } from '../systems/skills';
 import type { PlayerMods } from '../systems/vitals';
-import type { SkillDef, SpaceCutDef, SpriteRef, TagId, UltimateDef } from '../types/data';
+import type { RiftDef, SkillDef, SpaceCutDef, SpriteRef, TagId, UltimateDef } from '../types/data';
 
 export interface SkillHost {
   readonly scene: Phaser.Scene;
@@ -35,6 +35,8 @@ export interface SkillHost {
   hitStop?(sec: number): void;
   /** 화면 자체가 a→b 선에서 갈라지는 연출 (telegraphSec 동안 압축 예고 뒤). 할 수 없는 렌더러면 false */
   spaceCut?(def: SpaceCutDef, a: Vec2, b: Vec2, telegraphSec: number): boolean;
+  /** 화면 전체가 at을 지나는 사선(angle, 라디안)으로 갈라져 미끄러졌다가 봉합되는 연출. 할 수 없으면 false */
+  spaceRift?(def: SpaceCutDef, rift: RiftDef, at: Vec2, angle: number): boolean;
   /** 플레이어 자신이 받는 피해(특이점 실험 대실패) */
   hurtSelf(amount: number): void;
   /** 이 스킬이 대성공했다(아크로 궁극기 게이지 보너스) */

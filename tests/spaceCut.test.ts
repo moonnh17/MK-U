@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { gameData } from '../src/data/index';
-import { spaceCutFrame } from '../src/systems/spaceCut';
+import { riftFrame, riftTotalSec, spaceCutFrame } from '../src/systems/spaceCut';
 
 const C = gameData.ultimates.ultimates.find((u) => u.id === 'thunderbolt')!.spaceCut!;
 
@@ -30,5 +30,24 @@ describe('벼락 공간 절단 시간표', () => {
   it('예고 전·닫힌 뒤는 효과 없음', () => {
     expect(spaceCutFrame(-1, 0.25, C).on).toBe(false);
     expect(spaceCutFrame(0, 0, C).on).toBe(true);
+  });
+});
+
+describe('케라우노스 균열 시간표', () => {
+  const T = gameData.ultimates.ultimates.find((u) => u.id === 'thunderbolt')!;
+  const R = T.rift!;
+  it('갈라짐 → 계속 미끄러짐 → 봉합 뒤 원래대로', () => {
+    expect(riftFrame(-0.01, R).on).toBe(false);
+    const opened = riftFrame(R.openSec, R);
+    const sliding = riftFrame(R.openSec + R.slideSec * 0.9, R);
+    expect(opened.gap).toBe(R.gapPx);
+    expect(sliding.slide).toBeGreaterThan(opened.slide);
+    expect(sliding.slide).toBeLessThanOrEqual(R.slideMaxPx);
+    const sealing = riftFrame(R.openSec + R.slideSec + R.sealSec / 2, R);
+    expect(sealing.slide).toBeLessThan(R.slideMaxPx);
+    expect(riftFrame(riftTotalSec(R), R).on).toBe(false);
+  });
+  it('각성 값: 옛 사선 참격·주변 타격·붕괴 값은 없다', () => {
+    expect(Object.keys(T.awakening!.values).sort()).toEqual(['range', 'riftDelaySec', 'sealWidth', 'strikeRadius']);
   });
 });

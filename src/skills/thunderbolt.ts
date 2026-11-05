@@ -2,10 +2,11 @@
  * 벼락 (헥타르 학파 궁극기, 기술·원거리·공간격). 조준 방향으로 두 공간 사이를 직선으로 절단한다.
  * 공간격 규칙: 일반 몬스터 즉사, 엘리트·정예는 최대 체력 비율. 보스는 공간격 배율 대신 최대 체력의 일정 비율(벼락 전용).
  * 절단 연출: 화면 자체가 절단선에서 갈라져 어긋났다가 닫힌다(spaceCutFx 셰이더). 절단 그림은 균열·잔상 보조로만 옅게.
- * 각성 '케라우노스': 푸른 벼락 강림 → 절단선 → 사선 참격 연속 → 주변 추가 타격 → 공간 균열 붕괴.
- * 보스에게는 절단선(최대 체력 비례)만 들어가고, 나머지 타격은 보스에게 피해가 없다.
+ * 각성 '케라우노스': 하늘에서 벼락이 내리꽂힘 → 그 자리를 지나 화면 전체가 사선으로 갈라짐(선 위 적 절단)
+ * → 양쪽이 사선을 따라 반대로 미끄러짐 → 봉합(선 주변 한 번 더 절단). 보스에게는 갈라지는 선(최대 체력 비례)만 들어간다.
  */
 import { playFx } from './skillFx';
+import { riftTotalSec } from '../systems/spaceCut';
 import { shake } from '../entities/juice';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
@@ -21,6 +22,11 @@ const CUT_STEP_MS = 70;
 const CUT_THICK = 3;
 /** 참격 그림이 원래 기운 각도 (오른쪽 위) */
 const SLASH_ART_RAD = -Math.PI / 4;
+/** 하늘 벼락이 시작하는 높이 (화면 위 끝보다 이만큼 위) */
+const BOLT_ABOVE_PX = 20;
+/** 하늘 벼락 꺾임 하나의 길이·흔들림 */
+const BOLT_STEP_PX = 14;
+const BOLT_JITTER_PX = 7;
 
 function isBoss(e: Enemy): boolean {
   return e.rank === 'boss' || e.rank === 'hiddenBoss';
@@ -133,52 +139,73 @@ class Telegraph implements SkillObject {
   }
 }
 
-/** 케라우노스: 시간표대로 연속 타격 */
+/** 하늘에서 target까지 지그재그 벼락 (몇 번 깜빡이며 사라진다) */
+function skyBolt(host: SkillHost, u: UltimateCast, target: Vec2, sec: number): void {
+  const top = host.scene.cameras.main.worldView.y - BOLT_ABOVE_PX;
+  const color = hexColor(u.def.color);
+  const draw = (g: Phaser.GameObjects.Graphics) => {
+    const n = Math.max(4, Math.ceil((target.y - top) / BOLT_STEP_PX));
+    const pts = Array.from({ length: n + 1 }, (_, i) => ({ x: target.x + (i === n ? 0 : host.rng.range(-BOLT_JITTER_PX, BOLT_JITTER_PX)), y: top + ((target.y - top) * i) / n }));
+    g.clear().lineStyle(5, color, 0.85).strokePoints(pts).lineStyle(2, 0xffffff, 1).strokePoints(pts);
+  };
+  const g = host.scene.add.graphics().setDepth(7);
+  draw(g);
+  // 두 번 다시 그려 번쩍이는 느낌
+  host.scene.time.delayedCall((sec * 1000) / 3, () => draw(g));
+  host.scene.tweens.add({ targets: g, alpha: 0, delay: (sec * 1000) / 2, duration: (sec * 1000) / 2, onComplete: () => g.destroy() });
+}
+
+/** 선 위(폭 width)의 적. 보스는 갈라질 때만(최대 체력 비례), 봉합 땐 보스 제외 */
+function lineStrike(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: number, width: number, source: string, boss: boolean): void {
+  const enemies = [...host.enemies()];
+  const hits = lineHits(from, dir, length, width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
+  for (const i of hits) {
+    const e = enemies[i]!;
+    if (isBoss(e)) {
+      if (boss) host.hitTrue(e, e.maxHp * u.values.bossMaxHpRatio!, false);
+    } else host.hit(e, u.values.damage!, u.def.sources[source]!);
+  }
+}
+
+/** 케라우노스: 하늘 벼락 → 화면 전체 사선 균열 → 미끄러짐 → 봉합 */
 class Keraunos implements SkillObject {
   readonly owner = ID;
   readonly createdAt: number;
   private t = 0;
   private readonly steps: { at: number; fn: () => void; done: boolean }[] = [];
 
-  constructor(
-    host: SkillHost,
-    private readonly u: UltimateCast,
-    target: Vec2,
-    dir: Vec2,
-  ) {
+  constructor(host: SkillHost, u: UltimateCast, target: Vec2, angle: number) {
     this.createdAt = host.scene.time.now;
     const v = u.values;
-    const color = hexColor(u.def.color);
+    const rift = u.def.rift!;
+    const sp = u.def.sprites;
+    const dir = { x: Math.cos(angle), y: Math.sin(angle) };
     const step = (at: number, fn: () => void) => this.steps.push({ at, fn, done: false });
-    // 1) 푸른 벼락 강림
+    // 화면 전체를 가로지르는 선 (판정도 화면 끝까지)
+    const view = host.scene.cameras.main.worldView;
+    const reach = Math.hypot(view.width, view.height);
+    const from = { x: target.x - dir.x * reach, y: target.y - dir.y * reach };
+    // 1) 하늘에서 벼락
     step(0, () => {
-      line(host, color, { x: target.x, y: target.y - 200 }, target, 6, 0.25);
+      skyBolt(host, u, target, rift.boltSec);
+      playFx(host.scene, sp.cut1!, target.x, target.y, { w: CUT_VORTEX_PX, fadeSec: 0.3 });
       area(host, u, target, host.area(v.strikeRadius!), 'strike');
+      shake(host.scene, 'medium');
     });
-    // 2) 절단선 (플레이어 → 목표 방향, 보스는 최대 체력 비례)
-    step(0.15, () => cut(host, u, host.playerPos(), dir, v.length!));
-    // 3) 사선 참격 연속
-    const base = Math.atan2(dir.y, dir.x);
-    const angles = [Math.PI / 4, -Math.PI / 4, Math.PI / 2];
-    for (let i = 0; i < v.slashCount!; i++) {
-      step(0.3 + i * v.slashDelaySec!, () => {
-        const a = base + angles[i % angles.length]!;
-        const d = { x: Math.cos(a), y: Math.sin(a) };
-        const half = v.slashLength! / 2;
-        const from = { x: target.x - d.x * half, y: target.y - d.y * half };
-        const enemies = [...host.enemies()];
-        const hits = lineHits(from, d, v.slashLength!, v.width! / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
-        playFx(host.scene, u.def.sprites.slash!, target.x, target.y, { w: v.slashLength!, rotation: a - SLASH_ART_RAD });
-        line(host, color, from, { x: from.x + d.x * v.slashLength!, y: from.y + d.y * v.slashLength! }, v.width! / 6, 0.15);
-        for (const k of hits) if (!isBoss(enemies[k]!)) host.hit(enemies[k]!, v.damage!, u.def.sources.slash!);
+    // 2) 화면 전체가 사선으로 갈라진다: 선 위 적 절단 + 절단 그림이 사선을 따라
+    step(v.riftDelaySec!, () => {
+      const split = !!u.def.spaceCut && !!host.spaceRift?.(u.def.spaceCut, rift, target, angle);
+      lineStrike(host, u, from, dir, reach * 2, v.width!, 'cut', true);
+      [sp.cut2!, sp.cut3!, sp.cut4!].forEach((ref, i) => {
+        host.scene.time.delayedCall(i * CUT_STEP_MS, () => playFx(host.scene, ref, target.x, target.y, { w: reach * 2, h: v.width! * CUT_THICK, rotation: angle, fadeSec: 0.25 }).setAlpha(0.8));
       });
-    }
-    const afterSlash = 0.3 + v.slashCount! * v.slashDelaySec!;
-    // 4) 주변 추가 타격
-    step(afterSlash, () => area(host, u, target, host.area(v.surroundRadius!), 'surround', 0.25));
-    // 5) 공간 균열 붕괴
-    step(afterSlash + v.collapseDelaySec!, () => {
-      area(host, u, target, host.area(v.collapseRadius!), 'collapse', 0.5);
+      if (!split) line(host, hexColor(u.def.color), from, { x: target.x + dir.x * reach, y: target.y + dir.y * reach }, v.width! / 3);
+    });
+    // 3) 봉합: 원래 자리로 돌아오는 순간 선 주변이 한 번 더 잘리고, 흰 봉합선·참격 그림이 번쩍인다
+    step(v.riftDelaySec! + riftTotalSec(rift), () => {
+      lineStrike(host, u, from, dir, reach * 2, v.sealWidth!, 'seal', false);
+      line(host, 0xdff2ff, from, { x: target.x + dir.x * reach, y: target.y + dir.y * reach }, 2, 0.18);
+      playFx(host.scene, sp.slash!, target.x, target.y, { w: 120, rotation: angle - SLASH_ART_RAD });
       shake(host.scene, 'medium');
     });
   }
@@ -208,8 +235,9 @@ export const thunderbolt: UltimateImpl = {
     const v = u.values;
     const e = nearestEnemy(host, from, v.range!);
     const target = e ? { x: e.sprite.x, y: e.sprite.y } : { x: from.x + dir.x * v.range! * 0.5, y: from.y + dir.y * v.range! * 0.5 };
-    const d = Math.hypot(target.x - from.x, target.y - from.y) || 1;
-    host.addObject(new Keraunos(host, u, target, e ? { x: (target.x - from.x) / d, y: (target.y - from.y) / d } : dir));
+    // 사선은 조준 쪽으로 기운다 (오른쪽 조준이면 왼쪽 아래 → 오른쪽 위)
+    const tilt = (u.def.rift!.angleDeg * Math.PI) / 180;
+    host.addObject(new Keraunos(host, u, target, dir.x >= 0 ? -tilt : tilt));
     return true;
   },
 };

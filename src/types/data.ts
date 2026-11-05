@@ -1007,6 +1007,24 @@ export interface UltimateDef {
   sprites: Record<string, SpriteRef>;
   /** 벼락: 화면 자체가 절단선에서 갈라지는 연출 (기준 해상도 px) */
   spaceCut?: SpaceCutDef;
+  /** 케라우노스: 화면 전체가 사선으로 갈라져 미끄러졌다가 봉합되는 연출 */
+  rift?: RiftDef;
+}
+
+export interface RiftDef {
+  /** 사선 기울기 (조준이 왼쪽이면 반대로 기운다) */
+  angleDeg: number;
+  /** 갈라지는 시간, 미끄러지는 시간, 봉합되는 시간 */
+  openSec: number;
+  slideSec: number;
+  sealSec: number;
+  /** 틈 반폭, 미끄러짐 시작·최대 (기준 해상도 px) */
+  gapPx: number;
+  slideStartPx: number;
+  slideMaxPx: number;
+  rimPx: number;
+  /** 하늘에서 떨어지는 벼락이 보이는 시간 */
+  boltSec: number;
 }
 
 export interface SpaceCutDef {

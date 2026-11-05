@@ -983,7 +983,7 @@
   "ultimate.thunderbolt.desc": "설치 병기(포탑·지뢰·드론)의 공격으로 연산 데이터를 모아 쓴다. {telegraphSec}초 예고선 뒤 길이 {length}의 직선을 공간째 절단한다(공간격): 일반 몬스터 즉사, 엘리트도 즉사, 보스는 최대 체력의 {bossMaxHpRatioPct}%.",
   "ultimate.thunderbolt.awakened": "케라우노스",
   "ultimate.thunderbolt.awakened.short": "케라",
-  "ultimate.thunderbolt.awakened.desc": "푸른 벼락이 내리꽂힌 자리(반경 {strikeRadius})에서 절단선 → 사선 참격 {slashCount}회 → 주변 반경 {surroundRadius} 추가 타격 → {collapseDelaySec}초 뒤 반경 {collapseRadius} 공간 균열 붕괴로 이어진다.",
+  "ultimate.thunderbolt.awakened.desc": "하늘에서 푸른 벼락이 내리꽂히고(반경 {strikeRadius}), 그 자리를 지나 화면 전체가 사선으로 갈라진다. 갈라진 선 위의 적은 공간째 잘리고(보스는 최대 체력의 {bossMaxHpRatioPct}%), 어긋났던 공간이 봉합될 때 선 주변(폭 {sealWidth})이 한 번 더 잘린다.",
   "ultimate.singularity": "특이점 실험",
   "ultimate.singularity.short": "특이",
   "ultimate.singularity.desc": "실험 효과로 실험 데이터를 모아 쓴다. 사거리 {range} 안에 붉은 특이점을 열어 반경 {pullRadius}의 적을 {pullSec}초 동안 끌어당긴 뒤 무작위로 하나: 붕괴(반경 {collapseRadius}, 피해 {collapseDamage}), 증식(특이점 {proliferateCount}개), 변질({corruptSec}초 받는 피해 +{corruptVulnerabilityPct}%), 과부하(반경 {overloadRadius}, 피해 {overloadDamage}), 대실패(피해 {failureDamage}, 나도 {failureSelfDamage}). 대성공이면 위력 ×{greatMultiplier}.",
