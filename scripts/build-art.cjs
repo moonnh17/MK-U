@@ -401,6 +401,7 @@ const ITEM = {
   item_magnet_resonator: 'items/magnet-resonator.png', item_steel_castle_figure: 'items/steel-castle-figure.png', item_war_diary: 'items/war-diary.png',
   item_snell_law: 'items/snell-law.png', item_hela_cell: 'items/hela-cell.png', item_forbidden_virus: 'items/forbidden-virus.png',
   item_extra_arms: 'items/extra-arms.png', item_forbidden_gift: 'items/forbidden-gift.png',
+  item_tourbillon: 'items/tourbillon.png', item_crepuscule: 'items/crepuscule.png',
 };
 for (const [key, f] of Object.entries(ITEM)) sprites[key] = icon(key, f, CARD_ICON);
 

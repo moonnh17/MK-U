@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Rng } from '../src/core/rng';
 import { gameData } from '../src/data/index';
+import { itemDescParams } from '../src/ui/itemCard';
 import { validateGameData } from '../src/data/validate';
 import {
   activeEffects,
@@ -27,9 +28,9 @@ const totals = (ids: string[], school: 'hectar' | 'acro' | null = null) =>
   itemTotals(ids, I, { school, job: 'magiScholar' }, G);
 
 describe('아이템 목록 (기획서 표)', () => {
-  it('일반 5·레어 11·전설 7·유니크 6·신화 1 + 세트 1 + 보스 전용', () => {
+  it('일반 5·레어 12·전설 8·유니크 6·신화 1 + 세트 1 + 보스 전용', () => {
     const by = (g: string) => I.items.filter((x) => x.pool === 'normal' && x.grade === g).length;
-    expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([5, 11, 7, 6, 1]);
+    expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([5, 12, 8, 6, 1]);
     expect(I.items.filter((x) => x.pool === 'set').map((x) => x.id)).toEqual(['warriorMemory']);
     expect(I.items.filter((x) => x.pool === 'boss').map((x) => [x.id, x.bossId])).toEqual([
       ['wonhonLump', 'fusionAkgwi'],
@@ -216,3 +217,13 @@ describe('아이템 조합기', () => {
   });
 });
 
+
+describe('브이로드 신규 아이템', () => {
+  it('투르비용: 회피 쿨타임 -10%, 회피 시 3초 공격 속도 / 크레퓌스퀼: 치명타 +15%, 치명 피해 +25%', () => {
+    const t = (id: string) => gameData.items.items.find((x) => x.id === id)!;
+    expect(itemDescParams(t('tourbillon'), gameData.groupMultipliers)).toMatchObject({ v0: '10', dur1: '3' });
+    expect(itemDescParams(t('crepuscule'), gameData.groupMultipliers)).toMatchObject({ v0: '15', v1: '25' });
+    expect([t('tourbillon').grade, t('crepuscule').grade]).toEqual(['rare', 'legendary']);
+    expect(gameData.items.codexLore.vroad).toEqual(expect.arrayContaining(['tourbillon', 'crepuscule']));
+  });
+});

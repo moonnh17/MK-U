@@ -1149,6 +1149,14 @@ export type ItemEffect =
   | { kind: 'panicCalm'; visionMul: number }
   /** 패닉 중 각성: 체력이 초당 hpPerSec 닳고(1 아래로는 안 내려감) 모든 피해 +damage */
   | { kind: 'panicAwaken'; hpPerSec: number; damage: number }
+  /** 회피(구르기) 재사용 대기 −value 비율 (투르비용) */
+  | { kind: 'dodgeCdReduce'; value: number }
+  /** 구르는 동안 적 공격(탄·근접·장판)을 피하면 durationSec 동안 무기 공격 속도 +value (투르비용: 원심 가속) */
+  | { kind: 'dodgeHaste'; durationSec: number; value: number }
+  /** 무기 치명타 확률 + (크레퓌스퀼) */
+  | { kind: 'critChance'; value: number }
+  /** 무기 치명타 피해 배율 + (크레퓌스퀼) */
+  | { kind: 'critDamage'; value: number }
   /** 궁극기를 쓸 때 관통 탄환 shots발 전방위 (고대병기의 코어) */
   | { kind: 'ultimateBurst'; shots: number; damage: number; speed: number; range: number; tags: TagId[] };
 

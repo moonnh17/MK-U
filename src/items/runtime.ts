@@ -340,7 +340,28 @@ export class ItemRuntime {
     return { bonus, noFailure };
   }
 
+  /** 원심 가속(투르비용)이 남은 시간 */
+  private hasteLeft = 0;
+
+  /** 구르는 동안 적 공격을 피했을 때 (투르비용: 원심 가속) */
+  onDodgeAvoid(): void {
+    const e = this.first('dodgeHaste');
+    if (e) this.hasteLeft = e.durationSec;
+  }
+
+  /** 지금 무기 공격 속도 보너스 (원심 가속) */
+  attackSpeedBonus(): number {
+    const e = this.first('dodgeHaste');
+    return e && this.hasteLeft > 0 ? e.value : 0;
+  }
+
+  /** 값만 있는 효과의 합 (치명타 확률·치명타 피해·회피 재사용 감소) */
+  total(kind: 'critChance' | 'critDamage' | 'dodgeCdReduce'): number {
+    return this.each(kind).reduce((s, { e }) => s + e.value, 0);
+  }
+
   update(dt: number): void {
+    this.hasteLeft = Math.max(0, this.hasteLeft - dt);
     const p = this.host.player();
     for (const id of p.items) {
       const s = this.state(id);

@@ -496,7 +496,7 @@ export class WeaponCombat {
 
   /** 무기 치명 판정 */
   critRoll(base: number, chance: number, at: Vec2): number {
-    const r = rollCrit(this.run.rng, base, chance, this.run.ctx.data.weapons.critMultiplier);
+    const r = rollCrit(this.run.rng, base, chance, this.run.ctx.data.weapons.critMultiplier + this.run.itemRt.total('critDamage'));
     // 치명타는 바로 이어지는 피해의 숫자를 크고 노랗게 (at은 예전 '치명' 글자 자리, 지금은 쓰지 않음)
     void at;
     if (r.crit) this.pendingCrit = true;

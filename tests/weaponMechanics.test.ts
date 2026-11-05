@@ -98,7 +98,7 @@ describe('스넬의 법칙·LK-99', () => {
 describe('능력 이름', () => {
   it('능력 이름이 있는 아이템은 능력 설명이 따로 있다 (도감: 일반 능력 아래)', () => {
     const named = gameData.items.items.filter((x) => x.abilityNameKey);
-    expect(named.length).toBe(13);
+    expect(named.length).toBe(14);
     for (const x of named) expect(x.abilityDescKey, x.id).toBeDefined();
   });
   it('이름 받은 무기 능력', () => {

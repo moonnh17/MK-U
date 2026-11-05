@@ -1,11 +1,11 @@
 {
   "codexLore": {
     "old": ["pistol", "shotgun", "smg", "rifle", "sniper", "grenadeLauncher", "dagger", "greatsword", "spear", "hammer", "curvedBow"],
-    "standard": ["flameStaff", "zephyr", "antimatterPistol", "spaceNeedle"],
+    "standard": ["flameStaff", "zephyr", "antimatterPistol", "spaceNeedle", "soulCalibur"],
     "systemple": ["mg70", "orbitalDisc"],
     "historyArms": ["algiebaSling", "nekkarCleaver", "argoBanner", "alGulBlade"],
     "starRelic": ["rasalgethiClub", "aviorStaff", "rasalhagueSword"],
-    "ancient": ["brokenBlade", "ancientCore", "eclipseCore", "hwanRemnant", "magiFang", "hanabi", "soulCalibur"],
+    "ancient": ["brokenBlade", "ancientCore", "eclipseCore", "hwanRemnant", "magiFang", "hanabi"],
     "bossRemains": ["gihwanArm"],
     "street": ["bootlegGun", "debtorArm"],
     "creator": ["handi"]

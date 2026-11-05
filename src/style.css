@@ -2997,3 +2997,19 @@ body {
   display: flex;
   gap: 10px;
 }
+
+/* 바닥 무기 설명창: 태그 */
+#weapon-tip .wt-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin: 2px 0 3px;
+}
+#weapon-tip .wt-tags span {
+  padding: 0 5px;
+  border-radius: 3px;
+  font-size: 10px;
+  line-height: 15px;
+  color: #ffffff;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
+}

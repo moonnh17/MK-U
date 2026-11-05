@@ -9,6 +9,7 @@ import type { Card } from '../systems/cards';
 import type { WeaponItem } from '../systems/weapons';
 import { describeCard } from './cardView';
 import { weaponInfoLines } from './weaponInfo';
+import { tagBadges } from '../systems/tags';
 
 export class WeaponTip {
   private readonly root: HTMLDivElement;
@@ -75,6 +76,16 @@ export class WeaponTip {
     name.textContent = `${t(def.nameKey)} · ${grade ? t(grade.nameKey) : ''}`;
     name.style.color = grade?.color ?? '#ffffff';
     body.appendChild(name);
+    // 태그 (마기·기술·근접 …)
+    const tags = document.createElement('div');
+    tags.className = 'wt-tags';
+    for (const b of tagBadges(def.tags, d.tags)) {
+      const s = document.createElement('span');
+      s.textContent = t(b.nameKey);
+      s.style.background = b.color;
+      tags.appendChild(s);
+    }
+    if (tags.childElementCount) body.appendChild(tags);
     for (const l of weaponInfoLines(this.ctx, item)) {
       const row = document.createElement('div');
       row.className = l.sig ? 'wt-line sig' : 'wt-line';

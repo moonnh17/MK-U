@@ -974,6 +974,18 @@
       "frameHeight": 64,
       "frames": 1
     },
+    "item_tourbillon": {
+      "file": "mku/item_tourbillon.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_crepuscule": {
+      "file": "mku/item_crepuscule.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
     "tile_floor_c1": {
       "file": "mku/tile_floor_c1.png",
       "frameWidth": 128,

@@ -939,7 +939,9 @@ export class RunScene extends Phaser.Scene {
     const g = this.ctx.data.groupMultipliers;
     // 징수를 못 낸 의수는 주먹과 같은 성능
     if (item.unpaid) return this.weaponStatsOf(this.fistItem());
-    return weaponStats(this.weaponDefOf(item.defId), item, gradeMultiplier(item.grade, g), gradeEnergyMultiplier(item.grade, g));
+    const st = weaponStats(this.weaponDefOf(item.defId), item, gradeMultiplier(item.grade, g), gradeEnergyMultiplier(item.grade, g));
+    // 아이템: 원심 가속(공격 속도), 치명타 확률
+    return { ...st, fireIntervalSec: st.fireIntervalSec / (1 + this.itemRt.attackSpeedBonus()), critChance: Math.min(1, st.critChance + this.itemRt.total('critChance')) };
   }
 
   tagRule<T>(id: TagId): T {
@@ -1127,6 +1129,8 @@ export class RunScene extends Phaser.Scene {
 
   /** 피해를 받았으면 true. attacker: 때린 적(반사용, 모르면 null) */
   hurtPlayer(amount: number, attacker: Enemy | null = null, mentalRaw?: number): boolean {
+    // 구르기로 피한 공격 (투르비용: 원심 가속)
+    if (this.condition.dodge.invuln > 0 && amount > 0 && !this.session.outcome) this.itemRt.onDodgeAvoid();
     if (this.invuln > 0 || this.condition.dodge.invuln > 0 || this.dying || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
     // 특무 인장: 피해를 받기 직전 순간이동으로 피한다 (피격 무적과 같은 시간)
     if (this.itemRt.tryDodge()) {
@@ -1275,12 +1279,15 @@ export class RunScene extends Phaser.Scene {
     if (!b.active) return;
     // 구르는 동안에는 탄이 몸을 지나간다 (헥타르 RAM: 스칠 때 에너지)
     if (this.condition.dodge.invuln > 0) {
-      const graze = this.itemRt.first('grazeEnergy');
-      if (graze && !b.getData('grazed')) {
+      if (!b.getData('grazed')) {
         b.setData('grazed', true);
-        const p = this.session.player;
-        p.energy = Math.min(p.energyMax, p.energy + graze.value);
-        this.floatLabel({ x: this.player.x, y: this.player.y - 6 }, `+${graze.value}`, this.ctx.data.ui.hud.bars.energyColor);
+        this.itemRt.onDodgeAvoid();
+        const graze = this.itemRt.first('grazeEnergy');
+        if (graze) {
+          const p = this.session.player;
+          p.energy = Math.min(p.energyMax, p.energy + graze.value);
+          this.floatLabel({ x: this.player.x, y: this.player.y - 6 }, `+${graze.value}`, this.ctx.data.ui.hud.bars.energyColor);
+        }
       }
       return;
     }

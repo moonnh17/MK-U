@@ -29,7 +29,8 @@ export class PlayerCondition {
   /** 민첩이 재사용을 줄인다 */
   dodgeCooldownSec(): number {
     const d = this.run.ctx.data;
-    return d.player.dodge.cooldownSec;
+    // 투르비용: 회피 재사용 대기 감소
+    return d.player.dodge.cooldownSec * Math.max(0, 1 - this.run.itemRt.total('dodgeCdReduce'));
   }
 
   updateDodge(dt: number, frame: ActionFrame): void {
