@@ -121,7 +121,7 @@
 | `enemy_electric_ring` | 전기환띠 | 42×42 | feet | #3a9ad9 | mku/enemy_electric_ring.png (6프레임) |
 | `enemy_training_dummy` | 보스 자리(임시 표적) | 24×24 | feet | #8a5ad9 | mku/enemy_training_dummy.png (1프레임) |
 | `enemy_ancestor_echo` | 선조의 잔상 | 42×42 | feet | #b0583a | mku/enemy_ancestor_echo.png (16프레임) |
-| `enemy_royal_mage` | 왕실특무마기법사 외 1곳 | 33×33 | feet | #6a4ad9 | mku/enemy_royal_mage.png (8프레임) |
+| `enemy_royal_mage` | 왕속특무 마기법사 외 1곳 | 33×33 | feet | #6a4ad9 | mku/enemy_royal_mage.png (8프레임) |
 | `enemy_orion_crusader` | 오리온의 성전사 | 42×42 | feet | #d9c25a | mku/enemy_orion_crusader.png (16프레임) |
 | `enemy_hectar_chief` | 헥타르 수석 연구원 | 36×36 | feet | #3a9aff | mku/enemy_hectar_chief.png (9프레임) |
 | `enemy_magi_golem` | 마기골렘 | 48×48 | feet | #8a6a4a | mku/enemy_magi_golem.png (10프레임) |
@@ -142,8 +142,8 @@
 | `enemy_magi_kaiser_phase3` | 마기카이저 (3단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase3.png (50프레임) |
 | `enemy_ancestor_echo_phase1` | 선조의 잔상 (1단계) | 42×42 | feet | #b0583a | — |
 | `enemy_ancestor_echo_phase2` | 선조의 잔상 (2단계) | 42×42 | feet | #b0583a | — |
-| `enemy_royal_mage_phase1` | 왕실특무마기법사 (1단계) | 33×33 | feet | #6a4ad9 | — |
-| `enemy_royal_mage_phase2` | 왕실특무마기법사 (2단계) | 33×33 | feet | #6a4ad9 | mku/enemy_royal_mage_phase2.png (36프레임) |
+| `enemy_royal_mage_phase1` | 왕속특무 마기법사 (1단계) | 33×33 | feet | #6a4ad9 | — |
+| `enemy_royal_mage_phase2` | 왕속특무 마기법사 (2단계) | 33×33 | feet | #6a4ad9 | mku/enemy_royal_mage_phase2.png (36프레임) |
 | `enemy_orion_crusader_phase1` | 오리온의 성전사 (1단계) | 42×42 | feet | #d9c25a | — |
 | `enemy_orion_crusader_phase2` | 오리온의 성전사 (2단계) | 42×42 | feet | #d9c25a | — |
 
@@ -612,25 +612,25 @@
 | `fx_echo_twin_moon` | 선조의 잔상 (echoSlash.finish) | 45×45 | center | #ff7a3a | mku/fx_echo_twin_moon.png (4프레임) |
 | `fx_echo_chain` | 선조의 잔상 (deadChain.chain) | 55×55 | center | #ff7a3a | mku/fx_echo_chain.png (4프레임) |
 | `fx_echo_return` | 선조의 잔상 (ancestorsReturn.blastHit) 외 1곳 | 55×55 | center | #ff7a3a | mku/fx_echo_return.png (4프레임) |
-| `fx_royal_silent_shift` | 왕실특무마기법사 (blinkBarrage.shift) | 40×40 | center | #b05aff | mku/fx_royal_silent_shift.png (4프레임) |
-| `fx_royal_blink_flash` | 왕실특무마기법사 (blinkBarrage.flash) | 35×35 | center | #b05aff | mku/fx_royal_blink_flash.png (4프레임) |
-| `fx_royal_blink_ring` | 왕실특무마기법사 (blinkBarrage.ring) | 40×40 | center | #b05aff | mku/fx_royal_blink_ring.png (4프레임) |
-| `fx_royal_bullet` | 왕실특무마기법사 (bullet) | 6×6 | center | #b05aff | mku/fx_royal_bullet.png (4프레임) |
-| `fx_royal_laser` | 왕실특무마기법사 (greatLaser.beam) | 80×80 | center | #b05aff | mku/fx_royal_laser.png (3프레임) |
-| `fx_royal_laser_warn` | 왕실특무마기법사 (greatLaser.beamWarn) | 80×80 | center | #b05aff | mku/fx_royal_laser_warn.png (4프레임) |
-| `fx_royal_laser_muzzle` | 왕실특무마기법사 (greatLaser.muzzle) | 30×30 | center | #b05aff | mku/fx_royal_laser_muzzle.png (4프레임) |
-| `fx_royal_clone_shatter` | 왕실특무마기법사 (clones.shatter) 외 1곳 | 30×30 | center | #b05aff | mku/fx_royal_clone_shatter.png (4프레임) |
-| `fx_royal_strike_trail` | 왕실특무마기법사 (magiStrike.dashTrail) | 50×50 | center | #b05aff | mku/fx_royal_strike_trail.png (4프레임) |
-| `fx_royal_claw` | 왕실특무마기법사 (magiStrike.claw) | 50×50 | center | #c8102e | mku/fx_royal_claw.png (4프레임) |
-| `fx_royal_finisher` | 왕실특무마기법사 (magiStrike.finisher) | 50×50 | center | #c8102e | mku/fx_royal_finisher.png (4프레임) |
-| `fx_royal_strike_swipe` | 왕실특무마기법사 (magiStrike.sectorHit) | 40×40 | center | #b05aff | mku/fx_royal_strike_swipe.png (4프레임) |
-| `fx_royal_mark` | 왕실특무마기법사 (royalMark.mark) | 25×25 | center | #b05aff | mku/fx_royal_mark.png (4프레임) |
-| `fx_royal_seeker` | 왕실특무마기법사 (royalMark.seeker) | 7×7 | center | #b05aff | mku/fx_royal_seeker.png (4프레임) |
-| `fx_royal_pierce` | 왕실특무마기법사 (piercingLine.pierce) | 60×60 | center | #b05aff | mku/fx_royal_pierce.png (4프레임) |
-| `fx_royal_seal_edict` | 왕실특무마기법사 (sealEdict.seal) | 45×45 | center | #b05aff | mku/fx_royal_seal_edict.png (4프레임) |
-| `fx_royal_black_lance` | 왕실특무마기법사 (sealEdict.blastHit) | 45×45 | center | #b05aff | mku/fx_royal_black_lance.png (4프레임) |
-| `fx_royal_confiscate` | 왕실특무마기법사 (finalDecree.confiscate) | 45×45 | center | #b05aff | mku/fx_royal_confiscate.png (4프레임) |
-| `fx_royal_final_decree` | 왕실특무마기법사 (finalDecree.decree) | 60×60 | center | #b05aff | mku/fx_royal_final_decree.png (4프레임) |
+| `fx_royal_silent_shift` | 왕속특무 마기법사 (blinkBarrage.shift) | 40×40 | center | #b05aff | mku/fx_royal_silent_shift.png (4프레임) |
+| `fx_royal_blink_flash` | 왕속특무 마기법사 (blinkBarrage.flash) | 35×35 | center | #b05aff | mku/fx_royal_blink_flash.png (4프레임) |
+| `fx_royal_blink_ring` | 왕속특무 마기법사 (blinkBarrage.ring) | 40×40 | center | #b05aff | mku/fx_royal_blink_ring.png (4프레임) |
+| `fx_royal_bullet` | 왕속특무 마기법사 (bullet) | 6×6 | center | #b05aff | mku/fx_royal_bullet.png (4프레임) |
+| `fx_royal_laser` | 왕속특무 마기법사 (greatLaser.beam) | 80×80 | center | #b05aff | mku/fx_royal_laser.png (3프레임) |
+| `fx_royal_laser_warn` | 왕속특무 마기법사 (greatLaser.beamWarn) | 80×80 | center | #b05aff | mku/fx_royal_laser_warn.png (4프레임) |
+| `fx_royal_laser_muzzle` | 왕속특무 마기법사 (greatLaser.muzzle) | 30×30 | center | #b05aff | mku/fx_royal_laser_muzzle.png (4프레임) |
+| `fx_royal_clone_shatter` | 왕속특무 마기법사 (clones.shatter) 외 1곳 | 30×30 | center | #b05aff | mku/fx_royal_clone_shatter.png (4프레임) |
+| `fx_royal_strike_trail` | 왕속특무 마기법사 (magiStrike.dashTrail) | 50×50 | center | #b05aff | mku/fx_royal_strike_trail.png (4프레임) |
+| `fx_royal_claw` | 왕속특무 마기법사 (magiStrike.claw) | 50×50 | center | #c8102e | mku/fx_royal_claw.png (4프레임) |
+| `fx_royal_finisher` | 왕속특무 마기법사 (magiStrike.finisher) | 50×50 | center | #c8102e | mku/fx_royal_finisher.png (4프레임) |
+| `fx_royal_strike_swipe` | 왕속특무 마기법사 (magiStrike.sectorHit) | 40×40 | center | #b05aff | mku/fx_royal_strike_swipe.png (4프레임) |
+| `fx_royal_mark` | 왕속특무 마기법사 (royalMark.mark) | 25×25 | center | #b05aff | mku/fx_royal_mark.png (4프레임) |
+| `fx_royal_seeker` | 왕속특무 마기법사 (royalMark.seeker) | 7×7 | center | #b05aff | mku/fx_royal_seeker.png (4프레임) |
+| `fx_royal_pierce` | 왕속특무 마기법사 (piercingLine.pierce) | 60×60 | center | #b05aff | mku/fx_royal_pierce.png (4프레임) |
+| `fx_royal_seal_edict` | 왕속특무 마기법사 (sealEdict.seal) | 45×45 | center | #b05aff | mku/fx_royal_seal_edict.png (4프레임) |
+| `fx_royal_black_lance` | 왕속특무 마기법사 (sealEdict.blastHit) | 45×45 | center | #b05aff | mku/fx_royal_black_lance.png (4프레임) |
+| `fx_royal_confiscate` | 왕속특무 마기법사 (finalDecree.confiscate) | 45×45 | center | #b05aff | mku/fx_royal_confiscate.png (4프레임) |
+| `fx_royal_final_decree` | 왕속특무 마기법사 (finalDecree.decree) | 60×60 | center | #b05aff | mku/fx_royal_final_decree.png (4프레임) |
 | `fx_orion_prayer` | 오리온의 성전사 (holySwords.prayer) 외 1곳 | 45×45 | center | #ffd23f | mku/fx_orion_prayer.png (4프레임) |
 | `fx_orion_sword` | 오리온의 성전사 (holySwords.sword) 외 1곳 | 20×20 | center | #ffd23f | mku/fx_orion_sword.png (3프레임) |
 | `fx_orion_sword_warn` | 오리온의 성전사 (holySwords.blastWarn) 외 1곳 | 25×25 | center | #ffd23f | mku/fx_orion_sword_warn.png (4프레임) |

@@ -15,7 +15,7 @@ describe('그림 목록', () => {
     for (const o of gameData.lab.objects) expect(keys).toContain(o.spriteKey);
     expect(keys).toContain(gameData.player.spriteKey);
   });
-  it('같은 그림을 쓰는 곳은 한 줄로 합치고 수를 센다 (분신 = 왕실특무마기법사)', () => {
+  it('같은 그림을 쓰는 곳은 한 줄로 합치고 수를 센다 (분신 = 왕속특무 마기법사)', () => {
     const mage = refs.find((r) => r.key === 'enemy_royal_mage')!;
     expect(mage.group).toBe('boss');
     expect(mage.uses).toBe(2);

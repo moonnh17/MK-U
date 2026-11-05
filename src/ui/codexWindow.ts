@@ -52,6 +52,8 @@ function itemStatRows(def: ItemDef, d: GameData, t: GameContext['t']): [string, 
     // 쿨타임 감소·받는 피해 감소는 값이 양수일 때 줄어드는 쪽
     else if (e.kind === 'skillCooldown' || e.kind === 'damageTaken' || e.kind === 'chargeTime') rows.push([t(`codex.istat.${e.kind}`), pc(-e.value)]);
     else if (e.kind === 'skillDamage') rows.push([t('codex.istat.skillDamage', { skill: t(findSkill(d.skills, e.skillId).nameKey) }), pc(e.value)]);
+    else if (e.kind === 'lifesteal' || e.kind === 'critChance' || e.kind === 'critDamage') rows.push([t(`codex.istat.${e.kind}`), pc(e.value)]);
+    else if (e.kind === 'dodgeCdReduce') rows.push([t('codex.istat.dodgeCdReduce'), pc(-e.value)]);
   }
   return rows;
 }
@@ -330,7 +332,9 @@ export class CodexWindow {
     const hero = this.el('div', 'cx-hero');
     const icon = this.el('span', `cx-big${known ? '' : ' unknown'}`);
     const a = this.art(e);
-    applyArtIcon(icon, this.ctx, a.key, a.color);
+    // 보스 패턴 보기: 2단계에서 모습이 바뀌는 보스는 그 모습으로
+    const phase2 = artKeys.bossPhase(a.key, 2);
+    applyArtIcon(icon, this.ctx, e.kind === 'enemy' && this.altView && this.ctx.data.art.sprites[phase2] ? phase2 : a.key, a.color);
     this.side = this.el('div', 'cx-side');
     const stage = this.el('div', 'cx-stage');
     stage.appendChild(icon);

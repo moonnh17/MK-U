@@ -437,7 +437,7 @@ class AncestorsReturn extends Timed {
   }
 }
 
-/** 순간이동 탄막 (왕실특무마기법사): 소리 없이 사라졌다가 떨어진 곳에 나타나 원형 탄막 */
+/** 순간이동 탄막 (왕속특무 마기법사): 소리 없이 사라졌다가 떨어진 곳에 나타나 원형 탄막 */
 class BlinkBarrage extends Timed {
   constructor(c: PatternCtx) {
     super(c);
@@ -484,7 +484,7 @@ class BlinkBarrage extends Timed {
   }
 }
 
-/** 강력한 레이저 (왕실특무마기법사): 예고선 → 굵은 직선 (대형 레이저: 굴절 불가) */
+/** 강력한 레이저 (왕속특무 마기법사): 예고선 → 굵은 직선 (대형 레이저: 굴절 불가) */
 class GreatLaser extends Timed {
   constructor(c: PatternCtx) {
     super(c);
@@ -514,7 +514,7 @@ class GreatLaser extends Timed {
   }
 }
 
-/** 분신 (왕실특무마기법사) */
+/** 분신 (왕속특무 마기법사) */
 class Clones extends Timed {
   constructor(c: PatternCtx) {
     super(c);
@@ -522,7 +522,7 @@ class Clones extends Timed {
   }
 }
 
-/** 마기 강타 (왕실특무마기법사 마기화): 플레이어에게 돌진 → 부채꼴 연타 */
+/** 마기 강타 (왕속특무 마기법사 마기화): 플레이어에게 돌진 → 부채꼴 연타 */
 class MagiStrike implements PatternRun {
   private readonly dash: Dash;
   private t = 0;
@@ -556,7 +556,7 @@ class MagiStrike implements PatternRun {
   }
 }
 
-/** 왕인 각인 → 왕실 추적구 (왕실특무마기법사): 플레이어에게 왕인을 새긴 뒤 추적구를 날린다 */
+/** 왕인 각인 → 왕실 추적구 (왕속특무 마기법사): 플레이어에게 왕인을 새긴 뒤 추적구를 날린다 */
 class RoyalMark extends Timed {
   constructor(c: PatternCtx) {
     super(c);
@@ -571,7 +571,7 @@ class RoyalMark extends Timed {
   }
 }
 
-/** 특무 관통선 (왕실특무마기법사): 다시 조준하며 빠르고 좁은 관통선을 연달아 */
+/** 특무 관통선 (왕속특무 마기법사): 다시 조준하며 빠르고 좁은 관통선을 연달아 */
 class PiercingLine extends Timed {
   constructor(c: PatternCtx) {
     super(c);
@@ -589,7 +589,7 @@ class PiercingLine extends Timed {
   }
 }
 
-/** 봉쇄 칙령 → 집행의 흑창 (왕실특무마기법사): 플레이어 양옆을 봉인판으로 막고, 그 안으로 흑창이 떨어진다 */
+/** 봉쇄 칙령 → 집행의 흑창 (왕속특무 마기법사): 플레이어 양옆을 봉인판으로 막고, 그 안으로 흑창이 떨어진다 */
 class SealEdict extends Timed {
   constructor(c: PatternCtx) {
     super(c);
@@ -606,7 +606,7 @@ class SealEdict extends Timed {
   }
 }
 
-/** 왕명·최종 집행 (왕실특무마기법사 마기화): 마기를 거둬들인 뒤 방을 세로 집행선으로 가른다. 한 줄만 비어 있다 */
+/** 왕명·최종 집행 (왕속특무 마기법사 마기화): 마기를 거둬들인 뒤 방을 세로 집행선으로 가른다. 한 줄만 비어 있다 */
 class FinalDecree extends Timed {
   constructor(c: PatternCtx) {
     super(c);
