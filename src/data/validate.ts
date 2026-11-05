@@ -342,6 +342,8 @@ export function validateGameData(d: GameData): Errors {
   const enemyIds = d.enemies.enemies.map((e) => e.id);
   checkUnique(errors, 'enemies', enemyIds);
   checkUnique(errors, 'enemies.codexNo', d.enemies.enemies.filter((e) => e.codexNo !== undefined).map((e) => String(e.codexNo)));
+  checkUnique(errors, 'items.codexNo', d.items.items.filter((e) => e.codexNo !== undefined).map((e) => String(e.codexNo)));
+  checkUnique(errors, 'weapons.codexNo', d.weapons.weapons.filter((e) => e.codexNo !== undefined).map((e) => String(e.codexNo)));
   for (const g of ['1', '2', '3', '4', '5', '6', 'unknown']) if (!d.enemies.munGrades[g]) errors.push(`enemies.munGrades: ${g} 없음`);
   for (const e of d.enemies.enemies) if (e.mun !== undefined && e.mun !== null && e.mun !== 'unknown' && !(Number.isInteger(e.mun) && e.mun >= 1 && e.mun <= 6)) errors.push(`enemies.${e.id}.mun: 1~6, 'unknown' 또는 null`);
   for (const e of d.enemies.enemies) {

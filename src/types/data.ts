@@ -171,6 +171,8 @@ export interface WeaponOptionDef {
 
 export interface WeaponDef extends SpriteRef {
   id: string;
+  /** 도감 번호 (게임에 추가된 순서) */
+  codexNo?: number;
   nameKey: string;
   /** 도감 성능 아래 플레이버 문구 (ko.json 키) */
   flavor?: string;
@@ -1157,6 +1159,8 @@ export type ItemPool = 'normal' | 'boss' | 'hiddenBoss' | 'set';
 
 export interface ItemDef extends SpriteRef {
   id: string;
+  /** 도감 번호 (게임에 추가된 순서) */
+  codexNo?: number;
   nameKey: string;
   /** 일반 능력(늘 켜진 수치 등). 능력만 있는 아이템은 없다 */
   descKey?: string;

@@ -284,9 +284,10 @@ export class CodexWindow {
     return { key: w.spriteKey, color: w.color, ring: grade(w.grade), grade: w.grade };
   }
 
-  /** 도감 번호: 몬스터는 데이터의 codexNo, 나머지는 기본 정렬 순서 (정렬을 바꿔도 그대로) */
+  /** 도감 번호: 몬스터·아이템·무기는 데이터의 codexNo(게임에 추가된 순서), 나머지는 기본 정렬 순서 (정렬을 바꿔도 그대로) */
   private no(e: CodexEntry): string {
-    const n = e.kind === 'enemy' ? this.ctx.data.enemies.enemies.find((x) => x.id === e.id)?.codexNo : undefined;
+    const d = this.ctx.data;
+    const n = e.kind === 'enemy' ? d.enemies.enemies.find((x) => x.id === e.id)?.codexNo : e.kind === 'item' ? d.items.items.find((x) => x.id === e.id)?.codexNo : e.kind === 'weapon' ? d.weapons.weapons.find((x) => x.id === e.id)?.codexNo : undefined;
     return String(n ?? this.baseNo.get(`${e.kind}:${e.id}`) ?? 0).padStart(3, '0');
   }
 

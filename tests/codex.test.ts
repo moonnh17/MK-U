@@ -94,3 +94,14 @@ describe('도감 정렬', () => {
     expect(sortedCodexSections(D, 'characters', 'name', () => 0, (e) => e.id)).toEqual(codexSections(D, 'characters'));
   });
 });
+
+describe('도감 번호 (아이템·무기)', () => {
+  it('아이템·무기는 게임에 추가된 순서 번호가 1부터 빈틈없다 (맨손 제외)', () => {
+    const items = D.items.items.map((x) => x.codexNo!).sort((a, b) => a - b);
+    expect(items).toEqual(items.map((_, i) => i + 1));
+    const weapons = D.weapons.weapons.filter((w) => w.id !== D.weapons.fistWeapon).map((x) => x.codexNo!).sort((a, b) => a - b);
+    expect(weapons).toEqual(weapons.map((_, i) => i + 1));
+    expect(D.items.items.find((x) => x.id === 'slimeStew')!.codexNo).toBe(1);
+    expect(D.weapons.weapons.find((x) => x.id === 'pistol')!.codexNo).toBe(1);
+  });
+});
