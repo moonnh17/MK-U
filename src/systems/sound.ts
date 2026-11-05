@@ -39,6 +39,7 @@ export const SFX_IDS = [
   'itemGet',
   'skill',
   'ultimate',
+  'spaceRupture',
   'bossSlam',
   'warning',
   'bossPhase',

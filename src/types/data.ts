@@ -1014,14 +1014,13 @@ export interface UltimateDef {
 export interface RiftDef {
   /** 사선 기울기 (조준이 왼쪽이면 반대로 기운다) */
   angleDeg: number;
-  /** 갈라지는 시간, 미끄러지는 시간, 봉합되는 시간 */
+  /** 확 갈라지는 시간, 가장 벌어진 채 멈추는 시간, 서서히 봉합되는 시간 */
   openSec: number;
-  slideSec: number;
+  holdSec: number;
   sealSec: number;
-  /** 틈 반폭, 미끄러짐 시작·최대 (기준 해상도 px) */
+  /** 틈 반폭, 사선을 따라 어긋나는 양 (기준 해상도 px) */
   gapPx: number;
-  slideStartPx: number;
-  slideMaxPx: number;
+  slidePx: number;
   rimPx: number;
   /** 하늘에서 떨어지는 벼락이 보이는 시간 */
   boltSec: number;

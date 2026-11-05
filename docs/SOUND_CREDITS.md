@@ -82,5 +82,6 @@
 | skill | skill.ogg |
 | uiClick | uiClick.ogg |
 | ultimate | ultimate.ogg |
+| spaceRupture | spaceRupture.ogg (이어샷 glitch/hit·cut_hit/air + 직접 합성한 유리 파편층) |
 | warp | warp.ogg |
 | warpArrive | warpArrive.ogg |

@@ -30,25 +30,20 @@ export function spaceCutFrame(t: number, telegraphSec: number, c: SpaceCutDef): 
 
 /** 케라우노스 균열 전체 시간 */
 export function riftTotalSec(r: RiftDef): number {
-  return r.openSec + r.slideSec + r.sealSec;
+  return r.openSec + r.holdSec + r.sealSec;
 }
 
 /**
- * 케라우노스: 화면 전체가 사선으로 갈라진다(openSec) → 양쪽이 사선을 따라 반대로 계속 미끄러진다(slideSec)
- * → 원래 자리로 돌아오며 봉합된다(sealSec). t는 갈라지기 시작한 때부터(초).
+ * 케라우노스: 화면 전체가 사선으로 확 갈라지며 어긋난다(openSec) → 잠깐 그대로(holdSec)
+ * → 서서히 미끄러져 돌아오며 봉합된다(sealSec, 끝으로 갈수록 느리게). t는 갈라지기 시작한 때부터(초).
  */
 export function riftFrame(t: number, r: RiftDef): SpaceCutFrame {
-  const off = { shift: 0, gap: 0, slide: 0, on: false };
-  if (t < 0 || t >= riftTotalSec(r)) return off;
-  if (t < r.openSec) {
-    const e = t / r.openSec;
-    return { shift: r.gapPx * e, gap: r.gapPx * e, slide: r.slideStartPx * e, on: true };
+  if (t < 0 || t >= riftTotalSec(r)) return { shift: 0, gap: 0, slide: 0, on: false };
+  let k = 1;
+  if (t < r.openSec) k = t / r.openSec;
+  else if (t >= r.openSec + r.holdSec) {
+    const u = (t - r.openSec - r.holdSec) / r.sealSec;
+    k = (1 - u) ** 3;
   }
-  if (t < r.openSec + r.slideSec) {
-    const u = (t - r.openSec) / r.slideSec;
-    return { shift: r.gapPx, gap: r.gapPx, slide: r.slideStartPx + (r.slideMaxPx - r.slideStartPx) * (1 - (1 - u) * (1 - u)), on: true };
-  }
-  const u = (t - r.openSec - r.slideSec) / r.sealSec;
-  const k = 1 - u * u * (3 - 2 * u);
-  return { shift: r.gapPx * k, gap: r.gapPx * k, slide: r.slideMaxPx * k, on: true };
+  return { shift: r.gapPx * k, gap: r.gapPx * k, slide: r.slidePx * k, on: true };
 }

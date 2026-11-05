@@ -488,6 +488,15 @@
       "gapSec": 0.2,
       "maxVoices": 1
     },
+    "spaceRupture": {
+      "files": [
+        "spaceRupture.ogg"
+      ],
+      "volume": 0.8,
+      "durSec": 0.58,
+      "gapSec": 0.1,
+      "maxVoices": 2
+    },
     "advCharge": {
       "files": [
         "advCharge.ogg"
