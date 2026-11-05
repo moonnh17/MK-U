@@ -1027,6 +1027,11 @@ export interface SpaceCutDef {
   /** 잔상: 푸른 파편 수, 균열 그림이 남는 시간 */
   shards: number;
   afterSec: number;
+  /** 같은 순간 화면을 가로지르는 사선 베기: 월드 각도, 사선을 따라 미끄러지는 양, 사선 틈 반폭, 영향 띠 반폭 */
+  slashAngleDeg: number;
+  slashSlidePx: number;
+  slashGapPx: number;
+  slashBandPx: number;
 }
 
 export interface UltimatesData {

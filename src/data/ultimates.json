@@ -42,7 +42,7 @@
         "values": { "range": 200, "strikeRadius": 30, "slashLength": 120, "slashCount": 3, "slashDelaySec": 0.12, "surroundRadius": 70, "collapseRadius": 90, "collapseDelaySec": 0.4 }
       },
       "color": "#4ab0ff",
-      "spaceCut": { "compressPx": 1.5, "shiftPx": 6, "closeSec": 0.3, "bandPx": 30, "edgeFadePx": 40, "rimPx": 1.2, "hitStopSec": 0.05, "shards": 12, "afterSec": 0.35 },
+      "spaceCut": { "compressPx": 1.5, "shiftPx": 6, "closeSec": 0.3, "bandPx": 30, "edgeFadePx": 40, "rimPx": 1.2, "hitStopSec": 0.05, "shards": 12, "afterSec": 0.35, "slashAngleDeg": -40, "slashSlidePx": 10, "slashGapPx": 2, "slashBandPx": 90 },
       "sprites": {
         "cut1": { "spriteKey": "ult_cut1", "color": "#6a9cff", "size": 20 },
         "cut2": { "spriteKey": "ult_cut2", "color": "#6a9cff", "size": 20 },

@@ -53,6 +53,13 @@ function cutFx(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: 
     return;
   }
   host.hitStop?.(sc.hitStopSec);
+  // 사선 베기 그림: 기존 절단 그림 3단계를 화면 가운데를 가로지르는 사선 위에 (셰이더의 사선과 같은 선)
+  const view = host.scene.cameras.main.worldView;
+  const reach = Math.hypot(view.width, view.height);
+  const sa = (sc.slashAngleDeg * Math.PI) / 180;
+  [sp.cut2!, sp.cut3!, sp.cut4!].forEach((ref, i) => {
+    host.scene.time.delayedCall(i * CUT_STEP_MS, () => playFx(host.scene, ref, view.centerX, view.centerY, { w: reach, h: u.values.width! * CUT_THICK * 0.8, rotation: sa, fadeSec: 0.2, depth: 6 }));
+  });
   // 잔상: 틈이 거의 닫힐 때 얇은 균열(절단 그림, 옅고 가늘게)이 잠깐 남는다
   host.scene.time.delayedCall(sc.closeSec * 600, () => {
     for (const ref of [sp.cut3!, sp.cut4!]) playFx(host.scene, ref, mid.x, mid.y, { w: length, h: u.values.width! * 1.2, rotation: angle, fadeSec: sc.afterSec, depth: 3 }).setAlpha(0.45);
