@@ -578,17 +578,14 @@ export interface BossesData {
   rubbleColor: string;
 }
 
-export type StageScaleTable = Record<string, { base: number; perStage: number }>;
 
 /** 도감 '세계관 분류' 정렬: 분류 id → 그 분류의 id들 (적은 순서대로 묶음이 된다, 이름은 ko.json codex.lore.<탭>.<분류>) */
 export type CodexLore = Record<string, string[]>;
 
 export interface EnemiesData {
   codexLore: CodexLore;
-  /** 챕터별 일반 적·정예 체력 배율: base + perStage × (스테이지 − 1). 없는 챕터는 1 */
-  hpScale: StageScaleTable;
-  /** 챕터별 모든 적·보스의 피해 배율 (식은 hpScale과 같다) */
-  damageScale: StageScaleTable;
+  /** 히든보스(어느 장에서든 나온다) 체력·피해 배율: 장 번호 → 배율. 수치는 1장 기준값. 다른 적은 고정 스탯 */
+  hiddenBossScale: Record<string, number>;
   /** 적 투사체 모양 */
   projectile: SpriteRef;
   /** 디버그 '적 탄막': 플레이어 주위에서 플레이어를 향해 일반 탄을 쏜다(벡터굴절역장 확인용) */

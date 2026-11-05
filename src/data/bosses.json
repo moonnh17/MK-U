@@ -32,7 +32,7 @@
             "windupSec": 0.72,
             "radius": 82,
             "arcDeg": 94,
-            "damage": 14
+            "damage": 15
           },
           "maxRange": 110
         },
@@ -47,11 +47,11 @@
             "windupSec": 0.72,
             "length": 255,
             "speed": 300,
-            "damage": 14,
+            "damage": 15,
             "trailEvery": 18,
             "trailRadius": 11,
             "trailSec": 3,
-            "trailDamage": 5,
+            "trailDamage": 6,
             "trailTickSec": 0.5,
             "trailDelaySec": 0.35,
             "shotEverySec": 0.14,
@@ -59,7 +59,7 @@
             "shotSpeed": 100,
             "shotSpeedEnraged": 140,
             "shotRange": 200,
-            "shotDamage": 7,
+            "shotDamage": 8,
             "exposeSec": 0.8,
             "exposeMul": 2.2
           }
@@ -74,7 +74,7 @@
           "values": {
             "delaySec": 0.7,
             "radius": 72,
-            "damage": 18,
+            "damage": 20,
             "count": 1,
             "countEnraged": 2,
             "maxSummon": 3
@@ -96,7 +96,7 @@
             "speed": 105,
             "speedEnraged": 140,
             "range": 340,
-            "damage": 9
+            "damage": 10
           }
         }
       ],
@@ -215,7 +215,7 @@
             "intervalSec": 0.24,
             "delaySec": 0.7,
             "radius": 17,
-            "damage": 12
+            "damage": 15
           },
           "maxPhase": 1
         },
@@ -235,7 +235,7 @@
             "speed": 85,
             "speedStep": 30,
             "range": 360,
-            "damage": 11
+            "damage": 14
           }
         },
         {
@@ -252,7 +252,7 @@
             "spinSpeed": 0.9,
             "telegraphSec": 0.7,
             "liveSec": 2.4,
-            "damage": 11,
+            "damage": 14,
             "tickSec": 0.5
           }
         },
@@ -268,14 +268,14 @@
             "thickness": 6,
             "telegraphSec": 0.5,
             "liveSec": 2.8,
-            "damage": 11,
+            "damage": 14,
             "tickSec": 0.5,
             "gapDeg": 56,
             "strikes": 3,
             "strikeGapSec": 0.55,
             "strikeRadius": 16,
             "strikeDelaySec": 0.6,
-            "strikeDamage": 10
+            "strikeDamage": 12
           }
         },
         {
@@ -290,7 +290,7 @@
             "width": 14,
             "delaySec": 0.8,
             "lagSec": 0.55,
-            "damage": 13
+            "damage": 16
           },
           "maxPhase": 1
         },
@@ -306,7 +306,7 @@
             "shrinkSec": 2.6,
             "thickness": 8,
             "gapDeg": 60,
-            "damage": 12,
+            "damage": 15,
             "extraBeam": 0,
             "extraBeamEnraged": 1,
             "beamTelegraphSec": 1,
@@ -326,7 +326,7 @@
             "liveSec": 0.4,
             "lagSec": 0.95,
             "width": 10,
-            "damage": 13
+            "damage": 16
           }
         },
         {
@@ -341,7 +341,7 @@
             "intervalSec": 0.24,
             "delaySec": 0.65,
             "radius": 17,
-            "damage": 12,
+            "damage": 15,
             "ringRadius": 95,
             "ringEndRadius": 12,
             "ringSec": 1.2,
@@ -360,7 +360,7 @@
             "windupSec": 0.7,
             "length": 280,
             "speed": 420,
-            "damage": 16,
+            "damage": 20,
             "radius": 46,
             "delaySec": 0.7
           }
@@ -372,7 +372,7 @@
         "afterSec": 1.4,
         "radius": 18,
         "delaySec": 0.65,
-        "damage": 12
+        "damage": 15
       },
       "art": {
         "blastWarn": {
@@ -494,7 +494,7 @@
             "delaySec": 0.9,
             "radius": 62,
             "radiusEnraged": 72,
-            "damage": 18
+            "damage": 25
           }
         },
         {
@@ -516,7 +516,7 @@
             "spreadDeg": 32,
             "speed": 125,
             "range": 340,
-            "damage": 9
+            "damage": 13
           }
         },
         {
@@ -533,7 +533,7 @@
             "radius": 38,
             "delaySec": 1.15,
             "stepSec": 0.22,
-            "damage": 22
+            "damage": 31
           }
         },
         {
@@ -551,7 +551,7 @@
             "stepSec": 0.12,
             "liveSec": 0.25,
             "width": 9,
-            "damage": 20
+            "damage": 28
           }
         },
         {
@@ -568,7 +568,7 @@
             "radius": 24,
             "delaySec": 1.5,
             "stepSec": 0.1,
-            "damage": 20
+            "damage": 28
           }
         },
         {
@@ -585,7 +585,7 @@
             "speedEnraged": 210,
             "thickness": 9,
             "gapDeg": 60,
-            "damage": 16
+            "damage": 22
           }
         },
         {
@@ -601,7 +601,7 @@
             "radius": 20,
             "delaySec": 1.2,
             "stepSec": 0.18,
-            "damage": 18
+            "damage": 25
           }
         },
         {
@@ -711,7 +711,7 @@
             "thickness": 10,
             "gapDeg": 58,
             "gapStepDeg": 40,
-            "damage": 20
+            "damage": 34
           }
         },
         {
@@ -728,7 +728,7 @@
             "spread": 52,
             "radius": 22,
             "delaySec": 0.85,
-            "damage": 18
+            "damage": 31
           }
         },
         {
@@ -744,7 +744,7 @@
             "lagSec": 0.5,
             "sideDeg": 26,
             "width": 18,
-            "damage": 24
+            "damage": 41
           }
         },
         {
@@ -762,7 +762,7 @@
             "speed": 120,
             "thickness": 10,
             "gapDeg": 60,
-            "damage": 16
+            "damage": 27
           }
         },
         {
@@ -776,14 +776,14 @@
             "windupSec": 1.1,
             "length": 340,
             "speed": 360,
-            "damage": 24,
+            "damage": 41,
             "sideOffset": 40,
             "sideLiveSec": 0.5,
             "sideWidth": 10,
-            "sideDamage": 16,
+            "sideDamage": 27,
             "radius": 52,
             "delaySec": 0.6,
-            "blastDamage": 22,
+            "blastDamage": 37,
             "exposeSec": 2.1,
             "exposeMul": 2.2
           }
@@ -799,7 +799,7 @@
             "telegraphSec": 0.5,
             "liveSec": 0.25,
             "width": 22,
-            "damage": 18,
+            "damage": 31,
             "sanityBelow": 40,
             "rootSec": 2.5
           }
@@ -817,7 +817,7 @@
             "liveSec": 0.3,
             "gap": 46,
             "width": 16,
-            "damage": 20,
+            "damage": 34,
             "footRadius": 26,
             "footDelaySec": 0.65
           }
@@ -835,7 +835,7 @@
             "radius": 26,
             "delaySec": 1,
             "lagSec": 0.5,
-            "damage": 20,
+            "damage": 34,
             "waveAtSec": 0.8,
             "maxRadius": 300,
             "speed": 130,
@@ -858,7 +858,7 @@
             "stepSec": 0.22,
             "rows": 1,
             "rowGap": 0,
-            "damage": 24
+            "damage": 41
           }
         }
       ],
@@ -868,7 +868,7 @@
         "afterSec": 1.6,
         "radius": 26,
         "delaySec": 0.7,
-        "damage": 18
+        "damage": 31
       },
       "art": {
         "debris": { "spriteKey": "fx_bit_gear", "color": "#a03ae0", "size": 6 },
@@ -1022,7 +1022,7 @@
             "spread": 40,
             "radius": 30,
             "delaySec": 1.1,
-            "damage": 22
+            "damage": 42
           }
         },
         {
@@ -1039,7 +1039,7 @@
             "spreadDeg": 46,
             "speed": 210,
             "range": 360,
-            "damage": 12,
+            "damage": 23,
             "refractable": 1
           }
         },
@@ -1055,7 +1055,7 @@
             "speed": 170,
             "followSec": 0.8,
             "lockSec": 1,
-            "damage": 28
+            "damage": 53
           }
         },
         {
@@ -1072,7 +1072,7 @@
             "spreadDeg": 120,
             "speed": 85,
             "range": 400,
-            "damage": 11,
+            "damage": 21,
             "refractable": 1
           }
         },
@@ -1088,7 +1088,7 @@
             "safeRadius": 44,
             "safeReach": 170,
             "delaySec": 2,
-            "damage": 36
+            "damage": 68
           }
         },
         {
@@ -1102,7 +1102,7 @@
             "pullSec": 2.3,
             "pullSpeed": 55,
             "radius": 90,
-            "damage": 32
+            "damage": 61
           }
         },
         {
@@ -1117,7 +1117,7 @@
             "safeRadius": 38,
             "safeReach": 210,
             "delaySec": 3,
-            "damage": 60
+            "damage": 114
           },
           "hpBelow": 0.2
         }
@@ -1253,7 +1253,7 @@
             "telegraphSec": 0.9,
             "liveSec": 0.4,
             "width": 12,
-            "damage": 26
+            "damage": 61
           }
         },
         {
@@ -1269,7 +1269,7 @@
             "speed": 170,
             "thickness": 10,
             "gapDeg": 70,
-            "damage": 18
+            "damage": 42
           }
         },
         {
@@ -1287,7 +1287,7 @@
             "speed": 95,
             "turnRate": 1.8,
             "range": 460,
-            "damage": 12
+            "damage": 28
           }
         },
         {
@@ -1304,7 +1304,7 @@
             "spreadDeg": 130,
             "speed": 105,
             "range": 400,
-            "damage": 11,
+            "damage": 26,
             "refractable": 0
           }
         },
@@ -1321,7 +1321,7 @@
             "delaySec": 0.85,
             "spread": 48,
             "radius": 30,
-            "damage": 24
+            "damage": 56
           },
           "maxUnlock": 0
         },
@@ -1336,7 +1336,7 @@
             "windupSec": 0.55,
             "radius": 90,
             "arcDeg": 110,
-            "damage": 26
+            "damage": 61
           },
           "maxRange": 115,
           "unlock": 1
@@ -1352,13 +1352,13 @@
             "windupSec": 0.5,
             "length": 420,
             "speed": 430,
-            "damage": 24,
+            "damage": 56,
             "exposeSec": 1.1,
             "exposeMul": 2.2,
             "missileEverySec": 0.18,
             "missileSpeed": 85,
             "missileRange": 340,
-            "missileDamage": 10,
+            "missileDamage": 24,
             "turnRate": 1.6
           },
           "unlock": 1
@@ -1377,7 +1377,7 @@
             "spinSpeed": 0.8,
             "telegraphSec": 0.8,
             "liveSec": 2.7,
-            "damage": 14,
+            "damage": 33,
             "tickSec": 0.45
           },
           "unlock": 1
@@ -1397,7 +1397,7 @@
             "spinDelaySec": 1,
             "telegraphSec": 0.9,
             "liveSec": 2.6,
-            "damage": 14,
+            "damage": 33,
             "tickSec": 0.45
           },
           "unlock": 1
@@ -1413,7 +1413,7 @@
             "telegraphSec": 0.5,
             "liveSec": 0.25,
             "width": 24,
-            "damage": 22,
+            "damage": 52,
             "sanityBelow": 60,
             "rootSec": 2.5
           },
@@ -1436,7 +1436,7 @@
             "beamTelegraphSec": 0.8,
             "beamLiveSec": 0.4,
             "beamWidth": 14,
-            "beamDamage": 22,
+            "beamDamage": 52,
             "waveAtSec": 4.2,
             "maxRadius": 340,
             "speed": 170,
@@ -1447,7 +1447,7 @@
             "safeRadius": 36,
             "safeReach": 190,
             "delaySec": 2.2,
-            "damage": 60,
+            "damage": 141,
             "exposeSec": 3,
             "exposeMul": 2.2
           },
@@ -1465,7 +1465,7 @@
             "intervalSec": 0.22,
             "delaySec": 0.7,
             "radius": 18,
-            "damage": 16,
+            "damage": 38,
             "ringRadius": 100,
             "ringEndRadius": 12,
             "ringSec": 1.2,
@@ -1490,7 +1490,7 @@
             "rowGap": 70,
             "width": 24,
             "delaySec": 0.75,
-            "damage": 24
+            "damage": 56
           },
           "inherit": true,
           "unlock": 2
@@ -1508,7 +1508,7 @@
             "spread": 150,
             "radius": 24,
             "delaySec": 0.9,
-            "damage": 20
+            "damage": 47
           },
           "inherit": true,
           "unlock": 2
@@ -1523,7 +1523,7 @@
           "values": {
             "radius": 78,
             "delaySec": 0.8,
-            "damage": 24,
+            "damage": 56,
             "blasts": 6,
             "circle": 96,
             "blastRadius": 30,

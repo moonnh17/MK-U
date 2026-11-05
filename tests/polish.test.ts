@@ -7,7 +7,7 @@ import { bossHalfOrbs } from '../src/systems/bossEnergy';
 import { cardPrice, cardStock, collectCoins, encounterPool, rollCoinDrops, rollWeapon } from '../src/systems/loot';
 import { muzzleAngle, shotOrigin } from '../src/systems/targeting';
 import { cardStillValid } from '../src/systems/cards';
-import { enemyStageScale } from '../src/systems/champions';
+import { hiddenBossScale } from '../src/systems/champions';
 import { readyWeaponSet } from '../src/systems/items';
 import { weaponPose } from '../src/systems/motion';
 import { chargedCrit, spinUpMul, weaponStats } from '../src/systems/weapons';
@@ -120,14 +120,17 @@ describe('스킬 상점', () => {
   });
 });
 
-describe('후반 체력', () => {
-  const t = D.enemies.hpScale;
-  it('1장은 그대로, 2·3장은 스테이지가 갈수록 커진다', () => {
-    expect(enemyStageScale(1, 5, t)).toBe(1);
-    expect(enemyStageScale(2, 1, t)).toBeGreaterThan(1);
-    expect(enemyStageScale(2, 5, t)).toBeGreaterThan(enemyStageScale(2, 1, t));
-    expect(enemyStageScale(3, 1, t)).toBeGreaterThan(enemyStageScale(2, 5, t));
-    expect(enemyStageScale(3, 5, t)).toBeGreaterThan(enemyStageScale(3, 1, t));
+describe('고정 스탯', () => {
+  it('몬스터는 스테이지 배율 없이 고정, 히든보스만 1장 기준 ×1·×2·×3', () => {
+    expect('hpScale' in D.enemies).toBe(false);
+    expect('damageScale' in D.enemies).toBe(false);
+    expect([1, 2, 3].map((c) => hiddenBossScale(c, D.enemies.hiddenBossScale))).toEqual([1, 2, 3]);
+  });
+  it('뒤 장의 같은 역할 적일수록 체력이 많다', () => {
+    const e = (id: string) => D.enemies.enemies.find((x) => x.id === id)!.maxHp;
+    expect(e('ancientOne')).toBeGreaterThan(e('akgwi'));
+    expect(e('executor')).toBeGreaterThan(e('aMemory'));
+    expect(e('aMemory')).toBeGreaterThan(e('ghostShooter'));
   });
   it('뒤 챕터 보스일수록 체력이 많다', () => {
     const order = ['electricRing', 'hectarChief', 'magiGolem', 'eclipse', 'magiKaiser'].map(hp);
@@ -276,16 +279,6 @@ describe('포탑·역장', () => {
   });
   it('런 시작은 빈손, 시작 상자는 낮은 등급 + 전설 3%, 유니크 없음', () => {
     expect(D.loot.startChest).toEqual({ common: 77, rare: 20, legendary: 3 });
-  });
-});
-
-describe('적 피해 배율', () => {
-  const t = D.enemies.damageScale;
-  it('1장부터 늘고 뒤로 갈수록 커진다', () => {
-    const order = [[1, 1], [1, 5], [2, 1], [2, 5], [3, 1], [3, 5]].map(([c, s]) => enemyStageScale(c!, s!, t));
-    expect(order[0]).toBeGreaterThan(1);
-    expect(order).toEqual([...order].sort((a, b) => a - b));
-    expect(new Set(order).size).toBe(order.length);
   });
 });
 

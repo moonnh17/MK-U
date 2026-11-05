@@ -1,4 +1,5 @@
 {
+  "hiddenBossScale": { "1": 1, "2": 2, "3": 3 },
   "codexLore": {
     "common": ["tomakki", "gaedeulgae", "magiBeetle"],
     "mutant": ["vesselTree", "pulseSac", "gazeBell", "clusterAlveoli", "magiColonyFusion"],
@@ -10,8 +11,6 @@
     "contriaHero": ["ancestorEcho", "royalMage", "orionCrusader"]
   },
   "projectile": { "spriteKey": "enemy_bullet", "color": "#ff5a5a", "size": 4 },
-  "hpScale": { "2": { "base": 1.6, "perStage": 0.2 }, "3": { "base": 2.8, "perStage": 0.4 } },
-  "damageScale": { "1": { "base": 1.05, "perStage": 0.05 }, "2": { "base": 1.3, "perStage": 0.1 }, "3": { "base": 1.75, "perStage": 0.15 } },
   "debugBarrage": { "count": 12, "distance": 90, "speed": 90, "damage": 5 },
   "munGrades": {
     "1": { "color": "#b0101e", "rim": "#f0c040", "shape": "star8" },
@@ -33,7 +32,7 @@
       "maxHp": 6,
       "moveSpeed": 68,
       "noEliteAttacks": true,
-      "contactDamage": 5,
+      "contactDamage": 6,
       "contactIntervalSec": 0.8,
       "energyOrbs": [0, 1],
       "coins": [0, 1],
@@ -50,12 +49,12 @@
       "ai": "chase",
       "maxHp": 18,
       "moveSpeed": 80,
-      "contactDamage": 8,
+      "contactDamage": 9,
       "contactIntervalSec": 0.8,
       "energyOrbs": [1, 2],
       "coins": [1, 2],
       "attacks": [
-        { "id": "lunge", "kind": "lunge", "triggerRange": 70, "windupSec": 0.45, "actSec": 0.28, "recoverSec": 0.5, "cooldownSec": 2.5, "damage": 10, "speed": 260 }
+        { "id": "lunge", "kind": "lunge", "triggerRange": 70, "windupSec": 0.45, "actSec": 0.28, "recoverSec": 0.5, "cooldownSec": 2.5, "damage": 12, "speed": 260 }
       ],
       "spriteKey": "enemy_gaedeulgae",
       "color": "#c9a24a",
@@ -70,13 +69,13 @@
       "ai": "chase",
       "maxHp": 40,
       "moveSpeed": 32,
-      "contactDamage": 6,
+      "contactDamage": 7,
       "contactIntervalSec": 1.0,
       "energyOrbs": [2, 3],
       "coins": [1, 3],
       "attacks": [
-        { "id": "slam", "kind": "slam", "triggerRange": 30, "windupSec": 0.7, "actSec": 0.12, "recoverSec": 0.6, "cooldownSec": 1.8, "damage": 18, "radius": 18, "reach": 14,
-          "ring": { "shots": 8, "speed": 100, "range": 90, "damage": 5 } }
+        { "id": "slam", "kind": "slam", "triggerRange": 30, "windupSec": 0.7, "actSec": 0.12, "recoverSec": 0.6, "cooldownSec": 1.8, "damage": 21, "radius": 18, "reach": 14,
+          "ring": { "shots": 8, "speed": 100, "range": 90, "damage": 6 } }
       ],
       "spriteKey": "enemy_akgwi",
       "color": "#b0383a",
@@ -84,11 +83,11 @@
     },
     {
       "id": "ghostShooter", "codexNo": 4, "mun": "unknown", "flavor": "codex.flavor.ghostShooter", "nameKey": "enemy.ghostShooter", "chapter": 1, "rank": "champion", "ai": "chase", "mentalRatio": 1,
-      "maxHp": 110, "moveSpeed": 38, "contactDamage": 6, "contactIntervalSec": 1.0,
+      "maxHp": 110, "moveSpeed": 38, "contactDamage": 7, "contactIntervalSec": 1.0,
       "energyOrbs": [5, 7], "coins": [4, 6], "keepDistance": 110,
       "attacks": [
         { "id": "arrow", "kind": "burst", "triggerRange": 200, "windupSec": 0.7, "actSec": 0.35, "recoverSec": 0.5, "cooldownSec": 2.6, "firstDelayJitterSec": 1.5,
-          "damage": 8, "shots": 3, "shotGapSec": 0.15, "speed": 160, "range": 260,
+          "damage": 9, "shots": 3, "shotGapSec": 0.15, "speed": 160, "range": 260,
           "shot": { "spriteKey": "projectile_arrow", "color": "#ff3a3a", "size": 3 }, "shotTint": "#ff3a3a" }
       ],
       "spriteKey": "enemy_ghost_shooter", "color": "#c0303a", "size": 14
@@ -102,7 +101,7 @@
       "ai": "boss",
       "maxHp": 1080,
       "moveSpeed": 40,
-      "contactDamage": 10,
+      "contactDamage": 11,
       "contactIntervalSec": 1.0,
       "energyOrbs": [8, 10],
       "coins": [8, 12],
@@ -119,7 +118,7 @@
       "ai": "boss",
       "maxHp": 2520,
       "moveSpeed": 30,
-      "contactDamage": 10,
+      "contactDamage": 12,
       "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12],
       "coins": [10, 14],
@@ -168,93 +167,93 @@
     },
     {
       "id": "hectarTrooper", "codexNo": 16, "mun": null, "flavor": "codex.flavor.hectarTrooper", "nameKey": "enemy.hectarTrooper", "chapter": 2, "rank": "normal", "ai": "chase",
-      "maxHp": 30, "moveSpeed": 45, "contactDamage": 6, "contactIntervalSec": 1.0,
+      "maxHp": 60, "moveSpeed": 45, "contactDamage": 9, "contactIntervalSec": 1.0,
       "energyOrbs": [1, 2], "coins": [1, 3], "keepDistance": 90,
       "attacks": [
         { "id": "burst", "kind": "burst", "triggerRange": 170, "windupSec": 0.6, "actSec": 0.45, "recoverSec": 0.6, "cooldownSec": 2.6,
-          "damage": 6, "shots": 3, "shotGapSec": 0.15, "speed": 170, "range": 260, "linkRadius": 140 }
+          "damage": 9, "shots": 3, "shotGapSec": 0.15, "speed": 170, "range": 260, "linkRadius": 140 }
       ],
       "spriteKey": "enemy_hectar_trooper", "color": "#3a7bff", "size": 12
     },
     {
       "id": "magiBeetle", "codexNo": 8, "mun": 5, "munClass": true, "flavor": "codex.flavor.magiBeetle", "nameKey": "enemy.magiBeetle", "chapter": 2, "rank": "normal", "ai": "chase",
-      "maxHp": 60, "moveSpeed": 35, "contactDamage": 8, "contactIntervalSec": 1.0,
+      "maxHp": 120, "moveSpeed": 35, "contactDamage": 12, "contactIntervalSec": 1.0,
       "energyOrbs": [2, 3], "coins": [1, 3],
       "attacks": [
         { "id": "charge", "kind": "lunge", "triggerRange": 160, "windupSec": 0.7, "actSec": 0.55, "recoverSec": 0.5, "cooldownSec": 3,
-          "damage": 14, "speed": 340, "wallStunSec": 1, "stunTakenMul": 1.5 }
+          "damage": 21, "speed": 340, "wallStunSec": 1, "stunTakenMul": 1.5 }
       ],
       "spriteKey": "enemy_magi_beetle", "color": "#5a8a3a", "size": 15
     },
     {
       "id": "aMemory", "codexNo": 9, "mun": 5, "flavor": "codex.flavor.aMemory", "nameKey": "enemy.aMemory", "chapter": 2, "rank": "champion", "ai": "chase",
-      "maxHp": 170, "moveSpeed": 45, "contactDamage": 7, "contactIntervalSec": 1.0,
+      "maxHp": 340, "moveSpeed": 45, "contactDamage": 10, "contactIntervalSec": 1.0,
       "energyOrbs": [5, 7], "coins": [4, 6],
-      "trail": { "everyPx": 18, "radius": 10, "liveSec": 3, "damage": 5, "mentalDamage": 5, "tickSec": 0.5 },
+      "trail": { "everyPx": 18, "radius": 10, "liveSec": 3, "damage": 8, "mentalDamage": 8, "tickSec": 0.5 },
       "attacks": [
         { "id": "puddle", "kind": "puddle", "triggerRange": 160, "windupSec": 0.9, "actSec": 0.1, "recoverSec": 0.8, "cooldownSec": 3.5,
-          "damage": 7, "mentalDamage": 7, "radius": 26, "liveSec": 3.5, "tickSec": 0.5 }
+          "damage": 10, "mentalDamage": 10, "radius": 26, "liveSec": 3.5, "tickSec": 0.5 }
       ],
       "spriteKey": "enemy_a_memory", "color": "#8a7ab0", "size": 16
     },
     {
       "id": "hectarChief", "codexNo": 17, "mun": null, "flavor": "codex.flavor.hectarChief", "nameKey": "enemy.hectarChief", "chapter": 2, "rank": "boss", "ai": "boss",
-      "maxHp": 5400, "moveSpeed": 34, "contactDamage": 12, "contactIntervalSec": 1.0,
+      "maxHp": 5400, "moveSpeed": 34, "contactDamage": 17, "contactIntervalSec": 1.0,
       "energyOrbs": [10, 12], "coins": [12, 16],
       "spriteKey": "enemy_hectar_chief", "color": "#3a9aff", "size": 36
     },
     {
       "id": "magiGolem", "codexNo": 7, "mun": 2, "munClass": true, "flavor": "codex.flavor.magiGolem", "nameKey": "enemy.magiGolem", "chapter": 2, "rank": "boss", "ai": "boss",
-      "maxHp": 9000, "moveSpeed": 26, "contactDamage": 14, "contactIntervalSec": 1.0,
+      "maxHp": 9000, "moveSpeed": 26, "contactDamage": 24, "contactIntervalSec": 1.0,
       "energyOrbs": [12, 14], "coins": [14, 18],
       "spriteKey": "enemy_magi_golem", "color": "#8a6a4a", "size": 48
     },
     {
       "id": "ancientOne", "codexNo": 11, "mun": "unknown", "flavor": "codex.flavor.ancientOne", "nameKey": "enemy.ancientOne", "chapter": 3, "rank": "normal", "ai": "chase", "mentalRatio": 1,
-      "maxHp": 50, "moveSpeed": 30, "contactDamage": 7, "contactIntervalSec": 1.0,
+      "maxHp": 180, "moveSpeed": 30, "contactDamage": 14, "contactIntervalSec": 1.0,
       "energyOrbs": [1, 3], "coins": [1, 3], "keepDistance": 120,
       "attacks": [
         { "id": "fan", "kind": "fan", "triggerRange": 200, "windupSec": 0.7, "actSec": 0.1, "recoverSec": 0.6, "cooldownSec": 2.8,
-          "damage": 7, "shots": 5, "spreadDeg": 50, "speed": 120, "range": 280 }
+          "damage": 14, "shots": 5, "spreadDeg": 50, "speed": 120, "range": 280 }
       ],
       "spriteKey": "enemy_ancient_one", "color": "#c8b8a0", "size": 18
     },
     {
       "id": "hatredShard", "codexNo": 10, "mun": "unknown", "flavor": "codex.flavor.hatredShard", "nameKey": "enemy.hatredShard", "chapter": 3, "rank": "normal", "ai": "chase", "mentalRatio": 1,
-      "maxHp": 28, "moveSpeed": 70, "contactDamage": 7, "contactIntervalSec": 0.8,
+      "maxHp": 101, "moveSpeed": 70, "contactDamage": 14, "contactIntervalSec": 0.8,
       "energyOrbs": [1, 2], "coins": [1, 2],
       "attacks": [
         { "id": "rush", "kind": "lunge", "triggerRange": 140, "windupSec": 0.35, "actSec": 0.2, "recoverSec": 0.5, "cooldownSec": 2.6,
-          "damage": 9, "speed": 440, "chain": [2, 3], "chainWindupSec": 0.18 }
+          "damage": 18, "speed": 440, "chain": [2, 3], "chainWindupSec": 0.18 }
       ],
       "spriteKey": "enemy_hatred_shard", "color": "#ff3a4a", "size": 11
     },
     {
       "id": "executor", "codexNo": 14, "mun": null, "flavor": "codex.flavor.executor", "nameKey": "enemy.executor", "chapter": 3, "rank": "champion", "ai": "chase",
-      "maxHp": 330, "moveSpeed": 40, "contactDamage": 12, "contactIntervalSec": 1.0,
+      "maxHp": 1188, "moveSpeed": 40, "contactDamage": 25, "contactIntervalSec": 1.0,
       "energyOrbs": [5, 7], "coins": [5, 8],
       "attacks": [
         { "id": "axe", "kind": "slam", "triggerRange": 34, "windupSec": 0.6, "actSec": 0.12, "recoverSec": 0.6, "cooldownSec": 2,
-          "damage": 24, "radius": 24, "reach": 16 },
+          "damage": 49, "radius": 24, "reach": 16 },
         { "id": "rope", "kind": "rope", "triggerRange": 170, "windupSec": 0.7, "actSec": 0.5, "recoverSec": 0.3, "cooldownSec": 4.5,
-          "damage": 4, "speed": 420, "range": 170, "pullSpeed": 360, "axeDelaySec": 0.6, "radius": 36, "arcDeg": 110, "axeDamage": 26 }
+          "damage": 8, "speed": 420, "range": 170, "pullSpeed": 360, "axeDelaySec": 0.6, "radius": 36, "arcDeg": 110, "axeDamage": 53 }
       ],
       "spriteKey": "enemy_executor", "color": "#a0a8b8", "size": 24
     },
     {
       "id": "archon", "codexNo": 15, "mun": null, "flavor": "codex.flavor.archon", "nameKey": "enemy.archon", "chapter": 3, "rank": "champion", "ai": "chase", "mentalRatio": 1,
-      "maxHp": 250, "moveSpeed": 28, "contactDamage": 10, "contactIntervalSec": 1.0,
+      "maxHp": 900, "moveSpeed": 28, "contactDamage": 20, "contactIntervalSec": 1.0,
       "energyOrbs": [5, 7], "coins": [5, 8], "keepDistance": 150,
       "attacks": [
         { "id": "snipe", "kind": "snipe", "triggerRange": 260, "windupSec": 1.5, "lockSec": 0.3, "actSec": 0.25, "recoverSec": 0.6, "cooldownSec": 3.2,
-          "damage": 22, "width": 6, "range": 340 }
+          "damage": 45, "width": 6, "range": 340 }
       ],
       "absorb": {
         "stages": [
-          { "absorb": 60, "hpMul": 1.3, "damageMul": 1.2, "haloRadius": 12 },
-          { "absorb": 150, "hpMul": 1.6, "damageMul": 1.4, "haloRadius": 16 },
-          { "absorb": 300, "hpMul": 2.0, "damageMul": 1.7, "haloRadius": 20 },
-          { "absorb": 500, "hpMul": 2.5, "damageMul": 2.0, "haloRadius": 25 }
+          { "absorb": 216, "hpMul": 1.3, "damageMul": 1.2, "haloRadius": 12 },
+          { "absorb": 540, "hpMul": 1.6, "damageMul": 1.4, "haloRadius": 16 },
+          { "absorb": 1080, "hpMul": 2.0, "damageMul": 1.7, "haloRadius": 20 },
+          { "absorb": 1800, "hpMul": 2.5, "damageMul": 2.0, "haloRadius": 25 }
         ],
         "haloColor": "#ffe08a"
       },
@@ -262,72 +261,72 @@
     },
     {
       "id": "eclipse", "codexNo": 12, "mun": 2, "flavor": "codex.flavor.eclipse", "nameKey": "enemy.eclipse", "chapter": 3, "rank": "boss", "ai": "boss",
-      "maxHp": 13200, "moveSpeed": 32, "contactDamage": 14, "contactIntervalSec": 1.0,
+      "maxHp": 13200, "moveSpeed": 32, "contactDamage": 27, "contactIntervalSec": 1.0,
       "energyOrbs": [12, 14], "coins": [14, 18],
       "spriteKey": "enemy_eclipse", "color": "#c8a8ff", "size": 42
     },
     {
       "id": "magiKaiser", "codexNo": 13, "mun": null, "flavor": "codex.flavor.magiKaiser", "nameKey": "enemy.magiKaiser", "chapter": 3, "rank": "boss", "ai": "boss",
-      "maxHp": 31200, "moveSpeed": 40, "contactDamage": 16, "contactIntervalSec": 1.0,
+      "maxHp": 31200, "moveSpeed": 40, "contactDamage": 38, "contactIntervalSec": 1.0,
       "energyOrbs": [14, 16], "coins": [16, 20],
       "spriteKey": "enemy_magi_kaiser", "color": "#d02828", "size": 51
     },
     {
       "id": "vesselTree", "codexNo": 21, "mun": 5, "munClass": true, "flavor": "codex.flavor.vesselTree", "nameKey": "enemy.vesselTree", "chapter": 1, "rank": "normal", "ai": "chase", "rooted": true,
-      "maxHp": 40, "moveSpeed": 0, "contactDamage": 6, "contactIntervalSec": 1.0,
+      "maxHp": 40, "moveSpeed": 0, "contactDamage": 7, "contactIntervalSec": 1.0,
       "energyOrbs": [2, 3], "coins": [1, 3],
       "attacks": [
         { "id": "roots", "kind": "roots", "triggerRange": 170, "windupSec": 0.8, "actSec": 0.25, "recoverSec": 1.2, "cooldownSec": 5.2, "firstDelayJitterSec": 1.5,
-          "damage": 8, "strikes": 3, "strikeGapSec": 0.45, "warnSec": 0.75, "range": 150, "width": 10, "turnDeg": 35,
+          "damage": 9, "strikes": 3, "strikeGapSec": 0.45, "warnSec": 0.75, "range": 150, "width": 10, "turnDeg": 35,
           "warnArt": { "spriteKey": "fx_vessel_root_warn", "color": "#b05aff", "size": 40 }, "hitArt": { "spriteKey": "fx_vessel_root_hit", "color": "#b05aff", "size": 40 } }
       ],
       "spriteKey": "enemy_vessel_tree", "color": "#8a3ad0", "size": 16
     },
     {
       "id": "pulseSac", "codexNo": 22, "mun": 5, "munClass": true, "flavor": "codex.flavor.pulseSac", "nameKey": "enemy.pulseSac", "chapter": 2, "rank": "normal", "ai": "chase", "rooted": true,
-      "maxHp": 70, "moveSpeed": 0, "contactDamage": 6, "contactIntervalSec": 1.0,
+      "maxHp": 140, "moveSpeed": 0, "contactDamage": 9, "contactIntervalSec": 1.0,
       "energyOrbs": [2, 3], "coins": [1, 3],
       "attacks": [
         { "id": "spikes", "kind": "spikes", "triggerRange": 180, "windupSec": 1.0, "actSec": 0.1, "recoverSec": 0.8, "cooldownSec": 4.5, "firstDelayJitterSec": 1.5,
-          "damage": 9, "strikes": 3, "strikeGapSec": 0.25, "warnSec": 0.65, "radius": 16, "scatter": 36,
+          "damage": 14, "strikes": 3, "strikeGapSec": 0.25, "warnSec": 0.65, "radius": 16, "scatter": 36,
           "warnArt": { "spriteKey": "fx_pulse_spike_warn", "color": "#b05aff", "size": 32 }, "hitArt": { "spriteKey": "fx_pulse_spike_hit", "color": "#b05aff", "size": 32 } }
       ],
       "spriteKey": "enemy_pulse_sac", "color": "#8a3ad0", "size": 18
     },
     {
       "id": "gazeBell", "codexNo": 23, "mun": 5, "munClass": true, "flavor": "codex.flavor.gazeBell", "nameKey": "enemy.gazeBell", "chapter": 2, "rank": "normal", "ai": "chase", "rooted": true,
-      "maxHp": 50, "moveSpeed": 0, "contactDamage": 5, "contactIntervalSec": 1.0,
+      "maxHp": 100, "moveSpeed": 0, "contactDamage": 8, "contactIntervalSec": 1.0,
       "energyOrbs": [2, 3], "coins": [1, 3],
       "attacks": [
         { "id": "gaze", "kind": "spikes", "triggerRange": 220, "windupSec": 1.2, "actSec": 0.1, "recoverSec": 0.8, "cooldownSec": 3.8, "firstDelayJitterSec": 1.5,
-          "damage": 12, "strikes": 1, "strikeGapSec": 0, "warnSec": 0.7, "radius": 18,
+          "damage": 18, "strikes": 1, "strikeGapSec": 0, "warnSec": 0.7, "radius": 18,
           "warnArt": { "spriteKey": "fx_gaze_spike_warn", "color": "#b05aff", "size": 36 }, "hitArt": { "spriteKey": "fx_gaze_spike_hit", "color": "#b05aff", "size": 36 } }
       ],
       "spriteKey": "enemy_gaze_bell", "color": "#8a3ad0", "size": 13
     },
     {
       "id": "clusterAlveoli", "codexNo": 24, "mun": 5, "munClass": true, "flavor": "codex.flavor.clusterAlveoli", "nameKey": "enemy.clusterAlveoli", "chapter": 1, "rank": "normal", "ai": "chase", "rooted": true,
-      "maxHp": 65, "moveSpeed": 0, "contactDamage": 6, "contactIntervalSec": 1.0,
+      "maxHp": 65, "moveSpeed": 0, "contactDamage": 7, "contactIntervalSec": 1.0,
       "energyOrbs": [2, 3], "coins": [1, 3],
       "attacks": [
         { "id": "spores", "kind": "fan", "triggerRange": 200, "windupSec": 0.9, "actSec": 0.1, "recoverSec": 1.0, "cooldownSec": 4.2, "firstDelayJitterSec": 1.5,
-          "damage": 6, "shots": 5, "spreadDeg": 40, "speed": 110, "range": 240, "bursts": 3, "burstGapSec": 0.35, "burstTurnDeg": 30,
+          "damage": 7, "shots": 5, "spreadDeg": 40, "speed": 110, "range": 240, "bursts": 3, "burstGapSec": 0.35, "burstTurnDeg": 30,
           "shot": { "spriteKey": "fx_spore_shot", "color": "#c080ff", "size": 5 } }
       ],
       "spriteKey": "enemy_cluster_alveoli", "color": "#8a3ad0", "size": 16
     },
     {
       "id": "magiColonyFusion", "codexNo": 25, "mun": 4, "munClass": true, "flavor": "codex.flavor.magiColonyFusion", "nameKey": "enemy.magiColonyFusion", "chapter": 3, "rank": "normal", "ai": "chase", "mentalRatio": 1,
-      "maxHp": 90, "moveSpeed": 20, "contactDamage": 8, "contactIntervalSec": 1.0,
+      "maxHp": 324, "moveSpeed": 20, "contactDamage": 16, "contactIntervalSec": 1.0,
       "energyOrbs": [2, 4], "coins": [2, 4], "keepDistance": 110,
       "attacks": [
         { "id": "gazePulse", "kind": "spikes", "pose": "gaze", "triggerRange": 180, "windupSec": 0.9, "actSec": 0.1, "recoverSec": 0.5, "cooldownSec": 7, "firstDelayJitterSec": 1.5,
-          "damage": 12, "strikes": 3, "strikeGapSec": 0.22, "warnSec": 0.65, "radius": 10, "perpOffsets": [0, -18, 18],
+          "damage": 25, "strikes": 3, "strikeGapSec": 0.22, "warnSec": 0.65, "radius": 10, "perpOffsets": [0, -18, 18],
           "warnArt": { "spriteKey": "fx_colony_gaze_warn", "color": "#b05aff", "size": 28 }, "hitArt": { "spriteKey": "fx_colony_gaze_hit", "color": "#b05aff", "size": 28 } },
         { "id": "veinBarrage", "kind": "roots", "pose": "vein", "triggerRange": 180, "windupSec": 0.9, "actSec": 0.25, "recoverSec": 0.65, "cooldownSec": 7, "firstDelayJitterSec": 4,
-          "damage": 12, "strikes": 1, "strikeGapSec": 0, "warnSec": 0.65, "range": 96, "width": 12,
+          "damage": 25, "strikes": 1, "strikeGapSec": 0, "warnSec": 0.65, "range": 96, "width": 12,
           "warnArt": { "spriteKey": "fx_colony_root_warn", "color": "#b05aff", "size": 40 }, "hitArt": { "spriteKey": "fx_colony_root_hit", "color": "#b05aff", "size": 40 },
-          "volley": { "afterSec": 0.35, "shots": 3, "spreadDeg": 48, "speed": 120, "range": 240, "damage": 7, "bursts": 3, "burstGapSec": 0.2, "burstStartDeg": -8, "burstTurnDeg": 8, "shot": { "spriteKey": "fx_spore_shot", "color": "#c080ff", "size": 5 } } }
+          "volley": { "afterSec": 0.35, "shots": 3, "spreadDeg": 48, "speed": 120, "range": 240, "damage": 14, "bursts": 3, "burstGapSec": 0.2, "burstStartDeg": -8, "burstTurnDeg": 8, "shot": { "spriteKey": "fx_spore_shot", "color": "#c080ff", "size": 5 } } }
       ],
       "spriteKey": "enemy_magi_colony_fusion", "color": "#8a3ad0", "size": 26
     }

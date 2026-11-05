@@ -3,7 +3,7 @@
  * 3장 전투 칸 일부 웨이브에 1마리(방마다 상한), 대규모 습격은 한 웨이브에 하나 또는 둘. 보스방에는 나오지 않는다.
  */
 import type { Rng } from '../core/rng';
-import type { ArchonAbsorbDef, ChampionRules, StageScaleTable } from '../types/data';
+import type { ArchonAbsorbDef, ChampionRules } from '../types/data';
 
 /** 이 챕터의 정예 id (1장 유령 사수, 2장 어느 기억, 3장 집행자·집정관) */
 export function championIds(chapter: number, rules: ChampionRules): string[] {
@@ -52,10 +52,9 @@ export function archonMods(stage: number, def: ArchonAbsorbDef): { hpMul: number
 }
 
 /** 최대 체력 배율이 바뀔 때 남은 체력 비율을 유지한다 */
-/** 챕터·스테이지가 뒤로 갈수록 커지는 적 배율 (체력·피해) */
-export function enemyStageScale(chapter: number, stage: number, table: StageScaleTable): number {
-  const r = table[String(chapter)];
-  return r ? r.base + r.perStage * (stage - 1) : 1;
+/** 히든보스 배율: 1장 기준값에 장마다 곱한다 (표에 없는 장은 1) */
+export function hiddenBossScale(chapter: number, table: Record<string, number>): number {
+  return table[String(chapter)] ?? 1;
 }
 
 export function rescaleHp(hp: number, maxHp: number, newMaxHp: number): number {

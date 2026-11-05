@@ -41,7 +41,7 @@ import { nearestEnemy, type SkillHost } from '../skills/host';
 import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { gradeEnergyMultiplier, gradeMultiplier } from '../systems/damage';
 import { assignElites, eliteCount } from '../systems/elites';
-import { championWaves, enemyStageScale, raidChampions } from '../systems/champions';
+import { championWaves, hiddenBossScale, raidChampions } from '../systems/champions';
 import { collectCoins, rollCoinDrops, rollOptions } from '../systems/loot';
 import { generateStage } from '../systems/mapgen';
 import { hiddenChapterMul } from '../systems/hiddenBoss';
@@ -810,7 +810,8 @@ export class RunScene extends Phaser.Scene {
     const icon = [elite, extra].filter((x) => x !== null).map((x) => this.ctx.t(x!.iconKey)).join('');
     const enemy = new Enemy(this, def, pos.x, pos.y, d.waves.spawnWarnSec, elite, d.elites, icon, extra);
     if (!def.summon) this.discover('enemies', def.id);
-    if (def.ai !== 'boss' && !def.summon) enemy.scaleHp(enemyStageScale(this.session.stage.chapter, this.session.stage.stage, d.enemies.hpScale));
+    // 몬스터는 고정 스탯, 히든보스만 장에 따라 (1장 기준 ×1·×2·×3)
+    if (def.rank === 'hiddenBoss') enemy.scaleHp(hiddenBossScale(this.session.stage.chapter, d.enemies.hiddenBossScale));
     enemy.jitterFirstAttack(rng);
     this.enemyGroup.add(enemy.sprite);
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
@@ -1118,10 +1119,10 @@ export class RunScene extends Phaser.Scene {
     if (this.hurtPlayer(enemy.def.contactDamage * enemy.damageMul * this.enemyDamageMul(), enemy)) enemy.lastContactAt = now;
   }
 
-  /** 지금 챕터·스테이지의 적 피해 배율 */
+  /** 적 피해 배율: 몬스터는 고정 스탯(1), 히든보스와 싸우는 동안만 장 배율 (히든보스 방에는 그 보스와 부른 것만 있다) */
   enemyDamageMul(): number {
-    const { chapter, stage } = this.session.stage;
-    return enemyStageScale(chapter, stage, this.ctx.data.enemies.damageScale);
+    if (!this.enemies.some((e) => !e.dead && e.rank === 'hiddenBoss')) return 1;
+    return hiddenBossScale(this.session.stage.chapter, this.ctx.data.enemies.hiddenBossScale);
   }
 
   /** 피해를 받았으면 true. attacker: 때린 적(반사용, 모르면 null) */
