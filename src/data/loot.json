@@ -2,15 +2,15 @@
   "mythicChance": 0.001,
   "uniqueWeaponFallback": "legendary",
   "bossWeaponChance": 0.2,
-  "startChest": { "common": 77, "rare": 20, "legendary": 3 },
+  "startChest": { "common": 60, "rare": 34, "legendary": 6 },
   "startChestExclude": ["brokenBlade"],
   "bossWeaponChest": { "rare": 47, "legendary": 44, "unique": 9 },
   "bossItemChest": { "rare": 45, "legendary": 40, "unique": 15 },
   "combatDrop": { "chance": 0.1 },
   "weaponChestTiers": {
-    "basic": { "nameKey": "chest.weapon.basic", "weights": { "common": 64, "rare": 26, "legendary": 8, "unique": 2 }, "sprite": { "spriteKey": "chest_weapon_basic", "color": "#8a6a4a", "size": 14 } },
-    "advanced": { "nameKey": "chest.weapon.advanced", "weights": { "common": 49, "rare": 37, "legendary": 11, "unique": 3 }, "sprite": { "spriteKey": "chest_weapon_advanced", "color": "#4a8ac0", "size": 14 } },
-    "supreme": { "nameKey": "chest.weapon.supreme", "weights": { "common": 22, "rare": 46, "legendary": 23, "unique": 9 }, "sprite": { "spriteKey": "chest_weapon_supreme", "color": "#e8be46", "size": 15 } },
+    "basic": { "nameKey": "chest.weapon.basic", "weights": { "common": 45, "rare": 40, "legendary": 12, "unique": 3 }, "sprite": { "spriteKey": "chest_weapon_basic", "color": "#8a6a4a", "size": 14 } },
+    "advanced": { "nameKey": "chest.weapon.advanced", "weights": { "common": 32, "rare": 48, "legendary": 16, "unique": 4 }, "sprite": { "spriteKey": "chest_weapon_advanced", "color": "#4a8ac0", "size": 14 } },
+    "supreme": { "nameKey": "chest.weapon.supreme", "weights": { "common": 12, "rare": 50, "legendary": 28, "unique": 10 }, "sprite": { "spriteKey": "chest_weapon_supreme", "color": "#e8be46", "size": 15 } },
     "legendary": { "nameKey": "chest.weapon.legendary", "weights": { "rare": 40, "legendary": 45, "unique": 15 }, "sprite": { "spriteKey": "chest_weapon_legendary", "color": "#b070ff", "size": 16 } }
   },
   "combatChestTiers": {
@@ -21,7 +21,7 @@
   "raidLegendaryChestChance": { "1": 0.1, "2": 0.2, "3": 0.3 },
   "merchant": {
     "count": 3,
-    "weights": { "common": 40, "rare": 35, "legendary": 18, "unique": 7 },
+    "weights": { "common": 28, "rare": 42, "legendary": 22, "unique": 8 },
     "prices": { "common": 15, "rare": 30, "legendary": 60, "unique": 120, "mythic": 300 }
   },
   "skillShop": { "count": 3, "prices": { "skillNew": 100, "skillLevelUp": 100 } },

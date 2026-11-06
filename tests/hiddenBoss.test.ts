@@ -26,7 +26,7 @@ describe('히든보스 데이터 (기획서 표)', () => {
     for (const h of H) {
       expect(gameData.enemies.enemies.find((e) => e.id === h.id)!.rank).toBe('hiddenBoss');
       expect(weapon(h.weaponId).grade).toBe('unique');
-      expect(item(h.itemId)).toMatchObject({ grade: h.itemId === 'deathWhistle' ? 'legendary' : 'unique', pool: 'hiddenBoss', bossId: h.id });
+      expect(item(h.itemId)).toMatchObject({ grade: h.itemId === 'orionShield' ? 'unique' : 'legendary', pool: 'hiddenBoss', bossId: h.id });
     }
   });
   it('세 명 모두 페이즈2가 있고 강화 패턴이 하나씩 더해진다', () => {

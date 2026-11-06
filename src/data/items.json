@@ -184,7 +184,7 @@
       "effects": [{ "kind": "roomRoar", "durationSec": 10, "damage": 0.2, "moveSpeed": 0.1 }],
       "variants": [{ "job": "barbarian", "effects": [{ "kind": "roarBoost", "value": 0.2 }] }],
       "spriteKey": "item_death_whistle", "color": "#c86a3a", "size": 8 },
-    { "id": "royalSeal", "codexNo": 22, "nameKey": "item.royalSeal", "abilityDescKey": "item.royalSeal.abilityDesc", "grade": "unique", "pool": "hiddenBoss", "bossId": "royalMage", "tags": ["buff"],
+    { "id": "royalSeal", "codexNo": 22, "nameKey": "item.royalSeal", "abilityDescKey": "item.royalSeal.abilityDesc", "grade": "legendary", "pool": "hiddenBoss", "bossId": "royalMage", "tags": ["buff"],
       "effects": [{ "kind": "dodgeBlink", "cooldownSec": 8, "distance": 40, "attacks": 3, "bonus": 0.5 }],
       "variants": [{ "job": "magiMage", "effects": [{ "kind": "dodgeCooldown", "cooldownSec": 6 }] }],
       "spriteKey": "item_royal_seal", "color": "#6a4ad9", "size": 8 },

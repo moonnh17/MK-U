@@ -79,10 +79,12 @@ describe('무기 상자 등급', () => {
     expect(s1('basic')).toBeCloseTo(0.9, 1);
     expect(s1('supreme')).toBe(0);
   });
-  it('일반·고급 상자는 아이템 상자 1·2장 표, 최고급은 3장 표보다 전설·유니크가 높다', () => {
+  it('무기 상자는 같은 장 아이템 상자 표보다 일반이 적다, 최고급은 3장 표보다 전설·유니크가 높다', () => {
     const t = L.weaponChestTiers;
-    expect([t.basic.weights, t.advanced.weights]).toEqual([1, 2].map((ch) => chapterWeights(D.items.treasureWeights, ch)));
-    const ch3 = chapterWeights(D.items.treasureWeights, 3);
+    const tw = (ch: number) => chapterWeights(D.items.treasureWeights, ch);
+    expect(t.basic.weights.common!).toBeLessThan(tw(1).common!);
+    expect(t.advanced.weights.common!).toBeLessThan(tw(2).common!);
+    const ch3 = tw(3);
     expect(t.supreme.weights.legendary!).toBeGreaterThan(ch3.legendary!);
     expect(t.supreme.weights.unique!).toBeGreaterThan(ch3.unique!);
   });
