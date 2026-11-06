@@ -403,8 +403,9 @@ export class WeaponCombat {
     const want = Math.min(ia.maxDistance, t ? Math.hypot(t.x - from.x, t.y - from.y) + ia.behindPx : ia.maxDistance * 0.6);
     const len = Math.max(8, this.run.special.clipRay(from, dir, want));
     const to = { x: from.x + dir.x * len, y: from.y + dir.y * len };
-    this.run.dashVel = { x: (dir.x * len) / ia.sec, y: (dir.y * len) / ia.sec };
-    this.run.dashLeft = ia.sec;
+    // 순식간에 적을 지나 뒤로: 몸이 적에 막히지 않게 바로 옮긴다 (벽·장애물까지의 거리는 위에서 잘랐다)
+    p.setPosition(to.x, to.y);
+    p.setVelocity(0, 0);
     this.run.invuln = Math.max(this.run.invuln, ia.sec + 0.15);
     const color = hexColor(ia.color);
     this.startMeleeMotion(w, st.fireIntervalSec, ia.color);
