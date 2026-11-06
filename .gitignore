@@ -7,3 +7,12 @@ dist/
 .vite/
 # 이 PC의 node 경로가 들어 있는 로컬 실행 설정
 .claude/
+# 작업용 원본 그림 (저장소에 올리지 않는다)
+/MGTRPG-All-Created-Sprites-2026-11-04/
+/아이템/
+/01-monsters.jpg
+/02-characters.jpg
+/222.png
+/Gemini_Generated_Image_ibfmocibfmocibfm.png
+/Gemini_Generated_Image_oqh7mgoqh7mgoqh7.png
+/Gemini_Generated_Image_wvqa6swvqa6swvqa.png
