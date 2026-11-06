@@ -1611,6 +1611,89 @@
       "density": 2,
       "gripX": 0.18
     },
+    "weapon_mintaka_primary": {
+      "file": "mku/weapon_mintaka_primary.png",
+      "frameWidth": 68,
+      "frameHeight": 24,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.42
+    },
+    "weapon_mintaka_align": {
+      "file": "mku/weapon_mintaka_align.png",
+      "frameWidth": 68,
+      "frameHeight": 26,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.42
+    },
+    "weapon_mintaka_eclipse": {
+      "file": "mku/weapon_mintaka_eclipse.png",
+      "frameWidth": 68,
+      "frameHeight": 22,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.42
+    },
+    "fx_mintaka_bolt": {
+      "file": "mku/fx_mintaka_bolt.png",
+      "frameWidth": 22,
+      "frameHeight": 6,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": true
+        }
+      }
+    },
+    "fx_mintaka_gravity": {
+      "file": "mku/fx_mintaka_gravity.png",
+      "frameWidth": 30,
+      "frameHeight": 30,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "fx_mintaka_align": {
+      "file": "mku/fx_mintaka_align.png",
+      "frameWidth": 38,
+      "frameHeight": 38,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
+    "fx_mintaka_burst": {
+      "file": "mku/fx_mintaka_burst.png",
+      "frameWidth": 180,
+      "frameHeight": 180,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 16
+        }
+      }
+    },
     "fx_soul_burst": {
       "file": "mku/fx_soul_burst.png",
       "frameWidth": 88,

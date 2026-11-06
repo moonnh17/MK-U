@@ -257,6 +257,12 @@ export class WeaponCombat {
       this.run.special.fireBeam(w, { ...st, damage: st.damage * emp }, shotAngle);
       return;
     }
+    // 쌍성 지팡이: 지금 상태의 탄 (주성 별빛 화살 / 반성·정렬 관통·지형 무시 탄막)
+    const twin = this.run.special.twinStarMode(w);
+    if (twin) {
+      this.fireBullet(muzzle, shotAngle, st.projectileSpeed, w.range, st.damage * emp, w.tags, null, { pierce: twin.pierce, crit: st.critChance, sprite: twin.shot, ghost: twin.ghost, hitSize: twin.hitSize });
+      return;
+    }
     if (w.pattern.kind === 'homing') {
       this.fireBullet(muzzle, shotAngle, st.projectileSpeed, w.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, homing: w.pattern.turnRate });
       return;
@@ -453,7 +459,7 @@ export class WeaponCombat {
     base: number,
     tags: readonly TagId[],
     source: string | null = null,
-    opts: { pierce: number; crit: number; homing?: number; tint?: string; sprite?: SpriteRef; ricochet?: { bounces: number; range: number }; flame?: number; trail?: string } = { pierce: 0, crit: 0 },
+    opts: { pierce: number; crit: number; homing?: number; tint?: string; sprite?: SpriteRef; ricochet?: { bounces: number; range: number }; flame?: number; trail?: string; ghost?: boolean; hitSize?: number } = { pierce: 0, crit: 0 },
   ): void {
     const proj = this.run.ctx.data.weapons.projectile;
     const b = this.run.bullets.create(from.x, from.y, opts.sprite?.spriteKey ?? proj.spriteKey) as Phaser.Physics.Arcade.Sprite;
@@ -463,9 +469,9 @@ export class WeaponCombat {
       b.setRotation(angle);
       loopArt(b, opts.sprite);
     }
-    fitArt(this.run.ctx.data, b, proj.size, proj.height ?? proj.size);
+    fitArt(this.run.ctx.data, b, opts.hitSize ?? proj.size, opts.hitSize ?? proj.height ?? proj.size);
     b.setDepth(5);
-    b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>(), bounces: opts.ricochet?.bounces ?? 0, bounceRange: opts.ricochet?.range ?? 0, flame: opts.flame ?? 0, trail: opts.trail });
+    b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>(), bounces: opts.ricochet?.bounces ?? 0, bounceRange: opts.ricochet?.range ?? 0, flame: opts.flame ?? 0, trail: opts.trail, ghost: !!opts.ghost });
     if (opts.tint) b.setTint(hexColor(opts.tint));
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
   }

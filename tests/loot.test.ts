@@ -56,7 +56,7 @@ describe('등급·신화', () => {
       }
     }
   });
-  it('유니크는 드롭 유니크 무기 3종 중 하나, 옵션 없음', () => {
+  it('유니크는 드롭 유니크 무기 4종 중 하나, 옵션 없음', () => {
     const seen = new Set<string>();
     for (let s = 0; s < 200; s++) {
       const w = rollWeapon(new Rng(s), 'unique', W.weapons, W.options, G, L.uniqueWeaponFallback);
@@ -66,7 +66,7 @@ describe('등급·신화', () => {
       expect(w.options).toEqual([]);
       seen.add(w.defId);
     }
-    expect([...seen].sort()).toEqual(['algiebaSling', 'argoBanner', 'nekkarCleaver']);
+    expect([...seen].sort()).toEqual(['algiebaSling', 'argoBanner', 'mintakaStaff', 'nekkarCleaver']);
   });
 
   it('옵션 뽑기: 서로 다르고 분류에 맞는 것만 (지금은 어떤 등급도 옵션 수가 0)', () => {
@@ -135,5 +135,15 @@ describe('상인', () => {
 describe('데이터 검증', () => {
   it('현재 데이터는 오류가 없다', () => {
     expect(validateGameData(gameData)).toEqual([]);
+  });
+});
+
+describe('민타카의 쌍성 지팡이', () => {
+  it('주성은 빠르고 약하게, 반성은 느리고 세게(관통·지형 무시), 정렬은 둘을 겹친다', () => {
+    const ts = def('mintakaStaff').twinStar!;
+    expect([ts.primary.rateMul, ts.primary.damageMul]).toEqual([3, 0.5]);
+    expect([ts.eclipse.rateMul, ts.eclipse.damageMul, ts.eclipse.ghost]).toEqual([0.5, 3, true]);
+    expect([ts.align.rateMul, ts.align.damageMul, ts.align.ghost, ts.align.cooldownSec]).toEqual([ts.primary.rateMul, ts.eclipse.damageMul, true, 10]);
+    expect(ts.phaseSec).toBe(2);
   });
 });

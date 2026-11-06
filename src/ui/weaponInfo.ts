@@ -32,12 +32,20 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
     return { text: title ? t('weapon.sigLine', { title, desc }) : desc, sig: true, title, desc };
   };
   // 능력 이름이 아래 전용 특수 능력(회수·질 낮은 가품·징수·옛 명령)의 것이 아니면, 처음 나오는 고유 능력 줄에 붙인다
-  let nameFree = !!def.abilityNameKey && !(def.needle || def.energyRange || def.debt || def.beam);
+  let nameFree = !!def.abilityNameKey && !(def.needle || def.energyRange || def.debt || def.beam || def.twinStar);
   const main = (desc: string): WeaponInfoLine => {
     if (!nameFree) return { text: desc, sig: true };
     nameFree = false;
     return titled(desc);
   };
+  if (def.twinStar) {
+    const ts = def.twinStar;
+    const pc = (v: number) => Math.round(v * 100);
+    const title = t(`weapon.passive.${def.id}`);
+    const desc = t('weapon.sigDesc.twinStar', { sec: ts.phaseSec, rate1: pc(ts.primary.rateMul - 1), dmg1: pc(ts.primary.damageMul), rate2: pc(1 - ts.eclipse.rateMul), dmg2: pc(ts.eclipse.damageMul) });
+    out.push({ text: t('weapon.sigLine', { title, desc }), sig: true, title, desc });
+    out.push(titled(t('weapon.sigDesc.twinAlign', { sec: ts.align.sec, dmg: pc(ts.align.damageMul), cd: ts.align.cooldownSec })));
+  }
   if (def.pattern.kind === 'meteor') out.push({ text: t('weapon.sigDesc.meteor'), sig: true });
   if (def.pierce) out.push({ text: t('weapon.sigDesc.pierce'), sig: true });
   if (def.flame) out.push({ text: t('weapon.sigDesc.flame'), sig: true });

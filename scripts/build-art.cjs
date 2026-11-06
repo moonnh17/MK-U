@@ -666,6 +666,70 @@ userWhite('weapon_magi_fang', 'fang.png', { rotate: 19, fit: 30, gripX: 0.18 });
 userWhite('weapon_mg70', 'mg70.png', { fit: 30, gripX: 0.3, dim: 1.5 });
 userWhite('weapon_soul_calibur', 'soul.png', { flip: true, fit: 36, gripX: 0.24, dim: 1.9 });
 userWhite('weapon_antimatter_pistol', 'antimatter_pistol.png', { fit: 22, gripX: 0.18 });
+// 민타카의 쌍성 지팡이: 주성(밝은 별)·정렬(액티브)·반성(식) 세 모습. 원본은 머리가 왼쪽 위 → 뒤집고 25° 돌려 머리가 오른쪽(총구)
+// 정렬 그림은 자루 둘레 회색 연기가 흰 얼룩으로 남지 않게 배경 문턱을 낮춘다
+for (const st of ['primary', 'align', 'eclipse']) userWhite(`weapon_mintaka_${st}`, `mintaka_${st}.png`, { flip: true, rotate: 25, fit: 34, gripX: 0.42, min: st === 'align' ? 190 : 228 });
+{
+  // 쌍성 지팡이 이펙트 (직접 그림): 별빛 화살·중력 붕괴탄·정렬탄·정렬 폭발
+  const frames = (n, w, h, fn) =>
+    Array.from({ length: n }, (_, f) => {
+      const im = k.blank(w, h);
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const c = fn(x, y, f);
+        if (!c || c[3] <= 0) continue;
+        const o = (y * w + x) * 4;
+        im.px[o] = Math.min(255, c[0]); im.px[o + 1] = Math.min(255, c[1]); im.px[o + 2] = Math.min(255, c[2]); im.px[o + 3] = Math.min(255, Math.round(c[3]));
+      }
+      return im;
+    });
+  const mix = (a, b, t) => a.map((v, i) => v + (b[i] - v) * Math.max(0, Math.min(1, t)));
+  const WHITE = [245, 252, 255], ICE = [150, 215, 255], BLUE = [60, 110, 255], VIOLET = [110, 60, 210], VOID = [8, 8, 22];
+  // 1) 주성: 가늘고 빠른 백청색 별빛 화살 (오른쪽이 앞)
+  fxArt('fx_mintaka_bolt', frames(4, 64, 16, (x, y, f) => {
+    const u = x / 63, dy = Math.abs(y - 7.5);
+    const width = 1.2 + 3.2 * u;
+    const core = Math.exp(-((dy / (width * 0.45)) ** 2)) * u ** 0.6;
+    const glow = Math.exp(-((dy / (width * 1.3)) ** 2)) * u ** 1.2 * (0.75 + 0.25 * Math.sin(f * 1.7 + x * 0.4));
+    const a = Math.max(core, glow * 0.7) * 255;
+    return [...mix(ICE, WHITE, core * 1.4), a];
+  }), 11, { fps: 16, loop: true });
+  // 2) 반성: 크고 느린 중력 붕괴탄 (검은 핵 + 푸른 테 + 도는 파편)
+  fxArt('fx_mintaka_gravity', frames(4, 64, 64, (x, y, f) => {
+    const dx = x - 31.5, dy = y - 31.5, r = Math.hypot(dx, dy), ang = Math.atan2(dy, dx);
+    if (r < 13) return [...mix(VOID, [20, 20, 50], r / 13), 255];
+    const rim = Math.exp(-(((r - 15) / 2.4) ** 2));
+    const halo = Math.exp(-(((r - 20) / 6) ** 2)) * (0.6 + 0.4 * Math.sin(ang * 5 + f * 1.6));
+    // 도는 파편 세 개
+    let spark = 0;
+    for (let i = 0; i < 3; i++) {
+      const a2 = f * 0.55 + (i * Math.PI * 2) / 3;
+      spark = Math.max(spark, Math.exp(-((Math.hypot(dx - Math.cos(a2) * 25, dy - Math.sin(a2) * 25) / 2) ** 2)));
+    }
+    const a = Math.max(rim, halo * 0.55, spark) * 255;
+    return [...mix(mix(VIOLET, BLUE, rim), ICE, Math.max(rim * 0.6, spark)), a];
+  }), 15, { fps: 10, loop: true });
+  // 3) 정렬(액티브): 주성과 반성이 겹친 탄. 검은 핵을 눈부신 코로나와 빛살이 감싼다
+  fxArt('fx_mintaka_align', frames(4, 72, 72, (x, y, f) => {
+    const dx = x - 35.5, dy = y - 35.5, r = Math.hypot(dx, dy), ang = Math.atan2(dy, dx);
+    if (r < 11) return [...VOID, 255];
+    const corona = Math.exp(-(((r - 13) / 3) ** 2));
+    const rays = Math.max(0, Math.cos((ang + f * 0.2) * 8)) ** 12 * Math.exp(-((r - 14) / 14)) * (r > 12 ? 1 : 0);
+    const halo = Math.exp(-(((r - 18) / 9) ** 2)) * 0.5;
+    const a = Math.min(1, corona + rays + halo) * 255;
+    return [...mix(BLUE, WHITE, corona + rays * 0.8), a];
+  }), 19, { fps: 12, loop: true });
+  // 4) 정렬 순간 폭발: 퍼지는 고리 + 빛살 + 흩어지는 별 조각 (한 번)
+  fxArt('fx_mintaka_burst', frames(6, 128, 128, (x, y, f) => {
+    const dx = x - 63.5, dy = y - 63.5, r = Math.hypot(dx, dy), ang = Math.atan2(dy, dx);
+    const t = (f + 1) / 6, R = 14 + t * 46, fade = 1 - t * 0.85;
+    const ring = Math.exp(-(((r - R) / (2 + t * 3)) ** 2));
+    const inner = Math.exp(-(((r - R * 0.55) / 3) ** 2)) * 0.5;
+    const rays = Math.max(0, Math.cos(ang * 6 + t)) ** 20 * (r < R * 1.15 ? 1 : 0) * (1 - r / (R * 1.2));
+    const core = r < 10 * (1 - t) ? 1 : 0;
+    const a = Math.min(1, ring + inner + rays + core) * fade * 255;
+    return [...mix(BLUE, WHITE, ring + rays + core), a];
+  }), 90, { fps: 16 });
+}
 {
   // 소울 칼리버 시트 오른쪽 아래의 방전 파티클
   const sheetIm = knockWhite(k.read(path.join(__dirname, 'art-src/weapons/soul_sheet.png')));

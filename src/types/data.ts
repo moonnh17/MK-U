@@ -169,6 +169,18 @@ export interface WeaponOptionDef {
   needsEnergy?: boolean;
 }
 
+/** 쌍성 지팡이 한 상태: 연사력·피해·탄속 배율, 관통 수, 지형 무시, 탄 판정 크기, 탄 그림, 손에 든 모습 */
+export interface TwinStarMode {
+  rateMul: number;
+  damageMul: number;
+  speedMul: number;
+  pierce: number;
+  ghost: boolean;
+  hitSize: number;
+  shot: SpriteRef;
+  look: SpriteRef;
+}
+
 export interface WeaponDef extends SpriteRef {
   id: string;
   /** 도감 번호 (게임에 추가된 순서) */
@@ -238,6 +250,8 @@ export interface WeaponDef extends SpriteRef {
    * 환국의 잔명: 관통 광선. 적을 맞힌 발사마다(여러 적이어도 한 번) 에너지 energyGain 회복·충전 1.
    * 충전이 stacks가 되면 다음 사격이 강화 광선(피해 ×damageMul, 굵기·길이 증가). 강화 사격은 충전에 들어가지 않는다
    */
+  /** 민타카의 쌍성 지팡이: phaseSec마다 주성↔반성, 무기 특수공격으로 align(둘을 겹친 식 최대)을 sec 동안 */
+  twinStar?: { phaseSec: number; primary: TwinStarMode; eclipse: TwinStarMode; align: TwinStarMode & { sec: number; cooldownSec: number; burst: SpriteRef; color: string } };
   beam?: {
     length: number;
     width: number;

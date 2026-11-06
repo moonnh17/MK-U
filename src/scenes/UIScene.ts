@@ -112,7 +112,7 @@ export class UIScene extends Phaser.Scene {
         // 무기 특수공격 버튼: 특수공격이 있는 무기면 그 이름, 없으면 흐리게
         const held = activeWeapon(s.player.weapons);
         const special = held ? this.ctx.data.weapons.weapons.find((w) => w.id === held.defId) : undefined;
-        const has = !!special?.needle;
+        const has = !!special?.needle || !!special?.twinStar;
         this.ctx.touch.setLabel('weaponSpecial', has ? this.ctx.t(special!.abilityNameKey!) : this.ctx.t('mobile.special'));
         this.ctx.touch.setDisabled('weaponSpecial', !has);
       }

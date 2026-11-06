@@ -15,7 +15,8 @@ import { lineHits } from '../../systems/targeting';
 import { beamEmpowered, beamStacksAfter, collectDebt, needleLinks, rolledEnergyCost } from '../../systems/weaponMechanics';
 import { dropWeaponAt, gainEnergy, type WeaponStats } from '../../systems/weapons';
 import { contains, interiorRect } from '../../systems/worldLayout';
-import type { WeaponDef } from '../../types/data';
+import type { TwinStarMode, WeaponDef } from '../../types/data';
+import { playFx } from '../../skills/skillFx';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
 
@@ -63,6 +64,12 @@ export class SpecialWeapons {
   private roomId: number | null = null;
   /** 환국의 잔명 충전 (런 동안 이어진다) */
   beamStacks = 0;
+  /** 쌍성 지팡이: 주기 시간, 정렬 남은 시간, 정렬 재사용 대기, 지금 상태, 정렬 중 파티클 간격 */
+  private twinT = 0;
+  private twinAlignLeft = 0;
+  twinCd = 0;
+  private twinMode: 'primary' | 'eclipse' | 'align' = 'primary';
+  private twinSparkIn = 0;
   private readySparkIn = 0;
   /** 꾸밈 전용 난수 (시드 재현에 끼어들지 않게) */
   private readonly fx: Rng;
@@ -155,6 +162,79 @@ export class SpecialWeapons {
     this.updateDiscs(dt);
     this.updateNeedles(dt);
     this.updateHeldLook(dt);
+    this.updateTwinStar(dt);
+  }
+
+  // ---------- 민타카의 쌍성 지팡이 ----------
+
+  /** 들고 있는 쌍성 지팡이의 지금 상태 (그 무기가 아니면 null) */
+  twinStarMode(def: WeaponDef): TwinStarMode | null {
+    return def.twinStar ? def.twinStar[this.twinMode] : null;
+  }
+
+  /** 주성 2초 ↔ 반성 2초. 정렬 중이면 그대로 정렬, 상태가 바뀌면 지팡이 머리에서 짧게 번쩍 */
+  private updateTwinStar(dt: number): void {
+    this.twinCd = Math.max(0, this.twinCd - dt);
+    const ts = this.run.weaponDef().twinStar;
+    if (!ts) return;
+    let mode: typeof this.twinMode;
+    if (this.twinAlignLeft > 0) {
+      this.twinAlignLeft -= dt;
+      mode = 'align';
+      this.alignSparks(dt, ts.align.color);
+    } else {
+      this.twinT += dt;
+      mode = Math.floor(this.twinT / ts.phaseSec) % 2 ? 'eclipse' : 'primary';
+    }
+    if (mode === this.twinMode) return;
+    this.twinMode = mode;
+    const head = this.run.combat.muzzle();
+    playFx(this.run, ts.align.burst, head.x, head.y, { w: mode === 'eclipse' ? 22 : 30, depth: 7 }).setAlpha(mode === 'eclipse' ? 0.6 : 0.9);
+  }
+
+  /** 정렬 중: 지팡이 머리에서 별 조각이 흩날리고 몸 둘레로 빛이 감돈다 */
+  private alignSparks(dt: number, color: string): void {
+    this.twinSparkIn -= dt;
+    if (this.twinSparkIn > 0) return;
+    this.twinSparkIn = 0.04;
+    const head = this.run.combat.muzzle();
+    const p = this.run.player;
+    for (const [at, n] of [[head, 2], [{ x: p.x, y: p.y }, 1]] as const) {
+      for (let i = 0; i < n; i++) {
+        const a = this.fx.range(0, Math.PI * 2);
+        const d = this.fx.range(2, 10);
+        const dot = this.run.add.rectangle(at.x + Math.cos(a) * d, at.y + Math.sin(a) * d, this.fx.range(1, 2.4), this.fx.range(1, 2.4), this.fx.chance(0.5) ? 0xffffff : hexColor(color)).setDepth(7);
+        this.run.tweens.add({ targets: dot, x: dot.x + Math.cos(a) * 12, y: dot.y + Math.sin(a) * 12 - 6, alpha: 0, duration: 380, ease: 'Quad.easeOut', onComplete: () => dot.destroy() });
+      }
+    }
+  }
+
+  /** 무기 특수공격(성간 연주시차): 궤도를 정렬해 주성과 반성을 겹친다. 재사용 대기 중이면 남은 초를 알린다 */
+  alignTwinStar(def: WeaponDef): boolean {
+    const ts = def.twinStar;
+    if (!ts) return false;
+    if (this.twinCd > 0) {
+      this.run.toastThrottled(this.run.ctx.t('weapon.twinCooldown', { s: Math.ceil(this.twinCd) }));
+      return true;
+    }
+    this.twinAlignLeft = ts.align.sec;
+    this.twinCd = ts.align.cooldownSec;
+    this.twinMode = 'align';
+    const p = this.run.player;
+    const head = this.run.combat.muzzle();
+    // 강한 정렬: 머리에서 큰 폭발 두 번 + 몸에서 빛 고리, 별 조각 사방으로, 화면 번쩍·흔들림
+    playFx(this.run, ts.align.burst, head.x, head.y, { w: 110, depth: 7 });
+    this.run.time.delayedCall(110, () => playFx(this.run, ts.align.burst, p.x, p.y, { w: 150, depth: 6 }).setAlpha(0.7));
+    for (let i = 0; i < 28; i++) {
+      const a = (i / 28) * Math.PI * 2 + this.fx.range(-0.1, 0.1);
+      const dist = this.fx.range(30, 70);
+      const dot = this.run.add.rectangle(head.x, head.y, this.fx.range(1.5, 3), this.fx.range(1.5, 3), i % 3 ? hexColor(ts.align.color) : 0xffffff).setDepth(7);
+      this.run.tweens.add({ targets: dot, x: head.x + Math.cos(a) * dist, y: head.y + Math.sin(a) * dist, alpha: 0, duration: this.fx.range(380, 620), ease: 'Cubic.easeOut', onComplete: () => dot.destroy() });
+    }
+    this.run.cameras.main.flash(120, 150, 210, 255);
+    shake(this.run, 'medium');
+    sfx('awaken');
+    return true;
   }
 
   /** 들고 있는 무기가 바뀌거나 없어질 때 무기 위 표시 정리는 updateHeldLook이 한다 */

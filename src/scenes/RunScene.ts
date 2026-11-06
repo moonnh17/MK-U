@@ -314,8 +314,10 @@ export class RunScene extends Phaser.Scene {
     this.physics.add.collider(this.enemyGroup, this.doorGroup);
     this.physics.add.collider(this.enemyGroup, this.enemyGroup);
     const killBullet = (b: unknown) => (b as Phaser.GameObjects.GameObject).destroy();
-    this.physics.add.collider(this.bullets, this.walls, killBullet);
-    this.physics.add.collider(this.bullets, this.doorGroup, killBullet);
+    // 지형 무시 탄(쌍성 지팡이 반성·정렬)은 벽·문을 지나간다
+    const solid = (b: unknown) => !(b as Phaser.GameObjects.GameObject).getData('ghost');
+    this.physics.add.collider(this.bullets, this.walls, killBullet, solid);
+    this.physics.add.collider(this.bullets, this.doorGroup, killBullet, solid);
     this.physics.add.collider(this.enemyBullets, this.walls, killBullet);
     // 소품은 엄폐물: 양쪽 탄을 막고, 맞으면 부서진다 (석상은 막기만 한다)
     const propHit = (b: unknown, s: unknown, amount: (bullet: Phaser.GameObjects.GameObject) => number) => {
@@ -919,7 +921,8 @@ export class RunScene extends Phaser.Scene {
   shownWeaponKey(): string {
     const item = this.weaponItem();
     const def = this.weaponDefOf(item.defId);
-    if (def.category === 'blade' || canFire(this.session.player.energy, this.weaponStatsOf(item))) return def.spriteKey;
+    const key = this.special.twinStarMode(def)?.look.spriteKey ?? def.spriteKey;
+    if (def.category === 'blade' || canFire(this.session.player.energy, this.weaponStatsOf(item))) return key;
     return this.weaponDefOf(this.fistItem().defId).spriteKey;
   }
 
@@ -927,6 +930,7 @@ export class RunScene extends Phaser.Scene {
   useWeaponSpecial(): void {
     const def = this.weaponDef();
     if (def.needle && this.special.recallNeedles(def)) return;
+    if (def.twinStar && this.special.alignTwinStar(def)) return;
     this.toastThrottled(this.ctx.t(def.needle ? 'weapon.noNeedles' : 'weapon.noSpecial'));
   }
 
@@ -940,8 +944,18 @@ export class RunScene extends Phaser.Scene {
     // 징수를 못 낸 의수는 주먹과 같은 성능
     if (item.unpaid) return this.weaponStatsOf(this.fistItem());
     const st = weaponStats(this.weaponDefOf(item.defId), item, gradeMultiplier(item.grade, g), gradeEnergyMultiplier(item.grade, g));
+    // 쌍성 지팡이: 지금 상태(주성·반성·정렬)의 연사력·피해·탄속 (초당 에너지는 그대로)
+    const ts = this.special.twinStarMode(this.weaponDefOf(item.defId));
+    const m = ts ?? { rateMul: 1, damageMul: 1, speedMul: 1 };
     // 아이템: 원심 가속(공격 속도), 치명타 확률
-    return { ...st, fireIntervalSec: st.fireIntervalSec / (1 + this.itemRt.attackSpeedBonus()), critChance: Math.min(1, st.critChance + this.itemRt.total('critChance')) };
+    return {
+      ...st,
+      damage: st.damage * m.damageMul,
+      projectileSpeed: st.projectileSpeed * m.speedMul,
+      energyCost: st.energyCost / m.rateMul,
+      fireIntervalSec: st.fireIntervalSec / m.rateMul / (1 + this.itemRt.attackSpeedBonus()),
+      critChance: Math.min(1, st.critChance + this.itemRt.total('critChance')),
+    };
   }
 
   tagRule<T>(id: TagId): T {

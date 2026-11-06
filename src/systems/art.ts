@@ -105,6 +105,14 @@ export function collectAssets(d: GameData): AssetRef[] {
     if (w.boomerang) add('projectile', w.boomerang.shot, w.nameKey, '#fx');
     if (w.needle) add('projectile', w.needle.shot, w.nameKey, '#fx');
     if (w.beam) add('projectile', w.beam.gauge, w.nameKey, '#fx');
+    if (w.twinStar) {
+      const ts = w.twinStar;
+      for (const m of [ts.primary, ts.eclipse, ts.align]) {
+        if (m.look.spriteKey !== w.spriteKey) add('weapon', m.look, w.nameKey);
+        add('projectile', m.shot, w.nameKey, '#fx');
+      }
+      add('projectile', ts.align.burst, w.nameKey, '#fx');
+    }
     if (w.signature?.kind === 'laser' && w.signature.beam) add('projectile', w.signature.beam, w.nameKey, '#fx');
   }
   add('projectile', d.weapons.projectile, 'asset.playerBullet');

@@ -3,7 +3,7 @@
     "old": ["pistol", "shotgun", "smg", "sniper", "grenadeLauncher", "dagger", "greatsword", "spear", "curvedBow"],
     "standard": ["flameStaff", "zephyr", "antimatterPistol", "spaceNeedle", "soulCalibur"],
     "systemple": ["mg70", "orbitalDisc"],
-    "historyArms": ["algiebaSling", "nekkarCleaver", "argoBanner", "alGulBlade"],
+    "historyArms": ["algiebaSling", "nekkarCleaver", "argoBanner", "alGulBlade", "mintakaStaff"],
     "starRelic": ["rasalgethiClub", "aviorStaff", "rasalhagueSword"],
     "ancient": ["brokenBlade", "ancientCore", "eclipseCore", "hwanRemnant", "magiFang", "hanabi"],
     "bossRemains": ["gihwanArm"],
@@ -318,6 +318,18 @@
       },
       "projectileSpeed": 600, "range": 260, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_hwan_remnant", "color": "#6a5030", "size": 12
+    },
+    {
+      "id": "mintakaStaff", "codexNo": 34, "nameKey": "weapon.mintakaStaff", "abilityNameKey": "weapon.ability.mintakaStaff", "category": "staff", "grade": "unique", "classes": ["single"], "tags": ["magic", "ranged"],
+      "baseDamage": 6, "fireIntervalSec": 0.3, "energyCost": 1, "pattern": { "kind": "single" },
+      "twinStar": {
+        "phaseSec": 2,
+        "primary": { "rateMul": 3, "damageMul": 0.5, "speedMul": 1.8, "pierce": 0, "ghost": false, "hitSize": 4, "shot": { "spriteKey": "fx_mintaka_bolt", "color": "#bfe6ff", "size": 11 }, "look": { "spriteKey": "weapon_mintaka_primary", "color": "#4a8aff", "size": 12 } },
+        "eclipse": { "rateMul": 0.5, "damageMul": 3, "speedMul": 0.5, "pierce": 99, "ghost": true, "hitSize": 10, "shot": { "spriteKey": "fx_mintaka_gravity", "color": "#3a6aff", "size": 15 }, "look": { "spriteKey": "weapon_mintaka_eclipse", "color": "#2a3a8a", "size": 12 } },
+        "align": { "rateMul": 3, "damageMul": 3, "speedMul": 1.2, "pierce": 99, "ghost": true, "hitSize": 12, "shot": { "spriteKey": "fx_mintaka_align", "color": "#e0f4ff", "size": 19 }, "look": { "spriteKey": "weapon_mintaka_align", "color": "#6a9aff", "size": 12 }, "sec": 3, "cooldownSec": 10, "burst": { "spriteKey": "fx_mintaka_burst", "color": "#9ad8ff", "size": 90 }, "color": "#9ad8ff" }
+      },
+      "projectileSpeed": 300, "range": 300, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_mintaka_primary", "color": "#4a8aff", "size": 12
     },
     {
       "id": "fist", "nameKey": "weapon.fist", "category": "blade", "fxColor": "#ffe0c0", "grade": "common", "classes": ["slash"], "tags": ["physical", "melee"],
