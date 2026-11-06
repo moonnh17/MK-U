@@ -199,6 +199,10 @@ export class WeaponCombat {
       sfx(weaponSfx(w), st.damage * (sig?.kind === 'bigSmash' ? sig.damageMul : 1));
       // 특무 인장: 순간 회피 직후 기본공격 피해 증가
       const emp = this.run.itemRt.consumeEmpowered();
+      if (w.iaido) {
+        this.iaido(w, w.iaido, st, aimAngle, sig, emp);
+        return;
+      }
       if (w.lunge && this.lunge(w, w.lunge, aimAngle)) {
         // 돌진이 끝난 자리에서 벤다
         this.run.time.delayedCall(w.lunge.sec * 1000, () => this.melee(w, st, aimAngle, chargeRatio, sig, emp));
@@ -384,6 +388,80 @@ export class WeaponCombat {
     this.run.dashVel = { x: Math.cos(aimAngle) * speed, y: Math.sin(aimAngle) * speed };
     this.run.dashLeft = l.sec;
     return true;
+  }
+
+  /**
+   * 발도(라스알히게의 검): 눈 깜짝할 새 조준한 적을 꿰뚫고 뒤로 빠진다. 지나간 자리에 잔상과 가는 칼빛만 남고,
+   * cutDelaySec 뒤 칼을 거두는 순간 길 위의 적이 한꺼번에 베인다 (공간격 차례면 공간격)
+   */
+  private iaido(w: WeaponDef, ia: NonNullable<WeaponDef['iaido']>, st: WeaponStats, aimAngle: number, sig: WeaponSignature | null, emp: number): void {
+    const p = this.run.player;
+    const from = { x: p.x, y: p.y };
+    const t = this.run.aimTarget;
+    const ang = t ? Math.atan2(t.y - from.y, t.x - from.x) : aimAngle;
+    const dir = { x: Math.cos(ang), y: Math.sin(ang) };
+    const want = Math.min(ia.maxDistance, t ? Math.hypot(t.x - from.x, t.y - from.y) + ia.behindPx : ia.maxDistance * 0.6);
+    const len = Math.max(8, this.run.special.clipRay(from, dir, want));
+    const to = { x: from.x + dir.x * len, y: from.y + dir.y * len };
+    this.run.dashVel = { x: (dir.x * len) / ia.sec, y: (dir.y * len) / ia.sec };
+    this.run.dashLeft = ia.sec;
+    this.run.invuln = Math.max(this.run.invuln, ia.sec + 0.15);
+    const color = hexColor(ia.color);
+    this.startMeleeMotion(w, st.fireIntervalSec, ia.color);
+    // 1) 순간: 출발점 번쩍, 지나간 길에 잔상과 가는 칼빛
+    const flash = this.run.add.circle(from.x, from.y, 5, 0xffffff, 0.9).setDepth(7).setBlendMode(Phaser.BlendModes.ADD);
+    this.run.tweens.add({ targets: flash, scale: 3, alpha: 0, duration: 160, onComplete: () => flash.destroy() });
+    const ghosts = 6;
+    for (let i = 0; i < ghosts; i++) {
+      const k = i / (ghosts - 1);
+      const g = this.run.add
+        .image(from.x + dir.x * len * k, from.y + dir.y * len * k, p.texture.key, p.frame.name)
+        .setOrigin(p.originX, p.originY)
+        .setFlipX(dir.x < 0)
+        .setScale(p.scaleX, p.scaleY)
+        .setTintFill(i === ghosts - 1 ? 0xffffff : color)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setAlpha(0.15 + 0.5 * k)
+        .setDepth(6);
+      this.run.tweens.add({ targets: g, alpha: 0, duration: 200 + 140 * k, onComplete: () => g.destroy() });
+    }
+    const streak = this.run.add.graphics().setDepth(7).setBlendMode(Phaser.BlendModes.ADD);
+    streak.lineStyle(3, color, 0.55).lineBetween(from.x, from.y, to.x, to.y);
+    streak.lineStyle(1, 0xffffff, 1).lineBetween(from.x, from.y, to.x, to.y);
+    this.run.tweens.add({ targets: streak, alpha: 0.25, duration: ia.cutDelaySec * 1000 });
+    // 2) 칼을 거두는 순간: 길 위의 적이 한꺼번에 베인다
+    this.run.time.delayedCall(ia.cutDelaySec * 1000, () => {
+      streak.destroy();
+      const tags: readonly TagId[] = sig?.kind === 'space' ? [...w.tags, 'space'] : w.tags;
+      const enemies = this.run.enemies.filter((e) => !e.dead);
+      const hits = lineHits(from, dir, len, ia.width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
+      const lined = new Set(lineHits(from, dir, len, ia.width / 2, this.run.roomProps.breakables.map((b) => ({ x: b.x, y: b.y, radius: 6 }))).map((i) => this.run.roomProps.breakables[i]!));
+      this.run.roomProps.meleeProps(st.damage * emp, (b) => lined.has(b));
+      // 길 전체를 가르는 넓은 칼빛 (밝게 번쩍였다가 가늘어지며 사라진다)
+      const fx = this.run.ctx.data.weapons.meleeFx;
+      const mid = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 };
+      this.meleeFx(fx.slashBig, ia.color, 0.18, mid.x, mid.y, { w: len * 1.15, h: ia.width * 1.6, rotation: ang });
+      const cut = this.run.add.graphics().setDepth(7).setBlendMode(Phaser.BlendModes.ADD);
+      cut.lineStyle(ia.width * 0.5, color, 0.5).lineBetween(from.x, from.y, to.x, to.y);
+      cut.lineStyle(3, 0xffffff, 1).lineBetween(from.x - dir.x * 10, from.y - dir.y * 10, to.x + dir.x * 10, to.y + dir.y * 10);
+      this.run.tweens.add({ targets: cut, alpha: 0, scaleY: 1, duration: 260, ease: 'Quad.easeOut', onComplete: () => cut.destroy() });
+      for (const i of hits) {
+        const e = enemies[i]!;
+        const at = { x: e.sprite.x, y: e.sprite.y };
+        // 적마다 엇갈린 X자 참격 + 금빛 불꽃
+        for (const r of [ang + 0.6, ang - 0.6]) this.meleeFx(fx.slash, ia.color, 0.14, at.x, at.y, { w: 30, rotation: r });
+        for (let s = 0; s < 6; s++) this.spark(at.x, at.y, s % 2 ? '#ffffff' : ia.color, this.run.rng.range(-18, 18), this.run.rng.range(-18, 18));
+        this.hit(e, this.critRoll(st.damage * emp, st.critChance, at), tags);
+      }
+      // 칼을 거두는 소리·멈칫
+      sfx(hits.length ? 'crit' : 'swing');
+      if (hits.length) {
+        shake(this.run, 'light');
+        this.run.hitStop.request(this.run.ctx.data.juice.hitStop.crit);
+      }
+      const ring = this.run.add.circle(this.run.player.x, this.run.player.y, 6).setStrokeStyle(2, color, 1).setDepth(7);
+      this.run.tweens.add({ targets: ring, scale: 2.4, alpha: 0, duration: 240, onComplete: () => ring.destroy() });
+    });
   }
 
   /** 기환의 팔: 가까운 적에서 적으로 튕기는 번개 (anyDistance면 첫 적은 아무리 멀어도) */

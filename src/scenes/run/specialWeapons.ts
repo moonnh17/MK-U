@@ -56,6 +56,8 @@ const RAY_STEP = 3;
 
 export class SpecialWeapons {
   private discs: Disc[] = [];
+  /** 놓친 원반: 이 시간이 지나야 충전으로 돌아온다 */
+  private discRecharge: { def: WeaponDef; left: number }[] = [];
   private needles: Needle[] = [];
   private needleTickIn = 0;
   private lines: Phaser.GameObjects.Graphics | null = null;
@@ -95,7 +97,7 @@ export class SpecialWeapons {
   }
 
   /** origin에서 dir로 length까지 가다 벽·장애물에 닿는 거리 */
-  private clipRay(origin: Vec2, dir: Vec2, length: number): number {
+  clipRay(origin: Vec2, dir: Vec2, length: number): number {
     let d = 0;
     while (d + RAY_STEP <= length && this.open({ x: origin.x + dir.x * (d + RAY_STEP), y: origin.y + dir.y * (d + RAY_STEP) })) d += RAY_STEP;
     return d;
@@ -257,16 +259,19 @@ export class SpecialWeapons {
 
   /** 남은 원반 충전 */
   discCharges(def: WeaponDef): number {
-    return this.discMax(def) - this.discs.filter((d) => d.def === def).length;
+    return this.discMax(def) - this.discs.filter((d) => d.def === def).length - this.discRecharge.filter((r) => r.def === def).length;
   }
 
   throwDisc(def: WeaponDef, st: WeaponStats, from: Vec2, angle: number): void {
     const b = def.boomerang!;
     const sprite = this.run.add.image(from.x, from.y, b.shot.spriteKey).setDepth(5);
+    sprite.setScale(sprite.scaleX * b.scale);
     this.discs.push({ sprite, pos: { ...from }, dir: { x: Math.cos(angle), y: Math.sin(angle) }, speed: st.projectileSpeed, traveled: 0, back: false, age: 0, hit: new Set(), def, base: st.damage, crit: st.critChance });
   }
 
   private updateDiscs(dt: number): void {
+    for (const r of this.discRecharge) r.left -= dt;
+    this.discRecharge = this.discRecharge.filter((r) => r.left > 0);
     const p = { x: this.run.player.x, y: this.run.player.y };
     for (const d of [...this.discs]) {
       const b = d.def.boomerang!;
@@ -281,16 +286,18 @@ export class SpecialWeapons {
           d.hit = new Set();
         } else d.pos = next;
       } else {
-        // 돌아오는 원반은 움직이는 플레이어를 쫓는다
-        const dx = p.x - d.pos.x;
-        const dy = p.y - d.pos.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist <= b.catchPx || d.age >= b.maxSec) {
+        // 돌아오는 원반은 날아간 길을 그대로 되짚어 느리게 온다. 플레이어가 닿으면 잡아서 바로 충전
+        if (Math.hypot(p.x - d.pos.x, p.y - d.pos.y) <= b.catchPx + d.sprite.displayWidth / 2) {
           this.catchDisc(d);
           continue;
         }
-        const step = Math.min(dist, b.returnSpeed * dt);
-        d.pos = { x: d.pos.x + (dx / dist) * step, y: d.pos.y + (dy / dist) * step };
+        d.traveled -= b.returnSpeed * dt;
+        // 못 잡으면 출발점을 지나 조금 더 가다 사라지고, 잠시 뒤에 충전된다
+        if (d.traveled <= -b.overshootPx || d.age >= b.maxSec) {
+          this.missDisc(d);
+          continue;
+        }
+        d.pos = { x: d.pos.x - d.dir.x * b.returnSpeed * dt, y: d.pos.y - d.dir.y * b.returnSpeed * dt };
       }
       d.sprite.setPosition(d.pos.x, d.pos.y);
       if (this.fx.chance(dt * 20)) this.spark(d.pos, d.def.attackParticles?.color ?? '#5ad9ff');
@@ -307,7 +314,18 @@ export class SpecialWeapons {
   private catchDisc(d: Disc): void {
     d.sprite.destroy();
     this.discs.splice(this.discs.indexOf(d), 1);
-    if (d.age < d.def.boomerang!.maxSec) sfx('energy');
+    sfx('energy');
+    // 잡았다: 손에서 짧게 번쩍
+    const ring = this.run.add.circle(this.run.player.x, this.run.player.y, 6).setStrokeStyle(2, hexColor(d.def.attackParticles?.color ?? '#5ad9ff'), 1).setDepth(6);
+    this.run.tweens.add({ targets: ring, scale: 2.2, alpha: 0, duration: 220, onComplete: () => ring.destroy() });
+  }
+
+  /** 놓친 원반: 사라지며 흩어지고, 충전은 잠시 뒤에 */
+  private missDisc(d: Disc): void {
+    for (let i = 0; i < 4; i++) this.spark(d.pos, d.def.attackParticles?.color ?? '#5ad9ff');
+    this.run.tweens.add({ targets: d.sprite, alpha: 0, scale: d.sprite.scale * 0.6, duration: 200, onComplete: () => d.sprite.destroy() });
+    this.discs.splice(this.discs.indexOf(d), 1);
+    this.discRecharge.push({ def: d.def, left: d.def.boomerang!.missRechargeSec });
   }
 
   // ---------- 아크로제 공간봉합침 ----------

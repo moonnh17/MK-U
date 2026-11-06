@@ -61,6 +61,7 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
   if (def.selfBuff) out.push(main(t('weapon.sigDesc.gust', { dmg: Math.round(def.selfBuff.damage * 100), sec: def.selfBuff.sec })));
   const sig = def.signature;
   if (def.lunge) out.push({ text: t('weapon.sigDesc.lunge'), sig: true });
+  if (def.iaido) out.push({ text: t('weapon.sigDesc.iaido', { d: def.iaido.maxDistance }), sig: true });
   if (def.boomerang) out.push(main(t('weapon.sigDesc.boomerang', { n: def.boomerang.charges })));
   if (def.needle) {
     const n = def.needle;

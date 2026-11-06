@@ -228,10 +228,19 @@ export interface WeaponDef extends SpriteRef {
   /** 칼: 공격할 때 조준한 적 쪽으로 돌진한 뒤 벤다 (최대 distance, sec초) */
   lunge?: { distance: number; sec: number };
   /**
+   * 발도(라스알히게의 검): 조준한 적을 꿰뚫고 그 뒤 behindPx까지 sec 만에 지나간다(최대 maxDistance, 벽에서 멈춤, 그동안 무적).
+   * 지나간 길(폭 width)의 적은 cutDelaySec 뒤 칼을 거두는 순간 한꺼번에 베인다
+   */
+  iaido?: { maxDistance: number; behindPx: number; sec: number; width: number; cutDelaySec: number; color: string };
+  /**
    * 되돌아오는 원반 (궤도절삭륜): 충전이 있을 때 던지고, 관통하며 range까지 날아간 뒤 플레이어를 따라 돌아온다.
    * 가는 길·오는 길 모두 피해, 잡으면 충전 하나가 바로 찬다. maxSec이 지나면 사라지고 충전이 돌아온다
    */
-  boomerang?: { charges: number; /** 산탄 아이템(발사 탄수 +)으로 늘어나는 충전 상한 */ maxExtraCharges: number; range: number; returnSpeed: number; catchPx: number; maxSec: number; spinPerSec: number; shot: SpriteRef };
+  /**
+   * 궤도절삭륜: 날아간 길을 그대로 되짚어 느리게 돌아온다. 돌아오는 원반을 플레이어가 잡으면 바로 충전,
+   * 못 잡으면 출발점을 overshootPx 지나 사라지고 missRechargeSec 뒤에 충전. scale: 원반 그림 배율(판정도 커진다)
+   */
+  boomerang?: { charges: number; /** 산탄 아이템(발사 탄수 +)으로 늘어나는 충전 상한 */ maxExtraCharges: number; range: number; returnSpeed: number; catchPx: number; maxSec: number; spinPerSec: number; scale: number; overshootPx: number; missRechargeSec: number; shot: SpriteRef };
   /**
    * 공간봉합침 (아크로제): 침이 적이나 벽에 박힌다. 박힌 침은 가까운 순서로 이어져 절단선이 되고 tickSec마다 선에 닿은 적에게 피해.
    * 최대 max개(넘으면 가장 오래된 것부터 사라짐), lifeSec 뒤 사라짐. 특수공격(Q)으로 모두 회수하며 지나는 길의 적에게 피해
