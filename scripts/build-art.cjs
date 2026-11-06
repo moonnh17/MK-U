@@ -512,15 +512,6 @@ weapon('weapon_shotgun', 0.4, [
   '.KKKbBBK.KKKKK...',
   '....KKKK.........',
 ]);
-weapon('weapon_rifle', 0.35, [
-  '.......KKKK.........',
-  'KKKK.KKKKKKKKKKKKKKK',
-  'KoooKKooooooollllllK',
-  'KOoooooooooodKKKKKKK',
-  '.KKOOKKdKKOOK.......',
-  '...KKK.KdK.KK.......',
-  '.......KKK..........',
-]);
 weapon('weapon_sniper', 0.3, [
   '......KKKKKKK...........',
   '......KcCnnnK...........',
@@ -570,19 +561,6 @@ weapon('weapon_spear', 0.3, [
   'KKKKKKKKKKKKKKKKKKKKKmmmKK',
   '....................KmdK..',
   '.....................KK...',
-]);
-weapon('weapon_hammer', 0.25, [
-  '...........KKKKKK',
-  '...........KlllmK',
-  '...........KlmmdK',
-  '...........KlmmdK',
-  'KKKKKKKKKKKKlmmdK',
-  'KbBBBBBBBBBBlmmdK',
-  'KKKKKKKKKKKKlmmdK',
-  '...........KlmmdK',
-  '...........KlmmdK',
-  '...........KmmddK',
-  '...........KKKKKK',
 ]);
 weapon('weapon_avior_staff', 0.3, [
   '................KKK.',

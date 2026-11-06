@@ -14,8 +14,8 @@ const def = (id: string) => W.weapons.find((w) => w.id === id)!;
 describe('무기 종류 (기획서 무기 표)', () => {
   it('총 6종·칼 5종 + 신궁 환디', () => {
     const by = (c: string) => W.weapons.filter((w) => w.category === c && w.droppable).map((w) => w.id).sort();
-    expect(by('gun')).toEqual(['algiebaSling', 'antimatterPistol', 'bootlegGun', 'grenadeLauncher', 'mg70', 'orbitalDisc', 'pistol', 'rifle', 'shotgun', 'smg', 'sniper', 'soulCalibur', 'spaceNeedle']);
-    expect(by('blade')).toEqual(['argoBanner', 'brokenBlade', 'dagger', 'debtorArm', 'greatsword', 'hammer', 'hanabi', 'magiFang', 'nekkarCleaver', 'spear']);
+    expect(by('gun')).toEqual(['algiebaSling', 'antimatterPistol', 'bootlegGun', 'grenadeLauncher', 'mg70', 'orbitalDisc', 'pistol', 'shotgun', 'smg', 'sniper', 'soulCalibur', 'spaceNeedle']);
+    expect(by('blade')).toEqual(['argoBanner', 'brokenBlade', 'dagger', 'debtorArm', 'greatsword', 'hanabi', 'magiFang', 'nekkarCleaver', 'spear']);
     const handi = def('handi');
     expect(handi.grade).toBe('mythic');
     expect(handi.droppable).toBe(false);
@@ -71,7 +71,7 @@ describe('등급·신화', () => {
 
   it('옵션 뽑기: 서로 다르고 분류에 맞는 것만 (지금은 어떤 등급도 옵션 수가 0)', () => {
     for (let s = 0; s < 40; s++) {
-      const o = rollOptions(new Rng(s), def('rifle'), 2, W.options);
+      const o = rollOptions(new Rng(s), def('smg'), 2, W.options);
       expect(new Set(o.map((x) => x.id)).size).toBe(2);
       expect(rollWeapon(new Rng(s), 'legendary', W.weapons, W.options, G, 'legendary').options).toEqual([]);
     }
@@ -80,10 +80,10 @@ describe('등급·신화', () => {
 
 describe('무기 수치', () => {
   it('등급 배율과 옵션을 반영한다', () => {
-    const d = def('rifle');
-    const s = weaponStats(d, { defId: 'rifle', grade: 'legendary', options: [{ id: 'attackSpeed', value: 0.25 }, { id: 'crit', value: 0.1 }] }, 1.45);
-    expect(s.damage).toBeCloseTo(5 * 1.45);
-    expect(s.fireIntervalSec).toBeCloseTo(0.22 / 1.25);
+    const d = def('smg');
+    const s = weaponStats(d, { defId: 'smg', grade: 'legendary', options: [{ id: 'attackSpeed', value: 0.25 }, { id: 'crit', value: 0.1 }] }, 1.45);
+    expect(s.damage).toBeCloseTo(d.baseDamage * 1.45);
+    expect(s.fireIntervalSec).toBeCloseTo(d.fireIntervalSec / 1.25);
     expect(s.critChance).toBeCloseTo(0.1);
     const e = weaponStats(def('sniper'), { defId: 'sniper', grade: 'rare', options: [{ id: 'energyCost', value: 1 }] }, 1.2);
     expect(e.energyCost).toBe(3);
@@ -125,7 +125,7 @@ describe('상인', () => {
     for (const s of stock) expect(s.price).toBe(L.merchant.prices[s.weapon.grade]);
   });
   it('코인이 모자라거나 이미 팔렸으면 못 산다', () => {
-    const item = { weapon: plainWeapon(def('rifle')), price: 30, sold: false };
+    const item = { weapon: plainWeapon(def('smg')), price: 30, sold: false };
     expect(canBuy(29.9, item)).toBe(false);
     expect(canBuy(30, item)).toBe(true);
     expect(canBuy(99, { ...item, sold: true })).toBe(false);

@@ -74,7 +74,7 @@ describe('음 높이·무기 소리', () => {
     const w = (id: string) => gameData.weapons.weapons.find((x) => x.id === id)!;
     expect(weaponSfx(w('dagger'))).toBe('swing');
     expect(weaponSfx(w('pistol'))).toBe('shotPistol');
-    expect(weaponSfx(w('rifle'))).toBe('shotRifle');
+    expect(weaponSfx(w('handi'))).toBe('shotRifle');
     expect(weaponSfx(w('smg'))).toBe('shotSmg');
     expect(weaponSfx(w('shotgun'))).toBe('shotShotgun');
     expect(weaponSfx(w('sniper'))).toBe('shotSniper');

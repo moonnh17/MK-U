@@ -1447,13 +1447,6 @@
       "frames": 1,
       "gripX": 0.4
     },
-    "weapon_rifle": {
-      "file": "mku/weapon_rifle.png",
-      "frameWidth": 20,
-      "frameHeight": 7,
-      "frames": 1,
-      "gripX": 0.35
-    },
     "weapon_sniper": {
       "file": "mku/weapon_sniper.png",
       "frameWidth": 24,
@@ -1488,13 +1481,6 @@
       "frameHeight": 7,
       "frames": 1,
       "gripX": 0.3
-    },
-    "weapon_hammer": {
-      "file": "mku/weapon_hammer.png",
-      "frameWidth": 17,
-      "frameHeight": 11,
-      "frames": 1,
-      "gripX": 0.25
     },
     "weapon_avior_staff": {
       "file": "mku/weapon_avior_staff.png",

@@ -169,9 +169,9 @@ describe('무기 밸런스', () => {
       expect(g[i]!.damageMultiplier).toBeGreaterThan(g[i - 1]!.damageMultiplier);
       expect(g[i]!.energyMultiplier).toBeGreaterThan(g[i - 1]!.energyMultiplier);
     }
-    const st = weaponStats(w('rifle'), { defId: 'rifle', grade: 'rare', options: [] }, 1.4, 1.5);
-    expect(st.damage).toBeCloseTo(7);
-    expect(st.energyCost).toBeCloseTo(1.5);
+    const st = weaponStats(w('smg'), { defId: 'smg', grade: 'rare', options: [] }, 1.4, 1.5);
+    expect(st.damage).toBeCloseTo(w('smg').baseDamage * 1.4);
+    expect(st.energyCost).toBeCloseTo(w('smg').energyCost * 1.5);
   });
   it('저격총·대검은 레어, 장검은 없다, 전설은 모두 추가 능력이 있다', () => {
     expect(w('sniper').grade).toBe('rare');

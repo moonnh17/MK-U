@@ -60,12 +60,12 @@ export function codexSections(d: GameData, tab: CodexTab): CodexSection[] {
     ];
   }
   if (tab === 'weapons') {
-    // 상자·상점에서 나오는 무기는 등급별, 보스·히든보스·세트로만 얻는 무기(droppable 아님)는 따로 (아이템과 같은 짜임)
+    // 상자·상점에서 나오는 무기(와 신화)는 등급별, 보스·히든보스·세트로만 얻는 무기(droppable 아님)는 따로 (아이템과 같은 짜임)
     const weapons = d.weapons.weapons.filter((w) => w.id !== d.weapons.fistWeapon);
     const entry = (w: (typeof weapons)[number]): CodexEntry => ({ kind: 'weapon', id: w.id, record: 'weapons' });
     return [
-      ...GRADES.map((g) => ({ titleKey: `codex.section.weapons.${g}`, grade: g, entries: weapons.filter((w) => w.droppable && w.grade === g).map(entry) })),
-      { titleKey: 'codex.section.weapons.special', entries: weapons.filter((w) => !w.droppable).map(entry) },
+      ...GRADES.map((g) => ({ titleKey: `codex.section.weapons.${g}`, grade: g, entries: weapons.filter((w) => (w.droppable || w.grade === 'mythic') && w.grade === g).map(entry) })),
+      { titleKey: 'codex.section.weapons.special', entries: weapons.filter((w) => !w.droppable && w.grade !== 'mythic').map(entry) },
     ].filter((s) => s.entries.length > 0);
   }
   const items = d.items.items;
