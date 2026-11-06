@@ -35,6 +35,18 @@ git push -u origin main
    Node 버전은 저장소의 `.nvmrc`(22)를 자동으로 읽는다. 안 읽히면 환경 변수 `NODE_VERSION` = `22` 를 넣는다.
 5. **저장 후 배포**. 1~2분 뒤 `https://프로젝트이름.pages.dev` 주소가 생긴다.
 
+### Workers 화면이 나올 때
+
+Cloudflare가 Pages 대신 Workers 만들기 화면(빌드 명령 + `npx wrangler deploy`)을 보여 주면 그대로 써도 된다. 저장소의 `wrangler.jsonc`가 `dist` 폴더를 정적 사이트로 올리게 되어 있다.
+
+| 항목 | 값 |
+| --- | --- |
+| 빌드 명령 | `npm run build` |
+| 배포 명령 | `npx wrangler deploy` |
+| 미리보기 명령 | `npx wrangler versions upload` (기본값 그대로도 된다) |
+
+주소는 `https://mk-u.계정이름.workers.dev` 형태가 된다.
+
 ## 3. 이후 업데이트
 
 코드를 고치고 `git push` 하면 자동으로 다시 빌드·배포된다. 빌드는 `tsc --noEmit && vite build`라 타입 오류가 있으면 배포가 멈춘다(이전 버전이 그대로 남는다).
