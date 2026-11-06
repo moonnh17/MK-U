@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { Rng } from '../src/core/rng';
+import { ultimateCooldownSec } from '../src/systems/skills';
 import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
 import {
   convertSkills,
-  gaugeFromDamage,
-  gaugeFromEnergy,
-  gaugeFromGreatSuccess,
   judgeSchool,
   topSchools,
   paradoxRatio,
@@ -123,27 +121,12 @@ describe('전직 후 카드 풀', () => {
 describe('학파 궁극기', () => {
   const ult = (id: string) => gameData.ultimates.ultimates.find((u) => u.id === id)!;
 
-  it('마기학자 궁극기는 에너지를 쓴 만큼 찬다', () => {
-    expect(gaugeFromEnergy(ult('firstLaw'), 30)).toBe(30);
-    expect(gaugeFromEnergy(ult('firstLaw'), 0)).toBe(0);
-    expect(gaugeFromEnergy(ult('thunderbolt'), 30)).toBe(0);
-  });
-
-  it('헥타르 벼락: 포탑·지뢰·드론 피해로 연산 데이터', () => {
-    expect(gaugeFromDamage(ult('thunderbolt'), 'magiTurret', 100)).toBeCloseTo(15);
-    expect(gaugeFromDamage(ult('thunderbolt'), 'railgun', 100)).toBe(0);
-    expect(gaugeFromDamage(ult('thunderbolt'), null, 100)).toBe(0);
-    expect(gaugeFromGreatSuccess(ult('thunderbolt'))).toBe(0);
-  });
-
-  it('아크로 특이점 실험: 실험 효과 피해 + 대성공 보너스', () => {
-    expect(gaugeFromDamage(ult('singularity'), 'magiCorruption', 100)).toBeCloseTo(15);
-    expect(gaugeFromDamage(ult('singularity'), 'purifyingWings', 100)).toBe(0);
-    expect(gaugeFromGreatSuccess(ult('singularity'))).toBeGreaterThan(0);
-  });
-
-  it('열역학 제1법칙은 처치로만', () => {
-    expect(gaugeFromDamage(ult('firstLaw'), 'magiTurret', 100)).toBe(0);
+  it('모든 궁극기는 같은 재사용 대기(60초), 스킬 쿨타임 감소는 받지 않고 궁극기 쿨타임 감소만', () => {
+    expect(gameData.ultimates.cooldownSec).toBe(60);
+    expect(ultimateCooldownSec(60, 0)).toBe(60);
+    expect(ultimateCooldownSec(60, 0.25)).toBeCloseTo(45);
+    expect(ultimateCooldownSec(60, 5)).toBeCloseTo(6);
+    for (const u of gameData.ultimates.ultimates) expect('gauge' in u).toBe(false);
   });
 
   it('역설 재현 비율: 일부 / 실험 성공 상당 부분 / 대성공 전부', () => {

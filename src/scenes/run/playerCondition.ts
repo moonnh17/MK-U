@@ -140,7 +140,7 @@ export class PlayerCondition {
     if (p.panic) {
       // 아트로스 비석 필사본: 시야 방해가 준다
       const calm = this.run.itemRt.first('panicCalm')?.visionMul ?? 1;
-      this.panicFx ??= new PanicFx(this.run, { ...cfg.panic, darkAlpha: cfg.panic.darkAlpha * calm, lines: Math.round(cfg.panic.lines * calm), lightRadius: cfg.panic.lightRadius / calm }, Rng.derive(this.run.ctx.config.seed, 'panic-fx'), this.run.ctx.renderScale);
+      this.panicFx ??= new PanicFx(this.run, { ...cfg.panic, darkAlpha: cfg.panic.darkAlpha * calm, lines: Math.round(cfg.panic.lines * calm), lightRadius: cfg.panic.lightRadius / calm }, Rng.derive(this.run.ctx.config.seed, 'panic-fx'), this.run.ctx.renderScale, this.run.itemRt.panicAwaken()?.glyphColor);
       const cam = this.run.cameras.main;
       this.panicFx.update(dt, cam.width / 2 + (this.run.player.x - cam.midPoint.x), cam.height / 2 + (this.run.player.y - cam.midPoint.y));
     } else if (this.panicFx) {

@@ -642,9 +642,7 @@ export function validateGameData(d: GameData): Errors {
   // --- 궁극기 ---
   const u = d.ultimates;
   checkUnique(errors, 'ultimates', u.ultimates.map((x) => x.id));
-  for (const rank of ['normal', 'elite', 'champion', 'boss', 'hiddenBoss'] as const) {
-    checkPositive(errors, `ultimates.gaugePerKill.${rank}`, u.gaugePerKill[rank], true);
-  }
+  checkPositive(errors, 'ultimates.cooldownSec', u.cooldownSec);
   for (const x of u.ultimates) {
     const w = `ultimates.${x.id}`;
     needText(w, x.nameKey);
@@ -652,15 +650,6 @@ export function validateGameData(d: GameData): Errors {
     needText(w, x.descKey);
     checkTags(w, x.tags);
     checkSources(w, x.sources);
-    checkPositive(errors, `${w}.gaugeMax`, x.gaugeMax);
-    if (x.gauge?.kind === 'energy') {
-      checkPositive(errors, `${w}.gauge.perEnergy`, x.gauge.perEnergy);
-    } else if (x.gauge?.kind === 'damage') {
-      checkPositive(errors, `${w}.gauge.perDamage`, x.gauge.perDamage);
-      for (const id of x.gauge.skills) if (!d.skills.skills.some((s) => s.id === id)) errors.push(`${w}.gauge.skills: 없는 스킬 '${id}'`);
-    } else if (x.gauge?.kind !== 'kill') {
-      errors.push(`${w}.gauge: kind는 kill·energy·damage`);
-    }
     if (x.school !== undefined && !(SCHOOL_IDS as readonly string[]).includes(x.school)) errors.push(`${w}.school: 잘못됨`);
     if (x.awakening) {
       needText(`${w}.awakening`, x.awakening.nameKey);

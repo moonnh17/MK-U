@@ -54,7 +54,7 @@ import { advanceStage, playableChapters, firstStage } from '../systems/run';
 import { absorbHit } from '../systems/shield';
 import { corruptedDamage, tickCorruption } from '../systems/acro';
 import { hpStance, takeDamage } from '../systems/vitals';
-import { gainGauge, tickCooldowns } from '../systems/skills';
+import { tickCooldowns } from '../systems/skills';
 import { tickBleed } from '../systems/tags';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
@@ -352,7 +352,7 @@ export class RunScene extends Phaser.Scene {
       bus.on('debugSetSkill', (e) => this.debugTools.debugSetSkill(e.skillId, e.level, e.awakened)),
       bus.on('debugOpenCards', ({ kind }) => this.progression.queueOffers([{ kind, boss: false }])),
       bus.on('debugFillUltimate', () => {
-        this.session.player.ultimate.gauge = this.skillRt.ultimateDef().gaugeMax;
+        this.session.player.ultimate.cooldownLeft = 0;
       }),
       bus.on('debugSpawn', ({ enemyId, count, elite }) => this.debugTools.debugSpawn(enemyId, count, elite ?? null)),
       bus.on('debugBarrage', () => this.debugTools.debugBarrage()),
@@ -649,6 +649,7 @@ export class RunScene extends Phaser.Scene {
 
     // 스킬
     p.cooldowns = tickCooldowns(p.cooldowns, dt);
+    p.ultimate.cooldownLeft = Math.max(0, p.ultimate.cooldownLeft - dt);
     SKILL_ACTIONS.forEach((action, i) => {
       if (frame.pressed.has(action)) this.skillRt.castSlot(i);
     });
@@ -1019,9 +1020,6 @@ export class RunScene extends Phaser.Scene {
       const chestRng = Rng.derive(this.ctx.config.seed, `champion-chest-${stage.chapter}-${stage.stage}-${this.loot.lootSeq++}`);
       if (chestRng.chance(d.waves.champions.weaponChestChance)) this.loot.addCombatChest(x, y, 'champion');
     }
-    // 궁극기 게이지는 적 처치로 충전
-    const ult = this.session.player.ultimate;
-    if (this.skillRt.ultimateDef().gauge.kind === 'kill') ult.gauge = gainGauge(ult.gauge, this.skillRt.ultimateDef().gaugeMax, d.ultimates.gaugePerKill[e.rank]);
     // 첨탑: 원 안에서 잡으면 충전 (결과는 다음 프레임에 처리)
     const sp = roomId === undefined ? undefined : this.encounters.spires.find((x) => x.roomId === roomId);
     if (sp) {

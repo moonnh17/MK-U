@@ -9,7 +9,6 @@ import {
   emptyLoadout,
   equipSkill,
   findSkill,
-  gainGauge,
   levelUpSkill,
   setSkillLevel,
   skillValues,
@@ -167,8 +166,4 @@ describe('쿨타임·궁극기 게이지', () => {
     expect(cd.cannon).toBe(9);
   });
 
-  it('게이지는 최대치를 넘지 않는다', () => {
-    expect(gainGauge(90, 100, 30)).toBe(100);
-    expect(gainGauge(10, 100, 5)).toBe(15);
-  });
 });

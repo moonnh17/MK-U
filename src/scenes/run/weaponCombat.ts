@@ -16,13 +16,11 @@ import { weaponSfx } from '../../systems/sound';
 import { Explosive } from '../../skills/explosive';
 import { nearestEnemy } from '../../skills/host';
 import { calcDamage, spaceDamage, type RangeBonus, type TagBonus } from '../../systems/damage';
-import { gaugeFromDamage, gaugeFromEnergy } from '../../systems/advancement';
 import { itemDamageMultiplier } from '../../systems/items';
 import { chainTargets, lineHits, muzzleAngle, muzzlePoint, shotOrigin } from '../../systems/targeting';
 import { signatureFires, weaponPose, type WeaponMotionKind, type WeaponMotionParams } from '../../systems/motion';
 import { corruptedDamage, skillChance } from '../../systems/acro';
 import { hpStance } from '../../systems/vitals';
-import { gainGauge } from '../../systems/skills';
 import { gradeEnergyMultiplier } from '../../systems/damage';
 import { chargedCrit, gunShots, inArc, projectilesCut, rollCrit, spendEnergy, spinUpMul, type WeaponItem, type WeaponStats } from '../../systems/weapons';
 import { contains, interiorRect } from '../../systems/worldLayout';
@@ -232,8 +230,6 @@ export class WeaponCombat {
       this.melee(fistDef, fistStats, aimAngle, 0, null, this.run.itemRt.consumeEmpowered());
       return;
     }
-    const udef = this.run.skillRt.ultimateDef();
-    p.ultimate.gauge = gainGauge(p.ultimate.gauge, udef.gaugeMax, gaugeFromEnergy(udef, p.energy - left));
     p.energy = left;
     this.startShotMotion(w, this.fireCooldown);
     sfx(sig?.kind === 'laser' ? 'shotLaser' : weaponSfx(w));
@@ -871,11 +867,6 @@ export class WeaponCombat {
     for (const o of [...this.run.skillRt.skillObjects]) o.onDamageDealt?.(this.run.host, dealt, enemy);
     // 아이템 피해 흡혈 (과기전쟁의 일기)
     if (this.run.itemRt.sums.lifesteal > 0 && dealt > 0) this.run.host.heal(dealt * this.run.itemRt.sums.lifesteal, false);
-    // 학파 궁극기: 정해진 스킬의 피해로 데이터 축적
-    const ult = this.run.session.player.ultimate;
-    const udef = this.run.skillRt.ultimateDef();
-    const gain = gaugeFromDamage(udef, source, dealt);
-    if (gain > 0) ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gain);
     if (killed) this.run.onEnemyKilled(enemy);
     return killed;
   }

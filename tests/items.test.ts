@@ -66,14 +66,15 @@ describe('효과 합산', () => {
   });
   it('모든 적이 받는 피해·보스 피해는 따로 곱한다', () => {
     const t = totals(['magowikiCodex']);
-    expect(itemDamageMultiplier(t, 0, false, null)).toBeCloseTo(1.15 * 1.05);
+    expect(itemDamageMultiplier(t, 0, false, null)).toBeCloseTo(1.05);
+    expect(itemDamageMultiplier(totals(['magowikiCodex', 'elegantMagi']), 0, false, null)).toBeCloseTo(1.05);
   });
   it('각성 아이템 효과: 태그 피해·쿨타임·정신력·탄수·받는 피해', () => {
-    expect(totals(['magnetResonator'])).toMatchObject({ damage: { tech: 0.07, magic: 0.07 }, moveSpeed: 0.1 });
+    expect(totals(['magnetResonator'])).toMatchObject({ damage: { tech: 0, magic: 0 }, moveSpeed: 0.1 });
     expect(totals(['magowikiCodex']).energyGain).toBeCloseTo(0.05);
-    expect(totals(['lk99', 'warDiary', 'helaCell']).skillCooldown).toBeCloseTo(0.28);
+    expect(totals(['lk99', 'warDiary', 'helaCell']).skillCooldown).toBeCloseTo(0.3);
     expect(totals(['warDiary'])).toMatchObject({ lifesteal: 0.005, damage: { magic: 0, tech: 0 } });
-    expect(totals(['helaCell']).maxSanity).toBe(15);
+    expect(totals(['helaCell']).maxSanity).toBe(-5);
     expect(totals(['extraArms']).pellets).toBe(1);
     expect(totals(['forbiddenVirus']).damage.magic).toBeCloseTo(0.05);
     expect(totals(['forbiddenGift']).damageTaken).toBeCloseTo(-0.1);

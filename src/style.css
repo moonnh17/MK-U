@@ -3013,3 +3013,11 @@ body {
   color: #ffffff;
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
 }
+
+/* 인벤토리 아이템 플레이버 문구 */
+#inventory-window .iw-flavor,
+.iw-flavor {
+  margin-top: 6px;
+  font-style: italic;
+  opacity: 0.7;
+}

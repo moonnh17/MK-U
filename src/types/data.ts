@@ -1021,10 +1021,6 @@ export interface UltimateDef {
   descKey: string;
   tags: TagId[];
   sources: Record<string, TagId[]>;
-  /** 게이지가 이만큼 차면 발동할 수 있다 */
-  gaugeMax: number;
-  /** kill: 적 처치로 충전(열역학 제1법칙) / damage: 정해진 스킬의 피해량 × perDamage(+ 대성공 보너스) */
-  gauge: { kind: 'kill' } | { kind: 'energy'; perEnergy: number } | { kind: 'damage'; skills: string[]; perDamage: number; perGreatSuccess?: number };
   /** 학파 궁극기면 그 학파 (궁극기 각성 조건: 이 학파 스킬 각성 수) */
   school?: SchoolId;
   values: Record<string, number>;
@@ -1076,8 +1072,8 @@ export interface SpaceCutDef {
 }
 
 export interface UltimatesData {
-  /** 적 처치 시 게이지 충전량 (적 등급별) */
-  gaugePerKill: Record<EnemyRank, number>;
+  /** 모든 궁극기의 재사용 대기(초). 스킬 쿨타임 감소는 받지 않고, 궁극기 쿨타임 감소(아이템)만 받는다 */
+  cooldownSec: number;
   ultimates: UltimateDef[];
 }
 
@@ -1171,11 +1167,13 @@ export type ItemEffect =
   /** 패닉에도 방향이 뒤집히지 않고, 시야 방해가 visionMul배로 준다 */
   | { kind: 'panicCalm'; visionMul: number }
   /** 패닉 중 각성: 체력이 초당 hpPerSec 닳고(1 아래로는 안 내려감) 모든 피해 +damage */
-  | { kind: 'panicAwaken'; hpPerSec: number; damage: number }
+  | { kind: 'panicAwaken'; hpPerSec: number; damage: number; /** 패닉 중 화면에 지직거리며 떠오르는 비석 문양 색 (기숲 비석의 조각) */ glyphColor?: string }
   /** 회피(구르기) 재사용 대기 −value 비율 (투르비용) */
   | { kind: 'dodgeCdReduce'; value: number }
   /** 구르는 동안 적 공격(탄·근접·장판)을 피하면 durationSec 동안 무기 공격 속도 +value (투르비용: 원심 가속) */
   | { kind: 'dodgeHaste'; durationSec: number; value: number }
+  /** 궁극기 쿨타임 감소 비율 (스킬 쿨타임 감소와 따로) */
+  | { kind: 'ultimateCooldown'; value: number }
   /** 무기 치명타 확률 + (크레퓌스퀼) */
   | { kind: 'critChance'; value: number }
   /** 무기 치명타 피해 배율 + (크레퓌스퀼) */

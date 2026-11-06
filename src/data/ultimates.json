@@ -1,5 +1,5 @@
 {
-  "gaugePerKill": { "normal": 5, "elite": 15, "champion": 20, "boss": 30, "hiddenBoss": 30 },
+  "cooldownSec": 60,
   "ultimates": [
     {
       "id": "firstLaw",
@@ -8,8 +8,6 @@
       "descKey": "ultimate.firstLaw.desc",
       "tags": ["tech", "ranged"],
       "sources": { "explosion": ["tech", "ranged"] },
-      "gaugeMax": 100,
-      "gauge": { "kind": "energy", "perEnergy": 1 },
       "values": { "damage": 40, "radius": 40, "projectileSpeed": 220, "range": 220 },
       "color": "#ff9a3c",
       "sprites": {
@@ -27,8 +25,6 @@
         "cut": ["tech", "ranged", "space"],
         "strike": ["tech", "ranged", "space"]
       },
-      "gaugeMax": 100,
-      "gauge": { "kind": "damage", "skills": ["magiTurret", "magiMine", "combatDrone"], "perDamage": 0.15 },
       "values": { "damage": 60, "length": 480, "width": 10, "telegraphSec": 0.25, "bossMaxHpRatio": 0.1 },
       "awakening": {
         "requiredItem": "regulusShard",
@@ -93,17 +89,6 @@
           "ranged",
           "space"
         ]
-      },
-      "gaugeMax": 100,
-      "gauge": {
-        "kind": "damage",
-        "skills": [
-          "unstableSubject",
-          "magiCorruption",
-          "experimentalWeapon"
-        ],
-        "perDamage": 0.15,
-        "perGreatSuccess": 5
       },
       "values": {
         "range": 224,

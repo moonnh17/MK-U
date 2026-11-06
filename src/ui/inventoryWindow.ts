@@ -371,6 +371,8 @@ export class InventoryWindow {
       if (!def) return;
       const grade = d.groupMultipliers.grades.find((g) => g.id === def.grade);
       box.append(this.line('iw-dname', t(def.nameKey), grade?.color), this.line('iw-dmeta', grade ? t(grade.nameKey) : ''), this.line('iw-desc', itemDescText(def, d.groupMultipliers, t)));
+      // 플레이버 문구 (도감과 같은 글)
+      if (def.flavor) box.append(this.line('iw-desc iw-flavor', t(def.flavor)));
       return;
     }
     if (id === 'ultimate') {

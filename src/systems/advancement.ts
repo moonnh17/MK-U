@@ -79,25 +79,6 @@ export function skillAllowed(def: SkillDef, school: SchoolId | null): boolean {
   return school === null || def.school === school;
 }
 
-/**
- * 학파 궁극기 게이지가 얻는 양.
- * kill: 처치로 (열역학 제1법칙) / damage: 정해진 스킬의 피해량 × 비율
- */
-export function gaugeFromDamage(def: UltimateDef, skillId: string | null, damage: number): number {
-  const g = def.gauge;
-  if (g.kind !== 'damage' || !skillId || !g.skills.includes(skillId)) return 0;
-  return damage * g.perDamage;
-}
-
-/** 대성공 1회당 (아크로) */
-/** 에너지를 쓸 때 차는 게이지 (마기학자 기본 궁극기) */
-export function gaugeFromEnergy(def: UltimateDef, spent: number): number {
-  return def.gauge.kind === 'energy' ? Math.max(0, spent) * def.gauge.perEnergy : 0;
-}
-
-export function gaugeFromGreatSuccess(def: UltimateDef): number {
-  return def.gauge.kind === 'damage' ? (def.gauge.perGreatSuccess ?? 0) : 0;
-}
 
 /**
  * 역설: 관측 동안 표식 적에게 준 실제 피해 기록 → 재현 비율.

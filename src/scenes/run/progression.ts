@@ -317,7 +317,9 @@ export class Progression {
     p.cooldowns = Object.fromEntries(Object.entries(p.cooldowns).filter(([id]) => !removed.has(id)));
     for (const o of this.run.skillRt.skillObjects.filter((x) => removed.has(x.owner.split('.')[0]!))) this.run.skillRt.removeObject(o);
     const fromUlt = this.run.skillRt.ultimateDef();
-    p.ultimate = { id: adv.ultimate!, gauge: 0, awakened: false };
+    // 전직: 새 궁극기는 처음부터 재사용 대기 (지금 남은 대기를 이어받지 않는다)
+    const cd = this.run.skillRt.ultimateCooldown();
+    p.ultimate = { id: adv.ultimate!, cooldownLeft: cd, cooldownTotal: cd, awakened: false };
     p.advancement = school;
     p.advancementLog = r.log;
     this.run.applyPlayerArt();

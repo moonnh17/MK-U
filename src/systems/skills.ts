@@ -186,8 +186,12 @@ export function refundCooldown(cd: Cooldowns, id: string, sec: number): Cooldown
   return out;
 }
 
-// ---------- 궁극기 게이지 ----------
+// ---------- 궁극기 재사용 대기 ----------
 
-export function gainGauge(gauge: number, max: number, amount: number): number {
-  return Math.min(max, gauge + amount);
+/** 궁극기 쿨타임 감소 상한 (아이템을 겹쳐도 이 이상 줄지 않는다) */
+export const ULTIMATE_CDR_CAP = 0.9;
+
+/** 궁극기 재사용 대기(초): 기본값 × (1 − 궁극기 쿨타임 감소). 스킬 쿨타임 감소와는 상관없다 */
+export function ultimateCooldownSec(base: number, reduction: number): number {
+  return base * (1 - Math.min(ULTIMATE_CDR_CAP, Math.max(0, reduction)));
 }

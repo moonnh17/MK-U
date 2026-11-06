@@ -8,11 +8,10 @@ import { artKeys } from '../../systems/art';
 import { type ShieldOpts, type SkillHost, type SkillObject } from '../../skills/host';
 import { passiveImpl, skillImpl, ultimateImpl } from '../../skills/registry';
 import { calcDamage, spaceDamage } from '../../systems/damage';
-import { gaugeFromGreatSuccess } from '../../systems/advancement';
 import { refracts, tickShield, type ShieldState } from '../../systems/shield';
 import { applyCorruption, skillChance } from '../../systems/acro';
 import { combineMods, heal, payHp, type PlayerMods } from '../../systems/vitals';
-import { cooldownLeft, findSkill, gainGauge, refundCooldown, skillValues } from '../../systems/skills';
+import { cooldownLeft, findSkill, refundCooldown, skillValues, ultimateCooldownSec } from '../../systems/skills';
 import { applyBleed, canAutoCast, skillTags } from '../../systems/tags';
 import type { BleedRule, SkillDef, SpaceRule, UltimateDef } from '../../types/data';
 import type { RunScene } from '../RunScene';
@@ -69,11 +68,7 @@ export class SkillRuntime {
       hurtSelf: (amount) => {
         this.run.hurtPlayer(amount);
       },
-      greatSuccess: () => {
-        const ult = this.run.session.player.ultimate;
-        const udef = this.ultimateDef();
-        ult.gauge = gainGauge(ult.gauge, udef.gaugeMax, gaugeFromGreatSuccess(udef));
-      },
+      greatSuccess: () => {},
       buffDuration: (sec, tags) => sec * (tags.includes('buff') ? 1 + this.run.itemRt.sums.buffDuration : 1),
       chargeTime: (sec) => sec * (1 - this.run.itemRt.sums.chargeTime),
       shield: () => this.shield,
@@ -287,13 +282,13 @@ export class SkillRuntime {
     const def = this.ultimateDef();
     const impl = ultimateImpl(def.id);
     if (!impl) return;
-    if (ult.gauge < def.gaugeMax) {
-      this.run.toastThrottled(this.run.ctx.t('skillMsg.ultimateNotReady'));
+    if (ult.cooldownLeft > 0) {
+      this.run.toastThrottled(this.run.ctx.t('skillMsg.ultimateNotReady', { s: Math.ceil(ult.cooldownLeft) }));
       return;
     }
     const values = ult.awakened && def.awakening ? { ...def.values, ...def.awakening.values } : { ...def.values };
     if (!impl.cast(this.hostFor(def.id), { def, awakened: ult.awakened, values })) return;
-    ult.gauge = 0;
+    ult.cooldownTotal = ult.cooldownLeft = this.ultimateCooldown();
     sfx('ultimate');
     this.run.itemRt.onUltimate();
   }
@@ -343,13 +338,21 @@ export class SkillRuntime {
         skillId: ult.id,
         label: t(p.ultimate.awakened && ult.awakening ? ult.awakening.shortKey : ult.shortKey),
         awakened: p.ultimate.awakened,
-        gauge: p.ultimate.gauge / ult.gaugeMax,
-        usable: p.ultimate.gauge >= ult.gaugeMax,
+        // 칸이 차오르는 표시: 재사용 대기가 끝나면 가득
+        gauge: p.ultimate.cooldownTotal > 0 ? 1 - p.ultimate.cooldownLeft / p.ultimate.cooldownTotal : 1,
+        usable: p.ultimate.cooldownLeft <= 0,
+        cooldownLeft: p.ultimate.cooldownLeft,
+        cooldownTotal: p.ultimate.cooldownTotal,
         color: ult.color,
         iconKey: artKeys.ultimateIcon(ult.id),
       },
       slot(p.loadout.passive, false),
     ];
+  }
+
+  /** 지금 아이템으로 줄어든 궁극기 재사용 대기(초) */
+  ultimateCooldown(): number {
+    return ultimateCooldownSec(this.run.ctx.data.ultimates.cooldownSec, this.run.itemRt.total('ultimateCooldown'));
   }
 
   ultimateDef(): UltimateDef {

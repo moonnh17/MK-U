@@ -28,7 +28,8 @@ export interface PlayerState {
   loadout: SkillLoadout;
   /** 스킬 id → 남은 쿨타임(초) */
   cooldowns: Cooldowns;
-  ultimate: { id: string; gauge: number; awakened: boolean };
+  /** 궁극기: 남은 재사용 대기(초)와 이번 대기의 전체 길이 (0이면 바로 쓸 수 있다) */
+  ultimate: { id: string; cooldownLeft: number; cooldownTotal: number; awakened: boolean };
   /** 전직 판정용: 고른 스킬 카드의 계열 횟수 (전직은 M3) */
   schoolPicks: Record<SchoolId, number>;
   /** 마지막으로 고른 스킬 카드의 계열 (전직 동점 처리) */
@@ -171,7 +172,7 @@ export function newPlayerState(data: GameData, jobId: string = data.jobs.startJo
     weapons: { slots: [null, null], active: 0 },
     loadout: emptyLoadout(data.skills.activeSlots),
     cooldowns: {},
-    ultimate: { id: job.startUltimate, gauge: 0, awakened: false },
+    ultimate: { id: job.startUltimate, cooldownLeft: data.ultimates.cooldownSec, cooldownTotal: data.ultimates.cooldownSec, awakened: false },
     schoolPicks: { hectar: 0, acro: 0 },
     lastPickSchool: null,
     job: job.id,

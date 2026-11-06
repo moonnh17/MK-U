@@ -54,6 +54,7 @@ function itemStatRows(def: ItemDef, d: GameData, t: GameContext['t']): [string, 
     else if (e.kind === 'skillDamage') rows.push([t('codex.istat.skillDamage', { skill: t(findSkill(d.skills, e.skillId).nameKey) }), pc(e.value)]);
     else if (e.kind === 'lifesteal' || e.kind === 'critChance' || e.kind === 'critDamage') rows.push([t(`codex.istat.${e.kind}`), pc(e.value)]);
     else if (e.kind === 'dodgeCdReduce') rows.push([t('codex.istat.dodgeCdReduce'), pc(-e.value)]);
+    else if (e.kind === 'ultimateCooldown') rows.push([t('codex.istat.ultimateCooldown'), pc(-e.value)]);
   }
   return rows;
 }
