@@ -333,8 +333,8 @@ export class LabScene extends Phaser.Scene {
 
   private enterRun(): void {
     if (!this.job) return;
-    // 두 번째 런부터 새 시드 (?seed=로 정했으면 그대로)
-    if (this.runs > 0 && !this.ctx.config.seedFromUrl) this.ctx.config.seed = makeFallbackSeed();
+    // 두 번째 런부터는 늘 새 시드 (?seed=는 첫 런을 재현할 때만. 같은 시드로 계속 돌면 매 판 같은 아이템·무기가 나온다)
+    if (this.runs > 0) this.ctx.config.seed = makeFallbackSeed();
     this.runs++;
     this.scene.start('Run', { job: this.job });
   }
