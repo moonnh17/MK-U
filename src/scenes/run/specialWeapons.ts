@@ -516,7 +516,7 @@ export class SpecialWeapons {
     const before = this.beamStacks;
     this.beamStacks = beamStacksAfter(this.beamStacks, b.stacks, hits > 0);
     for (const s of path) this.beamFx(def, s.from, s.dir, s.len, width, empowered);
-    this.glyphs(origin, b.glyphColor, empowered ? 8 : 5);
+    this.glyphs(origin, b.glyphColor, empowered ? 6 : 3);
     // 강화 사격: 레이저 길 전체에 고대 문자가 줄지어 떠오른다
     if (empowered) for (const s of path) this.beamGlyphs(s.from, s.dir, s.len, width, b.glyphColor);
     if (this.beamStacks > before) this.stackFx(def);
@@ -540,36 +540,26 @@ export class SpecialWeapons {
     }
   }
 
-  /**
-   * 고대 명령 문자 하나: 짧은 획 3~4개(가로·세로·대각)로 된 글자. 어두운 테두리 위에 밝은 획, 가운데 흰 심으로 눈에 띄게.
-   * size: 글자 반 크기(px)
-   */
-  private glyph(at: Vec2, color: string, size: number): Phaser.GameObjects.Graphics {
-    const col = hexColor(color);
-    const strokes: [number, number, number, number][] = [];
-    const n = this.fx.int(3, 4);
-    for (let k = 0; k < n; k++) {
-      const x0 = Math.round(this.fx.range(-size, size * 0.4));
-      const y0 = Math.round(this.fx.range(-size, size * 0.4));
-      const [dx, dy] = this.fx.pick([[size, 0], [0, size], [size, size], [-size, size]] as const);
-      strokes.push([x0, y0, x0 + dx, y0 + dy]);
-    }
-    // 밝은 레이저 위에서도 보이게 어두운 테두리 → 문자 색 → 흰 심 (더하기 섞기를 쓰지 않는다)
-    const g = this.run.add.graphics().setDepth(7);
-    for (const [w, c, a] of [[4, 0x3a2400, 0.75], [2, col, 1], [1, 0xffffff, 0.9]] as const) {
-      g.lineStyle(w, c, a);
-      for (const [x0, y0, x1, y1] of strokes) g.lineBetween(x0, y0, x1, y1);
+  /** 고대 명령 문자 하나: 짧은 획 몇 개(가로·세로·대각)로 된 글자 */
+  private glyph(at: Vec2, color: string): Phaser.GameObjects.Graphics {
+    const g = this.run.add.graphics().setDepth(7).setBlendMode(Phaser.BlendModes.ADD);
+    g.lineStyle(1, hexColor(color), 1);
+    const s = 3;
+    for (let k = 0; k < 3; k++) {
+      const x0 = Math.round(this.fx.range(-s, s));
+      const y0 = Math.round(this.fx.range(-s, s));
+      // 가로·세로·대각 획만 (글자처럼 보이게)
+      const [dx, dy] = this.fx.pick([[s, 0], [0, s], [s, s], [-s, s]] as const);
+      g.lineBetween(x0, y0, x0 + dx, y0 + dy);
     }
     return g.setPosition(at.x, at.y);
   }
 
-  /** 총구 둘레에 고대 문자가 떴다 위로 흩어진다 */
+  /** 고대 명령 문자: 총구 둘레에 떴다 사라진다 */
   private glyphs(at: Vec2, color: string, count: number): void {
     for (let i = 0; i < count; i++) {
-      const g = this.glyph({ x: at.x + this.fx.range(-12, 12), y: at.y + this.fx.range(-14, 4) }, color, 5);
-      g.setScale(0.6);
-      this.run.tweens.add({ targets: g, scale: 1.15, y: g.y - 12, duration: 160, ease: 'Back.easeOut' });
-      this.run.tweens.add({ targets: g, alpha: 0, delay: 360 + i * 50, duration: 360, onComplete: () => g.destroy() });
+      const g = this.glyph({ x: at.x + this.fx.range(-10, 10), y: at.y + this.fx.range(-12, 2) }, color);
+      this.run.tweens.add({ targets: g, y: g.y - 8, alpha: 0, duration: 420 + i * 40, ease: 'Quad.easeOut', onComplete: () => g.destroy() });
     }
   }
 
@@ -579,7 +569,7 @@ export class SpecialWeapons {
     const nx = -dir.y, ny = dir.x;
     for (let d = 6; d < len; d += gap) {
       const side = this.fx.range(-width * 0.35, width * 0.35);
-      const g = this.glyph({ x: o.x + dir.x * d + nx * side, y: o.y + dir.y * d + ny * side }, color, 4);
+      const g = this.glyph({ x: o.x + dir.x * d + nx * side, y: o.y + dir.y * d + ny * side }, color);
       // 레이저와 함께 한꺼번에 새겨지고, 총구 쪽부터 차례로 떠오르며 사라진다
       this.run.tweens.add({ targets: g, alpha: 0, y: g.y - 10, delay: 320 + (d / len) * 160, duration: 380, ease: 'Quad.easeIn', onComplete: () => g.destroy() });
     }
@@ -641,7 +631,7 @@ export class SpecialWeapons {
     this.readySparkIn = 0.08;
     const m = this.run.combat.muzzle();
     this.spark({ x: m.x + this.fx.range(-2, 2), y: m.y + this.fx.range(-2, 2) }, b.glyphColor, 8);
-    if (this.fx.chance(0.45)) this.glyphs(m, b.glyphColor, 1);
+    if (this.fx.chance(0.3)) this.glyphs(m, b.glyphColor, 1);
   }
 
   /** 작은 빛 조각 하나 (angle이 없으면 아무 방향) */
