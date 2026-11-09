@@ -6,7 +6,7 @@
   "weaponOffset": 1,
   "muzzleMinTargetPx": 2,
   "weaponHand": {
-    "x": 0,
+    "x": 5,
     "y": -6
   },
   "dodge": {

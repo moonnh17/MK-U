@@ -535,14 +535,15 @@ weapon('weapon_grenade_launcher', 0.35, [
   '...KdKGGGK......',
   '...KKKKKKK......',
 ]);
-weapon('weapon_dagger', 0.2, [
-  '...K........',
-  '..KgKKKKKK..',
-  'KKKgKwwwwlK.',
-  'KbBgKlllmmdK',
-  'KKKgKmmmdK..',
-  '..KgKKKKK...',
-  '...K........',
+// 검 (id는 예전 단검 그대로 dagger)
+weapon('weapon_dagger', 0.15, [
+  '...K.............',
+  '..KgKKKKKKKKKKK..',
+  'KKKgKwwwwwwwwwlK.',
+  'KbBgKllllllllmmdK',
+  'KKKgKmmmmmmmmmdK.',
+  '..KgKKKKKKKKKKK..',
+  '...K.............',
 ]);
 weapon('weapon_greatsword', 0.15, [
   '....KK................',

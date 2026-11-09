@@ -65,8 +65,8 @@ describe('전사 전직 변환과 숙련', () => {
     lo = setSkillLevel(lo, findSkill(S, 'masteryWeapon'), 2, false);
     lo = setSkillLevel(lo, findSkill(S, 'masteryBody'), 1, false);
     const t = masteryTotals(lo, S);
-    expect(t.meleeDamage).toBeCloseTo(0.16);
-    expect(t.maxHpPct).toBeCloseTo(0.1);
+    expect(t.meleeDamage).toBeCloseTo(0.24);
+    expect(t.maxHpFlat).toBe(20);
   });
 });
 

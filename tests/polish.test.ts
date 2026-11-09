@@ -95,8 +95,8 @@ describe('정신력', () => {
 });
 
 describe('화면 수치', () => {
-  it('무기는 몸 가운데', () => {
-    expect(D.player.weaponHand.x).toBe(0);
+  it('무기는 화면 오른쪽 손', () => {
+    expect(D.player.weaponHand.x).toBeGreaterThan(0);
   });
   it('사망 연출 시간이 있다', () => {
     expect(D.juice.playerDeath.sec).toBeGreaterThan(0.5);

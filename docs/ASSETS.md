@@ -30,7 +30,7 @@
 | `weapon_smg` | 기관단총 | 7×7 | center | #9ab0c8 | mku/weapon_smg.png (1프레임) |
 | `weapon_sniper` | 저격총 | 10×10 | center | #5a6a8a | mku/weapon_sniper.png (1프레임) |
 | `weapon_grenade_launcher` | 유탄발사기 | 9×9 | center | #8a7a3a | mku/weapon_grenade_launcher.png (1프레임) |
-| `weapon_dagger` | 단검 | 6×6 | center | #d0d8e8 | mku/weapon_dagger.png (1프레임) |
+| `weapon_dagger` | 검 | 9×9 | center | #d0d8e8 | mku/weapon_dagger.png (1프레임) |
 | `weapon_greatsword` | 대검 | 12×12 | center | #b0b8d0 | mku/weapon_greatsword.png (1프레임) |
 | `weapon_spear` | 창 | 12×12 | center | #c8b07a | mku/weapon_spear.png (1프레임) |
 | `weapon_handi` | 신궁 환디 | 12×12 | center | #ff3b3b | mku/weapon_handi.png (1프레임) |

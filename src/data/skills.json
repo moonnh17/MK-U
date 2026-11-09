@@ -1020,9 +1020,9 @@
       "tags": [],
       "sources": {},
       "levels": [
-        { "cooldownSec": 0, "values": { "meleeDamage": 0.08 } },
-        { "cooldownSec": 0, "values": { "meleeDamage": 0.16 } },
-        { "cooldownSec": 0, "values": { "meleeDamage": 0.24 } }
+        { "cooldownSec": 0, "values": { "meleeDamage": 0.12 } },
+        { "cooldownSec": 0, "values": { "meleeDamage": 0.24 } },
+        { "cooldownSec": 0, "values": { "meleeDamage": 0.36 } }
       ],
       "color": "#c9ae79",
       "sprites": {}
@@ -1038,9 +1038,9 @@
       "tags": [],
       "sources": {},
       "levels": [
-        { "cooldownSec": 0, "values": { "maxHpPct": 0.1 } },
-        { "cooldownSec": 0, "values": { "maxHpPct": 0.2 } },
-        { "cooldownSec": 0, "values": { "maxHpPct": 0.3 } }
+        { "cooldownSec": 0, "values": { "maxHpFlat": 20 } },
+        { "cooldownSec": 0, "values": { "maxHpFlat": 40 } },
+        { "cooldownSec": 0, "values": { "maxHpFlat": 60 } }
       ],
       "color": "#c9ae79",
       "sprites": {}
@@ -1056,9 +1056,9 @@
       "tags": [],
       "sources": {},
       "levels": [
-        { "cooldownSec": 0, "values": { "paladinDamage": 0.08 } },
-        { "cooldownSec": 0, "values": { "paladinDamage": 0.16 } },
-        { "cooldownSec": 0, "values": { "paladinDamage": 0.24 } }
+        { "cooldownSec": 0, "values": { "paladinDamage": 0.12 } },
+        { "cooldownSec": 0, "values": { "paladinDamage": 0.24 } },
+        { "cooldownSec": 0, "values": { "paladinDamage": 0.36 } }
       ],
       "color": "#c9ae79",
       "sprites": {}

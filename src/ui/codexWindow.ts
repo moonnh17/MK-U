@@ -606,6 +606,19 @@ export class CodexWindow {
     ]);
     const ult = d.ultimates.ultimates.find((u) => u.id === job.startUltimate)!;
     this.block(box, 'codex.sub.ultimate', [`${t(ult.nameKey)} — ${t(ult.descKey, skillTextValues(ult.values))}`]);
+    // 숙련 (전사): 레벨 단추로 Lv1~3 설명을 바꿔 본다
+    const masteries = d.skills.skills.filter((s) => s.job === id && s.kind === 'mastery').map((s) => findSkill(d.skills, s.id));
+    this.block(
+      box,
+      'inventory.mastery',
+      masteries.map((s) =>
+        this.skillRow(
+          artKeys.skillIcon(s.id),
+          s.color,
+          s.levels.map((_, i) => ({ label: `Lv${i + 1}`, title: t(s.nameKey), desc: t(s.descKey, skillTextValues(skillValues(s, { level: i + 1, awakened: false }).values)), note: '' })),
+        ),
+      ),
+    );
     this.block(box, 'codex.sub.advancements', job.advancements.map((a) => `${t(a.nameKey)} — ${t(`codex.school.${a.id}`)}`));
   }
 

@@ -1310,12 +1310,13 @@ export class RunScene extends Phaser.Scene {
     this.hurtPlayer(damage, null, mental);
   }
 
-  /** 최대 체력 = (기본(+영구 강화) + 아이템) × (1 + 숙련·스킬 비율). 늘면 그만큼 현재 체력도 채운다 */
+  /** 최대 체력 = (기본(+영구 강화) + 아이템 + 신체 숙련) × (1 + 숙련·스킬 비율). 늘면 그만큼 현재 체력도 채운다 */
   syncMaxHp(): void {
     const d = this.ctx.data;
     const p = this.session.player;
-    const pct = (masteryTotals(p.loadout, d.skills).maxHpPct ?? 0) + (this.skillRt.playerMods().maxHpPct ?? 0);
-    const target = Math.round((d.player.maxHp + p.meta.maxHp + this.itemRt.sums.maxHp) * (1 + pct));
+    const m = masteryTotals(p.loadout, d.skills);
+    const pct = (m.maxHpPct ?? 0) + (this.skillRt.playerMods().maxHpPct ?? 0);
+    const target = Math.round((d.player.maxHp + p.meta.maxHp + this.itemRt.sums.maxHp + (m.maxHpFlat ?? 0)) * (1 + pct));
     if (target === p.maxHp) return;
     if (target > p.maxHp) p.hp += target - p.maxHp;
     p.maxHp = target;

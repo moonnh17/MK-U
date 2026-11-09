@@ -101,9 +101,9 @@
     },
     {
       "id": "dagger", "codexNo": 6, "nameKey": "weapon.dagger", "category": "blade", "fxColor": "#9af0d0", "critChance": 0.3, "grade": "common", "classes": ["slash"], "tags": ["physical", "melee"],
-      "baseDamage": 4, "fireIntervalSec": 0.16, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 70, "radius": 35 },
-      "projectileSpeed": 0, "range": 35, "cutsProjectiles": true, "droppable": true,
-      "spriteKey": "weapon_dagger", "color": "#d0d8e8", "size": 6
+      "baseDamage": 12, "fireIntervalSec": 0.4, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 110, "radius": 50 },
+      "projectileSpeed": 0, "range": 50, "cutsProjectiles": true, "droppable": true,
+      "spriteKey": "weapon_dagger", "color": "#d0d8e8", "size": 9
     },
     {
       "id": "greatsword", "codexNo": 7, "nameKey": "weapon.greatsword", "category": "blade", "fxColor": "#8ab0ff", "critChance": 0.3, "grade": "rare", "classes": ["slash"], "tags": ["physical", "melee", "charging"],
