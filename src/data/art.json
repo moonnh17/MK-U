@@ -6522,6 +6522,786 @@
           "loop": true
         }
       }
+    },
+    "player_warrior": {
+      "file": "mku/player_warrior.png",
+      "frameWidth": 48,
+      "frameHeight": 52,
+      "frames": 10,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 4
+        },
+        "move": {
+          "from": 4,
+          "to": 9,
+          "fps": 8
+        }
+      }
+    },
+    "player_barbarian": {
+      "file": "mku/player_barbarian.png",
+      "frameWidth": 34,
+      "frameHeight": 52,
+      "frames": 3,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "move": {
+          "from": 1,
+          "to": 2,
+          "fps": 8
+        }
+      }
+    },
+    "player_paladin": {
+      "file": "mku/player_paladin.png",
+      "frameWidth": 48,
+      "frameHeight": 52,
+      "frames": 9,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 2,
+          "fps": 4
+        },
+        "move": {
+          "from": 3,
+          "to": 8,
+          "fps": 8
+        }
+      }
+    },
+    "skill_bSlash_slash1": {
+      "file": "mku/skill_bSlash_slash1.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 24,
+          "loop": false
+        }
+      }
+    },
+    "skill_bChain_chain1": {
+      "file": "mku/skill_bChain_chain1.png",
+      "frameWidth": 120,
+      "frameHeight": 60,
+      "frames": 35,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 34,
+          "fps": 70,
+          "loop": false
+        }
+      }
+    },
+    "skill_bSlam_slam1": {
+      "file": "mku/skill_bSlam_slam1.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_bWhirl_whirl1": {
+      "file": "mku/skill_bWhirl_whirl1.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "skill_bShout_shout1": {
+      "file": "mku/skill_bShout_shout1.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_bHeart_heart1": {
+      "file": "mku/skill_bHeart_heart1.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 24,
+          "loop": true
+        }
+      }
+    },
+    "skill_pShield_shield1": {
+      "file": "mku/skill_pShield_shield1.png",
+      "frameWidth": 60,
+      "frameHeight": 60,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
+    "skill_pOath_oath1": {
+      "file": "mku/skill_pOath_oath1.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_pAura_aura1": {
+      "file": "mku/skill_pAura_aura1.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
+    "skill_pSmite_smite1": {
+      "file": "mku/skill_pSmite_smite1.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_pSwords_sword1": {
+      "file": "mku/skill_pSwords_sword1.png",
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_pPrayer_prayer1": {
+      "file": "mku/skill_pPrayer_prayer1.png",
+      "frameWidth": 60,
+      "frameHeight": 60,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_bSlash_slash2": {
+      "file": "mku/skill_bSlash_slash2.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 24,
+          "loop": false
+        }
+      }
+    },
+    "skill_bChain_chain2": {
+      "file": "mku/skill_bChain_chain2.png",
+      "frameWidth": 120,
+      "frameHeight": 60,
+      "frames": 36,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 35,
+          "fps": 70,
+          "loop": false
+        }
+      }
+    },
+    "skill_bSlam_slam2": {
+      "file": "mku/skill_bSlam_slam2.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_bWhirl_whirl2": {
+      "file": "mku/skill_bWhirl_whirl2.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "skill_bShout_shout2": {
+      "file": "mku/skill_bShout_shout2.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_bHeart_heart2": {
+      "file": "mku/skill_bHeart_heart2.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 24,
+          "loop": true
+        }
+      }
+    },
+    "skill_pShield_shield2": {
+      "file": "mku/skill_pShield_shield2.png",
+      "frameWidth": 60,
+      "frameHeight": 60,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
+    "skill_pOath_oath2": {
+      "file": "mku/skill_pOath_oath2.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_pAura_aura2": {
+      "file": "mku/skill_pAura_aura2.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
+    "skill_pSmite_smite2": {
+      "file": "mku/skill_pSmite_smite2.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_pSwords_sword2": {
+      "file": "mku/skill_pSwords_sword2.png",
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_pPrayer_prayer2": {
+      "file": "mku/skill_pPrayer_prayer2.png",
+      "frameWidth": 60,
+      "frameHeight": 60,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_bSlash_slash3": {
+      "file": "mku/skill_bSlash_slash3.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 24,
+          "loop": false
+        }
+      }
+    },
+    "skill_bChain_chain3": {
+      "file": "mku/skill_bChain_chain3.png",
+      "frameWidth": 120,
+      "frameHeight": 60,
+      "frames": 38,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 37,
+          "fps": 70,
+          "loop": false
+        }
+      }
+    },
+    "skill_bSlam_slam3": {
+      "file": "mku/skill_bSlam_slam3.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_bWhirl_whirl3": {
+      "file": "mku/skill_bWhirl_whirl3.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "skill_bShout_shout3": {
+      "file": "mku/skill_bShout_shout3.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_bHeart_heart3": {
+      "file": "mku/skill_bHeart_heart3.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 24,
+          "loop": true
+        }
+      }
+    },
+    "skill_pShield_shield3": {
+      "file": "mku/skill_pShield_shield3.png",
+      "frameWidth": 60,
+      "frameHeight": 60,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
+    "skill_pOath_oath3": {
+      "file": "mku/skill_pOath_oath3.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_pAura_aura3": {
+      "file": "mku/skill_pAura_aura3.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
+    "skill_pSmite_smite3": {
+      "file": "mku/skill_pSmite_smite3.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_pSwords_sword3": {
+      "file": "mku/skill_pSwords_sword3.png",
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_pPrayer_prayer3": {
+      "file": "mku/skill_pPrayer_prayer3.png",
+      "frameWidth": 60,
+      "frameHeight": 60,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "ult_sweep_sweep": {
+      "file": "mku/ult_sweep_sweep.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 24,
+          "loop": false
+        }
+      }
+    },
+    "ult_rage_aura": {
+      "file": "mku/ult_rage_aura.png",
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 24,
+          "loop": true
+        }
+      }
+    },
+    "ult_judgment_sword": {
+      "file": "mku/ult_judgment_sword.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 6,
+          "loop": false
+        }
+      }
+    },
+    "ult_judgment_impact": {
+      "file": "mku/ult_judgment_impact.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "ult_judgment_shield": {
+      "file": "mku/ult_judgment_shield.png",
+      "frameWidth": 60,
+      "frameHeight": 60,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": true
+        }
+      }
+    },
+    "icon_skill_masteryWeapon": {
+      "file": "mku/icon_skill_masteryWeapon.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_masteryBody": {
+      "file": "mku/icon_skill_masteryBody.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_masteryFaith": {
+      "file": "mku/icon_skill_masteryFaith.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_frenzySlash": {
+      "file": "mku/icon_skill_frenzySlash.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_chainThrow": {
+      "file": "mku/icon_skill_chainThrow.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_earthShatter": {
+      "file": "mku/icon_skill_earthShatter.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_whirlwind": {
+      "file": "mku/icon_skill_whirlwind.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_warCry": {
+      "file": "mku/icon_skill_warCry.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_boilingHeart": {
+      "file": "mku/icon_skill_boilingHeart.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_holyBulwark": {
+      "file": "mku/icon_skill_holyBulwark.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_oathOfRetribution": {
+      "file": "mku/icon_skill_oathOfRetribution.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_sanctuaryAura": {
+      "file": "mku/icon_skill_sanctuaryAura.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_smite": {
+      "file": "mku/icon_skill_smite.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_holySwords": {
+      "file": "mku/icon_skill_holySwords.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_prayerOfRevival": {
+      "file": "mku/icon_skill_prayerOfRevival.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_ult_berserkerRage": {
+      "file": "mku/icon_ult_berserkerRage.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_ult_divineJudgment": {
+      "file": "mku/icon_ult_divineJudgment.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_ult_sweep": {
+      "file": "mku/icon_ult_sweep.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
     }
   }
 }

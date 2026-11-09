@@ -8,15 +8,18 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 583개 · 그림 있음 571개
+전체 645개 · 그림 있음 633개
 
-## player (3)
+## player (6)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `player_human` | 플레이어 | 10×10 | feet | #e8e2d0 | mku/player_human.png (5프레임) |
 | `player_hectar` | 플레이어 헥타르 | 10×10 | feet | #e8e2d0 | mku/player_hectar.png (5프레임) |
 | `player_acro` | 플레이어 아크로 | 10×10 | feet | #e8e2d0 | mku/player_acro.png (5프레임) |
+| `player_warrior` | 플레이어 전사 | 10×10 | feet | #e8e2d0 | mku/player_warrior.png (10프레임) |
+| `player_barbarian` | 플레이어 야만용사 | 10×10 | feet | #e8e2d0 | mku/player_barbarian.png (3프레임) |
+| `player_paladin` | 플레이어 성기사 | 10×10 | feet | #e8e2d0 | mku/player_paladin.png (9프레임) |
 
 ## weapon (37)
 
@@ -224,7 +227,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (162)
+## skill (203)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -366,6 +369,42 @@
 | `fx_kaiser_laser` | MK : 프로토타입 (laser) 외 1곳 | 60×60 | center | #d9783b | mku/fx_kaiser_laser.png (3프레임) |
 | `skill_reduction_smoke` | 환원주의자 (smoke) | 12×12 | center | #5ad95a | mku/skill_reduction_smoke.png (1프레임) |
 | `skill_reduction_unit` | 환원주의자 (unit) | 14×14 | center | #5ad95a | mku/skill_reduction_unit.png (1프레임) |
+| `skill_bSlash_slash1` | 광란의 검격 (slash1) | 30×30 | center | #e07a2a | mku/skill_bSlash_slash1.png (12프레임) |
+| `skill_bSlash_slash2` | 광란의 검격 (slash2) | 30×30 | center | #e07a2a | mku/skill_bSlash_slash2.png (12프레임) |
+| `skill_bSlash_slash3` | 광란의 검격 (slash3) | 30×30 | center | #e07a2a | mku/skill_bSlash_slash3.png (12프레임) |
+| `skill_bChain_chain1` | 사슬 투척 (chain1) | 12×12 | center | #e07a2a | mku/skill_bChain_chain1.png (35프레임) |
+| `skill_bChain_chain2` | 사슬 투척 (chain2) | 12×12 | center | #e07a2a | mku/skill_bChain_chain2.png (36프레임) |
+| `skill_bChain_chain3` | 사슬 투척 (chain3) | 12×12 | center | #e07a2a | mku/skill_bChain_chain3.png (38프레임) |
+| `skill_bSlam_slam1` | 대지 파쇄 (slam1) | 48×48 | center | #e07a2a | mku/skill_bSlam_slam1.png (6프레임) |
+| `skill_bSlam_slam2` | 대지 파쇄 (slam2) | 48×48 | center | #e07a2a | mku/skill_bSlam_slam2.png (6프레임) |
+| `skill_bSlam_slam3` | 대지 파쇄 (slam3) | 48×48 | center | #e07a2a | mku/skill_bSlam_slam3.png (6프레임) |
+| `skill_bWhirl_whirl1` | 소용돌이 (whirl1) | 48×48 | center | #e07a2a | mku/skill_bWhirl_whirl1.png (6프레임) |
+| `skill_bWhirl_whirl2` | 소용돌이 (whirl2) | 48×48 | center | #e07a2a | mku/skill_bWhirl_whirl2.png (6프레임) |
+| `skill_bWhirl_whirl3` | 소용돌이 (whirl3) | 48×48 | center | #e07a2a | mku/skill_bWhirl_whirl3.png (6프레임) |
+| `skill_bShout_shout1` | 전장의 함성 (shout1) | 48×48 | center | #e07a2a | mku/skill_bShout_shout1.png (6프레임) |
+| `skill_bShout_shout2` | 전장의 함성 (shout2) | 48×48 | center | #e07a2a | mku/skill_bShout_shout2.png (6프레임) |
+| `skill_bShout_shout3` | 전장의 함성 (shout3) | 48×48 | center | #e07a2a | mku/skill_bShout_shout3.png (6프레임) |
+| `skill_bHeart_heart1` | 끓어오르는 심장 (heart1) | 16×16 | center | #e07a2a | mku/skill_bHeart_heart1.png (12프레임) |
+| `skill_bHeart_heart2` | 끓어오르는 심장 (heart2) | 16×16 | center | #e07a2a | mku/skill_bHeart_heart2.png (12프레임) |
+| `skill_bHeart_heart3` | 끓어오르는 심장 (heart3) | 16×16 | center | #e07a2a | mku/skill_bHeart_heart3.png (12프레임) |
+| `skill_pShield_shield1` | 성스러운 방벽 (shield1) | 14×14 | center | #e8d24a | mku/skill_pShield_shield1.png (6프레임) |
+| `skill_pShield_shield2` | 성스러운 방벽 (shield2) | 14×14 | center | #e8d24a | mku/skill_pShield_shield2.png (6프레임) |
+| `skill_pShield_shield3` | 성스러운 방벽 (shield3) | 14×14 | center | #e8d24a | mku/skill_pShield_shield3.png (6프레임) |
+| `skill_pOath_oath1` | 응징의 서약 (oath1) | 48×48 | center | #e8d24a | mku/skill_pOath_oath1.png (6프레임) |
+| `skill_pOath_oath2` | 응징의 서약 (oath2) | 48×48 | center | #e8d24a | mku/skill_pOath_oath2.png (6프레임) |
+| `skill_pOath_oath3` | 응징의 서약 (oath3) | 48×48 | center | #e8d24a | mku/skill_pOath_oath3.png (6프레임) |
+| `skill_pAura_aura1` | 성역 오라 (aura1) | 48×48 | center | #e8d24a | mku/skill_pAura_aura1.png (6프레임) |
+| `skill_pAura_aura2` | 성역 오라 (aura2) | 48×48 | center | #e8d24a | mku/skill_pAura_aura2.png (6프레임) |
+| `skill_pAura_aura3` | 성역 오라 (aura3) | 48×48 | center | #e8d24a | mku/skill_pAura_aura3.png (6프레임) |
+| `skill_pSmite_smite1` | 강타 (smite1) | 30×30 | center | #e8d24a | mku/skill_pSmite_smite1.png (6프레임) |
+| `skill_pSmite_smite2` | 강타 (smite2) | 30×30 | center | #e8d24a | mku/skill_pSmite_smite2.png (6프레임) |
+| `skill_pSmite_smite3` | 강타 (smite3) | 30×30 | center | #e8d24a | mku/skill_pSmite_smite3.png (6프레임) |
+| `skill_pSwords_sword1` | 성검 (sword1) | 24×24 | center | #e8d24a | mku/skill_pSwords_sword1.png (6프레임) |
+| `skill_pSwords_sword2` | 성검 (sword2) | 24×24 | center | #e8d24a | mku/skill_pSwords_sword2.png (6프레임) |
+| `skill_pSwords_sword3` | 성검 (sword3) | 24×24 | center | #e8d24a | mku/skill_pSwords_sword3.png (6프레임) |
+| `skill_pPrayer_prayer1` | 회생의 기도 (prayer1) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer1.png (6프레임) |
+| `skill_pPrayer_prayer2` | 회생의 기도 (prayer2) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer2.png (6프레임) |
+| `skill_pPrayer_prayer3` | 회생의 기도 (prayer3) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer3.png (6프레임) |
 | `ult_first_law` | 열역학 제1법칙 (particle) | 8×8 | center | #ff9a3c | mku/ult_first_law.png (1프레임) |
 | `ult_cut1` | 벼락 (cut1) | 20×20 | center | #6a9cff | mku/ult_cut1.png (1프레임) |
 | `ult_cut2` | 벼락 (cut2) | 20×20 | center | #6a9cff | mku/ult_cut2.png (1프레임) |
@@ -390,6 +429,11 @@
 | `ult_paradox_crumble` | 특이점 실험 (crumble) | 22×22 | center | #ff3a4a | mku/ult_paradox_crumble.png (4프레임) |
 | `ult_paradox_send` | 특이점 실험 (send) | 17×17 | center | #ff3a4a | mku/ult_paradox_send.png (3프레임) |
 | `ult_paradox_end` | 특이점 실험 (observeEnd) | 30×30 | center | #ff3a4a | mku/ult_paradox_end.png (4프레임) |
+| `ult_sweep_sweep` | 휩쓸기 (sweep) | 64×64 | center | #c9ae79 | mku/ult_sweep_sweep.png (6프레임) |
+| `ult_rage_aura` | 광전사의 진노 (aura) | 48×48 | center | #e07a2a | mku/ult_rage_aura.png (12프레임) |
+| `ult_judgment_sword` | 심판의 강림 (sword) | 64×64 | center | #e8d24a | mku/ult_judgment_sword.png (6프레임) |
+| `ult_judgment_impact` | 심판의 강림 (impact) | 64×64 | center | #e8d24a | mku/ult_judgment_impact.png (6프레임) |
+| `ult_judgment_shield` | 심판의 강림 (shield) | 32×32 | center | #e8d24a | mku/ult_judgment_shield.png (6프레임) |
 
 ## lab (7)
 
@@ -446,7 +490,7 @@
 | `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | mku/item_orion_shield.png (1프레임) |
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | mku/item_hectar_ram.png (1프레임) |
 
-## icon (17)
+## icon (35)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -462,9 +506,27 @@
 | `icon_skill_purifyingWings` | 정화의 날개 | 16×16 | center | #d93a3a | mku/icon_skill_purifyingWings.png (1프레임) |
 | `icon_skill_mkPrototype` | MK : 프로토타입 | 16×16 | center | #d9783b | mku/icon_skill_mkPrototype.png (1프레임) |
 | `icon_skill_reductionist` | 환원주의자 | 16×16 | center | #5ad95a | mku/icon_skill_reductionist.png (1프레임) |
+| `icon_skill_masteryWeapon` | 무기 숙련 | 16×16 | center | #c9ae79 | mku/icon_skill_masteryWeapon.png (1프레임) |
+| `icon_skill_masteryBody` | 신체 숙련 | 16×16 | center | #c9ae79 | mku/icon_skill_masteryBody.png (1프레임) |
+| `icon_skill_masteryFaith` | 신앙 강화 | 16×16 | center | #c9ae79 | mku/icon_skill_masteryFaith.png (1프레임) |
+| `icon_skill_frenzySlash` | 광란의 검격 | 16×16 | center | #e07a2a | mku/icon_skill_frenzySlash.png (1프레임) |
+| `icon_skill_chainThrow` | 사슬 투척 | 16×16 | center | #e07a2a | mku/icon_skill_chainThrow.png (1프레임) |
+| `icon_skill_earthShatter` | 대지 파쇄 | 16×16 | center | #e07a2a | mku/icon_skill_earthShatter.png (1프레임) |
+| `icon_skill_whirlwind` | 소용돌이 | 16×16 | center | #e07a2a | mku/icon_skill_whirlwind.png (1프레임) |
+| `icon_skill_warCry` | 전장의 함성 | 16×16 | center | #e07a2a | mku/icon_skill_warCry.png (1프레임) |
+| `icon_skill_boilingHeart` | 끓어오르는 심장 | 16×16 | center | #e07a2a | mku/icon_skill_boilingHeart.png (1프레임) |
+| `icon_skill_holyBulwark` | 성스러운 방벽 | 16×16 | center | #e8d24a | mku/icon_skill_holyBulwark.png (1프레임) |
+| `icon_skill_oathOfRetribution` | 응징의 서약 | 16×16 | center | #e8d24a | mku/icon_skill_oathOfRetribution.png (1프레임) |
+| `icon_skill_sanctuaryAura` | 성역 오라 | 16×16 | center | #e8d24a | mku/icon_skill_sanctuaryAura.png (1프레임) |
+| `icon_skill_smite` | 강타 | 16×16 | center | #e8d24a | mku/icon_skill_smite.png (1프레임) |
+| `icon_skill_holySwords` | 성검 | 16×16 | center | #e8d24a | mku/icon_skill_holySwords.png (1프레임) |
+| `icon_skill_prayerOfRevival` | 회생의 기도 | 16×16 | center | #e8d24a | mku/icon_skill_prayerOfRevival.png (1프레임) |
 | `icon_ult_firstLaw` | 열역학 제1법칙 | 16×16 | center | #ff9a3c | mku/icon_ult_firstLaw.png (1프레임) |
 | `icon_ult_thunderbolt` | 벼락 | 16×16 | center | #4ab0ff | mku/icon_ult_thunderbolt.png (1프레임) |
 | `icon_ult_singularity` | 특이점 실험 | 16×16 | center | #ff3a4a | mku/icon_ult_singularity.png (1프레임) |
+| `icon_ult_sweep` | 휩쓸기 | 16×16 | center | #c9ae79 | mku/icon_ult_sweep.png (1프레임) |
+| `icon_ult_berserkerRage` | 광전사의 진노 | 16×16 | center | #e07a2a | mku/icon_ult_berserkerRage.png (1프레임) |
+| `icon_ult_divineJudgment` | 심판의 강림 | 16×16 | center | #e8d24a | mku/icon_ult_divineJudgment.png (1프레임) |
 | `icon_gemini` | 미모사 제미니 (icon) | 16×16 | center | #4ab0ff | mku/icon_gemini.png (1프레임) |
 | `portrait_gemini` | 미모사 제미니 (portrait) | 48×64 | center | #4ab0ff | mku/portrait_gemini.png (1프레임) |
 

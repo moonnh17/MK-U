@@ -1599,6 +1599,47 @@ bFx('05', 'vfx.kaiser.command-shock', 'fx_kaiser_command', 120);
 // vfx.kaiser.debris는 원본이 네모로 잘린 조각이라 쓰지 않는다 (지열 분출은 어깨 미사일 집속 폭발)
 bFx('05', 'vfx.boss.magi_kaiser.death', 'fx_kaiser_death', 110);
 
+// ---------- 전사 (기본 · 야만용사 · 성기사) ----------
+// 본체는 warrior/ 고해상도 스트립(빈 세로줄로 프레임 나눔). 야만용사는 오른쪽 보는 그림.
+actor('player_warrior', gaps('warrior/warrior-idle.png'), gaps('warrior/warrior-move.png'), 26);
+actor('player_barbarian', gaps('warrior/barbarian-idle-right.png'), gaps('warrior/barbarian-move-right.png'), 26);
+actor('player_paladin', gaps('warrior/paladin-idle.png'), gaps('warrior/paladin-move.png'), 26);
+// 스킬 이펙트: 원본 게임의 칸 크기·프레임 수·FPS 그대로 (가로 스트립). 게임 Lv1·2·3 = 원본 Lv1·3·5
+const wStrip = (f, fw) => { const im = load(f); const n = Math.round(im.w / fw); return Array.from({ length: n }, (_, i) => k.crop(im, i * fw, 0, fw, im.h)); };
+const wFx = (key, f, fw, fit, fps, loop = false) => fxArt(key, wStrip(f, fw), fit, { fps, loop });
+const WLV = [['1', 'l1'], ['2', 'l3'], ['3', 'l5']];
+for (const [n, l] of WLV) {
+  wFx(`skill_bSlash_slash${n}`, `warrior-v8/b-slash-${l}.png`, 192, 60, 24);
+  wFx(`skill_bChain_chain${n}`, `warrior-v7/b-chain-arm-${l}.png`, 256, 60, 70);
+  wFx(`skill_bSlam_slam${n}`, `warrior-v7/b-slam-${l}.png`, 128, 50, 12);
+  wFx(`skill_bWhirl_whirl${n}`, `warrior-v119/b-whirl-${l}.png`, 192, 60, 14);
+  wFx(`skill_bShout_shout${n}`, `warrior-v7/b-shout-${l}.png`, 128, 50, 12);
+  wFx(`skill_bHeart_heart${n}`, `warrior-v8/b-heart-${l}.png`, 128, 24, 24, true);
+  wFx(`skill_pShield_shield${n}`, `warrior-v4/p-shield-${l}.png`, 128, 30, 12, true);
+  wFx(`skill_pOath_oath${n}`, `warrior-v4/p-oath-${l}.png`, 128, 50, 12);
+  wFx(`skill_pAura_aura${n}`, `warrior-v4/p-aura-${l}.png`, 128, 60, 12, true);
+  wFx(`skill_pSmite_smite${n}`, `warrior-v4/p-smite-${l}.png`, 128, 50, 12);
+  // 성검은 한 자루씩 떨어진다 (원본 Lv5 시트는 다섯 자루를 한 장에 그렸다)
+  wFx(`skill_pSwords_sword${n}`, 'warrior-v4/p-swords-l1.png', 128, 40, 12);
+  wFx(`skill_pPrayer_prayer${n}`, `warrior-v4/p-prayer-${l}.png`, 128, 30, 12);
+}
+wFx('ult_sweep_sweep', 'warrior-v6/w-slash.png', 192, 60, 24);
+wFx('ult_rage_aura', 'warrior-v8/b-rage.png', 64, 40, 24, true);
+wFx('ult_judgment_sword', 'warrior-v3/p-judgment.png', 96, 60, 6);
+wFx('ult_judgment_impact', 'warrior-v4/p-oath-l5.png', 128, 60, 12);
+wFx('ult_judgment_shield', 'warrior-v4/p-aura-l1.png', 128, 30, 12, true);
+// 카드·HUD 아이콘
+const W_ICON = {
+  masteryWeapon: 'icon-mastery-weapon', masteryBody: 'icon-mastery-body', masteryFaith: 'icon-mastery-faith',
+  frenzySlash: 'icon-b-slash', chainThrow: 'icon-b-chain', earthShatter: 'icon-b-slam', whirlwind: 'icon-b-whirl', warCry: 'icon-b-shout', boilingHeart: 'icon-b-heart',
+  holyBulwark: 'icon-p-shield', oathOfRetribution: 'icon-p-oath', sanctuaryAura: 'icon-p-aura', smite: 'icon-p-smite', holySwords: 'icon-p-swords', prayerOfRevival: 'icon-p-prayer',
+};
+for (const [id, f] of Object.entries(W_ICON)) sprites[`icon_skill_${id}`] = icon(`icon_skill_${id}`, `warrior/${f}.png`, CARD_ICON);
+sprites.icon_ult_berserkerRage = icon('icon_ult_berserkerRage', 'warrior/icon-b-rage.png', CARD_ICON);
+sprites.icon_ult_divineJudgment = icon('icon_ult_divineJudgment', 'warrior/icon-p-judgment.png', CARD_ICON);
+// 휩쓸기: 흰 초승달 참격 한 칸
+sprites.icon_ult_sweep = icon('icon_ult_sweep', 'warrior-v6/w-slash.png', CARD_ICON, { x: 192 * 2, y: 0, w: 192, h: 192 });
+
 const artPath = path.join(REPO, 'src/data/art.json');
 const json = { basePath: 'assets/', sprites };
 fs.writeFileSync(artPath, JSON.stringify(json, null, 2) + '\n');
