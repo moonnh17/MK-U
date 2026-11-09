@@ -128,3 +128,27 @@ describe('숙련은 보관 스킬이 아니다', () => {
     expect(ownedMasteries(lo, S)).toEqual(['masteryWeapon', 'masteryFaith']);
   });
 });
+
+describe('야만용사 각성', () => {
+  it('스킬·궁극기마다 정해진 요구 아이템', async () => {
+    const need = Object.fromEntries(S.skills.filter((x) => x.school === 'barbarian').map((x) => [x.id, x.awakening?.requiredItem]));
+    expect(need).toEqual({ frenzySlash: 'ichor', chainThrow: 'chainRing', earthShatter: 'oldMagiEngine', whirlwind: 'tourbillon', warCry: 'oakHeart', boilingHeart: 'warriorMemory' });
+    expect(gameData.ultimates.ultimates.find((u) => u.id === 'berserkerRage')!.awakening!.requiredItem).toBe('siriusArmor');
+  });
+  it('각성 수치는 Lv3 위에 덮인다 (소용돌이는 회전 그대로 + 참격)', async () => {
+    const { skillValues } = await import('../src/systems/skills');
+    const v = skillValues(findSkill(S, 'whirlwind'), { level: 3, awakened: true }).values;
+    expect(v).toMatchObject({ damage: 39, hits: 14, shotPierce: 6 });
+    expect(skillValues(findSkill(S, 'boilingHeart'), { level: 3, awakened: true }).values).toMatchObject({ maxHpPct: 0.65, hpDamage: 0.022, damageCap: 30 });
+  });
+  it('새 아이템: 설명 자리값, 시리우스의 갑주 야만용사 변형', async () => {
+    const { itemDescParams } = await import('../src/ui/itemCard');
+    const { activeEffects } = await import('../src/systems/items');
+    const it = (id: string) => gameData.items.items.find((i) => i.id === id)!;
+    expect(itemDescParams(it('ichor'), gameData.groupMultipliers)).toMatchObject({ ch2: '25', d2: '2' });
+    expect(itemDescParams(it('siriusArmor'), gameData.groupMultipliers)).toMatchObject({ th3: '30', g3: '40', dur3: '5', s3: '30' });
+    const kinds = (school: string | null) => activeEffects(it('siriusArmor'), { school: school as never, job: 'warrior' }, gameData.groupMultipliers).map((e) => e.kind);
+    expect(kinds('barbarian')).toContain('ultimateCooldown');
+    expect(kinds('paladin')).not.toContain('ultimateCooldown');
+  });
+});

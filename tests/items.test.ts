@@ -28,9 +28,9 @@ const totals = (ids: string[], school: 'hectar' | 'acro' | null = null) =>
   itemTotals(ids, I, { school, job: 'magiScholar' }, G);
 
 describe('아이템 목록 (기획서 표)', () => {
-  it('일반 5·레어 12·전설 8·유니크 6·신화 1 + 세트 1 + 보스 전용', () => {
+  it('일반 5·레어 14·전설 9·유니크 7·신화 1 + 세트 1 + 보스 전용', () => {
     const by = (g: string) => I.items.filter((x) => x.pool === 'normal' && x.grade === g).length;
-    expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([5, 12, 8, 6, 1]);
+    expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([5, 14, 9, 7, 1]);
     expect(I.items.filter((x) => x.pool === 'set').map((x) => x.id)).toEqual(['warriorMemory']);
     expect(I.items.filter((x) => x.pool === 'boss').map((x) => [x.id, x.bossId])).toEqual([
       ['wonhonLump', 'fusionAkgwi'],
@@ -80,12 +80,12 @@ describe('효과 합산', () => {
     expect(totals(['forbiddenGift']).damageTaken).toBeCloseTo(-0.1);
     expect(totals(['steelCastleFigure'])).toMatchObject({ maxHp: 20, damageTaken: 0.05, maxEnergy: 20 });
   });
-  it('각성 아이템은 모두 일반 풀 또는 보스 드롭에 있다', () => {
+  it('각성 아이템은 모두 일반 풀·보스 드롭·세트 합성으로 얻는다', () => {
     const skills = gameData.skills.skills.flatMap((s) => (s.awakening ? [s.awakening.requiredItem] : []));
     expect(new Set(skills).size).toBe(skills.length);
-    for (const id of skills) expect(['normal', 'boss']).toContain(item(id).pool);
+    for (const id of skills) expect(['normal', 'boss', 'set']).toContain(item(id).pool);
     const ult = gameData.ultimates.ultimates.filter((u) => u.awakening).map((u) => u.awakening!.requiredItem);
-    expect(ult.sort()).toEqual(['atrosCodex', 'regulusShard']);
+    expect(ult.sort()).toEqual(['atrosCodex', 'regulusShard', 'siriusArmor']);
   });
   it('실험용 반물질: 모두 기술 피해 +10%, 헥타르 외에는 자동 발사, 헥타르는 반물질포 피해 +50%', () => {
     const kinds = (school: 'hectar' | 'acro' | null) => activeEffects(item('antimatterSample'), { school, job: 'magiScholar' }, G).map((e) => e.kind);

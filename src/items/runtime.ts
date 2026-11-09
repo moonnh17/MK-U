@@ -40,6 +40,8 @@ export interface ItemState {
   absorbLeft: number;
   /** 회복을 쓴 횟수 (한우촌의 생등심). 예전 저장에는 없다 */
   healCount?: number;
+  /** 빈사 방어 남은 시간 (시리우스의 갑주). 예전 저장에는 없다 */
+  guardLeft?: number;
 }
 
 export function newItemState(): ItemState {
@@ -288,7 +290,8 @@ export class ItemRuntime {
   /** 방패가 날아가는 동안 받는 피해 감소 */
   guard(): number {
     this.refresh();
-    return this.shield && this.shieldsOut > 0 ? this.shield.e.guard : 0;
+    const thrown = this.shield && this.shieldsOut > 0 ? this.shield.e.guard : 0;
+    return thrown + this.each('lowHpGuard').reduce((sum, { id, e }) => sum + ((this.state(id).guardLeft ?? 0) > 0 ? e.reduction : 0), 0);
   }
 
   /** 함성(바바리안 데스 휘슬): 전투 칸에 들어갈 때·엘리트를 처치할 때 */
@@ -367,6 +370,7 @@ export class ItemRuntime {
       const s = this.state(id);
       s.cd = Math.max(0, s.cd - dt);
       s.roarLeft = Math.max(0, s.roarLeft - dt);
+      s.guardLeft = Math.max(0, (s.guardLeft ?? 0) - dt);
     }
     this.updateCore(dt);
     // 주기 발동
@@ -474,6 +478,14 @@ export class ItemRuntime {
       this.host.setInvuln(e.sec, true);
       s.cd = e.cooldownSec;
     }
+    // 시리우스의 갑주: 체력이 기준 아래로 떨어지면 잠시 받는 피해 감소
+    const p = this.host.player();
+    for (const { id, e } of this.each('lowHpGuard')) {
+      const s = this.state(id);
+      if (s.cd > 0 || p.hp / p.maxHp >= e.threshold) continue;
+      s.guardLeft = e.durationSec;
+      s.cd = e.cooldownSec;
+    }
     for (const { e } of this.each('hurtBurst')) {
       const p = host.playerPos();
       const r = this.host.area(e.radius);
@@ -566,6 +578,12 @@ export class ItemRuntime {
       const p = this.host.player();
       const up = hpStance(p.hp, p.maxHp, e).damage > 0;
       out.push({ id: `item.${id}`, label: t(up ? `item.${id}.buff.attack` : `item.${id}.buff.defense`), color: color(id) });
+    }
+    for (const { id, e } of this.each('lowHpGuard')) {
+      const s = this.state(id);
+      const base = { id: `item.${id}`, label: t(`item.${id}.buff`), color: color(id) };
+      if ((s.guardLeft ?? 0) > 0) out.push({ ...base, leftSec: s.guardLeft, totalSec: e.durationSec });
+      else if (s.cd > 0) out.push({ ...base, cdSec: s.cd, cdTotalSec: e.cooldownSec });
     }
     for (const { id, e } of this.each('hurtInvuln')) {
       const s = this.state(id);

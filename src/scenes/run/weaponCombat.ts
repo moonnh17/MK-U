@@ -21,6 +21,7 @@ import { chainTargets, lineHits, muzzleAngle, muzzlePoint, shotOrigin } from '..
 import { signatureFires, weaponPose, type WeaponMotionKind, type WeaponMotionParams } from '../../systems/motion';
 import { corruptedDamage, skillChance } from '../../systems/acro';
 import { hpStance } from '../../systems/vitals';
+
 import { masteryTotals } from '../../systems/skills';
 import { gradeEnergyMultiplier } from '../../systems/damage';
 import { chargedCrit, gunShots, inArc, projectilesCut, rollCrit, spendEnergy, spinUpMul, type WeaponItem, type WeaponStats } from '../../systems/weapons';
@@ -28,6 +29,9 @@ import { contains, interiorRect } from '../../systems/worldLayout';
 import type { SpriteRef, WeaponSignature, SpaceRule, TagId, WeaponDef } from '../../types/data';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
+
+/** 신성한 이코르의 출혈 공격 태그 */
+const ITEM_BLEED_TAGS: readonly TagId[] = ['physical', 'bleed'];
 
 export class WeaponCombat {
   /** 유니크 고유 효과: 지금 무기로 한 공격 수 */
@@ -841,7 +845,11 @@ export class WeaponCombat {
     if (space) dmg = spaceDamage(enemy.rank, enemy.maxHp, dmg, this.run.tagRule<SpaceRule>('space'));
     const crit = this.pendingCrit;
     this.pendingCrit = false;
-    return this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption), source, { tags, crit, space });
+    const killed = this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption), source, { tags, crit, space });
+    // 신성한 이코르: 근접 공격이 맞으면 확률로 출혈
+    const mb = this.run.itemRt.first('meleeBleed');
+    if (mb && !killed && tags.includes('melee') && this.run.rng.chance(mb.chance)) this.run.host.bleed(enemy, mb.damage, mb.stacks, ITEM_BLEED_TAGS);
+    return killed;
   }
 
   /** 계산이 끝난 피해를 넣는다. 환원주의자 등에게 알리고, 죽였으면 true */

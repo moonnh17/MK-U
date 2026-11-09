@@ -1182,6 +1182,10 @@ export type ItemEffect =
   /** 무기 치명타 피해 배율 + (크레퓌스퀼) */
   | { kind: 'critDamage'; value: number }
   /** 궁극기를 쓸 때 관통 탄환 shots발 전방위 (고대병기의 코어) */
+  /** 근접 공격이 맞으면 chance 확률로 출혈 (중첩당 틱 피해 damage). 신성한 이코르 */
+  | { kind: 'meleeBleed'; chance: number; damage: number; stacks: number }
+  /** 체력이 threshold 아래로 떨어지면 durationSec 동안 받는 피해 −reduction, 재사용 cooldownSec. 시리우스의 갑주 */
+  | { kind: 'lowHpGuard'; threshold: number; reduction: number; durationSec: number; cooldownSec: number }
   | { kind: 'ultimateBurst'; shots: number; damage: number; speed: number; range: number; tags: TagId[] };
 
 export type ItemPool = 'normal' | 'boss' | 'hiddenBoss' | 'set';

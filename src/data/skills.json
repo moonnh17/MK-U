@@ -1072,7 +1072,20 @@
       "shortKey": "skill.frenzySlash.short",
       "descKey": "skill.frenzySlash.desc",
       "tags": ["physical", "melee", "bleed"],
-      "sources": { "slash": ["physical", "melee"], "bleed": ["physical", "bleed"] },
+      "sources": { "slash": ["physical", "melee"], "bleed": ["physical", "bleed"], "cross": ["physical", "melee"] },
+      "awakening": {
+        "nameKey": "skill.frenzySlash.awakened",
+        "descKey": "skill.frenzySlash.awakened.desc",
+        "requiredItem": "ichor",
+        "tags": ["physical", "melee", "bleed"],
+        "cooldownSec": 8,
+        "values": {
+          "crossEvery": 4,
+          "crossDamage": 20.5,
+          "spreadRadius": 27,
+          "spreadCap": 6
+        }
+      },
       "levels": [
         {
           "cooldownSec": 10,
@@ -1119,6 +1132,7 @@
       ],
       "color": "#e07a2a",
       "sprites": {
+        "slashA": { "spriteKey": "skill_bSlash_slashA", "color": "#e07a2a", "size": 48 },
         "slash1": { "spriteKey": "skill_bSlash_slash1", "color": "#e07a2a", "size": 30 },
         "slash2": { "spriteKey": "skill_bSlash_slash2", "color": "#e07a2a", "size": 30 },
         "slash3": { "spriteKey": "skill_bSlash_slash3", "color": "#e07a2a", "size": 30 }
@@ -1133,7 +1147,26 @@
       "shortKey": "skill.chainThrow.short",
       "descKey": "skill.chainThrow.desc",
       "tags": ["physical", "ranged"],
-      "sources": { "chain": ["physical", "ranged"] },
+      "sources": { "chain": ["physical", "ranged"], "deploy": ["physical", "ranged"], "spin": ["physical", "ranged"] },
+      "awakening": {
+        "nameKey": "skill.chainThrow.awakened",
+        "descKey": "skill.chainThrow.awakened.desc",
+        "requiredItem": "chainRing",
+        "tags": ["physical", "ranged"],
+        "cooldownSec": 12.6,
+        "values": {
+          "chains": 8,
+          "range": 144,
+          "deploySec": 0.18,
+          "deployDamage": 20,
+          "spinDamage": 6,
+          "spin1Sec": 0.4,
+          "spin2Sec": 0.6,
+          "spin3Sec": 0.8,
+          "retractSec": 1.05,
+          "gapPx": 14
+        }
+      },
       "levels": [
         { "cooldownSec": 12, "values": { "chains": 3, "damage": 10.4, "range": 80, "spreadDeg": 52, "halfWidth": 4, "pullPx": 15, "pullSec": 0.25 } },
         { "cooldownSec": 11, "values": { "chains": 4, "damage": 17.3, "range": 96, "spreadDeg": 69, "halfWidth": 4, "pullPx": 15, "pullSec": 0.25 } },
@@ -1141,6 +1174,7 @@
       ],
       "color": "#e07a2a",
       "sprites": {
+        "chainA": { "spriteKey": "skill_bChain_chainA", "color": "#e07a2a", "size": 48 },
         "chain1": { "spriteKey": "skill_bChain_chain1", "color": "#e07a2a", "size": 12 },
         "chain2": { "spriteKey": "skill_bChain_chain2", "color": "#e07a2a", "size": 12 },
         "chain3": { "spriteKey": "skill_bChain_chain3", "color": "#e07a2a", "size": 12 }
@@ -1156,6 +1190,25 @@
       "descKey": "skill.earthShatter.desc",
       "tags": ["physical", "melee"],
       "sources": { "slam": ["physical", "melee"] },
+      "awakening": {
+        "nameKey": "skill.earthShatter.awakened",
+        "descKey": "skill.earthShatter.awakened.desc",
+        "requiredItem": "oldMagiEngine",
+        "tags": ["physical", "melee"],
+        "cooldownSec": 8.6,
+        "values": {
+          "damage": 135,
+          "range": 61,
+          "blast1Sec": 0.25,
+          "blast2Sec": 0.6,
+          "blast3Sec": 0.95,
+          "blast2Mul": 0.45,
+          "blast3Mul": 0.55,
+          "blast2Grow": 1.2,
+          "blast3Grow": 1.45,
+          "knockback": 12
+        }
+      },
       "levels": [
         { "cooldownSec": 10.8, "values": { "damage": 28, "range": 36, "blasts": 3, "blastGapSec": 0.25, "fracture": 0 } },
         { "cooldownSec": 9.7, "values": { "damage": 41, "range": 45, "blasts": 3, "blastGapSec": 0.25, "fracture": 0 } },
@@ -1177,7 +1230,20 @@
       "shortKey": "skill.whirlwind.short",
       "descKey": "skill.whirlwind.desc",
       "tags": ["physical", "melee"],
-      "sources": { "spin": ["physical", "melee"] },
+      "sources": { "spin": ["physical", "melee"], "shot": ["physical", "ranged"] },
+      "awakening": {
+        "nameKey": "skill.whirlwind.awakened",
+        "descKey": "skill.whirlwind.awakened.desc",
+        "requiredItem": "tourbillon",
+        "tags": ["physical", "melee"],
+        "cooldownSec": 14,
+        "values": {
+          "shotDamage": 13.7,
+          "shotRange": 150,
+          "shotSpeed": 186,
+          "shotPierce": 6
+        }
+      },
       "levels": [
         {
           "cooldownSec": 14,
@@ -1191,6 +1257,8 @@
       ],
       "color": "#e07a2a",
       "sprites": {
+        "whirlA": { "spriteKey": "skill_bWhirl_whirlA", "color": "#e07a2a", "size": 48 },
+        "shotA": { "spriteKey": "ult_sweep_sweep", "color": "#e07a2a", "size": 14 },
         "whirl1": { "spriteKey": "skill_bWhirl_whirl1", "color": "#e07a2a", "size": 48 },
         "whirl2": { "spriteKey": "skill_bWhirl_whirl2", "color": "#e07a2a", "size": 48 },
         "whirl3": { "spriteKey": "skill_bWhirl_whirl3", "color": "#e07a2a", "size": 48 }
@@ -1206,6 +1274,17 @@
       "descKey": "skill.warCry.desc",
       "tags": ["buff"],
       "sources": {},
+      "awakening": {
+        "nameKey": "skill.warCry.awakened",
+        "descKey": "skill.warCry.awakened.desc",
+        "requiredItem": "oakHeart",
+        "tags": ["buff"],
+        "cooldownSec": 14,
+        "values": {
+          "meleeDamage": 0.75,
+          "moveSpeed": 0.2
+        }
+      },
       "levels": [
         { "cooldownSec": 18, "values": { "meleeDamage": 0.29, "lifesteal": 0.01, "durationSec": 5 } },
         { "cooldownSec": 16, "values": { "meleeDamage": 0.43, "lifesteal": 0.015, "durationSec": 6 } },
@@ -1228,6 +1307,18 @@
       "descKey": "skill.boilingHeart.desc",
       "tags": [],
       "sources": {},
+      "awakening": {
+        "nameKey": "skill.boilingHeart.awakened",
+        "descKey": "skill.boilingHeart.awakened.desc",
+        "requiredItem": "warriorMemory",
+        "tags": [],
+        "cooldownSec": 0,
+        "values": {
+          "maxHpPct": 0.65,
+          "hpDamage": 0.022,
+          "damageCap": 30
+        }
+      },
       "levels": [
         { "cooldownSec": 0, "values": { "maxHpPct": 0.1, "hpDamage": 0, "damageCap": 18 } },
         { "cooldownSec": 0, "values": { "maxHpPct": 0.22, "hpDamage": 0.0124, "damageCap": 18 } },

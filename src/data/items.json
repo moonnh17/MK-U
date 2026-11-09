@@ -1,14 +1,14 @@
 {
   "codexLore": {
-    "commoner": ["slimeStew", "magicasol", "steelCastleFigure", "afroBelt"],
+    "commoner": ["slimeStew", "magicasol", "steelCastleFigure", "afroBelt", "chainRing"],
     "elite": ["leeSeal", "hanwooSteak"],
     "books": ["elegantMagi", "combatTheory", "magowikiCodex", "atrosCodex", "gisupStone", "warDiary", "snellLaw"],
     "warRelic": ["namelessSword", "namelessHelm", "brokenHilt", "warriorMemory", "wonhonLump"],
     "lab": ["antimatterSample", "lk99", "magnetResonator", "helaCell", "forbiddenVirus", "hectarRam", "extraArms"],
     "vroad": ["chantforetSpirit", "oakHeart", "tourbillon", "crepuscule"],
-    "history": ["forbiddenGift", "royalSeal", "deathWhistle"],
-    "starRelic": ["regulusShard", "caesarCrown", "acruxCross", "orionBelt", "orionShield"],
-    "creator": ["divineSword"]
+    "history": ["forbiddenGift", "royalSeal", "deathWhistle", "oldMagiEngine"],
+    "starRelic": ["regulusShard", "caesarCrown", "acruxCross", "orionBelt", "orionShield", "siriusArmor"],
+    "creator": ["divineSword", "ichor"]
   },
   "treasureWeights": {
     "1": { "common": 64, "rare": 26, "legendary": 8, "unique": 2 },
@@ -157,6 +157,19 @@
     { "id": "crepuscule", "codexNo": 38, "nameKey": "item.crepuscule", "descKey": "item.crepuscule.desc", "grade": "legendary", "pool": "normal", "tags": [],
       "effects": [{ "kind": "critChance", "value": 0.15 }, { "kind": "critDamage", "value": 0.25 }],
       "spriteKey": "item_crepuscule", "color": "#c06a3a", "size": 8 },
+    { "id": "ichor", "codexNo": 39, "nameKey": "item.ichor", "descKey": "item.ichor.desc", "abilityDescKey": "item.ichor.abilityDesc", "flavor": "codex.itemFlavor.ichor", "grade": "legendary", "pool": "normal", "tags": ["bleed"],
+      "effects": [{ "kind": "damage", "scope": "melee", "value": 0.15, "group": "damagePct" }, { "kind": "lifesteal", "value": 0.01, "group": "damagePct" }, { "kind": "meleeBleed", "chance": 0.25, "damage": 40, "stacks": 1 }],
+      "spriteKey": "item_ichor", "color": "#d9a53a", "size": 8 },
+    { "id": "chainRing", "codexNo": 40, "nameKey": "item.chainRing", "descKey": "item.chainRing.desc", "flavor": "codex.itemFlavor.chainRing", "grade": "rare", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "area", "value": 0.1, "group": "damagePct" }, { "kind": "maxHp", "value": 10, "group": "hpFlat" }],
+      "spriteKey": "item_chain_ring", "color": "#9aa4c0", "size": 8 },
+    { "id": "oldMagiEngine", "codexNo": 41, "nameKey": "item.oldMagiEngine", "descKey": "item.oldMagiEngine.desc", "flavor": "codex.itemFlavor.oldMagiEngine", "grade": "rare", "pool": "normal", "tags": [],
+      "effects": [{ "kind": "skillCooldown", "value": 0.08, "group": "damagePct" }, { "kind": "maxEnergy", "value": 15, "group": "hpFlat" }],
+      "spriteKey": "item_old_magi_engine", "color": "#5a6ad9", "size": 8 },
+    { "id": "siriusArmor", "codexNo": 42, "nameKey": "item.siriusArmor", "descKey": "item.siriusArmor.desc", "abilityDescKey": "item.siriusArmor.abilityDesc", "flavor": "codex.itemFlavor.siriusArmor", "grade": "unique", "pool": "normal", "tags": ["physical"],
+      "effects": [{ "kind": "maxHp", "value": 30, "group": "hpFlat" }, { "kind": "damageTaken", "value": 0.1, "group": "damagePct" }, { "kind": "damage", "scope": "physical", "value": 0.15, "group": "damagePct" }, { "kind": "lowHpGuard", "threshold": 0.3, "reduction": 0.4, "durationSec": 5, "cooldownSec": 30 }],
+      "variants": [{ "job": "barbarian", "effects": [{ "kind": "ultimateCooldown", "value": 0.15 }] }],
+      "spriteKey": "item_sirius_armor", "color": "#3a6ad9", "size": 8 },
     { "id": "helaCell", "codexNo": 31, "nameKey": "item.helaCell", "descKey": "item.helaCell.desc", "grade": "rare", "pool": "normal", "tags": [],
       "effects": [{ "kind": "maxSanity", "value": -5, "group": "hpFlat" }, { "kind": "skillCooldown", "value": 0.1, "group": "damagePct" }],
       "spriteKey": "item_hela_cell", "color": "#5a8ad9", "size": 8 },

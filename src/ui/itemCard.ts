@@ -63,6 +63,8 @@ export function itemDescParams(def: ItemDef, groups: GroupMultipliersData): Reco
     if (typeof e.bonus === 'number') out[`b${i}`] = num(e.bonus * 100);
     if (typeof e.bounces === 'number') out[`c${i}`] = num(e.bounces);
     if (typeof e.guard === 'number') out[`g${i}`] = num(e.guard * 100);
+    if (typeof e.reduction === 'number') out[`g${i}`] = num(e.reduction * 100);
+    if (typeof e.chance === 'number') out[`ch${i}`] = num(e.chance * 100);
   });
   return out;
 }

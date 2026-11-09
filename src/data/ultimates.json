@@ -258,6 +258,7 @@
       "sources": {},
       "school": "barbarian",
       "values": { "durationSec": 8, "cooldownRate": 3.5, "moveSpeed": 0.4, "whirlTimeMul": 0.55, "whirlIntervalMul": 0.5 },
+      "awakening": { "requiredItem": "siriusArmor", "nameKey": "ultimate.berserkerRage.awakened", "shortKey": "ultimate.berserkerRage.awakened.short", "descKey": "ultimate.berserkerRage.awakened.desc", "tags": ["buff"], "values": { "moveSpeed": 0.65 } },
       "color": "#e07a2a",
       "sprites": { "aura": { "spriteKey": "ult_rage_aura", "color": "#e07a2a", "size": 48 } }
     },

@@ -130,7 +130,12 @@ export class SkillRuntime {
         const perStack = calcDamage({ baseDamage: base, tags }, this.run.combat.tagBonus(), ctx.data.tags, this.run.combat.rangeBonus());
         e.bleed = applyBleed(e.bleed, perStack, stacks, this.run.tagRule<BleedRule>('bleed'));
       },
-      fireBullet: (from, angle, speed, range, base, tags, sprite) => this.run.combat.fireBullet(from, angle, speed, range, base, tags, source, { pierce: 0, crit: 0, sprite }),
+      fireBullet: (from, angle, speed, range, base, tags, sprite, extra) =>
+        this.run.combat.fireBullet(from, angle, speed, range, base, tags, source, { pierce: extra?.pierce ?? 0, crit: 0, sprite, hitSize: extra?.hitSize, tint: extra?.tint }),
+      castEquipped: (id) => {
+        const i = this.run.session.player.loadout.active.indexOf(id);
+        if (i >= 0) this.castSlot(i, true);
+      },
       addObject: (o) => this.skillObjects.push(o),
       removeObject: (o) => this.removeObject(o),
       objects: () => this.skillObjects,
@@ -253,7 +258,8 @@ export class SkillRuntime {
     return canAutoCast(skillTags(def, awakened), this.area(values.range ?? 0), this.run.player, targets);
   }
 
-  castSlot(i: number): void {
+  /** auto: 저절로 쓰는 시전(라스알게티의 기억) — 대상이 없어도 알리지 않는다 */
+  castSlot(i: number, auto = false): void {
     const p = this.run.session.player;
     const id = p.loadout.active[i];
     if (!id) return;
@@ -268,6 +274,7 @@ export class SkillRuntime {
     }
     if (cooldownLeft(p.cooldowns, id) > 0) return;
     if (!this.skillUsable(def, owned.awakened, sv.values)) {
+      if (auto) return;
       this.run.toastThrottled(this.run.ctx.t('skillMsg.noTarget'));
       return;
     }
