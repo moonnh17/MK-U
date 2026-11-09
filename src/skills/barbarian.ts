@@ -7,7 +7,7 @@ import { lineHits } from '../systems/targeting';
 import { inArc } from '../systems/weapons';
 import { frenzyInterval, heartFlatDamage, whirlBonus } from '../systems/warrior';
 import type { PlayerMods } from '../systems/vitals';
-import { levelRef, playFx, stretchFx } from './skillFx';
+import { arcSwipe, levelRef, playFx, stretchFx } from './skillFx';
 import { clearOwner, enemiesWithin, Timed } from './timed';
 import { nearestEnemy, type PassiveImpl, type SkillCast, type SkillHost, type SkillImpl, type UltimateCast, type UltimateImpl } from './host';
 
@@ -49,8 +49,10 @@ class Frenzy extends Timed {
     this.count++;
     const cross = awakened && this.count % v.crossEvery! === 0;
     let spreadFrom: Enemy | null = null;
+    let hitAny = false;
     for (const e of [...host.enemies()]) {
       if (!inArc(origin, angle, v.arcDeg!, range, e.sprite, e.radius)) continue;
+      hitAny = true;
       // 혈풍연참: 이미 출혈 중인 적을 베면 둘레로 출혈이 번진다 (검격당 한 번)
       if (awakened && !spreadFrom && e.bleed) spreadFrom = e;
       host.hit(e, v.damage!, tags);
@@ -63,7 +65,10 @@ class Frenzy extends Timed {
       for (const x of near.slice(0, v.spreadCap!)) host.bleed(x, v.bleedDamage!, v.bleedStacks!, this.s.def.sources.bleed!);
     }
     const ref = awakened ? this.s.def.sprites.slashA! : levelRef(this.s, 'slash');
-    playFx(host.scene, ref, origin.x, origin.y, { w: range * 2.2, rotation: angle, flipX: this.same % 2 === 1 });
+    // 판정 부채꼴을 그대로 긋고, 초승달 그림은 몸 앞 범위 가운데에 크게 (그림 속 초승달이 칸의 일부라 몸 위에 그리면 작아 보인다)
+    arcSwipe(host.scene, origin, angle, v.arcDeg!, range, this.s.def.color);
+    playFx(host.scene, ref, origin.x + Math.cos(angle) * range * 0.45, origin.y + Math.sin(angle) * range * 0.45, { w: range * 1.7, rotation: angle }).setFlipY(this.count % 2 === 0);
+    if (hitAny) host.hitStop?.(0.02);
     // 십자 참격: 엇갈린 두 줄기
     if (cross) for (const d of [-1, 1]) playFx(host.scene, ref, target.sprite.x, target.sprite.y, { w: range * 1.6, rotation: angle + (d * Math.PI) / 4 });
     this.next = frenzyInterval(v.intervalSec!, this.same, v.hastePerHit!, v.hasteCap!);

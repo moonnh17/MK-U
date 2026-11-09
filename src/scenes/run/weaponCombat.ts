@@ -560,7 +560,7 @@ export class WeaponCombat {
   handPos(): Vec2 {
     const { weaponHand: hand, weaponOffset: off } = this.run.ctx.data.player;
     // 바라보는 방향과 상관없이 화면 오른쪽 손에 든다
-    return { x: this.run.player.x + hand.x + this.run.aimDir.x * off, y: this.run.player.y + hand.y + this.run.aimDir.y * off };
+    return { x: this.run.player.x + hand.x + this.run.aimDir.x * off, y: this.run.player.y + hand.y - this.run.condition.leapLift + this.run.aimDir.y * off };
   }
 
   /** 탄이 나가는 자리: 무기 끝. 끝이 벽·장애물 너머면 몸 가운데 (벽 뒤로 쏘지 않게) */

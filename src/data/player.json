@@ -28,6 +28,21 @@
         "boltSegments": 7,
         "boltAmpPx": 7
       },
+      "barbarian": {
+        "kind": "leap",
+        "nameKey": "dodge.barbarian",
+        "descKey": "dodge.barbarian.desc",
+        "distancePx": 72,
+        "stepPx": 4,
+        "airSec": 0.36,
+        "heightPx": 16,
+        "invulnSec": 0.42,
+        "landRadius": 30,
+        "landDamage": 20,
+        "landKnockbackPx": 10,
+        "tags": ["physical", "melee"],
+        "color": "#e07a2a"
+      },
       "acro": {
         "kind": "shot",
         "nameKey": "dodge.acro",

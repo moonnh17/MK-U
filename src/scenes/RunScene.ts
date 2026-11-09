@@ -12,6 +12,7 @@ import { Progression } from './run/progression';
 import { WeaponCombat } from './run/weaponCombat';
 import { SpecialWeapons } from './run/specialWeapons';
 import { StageFx } from './run/stageFx';
+import { RoarAura } from './run/roarAura';
 import { PlayerCondition } from './run/playerCondition';
 import { RoomProps } from './run/roomProps';
 import { SKILL_ACTIONS, sfx, type Modal, type Prop, type RunSceneData } from './run/shared';
@@ -66,6 +67,7 @@ export type { RunSceneData } from './run/shared';
 export class RunScene extends Phaser.Scene {
   roomProps!: RoomProps;
   condition!: PlayerCondition;
+  roarAura!: RoarAura;
   stageFx!: StageFx;
   combat!: WeaponCombat;
   special!: SpecialWeapons;
@@ -165,6 +167,7 @@ export class RunScene extends Phaser.Scene {
     this.ctx = getContext();
     const d = this.ctx.data;
     this.special = new SpecialWeapons(this);
+    this.roarAura = new RoarAura(this);
     this.resetFields();
 
     const stage = this.initData.stage ?? firstStage();
@@ -668,6 +671,7 @@ export class RunScene extends Phaser.Scene {
     this.loot.updateInteractHint();
     this.roomProps.updateDoorIcons();
     this.stageFx.updateTutorial();
+    this.roarAura.update(dt);
 
     const weaponKey = this.shownWeaponKey();
     const handAt = this.combat.handPos();

@@ -267,6 +267,12 @@ export class ItemRuntime {
     return v;
   }
 
+  /** 아이템 함성(임시 함성·데스 휘슬)이 걸려 있는지 */
+  roaring(): boolean {
+    if (this.each('tempRoar').some(({ id }) => this.state(id).roarLeft > 0)) return true;
+    return !!this.roar && this.state(this.roar.id).roarLeft > 0;
+  }
+
   /** 회복을 쓸 때마다 늘어난 최대 에너지 (한우촌의 생등심) */
   healMaxEnergy(): number {
     return this.each('lowHpHeal').reduce((v, { id, e }) => v + (e.maxEnergyPerUse ?? 0) * healCount(this.state(id)), 0);

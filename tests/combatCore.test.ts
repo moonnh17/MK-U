@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { gameData } from '../src/data/index';
 import { bossOrbDrops } from '../src/systems/bossEnergy';
-import { blinkTarget, dodgeConfig, dodgeReady, startDodge, stepDodge, zigzag, type DodgeConfig } from '../src/systems/dodge';
+import { blinkTarget, dodgeConfig, leapTarget, dodgeReady, startDodge, stepDodge, zigzag, type DodgeConfig } from '../src/systems/dodge';
 import { Rng } from '../src/core/rng';
 import { buildPathField, pathDir, segmentClear } from '../src/systems/pathField';
 import { muzzleAngle, muzzlePoint } from '../src/systems/targeting';
@@ -53,6 +53,14 @@ describe('전직 회피', () => {
     const to = blinkTarget({ x: 0, y: 0 }, { x: 1, y: 0 }, 48, 4, (x) => blocked(x));
     expect(to.x).toBe(28);
     expect(blinkTarget({ x: 0, y: 0 }, { x: 0, y: 1 }, 48, 4, (x) => blocked(x)).y).toBe(48);
+  });
+  it('도약은 사이의 벽을 넘고, 내려설 수 없는 곳은 당겨 온다', () => {
+    // 20~40 사이에 벽, 60 너머는 방 밖
+    const ok = (x: number) => (x < 20 || x > 40) && x <= 60;
+    expect(leapTarget({ x: 0, y: 0 }, { x: 1, y: 0 }, 72, 4, ok).x).toBe(60);
+    expect(leapTarget({ x: 0, y: 0 }, { x: 1, y: 0 }, 32, 4, ok).x).toBe(16);
+    expect(leapTarget({ x: 5, y: 5 }, { x: 1, y: 0 }, 72, 4, () => false)).toEqual({ x: 5, y: 5 });
+    expect(gameData.player.dodge.schools.barbarian?.kind).toBe('leap');
   });
   it('번개는 양 끝이 정확하고 가운데는 흔들린다', () => {
     const pts = zigzag({ x: 0, y: 0 }, { x: 50, y: 0 }, 6, 7, new Rng(1));

@@ -56,6 +56,16 @@ export function blinkTarget(from: Vec2, dir: Vec2, distance: number, step: numbe
   return at;
 }
 
+/** 도약 착지점: 가장 먼 곳부터 당겨 오며 내려설 수 있는(ok) 첫 자리. 사이의 벽·장애물은 넘는다. 없으면 제자리 */
+export function leapTarget(from: Vec2, dir: Vec2, distance: number, step: number, ok: (x: number, y: number) => boolean): Vec2 {
+  const len = Math.hypot(dir.x, dir.y) || 1;
+  for (let d = distance; d > 0; d -= step) {
+    const at = { x: from.x + (dir.x / len) * d, y: from.y + (dir.y / len) * d };
+    if (ok(at.x, at.y)) return at;
+  }
+  return from;
+}
+
 /** 번개 모양: 두 점 사이를 segments칸으로 나눠 수직으로 흔든다 (양 끝은 고정) */
 export function zigzag(a: Vec2, b: Vec2, segments: number, amp: number, rng: Rng): Vec2[] {
   const dx = b.x - a.x;

@@ -253,6 +253,18 @@
     "particles": 280,
     "burstHoldSec": 0.9
   },
+  "roarAura": {
+    "color": "#ff9a3a",
+    "everySec": 0.045,
+    "lifeSec": 0.55,
+    "risePx": 16,
+    "spreadPx": 8,
+    "size": 1.5,
+    "ringRadius": 12,
+    "ringAlpha": 0.4,
+    "pulseSec": 0.5,
+    "itemShoutWidth": 70
+  },
   "playerDeath": {
     "sec": 1.5,
     "zoom": 1.35,

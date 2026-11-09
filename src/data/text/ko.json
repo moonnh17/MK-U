@@ -856,6 +856,8 @@
   "dodge.name": "회피",
   "dodge.hectar": "점멸",
   "dodge.hectar.desc": "번개처럼 순간이동한다",
+  "dodge.barbarian": "도약",
+  "dodge.barbarian.desc": "높이 뛰어올라 벽·장애물을 넘고, 착지하며 둘레 적에게 피해를 준다",
   "dodge.acro": "진격",
   "dodge.acro.desc": "구르면서 적에게 피해를 주는 탄환을 쏜다",
   "cut.advancement.dodge": "회피 변화: {from} → {to} ({desc})",

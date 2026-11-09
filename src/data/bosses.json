@@ -703,14 +703,14 @@
           "phase": 1,
           "values": {
             "windupSec": 0.6,
-            "waves": 4,
-            "wavesEnraged": 5,
-            "intervalSec": 0.5,
+            "waves": 3,
+            "wavesEnraged": 4,
+            "intervalSec": 0.35,
             "maxRadius": 300,
             "speed": 135,
-            "thickness": 10,
-            "gapDeg": 58,
-            "gapStepDeg": 40,
+            "thickness": 8,
+            "gapDeg": 80,
+            "gapStepDeg": 15,
             "damage": 34
           }
         },

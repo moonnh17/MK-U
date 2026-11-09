@@ -3,6 +3,7 @@
  * art.json의 anims.play가 있으면 그 프레임대로 한 바퀴 돌고 사라지고(반복 그림도 한 바퀴), 한 장짜리면 살짝 퍼지며 사라진다.
  */
 import type Phaser from 'phaser';
+import { hexColor } from '../core/scale';
 import { animKey } from '../systems/art';
 import type { SpriteRef } from '../types/data';
 import type { SkillCast } from './host';
@@ -70,4 +71,15 @@ export function poseThen(sp: Phaser.GameObjects.Sprite, pose: SpriteRef, back: S
   sp.chain();
   sp.play(a);
   if (sp.scene.anims.exists(b)) sp.chain(b);
+}
+
+/** 부채꼴 참격 자국: 실제 판정(반지름·각도)을 그대로 그리고 빠르게 사라진다 */
+export function arcSwipe(scene: Phaser.Scene, at: { x: number; y: number }, angle: number, arcDeg: number, r: number, color: string, sec = 0.16): void {
+  const half = (arcDeg * Math.PI) / 360;
+  const c = hexColor(color);
+  const g = scene.add.graphics().setDepth(5).setBlendMode('ADD');
+  g.fillStyle(c, 0.18).slice(at.x, at.y, r, angle - half, angle + half, false).fillPath();
+  g.lineStyle(3, c, 0.9).beginPath().arc(at.x, at.y, r, angle - half, angle + half).strokePath();
+  g.lineStyle(1, 0xffffff, 0.9).beginPath().arc(at.x, at.y, r - 1.5, angle - half * 0.7, angle + half * 0.7).strokePath();
+  scene.tweens.add({ targets: g, alpha: 0, duration: sec * 1000, ease: 'Quad.easeIn', onComplete: () => g.destroy() });
 }

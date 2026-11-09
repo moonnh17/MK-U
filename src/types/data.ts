@@ -779,9 +779,10 @@ export interface WavesData {
 
 // ---------- 플레이어 ----------
 
-/** 전직 회피. blink: 번개 순간이동(거리·무적·번개 모양) / shot: 구르면서 탄 발사 */
+/** 전직 회피. blink: 번개 순간이동(거리·무적·번개 모양) / leap: 장애물을 넘는 도약, 착지 피해 / shot: 구르면서 탄 발사 */
 export type DodgeSchoolDef = { nameKey: string; descKey: string } & (
   | { kind: 'blink'; distancePx: number; invulnSec: number; stepPx: number; boltColor: string; boltSec: number; boltSegments: number; boltAmpPx: number }
+  | { kind: 'leap'; distancePx: number; stepPx: number; airSec: number; heightPx: number; invulnSec: number; landRadius: number; landDamage: number; landKnockbackPx: number; tags: TagId[]; color: string }
   | { kind: 'shot'; shots: number; spreadDeg: number; damage: number; projectileSpeed: number; range: number; tags: TagId[]; tint: string }
 );
 
@@ -1559,6 +1560,8 @@ export interface JuiceData {
   hitStop: { melee: number; crit: number; eliteKill: number; bossKill: number; minGapSec: number };
   /** 처치: 파편, 번쩍임, 보상 구슬이 튀어 나가는 거리·시간 */
   /** 플레이어 사망 연출 */
+  /** 함성 버프(스킬·아이템) 동안 몸에서 피어오르는 불씨와 발밑 고리. itemShoutWidth: 아이템 함성이 걸릴 때 함성 그림 폭 */
+  roarAura: { color: string; everySec: number; lifeSec: number; risePx: number; spreadPx: number; size: number; ringRadius: number; ringAlpha: number; pulseSec: number; itemShoutWidth: number };
   playerDeath: { sec: number; zoom: number; flashMs: number; tint: string; shards: number };
   death: { shards: IntRange; eliteShards: IntRange; shardSpeed: [number, number]; shardLifeSec: number; shardSize: number; flashSec: number; orbPopPx: [number, number]; orbPopSec: number };
   /** 플레이어 피격: 화면 가장자리 붉은 번쩍임, 낮은 체력 맥박 */

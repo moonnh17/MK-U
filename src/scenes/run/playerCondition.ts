@@ -1,6 +1,7 @@
 /** 플레이어 상태: 회피(점멸·진격), 정신력·패닉, 보스전 에너지 구슬, 피격 깜빡임. */
 import { bossHalfOrbs, bossOrbDrops } from '../../systems/bossEnergy';
-import { IDLE_DODGE, blinkTarget, dodgeConfig, startDodge, stepDodge, zigzag, type DodgeState } from '../../systems/dodge';
+import { IDLE_DODGE, blinkTarget, dodgeConfig, leapTarget, startDodge, stepDodge, zigzag, type DodgeState } from '../../systems/dodge';
+import { contains, interiorRect } from '../../systems/worldLayout';
 import Phaser from 'phaser';
 import type { ActionFrame, Vec2 } from '../../core/actions';
 import { Rng } from '../../core/rng';
@@ -19,6 +20,8 @@ export class PlayerCondition {
   dodgeGhostIn = 0;
   dodgeBar: Phaser.GameObjects.Graphics | null = null;
   dodgeFxRng: Rng | null = null;
+  /** 도약 중 몸이 떠 있는 높이(px). 든 무기도 같이 뜬다 */
+  leapLift = 0;
   panicFx: PanicFx | null = null;
   panicTinted = false;
   bossHpSeen = new Map<Enemy, number>();
@@ -43,6 +46,7 @@ export class PlayerCondition {
         this.dodgeGhostIn = 0;
         const school = dodgeConfig(c, this.run.session.player.advancement).school;
         if (school?.kind === 'blink') this.blink(school, started.vel);
+        else if (school?.kind === 'leap') this.leap(school, started.vel);
         else {
           sfx('dash');
           if (school?.kind === 'shot') this.dodgeShot(school);
@@ -73,13 +77,7 @@ export class PlayerCondition {
   /** 점멸: 벽을 뚫지 않는 데까지 순간이동하고, 지나간 자리에 번개가 지직거린다 */
   blink(s: Extract<DodgeSchoolDef, { kind: 'blink' }>, dir: Vec2): void {
     const from = { x: this.run.player.x, y: this.run.player.y };
-    const r = this.run.ctx.data.player.size / 2;
-    const blocked = (x: number, y: number) =>
-      this.run.physics.overlapRect(x - r, y - r, r * 2, r * 2, false, true).some((b) => {
-        const go = b.gameObject;
-        return this.run.walls.contains(go) || this.run.doorGroup.contains(go) || this.run.roomProps.propGroup.contains(go);
-      });
-    const to = blinkTarget(from, dir, s.distancePx, s.stepPx, blocked);
+    const to = blinkTarget(from, dir, s.distancePx, s.stepPx, this.blockedAt());
     this.run.player.setPosition(to.x, to.y);
     (this.run.player.body as Phaser.Physics.Arcade.Body).reset(to.x, to.y);
     this.dodge = { ...this.dodge, left: 0, invuln: s.invulnSec };
@@ -98,6 +96,83 @@ export class PlayerCondition {
     this.run.time.addEvent({ delay: (s.boltSec * 1000) / 4, repeat: 2, callback: draw });
     this.run.tweens.add({ targets: g, alpha: 0, delay: s.boltSec * 500, duration: s.boltSec * 500, onComplete: () => g.destroy() });
     this.run.cameras.main.flash(50, 150, 210, 255);
+  }
+
+  /** 플레이어 몸이 (x, y)에 서면 벽·문·소품에 걸리는지 */
+  private blockedAt(): (x: number, y: number) => boolean {
+    const r = this.run.ctx.data.player.size / 2;
+    return (x, y) =>
+      this.run.physics.overlapRect(x - r, y - r, r * 2, r * 2, false, true).some((b) => {
+        const go = b.gameObject;
+        return this.run.walls.contains(go) || this.run.doorGroup.contains(go) || this.run.roomProps.propGroup.contains(go);
+      });
+  }
+
+  /**
+   * 도약(야만용사): 높이 뛰어 벽·장애물을 넘는다. 방 안에서는 그 방 바닥 안 내려설 수 있는 가장 먼 곳으로
+   * (잠긴 방을 넘어 나가지 않게), 복도에서는 벽 앞까지. 공중에서는 충돌·피격이 없고, 착지하며 둘레 적에게 피해
+   */
+  leap(s: Extract<DodgeSchoolDef, { kind: 'leap' }>, dir: Vec2): void {
+    const run = this.run;
+    const p = run.player;
+    const from = { x: p.x, y: p.y };
+    const blocked = this.blockedAt();
+    const rid = run.session.currentRoomId;
+    const half = run.ctx.data.player.size / 2;
+    const floor = rid === null ? null : interiorRect(run.session.map.rooms[rid]!, run.m, half);
+    const to = floor ? leapTarget(from, dir, s.distancePx, s.stepPx, (x, y) => contains(floor, x, y) && !blocked(x, y)) : blinkTarget(from, dir, s.distancePx, s.stepPx, blocked);
+    const body = p.body as Phaser.Physics.Arcade.Body;
+    body.enable = false;
+    // 공중에 있는 동안 입력·회피를 막는다 (MK 돌진과 같은 자리, 속도 0)
+    run.dashLeft = s.airSec;
+    run.dashVel = { x: 0, y: 0 };
+    this.dodge = { ...this.dodge, left: 0, invuln: s.invulnSec };
+    sfx('dash');
+    const col = hexColor(s.color);
+    const shadow = run.add.ellipse(from.x, from.y + half, 12, 5, 0x000000, 0.35).setDepth(2.4);
+    // 그림만 위로 띄운다 (위치·카메라는 땅을 따라간다)
+    const oy = p.originY;
+    run.tweens.addCounter({
+      from: 0,
+      to: 1,
+      duration: s.airSec * 1000,
+      onUpdate: (tw) => {
+        const t = tw.getValue() ?? 0;
+        const x = from.x + (to.x - from.x) * t;
+        const y = from.y + (to.y - from.y) * t;
+        const h = Math.sin(t * Math.PI) * s.heightPx;
+        this.leapLift = h;
+        p.setPosition(x, y).setOrigin(p.originX, oy + h / Math.max(1, p.displayHeight));
+        shadow.setPosition(x, y + half).setScale(1 - 0.4 * (h / s.heightPx));
+      },
+      onComplete: () => {
+        shadow.destroy();
+        this.leapLift = 0;
+        p.setOrigin(p.originX, oy).setPosition(to.x, to.y);
+        body.enable = true;
+        body.reset(to.x, to.y);
+        this.leapLand(s, to, col);
+      },
+    });
+  }
+
+  /** 도약 착지: 둘레 적에게 피해·밀치기, 흙먼지 고리와 화면 흔들림 */
+  private leapLand(s: Extract<DodgeSchoolDef, { kind: 'leap' }>, at: Vec2, col: number): void {
+    const run = this.run;
+    sfx('bossSlam');
+    run.cameras.main.shake(90, 0.006);
+    const ring = run.add.circle(at.x, at.y, s.landRadius, col, 0.25).setStrokeStyle(2, col, 0.9).setDepth(2.6).setScale(0.3);
+    run.tweens.add({ targets: ring, scale: 1, alpha: 0, duration: 260, ease: 'Quad.easeOut', onComplete: () => ring.destroy() });
+    for (const e of [...run.enemies]) {
+      if (e.dead) continue;
+      const dx = e.sprite.x - at.x;
+      const dy = e.sprite.y - at.y;
+      const d = Math.hypot(dx, dy);
+      if (d > s.landRadius + e.radius) continue;
+      run.combat.hit(e, s.landDamage, s.tags, 'dodge');
+      // 보스·고정 적은 knockback이 알아서 무시한다
+      if (!e.dead && d > 0) e.knockback({ x: dx / d, y: dy / d }, s.landKnockbackPx, 0.12);
+    }
   }
 
   /** 진격: 구르는 순간 조준 방향으로 부채꼴 탄 */

@@ -17,7 +17,7 @@ const hp = (id: string) => D.enemies.enemies.find((e) => e.id === id)!.maxHp;
 
 describe('보스 체력', () => {
   it('전체적으로 늘었고 마기카이저가 가장 많다', () => {
-    expect(hp('fusionAkgwi')).toBe(1080);
+    expect(hp('fusionAkgwi')).toBe(972);
     expect(hp('electricRing')).toBe(2520);
     expect(hp('magiKaiser')).toBe(31200);
     for (const b of D.bosses.bosses) if (b.id !== 'magiKaiser') expect(hp('magiKaiser')).toBeGreaterThan(hp(b.id) * 2);
