@@ -986,6 +986,30 @@
       "frameHeight": 64,
       "frames": 1
     },
+    "item_ichor": {
+      "file": "mku/item_ichor.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_chain_ring": {
+      "file": "mku/item_chain_ring.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_old_magi_engine": {
+      "file": "mku/item_old_magi_engine.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_sirius_armor": {
+      "file": "mku/item_sirius_armor.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
     "tile_floor_c1": {
       "file": "mku/tile_floor_c1.png",
       "frameWidth": 128,
@@ -7116,6 +7140,51 @@
           "from": 0,
           "to": 5,
           "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_bSlash_slashA": {
+      "file": "mku/skill_bSlash_slashA.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 34,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 33,
+          "fps": 40,
+          "loop": false
+        }
+      }
+    },
+    "skill_bChain_chainA": {
+      "file": "mku/skill_bChain_chainA.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 25,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 24,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "skill_bWhirl_whirlA": {
+      "file": "mku/skill_bWhirl_whirlA.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 16,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 15,
+          "fps": 24,
           "loop": false
         }
       }

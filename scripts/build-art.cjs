@@ -17,7 +17,7 @@ fs.mkdirSync(out, { recursive: true });
 
 const cache = new Map();
 const load = (f) => {
-  if (!cache.has(f)) cache.set(f, k.read(path.join(SRC, f)));
+  if (!cache.has(f)) cache.set(f, k.read(path.isAbsolute(f) ? f : path.join(SRC, f)));
   return cache.get(f);
 };
 
@@ -404,6 +404,9 @@ const ITEM = {
   item_tourbillon: 'items/tourbillon.png', item_crepuscule: 'items/crepuscule.png',
 };
 for (const [key, f] of Object.entries(ITEM)) sprites[key] = icon(key, f, CARD_ICON);
+// 사용자가 따로 준 아이템 그림 (배경을 지운 원본을 저장소 art-src/items에 둔다)
+const MY_ITEM = { item_ichor: 'ichor.png', item_chain_ring: 'chain-ring.png', item_old_magi_engine: 'old-magi-engine.png', item_sirius_armor: 'sirius-armor.png' };
+for (const [key, f] of Object.entries(MY_ITEM)) sprites[key] = icon(key, path.join(__dirname, 'art-src/items', f), CARD_ICON);
 
 // ---------- 방 타일 (terrain.png: 1행 돌, 2행 푸른 기술, 3행 붉은 균열) ----------
 // 3장은 붉은 적이 묻히지 않게 붉은 점이 드문 칸을 더 어둡게
@@ -1623,6 +1626,10 @@ for (const [n, l] of WLV) {
   wFx(`skill_pSwords_sword${n}`, 'warrior-v4/p-swords-l1.png', 128, 40, 12);
   wFx(`skill_pPrayer_prayer${n}`, `warrior-v4/p-prayer-${l}.png`, 128, 30, 12);
 }
+// 야만용사 각성 (원본 v120 각성 시트, 256px 칸)
+wFx('skill_bSlash_slashA', 'barbarian-awakening-v120/ba-slash.png', 256, 70, 40);
+wFx('skill_bChain_chainA', 'barbarian-awakening-v120/ba-chain.png', 256, 70, 18);
+wFx('skill_bWhirl_whirlA', 'barbarian-awakening-v120/ba-whirl.png', 256, 70, 24);
 wFx('ult_sweep_sweep', 'warrior-v6/w-slash.png', 192, 60, 24);
 wFx('ult_rage_aura', 'warrior-v8/b-rage.png', 64, 40, 24, true);
 wFx('ult_judgment_sword', 'warrior-v3/p-judgment.png', 96, 60, 6);
