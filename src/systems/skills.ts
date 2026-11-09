@@ -44,7 +44,9 @@ export function acquireSkill(lo: SkillLoadout, def: SkillDef): { loadout: SkillL
   const next = cloneLoadout(lo);
   next.owned[def.id] = { level: 1, awakened: false, order: next.nextOrder++ };
   let equipped = false;
-  if (def.kind === 'passive') {
+  // 숙련은 칸 없이 늘 켜져 있다
+  if (def.kind === 'mastery') equipped = true;
+  else if (def.kind === 'passive') {
     if (next.passive === null) {
       next.passive = def.id;
       equipped = true;
@@ -92,10 +94,10 @@ export function setSkillLevel(lo: SkillLoadout, def: SkillDef, level: number, aw
   return next;
 }
 
-/** 보관 중인 스킬 (가진 순서) */
-export function storedSkills(lo: SkillLoadout): string[] {
+/** 보관 중인 스킬 (가진 순서). 숙련은 칸이 없어 보관이 아니다 */
+export function storedSkills(lo: SkillLoadout, data: SkillsData): string[] {
   return Object.entries(lo.owned)
-    .filter(([id]) => !isEquipped(lo, id))
+    .filter(([id]) => !isEquipped(lo, id) && findSkill(data, id).kind !== 'mastery')
     .sort((a, b) => a[1].order - b[1].order)
     .map(([id]) => id);
 }
@@ -138,7 +140,7 @@ export function equipSkill(
 export function canAwaken(lo: SkillLoadout, def: SkillDef, items: readonly string[], maxLevel: number): boolean {
   const o = lo.owned[def.id];
   if (!o || o.awakened || o.level < maxLevel) return false;
-  return items.includes(def.awakening.requiredItem);
+  return !!def.awakening && items.includes(def.awakening.requiredItem);
 }
 
 /** 지금 각성할 수 있는 스킬 (오래 가진 순) */
@@ -155,8 +157,27 @@ export function skillValues(def: SkillDef, owned: Pick<OwnedSkill, 'level' | 'aw
   values: Record<string, number>;
 } {
   const lv = def.levels[Math.min(def.levels.length, Math.max(1, owned.level)) - 1]!;
-  if (!owned.awakened) return { cooldownSec: lv.cooldownSec, values: { ...lv.values } };
+  if (!owned.awakened || !def.awakening) return { cooldownSec: lv.cooldownSec, values: { ...lv.values } };
   return { cooldownSec: def.awakening.cooldownSec, values: { ...lv.values, ...def.awakening.values } };
+}
+
+/** 가진 숙련 (가진 순서) */
+export function ownedMasteries(lo: SkillLoadout, data: SkillsData): string[] {
+  return Object.entries(lo.owned)
+    .filter(([id]) => findSkill(data, id).kind === 'mastery')
+    .sort((a, b) => a[1].order - b[1].order)
+    .map(([id]) => id);
+}
+
+/** 가진 숙련의 수치 합 (숙련은 칸 없이 늘 켜져 있다). 예: { meleeDamage: 0.16, maxHpPct: 0.1 } */
+export function masteryTotals(lo: SkillLoadout, data: SkillsData): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const [id, o] of Object.entries(lo.owned)) {
+    const def = data.skills.find((s) => s.id === id);
+    if (def?.kind !== 'mastery') continue;
+    for (const [k, v] of Object.entries(skillValues(def, o).values)) out[k] = (out[k] ?? 0) + v;
+  }
+  return out;
 }
 
 // ---------- 쿨타임 ----------

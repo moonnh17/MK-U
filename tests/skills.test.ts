@@ -36,7 +36,7 @@ describe('스킬 슬롯: 장착·보관', () => {
     const r = acquireSkill(lo, def('railgun'));
     expect(r.equipped).toBe(false);
     expect(r.loadout.active).toEqual(ACTIVES.slice(0, 3));
-    expect(storedSkills(r.loadout)).toEqual(['railgun']);
+    expect(storedSkills(r.loadout, sd)).toEqual(['railgun']);
     expect(r.loadout.owned.railgun!.level).toBe(1);
   });
 
@@ -47,7 +47,7 @@ describe('스킬 슬롯: 장착·보관', () => {
     const r = acquireSkill(lo, def('reductionist'));
     expect(r.equipped).toBe(false);
     expect(r.loadout.passive).toBe('combatDrone');
-    expect(storedSkills(r.loadout)).toEqual(['reductionist']);
+    expect(storedSkills(r.loadout, sd)).toEqual(['reductionist']);
   });
 
   it('이미 가진 스킬은 다시 습득하지 않는다', () => {
@@ -60,7 +60,7 @@ describe('스킬 슬롯: 장착·보관', () => {
     const r = equipSkill(lo, 'magiField', 1, sd);
     lo = r.loadout;
     expect(lo.active[1]).toBe('magiField');
-    expect(storedSkills(lo)).toEqual(['magiMine']);
+    expect(storedSkills(lo, sd)).toEqual(['magiMine']);
     expect(r.restarted).toEqual(['magiField']);
   });
 
@@ -83,7 +83,7 @@ describe('스킬 슬롯: 장착·보관', () => {
     lo = acquireSkill(lo, def('reductionist')).loadout;
     lo = equipSkill(lo, 'reductionist', 'passive', sd).loadout;
     expect(lo.passive).toBe('reductionist');
-    expect(storedSkills(lo)).toEqual(['combatDrone']);
+    expect(storedSkills(lo, sd)).toEqual(['combatDrone']);
     expect(lo.owned.combatDrone!.level).toBe(2);
   });
 
@@ -138,8 +138,8 @@ describe('레벨·각성', () => {
     expect(skillValues(t, lo.owned.magiTurret!).values.lifeSec).toBe(24);
     lo = setSkillLevel(lo, t, 3, true);
     const v = skillValues(t, lo.owned.magiTurret!);
-    expect(v.cooldownSec).toBe(t.awakening.cooldownSec);
-    expect(v.values.laserDamage).toBe(t.awakening.values.laserDamage);
+    expect(v.cooldownSec).toBe(t.awakening!.cooldownSec);
+    expect(v.values.laserDamage).toBe(t.awakening!.values.laserDamage);
   });
 
   it('디버그 레벨 0은 스킬을 없앤다(칸도 비움)', () => {

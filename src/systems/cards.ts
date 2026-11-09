@@ -98,7 +98,7 @@ export function cardStillValid(card: Card, lo: SkillLoadout, skills: SkillsData)
 export interface CardHolder {
   loadout: SkillLoadout;
   /** 전직 판정용: 고른 스킬 카드의 계열 횟수 */
-  schoolPicks: Record<SchoolId, number>;
+  schoolPicks: Partial<Record<SchoolId, number>>;
   /** 마지막으로 고른 스킬 카드의 계열 (전직 동점 처리) */
   lastPickSchool?: SchoolId | null;
 }
@@ -120,6 +120,6 @@ export function applyCard<T extends CardHolder>(h: T, card: Card, c: CardContext
     loadout = levelUpSkill(h.loadout, def.id, c.skills.maxLevel);
   }
   // 신규·레벨업 모두 계열 1회
-  const schoolPicks = { ...h.schoolPicks, [def.school]: h.schoolPicks[def.school] + 1 };
+  const schoolPicks = { ...h.schoolPicks, [def.school]: (h.schoolPicks[def.school] ?? 0) + 1 };
   return { holder: { ...h, loadout, schoolPicks, lastPickSchool: def.school }, stored };
 }

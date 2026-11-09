@@ -7,6 +7,8 @@
       "nameKey": "job.magiScholar",
       "enabled": true,
       "startUltimate": "firstLaw",
+      "startWeapon": "pistol",
+      "preSchools": ["hectar", "acro"],
       "advancements": [
         { "id": "hectar", "nameKey": "job.adv.hectar", "color": "#3a7bff", "ultimate": "thunderbolt", "passive": "combatDrone" },
         { "id": "acro", "nameKey": "job.adv.acro", "color": "#e8323c", "ultimate": "singularity", "passive": "reductionist" }
@@ -17,6 +19,8 @@
       "nameKey": "job.magiMage",
       "enabled": false,
       "startUltimate": "firstLaw",
+      "startWeapon": "pistol",
+      "preSchools": [],
       "advancements": [
         { "id": "hwigang", "nameKey": "job.adv.hwigang", "color": "#9a9aff", "ultimate": null, "passive": null },
         { "id": "baekon", "nameKey": "job.adv.baekon", "color": "#e0e0e0", "ultimate": null, "passive": null }
@@ -25,11 +29,14 @@
     {
       "id": "warrior",
       "nameKey": "job.warrior",
-      "enabled": false,
-      "startUltimate": "firstLaw",
+      "enabled": true,
+      "startUltimate": "sweep",
+      "startWeapon": "dagger",
+      "preSchools": ["warrior"],
+      "masteryJudge": ["masteryWeapon", "masteryFaith"],
       "advancements": [
-        { "id": "barbarian", "nameKey": "job.adv.barbarian", "color": "#c86a3a", "ultimate": null, "passive": null },
-        { "id": "paladin", "nameKey": "job.adv.paladin", "color": "#e8d24a", "ultimate": null, "passive": null }
+        { "id": "barbarian", "nameKey": "job.adv.barbarian", "color": "#e07a2a", "ultimate": "berserkerRage", "passive": "boilingHeart" },
+        { "id": "paladin", "nameKey": "job.adv.paladin", "color": "#e8d24a", "ultimate": "divineJudgment", "passive": "prayerOfRevival" }
       ]
     }
   ]

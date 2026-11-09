@@ -606,7 +606,7 @@ export function validateGameData(d: GameData): Errors {
   for (const s of d.skills.skills) {
     const w = `skills.${s.id}`;
     if (!(SCHOOL_IDS as readonly string[]).includes(s.school)) errors.push(`${w}: 계열 태그(school) 없음 또는 잘못됨`);
-    if (s.kind !== 'active' && s.kind !== 'passive') errors.push(`${w}: kind는 active 또는 passive`);
+    if (!['active', 'passive', 'mastery'].includes(s.kind)) errors.push(`${w}: kind는 active·passive·mastery`);
     if (!HEX_COLOR.test(s.color)) errors.push(`${w}: color는 #RRGGBB`);
     needText(w, s.nameKey);
     needText(w, s.shortKey);
@@ -621,9 +621,7 @@ export function validateGameData(d: GameData): Errors {
       for (const [k, v] of Object.entries(lv.values)) if (!isNum(v)) errors.push(`${w}.levels[${i}].${k}: 숫자여야 함`);
     });
     const a = s.awakening;
-    if (!a) {
-      errors.push(`${w}: awakening 없음`);
-    } else {
+    if (a) {
       if (!d.items.items.some((x) => x.id === a.requiredItem)) errors.push(`${w}.awakening: 없는 요구 아이템 '${String(a.requiredItem)}'`);
       if (s.kind === 'active') checkPositive(errors, `${w}.awakening.cooldownSec`, a.cooldownSec);
       checkTags(`${w}.awakening`, a.tags);
@@ -672,6 +670,11 @@ export function validateGameData(d: GameData): Errors {
     needText(w, x.nameKey);
     if (!u.ultimates.some((y) => y.id === x.startUltimate)) errors.push(`${w}.startUltimate: '${x.startUltimate}' 없음`);
     if (x.advancements.length !== 2) errors.push(`${w}: 전직 분기는 2개`);
+    if (!d.weapons.weapons.some((y) => y.id === x.startWeapon)) errors.push(`${w}.startWeapon: '${x.startWeapon}' 없음`);
+    for (const ps of x.preSchools) if (!(SCHOOL_IDS as readonly string[]).includes(ps)) errors.push(`${w}.preSchools: '${ps}' 잘못됨`);
+    for (const m of x.masteryJudge ?? []) {
+      if (d.skills.skills.find((s) => s.id === m)?.kind !== 'mastery') errors.push(`${w}.masteryJudge: '${m}'는 숙련이 아님`);
+    }
     for (const a of x.advancements) {
       needText(`${w}.advancements.${a.id}`, a.nameKey);
       if (!HEX_COLOR.test(a.color)) errors.push(`${w}.advancements.${a.id}: color는 #RRGGBB`);

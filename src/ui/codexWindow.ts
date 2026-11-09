@@ -7,7 +7,7 @@ import type { GameContext } from '../core/context';
 import { skillTextValues } from './skillText';
 import { bus } from '../core/events';
 import type { GameData } from '../data/index';
-import { artKeys } from '../systems/art';
+import { playerArtKey, artKeys } from '../systems/art';
 import { gradeEnergyMultiplier, gradeMultiplier } from '../systems/damage';
 import { CODEX_SORTS, codexLore, codexProgress, codexSections, isKnown, sortedCodexSections, type CodexEntry, type CodexSection, type CodexSort, type CodexTab } from '../systems/codex';
 import { itemChance, itemSources, pct, weaponChance, weaponSources, type DropSource, type GradeRates } from '../systems/dropRates';
@@ -277,7 +277,7 @@ export class CodexWindow {
       const def = d.enemies.enemies.find((x) => x.id === e.id)!;
       return { key: def.spriteKey, color: def.color };
     }
-    if (e.kind === 'job') return { key: d.player.spriteKey, color: d.player.color };
+    if (e.kind === 'job') return { key: playerArtKey(this.ctx.artLoaded, d.player.spriteKey, e.id, null), color: d.player.color };
     if (e.kind === 'school') return { key: artKeys.playerSchool(e.id), color: d.player.color };
     if (e.kind === 'item') {
       const def = d.items.items.find((x) => x.id === e.id)!;
@@ -621,12 +621,13 @@ export class CodexWindow {
       box,
       'codex.sub.skills',
       skills.map((s) => {
-        const passive = s.kind === 'passive';
+        const passive = s.kind !== 'active';
         const cd = (sec: number) => (passive ? '' : t('inventory.detailCooldown', { sec: Math.round(sec * 10) / 10 }));
         const levels = s.levels.map((_, i): SkillVariant => {
           const v = skillValues(s, { level: i + 1, awakened: false });
-          return { label: `Lv${i + 1}`, title: `${t(s.nameKey)}${passive ? ` (${t('card.passive')})` : ''}`, desc: t(s.descKey, skillTextValues(v.values)), note: cd(v.cooldownSec), tags: s.tags };
+          return { label: `Lv${i + 1}`, title: `${t(s.nameKey)}${passive ? ` (${t(`card.${s.kind}`)})` : ''}`, desc: t(s.descKey, skillTextValues(v.values)), note: cd(v.cooldownSec), tags: s.tags };
         });
+        if (!s.awakening) return this.skillRow(artKeys.skillIcon(s.id), s.color, levels);
         const aw = skillValues(s, { level: s.levels.length, awakened: true });
         const awakened: SkillVariant = {
           label: t('codex.lv.awakened'),
@@ -689,7 +690,7 @@ export class CodexWindow {
     }
     this.flavor(box, def.flavor, 'cx-flavor small');
     const links: string[] = [];
-    for (const s of d.skills.skills.filter((x) => x.awakening.requiredItem === id)) links.push(t('codex.link.skill', { skill: t(s.nameKey), name: t(s.awakening.nameKey) }));
+    for (const s of d.skills.skills.filter((x) => x.awakening?.requiredItem === id)) links.push(t('codex.link.skill', { skill: t(s.nameKey), name: t(s.awakening!.nameKey) }));
     for (const u of d.ultimates.ultimates.filter((x) => x.awakening?.requiredItem === id)) links.push(t('codex.link.skill', { skill: t(u.nameKey), name: t(u.awakening!.nameKey) }));
     const nm = (iid: string) => t(d.items.items.find((x) => x.id === iid)?.nameKey ?? '');
     const wn = (wid: string) => t(d.weapons.weapons.find((x) => x.id === wid)?.nameKey ?? '');

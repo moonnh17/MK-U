@@ -94,6 +94,7 @@ export function collectAssets(d: GameData): AssetRef[] {
   };
   add('player', d.player, 'asset.player');
   for (const j of d.jobs.jobs.filter((x) => x.enabled)) {
+    if (j.id !== d.jobs.startJob) add('player', { ...d.player, spriteKey: artKeys.playerSchool(j.id) }, 'asset.player', j.nameKey);
     for (const a of j.advancements) add('player', { ...d.player, spriteKey: artKeys.playerSchool(a.id) }, 'asset.player', a.nameKey);
   }
   for (const w of d.weapons.weapons) {
@@ -279,4 +280,10 @@ export function assetsMarkdown(refs: readonly AssetRef[], art: ArtData, text: Re
     }
   }
   return lines.join('\n') + '\n';
+}
+
+/** 플레이어 그림: 전직 그림 → 직업 그림(전사) → 기본 그림 중 불러온 것 */
+export function playerArtKey(loaded: ReadonlySet<string>, fallback: string, job: string, school: string | null): string {
+  for (const key of [school && artKeys.playerSchool(school), artKeys.playerSchool(job)]) if (key && loaded.has(key)) return key;
+  return fallback;
 }

@@ -1,5 +1,6 @@
 import { pickTrack } from '../systems/music';
 import Phaser from 'phaser';
+import { playerArtKey } from '../systems/art';
 import type { Vec2 } from '../core/actions';
 import { makeFallbackSeed } from '../core/config';
 import { getContext, type GameContext } from '../core/context';
@@ -326,6 +327,14 @@ export class LabScene extends Phaser.Scene {
     const job = this.ctx.data.jobs.jobs.find((j) => j.id === jobId);
     if (!job?.enabled) return;
     this.job = jobId;
+    // 고른 직업 모습으로 (전사 그림이 없으면 기본 그림)
+    const d = this.ctx.data;
+    const key = playerArtKey(this.ctx.artLoaded, d.player.spriteKey, jobId, null);
+    if (this.player.texture.key !== key) {
+      this.player.anims.stop();
+      this.player.setTexture(key, 0);
+      fitArt(d, this.player, d.player.size, d.player.height ?? d.player.size);
+    }
     this.closeJobWindow();
     this.refreshPortal();
     bus.emit('toast', { text: this.ctx.t('lab.jobPicked', { job: this.ctx.t(job.nameKey) }) });

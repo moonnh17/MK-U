@@ -2,7 +2,7 @@
  * 각성·궁극기 각성·전직 연출의 내용(컷인 종류 + 설명창 페이지)을 만든다.
  * 그리는 것은 cutsceneWindow.ts. 학파 엠블럼·실루엣은 지금 색 도형으로 대신한다.
  */
-import { artKeys } from '../systems/art';
+import { playerArtKey, artKeys } from '../systems/art';
 import { skillTextValues } from './skillText';
 import type { GameContext } from '../core/context';
 import type { ConversionLog } from '../systems/advancement';
@@ -52,7 +52,7 @@ export function skillAwakeningCut(ctx: GameContext, skillId: string): Cutscene {
   const color = schoolColor(ctx, def.school);
   const before = skillValues(def, { level: d.skills.maxLevel, awakened: false });
   const after = skillValues(def, { level: d.skills.maxLevel, awakened: true });
-  const a = def.awakening;
+  const a = def.awakening!;
   return {
     id: `skill.${skillId}`,
     cut: { kind: 'skillAwakening', icon: { label: t(def.shortKey), color: def.color, key: artKeys.skillIcon(def.id) }, flash: color },
@@ -104,8 +104,10 @@ export function advancementCut(
   ctx: GameContext,
   args: {
     jobNameKey: string;
+    jobId: string;
     adv: AdvancementDef;
-    picks: Record<SchoolId, number>;
+    /** 판정 근거 한 줄 */
+    judgeLine: string;
     fromUlt: UltimateDef;
     toUlt: UltimateDef;
     log: ConversionLog;
@@ -130,14 +132,14 @@ export function advancementCut(
       emblem: { label: advName, color: adv.color },
       broken: log.removed.map((r) => icon(r.skillId)),
       gains: [...plus].map(([id, n]) => ({ ...icon(id), plus: n })),
-      actorFrom: ctx.data.player.spriteKey,
+      actorFrom: playerArtKey(ctx.artLoaded, ctx.data.player.spriteKey, args.jobId, null),
       actorTo: artKeys.playerSchool(adv.id),
     },
     pages: [
       {
         title: `${t('cut.advancement')} — ${t('cut.advancement.title', { job: t(args.jobNameKey), adv: advName })}`,
         lines: [
-          t('cut.advancement.judge', { hectar: args.picks.hectar, acro: args.picks.acro }),
+          args.judgeLine,
           t('cut.advancement.ultimate', { from: t(args.fromUlt.nameKey), to: t(args.toUlt.nameKey) }),
           ...dodgeLines,
         ],

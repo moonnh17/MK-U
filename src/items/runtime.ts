@@ -356,7 +356,7 @@ export class ItemRuntime {
   }
 
   /** 값만 있는 효과의 합 (치명타 확률·치명타 피해·회피 재사용 감소) */
-  total(kind: 'critChance' | 'critDamage' | 'dodgeCdReduce' | 'ultimateCooldown'): number {
+  total(kind: 'critChance' | 'critDamage' | 'dodgeCdReduce' | 'ultimateCooldown' | 'roarBoost'): number {
     return this.each(kind).reduce((s, { e }) => s + e.value, 0);
   }
 

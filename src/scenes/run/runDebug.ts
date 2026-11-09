@@ -23,7 +23,7 @@ export class RunDebug {
   debugAdvance(hectar: number, acro: number): void {
     const p = this.run.session.player;
     if (this.run.modal || p.advancement !== null) return;
-    p.schoolPicks = { hectar, acro };
+    p.schoolPicks = { ...p.schoolPicks, hectar, acro };
     this.run.progression.advance(() => {});
   }
 

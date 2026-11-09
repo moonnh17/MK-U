@@ -1008,6 +1008,369 @@
           "size": 14
         }
       }
+    },
+    {
+      "id": "masteryWeapon",
+      "job": "warrior",
+      "school": "warrior",
+      "kind": "mastery",
+      "nameKey": "skill.masteryWeapon",
+      "shortKey": "skill.masteryWeapon.short",
+      "descKey": "skill.masteryWeapon.desc",
+      "tags": [],
+      "sources": {},
+      "levels": [
+        { "cooldownSec": 0, "values": { "meleeDamage": 0.08 } },
+        { "cooldownSec": 0, "values": { "meleeDamage": 0.16 } },
+        { "cooldownSec": 0, "values": { "meleeDamage": 0.24 } }
+      ],
+      "color": "#c9ae79",
+      "sprites": {}
+    },
+    {
+      "id": "masteryBody",
+      "job": "warrior",
+      "school": "warrior",
+      "kind": "mastery",
+      "nameKey": "skill.masteryBody",
+      "shortKey": "skill.masteryBody.short",
+      "descKey": "skill.masteryBody.desc",
+      "tags": [],
+      "sources": {},
+      "levels": [
+        { "cooldownSec": 0, "values": { "maxHpPct": 0.1 } },
+        { "cooldownSec": 0, "values": { "maxHpPct": 0.2 } },
+        { "cooldownSec": 0, "values": { "maxHpPct": 0.3 } }
+      ],
+      "color": "#c9ae79",
+      "sprites": {}
+    },
+    {
+      "id": "masteryFaith",
+      "job": "warrior",
+      "school": "warrior",
+      "kind": "mastery",
+      "nameKey": "skill.masteryFaith",
+      "shortKey": "skill.masteryFaith.short",
+      "descKey": "skill.masteryFaith.desc",
+      "tags": [],
+      "sources": {},
+      "levels": [
+        { "cooldownSec": 0, "values": { "paladinDamage": 0.08 } },
+        { "cooldownSec": 0, "values": { "paladinDamage": 0.16 } },
+        { "cooldownSec": 0, "values": { "paladinDamage": 0.24 } }
+      ],
+      "color": "#c9ae79",
+      "sprites": {}
+    },
+    {
+      "id": "frenzySlash",
+      "job": "warrior",
+      "school": "barbarian",
+      "kind": "active",
+      "nameKey": "skill.frenzySlash",
+      "shortKey": "skill.frenzySlash.short",
+      "descKey": "skill.frenzySlash.desc",
+      "tags": ["physical", "melee", "bleed"],
+      "sources": { "slash": ["physical", "melee"], "bleed": ["physical", "bleed"] },
+      "levels": [
+        {
+          "cooldownSec": 10,
+          "values": {
+            "durationSec": 4,
+            "intervalSec": 0.58,
+            "damage": 15.5,
+            "range": 32,
+            "arcDeg": 120,
+            "hastePerHit": 0.03,
+            "hasteCap": 0.3,
+            "bleedDamage": 0,
+            "bleedStacks": 1
+          }
+        },
+        {
+          "cooldownSec": 9,
+          "values": {
+            "durationSec": 5,
+            "intervalSec": 0.5,
+            "damage": 27,
+            "range": 34,
+            "arcDeg": 120,
+            "hastePerHit": 0.05,
+            "hasteCap": 0.5,
+            "bleedDamage": 2.5,
+            "bleedStacks": 1
+          }
+        },
+        {
+          "cooldownSec": 8,
+          "values": {
+            "durationSec": 6,
+            "intervalSec": 0.42,
+            "damage": 31.5,
+            "range": 38,
+            "arcDeg": 120,
+            "hastePerHit": 0.09,
+            "hasteCap": 0.9,
+            "bleedDamage": 3.75,
+            "bleedStacks": 1
+          }
+        }
+      ],
+      "color": "#e07a2a",
+      "sprites": {
+        "slash1": { "spriteKey": "skill_bSlash_slash1", "color": "#e07a2a", "size": 30 },
+        "slash2": { "spriteKey": "skill_bSlash_slash2", "color": "#e07a2a", "size": 30 },
+        "slash3": { "spriteKey": "skill_bSlash_slash3", "color": "#e07a2a", "size": 30 }
+      }
+    },
+    {
+      "id": "chainThrow",
+      "job": "warrior",
+      "school": "barbarian",
+      "kind": "active",
+      "nameKey": "skill.chainThrow",
+      "shortKey": "skill.chainThrow.short",
+      "descKey": "skill.chainThrow.desc",
+      "tags": ["physical", "ranged"],
+      "sources": { "chain": ["physical", "ranged"] },
+      "levels": [
+        { "cooldownSec": 12, "values": { "chains": 3, "damage": 10.4, "range": 80, "spreadDeg": 52, "halfWidth": 4, "pullPx": 15, "pullSec": 0.25 } },
+        { "cooldownSec": 11, "values": { "chains": 4, "damage": 17.3, "range": 96, "spreadDeg": 69, "halfWidth": 4, "pullPx": 15, "pullSec": 0.25 } },
+        { "cooldownSec": 10, "values": { "chains": 5, "damage": 20, "range": 115, "spreadDeg": 86, "halfWidth": 4, "pullPx": 15, "pullSec": 0.25 } }
+      ],
+      "color": "#e07a2a",
+      "sprites": {
+        "chain1": { "spriteKey": "skill_bChain_chain1", "color": "#e07a2a", "size": 12 },
+        "chain2": { "spriteKey": "skill_bChain_chain2", "color": "#e07a2a", "size": 12 },
+        "chain3": { "spriteKey": "skill_bChain_chain3", "color": "#e07a2a", "size": 12 }
+      }
+    },
+    {
+      "id": "earthShatter",
+      "job": "warrior",
+      "school": "barbarian",
+      "kind": "active",
+      "nameKey": "skill.earthShatter",
+      "shortKey": "skill.earthShatter.short",
+      "descKey": "skill.earthShatter.desc",
+      "tags": ["physical", "melee"],
+      "sources": { "slam": ["physical", "melee"] },
+      "levels": [
+        { "cooldownSec": 10.8, "values": { "damage": 28, "range": 36, "blasts": 3, "blastGapSec": 0.25, "fracture": 0 } },
+        { "cooldownSec": 9.7, "values": { "damage": 41, "range": 45, "blasts": 3, "blastGapSec": 0.25, "fracture": 0 } },
+        { "cooldownSec": 8.6, "values": { "damage": 45, "range": 55, "blasts": 3, "blastGapSec": 0.25, "fracture": 0.45 } }
+      ],
+      "color": "#e07a2a",
+      "sprites": {
+        "slam1": { "spriteKey": "skill_bSlam_slam1", "color": "#e07a2a", "size": 48 },
+        "slam2": { "spriteKey": "skill_bSlam_slam2", "color": "#e07a2a", "size": 48 },
+        "slam3": { "spriteKey": "skill_bSlam_slam3", "color": "#e07a2a", "size": 48 }
+      }
+    },
+    {
+      "id": "whirlwind",
+      "job": "warrior",
+      "school": "barbarian",
+      "kind": "active",
+      "nameKey": "skill.whirlwind",
+      "shortKey": "skill.whirlwind.short",
+      "descKey": "skill.whirlwind.desc",
+      "tags": ["physical", "melee"],
+      "sources": { "spin": ["physical", "melee"] },
+      "levels": [
+        {
+          "cooldownSec": 14,
+          "values": { "damage": 20.7, "range": 33, "durationSec": 2, "hits": 9, "perSkill": 0.08, "bonusCap": 0.8, "moveSpeed": 0.3 }
+        },
+        { "cooldownSec": 14, "values": { "damage": 35, "range": 41, "durationSec": 2, "hits": 10, "perSkill": 0.1, "bonusCap": 0.8, "moveSpeed": 0.3 } },
+        {
+          "cooldownSec": 14,
+          "values": { "damage": 39, "range": 50, "durationSec": 2, "hits": 14, "perSkill": 0.16, "bonusCap": 0.8, "moveSpeed": 0.3 }
+        }
+      ],
+      "color": "#e07a2a",
+      "sprites": {
+        "whirl1": { "spriteKey": "skill_bWhirl_whirl1", "color": "#e07a2a", "size": 48 },
+        "whirl2": { "spriteKey": "skill_bWhirl_whirl2", "color": "#e07a2a", "size": 48 },
+        "whirl3": { "spriteKey": "skill_bWhirl_whirl3", "color": "#e07a2a", "size": 48 }
+      }
+    },
+    {
+      "id": "warCry",
+      "job": "warrior",
+      "school": "barbarian",
+      "kind": "active",
+      "nameKey": "skill.warCry",
+      "shortKey": "skill.warCry.short",
+      "descKey": "skill.warCry.desc",
+      "tags": ["buff"],
+      "sources": {},
+      "levels": [
+        { "cooldownSec": 18, "values": { "meleeDamage": 0.29, "lifesteal": 0.01, "durationSec": 5 } },
+        { "cooldownSec": 16, "values": { "meleeDamage": 0.43, "lifesteal": 0.015, "durationSec": 6 } },
+        { "cooldownSec": 14, "values": { "meleeDamage": 0.6, "lifesteal": 0.02, "durationSec": 7 } }
+      ],
+      "color": "#e07a2a",
+      "sprites": {
+        "shout1": { "spriteKey": "skill_bShout_shout1", "color": "#e07a2a", "size": 48 },
+        "shout2": { "spriteKey": "skill_bShout_shout2", "color": "#e07a2a", "size": 48 },
+        "shout3": { "spriteKey": "skill_bShout_shout3", "color": "#e07a2a", "size": 48 }
+      }
+    },
+    {
+      "id": "boilingHeart",
+      "job": "warrior",
+      "school": "barbarian",
+      "kind": "passive",
+      "nameKey": "skill.boilingHeart",
+      "shortKey": "skill.boilingHeart.short",
+      "descKey": "skill.boilingHeart.desc",
+      "tags": [],
+      "sources": {},
+      "levels": [
+        { "cooldownSec": 0, "values": { "maxHpPct": 0.1, "hpDamage": 0, "damageCap": 18 } },
+        { "cooldownSec": 0, "values": { "maxHpPct": 0.22, "hpDamage": 0.0124, "damageCap": 18 } },
+        { "cooldownSec": 0, "values": { "maxHpPct": 0.4, "hpDamage": 0.015, "damageCap": 18 } }
+      ],
+      "color": "#e07a2a",
+      "sprites": {
+        "heart1": { "spriteKey": "skill_bHeart_heart1", "color": "#e07a2a", "size": 16 },
+        "heart2": { "spriteKey": "skill_bHeart_heart2", "color": "#e07a2a", "size": 16 },
+        "heart3": { "spriteKey": "skill_bHeart_heart3", "color": "#e07a2a", "size": 16 }
+      }
+    },
+    {
+      "id": "holyBulwark",
+      "job": "warrior",
+      "school": "paladin",
+      "kind": "active",
+      "nameKey": "skill.holyBulwark",
+      "shortKey": "skill.holyBulwark.short",
+      "descKey": "skill.holyBulwark.desc",
+      "tags": ["physical", "ranged"],
+      "sources": { "shield": ["physical", "ranged"] },
+      "levels": [
+        { "cooldownSec": 10.8, "values": { "damage": 14, "bounces": 3, "guard": 0.08, "speed": 195, "range": 156, "maxSec": 4 } },
+        { "cooldownSec": 9.9, "values": { "damage": 23, "bounces": 5, "guard": 0.12, "speed": 195, "range": 156, "maxSec": 4 } },
+        { "cooldownSec": 9, "values": { "damage": 36, "bounces": 7, "guard": 0.22, "speed": 195, "range": 156, "maxSec": 4 } }
+      ],
+      "color": "#e8d24a",
+      "sprites": {
+        "shield1": { "spriteKey": "skill_pShield_shield1", "color": "#e8d24a", "size": 14 },
+        "shield2": { "spriteKey": "skill_pShield_shield2", "color": "#e8d24a", "size": 14 },
+        "shield3": { "spriteKey": "skill_pShield_shield3", "color": "#e8d24a", "size": 14 }
+      }
+    },
+    {
+      "id": "oathOfRetribution",
+      "job": "warrior",
+      "school": "paladin",
+      "kind": "active",
+      "nameKey": "skill.oathOfRetribution",
+      "shortKey": "skill.oathOfRetribution.short",
+      "descKey": "skill.oathOfRetribution.desc",
+      "tags": ["physical", "buff"],
+      "sources": { "counter": ["physical", "melee"] },
+      "levels": [
+        { "cooldownSec": 14, "values": { "damageReduction": 0.1, "counterDamage": 22, "counterRadius": 57, "durationSec": 6, "counterGapSec": 0.3 } },
+        { "cooldownSec": 13, "values": { "damageReduction": 0.16, "counterDamage": 40, "counterRadius": 68, "durationSec": 6, "counterGapSec": 0.3 } },
+        { "cooldownSec": 12, "values": { "damageReduction": 0.25, "counterDamage": 68, "counterRadius": 90, "durationSec": 6, "counterGapSec": 0.3 } }
+      ],
+      "color": "#e8d24a",
+      "sprites": {
+        "oath1": { "spriteKey": "skill_pOath_oath1", "color": "#e8d24a", "size": 48 },
+        "oath2": { "spriteKey": "skill_pOath_oath2", "color": "#e8d24a", "size": 48 },
+        "oath3": { "spriteKey": "skill_pOath_oath3", "color": "#e8d24a", "size": 48 }
+      }
+    },
+    {
+      "id": "sanctuaryAura",
+      "job": "warrior",
+      "school": "paladin",
+      "kind": "active",
+      "nameKey": "skill.sanctuaryAura",
+      "shortKey": "skill.sanctuaryAura.short",
+      "descKey": "skill.sanctuaryAura.desc",
+      "tags": ["physical", "buff"],
+      "sources": { "pulse": ["physical", "melee"] },
+      "levels": [
+        { "cooldownSec": 14, "values": { "damage": 7, "radius": 51, "intervalSec": 0.5, "lowHpReduction": 0.12, "durationSec": 6 } },
+        { "cooldownSec": 13, "values": { "damage": 12.5, "radius": 65, "intervalSec": 0.5, "lowHpReduction": 0.2, "durationSec": 7 } },
+        { "cooldownSec": 12, "values": { "damage": 20, "radius": 78, "intervalSec": 0.5, "lowHpReduction": 0.35, "durationSec": 8 } }
+      ],
+      "color": "#e8d24a",
+      "sprites": {
+        "aura1": { "spriteKey": "skill_pAura_aura1", "color": "#e8d24a", "size": 48 },
+        "aura2": { "spriteKey": "skill_pAura_aura2", "color": "#e8d24a", "size": 48 },
+        "aura3": { "spriteKey": "skill_pAura_aura3", "color": "#e8d24a", "size": 48 }
+      }
+    },
+    {
+      "id": "smite",
+      "job": "warrior",
+      "school": "paladin",
+      "kind": "active",
+      "nameKey": "skill.smite",
+      "shortKey": "skill.smite.short",
+      "descKey": "skill.smite.desc",
+      "tags": ["physical", "ranged"],
+      "sources": { "smite": ["physical", "ranged"] },
+      "levels": [
+        { "cooldownSec": 8, "values": { "damage": 35, "bossBonus": 0.5, "length": 195, "halfWidth": 4 } },
+        { "cooldownSec": 7, "values": { "damage": 58, "bossBonus": 0.85, "length": 216, "halfWidth": 5 } },
+        { "cooldownSec": 6, "values": { "damage": 90, "bossBonus": 1.3, "length": 270, "halfWidth": 7 } }
+      ],
+      "color": "#e8d24a",
+      "sprites": {
+        "smite1": { "spriteKey": "skill_pSmite_smite1", "color": "#e8d24a", "size": 30 },
+        "smite2": { "spriteKey": "skill_pSmite_smite2", "color": "#e8d24a", "size": 30 },
+        "smite3": { "spriteKey": "skill_pSmite_smite3", "color": "#e8d24a", "size": 30 }
+      }
+    },
+    {
+      "id": "holySwords",
+      "job": "warrior",
+      "school": "paladin",
+      "kind": "active",
+      "nameKey": "skill.holySwords",
+      "shortKey": "skill.holySwords.short",
+      "descKey": "skill.holySwords.desc",
+      "tags": ["physical", "ranged"],
+      "sources": { "sword": ["physical", "ranged"] },
+      "levels": [
+        { "cooldownSec": 10.8, "values": { "damage": 23, "count": 1, "range": 150, "radius": 20, "fallDelaySec": 0.4 } },
+        { "cooldownSec": 9.7, "values": { "damage": 40, "count": 3, "range": 168, "radius": 24, "fallDelaySec": 0.4 } },
+        { "cooldownSec": 8.6, "values": { "damage": 62, "count": 5, "range": 195, "radius": 33, "fallDelaySec": 0.4 } }
+      ],
+      "color": "#e8d24a",
+      "sprites": {
+        "sword1": { "spriteKey": "skill_pSwords_sword1", "color": "#e8d24a", "size": 24 },
+        "sword2": { "spriteKey": "skill_pSwords_sword2", "color": "#e8d24a", "size": 24 },
+        "sword3": { "spriteKey": "skill_pSwords_sword3", "color": "#e8d24a", "size": 24 }
+      }
+    },
+    {
+      "id": "prayerOfRevival",
+      "job": "warrior",
+      "school": "paladin",
+      "kind": "passive",
+      "nameKey": "skill.prayerOfRevival",
+      "shortKey": "skill.prayerOfRevival.short",
+      "descKey": "skill.prayerOfRevival.desc",
+      "tags": ["buff"],
+      "sources": {},
+      "levels": [
+        { "cooldownSec": 0, "values": { "everySec": 14, "healPct": 0.07, "healFlat": 4, "guard": 0.12, "guardSec": 2 } },
+        { "cooldownSec": 0, "values": { "everySec": 12, "healPct": 0.1, "healFlat": 8, "guard": 0.18, "guardSec": 2.5 } },
+        { "cooldownSec": 0, "values": { "everySec": 10, "healPct": 0.15, "healFlat": 14, "guard": 0.28, "guardSec": 4 } }
+      ],
+      "color": "#e8d24a",
+      "sprites": {
+        "prayer1": { "spriteKey": "skill_pPrayer_prayer1", "color": "#e8d24a", "size": 32 },
+        "prayer2": { "spriteKey": "skill_pPrayer_prayer2", "color": "#e8d24a", "size": 32 },
+        "prayer3": { "spriteKey": "skill_pPrayer_prayer3", "color": "#e8d24a", "size": 32 }
+      }
     }
   ]
 }

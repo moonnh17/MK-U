@@ -35,7 +35,7 @@ export function cutsceneSlots(
 ): CutsceneSlot[] {
   const jobs = data.jobs.jobs.filter((j) => j.enabled);
   const out: CutsceneSlot[] = [];
-  for (const s of data.skills.skills) if (implemented.skill(s.id)) out.push({ id: `skill.${s.id}`, group: 'skill', nameKey: s.awakening.nameKey });
+  for (const s of data.skills.skills) if (s.awakening && implemented.skill(s.id)) out.push({ id: `skill.${s.id}`, group: 'skill', nameKey: s.awakening.nameKey });
   for (const u of data.ultimates.ultimates) {
     if (u.awakening && implemented.ultimate(u.id)) out.push({ id: `ultimate.${u.id}`, group: 'ultimate', nameKey: u.awakening.nameKey });
   }

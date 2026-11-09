@@ -275,9 +275,9 @@ describe('포탑·역장', () => {
   });
   it('마기역장은 겹치지 않는다', () => {
     for (const l of sk('magiField').levels) expect(l.values.maxHits).toBe(1);
-    expect(sk('magiField').awakening.values.maxHits).toBe(1);
+    expect(sk('magiField').awakening!.values.maxHits).toBe(1);
   });
-  it('런 시작은 빈손, 시작 상자는 낮은 등급 + 전설 6%, 유니크 없음', () => {
+  it('시작 상자는 낮은 등급 + 전설 6%, 유니크 없음', () => {
     expect(D.loot.startChest).toEqual({ common: 60, rare: 34, legendary: 6 });
   });
 });
@@ -317,7 +317,7 @@ describe('스킬 피해', () => {
     const dmg = [0, 1, 2].map((i) => sk.levels[i]!.values.damage!);
     expect(dmg[0]).toBeLessThan(dmg[1]!);
     expect(dmg[1]).toBeLessThan(dmg[2]!);
-    expect(sk.awakening.values.damage).toBeGreaterThan(dmg[2]!);
+    expect(sk.awakening!.values.damage).toBeGreaterThan(dmg[2]!);
     expect(D.skills.skills.find((x) => x.id === 'mkPrototype')!.levels[2]!.values.damageReduction).toBe(0.3);
   });
 });

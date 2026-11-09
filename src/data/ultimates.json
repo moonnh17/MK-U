@@ -237,6 +237,45 @@
           "size": 30
         }
       }
+    },
+    {
+      "id": "sweep",
+      "nameKey": "ultimate.sweep",
+      "shortKey": "ultimate.sweep.short",
+      "descKey": "ultimate.sweep.desc",
+      "tags": ["physical", "melee"],
+      "sources": { "sweep": ["physical", "melee"] },
+      "values": { "damage": 30, "radius": 80, "knockback": 24 },
+      "color": "#c9ae79",
+      "sprites": { "sweep": { "spriteKey": "ult_sweep_sweep", "color": "#c9ae79", "size": 64 } }
+    },
+    {
+      "id": "berserkerRage",
+      "nameKey": "ultimate.berserkerRage",
+      "shortKey": "ultimate.berserkerRage.short",
+      "descKey": "ultimate.berserkerRage.desc",
+      "tags": ["buff"],
+      "sources": {},
+      "school": "barbarian",
+      "values": { "durationSec": 8, "cooldownRate": 3.5, "moveSpeed": 0.4, "whirlTimeMul": 0.55, "whirlIntervalMul": 0.5 },
+      "color": "#e07a2a",
+      "sprites": { "aura": { "spriteKey": "ult_rage_aura", "color": "#e07a2a", "size": 48 } }
+    },
+    {
+      "id": "divineJudgment",
+      "nameKey": "ultimate.divineJudgment",
+      "shortKey": "ultimate.divineJudgment.short",
+      "descKey": "ultimate.divineJudgment.desc",
+      "tags": ["physical", "ranged"],
+      "sources": { "judgment": ["physical", "ranged"] },
+      "school": "paladin",
+      "values": { "shieldPct": 0.65, "shieldSec": 8, "impactDelaySec": 0.9, "damage": 220, "radius": 108, "bossMaxHpPct": 0.02 },
+      "color": "#e8d24a",
+      "sprites": {
+        "sword": { "spriteKey": "ult_judgment_sword", "color": "#e8d24a", "size": 64 },
+        "impact": { "spriteKey": "ult_judgment_impact", "color": "#e8d24a", "size": 64 },
+        "shield": { "spriteKey": "ult_judgment_shield", "color": "#e8d24a", "size": 32 }
+      }
     }
   ]
 }

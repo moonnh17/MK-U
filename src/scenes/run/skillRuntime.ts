@@ -110,6 +110,9 @@ export class SkillRuntime {
         p.hp = Math.max(1, p.hp - amount);
       },
       hpRatio: () => this.run.session.player.hp / this.run.session.player.maxHp,
+      maxHp: () => this.run.session.player.maxHp,
+      ownedSkills: () => Object.keys(this.run.session.player.loadout.owned),
+      roarBoost: () => this.run.itemRt.total('roarBoost'),
       dash: (dir, speed, sec) => {
         sfx('dash');
         this.run.dashVel = { x: dir.x * speed, y: dir.y * speed };
@@ -360,8 +363,24 @@ export class SkillRuntime {
     return this.run.ctx.data.ultimates.ultimates.find((u) => u.id === id)!;
   }
 
-  /** 지금 스킬 오브젝트들이 주는 플레이어 보정 */
+  /** 지금 스킬 오브젝트들과 장착한 액티브(heldMods)가 주는 플레이어 보정 */
   playerMods(): PlayerMods {
-    return combineMods(this.skillObjects.flatMap((o) => (o.playerMods ? [o.playerMods()] : [])));
+    const p = this.run.session.player;
+    const held = p.loadout.active.flatMap((id) => {
+      const impl = id ? skillImpl(id) : undefined;
+      const owned = id ? p.loadout.owned[id] : undefined;
+      if (!id || !owned || !impl?.heldMods) return [];
+      const def = findSkill(this.run.ctx.data.skills, id);
+      const m = impl.heldMods(this.hostFor(id), { def, owned, values: skillValues(def, owned).values });
+      return m ? [m] : [];
+    });
+    return combineMods([...this.skillObjects.flatMap((o) => (o.playerMods ? [o.playerMods()] : [])), ...held]);
+  }
+
+  /** 보호막 오브젝트가 피해를 먼저 흡수한다. 남은 피해 */
+  absorb(amount: number): number {
+    let left = amount;
+    for (const o of this.skillObjects) if (o.absorb && left > 0) left = o.absorb(left);
+    return left;
   }
 }

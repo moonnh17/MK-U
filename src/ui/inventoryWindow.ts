@@ -10,9 +10,9 @@ import type { GameContext } from '../core/context';
 import { buffText } from '../core/session';
 import { bus } from '../core/events';
 import { conversionLines } from './cutscenePages';
-import { artKeys } from '../systems/art';
+import { playerArtKey, artKeys } from '../systems/art';
 import { weaponInfoLines } from './weaponInfo';
-import { findSkill, skillValues, storedSkills } from '../systems/skills';
+import { findSkill, skillValues, ownedMasteries, storedSkills } from '../systems/skills';
 import { skillTags, tagBadges } from '../systems/tags';
 import { emptyHanded, type WeaponItem } from '../systems/weapons';
 import type { TagId } from '../types/data';
@@ -155,8 +155,7 @@ export class InventoryWindow {
     hero.className = 'iw-hero';
     const face = document.createElement('span');
     face.className = 'iw-face';
-    const schoolKey = p.advancement ? artKeys.playerSchool(p.advancement) : null;
-    applyArtIcon(face, this.ctx, schoolKey && this.ctx.artLoaded.has(schoolKey) ? schoolKey : d.player.spriteKey, d.player.color);
+    applyArtIcon(face, this.ctx, playerArtKey(this.ctx.artLoaded, d.player.spriteKey, p.job, p.advancement), d.player.color);
     const who = document.createElement('div');
     who.className = 'iw-who';
     who.append(this.line('iw-job', job ? t(job.nameKey) : p.job), this.line('iw-adv', adv ? t(adv.nameKey) : t('settlement.noAdv'), adv?.color), this.line('iw-coins', t('inventory.coins', { coins: p.coins })));
@@ -203,10 +202,19 @@ export class InventoryWindow {
     equipRow.appendChild(ultEl);
     const storedRow = document.createElement('div');
     storedRow.className = 'iw-row stored';
-    const stored = storedSkills(p.loadout);
+    const stored = storedSkills(p.loadout, d.skills);
     if (stored.length === 0) storedRow.appendChild(this.line('iw-none', t('inventory.none')));
     for (const id of stored) storedRow.appendChild(this.skillCard(id));
-    el.append(equipRow, this.line('iw-sub', t('inventory.stored')), storedRow, this.line('iw-hint', t('inventory.hint')));
+    el.append(equipRow, this.line('iw-sub', t('inventory.stored')), storedRow);
+    // 전사 숙련: 칸 없이 늘 켜져 있다
+    const masteries = ownedMasteries(p.loadout, d.skills);
+    if (masteries.length > 0) {
+      const row = document.createElement('div');
+      row.className = 'iw-row stored';
+      for (const id of masteries) row.appendChild(this.skillCard(id));
+      el.append(this.line('iw-sub', t('inventory.mastery')), row);
+    }
+    el.append(this.line('iw-hint', t('inventory.hint')));
     if (this.ctx.uiMode === 'mobile') el.appendChild(this.makeDetail());
     // 전직 후 스킬 변환 기록
     if (p.advancementLog) {
@@ -329,7 +337,7 @@ export class InventoryWindow {
     applyArtIcon(icon, this.ctx, artKeys.skillIcon(id));
     const name = document.createElement('div');
     name.className = 'iw-name';
-    name.textContent = owned.awakened ? t(def.awakening.nameKey) : t(def.nameKey);
+    name.textContent = owned.awakened && def.awakening ? t(def.awakening.nameKey) : t(def.nameKey);
     const lv = document.createElement('div');
     lv.className = 'iw-lv';
     lv.textContent = `Lv${owned.level} ${'●'.repeat(owned.level)}${'○'.repeat(d.skills.maxLevel - owned.level)}`;
@@ -337,8 +345,8 @@ export class InventoryWindow {
     const req = document.createElement('div');
     req.className = 'iw-req';
     const a = def.awakening;
-    req.textContent = t('inventory.requirement', { item: this.itemName(a.requiredItem) });
-    req.classList.toggle('met', p.items.includes(a.requiredItem));
+    req.textContent = a ? t('inventory.requirement', { item: this.itemName(a.requiredItem) }) : '';
+    req.classList.toggle('met', !!a && p.items.includes(a.requiredItem));
     el.append(icon, name, lv, req);
     el.addEventListener('pointerdown', (e) => {
       e.stopPropagation();
@@ -392,20 +400,20 @@ export class InventoryWindow {
     if (!owned) return;
     const def = findSkill(d.skills, id);
     const sv = skillValues(def, owned);
-    const meta = [t(`school.${def.school}`), t(def.kind === 'passive' ? 'card.passive' : 'card.active'), `Lv${owned.level}`];
-    if (def.kind !== 'passive') meta.push(t('inventory.detailCooldown', { sec: Math.round(sv.cooldownSec * 10) / 10 }));
+    const meta = [t(`school.${def.school}`), t(`card.${def.kind}`), `Lv${owned.level}`];
+    if (def.kind === 'active') meta.push(t('inventory.detailCooldown', { sec: Math.round(sv.cooldownSec * 10) / 10 }));
     box.append(
-      this.line('iw-dname', owned.awakened ? `★ ${t(def.awakening.nameKey)}` : t(def.nameKey)),
+      this.line('iw-dname', owned.awakened && def.awakening ? `★ ${t(def.awakening.nameKey)}` : t(def.nameKey)),
       this.line('iw-dmeta', meta.join(' · ')),
       this.badges(skillTags(def, owned.awakened)),
-      this.line('iw-desc', t(owned.awakened ? def.awakening.descKey : def.descKey, skillTextValues(sv.values))),
+      this.line('iw-desc', t(owned.awakened && def.awakening ? def.awakening.descKey : def.descKey, skillTextValues(sv.values))),
     );
     if (!owned.awakened && owned.level < d.skills.maxLevel) {
       const next = skillValues(def, { level: owned.level + 1, awakened: false });
       box.append(this.line('iw-dsub', t('inventory.detailNext', { level: owned.level + 1 })), this.line('iw-desc dim', t(def.descKey, skillTextValues(next.values))));
     }
-    if (!owned.awakened) {
-      const a = def.awakening;
+    const a = def.awakening;
+    if (!owned.awakened && a) {
       const met = p.items.includes(a.requiredItem) && owned.level >= d.skills.maxLevel;
       const req = this.line('iw-dsub', t('inventory.detailAwaken', { item: this.itemName(a.requiredItem), level: d.skills.maxLevel }));
       req.classList.toggle('met', met);

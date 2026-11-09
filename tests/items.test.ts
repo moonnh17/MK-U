@@ -81,7 +81,7 @@ describe('효과 합산', () => {
     expect(totals(['steelCastleFigure'])).toMatchObject({ maxHp: 20, damageTaken: 0.05, maxEnergy: 20 });
   });
   it('각성 아이템은 모두 일반 풀 또는 보스 드롭에 있다', () => {
-    const skills = gameData.skills.skills.map((s) => s.awakening.requiredItem);
+    const skills = gameData.skills.skills.flatMap((s) => (s.awakening ? [s.awakening.requiredItem] : []));
     expect(new Set(skills).size).toBe(skills.length);
     for (const id of skills) expect(['normal', 'boss']).toContain(item(id).pool);
     const ult = gameData.ultimates.ultimates.filter((u) => u.awakening).map((u) => u.awakening!.requiredItem);

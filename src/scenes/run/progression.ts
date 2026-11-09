@@ -4,7 +4,7 @@ import { bus } from '../../core/events';
 import { Rng } from '../../core/rng';
 import { isSkillImplemented } from '../../skills/registry';
 import { applyCard, drawSkillCards, type AnyCard, type Card } from '../../systems/cards';
-import { convertSkills, judgeSchool, skillAllowed, topSchools } from '../../systems/advancement';
+import { convertSkills, judgeMastery, judgeSchool, skillAllowed, topSchools } from '../../systems/advancement';
 import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type Cutscene } from '../../ui/cutscenePages';
 import { type RoomNode } from '../../systems/mapgen';
 import { registerCutscene, registerGemini } from '../../core/save';
@@ -106,7 +106,8 @@ export class Progression {
   private drawSkills(rng: Rng): Card[] {
     const d = this.run.ctx.data;
     const p = this.run.session.player;
-    return drawSkillCards(rng, p.loadout, d.skills, d.cards, (id) => isSkillImplemented(id) && skillAllowed(findSkill(d.skills, id), p.advancement));
+    const job = d.jobs.jobs.find((j) => j.id === p.job)!;
+    return drawSkillCards(rng, p.loadout, d.skills, d.cards, (id) => isSkillImplemented(id) && skillAllowed(findSkill(d.skills, id), job, p.advancement));
   }
 
   /** 아이템 카드: 아이템 상자와 같은 가중치 */
@@ -296,7 +297,7 @@ export class Progression {
     const p = this.run.session.player;
     const job = this.run.ctx.data.jobs.jobs.find((j) => j.id === p.job)!;
     const order = job.advancements.map((a) => a.id as SchoolId);
-    const school = judgeSchool(p.schoolPicks, order);
+    const school = job.masteryJudge ? judgeMastery(p.loadout.owned, job.masteryJudge, order) : judgeSchool(p.schoolPicks, order);
     if (school) {
       this.advanceTo(school, then);
       return;
@@ -323,7 +324,17 @@ export class Progression {
     p.advancement = school;
     p.advancementLog = r.log;
     this.run.applyPlayerArt();
-    const cuts = [advancementCut(this.run.ctx, { jobNameKey: job.nameKey, adv, picks: p.schoolPicks, fromUlt, toUlt: this.run.skillRt.ultimateDef(), log: r.log }), ...this.collectAwakenings()];
+    const t = this.run.ctx.t;
+    // 판정 근거: 숙련 판정이면 두 숙련 레벨, 아니면 두 학파 카드 수
+    const judgeLine = job.masteryJudge
+      ? t('cut.advancement.judgeMastery', {
+          a: t(findSkill(d.skills, job.masteryJudge[0]).nameKey),
+          an: p.loadout.owned[job.masteryJudge[0]]?.level ?? 0,
+          b: t(findSkill(d.skills, job.masteryJudge[1]).nameKey),
+          bn: p.loadout.owned[job.masteryJudge[1]]?.level ?? 0,
+        })
+      : t('cut.advancement.judge', { hectar: p.schoolPicks.hectar ?? 0, acro: p.schoolPicks.acro ?? 0 });
+    const cuts = [advancementCut(this.run.ctx, { jobNameKey: job.nameKey, jobId: job.id, adv, judgeLine, fromUlt, toUlt: this.run.skillRt.ultimateDef(), log: r.log }), ...this.collectAwakenings()];
     this.run.skillRt.refreshSkillView();
     bus.emit('inventoryChanged', {});
     this.playCutscenes(cuts, () => {

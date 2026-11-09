@@ -37,6 +37,16 @@ export interface PlayerMods {
   damageReduction: number;
   /** 움직일 수 없음 (MK 레이저 집중 사격) */
   rooted?: boolean;
+  /** 근접 피해 증가 (전장의 함성) */
+  meleeDamage?: number;
+  /** 최대 체력 증가 비율 (끓어오르는 심장) */
+  maxHpPct?: number;
+  /** 피해 흡혈 비율 (전장의 함성) */
+  lifesteal?: number;
+  /** 공격마다 기본 피해에 더하는 값 (끓어오르는 심장) */
+  flatDamage?: number;
+  /** 스킬 쿨타임이 추가로 도는 배수 (광전사의 진노 3.5배 → 2.5) */
+  cooldownRate?: number;
 }
 
 export const NO_MODS: PlayerMods = { moveSpeed: 0, damageReduction: 0 };
@@ -46,10 +56,12 @@ export function combineMods(list: readonly Partial<PlayerMods>[]): PlayerMods {
   let moveSpeed = 0;
   let keep = 1;
   let rooted = false;
+  const sum = { meleeDamage: 0, maxHpPct: 0, lifesteal: 0, flatDamage: 0, cooldownRate: 0 };
   for (const m of list) {
     moveSpeed += m.moveSpeed ?? 0;
     keep *= 1 - Math.min(1, Math.max(0, m.damageReduction ?? 0));
     rooted ||= m.rooted ?? false;
+    for (const k of Object.keys(sum) as (keyof typeof sum)[]) sum[k] += m[k] ?? 0;
   }
-  return { moveSpeed, damageReduction: 1 - keep, rooted };
+  return { moveSpeed, damageReduction: 1 - keep, rooted, ...sum };
 }

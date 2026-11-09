@@ -7,7 +7,7 @@ import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { findSkill } from '../systems/skills';
 import { formatPlayTime } from '../systems/runRecord';
-import { artKeys } from '../systems/art';
+import { playerArtKey, artKeys } from '../systems/art';
 import { applyArtIcon } from './artIcon';
 
 export class SettlementWindow {
@@ -68,8 +68,7 @@ export class SettlementWindow {
     const adv = job?.advancements.find((a) => a.id === p.advancement);
     const hero = el('div', 'st-hero');
     const face = el('span', dead ? 'st-heroface dead' : 'st-heroface');
-    const schoolKey = p.advancement ? artKeys.playerSchool(p.advancement) : null;
-    applyArtIcon(face, this.ctx, schoolKey && this.ctx.artLoaded.has(schoolKey) ? schoolKey : d.player.spriteKey, d.player.color);
+    applyArtIcon(face, this.ctx, playerArtKey(this.ctx.artLoaded, d.player.spriteKey, p.job, p.advancement), d.player.color);
     hero.append(face, el('b', '', job ? t(job.nameKey) : p.job), el('span', 'st-dim', adv ? t(adv.nameKey) : t('settlement.noAdv')));
 
     // 큰 숫자 기록
@@ -109,7 +108,7 @@ export class SettlementWindow {
     const skillIcons = row();
     for (const [id, o] of Object.entries(p.loadout.owned).sort((a, b) => a[1].order - b[1].order)) {
       const def = findSkill(d.skills, id);
-      const c = iconCell(artKeys.skillIcon(id), def.color, t(o.awakened ? def.awakening.nameKey : def.nameKey));
+      const c = iconCell(artKeys.skillIcon(id), def.color, t(o.awakened && def.awakening ? def.awakening.nameKey : def.nameKey));
       c.appendChild(el('small', '', o.awakened ? '★' : `Lv${o.level}`));
       skillIcons.appendChild(c);
     }

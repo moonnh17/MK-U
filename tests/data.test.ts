@@ -39,7 +39,7 @@ describe('데이터 검증', () => {
       const by = (school: string) => gameData.skills.skills.filter((s) => s.school === school).map((s) => s.id);
       expect(by('hectar')).toHaveLength(6);
       expect(by('acro')).toHaveLength(6);
-      expect(gameData.skills.skills.filter((s) => s.kind === 'passive').map((s) => s.id).sort()).toEqual([
+      expect(gameData.skills.skills.filter((s) => s.kind === 'passive' && s.job === 'magiScholar').map((s) => s.id).sort()).toEqual([
         'combatDrone',
         'reductionist',
       ]);
@@ -63,8 +63,8 @@ describe('데이터 검증', () => {
       for (const [id, n, an, item] of table) {
         const s = skill(id);
         expect(name(s.nameKey)).toBe(n);
-        expect(name(s.awakening.nameKey)).toBe(an);
-        expect(s.awakening.requiredItem).toBe(item);
+        expect(name(s.awakening!.nameKey)).toBe(an);
+        expect(s.awakening!.requiredItem).toBe(item);
       }
     });
 
@@ -72,15 +72,15 @@ describe('데이터 검증', () => {
       expect(skill('magiTurret').tags).toEqual(['tech', 'ranged']);
       expect(skill('magiTurret').sources.bigBullet).toEqual(['physical', 'ranged']);
       expect(skill('purifyingWings').tags).toEqual(['physical', 'melee']);
-      expect(skill('purifyingWings').awakening.tags).toEqual(['physical', 'melee', 'bleed']);
+      expect(skill('purifyingWings').awakening!.tags).toEqual(['physical', 'melee', 'bleed']);
       // 출혈 공격 source는 물리·출혈, 근접 없음
       expect(skill('purifyingWings').sources.bleed).toEqual(['physical', 'bleed']);
       expect(skill('antimatterCannon').tags).toContain('charging');
       expect(skill('railgun').tags).not.toContain('charging');
-      expect(skill('magiField').awakening.tags).toEqual([]);
+      expect(skill('magiField').awakening!.tags).toEqual([]);
       expect(skill('magiField').tags).toEqual(['buff']);
       // 무한연쇄기폭: 기술·마기·원거리
-      expect(skill('magiMine').awakening.tags).toEqual(['tech', 'magic', 'ranged']);
+      expect(skill('magiMine').awakening!.tags).toEqual(['tech', 'magic', 'ranged']);
       expect(skill('magiMine').sources.chainMine).toEqual(['tech', 'magic', 'ranged']);
       expect(skill('combatDrone').sources.droneShot).toEqual(['tech', 'ranged']);
     });
@@ -112,7 +112,7 @@ describe('데이터 검증', () => {
       for (const id of gameData.skills.skills.map((x) => x.id).filter(isSkillImplemented)) {
         const s = skill(id);
         s.levels.forEach((lv) => expect(Object.keys(lv.values).length, `${id} 레벨 수치`).toBeGreaterThan(0));
-        expect(Object.keys(s.awakening.values).length, `${id} 각성 수치`).toBeGreaterThan(0);
+        if (s.awakening) expect(Object.keys(s.awakening.values).length, `${id} 각성 수치`).toBeGreaterThan(0);
       }
     });
 

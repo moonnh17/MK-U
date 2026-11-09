@@ -29,7 +29,7 @@ export function skillTags(def: SkillDef, awakened: boolean, source?: string): Ta
     if (!t) throw new Error(`스킬 '${def.id}'에 source '${source}' 없음`);
     return [...t];
   }
-  return [...(awakened ? def.awakening.tags : def.tags)];
+  return [...(awakened && def.awakening ? def.awakening.tags : def.tags)];
 }
 
 export function hasTag(tags: readonly TagId[], id: TagId): boolean {

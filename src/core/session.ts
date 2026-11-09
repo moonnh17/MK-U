@@ -2,6 +2,7 @@ import { sanityMaxFor } from '../systems/sanity';
 import type { GameData } from '../data/index';
 import type { StageMap } from '../systems/mapgen';
 import type { StageRef } from '../systems/run';
+import { plainWeapon } from '../systems/weapons';
 import { emptyLoadout, type Cooldowns, type SkillLoadout } from '../systems/skills';
 import type { WeaponSlots } from '../systems/weapons';
 import type { ItemState } from '../items/runtime';
@@ -31,7 +32,7 @@ export interface PlayerState {
   /** 궁극기: 남은 재사용 대기(초)와 이번 대기의 전체 길이 (0이면 바로 쓸 수 있다) */
   ultimate: { id: string; cooldownLeft: number; cooldownTotal: number; awakened: boolean };
   /** 전직 판정용: 고른 스킬 카드의 계열 횟수 (전직은 M3) */
-  schoolPicks: Record<SchoolId, number>;
+  schoolPicks: Partial<Record<SchoolId, number>>;
   /** 마지막으로 고른 스킬 카드의 계열 (전직 동점 처리) */
   lastPickSchool: SchoolId | null;
   job: JobId;
@@ -168,12 +169,12 @@ export function newPlayerState(data: GameData, jobId: string = data.jobs.startJo
     energyMax: data.player.energy.max,
     coins: 0,
     coinCarry: 0,
-    // 빈손으로 시작해 시작방의 무기 상자를 연다
-    weapons: { slots: [null, null], active: 0 },
+    // 직업 시작 무기를 들고, 시작방의 무기 상자로 두 번째 무기를 얻는다
+    weapons: { slots: [startWeaponItem(data, job.startWeapon), null], active: 0 },
     loadout: emptyLoadout(data.skills.activeSlots),
     cooldowns: {},
     ultimate: { id: job.startUltimate, cooldownLeft: data.ultimates.cooldownSec, cooldownTotal: data.ultimates.cooldownSec, awakened: false },
-    schoolPicks: { hectar: 0, acro: 0 },
+    schoolPicks: {},
     lastPickSchool: null,
     job: job.id,
     advancement: null,
@@ -186,6 +187,11 @@ export function newPlayerState(data: GameData, jobId: string = data.jobs.startJo
     geminiSaid: [],
     record: newRunRecord(),
   };
+}
+
+function startWeaponItem(data: GameData, id: string) {
+  const def = data.weapons.weapons.find((w) => w.id === id);
+  return def ? plainWeapon(def) : null;
 }
 
 /** 디버그 토글 (스테이지를 넘어가도 유지) */

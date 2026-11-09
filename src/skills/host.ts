@@ -77,6 +77,12 @@ export interface SkillHost {
   drainHp(amount: number): void;
   /** 지금 체력 비율 (0~1) */
   hpRatio(): number;
+  /** 지금 최대 체력 */
+  maxHp(): number;
+  /** 가진 스킬 id (장착·보관 모두, 숙련 포함) */
+  ownedSkills(): readonly string[];
+  /** 함성 효과 증가 (아이템 직업 변형: 참나무의 심장·바바리안 데스 휘슬) */
+  roarBoost(): number;
   /** 플레이어 돌진: sec 동안 입력 대신 dir 방향으로 speed로 움직인다(벽에는 막힘) */
   dash(dir: Vec2, speed: number, sec: number): void;
   /** 빛 입자가 사방으로 터지는 연출 */
@@ -116,6 +122,8 @@ export interface SkillObject {
   onKill?(host: SkillHost, enemy: Enemy): void;
   /** 이 오브젝트가 있는 동안 플레이어에게 주는 보정 (MK 슈트 등) */
   playerMods?(): Partial<PlayerMods>;
+  /** 플레이어가 받을 피해를 먼저 흡수한다(심판의 강림 보호막). 남은 피해를 돌려준다 */
+  absorb?(amount: number): number;
 }
 
 export interface SkillCast {
@@ -131,6 +139,8 @@ export interface SkillImpl {
   recast?(host: SkillHost, s: SkillCast): boolean;
   /** 다시 누르면 쓸 추가 스킬이 지금 준비돼 있는지 (스킬 칸에 노란 테두리가 돈다) */
   followUpReady?(host: SkillHost): boolean;
+  /** 장착해 둔 것만으로 주는 보정 (성스러운 방벽: 방패가 손에 있는 동안 받는 피해 감소) */
+  heldMods?(host: SkillHost, s: SkillCast): Partial<PlayerMods> | null;
 }
 
 /** 패시브: 장착되면 한 번 불려 상시 오브젝트(드론 등)를 깐다. 해제·레벨 변경 시 그 오브젝트를 치우고 다시 부른다 */

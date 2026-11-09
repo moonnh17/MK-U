@@ -57,9 +57,9 @@
       "effects": [
         { "kind": "buffDuration", "value": 0.2, "group": "damagePct" },
         { "kind": "moveSpeed", "value": 0.08, "group": "damagePct" },
-        { "kind": "tempRoar", "everySec": 10, "durationSec": 5, "damage": 0.1, "moveSpeed": 0.1 }
+        { "kind": "tempRoar", "everySec": 10, "durationSec": 5, "damage": 0.1, "moveSpeed": 0.1, "notSchool": "barbarian" }
       ],
-      "variants": [{ "job": "barbarian", "effects": [] }],
+      "variants": [{ "job": "barbarian", "effects": [{ "kind": "roarBoost", "value": 0.1 }] }],
       "spriteKey": "item_oak_heart", "color": "#6a9a3a", "size": 8 },
     { "id": "hanwooSteak", "codexNo": 10, "flavor": "codex.itemFlavor.hanwooSteak", "nameKey": "item.hanwooSteak", "abilityDescKey": "item.hanwooSteak.abilityDesc", "grade": "rare", "pool": "normal", "tags": [],
       "effects": [{ "kind": "lowHpHeal", "threshold": 0.1, "healTo": 0.5, "cooldownSec": 0, "priority": 1, "uses": 3, "maxEnergyPerUse": 5 }],

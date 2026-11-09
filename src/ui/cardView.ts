@@ -40,7 +40,7 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
       kindLabel: t('card.school'),
       name: t(adv.nameKey),
       subName: '',
-      levelText: t('card.schoolPicks', { n: player.schoolPicks[card.school] }),
+      levelText: t('card.schoolPicks', { n: player.schoolPicks[card.school] ?? 0 }),
       desc: t('card.schoolDesc', { ult: ult ? t(ult.nameKey) : '', n: lose }),
       badges: [],
       accent: adv.color,
@@ -66,7 +66,7 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
   const def = findSkill(d.skills, card.skillId);
   const owned = player.loadout.owned[def.id];
   const sb = d.ui.hud.skillbar;
-  const slotKind = t(def.kind === 'passive' ? 'card.passive' : 'card.active');
+  const slotKind = t(`card.${def.kind}`);
   const school = t(`school.${def.school}`);
   const from = owned?.level ?? 0;
   const to = from + 1;

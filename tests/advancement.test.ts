@@ -109,12 +109,13 @@ describe('전직 스킬 변환 (기획서 예시)', () => {
 
 describe('전직 후 카드 풀', () => {
   it('자기 학파 스킬만 나온다', () => {
-    const allowed = (id: string) => skillAllowed(findSkill(S, id), 'acro');
+    const scholar = gameData.jobs.jobs.find((j) => j.id === 'magiScholar')!;
+    const allowed = (id: string) => skillAllowed(findSkill(S, id), scholar, 'acro');
     for (let seed = 0; seed < 30; seed++) {
       const cards = drawSkillCards(new Rng(seed), emptyLoadout(4), S, gameData.cards, allowed);
       for (const c of cards) expect(findSkill(S, c.skillId).school).toBe('acro');
     }
-    expect(skillAllowed(findSkill(S, 'magiTurret'), null)).toBe(true);
+    expect(skillAllowed(findSkill(S, 'magiTurret'), scholar, null)).toBe(true);
   });
 });
 
@@ -143,12 +144,16 @@ describe('학파 궁극기', () => {
 });
 
 describe('직업 데이터', () => {
-  it('마기학자만 열려 있고, 마기법사·전사는 틀만', () => {
+  it('마기학자·전사가 열려 있고, 마기법사는 틀만', () => {
     const j = gameData.jobs.jobs;
     expect(j.map((x) => [x.id, x.enabled])).toEqual([
       ['magiScholar', true],
       ['magiMage', false],
-      ['warrior', false],
+      ['warrior', true],
+    ]);
+    expect(j[2]!.advancements.map((a) => [a.id, a.ultimate, a.passive])).toEqual([
+      ['barbarian', 'berserkerRage', 'boilingHeart'],
+      ['paladin', 'divineJudgment', 'prayerOfRevival'],
     ]);
     const ms = j[0]!;
     expect(ms.advancements.map((a) => [a.id, a.ultimate, a.passive])).toEqual([

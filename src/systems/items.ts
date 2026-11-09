@@ -34,7 +34,7 @@ export function activeEffects(def: ItemDef, ctx: ItemContext, groups: GroupMulti
     .filter((e) => {
       if ((e.kind === 'skillDamage' || e.kind === 'revive') && e.school) return ctx.school === e.school;
       if (e.kind === 'greatSuccess') return ctx.school === e.school;
-      if (e.kind === 'autoCast' && e.notSchool) return ctx.school !== e.notSchool;
+      if ((e.kind === 'autoCast' || e.kind === 'tempRoar') && e.notSchool) return ctx.school !== e.notSchool;
       return true;
     })
     .map((e) => scaleEffect(e, groups));

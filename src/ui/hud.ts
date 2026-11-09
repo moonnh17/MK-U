@@ -313,7 +313,7 @@ export class Hud {
       ui.container.setAlpha(filled && !v.usable && i !== ultIndex ? sb.disabledAlpha : 1);
     });
     // 보관 중인 스킬이 있으면 스킬바 옆에 개수 배지
-    const stored = storedSkills(s.player.loadout).length;
+    const stored = storedSkills(s.player.loadout, this.ctx.data.skills).length;
     this.storedBadge.setText(stored > 0 ? this.ctx.t('hud.stored', { count: stored }) : '');
   }
 

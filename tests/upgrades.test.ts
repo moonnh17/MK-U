@@ -104,7 +104,7 @@ describe('기억조각 보관대 칸', () => {
     expect(ids).toContain('skill.magiTurret');
     expect(ids).toContain('advancement.hectar');
     expect(ids).toContain('advancement.acro');
-    expect(ids.filter((x) => x?.startsWith('advancement.'))).toHaveLength(2); // 잠긴 직업의 전직은 없음
+    expect(ids.filter((x) => x?.startsWith('advancement.'))).toHaveLength(4); // 마기학자·전사 전직 (잠긴 마기법사는 없음)
     expect(slots.filter((s) => s.id === null).map((s) => s.group)).toEqual(['boss']);
     expect(new Set(ids.filter(Boolean)).size).toBe(ids.filter(Boolean).length);
   });

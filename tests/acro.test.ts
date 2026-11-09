@@ -91,7 +91,7 @@ describe('플레이어 보정 합치기', () => {
     expect(m.damageReduction).toBeCloseTo(0.75);
   });
   it('비어 있으면 0', () => {
-    expect(combineMods([])).toEqual({ moveSpeed: 0, damageReduction: 0, rooted: false });
+    expect(combineMods([])).toMatchObject({ moveSpeed: 0, damageReduction: 0, rooted: false, meleeDamage: 0, cooldownRate: 0 });
     // MK 레이저: 하나라도 묶이면 묶이고, 피해 감소는 곱해서 쌓인다
     expect(combineMods([{ moveSpeed: 0.35, damageReduction: 0.44, rooted: true }, { moveSpeed: 0.1 }]).rooted).toBe(true);
   });

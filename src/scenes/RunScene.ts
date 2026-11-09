@@ -33,7 +33,7 @@ import { animateArt, fitArt } from '../entities/art';
 import { Juice, shake } from '../entities/juice';
 import { cameraFocus, viewSize } from '../systems/camera';
 import { HitStop, slowMoScale } from '../systems/juice';
-import { artKeys } from '../systems/art';
+import { playerArtKey, artKeys } from '../systems/art';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
 import { Pickup } from '../entities/pickup';
@@ -54,7 +54,7 @@ import { advanceStage, playableChapters, firstStage } from '../systems/run';
 import { absorbHit } from '../systems/shield';
 import { corruptedDamage, tickCorruption } from '../systems/acro';
 import { hpStance, takeDamage } from '../systems/vitals';
-import { tickCooldowns } from '../systems/skills';
+import { masteryTotals, tickCooldowns } from '../systems/skills';
 import { tickBleed } from '../systems/tags';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
@@ -491,8 +491,8 @@ export class RunScene extends Phaser.Scene {
   /** 플레이어 모습: 전직했으면 그 학파 그림(있으면), 아니면 기본 */
   applyPlayerArt(): void {
     const d = this.ctx.data;
-    const school = this.session.player.advancement;
-    const key = school && this.ctx.artLoaded.has(artKeys.playerSchool(school)) ? artKeys.playerSchool(school) : d.player.spriteKey;
+    const p = this.session.player;
+    const key = playerArtKey(this.ctx.artLoaded, d.player.spriteKey, p.job, p.advancement);
     if (this.player.texture.key === key) return;
     this.player.anims.stop();
     this.player.setTexture(key, 0);
@@ -648,7 +648,8 @@ export class RunScene extends Phaser.Scene {
     this.special.update(dt);
 
     // 스킬
-    p.cooldowns = tickCooldowns(p.cooldowns, dt);
+    // 광전사의 진노: 스킬 쿨타임이 더 빨리 돈다 (궁극기 대기는 그대로)
+    p.cooldowns = tickCooldowns(p.cooldowns, dt * (1 + (mods.cooldownRate ?? 0)));
     p.ultimate.cooldownLeft = Math.max(0, p.ultimate.cooldownLeft - dt);
     SKILL_ACTIONS.forEach((action, i) => {
       if (frame.pressed.has(action)) this.skillRt.castSlot(i);
@@ -1163,7 +1164,7 @@ export class RunScene extends Phaser.Scene {
     }
     const p = this.session.player;
     const stance = this.itemRt.first('hpStance');
-    const taken = amount * (1 - this.skillRt.playerMods().damageReduction) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard()) * (stance ? 1 - hpStance(p.hp, p.maxHp, stance).taken : 1);
+    const taken = this.skillRt.absorb(amount * (1 - this.skillRt.playerMods().damageReduction) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard()) * (stance ? 1 - hpStance(p.hp, p.maxHp, stance).taken : 1));
     // 정신 피해: 패닉 중이면 체력 피해로 바뀐다
     const mental = (mentalRaw ?? amount * (attacker?.def.mentalRatio ?? 0)) ;
     const m = applyMental(p, mental);
@@ -1309,11 +1310,12 @@ export class RunScene extends Phaser.Scene {
     this.hurtPlayer(damage, null, mental);
   }
 
-  /** 최대 체력 = 기본(+영구 강화) + 아이템. 늘면 그만큼 현재 체력도 채운다 */
+  /** 최대 체력 = (기본(+영구 강화) + 아이템) × (1 + 숙련·스킬 비율). 늘면 그만큼 현재 체력도 채운다 */
   syncMaxHp(): void {
     const d = this.ctx.data;
     const p = this.session.player;
-    const target = d.player.maxHp + p.meta.maxHp + this.itemRt.sums.maxHp;
+    const pct = (masteryTotals(p.loadout, d.skills).maxHpPct ?? 0) + (this.skillRt.playerMods().maxHpPct ?? 0);
+    const target = Math.round((d.player.maxHp + p.meta.maxHp + this.itemRt.sums.maxHp) * (1 + pct));
     if (target === p.maxHp) return;
     if (target > p.maxHp) p.hp += target - p.maxHp;
     p.maxHp = target;

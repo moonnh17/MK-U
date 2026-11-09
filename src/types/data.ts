@@ -959,9 +959,11 @@ export interface UiData {
 // ---------- 스킬 ----------
 
 export type JobId = 'magiScholar' | 'magiMage' | 'warrior';
-export const SCHOOL_IDS = ['hectar', 'acro'] as const;
+/** 계열 태그. warrior는 전사 숙련(전직 전 카드)이다 */
+export const SCHOOL_IDS = ['hectar', 'acro', 'warrior', 'barbarian', 'paladin'] as const;
 export type SchoolId = (typeof SCHOOL_IDS)[number];
-export type SkillSlotKind = 'active' | 'passive';
+/** mastery: 슬롯 없이 늘 켜져 있는 전사 숙련 (전직 후에도 유지) */
+export type SkillSlotKind = 'active' | 'passive' | 'mastery';
 
 export interface SkillLevelDef {
   /** 쿨타임(초). 패시브는 0 */
@@ -997,7 +999,8 @@ export interface SkillDef {
   sources: Record<string, TagId[]>;
   /** Lv1~3 */
   levels: SkillLevelDef[];
-  awakening: SkillAwakeningDef;
+  /** 없으면 각성하지 않는다 (요구 아이템이 아직 정해지지 않은 스킬) */
+  awakening?: SkillAwakeningDef;
   /** 아이콘 자리 색 */
   color: string;
   /** 스킬이 만드는 오브젝트 모양 */
@@ -1123,7 +1126,7 @@ export type ItemEffect =
   /** 주기적으로 스킬 자동 발동 (notSchool로 전직했으면 꺼짐) */
   | { kind: 'autoCast'; skillId: string; level: number; everySec: number; notSchool?: SchoolId }
   /** 주기적 임시 함성: 피해·이동속도 증가 (버프 태그) */
-  | { kind: 'tempRoar'; everySec: number; durationSec: number; damage: number; moveSpeed: number }
+  | { kind: 'tempRoar'; everySec: number; durationSec: number; damage: number; moveSpeed: number; /** 이 학파로 전직했으면 꺼짐 (야만용사는 전장의 함성 강화로 대신) */ notSchool?: SchoolId }
   /** 주기적 인력탄: 맞은 자리 둘레 적을 끌어당기며 피해 */
   | { kind: 'gravityShot'; everySec: number; damage: number; radius: number; pull: number; range: number; tags: TagId[] }
   /** 코인을 perCoins만큼 얻을 때마다 관통탄 shots발 (남은 양 이월) */
@@ -1320,6 +1323,15 @@ export interface JobDef {
   nameKey: string;
   enabled: boolean;
   startUltimate: string;
+  /** 시작 무기 (1번 칸) */
+  startWeapon: string;
+  /** 전직 전 카드로 나오는 계열 */
+  preSchools: SchoolId[];
+  /**
+   * 숙련 판정(전사, 원본 규칙): 두 숙련 레벨을 비교해 큰 쪽 분기로. 같으면 두 번째가 1 이상일 때 두 번째, 아니면 첫 번째.
+   * 없으면 고른 카드 계열 수로 판정한다.
+   */
+  masteryJudge?: [string, string];
   advancements: AdvancementDef[];
 }
 

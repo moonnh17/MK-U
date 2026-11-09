@@ -21,6 +21,7 @@ import { chainTargets, lineHits, muzzleAngle, muzzlePoint, shotOrigin } from '..
 import { signatureFires, weaponPose, type WeaponMotionKind, type WeaponMotionParams } from '../../systems/motion';
 import { corruptedDamage, skillChance } from '../../systems/acro';
 import { hpStance } from '../../systems/vitals';
+import { masteryTotals } from '../../systems/skills';
 import { gradeEnergyMultiplier } from '../../systems/damage';
 import { chargedCrit, gunShots, inArc, projectilesCut, rollCrit, spendEnergy, spinUpMul, type WeaponItem, type WeaponStats } from '../../systems/weapons';
 import { contains, interiorRect } from '../../systems/worldLayout';
@@ -816,7 +817,10 @@ export class WeaponCombat {
   hit(enemy: Enemy, base: number, tags: readonly TagId[], source: string | null = null): boolean {
     if (enemy.dead) return false;
     const d = this.run.ctx.data;
-    let dmg = calcDamage({ baseDamage: base, tags }, this.tagBonus(), d.tags, this.rangeBonus());
+    // 끓어오르는 심장: 공격마다 기본 피해에 체력 비례 값을 더한다
+    let dmg = calcDamage({ baseDamage: base + (this.run.skillRt.playerMods().flatDamage ?? 0), tags }, this.tagBonus(), d.tags, this.rangeBonus());
+    // 신앙 강화: 성기사 계열(성기사 스킬·궁극기) 피해
+    if (source && this.schoolOf(source) === 'paladin') dmg *= 1 + (masteryTotals(this.run.session.player.loadout, d.skills).paladinDamage ?? 0);
     // 아이템: 피해 %(더한 뒤 한 번), 보스·적이 받는 피해·스킬 피해, 적중 효과(신검 공간격·참마검)
     const boss = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss';
     const hm = this.run.itemRt.hitMods(this.run.rng, (c) => skillChance(c, 'success', ['chance'], d.tags));
@@ -865,8 +869,9 @@ export class WeaponCombat {
       if (fx.crit) this.run.hitStop.request(hs.crit);
     }
     for (const o of [...this.run.skillRt.skillObjects]) o.onDamageDealt?.(this.run.host, dealt, enemy);
-    // 아이템 피해 흡혈 (과기전쟁의 일기)
-    if (this.run.itemRt.sums.lifesteal > 0 && dealt > 0) this.run.host.heal(dealt * this.run.itemRt.sums.lifesteal, false);
+    // 아이템 피해 흡혈 (과기전쟁의 일기) + 스킬 흡혈 (전장의 함성)
+    const steal = this.run.itemRt.sums.lifesteal + (this.run.skillRt.playerMods().lifesteal ?? 0);
+    if (steal > 0 && dealt > 0) this.run.host.heal(dealt * steal, false);
     if (killed) this.run.onEnemyKilled(enemy);
     return killed;
   }
@@ -877,10 +882,18 @@ export class WeaponCombat {
     return { physical: it.physical + (this.run.weaponDef().equipBonus?.physicalDamage ?? 0), magic: it.magic, tech: it.tech };
   }
 
-  /** 근접·원거리 피해 증가: 들고 있는 무기 + 아이템 (같은 종류라 더한다) */
+  /** 근접·원거리 피해 증가: 들고 있는 무기 + 아이템 + 무기 숙련 + 전장의 함성 (같은 종류라 더한다) */
   rangeBonus(): RangeBonus {
     const b = this.run.weaponDef().equipBonus;
     const it = this.run.itemRt.sums.damage;
-    return { melee: (b?.meleeDamage ?? 0) + it.melee, ranged: (b?.rangedDamage ?? 0) + it.ranged };
+    const mastery = masteryTotals(this.run.session.player.loadout, this.run.ctx.data.skills).meleeDamage ?? 0;
+    const skill = this.run.skillRt.playerMods().meleeDamage ?? 0;
+    return { melee: (b?.meleeDamage ?? 0) + it.melee + mastery + skill, ranged: (b?.rangedDamage ?? 0) + it.ranged };
+  }
+
+  /** 피해를 준 스킬·궁극기의 계열 (무기·아이템이면 null) */
+  private schoolOf(source: string): string | null {
+    const d = this.run.ctx.data;
+    return d.skills.skills.find((s) => s.id === source)?.school ?? d.ultimates.ultimates.find((u) => u.id === source)?.school ?? null;
   }
 }
