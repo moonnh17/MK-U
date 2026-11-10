@@ -1218,6 +1218,7 @@
   "cut.conversion": "스킬 변환",
   "cut.conversion.removed": "{skill} Lv{level} 소멸",
   "cut.conversion.gain": "{skill} +1 (Lv{level})",
+  "cut.conversion.granted": "{skill} 획득 (Lv1)",
   "cut.conversion.none": "변환할 스킬 없음",
   "cut.advancement.only": "이제부터 {adv} 스킬만 등장합니다",
   "inventory.advancementLog": "전직 기록 — {adv}",

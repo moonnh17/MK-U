@@ -1,4 +1,4 @@
-/** 적 상태이상 겉모습: 화상(머리 위 불 문양·불씨), 석화(굳는 금·깨지는 파편), 처형 X표시. 색·시간은 juice.status */
+/** 적 상태이상 겉모습: 화상·출혈(머리 위 문양·입자), 석화(굳는 금·깨지는 파편), 처형 X표시. 색·시간은 juice.status */
 import type Phaser from 'phaser';
 import { getContext } from '../core/context';
 import { Rng } from '../core/rng';
@@ -8,38 +8,74 @@ import { hexColor } from '../core/scale';
 let fxRng: Rng | null = null;
 const rnd = () => (fxRng ??= Rng.derive(getContext().config.seed, 'status-fx')).next();
 
-/** 7×8 불 문양 (1 밝은 노랑, 2 주황, 3 빨강) */
-const FLAME = ['...1...', '..121..', '..121..', '.12221.', '.12321.', '1233321', '1233321', '.12221.'];
-const FLAME_KEY = 'status_burn_mark';
+export type StatusKind = 'burn' | 'bleed';
 
-function flameTexture(scene: Phaser.Scene): string {
-  if (scene.textures.exists(FLAME_KEY)) return FLAME_KEY;
-  const cols = getContext().data.juice.status.burnColors.map(hexColor);
+/**
+ * 머리 위 문양 픽셀 (숫자는 juice.status.<kind>.colors 순번, 1부터). small은 중첩이 차는 동안, full은 최대 중첩.
+ * 불: 1 노랑 2 주황 3 빨강 4 흰 심지 / 핏방울: 1 밝은 빨강 2 빨강 3 검붉음 4 옅은 반짝임
+ */
+const MARKS: Record<StatusKind, { small: string[]; full: string[] }> = {
+  burn: {
+    small: ['...1...', '..121..', '..121..', '.12221.', '.12321.', '1233321', '1233321', '.12221.'],
+    full: ['....1....', '...121...', '.1.121.1.', '.1122211.', '.1224221.', '122444221', '123444321', '123343321', '123333321', '.1233321.', '..11111..'],
+  },
+  bleed: {
+    small: ['..3..', '.323.', '.323.', '32213', '32223', '32223', '.333.'],
+    full: ['4...3...4', '....3....', '...323...', '..32223..', '.3221223.', '.3221223.', '322222223', '322222223', '.3222223.', '..33333..', '4.......4'],
+  },
+};
+
+function markTexture(scene: Phaser.Scene, kind: StatusKind, size: 'small' | 'full'): string {
+  const key = `status_${kind}_${size}`;
+  if (scene.textures.exists(key)) return key;
+  const cols = getContext().data.juice.status[kind].colors.map(hexColor);
+  const rows = MARKS[kind][size];
   const g = scene.make.graphics({}, false);
-  FLAME.forEach((row, y) => [...row].forEach((c, x) => c !== '.' && g.fillStyle(cols[Number(c) - 1]!, 1).fillRect(x, y, 1, 1)));
-  g.generateTexture(FLAME_KEY, 7, 8);
+  rows.forEach((row, y) => [...row].forEach((c, x) => c !== '.' && g.fillStyle(cols[Number(c) - 1]!, 1).fillRect(x, y, 1, 1)));
+  g.generateTexture(key, rows[0]!.length, rows.length);
   g.destroy();
-  return FLAME_KEY;
+  return key;
 }
 
-export class BurnLook {
+/**
+ * 화상·출혈 겉모습: 머리 위 문양(중첩이 쌓일수록 커지고 최대 중첩이면 화려한 문양으로 바뀌어 맥박친다)과 입자
+ * (불티는 위로, 핏방울은 아래로). 물듦은 enemy.restoreTint가 맡는다.
+ */
+export class StatusLook {
   private readonly mark: Phaser.GameObjects.Image;
-  private emberIn = 0;
+  private particleIn = 0;
+  private full = false;
 
-  constructor(private readonly scene: Phaser.Scene) {
-    this.mark = scene.add.image(0, 0, flameTexture(scene)).setDepth(6);
+  constructor(
+    private readonly scene: Phaser.Scene,
+    private readonly kind: StatusKind,
+  ) {
+    this.mark = scene.add.image(0, 0, markTexture(scene, kind, 'small')).setDepth(6);
   }
 
-  update(dt: number, x: number, headY: number): void {
+  update(dt: number, x: number, headY: number, stacks: number, maxStacks: number): void {
     const st = getContext().data.juice.status;
+    const def = st[this.kind];
+    const full = stacks >= maxStacks;
+    if (full !== this.full) {
+      this.full = full;
+      this.mark.setTexture(markTexture(this.scene, this.kind, full ? 'full' : 'small'));
+    }
+    const smallW = MARKS[this.kind].small[0]!.length;
+    const t = maxStacks > 1 ? Math.min(1, (stacks - 1) / (maxStacks - 1)) : 1;
+    const pulse = full ? 1 + st.markFullPulse * Math.sin(this.scene.time.now / 90) : 1;
+    // 같은 화면 폭으로 이어지게: 최대 중첩 문양은 작은 문양의 최대 크기에 맞춘다
+    const w = smallW * (1 + (st.markMaxScale - 1) * t) * pulse;
+    this.mark.setScale(w / this.mark.width);
     const bob = Math.sin(this.scene.time.now / 120) * 0.6;
-    this.mark.setPosition(x, headY - st.burnMarkGapPx + bob);
-    this.emberIn -= dt;
-    if (this.emberIn > 0) return;
-    this.emberIn = st.burnEmberEverySec;
-    const col = st.burnColors[Math.floor(rnd() * st.burnColors.length)]!;
-    const e = this.scene.add.rectangle(x + (rnd() - 0.5) * 10, headY + 6 + rnd() * 8, 1, 1, hexColor(col)).setDepth(5);
-    this.scene.tweens.add({ targets: e, y: e.y - st.burnEmberRisePx, alpha: 0, duration: st.burnEmberLifeSec * 1000, onComplete: () => e.destroy() });
+    this.mark.setPosition(x, headY - st.markGapPx - (this.mark.displayHeight - this.mark.height) / 2 + bob);
+    this.particleIn -= dt;
+    if (this.particleIn > 0) return;
+    this.particleIn = def.particleEverySec / (full ? st.markFullParticleMul : 1);
+    const col = def.colors[Math.floor(rnd() * 3)]!;
+    const s = full && rnd() < 0.4 ? 2 : 1;
+    const p = this.scene.add.rectangle(x + (rnd() - 0.5) * 10, headY + 6 + rnd() * 8, s, s, hexColor(col)).setDepth(5);
+    this.scene.tweens.add({ targets: p, y: p.y + def.particleMovePx, alpha: 0, duration: def.particleLifeSec * 1000, ease: def.particleMovePx > 0 ? 'Quad.easeIn' : 'Linear', onComplete: () => p.destroy() });
   }
 
   destroy(): void {

@@ -79,13 +79,13 @@ describe('공간격', () => {
 it('엘리트도 즉사 (최대 HP만큼), 집행자·집정관 10%', () => {    expect(spaceDamage('elite', 400, 10, r)).toBeGreaterThanOrEqual(400);    expect(spaceDamage('champion', 400, 10, r)).toBeCloseTo(40);  });  it('보스·히든보스는 즉사 없이 피해 ×1.8', () => {    expect(spaceDamage('boss', 1000, 10, r)).toBeCloseTo(18);    expect(spaceDamage('hiddenBoss', 1000, 10, r)).toBeCloseTo(18);  });
 });
 
-describe('출혈: 4초 / 1초 간격 / 최대 3중첩 / 재적용 시 갱신', () => {
+describe('출혈: 4초 / 1초 간격 / 최대 10중첩 / 재적용 시 갱신', () => {
   const r = rule<BleedRule>('bleed');
-  it('중첩은 최대 3, 다시 걸면 지속시간이 갱신된다', () => {
+  it('중첩은 최대 10, 다시 걸면 지속시간이 갱신된다', () => {
     let s = applyBleed(null, 2, 1, r);
     s = { ...s, remainingSec: 1 };
-    s = applyBleed(s, 2, 5, r);
-    expect(s.stacks).toBe(3);
+    s = applyBleed(s, 2, 15, r);
+    expect(s.stacks).toBe(10);
     expect(s.remainingSec).toBe(4);
   });
   it('1초마다 중첩 × 피해를 주고 4초 뒤 끝난다', () => {
@@ -128,5 +128,29 @@ describe('태그 배지', () => {
       { id: 'physical', nameKey: 'tag.physical', color: '#d9663b' },
       { id: 'melee', nameKey: 'tag.melee', color: '#c88f7f' },
     ]);
+  });
+});
+
+describe('출혈·화상 고정 피해 (사용자 지정)', () => {
+  it('출혈 5, 화상 3, 최대 중첩 모두 10', () => {
+    const b = rule<BleedRule>('bleed');
+    const f = rule<BurnRule>('burn');
+    expect([b.damagePerStack, f.damagePerStack]).toEqual([5, 3]);
+    expect([b.maxStacks, f.maxStacks, f.bossMaxStacks]).toEqual([10, 10, 10]);
+  });
+  it('설명에 쓰는 데이터 값도 고정값과 같다 (0은 출혈 없음)', () => {
+    const b = rule<BleedRule>('bleed').damagePerStack;
+    const f = rule<BurnRule>('burn').damagePerStack;
+    const vals = gameData.skills.skills.flatMap((s) => [...s.levels.map((l) => l.values), s.awakening?.values ?? {}]);
+    for (const v of vals) {
+      if (v.bleedDamage) expect(v.bleedDamage).toBe(b);
+      if (v.burnDamage) expect(v.burnDamage).toBe(f);
+    }
+    for (const it of gameData.items.items)
+      for (const e of it.effects) {
+        if (e.kind === 'meleeBleed') expect(e.damage).toBe(b);
+        if (e.kind === 'meleeBurn') expect(e.damage).toBe(f);
+      }
+    for (const w of gameData.weapons.weapons) if (w.bleed) expect(w.bleed.base).toBe(b);
   });
 });

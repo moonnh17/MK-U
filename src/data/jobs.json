@@ -34,6 +34,7 @@
       "startWeapon": "dagger",
       "preSchools": ["warrior"],
       "masteryJudge": ["masteryWeapon", "masteryFaith"],
+      "advancementGrantSkills": 1,
       "advancements": [
         { "id": "barbarian", "nameKey": "job.adv.barbarian", "color": "#e07a2a", "ultimate": "berserkerRage", "passive": "boilingHeart" },
         { "id": "paladin", "nameKey": "job.adv.paladin", "color": "#e8d24a", "ultimate": "divineJudgment", "passive": "prayerOfRevival" }

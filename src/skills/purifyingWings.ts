@@ -23,7 +23,7 @@ function slash(host: SkillHost, s: SkillCast, art: SpriteRef, damage: number, so
     playFx(host.scene, sp.flash!, x, y);
     host.hit(e, damage, tags);
     if (s.owned.awakened && !e.dead) {
-      host.bleed(e, v.bleedDamage!, v.bleedStacksPerHit!, skillTags(s.def, true, 'bleed'));
+      host.bleed(e, v.bleedStacksPerHit!);
       playFx(host.scene, sp.bleedA!, x, y);
       playFx(host.scene, sp.markA!, x, y - e.radius, { fadeSec: 0.6 });
     }

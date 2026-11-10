@@ -127,15 +127,16 @@ export class SkillRuntime {
         const total = this.cooldownOf(skillValues(findSkill(ctx.data.skills, id), owned).cooldownSec);
         p.cooldowns = refundCooldown(p.cooldowns, id, total * ratio);
       },
-      bleed: (e, base, stacks, tags) => {
+      // 출혈·화상 틱 피해는 출처와 상관없이 태그 규칙의 고정값
+      bleed: (e, stacks) => {
         if (e.dead) return;
-        const perStack = calcDamage({ baseDamage: base, tags }, this.run.combat.tagBonus(), ctx.data.tags, this.run.combat.rangeBonus());
-        e.bleed = applyBleed(e.bleed, perStack, stacks, this.run.tagRule<BleedRule>('bleed'));
+        const rule = this.run.tagRule<BleedRule>('bleed');
+        e.bleed = applyBleed(e.bleed, rule.damagePerStack, stacks, rule);
       },
-      burn: (e, base, stacks, tags) => {
+      burn: (e, stacks) => {
         if (e.dead) return;
-        const perStack = calcDamage({ baseDamage: base, tags }, this.run.combat.tagBonus(), ctx.data.tags, this.run.combat.rangeBonus());
-        e.burn = applyBurn(e.burn, perStack, stacks, this.run.tagRule<BurnRule>('burn'), e.rank === 'boss' || e.rank === 'hiddenBoss');
+        const rule = this.run.tagRule<BurnRule>('burn');
+        e.burn = applyBurn(e.burn, rule.damagePerStack, stacks, rule, e.rank === 'boss' || e.rank === 'hiddenBoss');
       },
       fireBullet: (from, angle, speed, range, base, tags, sprite, extra) =>
         this.run.combat.fireBullet(from, angle, speed, range, base, tags, source, { pierce: extra?.pierce ?? 0, crit: 0, sprite, hitSize: extra?.hitSize, tint: extra?.tint }),
@@ -322,7 +323,6 @@ export class SkillRuntime {
       awakened: false,
       cooldownLeft: 0,
       cooldownTotal: 0,
-      gauge: 0,
       usable: false,
       color: d.ui.hud.skillbar.emptyColor,
       iconKey: null,
@@ -339,8 +339,7 @@ export class SkillRuntime {
         awakened: owned.awakened,
         cooldownLeft: active ? cooldownLeft(p.cooldowns, id) : 0,
         cooldownTotal: this.cooldownOf(sv.cooldownSec),
-        gauge: 0,
-        usable: !active || this.skillUsable(def, owned.awakened, sv.values),
+          usable: !active || this.skillUsable(def, owned.awakened, sv.values),
         followUp: active && (skillImpl(id)?.followUpReady?.(this.hostFor(id)) ?? false),
         color: def.color,
         iconKey: owned.awakened ? artKeys.awakenedIcon(artKeys.skillIcon(id), (k) => this.run.textures.exists(k)) : artKeys.skillIcon(id),
@@ -355,8 +354,6 @@ export class SkillRuntime {
         skillId: ult.id,
         label: t(p.ultimate.awakened && ult.awakening ? ult.awakening.shortKey : ult.shortKey),
         awakened: p.ultimate.awakened,
-        // 칸이 차오르는 표시: 재사용 대기가 끝나면 가득
-        gauge: p.ultimate.cooldownTotal > 0 ? 1 - p.ultimate.cooldownLeft / p.ultimate.cooldownTotal : 1,
         usable: p.ultimate.cooldownLeft <= 0,
         cooldownLeft: p.ultimate.cooldownLeft,
         cooldownTotal: p.ultimate.cooldownTotal,

@@ -711,7 +711,7 @@
             "thickness": 8,
             "gapDeg": 80,
             "gapStepDeg": 15,
-            "damage": 34
+            "damage": 27
           }
         },
         {
@@ -728,7 +728,7 @@
             "spread": 52,
             "radius": 22,
             "delaySec": 0.85,
-            "damage": 31
+            "damage": 25
           }
         },
         {
@@ -744,7 +744,7 @@
             "lagSec": 0.5,
             "sideDeg": 26,
             "width": 18,
-            "damage": 41
+            "damage": 33
           }
         },
         {
@@ -762,7 +762,7 @@
             "speed": 120,
             "thickness": 10,
             "gapDeg": 60,
-            "damage": 27
+            "damage": 22
           }
         },
         {
@@ -776,14 +776,14 @@
             "windupSec": 1.1,
             "length": 340,
             "speed": 360,
-            "damage": 41,
+            "damage": 33,
             "sideOffset": 40,
             "sideLiveSec": 0.5,
             "sideWidth": 10,
-            "sideDamage": 27,
+            "sideDamage": 22,
             "radius": 52,
             "delaySec": 0.6,
-            "blastDamage": 37,
+            "blastDamage": 30,
             "exposeSec": 2.1,
             "exposeMul": 2.2
           }
@@ -799,7 +799,7 @@
             "telegraphSec": 0.5,
             "liveSec": 0.25,
             "width": 22,
-            "damage": 31,
+            "damage": 25,
             "sanityBelow": 40,
             "rootSec": 2.5
           }
@@ -817,7 +817,7 @@
             "liveSec": 0.3,
             "gap": 46,
             "width": 16,
-            "damage": 34,
+            "damage": 27,
             "footRadius": 26,
             "footDelaySec": 0.65
           }
@@ -835,7 +835,7 @@
             "radius": 26,
             "delaySec": 1,
             "lagSec": 0.5,
-            "damage": 34,
+            "damage": 27,
             "waveAtSec": 0.8,
             "maxRadius": 300,
             "speed": 130,
@@ -858,7 +858,7 @@
             "stepSec": 0.22,
             "rows": 1,
             "rowGap": 0,
-            "damage": 41
+            "damage": 33
           }
         }
       ],
@@ -868,7 +868,7 @@
         "afterSec": 1.6,
         "radius": 26,
         "delaySec": 0.7,
-        "damage": 31
+        "damage": 25
       },
       "art": {
         "debris": { "spriteKey": "fx_bit_gear", "color": "#a03ae0", "size": 6 },

@@ -147,6 +147,11 @@ export const holyBulwark: SkillImpl = {
 
 // ---------- 응징의 서약 / 업보청산 ----------
 
+/** 서약 고리가 밝아지는 주기, 불티 간격 */
+const OATH_PULSE_HZ = 0.8;
+const OATH_EMBER_SEC = 0.09;
+const OATH_EMBER = 0xf0d860;
+
 class Oath extends Timed {
   private lastCounter = -Infinity;
 
@@ -155,7 +160,21 @@ class Oath extends Timed {
     private readonly s: SkillCast,
   ) {
     super(s.def.id, host, host.buffDuration(s.values.durationSec!, s.def.tags), { key: 'buff.oathOfRetribution', color: s.def.color });
-    this.attach(host, levelRef(s, 'oath'), 16, 0.5);
+    this.attach(host, levelRef(s, 'oath'), 18, 0.6);
+  }
+
+  /** 서약 중임이 보이게: 고리가 숨 쉬듯 밝아졌다 어두워지고, 몸에서 금빛 불티가 피어오른다 */
+  private glowT = 0;
+  private emberIn = 0;
+  protected override tick(dt: number, host: SkillHost): void {
+    this.glowT += dt;
+    this.follow?.setAlpha(0.45 + 0.35 * Math.sin(this.glowT * OATH_PULSE_HZ * Math.PI * 2) ** 2);
+    this.emberIn -= dt;
+    if (this.emberIn > 0) return;
+    this.emberIn = OATH_EMBER_SEC;
+    const p = host.playerPos();
+    const ox = host.rng.range(-8, 8);
+    mote(host, p.x + ox, p.y + 6, host.rng.chance(0.3) ? 0xffffff : OATH_EMBER, 1, 2, ox * 0.2, -14, 0.6);
   }
 
   playerMods(): Partial<PlayerMods> {
@@ -216,7 +235,7 @@ class Aura extends Timed {
     for (const e of enemiesWithin(host, host.playerPos(), host.area(v.radius!))) {
       host.hit(e, v.damage!, this.s.def.sources.pulse!);
       // 신성한 빛: 오라 안의 적이 타오른다
-      if (this.s.owned.awakened && !e.dead) host.burn(e, v.burnDamage!, v.burnStacks!, this.s.def.sources.burn!);
+      if (this.s.owned.awakened && !e.dead) host.burn(e, v.burnStacks!);
     }
   }
 
@@ -407,7 +426,8 @@ class JudgmentShield extends Timed {
   constructor(host: SkillHost, amount: number, sec: number, color: string, ref: Parameters<Timed['attach']>[1]) {
     super('divineJudgment', host, sec, { key: 'buff.divineJudgment', color });
     this.shield = amount;
-    this.attach(host, ref, 14, 0.4);
+    // 피해를 막아 주는 동안 문양을 머리 뒤 후광으로
+    this.attach(host, ref, 10, 0.85, true);
   }
 
   absorb(amount: number): number {

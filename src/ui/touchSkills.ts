@@ -64,7 +64,7 @@ export class TouchSkills {
       const p = this.parts[i];
       if (!p) return;
       const cdSec = Math.ceil(v.cooldownLeft);
-      const frac = i === ULT ? v.gauge : v.cooldownTotal > 0 ? v.cooldownLeft / v.cooldownTotal : 0;
+      const frac = v.cooldownTotal > 0 ? v.cooldownLeft / v.cooldownTotal : 0;
       const sig = `${v.skillId}|${v.iconKey}|${v.level}|${v.awakened}|${v.usable}|${cdSec}|${frac.toFixed(2)}|${v.followUp ? 1 : 0}`;
       if (sig === p.sig) return;
       p.sig = sig;
@@ -94,12 +94,8 @@ export class TouchSkills {
         dot.style.display = filled && i !== ULT ? 'block' : 'none';
         dot.style.background = k < v.level ? levelColor : '';
       });
-      if (i === ULT) {
-        // 궁극기: 게이지가 차오르는 원
-        p.cd.style.background = `conic-gradient(${v.color}88 ${frac * 360}deg, transparent 0)`;
-        p.num.textContent = '';
-      } else if (v.cooldownLeft > 0) {
-        // 쿨타임: 남은 만큼 어둡게 덮고 숫자
+      if (v.cooldownLeft > 0) {
+        // 쿨타임: 남은 만큼 어둡게 덮고 숫자 (궁극기도 같다)
         p.cd.style.background = `conic-gradient(rgba(0,0,0,${sb.cooldownAlpha}) ${frac * 360}deg, transparent 0)`;
         p.num.textContent = String(cdSec);
       } else {

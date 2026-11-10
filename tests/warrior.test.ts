@@ -145,7 +145,7 @@ describe('야만용사 각성', () => {
     const { itemDescParams } = await import('../src/ui/itemCard');
     const { activeEffects } = await import('../src/systems/items');
     const it = (id: string) => gameData.items.items.find((i) => i.id === id)!;
-    expect(itemDescParams(it('ichor'), gameData.groupMultipliers)).toMatchObject({ ch2: '25', d2: '2' });
+    expect(itemDescParams(it('ichor'), gameData.groupMultipliers)).toMatchObject({ ch2: '25', d2: '5' });
     expect(itemDescParams(it('siriusArmor'), gameData.groupMultipliers)).toMatchObject({ th3: '30', g3: '40', dur3: '5', s3: '30' });
     const kinds = (school: string | null) => activeEffects(it('siriusArmor'), { school: school as never, job: 'warrior' }, gameData.groupMultipliers).map((e) => e.kind);
     expect(kinds('barbarian')).toContain('ultimateCooldown');

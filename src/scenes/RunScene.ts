@@ -467,6 +467,7 @@ export class RunScene extends Phaser.Scene {
     this.rootLeft = 0;
     this.aimDir = { x: 1, y: 0 };
     this.combat.fireCooldown = 0;
+    this.combat.benchCooldown = 0;
     this.invuln = 0;
     this.condition.dodge = IDLE_DODGE;
     this.stageFx.tutorialTexts = [];
@@ -641,8 +642,9 @@ export class RunScene extends Phaser.Scene {
 
     if (frame.pressed.has('swapWeapon')) {
       p.weapons = swapWeapon(p.weapons);
-      // 바꿔 가며 연사하지 못하게: 남은 쿨타임은 유지하고 교체 딜레이를 건다
-      this.combat.fireCooldown = Math.max(this.combat.fireCooldown, this.ctx.data.weapons.swapDelaySec);
+      // 쿨타임은 무기마다 따로: 들던 무기의 남은 쿨타임은 넣어 두고, 꺼낸 무기는 교체 딜레이(와 제 남은 쿨타임) 뒤 바로 쏜다
+      const c = this.combat;
+      [c.fireCooldown, c.benchCooldown] = [Math.max(c.benchCooldown, this.ctx.data.weapons.swapDelaySec), c.fireCooldown];
       this.combat.resetCharge();
     }
     if (frame.pressed.has('interact')) this.loot.interact();

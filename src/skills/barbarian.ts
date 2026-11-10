@@ -57,12 +57,12 @@ class Frenzy extends Timed {
       if (awakened && !spreadFrom && e.bleed) spreadFrom = e;
       host.hit(e, v.damage!, tags);
       if (cross && !e.dead) host.hit(e, v.crossDamage!, this.s.def.sources.cross!);
-      if (v.bleedDamage! > 0 && !e.dead) host.bleed(e, v.bleedDamage!, v.bleedStacks!, this.s.def.sources.bleed!);
+      if (v.bleedDamage! > 0 && !e.dead) host.bleed(e, v.bleedStacks!);
     }
     if (spreadFrom) {
       const from = spreadFrom;
       const near = enemiesWithin(host, { x: from.sprite.x, y: from.sprite.y }, host.area(v.spreadRadius!)).filter((x) => x !== from && !x.bleed);
-      for (const x of near.slice(0, v.spreadCap!)) host.bleed(x, v.bleedDamage!, v.bleedStacks!, this.s.def.sources.bleed!);
+      for (const x of near.slice(0, v.spreadCap!)) host.bleed(x, v.bleedStacks!);
     }
     const ref = awakened ? this.s.def.sprites.slashA! : levelRef(this.s, 'slash');
     // 판정 부채꼴을 그대로 긋고, 초승달 그림은 몸 앞 범위 가운데에 크게 (그림 속 초승달이 칸의 일부라 몸 위에 그리면 작아 보인다)

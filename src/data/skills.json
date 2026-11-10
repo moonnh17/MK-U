@@ -717,7 +717,7 @@
           "range": 64,
           "arcDeg": 220,
           "hitDelaySec": 0.18,
-          "bleedDamage": 7.2,
+          "bleedDamage": 5,
           "bleedStacksPerHit": 1
         }
       },
@@ -1111,7 +1111,7 @@
             "arcDeg": 150,
             "hastePerHit": 0.05,
             "hasteCap": 0.5,
-            "bleedDamage": 2.5,
+            "bleedDamage": 5,
             "bleedStacks": 1
           }
         },
@@ -1125,7 +1125,7 @@
             "arcDeg": 150,
             "hastePerHit": 0.09,
             "hasteCap": 0.9,
-            "bleedDamage": 3.75,
+            "bleedDamage": 5,
             "bleedStacks": 1
           }
         }
@@ -1414,7 +1414,7 @@
         "requiredItem": "dawnFlame",
         "tags": ["physical", "buff", "burn"],
         "cooldownSec": 12,
-        "values": { "radius": 100, "burnDamage": 4, "burnStacks": 1 }
+        "values": { "radius": 100, "burnDamage": 3, "burnStacks": 1 }
       },
       "color": "#e8d24a",
       "sprites": {
@@ -1498,9 +1498,9 @@
       "tags": ["buff"],
       "sources": { "rain": ["physical"] },
       "levels": [
-        { "cooldownSec": 0, "values": { "everySec": 14, "healPct": 0.07, "healFlat": 4, "guard": 0.12, "guardSec": 2 } },
-        { "cooldownSec": 0, "values": { "everySec": 12, "healPct": 0.1, "healFlat": 8, "guard": 0.18, "guardSec": 2.5 } },
-        { "cooldownSec": 0, "values": { "everySec": 10, "healPct": 0.15, "healFlat": 14, "guard": 0.28, "guardSec": 4 } }
+        { "cooldownSec": 0, "values": { "everySec": 7, "healPct": 0.06, "healFlat": 3, "guard": 0.12, "guardSec": 2 } },
+        { "cooldownSec": 0, "values": { "everySec": 6, "healPct": 0.08, "healFlat": 6, "guard": 0.18, "guardSec": 2.5 } },
+        { "cooldownSec": 0, "values": { "everySec": 5, "healPct": 0.12, "healFlat": 11, "guard": 0.28, "guardSec": 4 } }
       ],
       "awakening": {
         "nameKey": "skill.prayerOfRevival.awakened",
@@ -1508,7 +1508,7 @@
         "requiredItem": "masterGStatue",
         "tags": ["buff", "physical"],
         "cooldownSec": 0,
-        "values": { "healPct": 0.2, "healFlat": 18, "rainRadius": 70, "rainDamage": 14, "rainTicks": 4, "rainTickSec": 0.3 }
+        "values": { "healPct": 0.16, "healFlat": 14, "rainRadius": 70, "rainDamage": 14, "rainTicks": 4, "rainTickSec": 0.3 }
       },
       "color": "#e8d24a",
       "sprites": {

@@ -5,6 +5,7 @@ import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
 import {
   convertSkills,
+  grantSchoolSkills,
   judgeSchool,
   topSchools,
   paradoxRatio,
@@ -166,5 +167,21 @@ describe('직업 데이터', () => {
     const d = structuredClone(gameData);
     d.jobs.jobs[0]!.advancements[0]!.ultimate = 'singularity';
     expect(validateGameData(d).some((e) => e.includes('학파가 다름'))).toBe(true);
+  });
+});
+
+describe('전직 선물 (전사)', () => {
+  it('자기 학파 스킬 중 아직 없는 것 하나를 Lv1로 주고 칸에 낀다', () => {
+    const lo = loadout([['masteryWeapon', 2]]);
+    const r = grantSchoolSkills(new Rng(3), lo, S, 'warrior', 'paladin', 1);
+    expect(r.granted).toHaveLength(1);
+    const def = findSkill(S, r.granted[0]!);
+    expect([def.job, def.school]).toEqual(['warrior', 'paladin']);
+    expect(def.kind).not.toBe('mastery');
+    expect(r.loadout.owned[def.id]?.level).toBe(1);
+    expect(r.loadout.active.includes(def.id) || r.loadout.passive === def.id).toBe(true);
+  });
+  it('전사 데이터는 1개를 준다', () => {
+    expect(gameData.jobs.jobs.find((j) => j.id === 'warrior')?.advancementGrantSkills).toBe(1);
   });
 });

@@ -204,7 +204,7 @@
     },
     {
       "id": "magiGolem", "codexNo": 7, "mun": 2, "munClass": true, "flavor": "codex.flavor.magiGolem", "nameKey": "enemy.magiGolem", "chapter": 2, "rank": "boss", "ai": "boss",
-      "maxHp": 9000, "moveSpeed": 26, "contactDamage": 24, "contactIntervalSec": 1.0,
+      "maxHp": 9000, "moveSpeed": 26, "contactDamage": 19, "contactIntervalSec": 1.0,
       "energyOrbs": [12, 14], "coins": [14, 18],
       "spriteKey": "enemy_magi_golem", "color": "#8a6a4a", "size": 48
     },

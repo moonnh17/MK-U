@@ -19,8 +19,9 @@ export function scaleEffect(e: ItemEffect, groups: GroupMultipliersData): ItemEf
   const g = groups.itemGroups;
   const out = { ...e } as Record<string, unknown>;
   if ('group' in e) out.value = e.value * g[e.group];
-  // 함성·패닉 각성의 damage는 피해 %라 발동 피해 배율을 받지 않는다
-  if ('damage' in e && e.kind !== 'tempRoar' && e.kind !== 'roomRoar' && e.kind !== 'panicAwaken') out.damage = (e.damage as number) * g.procDamage;
+  // 함성·패닉 각성의 damage는 피해 %, 출혈·화상은 태그 규칙의 고정 틱 피해라 발동 피해 배율을 받지 않는다
+  const unscaled = ['tempRoar', 'roomRoar', 'panicAwaken', 'meleeBleed', 'meleeBurn'];
+  if ('damage' in e && !unscaled.includes(e.kind)) out.damage = (e.damage as number) * g.procDamage;
   if ('radius' in e) out.radius = (e.radius as number) * g.area;
   if ('everySec' in e) out.everySec = (e.everySec as number) * g.cooldown;
   if ('cooldownSec' in e) out.cooldownSec = (e.cooldownSec as number) * g.cooldown;

@@ -287,14 +287,10 @@ export class Hud {
         dot.setFillStyle(k < v.level ? hexColor(sb.levelColors[v.level - 1] ?? sb.emptyColor) : 0x333333);
       });
 
-      // 쿨타임: 위에서부터 시계 방향으로 줄어드는 원형 게이지 + 숫자 / 궁극기: 아래에서 차오르는 게이지
+      // 쿨타임: 위에서부터 시계 방향으로 줄어드는 원형 게이지 + 숫자 (궁극기도 같다)
       ui.cd.clear();
       ui.cdText.setText('');
-      if (i === ultIndex) {
-        const hgt = Math.round(size * Math.min(1, v.gauge));
-        ui.cd.fillStyle(hexColor(v.color), 0.45);
-        ui.cd.fillRect(1, size - hgt, size - 2, hgt);
-      } else if (v.cooldownLeft > 0 && v.cooldownTotal > 0) {
+      if (v.cooldownLeft > 0 && v.cooldownTotal > 0) {
         const frac = Math.min(1, v.cooldownLeft / v.cooldownTotal);
         const start = -Math.PI / 2;
         ui.cd.fillStyle(hexColor(sb.cooldownColor), sb.cooldownAlpha);

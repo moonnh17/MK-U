@@ -8,7 +8,7 @@
  */
 import type { Rng } from '../core/rng';
 import type { JobDef, SchoolId, SkillDef, SkillsData } from '../types/data';
-import { findSkill, type SkillLoadout } from './skills';
+import { acquireSkill, findSkill, type SkillLoadout } from './skills';
 
 /**
  * 숙련 판정 (전사, 원본 규칙): 두 숙련 중 레벨이 높은 쪽 분기로.
@@ -42,6 +42,8 @@ export interface ConversionLog {
   removed: { skillId: string; level: number }[];
   /** 포인트로 오른 스킬 (같은 스킬이 여러 번이면 여러 줄) */
   gains: { skillId: string; level: number }[];
+  /** 전직으로 새로 받은 스킬 (전사). 예전 저장에는 없다 */
+  granted?: string[];
 }
 
 export function convertSkills(
@@ -104,4 +106,25 @@ export function skillAllowed(def: SkillDef, job: Pick<JobDef, 'id' | 'preSchools
 export function paradoxRatio(success: boolean, great: boolean, ratios: { partial: number; major: number; full: number }): number {
   if (great) return ratios.full;
   return success ? ratios.major : ratios.partial;
+}
+
+/** 전직 선물: 아직 없는 자기 학파 스킬(숙련 제외) 중 count개를 무작위로 Lv1로 준다 */
+export function grantSchoolSkills(
+  rng: Rng,
+  lo: SkillLoadout,
+  data: SkillsData,
+  jobId: string,
+  school: SchoolId,
+  count: number,
+): { loadout: SkillLoadout; granted: string[] } {
+  let loadout = lo;
+  const granted: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const pool = data.skills.filter((s) => s.job === jobId && s.school === school && s.kind !== 'mastery' && !loadout.owned[s.id]);
+    if (pool.length === 0) break;
+    const def = rng.pick(pool);
+    loadout = acquireSkill(loadout, def).loadout;
+    granted.push(def.id);
+  }
+  return { loadout, granted };
 }

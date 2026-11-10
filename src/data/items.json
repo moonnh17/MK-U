@@ -158,7 +158,7 @@
       "effects": [{ "kind": "critChance", "value": 0.15 }, { "kind": "critDamage", "value": 0.25 }],
       "spriteKey": "item_crepuscule", "color": "#c06a3a", "size": 8 },
     { "id": "ichor", "codexNo": 39, "nameKey": "item.ichor", "descKey": "item.ichor.desc", "abilityDescKey": "item.ichor.abilityDesc", "flavor": "codex.itemFlavor.ichor", "grade": "legendary", "pool": "normal", "tags": ["bleed"],
-      "effects": [{ "kind": "damage", "scope": "melee", "value": 0.15, "group": "damagePct" }, { "kind": "lifesteal", "value": 0.01, "group": "damagePct" }, { "kind": "meleeBleed", "chance": 0.25, "damage": 40, "stacks": 1 }],
+      "effects": [{ "kind": "damage", "scope": "melee", "value": 0.15, "group": "damagePct" }, { "kind": "lifesteal", "value": 0.01, "group": "damagePct" }, { "kind": "meleeBleed", "chance": 0.25, "damage": 5, "stacks": 1 }],
       "spriteKey": "item_ichor", "color": "#d9a53a", "size": 8 },
     { "id": "chainRing", "codexNo": 40, "nameKey": "item.chainRing", "descKey": "item.chainRing.desc", "flavor": "codex.itemFlavor.chainRing", "grade": "rare", "pool": "normal", "tags": [],
       "effects": [{ "kind": "area", "value": 0.1, "group": "damagePct" }, { "kind": "maxHp", "value": 10, "group": "hpFlat" }],

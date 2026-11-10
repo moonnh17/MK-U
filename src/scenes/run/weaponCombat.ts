@@ -31,10 +31,6 @@ import { applyBurn } from '../../systems/tags';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
 
-/** 신성한 이코르의 출혈 공격 태그 */
-const ITEM_BLEED_TAGS: readonly TagId[] = ['physical', 'bleed'];
-const ITEM_BURN_TAGS: readonly TagId[] = ['physical', 'burn'];
-
 export class WeaponCombat {
   /** 유니크 고유 효과: 지금 무기로 한 공격 수 */
   sigItem: WeaponItem | null = null;
@@ -51,6 +47,8 @@ export class WeaponCombat {
   private spinShots = 0;
   private spinIdle = 0;
   fireCooldown = 0;
+  /** 넣어 둔 무기의 남은 쿨타임 (꺼내면 그 무기에 그대로 돌려준다) */
+  benchCooldown = 0;
   /** 공격력 버프 (아르고 원정대의 깃발) */
   buffLeft = 0;
   buffTotal = 0;
@@ -68,6 +66,7 @@ export class WeaponCombat {
   /** Space를 누르고 있으면 연사. 차지 무기(대검)는 누르는 동안 모았다가 놓을 때 휘두른다 */
   updateAttack(dt: number, held: boolean, aimAngle: number): void {
     this.fireCooldown -= dt;
+    this.benchCooldown -= dt;
     this.updateBuff(dt);
     const def = this.run.weaponDef();
     if (def.spinUp) {
@@ -672,7 +671,7 @@ export class WeaponCombat {
     for (const e of targets) {
       const at = { x: e.sprite.x, y: e.sprite.y };
       this.hit(e, this.critRoll(st.damage * dmgMul, st.critChance, at), tags);
-      if (w.bleed) this.run.skillRt.hostFor('weapon').bleed(e, w.bleed.base, w.bleed.stacks, w.tags);
+      if (w.bleed) this.run.skillRt.hostFor('weapon').bleed(e, w.bleed.stacks);
       if (w.knockback && !e.dead) {
         const d = Math.hypot(at.x - origin.x, at.y - origin.y) || 1;
         e.knockback({ x: (at.x - origin.x) / d, y: (at.y - origin.y) / d }, w.knockback.distance, w.knockback.sec);
@@ -855,10 +854,10 @@ export class WeaponCombat {
     const killed = this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption), source, { tags, crit, space });
     // 신성한 이코르: 근접 공격이 맞으면 확률로 출혈
     const mb = this.run.itemRt.first('meleeBleed');
-    if (mb && !killed && tags.includes('melee') && this.run.rng.chance(mb.chance)) this.run.host.bleed(enemy, mb.damage, mb.stacks, ITEM_BLEED_TAGS);
+    if (mb && !killed && tags.includes('melee') && this.run.rng.chance(mb.chance)) this.run.host.bleed(enemy, mb.stacks);
     // 새벽불길: 근접 공격이 맞으면 확률로 화상
     const mf = this.run.itemRt.first('meleeBurn');
-    if (mf && !killed && tags.includes('melee') && this.run.rng.chance(mf.chance)) this.run.host.burn(enemy, mf.damage, mf.stacks, ITEM_BURN_TAGS);
+    if (mf && !killed && tags.includes('melee') && this.run.rng.chance(mf.chance)) this.run.host.burn(enemy, mf.stacks);
     return killed;
   }
 
@@ -917,7 +916,7 @@ export class WeaponCombat {
     best.burn = applyBurn(best.burn, b.damagePerStack, b.stacks, rule, best.rank === 'boss' || best.rank === 'hiddenBoss');
     // 불씨가 날아가 옮겨붙는 줄
     const g = this.run.add.graphics().setDepth(5);
-    g.lineStyle(1, hexColor(this.run.ctx.data.juice.status.burnColors[1]!), 1).lineBetween(dead.sprite.x, dead.sprite.y, best.sprite.x, best.sprite.y);
+    g.lineStyle(1, hexColor(this.run.ctx.data.juice.status.burn.colors[1]!), 1).lineBetween(dead.sprite.x, dead.sprite.y, best.sprite.x, best.sprite.y);
     this.run.tweens.add({ targets: g, alpha: 0, duration: 250, onComplete: () => g.destroy() });
   }
 

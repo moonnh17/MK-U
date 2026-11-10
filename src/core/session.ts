@@ -68,12 +68,10 @@ export interface SkillSlotView {
   label: string;
   level: number;
   awakened: boolean;
-  /** 남은 쿨타임(초). 궁극기는 0 */
+  /** 남은 쿨타임(초). 궁극기도 일반 스킬처럼 타이머 */
   cooldownLeft: number;
   cooldownTotal: number;
-  /** 0~1. 궁극기 게이지(액티브는 쓰지 않음) */
-  gauge: number;
-  /** 지금 누르면 발동하는지 (근접: 사거리 안 적, 궁극기: 게이지) */
+  /** 지금 누르면 발동하는지 (근접: 사거리 안 적, 궁극기: 쿨타임) */
   usable: boolean;
   /** 다시 누르면 쓸 추가 스킬이 준비됨 (MK 각성 레이저 등): 쿨타임 동안 노란 테두리가 돈다 */
   followUp?: boolean;

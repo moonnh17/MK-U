@@ -96,6 +96,7 @@ export function conversionLines(log: ConversionLog, ctx: GameContext): string[] 
   const lines = [
     ...log.removed.map((r) => t('cut.conversion.removed', { skill: name(r.skillId), level: r.level })),
     ...log.gains.map((g) => t('cut.conversion.gain', { skill: name(g.skillId), level: g.level })),
+    ...(log.granted ?? []).map((id) => t('cut.conversion.granted', { skill: name(id) })),
   ];
   return lines.length > 0 ? lines : [t('cut.conversion.none')];
 }
@@ -121,6 +122,7 @@ export function advancementCut(
   };
   const plus = new Map<string, number>();
   for (const g of log.gains) plus.set(g.skillId, (plus.get(g.skillId) ?? 0) + 1);
+  for (const id of log.granted ?? []) plus.set(id, (plus.get(id) ?? 0) + 1);
   const advName = t(adv.nameKey);
   const dodgeSchool = ctx.data.player.dodge.schools[adv.id];
   const dodgeLines = dodgeSchool ? [t('cut.advancement.dodge', { from: t(ctx.data.player.dodge.nameKey), to: t(dodgeSchool.nameKey), desc: t(dodgeSchool.descKey) })] : [];

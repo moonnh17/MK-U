@@ -7,10 +7,15 @@ import type { SpriteRef } from '../types/data';
 import { loopArt } from './skillFx';
 import type { BuffView, SkillHost, SkillObject } from './host';
 
+/** 후광 자리: 몸 가운데(키 26px 스프라이트)에서 머리 뒤까지 */
+const HALO_DY = 10;
+
 export abstract class Timed implements SkillObject {
   readonly createdAt: number;
   left: number;
-  private follow: Phaser.GameObjects.Sprite | null = null;
+  protected follow: Phaser.GameObjects.Sprite | null = null;
+  /** 따라다니는 그림을 몸 가운데에서 얼마나 위로 (후광은 머리 뒤) */
+  private followDy = 0;
 
   constructor(
     readonly owner: string,
@@ -22,10 +27,11 @@ export abstract class Timed implements SkillObject {
     this.left = total;
   }
 
-  /** 몸을 따라다니는 반복 그림 (반지름 r) */
-  protected attach(host: SkillHost, ref: SpriteRef, r: number, alpha = 0.7): void {
+  /** 몸을 따라다니는 반복 그림 (반지름 r). halo면 머리 뒤(몸보다 아래 층)에 띄운다 */
+  protected attach(host: SkillHost, ref: SpriteRef, r: number, alpha = 0.7, halo = false): void {
     const p = host.playerPos();
-    const sp = host.sprite(p.x, p.y, ref).setDepth(2.6).setAlpha(alpha);
+    this.followDy = halo ? HALO_DY : 0;
+    const sp = host.sprite(p.x, p.y - this.followDy, ref).setDepth(halo ? 3.9 : 2.6).setAlpha(alpha);
     sp.setDisplaySize(r * 2, (r * 2 * sp.height) / Math.max(1, sp.width));
     loopArt(sp, ref);
     this.follow = sp;
@@ -35,7 +41,7 @@ export abstract class Timed implements SkillObject {
     this.left -= dt;
     if (this.follow) {
       const p = host.playerPos();
-      this.follow.setPosition(p.x, p.y);
+      this.follow.setPosition(p.x, p.y - this.followDy);
     }
     this.tick(dt, host);
     return this.left > 0;

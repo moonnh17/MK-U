@@ -4,7 +4,7 @@ import { bus } from '../../core/events';
 import { Rng } from '../../core/rng';
 import { isSkillImplemented } from '../../skills/registry';
 import { applyCard, drawSkillCards, type AnyCard, type Card } from '../../systems/cards';
-import { convertSkills, judgeMastery, judgeSchool, skillAllowed, topSchools } from '../../systems/advancement';
+import { convertSkills, grantSchoolSkills, judgeMastery, judgeSchool, skillAllowed, topSchools } from '../../systems/advancement';
 import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type Cutscene } from '../../ui/cutscenePages';
 import { type RoomNode } from '../../systems/mapgen';
 import { registerCutscene, registerGemini } from '../../core/save';
@@ -314,6 +314,11 @@ export class Progression {
     const adv = job.advancements.find((a) => a.id === school)!;
     const r = convertSkills(Rng.derive(this.run.ctx.config.seed, 'advancement'), p.loadout, d.skills, school);
     p.loadout = r.loadout;
+    if (job.advancementGrantSkills) {
+      const g = grantSchoolSkills(Rng.derive(this.run.ctx.config.seed, 'advancement-grant'), p.loadout, d.skills, job.id, school, job.advancementGrantSkills);
+      p.loadout = g.loadout;
+      r.log.granted = g.granted;
+    }
     const removed = new Set(r.log.removed.map((x) => x.skillId));
     p.cooldowns = Object.fromEntries(Object.entries(p.cooldowns).filter(([id]) => !removed.has(id)));
     for (const o of this.run.skillRt.skillObjects.filter((x) => removed.has(x.owner.split('.')[0]!))) this.run.skillRt.removeObject(o);

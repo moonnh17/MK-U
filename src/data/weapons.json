@@ -13,7 +13,7 @@
   "fistWeapon": "fist",
   "projectile": { "spriteKey": "projectile_player", "color": "#fff3a0", "size": 3 },
   "critMultiplier": 1.5,
-  "swapDelaySec": 0.35,
+  "swapDelaySec": 0.5,
   "debtDelaySec": 0.6,
   "classes": [
     { "id": "single", "nameKey": "weaponClass.single" },
@@ -203,7 +203,7 @@
     {
       "id": "nekkarCleaver", "codexNo": 20, "fxColor": "#e8343a", "nameKey": "weapon.nekkarCleaver", "abilityNameKey": "weapon.ability.nekkarCleaver", "category": "blade", "grade": "unique", "classes": ["slash"], "tags": ["physical", "melee", "bleed"],
       "baseDamage": 5, "fireIntervalSec": 0.2, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 100, "radius": 43 },
-      "bleed": { "base": 2.5, "stacks": 1 },
+      "bleed": { "base": 5, "stacks": 1 },
       "projectileSpeed": 0, "range": 43, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_nekkar_cleaver", "color": "#a03a3a", "size": 9
     },

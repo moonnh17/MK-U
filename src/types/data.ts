@@ -65,6 +65,8 @@ export interface BleedRule {
   tickIntervalSec: number;
   maxStacks: number;
   refreshOnReapply: boolean;
+  /** 중첩 1개당 틱 피해 (출처·태그 보너스와 상관없이 고정, 사용자 지정) */
+  damagePerStack: number;
 }
 
 /** 화상: 지속시간 없이 죽을 때까지 탄다. 중첩 상한은 일반·보스 따로 */
@@ -73,6 +75,8 @@ export interface BurnRule {
   tickIntervalSec: number;
   maxStacks: number;
   bossMaxStacks: number;
+  /** 중첩 1개당 틱 피해 (고정) */
+  damagePerStack: number;
 }
 
 export interface NoScaling {
@@ -1358,6 +1362,8 @@ export interface JobDef {
    * 없으면 고른 카드 계열 수로 판정한다.
    */
   masteryJudge?: [string, string];
+  /** 전직하면 새 학파 스킬을 이만큼 무작위로 준다 (전사, 사용자 지정) */
+  advancementGrantSkills?: number;
   advancements: AdvancementDef[];
 }
 
@@ -1560,6 +1566,14 @@ export interface ArtData {
 
 export type ShakeLevel = 'light' | 'medium' | 'heavy' | 'rumble';
 
+export interface StatusLookDef {
+  tint: string;
+  colors: string[];
+  particleEverySec: number;
+  particleLifeSec: number;
+  particleMovePx: number;
+}
+
 export interface JuiceData {
   /** 피해 숫자 (동시 max개, riseSec 동안 risePx 위로) */
   damageNumbers: {
@@ -1586,7 +1600,10 @@ export interface JuiceData {
   playerDeath: { sec: number; zoom: number; flashMs: number; tint: string; shards: number };
   /** 상태이상 겉모습: 화상(주황 물듦·머리 위 불 문양·불씨), 석화(회색·금·깨지는 파편), 처형(X표시) */
   status: {
-    burnTint: string; burnColors: string[]; burnEmberEverySec: number; burnEmberLifeSec: number; burnEmberRisePx: number; burnMarkGapPx: number;
+    /** 화상·출혈: 적 물듦 색(보스는 안 물듦), 문양·입자 색(1 밝은색 2 중간 3 어두운 4 가장 밝은 점), 입자 간격·수명·이동(음수면 위로) */
+    burn: StatusLookDef; bleed: StatusLookDef;
+    /** 문양: 머리 위 간격, 둘 다 걸리면 좌우로 벌리는 간격, 중첩이 차기 직전 최대 배율, 최대 중첩일 때 맥박 폭·입자 배수 */
+    markGapPx: number; markSideGapPx: number; markMaxScale: number; markFullPulse: number; markFullParticleMul: number;
     petrifyTint: string; petrifyColors: string[]; petrifyCrackSec: number; shatterShards: number; shatterSpeed: [number, number]; shatterLifeSec: number;
     executeColor: string; executeSec: number; executeSize: number;
   };

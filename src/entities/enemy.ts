@@ -10,7 +10,7 @@ import type { CorruptionState } from '../systems/acro';
 import { effectiveRank, eliteMods, type EliteMods } from '../systems/elites';
 import { aimLocked, burstAngle, chainWindup, forceWindup, initialAi, keepDistanceStep, rootAngle, stepAi, type AiEvent, type AiState } from '../systems/enemyAi';
 import type { BleedState, BurnState } from '../systems/tags';
-import { BurnLook, petrifyCrack, shatter } from './statusLook';
+import { petrifyCrack, shatter, StatusLook, type StatusKind } from './statusLook';
 import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank, SpriteRef } from '../types/data';
 import { Beams, DelayedBlast, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
 import { animateArt, fitArt } from './art';
@@ -77,10 +77,11 @@ export class Enemy {
   /** 반역 개체가 되어 사라졌다(폭발 엘리트도 터지지 않음) */
   converted = false;
   /** 걸려 있는 출혈 */
-  bleed: BleedState | null = null;
+  private bleedState: BleedState | null = null;
   /** 걸려 있는 화상 (죽을 때까지) */
   private burnState: BurnState | null = null;
-  private burnLook: BurnLook | null = null;
+  /** 화상·출혈 문양과 입자 */
+  private looks: Partial<Record<StatusKind, StatusLook>> = {};
   /** 석화 남은 시간(초): 움직이지도 공격하지도 않는다 */
   petrifyLeft = 0;
   /** 굳어 가는 시선(사르비스의 방패): 이동 속도 감소 비율, 겨눈 시간 */
@@ -243,12 +244,25 @@ export class Enemy {
   set burn(s: BurnState | null) {
     const was = !!this.burnState;
     this.burnState = s;
-    if (!!s === was || this.dead) return;
-    if (s) this.burnLook = new BurnLook(this.scene);
-    else {
-      this.burnLook?.destroy();
-      this.burnLook = null;
-    }
+    if (!!s !== was) this.setLook('burn', !!s);
+  }
+
+  /** 걸려 있는 출혈 (끝나면 null) */
+  get bleed(): BleedState | null {
+    return this.bleedState;
+  }
+
+  set bleed(s: BleedState | null) {
+    const was = !!this.bleedState;
+    this.bleedState = s;
+    if (!!s !== was) this.setLook('bleed', !!s);
+  }
+
+  private setLook(kind: StatusKind, on: boolean): void {
+    if (this.dead) return;
+    this.looks[kind]?.destroy();
+    delete this.looks[kind];
+    if (on) this.looks[kind] = new StatusLook(this.scene, kind);
     this.restoreTint();
   }
 
@@ -284,14 +298,40 @@ export class Enemy {
     const st = getContext().data.juice.status;
     if (this.petrified) this.sprite.setTint(hexColor(st.petrifyTint));
     else if (this.stunLeft > 0 && this.def.ai !== 'boss') this.sprite.setTint(0x8888ff);
-    else if (this.burnState) this.sprite.setTint(hexColor(st.burnTint));
+    // 보스는 물들지 않고 문양·입자만
+    else if (this.burnState && !this.isBossRank) this.sprite.setTint(hexColor(st.burn.tint));
+    else if (this.bleedState && !this.isBossRank) this.sprite.setTint(hexColor(st.bleed.tint));
     else if (this.gazeSlow > 0) this.sprite.setTint(hexColor(st.petrifyTint));
     else this.sprite.clearTint();
   }
 
+  private clearLooks(): void {
+    for (const l of Object.values(this.looks)) l.destroy();
+    this.looks = {};
+  }
+
+  private get isBossRank(): boolean {
+    return this.rank === 'boss' || this.rank === 'hiddenBoss';
+  }
+
+  /** 머리 위 문양: 둘 다 걸리면 좌우로 나눠 띄운다 */
+  private updateStatusLooks(dt: number): void {
+    const { burn, bleed } = this.looks;
+    if (!burn && !bleed) return;
+    const d = getContext().data;
+    const headY = this.sprite.y - this.radius - (this.icon ? 8 : 2);
+    const side = burn && bleed ? d.juice.status.markSideGapPx : 0;
+    const tag = (id: StatusKind) => d.tags.tags.find((x) => x.id === id)!.rule as { maxStacks: number; bossMaxStacks?: number };
+    if (bleed && this.bleedState) bleed.update(dt, this.sprite.x - side, headY, this.bleedState.stacks, tag('bleed').maxStacks);
+    if (burn && this.burnState) {
+      const r = tag('burn');
+      burn.update(dt, this.sprite.x + side, headY, this.burnState.stacks, this.isBossRank ? (r.bossMaxStacks ?? r.maxStacks) : r.maxStacks);
+    }
+  }
+
   update(dt: number, host: EnemyHost): void {
     if (this.dead) return;
-    if (this.burnLook) this.burnLook.update(dt, this.sprite.x, this.sprite.y - this.radius - (this.icon ? 8 : 2));
+    this.updateStatusLooks(dt);
     if (this.petrifyLeft > 0) {
       this.petrifyLeft -= dt;
       this.updateLook(dt);
@@ -833,8 +873,7 @@ export class Enemy {
     this.sprite.scene.time.delayedCall(50, () => this.restoreTint());
     if (this.hp <= 0) {
       this.dead = true;
-      this.burnLook?.destroy();
-      this.burnLook = null;
+      this.clearLooks();
       return true;
     }
     return false;
@@ -846,8 +885,7 @@ export class Enemy {
     this.clearSpawn();
     this.halo?.destroy();
     this.icon?.destroy();
-    this.burnLook?.destroy();
-    this.burnLook = null;
+    this.clearLooks();
     for (const r of this.rim) r.img.destroy();
     this.sprite.destroy();
   }
