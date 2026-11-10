@@ -45,8 +45,6 @@ const ANIMS = {
 /** 아이콘 칸 [시트, x, y, w, h] → 64px */
 const ICON = 64;
 const ICONS = {
-  item_hermes_herald: ['shield', 222, 6, 501, 536],
-  item_phantom_feather: ['pegasus', 585, 0, 421, 508],
   icon_skill_holyBulwarkA: ['shield', 222, 6, 501, 536],
   icon_skill_oathOfRetributionA: ['oath', 143, 4, 426, 494],
   icon_skill_sanctuaryAuraA: ['aura', 123, 2, 429, 762],

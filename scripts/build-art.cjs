@@ -405,7 +405,9 @@ const ITEM = {
 };
 for (const [key, f] of Object.entries(ITEM)) sprites[key] = icon(key, f, CARD_ICON);
 // 사용자가 따로 준 아이템 그림 (배경을 지운 원본을 저장소 art-src/items에 둔다)
-const MY_ITEM = { item_ichor: 'ichor.png', item_chain_ring: 'chain-ring.png', item_old_magi_engine: 'old-magi-engine.png', item_sirius_armor: 'sirius-armor.png' };
+const MY_ITEM = { item_ichor: 'ichor.png', item_chain_ring: 'chain-ring.png', item_old_magi_engine: 'old-magi-engine.png', item_sirius_armor: 'sirius-armor.png',
+  item_sarvis_shield: 'sarvis-shield.png', item_phantom_feather: 'phantom-feather.png', item_dawn_flame: 'dawn-flame.png',
+  item_blood_rider: 'blood-rider.png', item_hermes_herald: 'hermes-herald.png', item_master_g_statue: 'master-g-statue.png' };
 for (const [key, f] of Object.entries(MY_ITEM)) sprites[key] = icon(key, path.join(__dirname, 'art-src/items', f), CARD_ICON);
 
 // ---------- 방 타일 (terrain.png: 1행 돌, 2행 푸른 기술, 3행 붉은 균열) ----------

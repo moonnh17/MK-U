@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 697개 · 그림 있음 660개
+전체 697개 · 그림 있음 664개
 
 ## player (6)
 
@@ -495,11 +495,11 @@
 | `item_old_magi_engine` | 구형 마기기관 | 8×8 | center | #5a6ad9 | mku/item_old_magi_engine.png (1프레임) |
 | `item_sirius_armor` | 시리우스의 갑주 | 8×8 | center | #3a6ad9 | mku/item_sirius_armor.png (1프레임) |
 | `item_hermes_herald` | 헤르메스의 전령 | 8×8 | center | #e8e0d0 | mku/item_hermes_herald.png (1프레임) |
-| `item_dawn_flame` | 새벽불길 | 8×8 | center | #ff8a1e | — |
-| `item_blood_rider` | 선혈기수 | 8×8 | center | #b01e2a | — |
+| `item_dawn_flame` | 새벽불길 | 8×8 | center | #ff8a1e | mku/item_dawn_flame.png (1프레임) |
+| `item_blood_rider` | 선혈기수 | 8×8 | center | #b01e2a | mku/item_blood_rider.png (1프레임) |
 | `item_phantom_feather` | 환상의 깃털 | 8×8 | center | #f0f0ff | mku/item_phantom_feather.png (1프레임) |
-| `item_master_g_statue` | 마스터 G 조각상 | 8×8 | center | #c8a050 | — |
-| `item_sarvis_shield` | 사르비스의 방패 | 8×8 | center | #8a6a3a | — |
+| `item_master_g_statue` | 마스터 G 조각상 | 8×8 | center | #c8a050 | mku/item_master_g_statue.png (1프레임) |
+| `item_sarvis_shield` | 사르비스의 방패 | 8×8 | center | #8a6a3a | mku/item_sarvis_shield.png (1프레임) |
 | `item_hela_cell` | 헬라 세포 | 8×8 | center | #5a8ad9 | mku/item_hela_cell.png (1프레임) |
 | `item_forbidden_virus` | 금지된 바이러스 | 8×8 | center | #5a8ad9 | mku/item_forbidden_virus.png (1프레임) |
 | `item_forbidden_gift` | 열어선 안되는 선물 | 8×8 | center | #ffd23f | mku/item_forbidden_gift.png (1프레임) |

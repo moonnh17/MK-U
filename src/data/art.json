@@ -7637,6 +7637,30 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frames": 1
+    },
+    "item_sarvis_shield": {
+      "file": "mku/item_sarvis_shield.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_dawn_flame": {
+      "file": "mku/item_dawn_flame.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_blood_rider": {
+      "file": "mku/item_blood_rider.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_master_g_statue": {
+      "file": "mku/item_master_g_statue.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
     }
   }
 }
