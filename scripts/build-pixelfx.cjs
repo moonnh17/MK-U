@@ -1,0 +1,48 @@
+// pixelfx(github.com/patch-gg/pixelfx, MIT, LICENSE는 art-src/pixelfx에) 이펙트 시트 → public/assets/mku/<key>.png + art.json 항목
+//
+// 원본은 pixelfx에서 `node tools/render.mjs <id> --sheet --fps 18`로 뽑은 격자 시트(PNG + JSON)를 scripts/art-src/pixelfx에 둔다.
+// 18fps는 juice.fxAnim의 재생 속도다. pixelfx 1px을 게임 0.5px로 보여(density 2) 다른 고밀도 그림과 도트 크기를 맞춘다.
+// 모든 프레임을 덮는 상자로 빈 여백을 잘라 가로 한 줄로 잇는다.
+// build-art.cjs가 불러 쓰고, 혼자 실행하면(node scripts/build-pixelfx.cjs) art.json의 해당 항목만 바꾼다.
+const fs = require('fs');
+const path = require('path');
+const k = require('./pngkit.cjs');
+
+const REPO = path.resolve(__dirname, '..');
+const SRC = path.join(REPO, 'scripts/art-src/pixelfx');
+const DENSITY = 2;
+/** spriteKey → art-src/pixelfx 안의 시트 이름 */
+const FX = { fx_poof: 'poof' };
+
+function buildPixelfx(outDir) {
+  const out = {};
+  for (const [key, name] of Object.entries(FX)) {
+    const meta = JSON.parse(fs.readFileSync(path.join(SRC, `${name}.json`), 'utf8')).meta.pixelfx;
+    const sheet = k.read(path.join(SRC, `${name}.png`));
+    const [fw, fh] = meta.frameSize;
+    const frames = Array.from({ length: meta.frames }, (_, i) => k.crop(sheet, (i % meta.columns) * fw, Math.floor(i / meta.columns) * fh, fw, fh));
+    let x0 = fw, y0 = fh, x1 = 0, y1 = 0;
+    for (const f of frames) {
+      const b = k.bbox(f, 0);
+      if (!b) continue;
+      x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
+    }
+    // density로 나눠 떨어지게 짝수로 넓힌다
+    const w = Math.ceil((x1 - x0) / DENSITY) * DENSITY, h = Math.ceil((y1 - y0) / DENSITY) * DENSITY;
+    const strip = k.blank(w * frames.length, h);
+    frames.forEach((f, i) => k.paste(strip, k.crop(f, x0, y0, w, h), i * w, 0));
+    k.write(path.join(outDir, `${key}.png`), strip);
+    out[key] = { file: `mku/${key}.png`, frameWidth: w, frameHeight: h, frames: frames.length, density: DENSITY };
+  }
+  return out;
+}
+
+module.exports = { buildPixelfx };
+
+if (require.main === module) {
+  const artPath = path.join(REPO, 'src/data/art.json');
+  const art = JSON.parse(fs.readFileSync(artPath, 'utf8'));
+  Object.assign(art.sprites, buildPixelfx(path.join(REPO, 'public/assets/mku')));
+  fs.writeFileSync(artPath, JSON.stringify(art, null, 2) + '\n');
+  console.log(Object.keys(FX).map((key) => `${key} ${art.sprites[key].frameWidth}×${art.sprites[key].frameHeight} ×${art.sprites[key].frames}`).join('\n'));
+}

@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 652개 · 그림 있음 640개
+전체 653개 · 그림 있음 641개
 
 ## player (6)
 
@@ -565,7 +565,7 @@
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
-## fx (157)
+## fx (158)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -726,3 +726,4 @@
 | `fx_explosion` | 폭발 | 30×30 | center | #ff5a3a | mku/fx_explosion.png (5프레임) |
 | `fx_elite_burst` | 엘리트 처치 폭발 | 34×34 | center | #c08aff | mku/fx_elite_burst.png (1프레임) |
 | `fx_spawn` | 적 소환 연기 | 20×20 | center | #8a5ad9 | mku/fx_spawn.png (1프레임) |
+| `fx_poof` | 적 처치 연기 (pixelfx) | 30×30 | center | #cdc8e0 | mku/fx_poof.png (30프레임) |

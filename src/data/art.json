@@ -7426,6 +7426,13 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frames": 1
+    },
+    "fx_poof": {
+      "file": "mku/fx_poof.png",
+      "frameWidth": 90,
+      "frameHeight": 76,
+      "frames": 30,
+      "density": 2
     }
   }
 }

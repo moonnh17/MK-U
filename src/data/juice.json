@@ -124,6 +124,11 @@
       "spriteKey": "fx_spawn",
       "color": "#8a5ad9",
       "size": 20
+    },
+    "poof": {
+      "spriteKey": "fx_poof",
+      "color": "#cdc8e0",
+      "size": 30
     }
   },
   "spawn": {

@@ -1568,7 +1568,7 @@ export interface JuiceData {
   playerHurt: { flashSec: number; flashAlpha: number; lowHpRatio: number; pulseSec: number; pulseAlpha: number; color: string; edgePx: number };
   shake: Record<ShakeLevel, { ms: number; intensity: number }>;
   /** 이펙트 그림 (없으면 도형) */
-  fx: Record<'hitTech' | 'hitMagic' | 'hitPhysical' | 'explosion' | 'eliteBurst' | 'spawn', SpriteRef>;
+  fx: Record<'hitTech' | 'hitMagic' | 'hitPhysical' | 'explosion' | 'eliteBurst' | 'spawn' | 'poof', SpriteRef>;
   /** 적 소환: 바닥 원(몸 반지름 × ringRadiusMul), 작게(startScale) 아래(risePx)에서 솟아오른다 */
   spawn: { ringColor: string; ringRadiusMul: number; startScale: number; risePx: number };
   /** 보스 등장 컷: 카메라 이동(panSec) → 내려찍기(dropSec, dropHeight) → 이름 띠(nameSec) → 복귀(returnSec) */

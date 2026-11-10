@@ -671,6 +671,7 @@
   "asset.fx.explosion": "폭발",
   "asset.fx.eliteBurst": "엘리트 처치 폭발",
   "asset.fx.spawn": "적 소환 연기",
+  "asset.fx.poof": "적 처치 연기 (pixelfx)",
   "gemini.name": "미모사 제미니",
   "gemini.story.hint": "PC 아무 키 · 모바일 화면 탭",
   "gemini.story.firstRun.name": "첫 만남",
