@@ -294,7 +294,7 @@ export class WeaponCombat {
       return;
     }
     for (const shot of gunShots(w, shotAngle, this.run.rng, this.run.itemRt.sums.pellets)) {
-      this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: chargedCrit(st.critChance, chargeRatio, w.charge?.critAtMax), ricochet: w.ricochet, tint: w.ricochet || w.flame ? w.color : undefined, sprite: w.shot, flame: w.flame?.scaleTo, trail: w.attackParticles?.color });
+      this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: chargedCrit(st.critChance, chargeRatio, w.charge?.critAtMax), ricochet: w.ricochet, tint: w.ricochet || (w.flame && !w.shot) ? w.color : undefined, sprite: w.shot, flame: w.flame?.scaleTo, trail: w.attackParticles?.color });
     }
     // 질 낮은 가품: 쏠 때마다 따로 판정해 터지면 무기가 사라진다
     this.run.special.rollSelfDestruct(w);
@@ -526,9 +526,18 @@ export class WeaponCombat {
         this.run.tweens.add({ targets: beam, alpha: 0, duration: 180, onComplete: () => beam.destroy() });
         continue;
       }
-      const g = this.run.add.graphics().setDepth(6);
-      g.lineStyle(width, hexColor(w.color), 0.8).lineBetween(s.from.x, s.from.y, s.from.x + s.dir.x * s.len, s.from.y + s.dir.y * s.len);
-      this.run.time.delayedCall(this.run.ctx.data.ui.slashFxSec * 1000, () => g.destroy());
+      // 등급별 픽셀 레이저: 길이에 맞춰 늘이고 무기 색을 입힌다
+      this.beamSprite(this.tierFx(this.run.ctx.data.weapons.meleeFx.beamTiers, w, false), w.color, s.from, s.dir, s.len, width * 2.5);
+    }
+  }
+
+  /** 늘여 그리는 픽셀 레이저 한 번 (무기 색 + 밝은 심) */
+  beamSprite(ref: SpriteRef, color: string, from: Vec2, dir: Vec2, len: number, thick: number): void {
+    const glow = this.run.ctx.data.weapons.meleeFx.glowAlpha;
+    for (const core of [false, true]) {
+      const sp = playFx(this.run, ref, from.x, from.y, { w: Math.max(1, len), h: thick, rotation: Math.atan2(dir.y, dir.x), originX: 0, depth: 6 });
+      if (core) sp.setBlendMode(Phaser.BlendModes.ADD).setAlpha(glow);
+      else sp.setTint(hexColor(color));
     }
   }
 
@@ -643,7 +652,7 @@ export class WeaponCombat {
       targets = enemies.filter((e) => inArc(origin, aimAngle, p.arcDeg, radius, e.sprite, e.radius));
       this.run.roomProps.meleeProps(st.damage * dmgMul, (b) => inArc(origin, aimAngle, p.arcDeg, radius, b, 6));
       this.swingFlip = !this.swingFlip;
-      this.meleeFx(strong ? fx.slashBig : fx.slash, color, st.fireIntervalSec, origin.x + dir.x * radius * 0.5, origin.y + dir.y * radius * 0.5, { w: radius * (strong ? 1.5 : 1.2), rotation: aimAngle, flipY: this.swingFlip });
+      this.meleeFx(this.tierFx(fx.slashTiers, w, strong), color, st.fireIntervalSec, origin.x + dir.x * radius * 0.5, origin.y + dir.y * radius * 0.5, { w: radius * (strong ? 1.5 : 1.2), rotation: aimAngle, flipY: this.swingFlip });
     } else if (p.kind === 'line') {
       const len = p.length * radMul;
       const idx = lineHits(origin, dir, len, p.width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
@@ -651,19 +660,19 @@ export class WeaponCombat {
       const propIdx = lineHits(origin, dir, len, p.width / 2, this.run.roomProps.breakables.map((b) => ({ x: b.x, y: b.y, radius: 6 })));
       const lined = new Set(propIdx.map((i) => this.run.roomProps.breakables[i]!));
       this.run.roomProps.meleeProps(st.damage * dmgMul, (b) => lined.has(b));
-      // 찌르기: 참격을 찌른 방향으로 길게 늘인다
-      this.meleeFx(strong ? fx.slashBig : fx.slash, color, st.fireIntervalSec, origin.x + dir.x * len * 0.5, origin.y + dir.y * len * 0.5, { w: len, h: p.width * (strong ? 4 : 3), rotation: aimAngle });
+      // 찌르기: 찌른 방향으로 뻗는 창 줄기
+      this.meleeFx(this.tierFx(fx.thrustTiers, w, strong), color, st.fireIntervalSec, origin.x + dir.x * len * 0.5, origin.y + dir.y * len * 0.5, { w: len * 1.08, h: p.width * (strong ? 4 : 3), rotation: aimAngle });
     } else if (p.kind === 'smash') {
       const c = { x: origin.x + dir.x * p.reach, y: origin.y + dir.y * p.reach };
       const r = p.radius * radMul;
       targets = enemies.filter((e) => Math.hypot(e.sprite.x - c.x, e.sprite.y - c.y) <= r + e.radius);
       this.run.roomProps.meleeProps(st.damage * dmgMul, (b) => Math.hypot(b.x - c.x, b.y - c.y) <= r + 6);
-      this.meleeFx(strong ? fx.slamBig : fx.slam, color, st.fireIntervalSec, c.x, c.y, this.fitWidth(strong ? fx.slamBig : fx.slam, r * 2.3));
+      this.meleeFx(this.tierFx(fx.smashTiers, w, strong), color, st.fireIntervalSec, c.x, c.y, { w: r * 2.3 });
     } else if (p.kind === 'gust') {
       const r = p.radius * radMul;
       targets = enemies.filter((e) => Math.hypot(e.sprite.x - origin.x, e.sprite.y - origin.y) <= r + e.radius);
       this.run.roomProps.meleeProps(st.damage * dmgMul, (b) => Math.hypot(b.x - origin.x, b.y - origin.y) <= r + 6);
-      this.gustFx(origin, r, color);
+      this.gustFx(origin, r, color, this.tierFx(fx.smashTiers, w, true));
     }
     this.startMeleeMotion(w, st.fireIntervalSec, color);
     if (w.meleeShot) this.fireMeleeShot(w, w.meleeShot, st, aimAngle);
@@ -724,16 +733,15 @@ export class WeaponCombat {
     }
   }
 
-  /** 세로로 긴 그림도 긴 쪽이 size에 맞게 (타격 이펙트) */
-  private fitWidth(ref: SpriteRef, size: number): { w: number } {
-    const art = this.run.ctx.data.art.sprites[ref.spriteKey];
-    return { w: art ? size * Math.min(1, art.frameWidth / art.frameHeight) : size };
+  /** 무기 등급에 맞는 이펙트 단계 그림 (강화 평타는 한 단계 위) */
+  tierFx(list: readonly SpriteRef[], w: WeaponDef, strong: boolean): SpriteRef {
+    const tier = this.run.ctx.data.weapons.meleeFx.tiers[w.grade] + (strong ? 1 : 0);
+    return list[Math.min(list.length, tier) - 1]!;
   }
 
   /** 바람: 충격파 + 사방으로 뻗는 바람 줄기 */
-  private gustFx(at: Vec2, radius: number, color: string): void {
-    const fx = this.run.ctx.data.weapons.meleeFx;
-    this.meleeFx(fx.slamBig, color, 0.5, at.x, at.y, this.fitWidth(fx.slamBig, radius * 2.2));
+  private gustFx(at: Vec2, radius: number, color: string, ref: SpriteRef): void {
+    this.meleeFx(ref, color, 0.5, at.x, at.y, { w: radius * 2.2 });
     const col = hexColor(color);
     const n = 18;
     for (let i = 0; i < n; i++) {

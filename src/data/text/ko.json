@@ -701,7 +701,7 @@
   "asset.fx.explosion": "폭발",
   "asset.fx.eliteBurst": "엘리트 처치 폭발",
   "asset.fx.spawn": "적 소환 연기",
-  "asset.fx.poof": "적 처치 연기 (pixelfx)",
+  "asset.fx.death": "적 처치 — 핏덩이와 떠오르는 영혼 (pixelfx)",
   "gemini.name": "미모사 제미니",
   "gemini.speaker": "MG",
   "gemini.story.link": "HECTAR / SIMULATION LINK",

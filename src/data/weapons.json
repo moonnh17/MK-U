@@ -35,6 +35,11 @@
     "slashBig": { "spriteKey": "fx_melee_slash_big", "color": "#ffffff", "size": 24 },
     "slamBig": { "spriteKey": "fx_melee_slam_big", "color": "#ffffff", "size": 24 },
     "buffAura": { "spriteKey": "fx_buff_aura", "color": "#ffffff", "size": 22 },
+    "tiers": { "common": 1, "rare": 2, "legendary": 3, "unique": 4, "mythic": 4 },
+    "slashTiers": [{ "spriteKey": "fx_w_slash1", "color": "#ffffff", "size": 20 }, { "spriteKey": "fx_w_slash2", "color": "#ffffff", "size": 20 }, { "spriteKey": "fx_w_slash3", "color": "#ffffff", "size": 20 }, { "spriteKey": "fx_w_slash4", "color": "#ffffff", "size": 20 }],
+    "thrustTiers": [{ "spriteKey": "fx_w_thrust1", "color": "#ffffff", "size": 24 }, { "spriteKey": "fx_w_thrust2", "color": "#ffffff", "size": 24 }, { "spriteKey": "fx_w_thrust3", "color": "#ffffff", "size": 24 }, { "spriteKey": "fx_w_thrust4", "color": "#ffffff", "size": 24 }],
+    "smashTiers": [{ "spriteKey": "fx_w_smash1", "color": "#ffffff", "size": 20 }, { "spriteKey": "fx_w_smash2", "color": "#ffffff", "size": 20 }, { "spriteKey": "fx_w_smash3", "color": "#ffffff", "size": 20 }, { "spriteKey": "fx_w_smash4", "color": "#ffffff", "size": 20 }],
+    "beamTiers": [{ "spriteKey": "fx_w_beam3", "color": "#ffffff", "size": 12 }, { "spriteKey": "fx_w_beam3", "color": "#ffffff", "size": 12 }, { "spriteKey": "fx_w_beam3", "color": "#ffffff", "size": 12 }, { "spriteKey": "fx_w_beam4", "color": "#ffffff", "size": 12 }],
     "glowAlpha": 0.35,
     "buffSparkSec": 0.1
   },
@@ -234,6 +239,7 @@
     {
       "id": "flameStaff", "codexNo": 24, "nameKey": "weapon.flameStaff", "category": "staff", "grade": "rare", "classes": ["rapid"], "tags": ["magic", "ranged"],
       "baseDamage": 2, "fireIntervalSec": 0.1, "energyCost": 0.5, "pattern": { "kind": "single", "jitterDeg": 14 }, "pierce": 2,
+      "shot": { "spriteKey": "fx_w_flame", "color": "#ff7a2a", "size": 8 },
       "flame": { "scaleTo": 3 },
       "projectileSpeed": 170, "range": 110, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_flame_staff", "color": "#ff7a2a", "size": 10

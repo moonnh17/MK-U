@@ -7433,13 +7433,6 @@
       "frameHeight": 64,
       "frames": 1
     },
-    "fx_poof": {
-      "file": "mku/fx_poof.png",
-      "frameWidth": 90,
-      "frameHeight": 76,
-      "frames": 30,
-      "density": 2
-    },
     "skill_pShield_shieldA": {
       "file": "mku/skill_pShield_shieldA.png",
       "frameWidth": 80,
@@ -7667,6 +7660,238 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "frames": 1
+    },
+    "fx_death_dark": {
+      "file": "mku/fx_death_dark.png",
+      "frameWidth": 60,
+      "frameHeight": 96,
+      "frames": 19,
+      "density": 2
+    },
+    "fx_w_slash1": {
+      "file": "mku/fx_w_slash1.png",
+      "frameWidth": 72,
+      "frameHeight": 82,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_thrust1": {
+      "file": "mku/fx_w_thrust1.png",
+      "frameWidth": 136,
+      "frameHeight": 36,
+      "frames": 10,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 9,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_smash1": {
+      "file": "mku/fx_w_smash1.png",
+      "frameWidth": 72,
+      "frameHeight": 72,
+      "frames": 15,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 14,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_slash2": {
+      "file": "mku/fx_w_slash2.png",
+      "frameWidth": 80,
+      "frameHeight": 88,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_thrust2": {
+      "file": "mku/fx_w_thrust2.png",
+      "frameWidth": 142,
+      "frameHeight": 40,
+      "frames": 10,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 9,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_smash2": {
+      "file": "mku/fx_w_smash2.png",
+      "frameWidth": 86,
+      "frameHeight": 86,
+      "frames": 15,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 14,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_slash3": {
+      "file": "mku/fx_w_slash3.png",
+      "frameWidth": 104,
+      "frameHeight": 94,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_thrust3": {
+      "file": "mku/fx_w_thrust3.png",
+      "frameWidth": 142,
+      "frameHeight": 42,
+      "frames": 10,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 9,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_smash3": {
+      "file": "mku/fx_w_smash3.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 15,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 14,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_slash4": {
+      "file": "mku/fx_w_slash4.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_thrust4": {
+      "file": "mku/fx_w_thrust4.png",
+      "frameWidth": 142,
+      "frameHeight": 44,
+      "frames": 10,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 9,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_smash4": {
+      "file": "mku/fx_w_smash4.png",
+      "frameWidth": 120,
+      "frameHeight": 114,
+      "frames": 15,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 14,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_beam3": {
+      "file": "mku/fx_w_beam3.png",
+      "frameWidth": 160,
+      "frameHeight": 30,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_beam4": {
+      "file": "mku/fx_w_beam4.png",
+      "frameWidth": 160,
+      "frameHeight": 30,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_flame": {
+      "file": "mku/fx_w_flame.png",
+      "frameWidth": 38,
+      "frameHeight": 22,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 18,
+          "loop": true
+        }
+      }
     }
   }
 }

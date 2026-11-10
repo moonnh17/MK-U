@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 698개 · 그림 있음 665개
+전체 713개 · 그림 있음 680개
 
 ## player (6)
 
@@ -63,13 +63,14 @@
 | `weapon_mintaka_align` | 민타카의 쌍성 지팡이 | 12×12 | center | #6a9aff | mku/weapon_mintaka_align.png (1프레임) |
 | `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | mku/weapon_fist.png (1프레임) |
 
-## projectile (32)
+## projectile (47)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `fx_golem_laser` | 고대병기의 코어 (fx) | 12×12 | center | #a05aff | mku/fx_golem_laser.png (1프레임) |
 | `fx_eclipse_meteor` | 식광의 핵 (fx) 외 1곳 | 10×10 | center | #ff3a4a | mku/fx_eclipse_meteor.png (1프레임) |
 | `projectile_arrow` | 곡궁 (fx) 외 1곳 | 3×3 | center | #c8a070 | mku/projectile_arrow.png (1프레임) |
+| `fx_w_flame` | 보급형 마력사출기 (fx) | 8×8 | center | #ff7a2a | mku/fx_w_flame.png (7프레임) |
 | `projectile_zephyr_arrow` | 서풍 (fx) | 3×3 | center | #7ae8f0 | mku/projectile_zephyr_arrow.png (1프레임) |
 | `fx_soul_burst` | 소울 칼리버 (fx) | 20×20 | center | #c060ff | mku/fx_soul_burst.png (1프레임) |
 | `skill_antimatter_shellA` | 반물질 권총 (fx) 외 1곳 | 9×9 | center | #5ab0ff | mku/skill_antimatter_shellA.png (6프레임) |
@@ -87,6 +88,20 @@
 | `fx_melee_slash_big` | 근접 이펙트 (fx) | 24×24 | center | #ffffff | mku/fx_melee_slash_big.png (10프레임) |
 | `fx_melee_slam_big` | 근접 이펙트 (fx) | 24×24 | center | #ffffff | mku/fx_melee_slam_big.png (5프레임) |
 | `fx_buff_aura` | 근접 이펙트 (fx) | 22×22 | center | #ffffff | mku/fx_buff_aura.png (8프레임) |
+| `fx_w_slash1` | 근접 이펙트 (slashTiers1) | 20×20 | center | #ffffff | mku/fx_w_slash1.png (12프레임) |
+| `fx_w_slash2` | 근접 이펙트 (slashTiers2) | 20×20 | center | #ffffff | mku/fx_w_slash2.png (12프레임) |
+| `fx_w_slash3` | 근접 이펙트 (slashTiers3) | 20×20 | center | #ffffff | mku/fx_w_slash3.png (12프레임) |
+| `fx_w_slash4` | 근접 이펙트 (slashTiers4) | 20×20 | center | #ffffff | mku/fx_w_slash4.png (12프레임) |
+| `fx_w_thrust1` | 근접 이펙트 (thrustTiers1) | 24×24 | center | #ffffff | mku/fx_w_thrust1.png (10프레임) |
+| `fx_w_thrust2` | 근접 이펙트 (thrustTiers2) | 24×24 | center | #ffffff | mku/fx_w_thrust2.png (10프레임) |
+| `fx_w_thrust3` | 근접 이펙트 (thrustTiers3) | 24×24 | center | #ffffff | mku/fx_w_thrust3.png (10프레임) |
+| `fx_w_thrust4` | 근접 이펙트 (thrustTiers4) | 24×24 | center | #ffffff | mku/fx_w_thrust4.png (10프레임) |
+| `fx_w_smash1` | 근접 이펙트 (smashTiers1) | 20×20 | center | #ffffff | mku/fx_w_smash1.png (15프레임) |
+| `fx_w_smash2` | 근접 이펙트 (smashTiers2) | 20×20 | center | #ffffff | mku/fx_w_smash2.png (15프레임) |
+| `fx_w_smash3` | 근접 이펙트 (smashTiers3) | 20×20 | center | #ffffff | mku/fx_w_smash3.png (15프레임) |
+| `fx_w_smash4` | 근접 이펙트 (smashTiers4) | 20×20 | center | #ffffff | mku/fx_w_smash4.png (15프레임) |
+| `fx_w_beam3` | 근접 이펙트 (beamTiers1) | 12×12 | center | #ffffff | mku/fx_w_beam3.png (7프레임) |
+| `fx_w_beam4` | 근접 이펙트 (beamTiers4) | 12×12 | center | #ffffff | mku/fx_w_beam4.png (7프레임) |
 | `enemy_bullet` | 적 탄 | 4×4 | center | #ff5a5a | mku/enemy_bullet.png (1프레임) |
 | `fx_vessel_root_warn` | 마기 혈관수 (fx) | 40×40 | center | #b05aff | mku/fx_vessel_root_warn.png (2프레임) |
 | `fx_vessel_root_hit` | 마기 혈관수 (fx) | 40×40 | center | #b05aff | mku/fx_vessel_root_hit.png (2프레임) |
@@ -771,4 +786,4 @@
 | `fx_explosion` | 폭발 | 30×30 | center | #ff5a3a | mku/fx_explosion.png (5프레임) |
 | `fx_elite_burst` | 엘리트 처치 폭발 | 34×34 | center | #c08aff | mku/fx_elite_burst.png (1프레임) |
 | `fx_spawn` | 적 소환 연기 | 20×20 | center | #8a5ad9 | mku/fx_spawn.png (1프레임) |
-| `fx_poof` | 적 처치 연기 (pixelfx) | 30×30 | center | #cdc8e0 | mku/fx_poof.png (30프레임) |
+| `fx_death_dark` | 적 처치 — 핏덩이와 떠오르는 영혼 (pixelfx) | 30×30 | center | #8e1a2e | mku/fx_death_dark.png (19프레임) |

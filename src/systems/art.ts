@@ -122,6 +122,11 @@ export function collectAssets(d: GameData): AssetRef[] {
   }
   add('projectile', d.weapons.projectile, 'asset.playerBullet');
   for (const k of ['slash', 'slam', 'slashBig', 'slamBig', 'buffAura'] as const) add('projectile', d.weapons.meleeFx[k], 'asset.meleeFx', '#fx');
+  // 무기 이펙트 단계별 그림 (같은 그림을 여러 단계가 쓰면 한 번만)
+  for (const k of ['slashTiers', 'thrustTiers', 'smashTiers', 'beamTiers'] as const)
+    d.weapons.meleeFx[k].forEach((r, i) => {
+      if (d.weapons.meleeFx[k].findIndex((x) => x.spriteKey === r.spriteKey) === i) add('projectile', r, 'asset.meleeFx', `#${k}${i + 1}`);
+    });
   add('projectile', d.enemies.projectile, 'asset.enemyBullet');
   for (const e of d.enemies.enemies) add(e.rank === 'boss' || e.rank === 'hiddenBoss' ? 'boss' : 'enemy', e, e.nameKey);
   for (const e of d.enemies.enemies) for (const a of e.attacks ?? []) for (const r of [a.shot, a.warnArt, a.hitArt]) if (r) add('projectile', r, e.nameKey, '#fx');

@@ -11,12 +11,25 @@ const k = require('./pngkit.cjs');
 const REPO = path.resolve(__dirname, '..');
 const SRC = path.join(REPO, 'scripts/art-src/pixelfx');
 const DENSITY = 2;
-/** spriteKey → art-src/pixelfx 안의 시트 이름 */
-const FX = { fx_poof: 'poof' };
+/**
+ * spriteKey → art-src/pixelfx 안의 시트 이름. 우리가 만든 이펙트의 원본 코드는 art-src/pixelfx/src(pixelfx의 src/fx/mku에 넣어 뽑는다).
+ * center: 이펙트 기준점을 가운데에 두고 위아래·좌우를 같게 자른다(게임이 그림 가운데에 놓는 것). play: 'play' 애니메이션(once 한 번, loop 반복)
+ */
+const FX = {
+  fx_death_dark: { name: 'death-dark', center: true },
+  ...Object.fromEntries([1, 2, 3, 4].flatMap((t) => [
+    [`fx_w_slash${t}`, { name: `w-slash${t}`, center: true, play: 'once' }],
+    [`fx_w_thrust${t}`, { name: `w-thrust${t}`, play: 'once' }],
+    [`fx_w_smash${t}`, { name: `w-smash${t}`, center: true, play: 'once' }],
+  ])),
+  fx_w_beam3: { name: 'w-beam3', play: 'once' },
+  fx_w_beam4: { name: 'w-beam4', play: 'once' },
+  fx_w_flame: { name: 'w-flame', center: true, play: 'loop' },
+};
 
 function buildPixelfx(outDir) {
   const out = {};
-  for (const [key, name] of Object.entries(FX)) {
+  for (const [key, { name, center, play }] of Object.entries(FX)) {
     const meta = JSON.parse(fs.readFileSync(path.join(SRC, `${name}.json`), 'utf8')).meta.pixelfx;
     const sheet = k.read(path.join(SRC, `${name}.png`));
     const [fw, fh] = meta.frameSize;
@@ -27,12 +40,19 @@ function buildPixelfx(outDir) {
       if (!b) continue;
       x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
     }
+    if (center) {
+      // 기준점에서 가장 먼 쪽만큼 양쪽을 같게
+      const [ox, oy] = meta.pivot ?? meta.origin;
+      const hx = Math.max(ox - x0, x1 - ox), hy = Math.max(oy - y0, y1 - oy);
+      x0 = Math.max(0, ox - hx); x1 = Math.min(fw, ox + hx); y0 = Math.max(0, oy - hy); y1 = Math.min(fh, oy + hy);
+    }
     // density로 나눠 떨어지게 짝수로 넓힌다
     const w = Math.ceil((x1 - x0) / DENSITY) * DENSITY, h = Math.ceil((y1 - y0) / DENSITY) * DENSITY;
     const strip = k.blank(w * frames.length, h);
     frames.forEach((f, i) => k.paste(strip, k.crop(f, x0, y0, w, h), i * w, 0));
     k.write(path.join(outDir, `${key}.png`), strip);
     out[key] = { file: `mku/${key}.png`, frameWidth: w, frameHeight: h, frames: frames.length, density: DENSITY };
+    if (play) out[key].anims = { play: { from: 0, to: frames.length - 1, fps: meta.fps, loop: play === 'loop' } };
   }
   return out;
 }

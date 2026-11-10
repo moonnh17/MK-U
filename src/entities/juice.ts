@@ -123,7 +123,7 @@ export class Juice {
       this.fxImage(this.j.fx.eliteBurst.spriteKey, at, 0.35, 0.6, 1.3);
       shake(this.scene, 'light');
     } else {
-      this.fxAnim(this.j.fx.poof.spriteKey, at);
+      this.fxAnim(this.j.fx.death.spriteKey, at);
     }
   }
 

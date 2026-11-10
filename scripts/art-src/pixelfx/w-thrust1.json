@@ -1,0 +1,259 @@
+{
+ "frames": [
+  {
+   "filename": "weapon-thrust 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 144,
+    "h": 48
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-thrust 1",
+   "frame": {
+    "x": 144,
+    "y": 0,
+    "w": 144,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 144,
+    "h": 48
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-thrust 2",
+   "frame": {
+    "x": 0,
+    "y": 48,
+    "w": 144,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 144,
+    "h": 48
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-thrust 3",
+   "frame": {
+    "x": 144,
+    "y": 48,
+    "w": 144,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 144,
+    "h": 48
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-thrust 4",
+   "frame": {
+    "x": 0,
+    "y": 96,
+    "w": 144,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 144,
+    "h": 48
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-thrust 5",
+   "frame": {
+    "x": 144,
+    "y": 96,
+    "w": 144,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 144,
+    "h": 48
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-thrust 6",
+   "frame": {
+    "x": 0,
+    "y": 144,
+    "w": 144,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 144,
+    "h": 48
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-thrust 7",
+   "frame": {
+    "x": 144,
+    "y": 144,
+    "w": 144,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 144,
+    "h": 48
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-thrust 8",
+   "frame": {
+    "x": 0,
+    "y": 192,
+    "w": 144,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 144,
+    "h": 48
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-thrust 9",
+   "frame": {
+    "x": 144,
+    "y": 192,
+    "w": 144,
+    "h": 48
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 144,
+    "h": 48
+   },
+   "sourceSize": {
+    "w": 144,
+    "h": 48
+   },
+   "duration": 56
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "weapon-thrust.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 288,
+   "h": 240
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "weapon-thrust",
+    "from": 0,
+    "to": 9,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "mku/weapon-thrust",
+   "name": "MKU weapon thrust",
+   "fps": 18,
+   "loop": false,
+   "frames": 10,
+   "frameSize": [
+    144,
+    48
+   ],
+   "pivot": [
+    8,
+    24
+   ],
+   "columns": 2
+  }
+ }
+}

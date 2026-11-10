@@ -528,12 +528,8 @@ export class SpecialWeapons {
 
   private beamFx(def: WeaponDef, o: Vec2, dir: Vec2, len: number, width: number, big: boolean): void {
     const b = def.beam!;
-    const g = this.run.add.graphics().setDepth(6).setBlendMode(Phaser.BlendModes.ADD);
-    const end = { x: o.x + dir.x * len, y: o.y + dir.y * len };
-    g.lineStyle(width * 1.8, hexColor(b.color), 0.25).lineBetween(o.x, o.y, end.x, end.y);
-    g.lineStyle(width, hexColor(b.color), 0.75).lineBetween(o.x, o.y, end.x, end.y);
-    g.lineStyle(Math.max(1, width / 3), 0xffffff, 1).lineBetween(o.x, o.y, end.x, end.y);
-    this.run.tweens.add({ targets: g, alpha: 0, duration: big ? 320 : 160, onComplete: () => g.destroy() });
+    // 등급별 픽셀 레이저 (강화 레이저는 한 단계 위)
+    this.run.combat.beamSprite(this.run.combat.tierFx(this.run.ctx.data.weapons.meleeFx.beamTiers, def, big), b.color, o, dir, len, width * 2.2);
     if (big) for (let i = 0; i < 10; i++) {
       const k = this.fx.range(0, 1);
       this.spark({ x: o.x + dir.x * len * k, y: o.y + dir.y * len * k }, b.glyphColor, 14);

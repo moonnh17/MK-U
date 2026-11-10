@@ -332,7 +332,16 @@ export interface WeaponsData {
   /** 무기 분류 (산탄·레이저 등). 아이템 효과가 분류를 보고 붙는다 (산탄: 발사 탄수 +) */
   classes: { id: string; nameKey: string }[];
   /** 근접 이펙트: 흑백 그림에 무기 색을 입힌다. glowAlpha: 밝은 심을 더하는 겹 / buffSparkSec: 버프 불티 간격 */
-  meleeFx: { slash: SpriteRef; slam: SpriteRef; slashBig: SpriteRef; slamBig: SpriteRef; buffAura: SpriteRef; glowAlpha: number; buffSparkSec: number };
+  /**
+   * tiers: 등급 → 무기 이펙트 단계(1~4, 높을수록 화려). xxxTiers: 단계별 그림(1단계부터). 강화 평타는 한 단계 위.
+   * slash 베기 · thrust 찌르기 · smash 내려찍기·바람 · beam 레이저(그림이 따로 없는 무기)
+   */
+  meleeFx: {
+    slash: SpriteRef; slam: SpriteRef; slashBig: SpriteRef; slamBig: SpriteRef; buffAura: SpriteRef;
+    tiers: Record<GradeId, number>;
+    slashTiers: SpriteRef[]; thrustTiers: SpriteRef[]; smashTiers: SpriteRef[]; beamTiers: SpriteRef[];
+    glowAlpha: number; buffSparkSec: number;
+  };
   options: WeaponOptionDef[];
   weapons: WeaponDef[];
 }
@@ -1623,7 +1632,7 @@ export interface JuiceData {
   playerHurt: { flashSec: number; flashAlpha: number; lowHpRatio: number; pulseSec: number; pulseAlpha: number; color: string; edgePx: number };
   shake: Record<ShakeLevel, { ms: number; intensity: number }>;
   /** 이펙트 그림 (없으면 도형) */
-  fx: Record<'hitTech' | 'hitMagic' | 'hitPhysical' | 'explosion' | 'eliteBurst' | 'spawn' | 'poof', SpriteRef>;
+  fx: Record<'hitTech' | 'hitMagic' | 'hitPhysical' | 'explosion' | 'eliteBurst' | 'spawn' | 'death', SpriteRef>;
   /** 적 소환: 바닥 원(몸 반지름 × ringRadiusMul), 작게(startScale) 아래(risePx)에서 솟아오른다 */
   spawn: { ringColor: string; ringRadiusMul: number; startScale: number; risePx: number };
   /** 보스 등장 컷: 카메라 이동(panSec) → 내려찍기(dropSec, dropHeight) → 이름 띠(nameSec) → 복귀(returnSec) */

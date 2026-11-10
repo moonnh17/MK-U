@@ -125,9 +125,9 @@
       "color": "#8a5ad9",
       "size": 20
     },
-    "poof": {
-      "spriteKey": "fx_poof",
-      "color": "#cdc8e0",
+    "death": {
+      "spriteKey": "fx_death_dark",
+      "color": "#8e1a2e",
       "size": 30
     }
   },
