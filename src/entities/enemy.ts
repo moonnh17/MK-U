@@ -83,6 +83,9 @@ export class Enemy {
   private burnLook: BurnLook | null = null;
   /** 석화 남은 시간(초): 움직이지도 공격하지도 않는다 */
   petrifyLeft = 0;
+  /** 굳어 가는 시선(사르비스의 방패): 이동 속도 감소 비율, 겨눈 시간 */
+  gazeSlow = 0;
+  gazeSec = 0;
   /** 석화 동안 몸을 회색 돌로 바꾸는 색 행렬 (WebGL에서만) */
   private stoneFx: ReturnType<NonNullable<Phaser.GameObjects.Sprite['preFX']>['addColorMatrix']> | null = null;
   /** 걸려 있는 마기 변질 */
@@ -249,6 +252,14 @@ export class Enemy {
     this.restoreTint();
   }
 
+  /** 굳어 가는 시선의 감속을 바꾼다 (색은 감속이 생기고 없어질 때만 바꾼다) */
+  setGaze(sec: number, slow: number): void {
+    this.gazeSec = sec;
+    const was = this.gazeSlow > 0;
+    this.gazeSlow = slow;
+    if (was !== slow > 0) this.restoreTint();
+  }
+
   get petrified(): boolean {
     return this.petrifyLeft > 0;
   }
@@ -274,6 +285,7 @@ export class Enemy {
     if (this.petrified) this.sprite.setTint(hexColor(st.petrifyTint));
     else if (this.stunLeft > 0 && this.def.ai !== 'boss') this.sprite.setTint(0x8888ff);
     else if (this.burnState) this.sprite.setTint(hexColor(st.burnTint));
+    else if (this.gazeSlow > 0) this.sprite.setTint(hexColor(st.petrifyTint));
     else this.sprite.clearTint();
   }
 
@@ -372,7 +384,7 @@ export class Enemy {
 
     const attack = this.attacks.find((a) => a.id === this.ai.attackId);
     if (this.ai.phase === 'chase') {
-      const speed = this.def.moveSpeed * this.mods.moveSpeedMul;
+      const speed = this.def.moveSpeed * this.mods.moveSpeedMul * (1 - this.gazeSlow);
       const len = dist || 1;
       // 원거리 적은 거리를 유지한다
       const k = this.def.keepDistance ? keepDistanceStep(dist, this.def.keepDistance, KEEP_BAND) : 1;

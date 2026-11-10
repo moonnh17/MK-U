@@ -1027,6 +1027,8 @@
   "item.masterGStatue.buff": "넘치는 은총",
   "item.sarvisShield": "사르비스의 방패",
   "item.sarvisShield.desc": "받는 피해 -{v0}%, 최대 체력 +{v1}",
+  "item.sarvisShield.ability": "굳어 가는 시선",
+  "item.sarvisShield.abilityDesc": "자동 조준으로 겨눈 적이 점점 느려진다(최대 {sl2}%). {af2}초 넘게 겨누면 {dur2}초 동안 돌이 된다. 보스는 느려지기만 한다",
   "item.siriusArmor": "시리우스의 갑주",
   "item.siriusArmor.desc": "최대 체력 +{v0}, 받는 피해 -{v1}%, 물리 피해 +{v2}%",
   "item.siriusArmor.abilityDesc": "체력이 {th3}% 아래로 떨어지면 {dur3}초간 받는 피해 -{g3}% (재사용 {s3}초). 야만용사: 궁극기 쿨타임 -15%",

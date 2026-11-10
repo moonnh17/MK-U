@@ -66,6 +66,10 @@ export function itemDescParams(def: ItemDef, groups: GroupMultipliersData): Reco
     if (typeof e.reduction === 'number') out[`g${i}`] = num(e.reduction * 100);
     if (typeof e.chance === 'number') out[`ch${i}`] = num(e.chance * 100);
     if (typeof e.capPct === 'number') out[`cap${i}`] = num(e.capPct * 100);
+    if (e.kind === 'gazePetrify') {
+      out[`sl${i}`] = num((e.slow as number) * 100);
+      out[`af${i}`] = num(e.afterSec as number);
+    }
     if (e.kind === 'lowHpEnemyDamage') out[`v${i}`] = num((e.value as number) * 100);
   });
   return out;

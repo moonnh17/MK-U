@@ -295,6 +295,25 @@ export class ItemRuntime {
     }
   }
 
+  private gazed: Enemy | null = null;
+
+  /** 굳어 가는 시선(사르비스의 방패): 자동 조준이 겨눈 적을 매 프레임 넘긴다 */
+  gaze(target: Enemy | null, dt: number): void {
+    const e = this.first('gazePetrify');
+    if (this.gazed && (this.gazed !== target || !e)) this.gazed.setGaze(0, 0);
+    this.gazed = e && target && !target.dead ? target : null;
+    if (!e || !this.gazed || this.gazed.petrified) return;
+    const t = this.gazed;
+    const boss = t.rank === 'boss' || t.rank === 'hiddenBoss';
+    const sec = t.gazeSec + dt;
+    if (!boss && sec >= e.afterSec) {
+      t.setGaze(0, 0);
+      t.petrify(e.durationSec);
+      return;
+    }
+    t.setGaze(sec, e.slow * Math.min(1, sec / e.afterSec));
+  }
+
   /** 회복이 최대 체력을 넘친 양 (넘치는 은총이 있으면 보호막으로 쌓는다) */
   overheal(over: number): void {
     const e = this.first('overhealShield');

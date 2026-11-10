@@ -1204,6 +1204,8 @@ export type ItemEffect =
   | { kind: 'lowHpEnemyDamage'; threshold: number; value: number }
   /** 체력이 가득 찬 뒤 넘친 회복량이 보호막이 된다 (최대 체력 × capPct까지). 마스터 G 조각상 */
   | { kind: 'overhealShield'; capPct: number }
+  /** 자동 조준으로 겨눈 적이 점점 느려지다(최대 slow) afterSec을 넘기면 durationSec 석화. 보스는 느려지기만. 사르비스의 방패 */
+  | { kind: 'gazePetrify'; slow: number; afterSec: number; durationSec: number }
   /** 체력이 threshold 아래로 떨어지면 durationSec 동안 받는 피해 −reduction, 재사용 cooldownSec. 시리우스의 갑주 */
   | { kind: 'lowHpGuard'; threshold: number; reduction: number; durationSec: number; cooldownSec: number }
   | { kind: 'ultimateBurst'; shots: number; damage: number; speed: number; range: number; tags: TagId[] };

@@ -636,6 +636,7 @@ export class RunScene extends Phaser.Scene {
     );
     this.aimDir = aim.target ? aim.dir : moving ? normalize(frame.move) : this.aimDir;
     this.aimTarget = aim.target ? { x: aim.target.x, y: aim.target.y } : null;
+    this.itemRt.gaze(aim.target ? (this.enemies.find((e) => e.sprite === aim.target) ?? null) : null, dt);
     const aimAngle = Math.atan2(this.aimDir.y, this.aimDir.x);
 
     if (frame.pressed.has('swapWeapon')) {

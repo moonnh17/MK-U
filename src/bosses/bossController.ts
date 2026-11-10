@@ -307,7 +307,7 @@ export class BossController {
       e.sprite.setVelocity(0, 0);
       return;
     }
-    const speed = e.def.moveSpeed * (this.enraged ? this.def.enraged.moveSpeedMul : 1) * this.buffSpeed;
+    const speed = e.def.moveSpeed * (this.enraged ? this.def.enraged.moveSpeedMul : 1) * this.buffSpeed * (1 - e.gazeSlow);
     e.sprite.setVelocity(((p.x - e.sprite.x) / dist) * speed, ((p.y - e.sprite.y) / dist) * speed);
   }
 
