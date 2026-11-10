@@ -1361,173 +1361,326 @@ body {
 }
 
 /* ---------- 미모사 제미니 ---------- */
+/* 헥타르 연구소 톤: 깊은 남색 유리판, 벌집 격자, 코트 장식의 금테 마름모 */
+#story,
+#gemini-mini {
+  --hx-ink: #eaf4ff;
+  --hx-dim: #8fb6dc;
+  --hx-line: rgba(120, 190, 255, 0.42);
+  --hx-glass: linear-gradient(180deg, rgba(18, 42, 76, 0.94), rgba(8, 20, 42, 0.96));
+  --hx-gold: #d9b45a;
+  --hx-red: #ff7a8a;
+  --hx-hex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='48' viewBox='0 0 28 48'%3E%3Cpath d='M14 16L0 8V-8M14 16l14-8V-8M14 16v16L0 40v16M14 32l14 8v16' fill='none' stroke='%237cc4ff' stroke-opacity='0.1'/%3E%3C/svg%3E");
+}
 #story {
   position: fixed;
   inset: 0;
   z-index: 12;
   display: none;
   overflow: hidden;
-  background: radial-gradient(ellipse at 60% 40%, rgba(16, 44, 78, 0.78), rgba(2, 8, 18, 0.9));
+  background:
+    var(--hx-hex),
+    radial-gradient(ellipse at 62% 38%, rgba(40, 110, 190, 0.38), transparent 60%),
+    linear-gradient(180deg, rgba(4, 12, 26, 0.86), rgba(2, 6, 14, 0.94));
   font-family: sans-serif;
-  color: #e8f3ff;
+  color: var(--hx-ink);
   pointer-events: auto;
   user-select: none;
   -webkit-user-select: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+#story.show {
+  opacity: 1;
 }
 .sw-link {
   position: absolute;
-  top: 12px;
+  top: 14px;
   left: 16px;
-  font: bold 13px monospace;
-  letter-spacing: 0.12em;
-  color: var(--gemini);
-  opacity: 0.85;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border: 1px solid var(--hx-line);
+  border-radius: 999px;
+  background: rgba(10, 28, 52, 0.7);
+  font: bold 11px monospace;
+  letter-spacing: 0.14em;
+  color: #9fd2ff;
+}
+.sw-link i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5fe0ff;
+  box-shadow: 0 0 8px #5fe0ff;
+  animation: hx-pulse 1.6s ease-in-out infinite;
 }
 .sw-figure {
   position: absolute;
   left: 50%;
-  bottom: clamp(70px, 16vh, 150px);
-  height: min(82vh, 820px);
-  aspect-ratio: 554 / 812;
-  transform: translateX(-12%);
+  bottom: clamp(64px, 14vh, 140px);
+  height: min(84vh, 860px);
+  aspect-ratio: 551 / 892;
+  transform: translate(-6%, 18px);
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
   background-position: center bottom !important;
-  image-rendering: pixelated;
-  filter: drop-shadow(0 0 14px rgba(74, 176, 255, 0.25));
+  image-rendering: auto !important;
+  filter: drop-shadow(0 0 18px rgba(90, 180, 255, 0.28));
+}
+#story.show .sw-figure {
+  opacity: 1;
+  transform: translate(-6%, 0);
+  animation: hx-float 4s ease-in-out 0.5s infinite;
 }
 .sw-box {
   position: absolute;
   left: 50%;
-  bottom: max(12px, 3vh);
-  transform: translateX(-50%);
-  width: min(1000px, calc(100vw - 32px));
+  bottom: max(14px, 3vh);
+  width: min(980px, calc(100vw - 32px));
   box-sizing: border-box;
-  padding: clamp(10px, 2.4vh, 20px) clamp(14px, 2.4vw, 26px);
-  background: rgba(8, 20, 38, 0.96);
-  border: 2px solid #6ab8ff;
-  box-shadow: 0 0 0 4px rgba(8, 20, 38, 0.9), 0 0 24px rgba(74, 176, 255, 0.25);
+  padding: clamp(22px, 3.6vh, 30px) clamp(18px, 2.8vw, 30px) clamp(12px, 2vh, 18px);
+  background: var(--hx-glass);
+  border: 1px solid var(--hx-line);
+  border-radius: 18px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45), 0 0 30px rgba(74, 176, 255, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
-  gap: clamp(6px, 1.4vh, 12px);
+  gap: clamp(8px, 1.6vh, 14px);
+  transform: translate(-50%, 14px);
+  opacity: 0;
+  transition: opacity 0.3s ease 0.08s, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s;
 }
-.sw-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+#story.show .sw-box {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+/* 위쪽 가는 빛줄 */
+.sw-box::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 12%;
+  right: 12%;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #7fd0ff, transparent);
+}
+/* 오른쪽 아래로 옅어지는 벌집 무늬 */
+.sw-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--hx-hex);
+  -webkit-mask-image: radial-gradient(ellipse at 100% 100%, #000, transparent 50%);
+  mask-image: radial-gradient(ellipse at 100% 100%, #000, transparent 50%);
 }
 .sw-name {
-  font: bold clamp(16px, 3vh, 24px) monospace;
-  color: #f2f8ff;
+  position: absolute;
+  top: 0;
+  left: clamp(16px, 2.6vw, 28px);
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px 6px 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #1d5fa8, #2a86d8);
+  border: 1px solid rgba(170, 220, 255, 0.6);
+  box-shadow: 0 4px 14px rgba(20, 90, 170, 0.45);
+  font: bold clamp(14px, 2.4vh, 18px) sans-serif;
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+/* 코트 장식처럼 금테 두른 푸른 마름모 */
+.sw-gem {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  transform: rotate(45deg);
+  background: #3d8cff;
+  border: 2px solid var(--hx-gold);
+  box-shadow: 0 0 6px rgba(120, 200, 255, 0.8);
 }
 .sw-count {
-  font: 12px monospace;
-  color: var(--gemini);
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(74, 176, 255, 0.12);
+  font: 11px monospace;
+  color: var(--hx-dim);
 }
 .sw-text {
-  min-height: 2.8em;
-  font-size: clamp(15px, 2.8vh, 22px);
-  font-weight: bold;
-  line-height: 1.45;
-  color: #e8dcc8;
+  min-height: 2.9em;
+  font-size: clamp(15px, 2.8vh, 21px);
+  font-weight: 600;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: var(--hx-ink);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.sw-more {
+  position: absolute;
+  right: 24px;
+  bottom: clamp(56px, 8.5vh, 70px);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid #8fd4ff;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.sw-box.done .sw-more {
+  opacity: 1;
+  animation: hx-bob 0.9s ease-in-out infinite;
 }
 .sw-foot {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   gap: 10px;
+  padding-top: clamp(8px, 1.4vh, 12px);
+  border-top: 1px solid rgba(120, 190, 255, 0.14);
 }
 .sw-foot small {
-  font-size: 12px;
-  opacity: 0.7;
+  font-size: 11px;
+  color: var(--hx-dim);
 }
 .sw-btns {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex: 0 0 auto;
 }
 .sw-btn {
-  padding: 8px 18px;
-  font-size: clamp(13px, 2.2vh, 16px);
-  color: #e8f3ff;
-  background: #0f2a48;
-  border: 1px solid #6ab8ff;
+  padding: 7px 18px;
+  border-radius: 999px;
+  font-size: clamp(12px, 2vh, 14px);
+  color: #cfe6ff;
+  background: rgba(20, 50, 90, 0.6);
+  border: 1px solid var(--hx-line);
   cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.sw-btn:last-child {
+  color: #fff;
+  background: linear-gradient(90deg, #1d5fa8, #2a86d8);
+  border-color: rgba(170, 220, 255, 0.6);
 }
 .sw-btn:hover {
-  background: #17406a;
+  box-shadow: 0 0 12px rgba(90, 180, 255, 0.45);
 }
 .mk-hl {
-  color: #ff6b7a;
+  color: #ff7a8a;
 }
+@keyframes hx-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes hx-float {
+  50% {
+    transform: translate(-6%, -6px);
+  }
+}
+@keyframes hx-bob {
+  50% {
+    transform: translateY(3px);
+  }
+}
+
 #gemini-mini {
   position: fixed;
   top: 8px;
   left: 50%;
-  transform: translate(-50%, -6px);
+  transform: translate(-50%, -8px);
   z-index: 9;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
   box-sizing: border-box;
   width: max-content;
   max-width: min(calc(100vw - 32px), 460px);
-  padding: 6px 12px 6px 8px;
-  background: rgba(8, 20, 38, 0.94);
-  border: 1px solid #5aa8f0;
+  margin-top: 14px;
+  padding: 8px 14px 8px 6px;
+  background: var(--hx-glass);
+  border: 1px solid var(--hx-line);
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), 0 0 16px rgba(74, 176, 255, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.07);
   pointer-events: none;
   opacity: 0;
-  transition: opacity var(--fade, 0.3s), transform var(--fade, 0.3s);
+  transition: opacity var(--fade, 0.3s) ease, transform var(--fade, 0.3s) ease;
   font-family: sans-serif;
 }
 #gemini-mini::after {
   content: '';
   position: absolute;
-  left: 22%;
-  bottom: -7px;
+  left: 34px;
+  bottom: -6px;
   width: 10px;
   height: 10px;
-  background: rgba(8, 20, 38, 0.94);
-  border-right: 1px solid #5aa8f0;
-  border-bottom: 1px solid #5aa8f0;
+  background: rgba(8, 20, 42, 0.96);
+  border-right: 1px solid var(--hx-line);
+  border-bottom: 1px solid var(--hx-line);
+  border-bottom-right-radius: 3px;
   transform: rotate(45deg);
 }
 #gemini-mini.show {
   opacity: 1;
   transform: translate(-50%, 0);
 }
+#gemini-mini.ominous {
+  --hx-line: rgba(255, 120, 140, 0.38);
+}
+/* 미니 그림은 네모로 자르지 않고 통째로, 머리가 말풍선 위로 살짝 나온다 */
 .gm-icon {
   position: relative;
   flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
+  width: 58px;
+  height: 58px;
+  margin-top: -22px;
   background: var(--gemini);
-  image-rendering: pixelated;
+  border-radius: 50%;
+  image-rendering: auto !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
-#gemini-mini.ominous .gm-icon:not(.has-art) {
-  background: #1c3a5a;
-}
-#gemini-mini.ominous .gm-icon i {
-  background: #ff5a5a;
-  height: 4%;
+.gm-icon.has-art {
+  border-radius: 0;
 }
 .gm-body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
+  padding-bottom: 2px;
 }
 .gm-name {
-  font: bold 11px monospace;
-  color: var(--gemini);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: bold 11px sans-serif;
+  letter-spacing: 0.08em;
+  color: #8fd4ff;
+}
+.gm-name .sw-gem {
+  width: 6px;
+  height: 6px;
+  border-width: 1px;
 }
 .gm-text {
-  color: #f2fbff;
+  color: var(--hx-ink);
   font-size: 13px;
-  font-weight: bold;
-  line-height: 1.4;
-  text-shadow: 1px 1px 0 #000;
+  font-weight: 600;
+  line-height: 1.45;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   word-break: keep-all;
 }
-.sw-figure i,
 .gm-icon i {
   position: absolute;
   top: 38%;
@@ -1540,6 +1693,10 @@ body {
 }
 .gm-icon i:last-child {
   right: 28%;
+}
+#gemini-mini.ominous .gm-icon i {
+  background: #ff5a5a;
+  height: 4%;
 }
 @media (max-height: 420px) {
   .sw-foot small {

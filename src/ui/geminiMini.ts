@@ -30,7 +30,9 @@ export class GeminiMini {
     body.className = 'gm-body';
     const name = document.createElement('b');
     name.className = 'gm-name';
-    name.textContent = ctx.t('gemini.speaker');
+    const gem = document.createElement('i');
+    gem.className = 'sw-gem';
+    name.append(gem, ctx.t('gemini.speaker'));
     this.text = document.createElement('div');
     this.text.className = 'gm-text';
     body.append(name, this.text);

@@ -784,8 +784,8 @@
     },
     "icon_gemini": {
       "file": "mku/icon_gemini.png",
-      "frameWidth": 32,
-      "frameHeight": 32,
+      "frameWidth": 128,
+      "frameHeight": 128,
       "frames": 1
     },
     "portrait_gemini": {
@@ -796,8 +796,8 @@
     },
     "story_gemini_full": {
       "file": "mku/story_gemini_full.png",
-      "frameWidth": 554,
-      "frameHeight": 812,
+      "frameWidth": 551,
+      "frameHeight": 892,
       "frames": 1
     },
     "item_slime_stew": {

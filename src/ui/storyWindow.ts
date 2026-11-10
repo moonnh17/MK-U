@@ -17,6 +17,7 @@ const ADVANCE_KEYS = new Set(['Enter', 'NumpadEnter', 'Space']);
 export class StoryWindow {
   private readonly root: HTMLDivElement;
   private readonly figure: HTMLDivElement;
+  private readonly box: HTMLDivElement;
   private readonly name: HTMLElement;
   private readonly count: HTMLElement;
   private readonly text: HTMLDivElement;
@@ -42,10 +43,11 @@ export class StoryWindow {
     this.root.style.setProperty('--gemini', ctx.data.gemini.color);
     this.figure = el('div', 'sw-figure');
     const box = el('div', 'sw-box');
-    const head = el('div', 'sw-head');
-    this.name = el('b', 'sw-name');
+    this.box = box;
+    const tag = el('b', 'sw-name');
+    this.name = el('span', '');
+    tag.append(el('i', 'sw-gem'), this.name);
     this.count = el('span', 'sw-count');
-    head.append(this.name, this.count);
     this.text = el('div', 'sw-text');
     const foot = el('div', 'sw-foot');
     const skip = el('button', 'sw-btn', t('gemini.story.skip'));
@@ -53,8 +55,10 @@ export class StoryWindow {
     const btns = el('div', 'sw-btns');
     btns.append(skip, next);
     foot.append(el('small', '', t('gemini.story.hint')), btns);
-    box.append(head, this.text, foot);
-    this.root.append(el('div', 'sw-link', t('gemini.story.link')), this.figure, box);
+    box.append(tag, this.count, this.text, el('i', 'sw-more'), foot);
+    const link = el('div', 'sw-link');
+    link.append(el('i', ''), t('gemini.story.link'));
+    this.root.append(link, this.figure, box);
     document.body.appendChild(this.root);
 
     window.addEventListener(
@@ -88,6 +92,9 @@ export class StoryWindow {
     this.lines = lines;
     this.open = true;
     this.root.style.display = 'block';
+    // 한 프레임 뒤에 show를 붙여 등장 전환이 보이게
+    this.root.classList.remove('show');
+    requestAnimationFrame(() => this.root.classList.add('show'));
     this.setLine(0);
   }
 
@@ -99,13 +106,19 @@ export class StoryWindow {
     this.count.textContent = `${i + 1} / ${this.lines.length}`;
     this.typed = 0;
     this.total = plainLength(line.text);
+    this.box.classList.remove('done');
     this.stopTyping();
     renderMarked(this.text, line.text, 0);
     this.timer = window.setInterval(() => {
       this.typed++;
       renderMarked(this.text, line.text, this.typed);
-      if (this.typed >= this.total) this.stopTyping();
+      if (this.typed >= this.total) this.finishTyping();
     }, this.ctx.data.gemini.typeCharSec * 1000);
+  }
+
+  private finishTyping(): void {
+    this.stopTyping();
+    this.box.classList.add('done');
   }
 
   private stopTyping(): void {
@@ -118,7 +131,7 @@ export class StoryWindow {
     this.shownAt = performance.now();
     if (this.typed < this.total) {
       // 출력 중: 지금 문장을 전부 보인다
-      this.stopTyping();
+      this.finishTyping();
       this.typed = this.total;
       renderMarked(this.text, this.lines[this.index]!.text, this.total);
       return;
@@ -131,6 +144,7 @@ export class StoryWindow {
     if (!this.open) return;
     this.stopTyping();
     this.open = false;
+    this.root.classList.remove('show');
     this.root.style.display = 'none';
     bus.emit('storyDone', {});
   }
