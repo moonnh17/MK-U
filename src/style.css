@@ -1606,9 +1606,9 @@ body {
   gap: 10px;
   box-sizing: border-box;
   width: max-content;
-  max-width: min(calc(100vw - 32px), 460px);
-  margin-top: 14px;
-  padding: 8px 14px 8px 6px;
+  max-width: min(calc(100vw - 32px), 560px);
+  margin-top: 18px;
+  padding: 10px 18px 10px 8px;
   background: var(--hx-glass);
   border: 1px solid var(--hx-line);
   border-radius: 14px;
@@ -1621,7 +1621,7 @@ body {
 #gemini-mini::after {
   content: '';
   position: absolute;
-  left: 34px;
+  left: 42px;
   bottom: -6px;
   width: 10px;
   height: 10px;
@@ -1642,9 +1642,9 @@ body {
 .gm-icon {
   position: relative;
   flex: 0 0 auto;
-  width: 58px;
-  height: 58px;
-  margin-top: -22px;
+  width: 74px;
+  height: 74px;
+  margin-top: -28px;
   background: var(--gemini);
   border-radius: 50%;
   image-rendering: auto !important;
@@ -1664,7 +1664,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  font: bold 11px sans-serif;
+  font: bold 13px sans-serif;
   letter-spacing: 0.08em;
   color: #8fd4ff;
 }
@@ -1675,7 +1675,7 @@ body {
 }
 .gm-text {
   color: var(--hx-ink);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1.45;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);

@@ -9,6 +9,10 @@ import { plainLength } from '../systems/gemini';
 import { applyArtIcon } from './artIcon';
 import { renderMarked } from './markedText';
 
+/** 캔버스 위에서 띄우는 거리(게임 픽셀). 보스 체력바가 있으면 그만큼 더 내린다 */
+const TOP_GAP = 16;
+const BOSS_BAR_GAP = 18;
+
 export class GeminiMini {
   private readonly root: HTMLDivElement;
   private readonly text: HTMLDivElement;
@@ -40,9 +44,7 @@ export class GeminiMini {
     document.body.appendChild(this.root);
     bus.on('geminiMini', ({ line }) => {
       if (line) {
-        // 게임 화면(캔버스) 위쪽 가운데에 붙인다 (창 비율이 달라 위아래가 비어도)
-        const r = document.querySelector('canvas')?.getBoundingClientRect();
-        if (r) this.root.style.top = `${Math.max(0, r.top) + 6 + (this.low ? (r.height / 270) * 22 : 0)}px`;
+        this.place();
         // 아이콘 그림이 있으면 그림(표정 대신), 없으면 색 블록 + 눈
         if (applyArtIcon(this.icon, this.ctx, artKeys.geminiIcon)) this.icon.replaceChildren();
         this.type(line.text);
@@ -55,10 +57,17 @@ export class GeminiMini {
     bus.on('bossBarShown', ({ shown }) => {
       this.low = shown;
     });
+    window.addEventListener('resize', () => this.place());
     // 런이 끝나 실험장으로 돌아가면 숨긴다
     bus.on('overlay', ({ open }) => {
       if (open) this.root.classList.remove('show');
     });
+  }
+
+  /** 게임 화면(캔버스) 위쪽 가운데에 붙인다 (창 비율이 달라 위아래가 비어도) */
+  private place(): void {
+    const r = document.querySelector('canvas')?.getBoundingClientRect();
+    if (r) this.root.style.top = `${Math.max(0, r.top) + (r.height / 270) * (TOP_GAP + (this.low ? BOSS_BAR_GAP : 0))}px`;
   }
 
   private type(text: string): void {
