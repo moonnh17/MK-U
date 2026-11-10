@@ -1,0 +1,127 @@
+{
+ "frames": [
+  {
+   "filename": "weapon-bullet 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 16
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 16
+   },
+   "sourceSize": {
+    "w": 36,
+    "h": 16
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-bullet 1",
+   "frame": {
+    "x": 36,
+    "y": 0,
+    "w": 36,
+    "h": 16
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 16
+   },
+   "sourceSize": {
+    "w": 36,
+    "h": 16
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-bullet 2",
+   "frame": {
+    "x": 0,
+    "y": 16,
+    "w": 36,
+    "h": 16
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 16
+   },
+   "sourceSize": {
+    "w": 36,
+    "h": 16
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-bullet 3",
+   "frame": {
+    "x": 36,
+    "y": 16,
+    "w": 36,
+    "h": 16
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 16
+   },
+   "sourceSize": {
+    "w": 36,
+    "h": 16
+   },
+   "duration": 56
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "weapon-bullet.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 72,
+   "h": 32
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "weapon-bullet",
+    "from": 0,
+    "to": 3,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "mku/weapon-bullet",
+   "name": "MKU weapon bullet",
+   "fps": 18,
+   "loop": true,
+   "frames": 4,
+   "frameSize": [
+    36,
+    16
+   ],
+   "pivot": [
+    28,
+    8
+   ],
+   "columns": 2
+  }
+ }
+}

@@ -22,3 +22,10 @@ export function renderScale(screenW: number, screenH: number, dpr: number, baseW
 export function hexColor(s: string): number {
   return parseInt(s.slice(1), 16);
 }
+
+/** 두 "#rrggbb" 색을 k(0이면 a, 1이면 b)만큼 섞는다 */
+export function mixHex(a: string, b: string, k: number): string {
+  const x = hexColor(a), y = hexColor(b);
+  const ch = (s: number) => Math.round(((x >> s) & 255) * (1 - k) + ((y >> s) & 255) * k);
+  return `#${((ch(16) << 16) | (ch(8) << 8) | ch(0)).toString(16).padStart(6, '0')}`;
+}

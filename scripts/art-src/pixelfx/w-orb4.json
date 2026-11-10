@@ -1,0 +1,193 @@
+{
+ "frames": [
+  {
+   "filename": "weapon-orb 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 24
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 24
+   },
+   "sourceSize": {
+    "w": 36,
+    "h": 24
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-orb 1",
+   "frame": {
+    "x": 36,
+    "y": 0,
+    "w": 36,
+    "h": 24
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 24
+   },
+   "sourceSize": {
+    "w": 36,
+    "h": 24
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-orb 2",
+   "frame": {
+    "x": 72,
+    "y": 0,
+    "w": 36,
+    "h": 24
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 24
+   },
+   "sourceSize": {
+    "w": 36,
+    "h": 24
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-orb 3",
+   "frame": {
+    "x": 0,
+    "y": 24,
+    "w": 36,
+    "h": 24
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 24
+   },
+   "sourceSize": {
+    "w": 36,
+    "h": 24
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-orb 4",
+   "frame": {
+    "x": 36,
+    "y": 24,
+    "w": 36,
+    "h": 24
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 24
+   },
+   "sourceSize": {
+    "w": 36,
+    "h": 24
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-orb 5",
+   "frame": {
+    "x": 72,
+    "y": 24,
+    "w": 36,
+    "h": 24
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 24
+   },
+   "sourceSize": {
+    "w": 36,
+    "h": 24
+   },
+   "duration": 56
+  },
+  {
+   "filename": "weapon-orb 6",
+   "frame": {
+    "x": 0,
+    "y": 48,
+    "w": 36,
+    "h": 24
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 36,
+    "h": 24
+   },
+   "sourceSize": {
+    "w": 36,
+    "h": 24
+   },
+   "duration": 56
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "weapon-orb.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 108,
+   "h": 72
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "weapon-orb",
+    "from": 0,
+    "to": 6,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "mku/weapon-orb",
+   "name": "MKU weapon orb",
+   "fps": 18,
+   "loop": true,
+   "frames": 7,
+   "frameSize": [
+    36,
+    24
+   ],
+   "pivot": [
+    24,
+    12
+   ],
+   "columns": 3
+  }
+ }
+}

@@ -5,7 +5,7 @@ import { zigzag } from '../../systems/dodge';
 import Phaser from 'phaser';
 import type { Vec2 } from '../../core/actions';
 import { Rng } from '../../core/rng';
-import { hexColor } from '../../core/scale';
+import { hexColor, mixHex } from '../../core/scale';
 import { animKey } from '../../systems/art';
 import { Enemy } from '../../entities/enemy';
 import { lowSanityBonus } from '../../systems/sanity';
@@ -270,7 +270,7 @@ export class WeaponCombat {
       return;
     }
     if (w.pattern.kind === 'homing') {
-      this.fireBullet(muzzle, shotAngle, st.projectileSpeed, w.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, homing: w.pattern.turnRate });
+      this.fireBullet(muzzle, shotAngle, st.projectileSpeed, w.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: st.critChance, homing: w.pattern.turnRate, sprite: this.tierFx(this.run.ctx.data.weapons.meleeFx.orbTiers, w, false), tint: this.shotTint(w) });
       return;
     }
     if (w.pattern.kind === 'lob') {
@@ -293,8 +293,12 @@ export class WeaponCombat {
       );
       return;
     }
+    // 따로 그린 탄이 없는 무기: 등급별 픽셀 탄(총) · 구슬(지팡이)에 무기 색, 총은 총구 섬광
+    const fx = this.run.ctx.data.weapons.meleeFx;
+    const own = w.shot ?? this.tierFx(w.category === 'staff' ? fx.orbTiers : fx.bulletTiers, w, chargeRatio >= 1);
+    if (!w.shot && w.category === 'gun') this.muzzleFlash(w, muzzle, shotAngle, chargeRatio >= 1);
     for (const shot of gunShots(w, shotAngle, this.run.rng, this.run.itemRt.sums.pellets)) {
-      this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: chargedCrit(st.critChance, chargeRatio, w.charge?.critAtMax), ricochet: w.ricochet, tint: w.ricochet || (w.flame && !w.shot) ? w.color : undefined, sprite: w.shot, flame: w.flame?.scaleTo, trail: w.attackParticles?.color });
+      this.fireBullet(muzzle, shot.angle, st.projectileSpeed, shot.range, st.damage * emp, w.tags, null, { pierce: w.pierce ?? 0, crit: chargedCrit(st.critChance, chargeRatio, w.charge?.critAtMax), ricochet: w.ricochet, tint: w.shot ? undefined : this.shotTint(w), sprite: own, flame: w.flame?.scaleTo, trail: w.attackParticles?.color });
     }
     // 질 낮은 가품: 쏠 때마다 따로 판정해 터지면 무기가 사라진다
     this.run.special.rollSelfDestruct(w);
@@ -529,6 +533,17 @@ export class WeaponCombat {
       // 등급별 픽셀 레이저: 길이에 맞춰 늘이고 무기 색을 입힌다
       this.beamSprite(this.tierFx(this.run.ctx.data.weapons.meleeFx.beamTiers, w, false), w.color, s.from, s.dir, s.len, width * 2.5);
     }
+  }
+
+  /** 탄·섬광에 입히는 색: 무기 색을 흰색 쪽으로 밝힌다 */
+  shotTint(w: WeaponDef): string {
+    return mixHex(w.fxColor ?? w.color, '#ffffff', this.run.ctx.data.weapons.meleeFx.shotTintWhite);
+  }
+
+  /** 총구 섬광 (등급별, 무기 색) */
+  private muzzleFlash(w: WeaponDef, at: Vec2, angle: number, strong: boolean): void {
+    const ref = this.tierFx(this.run.ctx.data.weapons.meleeFx.muzzleTiers, w, strong);
+    playFx(this.run, ref, at.x, at.y, { rotation: angle, originX: 0, depth: 7 }).setTint(hexColor(this.shotTint(w)));
   }
 
   /** 늘여 그리는 픽셀 레이저 한 번 (무기 색 + 밝은 심) */
@@ -824,6 +839,7 @@ export class WeaponCombat {
     const body = b.body as Phaser.Physics.Arcade.Body;
     const a = Math.atan2(next.sprite.y - b.y, next.sprite.x - b.x);
     b.setVelocity(Math.cos(a) * body.speed, Math.sin(a) * body.speed);
+    b.setRotation(a);
     b.setData({ bounces: bounces - 1, ox: b.x, oy: b.y });
   }
 

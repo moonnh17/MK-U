@@ -7892,6 +7892,186 @@
           "loop": true
         }
       }
+    },
+    "fx_w_bullet1": {
+      "file": "mku/fx_w_bullet1.png",
+      "frameWidth": 18,
+      "frameHeight": 10,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_w_orb1": {
+      "file": "mku/fx_w_orb1.png",
+      "frameWidth": 28,
+      "frameHeight": 20,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_w_muzzle1": {
+      "file": "mku/fx_w_muzzle1.png",
+      "frameWidth": 20,
+      "frameHeight": 26,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_bullet2": {
+      "file": "mku/fx_w_bullet2.png",
+      "frameWidth": 22,
+      "frameHeight": 12,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_w_orb2": {
+      "file": "mku/fx_w_orb2.png",
+      "frameWidth": 30,
+      "frameHeight": 22,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_w_muzzle2": {
+      "file": "mku/fx_w_muzzle2.png",
+      "frameWidth": 24,
+      "frameHeight": 28,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_bullet3": {
+      "file": "mku/fx_w_bullet3.png",
+      "frameWidth": 28,
+      "frameHeight": 14,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_w_orb3": {
+      "file": "mku/fx_w_orb3.png",
+      "frameWidth": 32,
+      "frameHeight": 22,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_w_muzzle3": {
+      "file": "mku/fx_w_muzzle3.png",
+      "frameWidth": 28,
+      "frameHeight": 32,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_w_bullet4": {
+      "file": "mku/fx_w_bullet4.png",
+      "frameWidth": 32,
+      "frameHeight": 14,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_w_orb4": {
+      "file": "mku/fx_w_orb4.png",
+      "frameWidth": 36,
+      "frameHeight": 22,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_w_muzzle4": {
+      "file": "mku/fx_w_muzzle4.png",
+      "frameWidth": 32,
+      "frameHeight": 34,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 18,
+          "loop": false
+        }
+      }
     }
   }
 }

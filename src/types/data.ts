@@ -334,12 +334,14 @@ export interface WeaponsData {
   /** 근접 이펙트: 흑백 그림에 무기 색을 입힌다. glowAlpha: 밝은 심을 더하는 겹 / buffSparkSec: 버프 불티 간격 */
   /**
    * tiers: 등급 → 무기 이펙트 단계(1~4, 높을수록 화려). xxxTiers: 단계별 그림(1단계부터). 강화 평타는 한 단계 위.
-   * slash 베기 · thrust 찌르기 · smash 내려찍기·바람 · beam 레이저(그림이 따로 없는 무기)
+   * slash 베기 · thrust 찌르기 · smash 내려찍기·바람 · beam 레이저(그림이 따로 없는 무기) · bullet 총 탄 · orb 지팡이 구슬 · muzzle 총구 섬광
    */
   meleeFx: {
     slash: SpriteRef; slam: SpriteRef; slashBig: SpriteRef; slamBig: SpriteRef; buffAura: SpriteRef;
     tiers: Record<GradeId, number>;
     slashTiers: SpriteRef[]; thrustTiers: SpriteRef[]; smashTiers: SpriteRef[]; beamTiers: SpriteRef[];
+    /** 총 탄 · 지팡이 구슬 · 총구 섬광. 탄과 섬광은 무기 색을 shotTintWhite만큼 흰색 쪽으로 밝혀 입힌다(어두운 무기 색도 바닥에서 보이게) */
+    bulletTiers: SpriteRef[]; orbTiers: SpriteRef[]; muzzleTiers: SpriteRef[]; shotTintWhite: number;
     glowAlpha: number; buffSparkSec: number;
   };
   options: WeaponOptionDef[];

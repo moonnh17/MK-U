@@ -40,6 +40,10 @@
     "thrustTiers": [{ "spriteKey": "fx_w_thrust1", "color": "#ffffff", "size": 24 }, { "spriteKey": "fx_w_thrust2", "color": "#ffffff", "size": 24 }, { "spriteKey": "fx_w_thrust3", "color": "#ffffff", "size": 24 }, { "spriteKey": "fx_w_thrust4", "color": "#ffffff", "size": 24 }],
     "smashTiers": [{ "spriteKey": "fx_w_smash1", "color": "#ffffff", "size": 20 }, { "spriteKey": "fx_w_smash2", "color": "#ffffff", "size": 20 }, { "spriteKey": "fx_w_smash3", "color": "#ffffff", "size": 20 }, { "spriteKey": "fx_w_smash4", "color": "#ffffff", "size": 20 }],
     "beamTiers": [{ "spriteKey": "fx_w_beam3", "color": "#ffffff", "size": 12 }, { "spriteKey": "fx_w_beam3", "color": "#ffffff", "size": 12 }, { "spriteKey": "fx_w_beam3", "color": "#ffffff", "size": 12 }, { "spriteKey": "fx_w_beam4", "color": "#ffffff", "size": 12 }],
+    "bulletTiers": [{ "spriteKey": "fx_w_bullet1", "color": "#ffffff", "size": 4 }, { "spriteKey": "fx_w_bullet2", "color": "#ffffff", "size": 4 }, { "spriteKey": "fx_w_bullet3", "color": "#ffffff", "size": 4 }, { "spriteKey": "fx_w_bullet4", "color": "#ffffff", "size": 4 }],
+    "orbTiers": [{ "spriteKey": "fx_w_orb1", "color": "#ffffff", "size": 5 }, { "spriteKey": "fx_w_orb2", "color": "#ffffff", "size": 5 }, { "spriteKey": "fx_w_orb3", "color": "#ffffff", "size": 5 }, { "spriteKey": "fx_w_orb4", "color": "#ffffff", "size": 5 }],
+    "muzzleTiers": [{ "spriteKey": "fx_w_muzzle1", "color": "#ffffff", "size": 8 }, { "spriteKey": "fx_w_muzzle2", "color": "#ffffff", "size": 8 }, { "spriteKey": "fx_w_muzzle3", "color": "#ffffff", "size": 8 }, { "spriteKey": "fx_w_muzzle4", "color": "#ffffff", "size": 8 }],
+    "shotTintWhite": 0.45,
     "glowAlpha": 0.35,
     "buffSparkSec": 0.1
   },

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseLaunchConfig } from '../src/core/config';
-import { computeZoom, renderScale } from '../src/core/scale';
+import { computeZoom, mixHex, renderScale } from '../src/core/scale';
 import { formatText } from '../src/core/text';
 
 describe('parseLaunchConfig', () => {
@@ -56,5 +56,13 @@ describe('formatText', () => {
     const table = { a: '{chapter}-{stage}' };
     expect(formatText(table, 'a', { chapter: 1, stage: 2 })).toBe('1-2');
     expect(formatText(table, 'missing')).toBe('missing');
+  });
+});
+
+describe('mixHex', () => {
+  it('두 색을 섞는다', () => {
+    expect(mixHex('#000000', '#ffffff', 0.5)).toBe('#808080');
+    expect(mixHex('#ff0000', '#ffffff', 0)).toBe('#ff0000');
+    expect(mixHex('#102030', '#ffffff', 1)).toBe('#ffffff');
   });
 });

@@ -21,6 +21,10 @@ const FX = {
     [`fx_w_slash${t}`, { name: `w-slash${t}`, center: true, play: 'once' }],
     [`fx_w_thrust${t}`, { name: `w-thrust${t}`, play: 'once' }],
     [`fx_w_smash${t}`, { name: `w-smash${t}`, center: true, play: 'once' }],
+    // 탄은 머리가 판정 가운데에 오게
+    [`fx_w_bullet${t}`, { name: `w-bullet${t}`, center: true, play: 'loop' }],
+    [`fx_w_orb${t}`, { name: `w-orb${t}`, center: true, play: 'loop' }],
+    [`fx_w_muzzle${t}`, { name: `w-muzzle${t}`, play: 'once' }],
   ])),
   fx_w_beam3: { name: 'w-beam3', play: 'once' },
   fx_w_beam4: { name: 'w-beam4', play: 'once' },

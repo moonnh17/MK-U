@@ -111,11 +111,12 @@ export function validateGameData(d: GameData): Errors {
   else if (fist.droppable || fist.category !== 'blade' || fist.energyCost !== 0) errors.push('weapons.fistWeapon: 에너지 없는 칼, droppable false');
   checkSprite(errors, 'weapons.projectile', d.weapons.projectile);
   for (const k of ['slash', 'slam', 'slashBig', 'slamBig', 'buffAura'] as const) checkSprite(errors, `weapons.meleeFx.${k}`, d.weapons.meleeFx[k]);
-  for (const k of ['slashTiers', 'thrustTiers', 'smashTiers', 'beamTiers'] as const) {
+  for (const k of ['slashTiers', 'thrustTiers', 'smashTiers', 'beamTiers', 'bulletTiers', 'orbTiers', 'muzzleTiers'] as const) {
     const list = d.weapons.meleeFx[k];
     if (list.length !== 4) errors.push(`weapons.meleeFx.${k}: 4단계`);
     list.forEach((r, i) => checkSprite(errors, `weapons.meleeFx.${k}[${i}]`, r));
   }
+  if (!(d.weapons.meleeFx.shotTintWhite >= 0 && d.weapons.meleeFx.shotTintWhite <= 1)) errors.push('weapons.meleeFx.shotTintWhite: 0~1');
   for (const g of GRADE_IDS) {
     const t = d.weapons.meleeFx.tiers[g];
     if (!(Number.isInteger(t) && t >= 1 && t <= 4)) errors.push(`weapons.meleeFx.tiers.${g}: 1~4 정수`);

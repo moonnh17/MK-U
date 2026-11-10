@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 713개 · 그림 있음 680개
+전체 725개 · 그림 있음 692개
 
 ## player (6)
 
@@ -63,7 +63,7 @@
 | `weapon_mintaka_align` | 민타카의 쌍성 지팡이 | 12×12 | center | #6a9aff | mku/weapon_mintaka_align.png (1프레임) |
 | `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | mku/weapon_fist.png (1프레임) |
 
-## projectile (47)
+## projectile (59)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -102,6 +102,18 @@
 | `fx_w_smash4` | 근접 이펙트 (smashTiers4) | 20×20 | center | #ffffff | mku/fx_w_smash4.png (15프레임) |
 | `fx_w_beam3` | 근접 이펙트 (beamTiers1) | 12×12 | center | #ffffff | mku/fx_w_beam3.png (7프레임) |
 | `fx_w_beam4` | 근접 이펙트 (beamTiers4) | 12×12 | center | #ffffff | mku/fx_w_beam4.png (7프레임) |
+| `fx_w_bullet1` | 근접 이펙트 (bulletTiers1) | 4×4 | center | #ffffff | mku/fx_w_bullet1.png (4프레임) |
+| `fx_w_bullet2` | 근접 이펙트 (bulletTiers2) | 4×4 | center | #ffffff | mku/fx_w_bullet2.png (4프레임) |
+| `fx_w_bullet3` | 근접 이펙트 (bulletTiers3) | 4×4 | center | #ffffff | mku/fx_w_bullet3.png (4프레임) |
+| `fx_w_bullet4` | 근접 이펙트 (bulletTiers4) | 4×4 | center | #ffffff | mku/fx_w_bullet4.png (4프레임) |
+| `fx_w_orb1` | 근접 이펙트 (orbTiers1) | 5×5 | center | #ffffff | mku/fx_w_orb1.png (7프레임) |
+| `fx_w_orb2` | 근접 이펙트 (orbTiers2) | 5×5 | center | #ffffff | mku/fx_w_orb2.png (7프레임) |
+| `fx_w_orb3` | 근접 이펙트 (orbTiers3) | 5×5 | center | #ffffff | mku/fx_w_orb3.png (7프레임) |
+| `fx_w_orb4` | 근접 이펙트 (orbTiers4) | 5×5 | center | #ffffff | mku/fx_w_orb4.png (7프레임) |
+| `fx_w_muzzle1` | 근접 이펙트 (muzzleTiers1) | 8×8 | center | #ffffff | mku/fx_w_muzzle1.png (5프레임) |
+| `fx_w_muzzle2` | 근접 이펙트 (muzzleTiers2) | 8×8 | center | #ffffff | mku/fx_w_muzzle2.png (5프레임) |
+| `fx_w_muzzle3` | 근접 이펙트 (muzzleTiers3) | 8×8 | center | #ffffff | mku/fx_w_muzzle3.png (5프레임) |
+| `fx_w_muzzle4` | 근접 이펙트 (muzzleTiers4) | 8×8 | center | #ffffff | mku/fx_w_muzzle4.png (5프레임) |
 | `enemy_bullet` | 적 탄 | 4×4 | center | #ff5a5a | mku/enemy_bullet.png (1프레임) |
 | `fx_vessel_root_warn` | 마기 혈관수 (fx) | 40×40 | center | #b05aff | mku/fx_vessel_root_warn.png (2프레임) |
 | `fx_vessel_root_hit` | 마기 혈관수 (fx) | 40×40 | center | #b05aff | mku/fx_vessel_root_hit.png (2프레임) |
