@@ -4,7 +4,7 @@
  */
 import { collectAssets, validateArt } from '../systems/art';
 import { BUTTON_ACTIONS } from '../core/actions';
-import { GRADE_IDS, SCHOOL_IDS, TAG_IDS } from '../types/data';
+import { GEMINI_EVENTS, GRADE_IDS, SCHOOL_IDS, TAG_IDS } from '../types/data';
 import type { EnemyAttackDef, IntRange, SpriteRef } from '../types/data';
 import type { GameData } from './index';
 
@@ -864,9 +864,11 @@ export function validateGameData(d: GameData): Errors {
   const gm = d.gemini;
   checkPositive(errors, 'gemini.mini.showSec', gm.mini.showSec);
   checkPositive(errors, 'gemini.mini.fadeSec', gm.mini.fadeSec, true);
+  checkPositive(errors, 'gemini.mini.perCharSec', gm.mini.perCharSec, true);
+  checkPositive(errors, 'gemini.typeCharSec', gm.typeCharSec);
   if (!HEX_COLOR.test(gm.color)) errors.push('gemini.color: #RRGGBB');
   checkUnique(errors, 'gemini', [...gm.stories, ...gm.minis].map((x) => x.id));
-  const events = ['firstRun', 'advancement', 'bossKill', 'championMet', 'chapterEnd', 'hiddenBoss'];
+  const events: readonly string[] = GEMINI_EVENTS;
   for (const s of gm.stories) {
     const w = `gemini.stories.${s.id}`;
     if (!events.includes(s.event)) errors.push(`${w}: 알 수 없는 이벤트 '${s.event}'`);
@@ -878,6 +880,7 @@ export function validateGameData(d: GameData): Errors {
     const w = `gemini.minis.${m.id}`;
     if (!events.includes(m.event)) errors.push(`${w}: 알 수 없는 이벤트 '${m.event}'`);
     if (!['calm', 'ominous'].includes(m.mood)) errors.push(`${w}.mood: calm · ominous`);
+    if (m.once && !m.record) errors.push(`${w}.once: record가 있어야 한 번만 띄울 수 있음`);
     checkPositive(errors, `${w}.priority`, m.priority);
     if (m.candidates.length === 0 || m.candidates.some((c) => c.length === 0)) errors.push(`${w}.candidates: 빈 후보`);
     needText(w, m.nameKey);

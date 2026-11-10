@@ -8,7 +8,7 @@ import { bus } from '../core/events';
 import { registerGemini } from '../core/save';
 import { hexColor } from '../core/scale';
 import { animateArt, fitArt, fitBaseCamera } from '../entities/art';
-import { hasLines, storyFor } from '../systems/gemini';
+import { hasLines, storyFor, storyLines } from '../systems/gemini';
 import { jobChoices, nearestInteractable, portalActive } from '../systems/lab';
 import type { LabObjectDef } from '../types/data';
 import type { TouchControlId } from '../ui/mobileLayout';
@@ -214,7 +214,7 @@ export class LabScene extends Phaser.Scene {
     if (registerGemini(this.ctx.save.data, `gemini.${story.id}`, story.lines)) this.ctx.save.write();
     this.storyOpen = true;
     bus.emit('modal', { kind: 'story' });
-    bus.emit('storyShow', { lines: story.lines.map((k) => this.ctx.t(k)) });
+    bus.emit('storyShow', { lines: storyLines(story.lines, d.text, d.text['gemini.speaker'] ?? '') });
   }
 
   // ---------- 루프 ----------

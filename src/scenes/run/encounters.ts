@@ -158,8 +158,9 @@ export class Encounters {
   spawnSpireStrong(sp: Spire, rng: Rng): void {
     const d = this.run.ctx.data;
     if (d.waves.champions.stages[String(this.run.session.stage.chapter)]) {
-      this.run.spawnEnemy(rng.pick(championIds(this.run.session.stage.chapter, d.waves.champions)), sp.roomId, rng, true);
-      this.run.progression.say('championMet');
+      const id = rng.pick(championIds(this.run.session.stage.chapter, d.waves.champions));
+      this.run.spawnEnemy(id, sp.roomId, rng, true);
+      this.run.progression.say('championMet', id);
       return;
     }
     const roster = this.run.chapterRoster();

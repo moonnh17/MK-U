@@ -4,6 +4,7 @@ import type { SfxGroup, SfxId } from '../systems/sound';
 import type { ButtonAction } from './actions';
 import type { UiMode } from '../input/uiMode';
 import type { AnyCard, Card } from '../systems/cards';
+import type { StoryLine } from '../systems/gemini';
 import type { CardOfferKind, EncounterKindId, GradeId } from '../types/data';
 
 /** 이벤트 이름 → 페이로드 */
@@ -55,8 +56,8 @@ export interface GameEvents {
   cutsceneShow: { cut: CutIn; pages: CutPage[] };
   /** 컷인·설명창을 다 넘겼다 */
   cutsceneDone: Record<string, never>;
-  /** 미모사 제미니 일반 스토리 대화 (게임을 멈춘다). lines: 차례로 넘길 문장 */
-  storyShow: { lines: string[] };
+  /** 미모사 제미니 일반 스토리 대화 (게임을 멈춘다). lines: 차례로 넘길 화자·문장 */
+  storyShow: { lines: StoryLine[] };
   storyDone: Record<string, never>;
   /** 미모사 제미니 미니 대사 한 문장을 띄우거나(null이면) 숨긴다 */
   geminiMini: { line: { text: string; mood: 'calm' | 'ominous' } | null };

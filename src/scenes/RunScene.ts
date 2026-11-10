@@ -142,6 +142,8 @@ export class RunScene extends Phaser.Scene {
 
   // 카드·인벤토리
   modal: Modal = null;
+  /** 이번 런의 엔딩 대화를 띄웠다 (결산 → 엔딩 → 실험장) */
+  endingPlayed = false;
   /** 포털을 탔다(카드를 고르는 동안 포털을 다시 밟지 않게) */
   leaving = false;
 
@@ -192,7 +194,7 @@ export class RunScene extends Phaser.Scene {
     };
     this.ctx.session = this.session;
     this.rng = Rng.derive(seed, `combat-${stage.chapter}-${stage.stage}`);
-    this.progression.mini = new MiniQueue(d.gemini.mini.showSec, d.gemini.mini.fadeSec);
+    this.progression.mini = new MiniQueue(d.gemini.mini.showSec, d.gemini.mini.fadeSec, d.gemini.mini.perCharSec);
     // 연출용 난수는 전투 난수와 따로 (시드 재현에 영향 없게)
     this.juice = new Juice(this, d, Rng.derive(seed, `juice-${stage.chapter}-${stage.stage}`));
     this.hitStop = new HitStop(d.juice.hitStop.minGapSec);
@@ -209,6 +211,8 @@ export class RunScene extends Phaser.Scene {
     bus.emit('geminiMini', { line: null });
     // 챕터를 끝내고 넘어왔다 (2장 종료 미니 대사)
     if (!newRun && stage.stage === 1 && stage.chapter > 1) this.progression.say('chapterEnd', String(stage.chapter - 1));
+    // 직업을 고르고 실험을 시작했다
+    if (newRun) this.progression.say('runStart', this.session.player.job);
     this.m = metrics(d.mapgen);
     this.skillRt.hosts = new Map();
     this.host = this.skillRt.hostFor(null);
@@ -420,6 +424,7 @@ export class RunScene extends Phaser.Scene {
 
   resetFields(): void {
     this.dying = false;
+    this.endingPlayed = false;
     this.doorsByRoom = new Map();
     this.rooms = new Map();
     this.enemies = [];
@@ -807,7 +812,7 @@ export class RunScene extends Phaser.Scene {
         ? [championWaves(Rng.derive(this.ctx.config.seed, champLabel), map.chapter, map.stage, total, d.waves.champions)[index] ?? null].filter((x): x is string => x !== null)
         : [];
     for (const id of champs) this.spawnEnemy(id, roomId, rng, true);
-    if (champs.length > 0) this.progression.say('championMet');
+    for (const id of champs) this.progression.say('championMet', id);
     this.rooms.get(roomId)?.addAlive(champs.length);
   }
 
@@ -1506,6 +1511,14 @@ export class RunScene extends Phaser.Scene {
 
   /** 결산 확인 → 실험장으로 돌아간다 */
   restartRun(): void {
+    if (this.modal === 'story') return;
+    // 마지막 챕터 클리어: 결산 화면을 닫고 엔딩 대화를 본 뒤 실험장으로 (대화가 비어 있으면 바로)
+    if (this.session.settlement?.runClear && !this.endingPlayed) {
+      this.endingPlayed = true;
+      bus.emit('overlay', { open: false });
+      this.progression.playStory('runClear', undefined, () => this.restartRun());
+      return;
+    }
     this.time.paused = false;
     bus.emit('overlay', { open: false });
     if (this.modal) bus.emit('modal', { kind: null });

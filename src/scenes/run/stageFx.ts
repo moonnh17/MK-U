@@ -91,6 +91,8 @@ export class StageFx {
     it.e.warn = 0;
     bus.emit('bossIntroBand', { name: '', sub: '' });
     if (this.run.modal === 'intro') this.run.setModal(null);
+    // 등장 컷이 끝난 뒤 첫 조우 미니 대사 (보스만, 히든보스는 따로)
+    if (it.e.rank === 'boss') this.run.progression.say('bossMet', it.e.def.id);
   }
 
   /**

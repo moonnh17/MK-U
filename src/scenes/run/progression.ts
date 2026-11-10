@@ -8,7 +8,7 @@ import { convertSkills, grantSchoolSkills, judgeMastery, judgeSchool, skillAllow
 import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type Cutscene } from '../../ui/cutscenePages';
 import { type RoomNode } from '../../systems/mapgen';
 import { registerCutscene, registerGemini } from '../../core/save';
-import { hasLines, MiniQueue, pickMini, saidKeys, storyFor } from '../../systems/gemini';
+import { hasLines, MiniQueue, pickMini, saidKeys, storyFor, storyLines } from '../../systems/gemini';
 import { chapterWeights, effectiveWeights, itemChoices } from '../../systems/items';
 import { awakenSkill, awakeningReady, equipSkill, findSkill, skillValues } from '../../systems/skills';
 import { roomCenter } from '../../systems/worldLayout';
@@ -228,7 +228,7 @@ export class Progression {
     const d = this.run.ctx.data;
     const p = this.run.session.player;
     const rng = Rng.derive(this.run.ctx.config.seed, `gemini-${event}-${arg ?? ''}-${p.geminiSaid.length}`);
-    const pick = pickMini(d.gemini, event, arg, new Set(p.geminiSaid), rng, d.text);
+    const pick = pickMini(d.gemini, event, arg, new Set(p.geminiSaid), rng, d.text, new Set(Object.keys(this.run.ctx.save.data.gemini)));
     if (!pick) return;
     p.geminiSaid = [...p.geminiSaid, ...saidKeys(event, arg, pick)];
     this.mini.push(
@@ -249,7 +249,7 @@ export class Progression {
     if (registerGemini(this.run.ctx.save.data, `gemini.${story.id}`, story.lines)) this.run.ctx.save.write();
     this.storyThen = then;
     this.run.setModal('story');
-    bus.emit('storyShow', { lines: story.lines.map((k) => this.run.ctx.t(k)) });
+    bus.emit('storyShow', { lines: storyLines(story.lines, d.text, d.text['gemini.speaker'] ?? '') });
   }
 
   finishStory(): void {

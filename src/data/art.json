@@ -794,6 +794,12 @@
       "frameHeight": 128,
       "frames": 1
     },
+    "story_gemini_full": {
+      "file": "mku/story_gemini_full.png",
+      "frameWidth": 554,
+      "frameHeight": 812,
+      "frames": 1
+    },
     "item_slime_stew": {
       "file": "mku/item_slime_stew.png",
       "frameWidth": 64,

@@ -2,61 +2,84 @@ import { describe, expect, it } from 'vitest';
 import { Rng } from '../src/core/rng';
 import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
-import { geminiSlots, hasLines, instanceKey, MiniQueue, pickMini, saidKeys, storyFor, type MiniLine } from '../src/systems/gemini';
+import { geminiSlots, hasLines, instanceKey, markedSegments, MiniQueue, pickMini, plainLength, saidKeys, storyFor, storyLines, type MiniLine } from '../src/systems/gemini';
 
 const G = gameData.gemini;
 const T = gameData.text;
 
 describe('제미니 대사 데이터', () => {
-  it('기획서 예시 대사는 그대로, 미공개 대사는 빈 자리', () => {
-    expect(T['gemini.mini.advancementHectar.1']).toBe('헥타르를 골랐네. 안정적인 걸 좋아하나 봐?');
-    expect(T['gemini.mini.advancementAcro.1']).toBe('아크로라... 흥미로운 선택이야.');
-    expect([T['gemini.mini.bossKill.1'], T['gemini.mini.bossKill.2']]).toEqual(['벌써 끝났어? 생각보다 빠른데.', '좋아. 데이터는 충분히 모이고 있어.']);
-    expect([T['gemini.mini.championMet.1'], T['gemini.mini.championMet.2']]).toEqual(['어라, 저 녀석들까지 나타났네.', '저 둘은... 뭐, 직접 상대해 보면 알 거야.']);
-    for (const k of ['gemini.story.firstRun.1', 'gemini.story.eclipseKill.1', 'gemini.story.ending.1', 'gemini.mini.chapterEnd2.1', 'gemini.mini.hiddenBoss.1']) expect(T[k]).toBe('');
+  it('사용자 대사 그대로 (맞춤법만), 미공개 대사는 빈 자리', () => {
+    expect(T['gemini.story.firstRun.1']).toBe('아, 됐다. 이제 들리지?');
+    expect(T['gemini.story.firstRun.1.speaker']).toBe('??');
+    expect(T['gemini.story.ending.12']).toBe('다음에 만나면 재밌는 거 보여 줄게.');
+    expect(T['gemini.mini.advancement.3']).toContain('**조합하면 능력을 각성시킬 수 있을 거야.**');
+    for (const k of ['gemini.mini.chapterEnd2.1', 'gemini.mini.hiddenBoss.1']) expect(T[k]).toBe('');
   });
-  it('스토리 대화: 첫 실행·식광 처치·마기카이저 처치', () => {
-    expect(storyFor(G, 'firstRun')?.id).toBe('firstRun');
-    expect(storyFor(G, 'bossKill', 'eclipse')?.id).toBe('eclipseKill');
-    expect(storyFor(G, 'bossKill', 'magiKaiser')?.id).toBe('ending');
-    expect(storyFor(G, 'bossKill', 'fusionAkgwi')).toBeUndefined();
+  it('스토리 대화: 첫 실행 11줄, 엔딩은 마지막 챕터 결산 뒤 12줄. 보스 처치는 스토리 대화 없음', () => {
+    expect(storyFor(G, 'firstRun')?.lines).toHaveLength(11);
+    expect(storyFor(G, 'runClear')?.id).toBe('ending');
+    expect(storyFor(G, 'runClear')?.lines).toHaveLength(12);
+    expect(storyFor(G, 'bossKill', 'eclipse')).toBeUndefined();
+    expect(storyFor(G, 'bossKill', 'magiKaiser')).toBeUndefined();
   });
   it('데이터 검증 통과 (제미니 대사만 빈 값 허용)', () => {
     expect(validateGameData(gameData)).toEqual([]);
     expect(validateGameData({ ...gameData, text: { ...T, 'card.title.skill': '' } }).some((e) => e.includes('card.title.skill'))).toBe(true);
   });
+  it('화자: <키>.speaker가 있으면 그 이름, 없으면 기본', () => {
+    expect(storyLines(['gemini.story.firstRun.1', 'gemini.story.firstRun.2'], T, 'MG').map((l) => l.speaker)).toEqual(['??', 'MG']);
+  });
+  it('**…** 강조: 구간 나누기와 보이는 글자 수', () => {
+    expect(markedSegments('참, **기술 피해**야')).toEqual([
+      { text: '참, ', hl: false },
+      { text: '기술 피해', hl: true },
+      { text: '야', hl: false },
+    ]);
+    expect(plainLength('참, **기술 피해**야')).toBe(9);
+  });
 });
 
 describe('미니 대사 고르기', () => {
-  const pick = (event: Parameters<typeof pickMini>[1], arg?: string, said = new Set<string>(), seed = 1) => pickMini(G, event, arg, said, new Rng(seed), T);
+  const pick = (event: Parameters<typeof pickMini>[1], arg?: string, said = new Set<string>(), seed = 1, remembered = new Set<string>()) =>
+    pickMini(G, event, arg, said, new Rng(seed), T, remembered);
 
-  it('전직: 고른 학파의 대사', () => {
-    expect(pick('advancement', 'hectar')?.lines).toEqual(['gemini.mini.advancementHectar.1']);
-    expect(pick('advancement', 'acro')?.lines).toEqual(['gemini.mini.advancementAcro.1']);
+  it('시작 직업·전직마다 그 대사', () => {
+    expect(pick('runStart', 'magiScholar')?.lines[0]).toBe('gemini.mini.runStartMagiScholar.1');
+    expect(pick('runStart', 'warrior')?.lines[0]).toBe('gemini.mini.runStartWarrior.1');
+    expect(pick('runStart', 'magiMage')).toBeNull();
+    for (const [adv, id] of [['hectar', 'Hectar'], ['acro', 'Acro'], ['barbarian', 'Barbarian'], ['paladin', 'Paladin']] as const) {
+      expect(pick('advancement', adv)?.lines).toEqual([`gemini.mini.advancement${id}.1`, 'gemini.mini.advancement.2', 'gemini.mini.advancement.3', 'gemini.mini.advancement.4']);
+    }
   });
-  it('일반 보스 처치: 후보 둘 중 하나, 식광·마기카이저는 스토리 대화라 미니 대사 없음', () => {
-    const seen = new Set<string>();
-    for (let s = 1; s < 30; s++) seen.add(pick('bossKill', 'magiGolem', new Set(), s)!.lines[0]!);
-    expect([...seen].sort()).toEqual(['gemini.mini.bossKill.1', 'gemini.mini.bossKill.2']);
-    expect(pick('bossKill', 'eclipse')).toBeNull();
-    expect(pick('bossKill', 'magiKaiser')).toBeNull();
+  it('보스 처치: 정해진 보스는 그 대사, 나머지는 기본 후보, 마기카이저는 없음', () => {
+    expect(pick('bossKill', 'fusionAkgwi')?.def.id).toBe('killFusionAkgwi');
+    expect(pick('bossKill', 'electricRing')?.def.id).toBe('killElectricRing');
+    expect(pick('bossKill', 'magiGolem')?.def.id).toBe('killMagiGolem');
+    expect(pick('bossKill', 'eclipse')?.def.id).toBe('killEclipse');
+    expect(pick('bossKill', 'hectarChief')?.def.id).toBe('bossKill');
   });
-  it('같은 보스는 그 런에서 처음 잡을 때만, 같은 대사는 반복하지 않는다', () => {
+  it('첫 처치·첫 조우 대사는 저장에 남으면 다시 띄우지 않는다 (기본 후보로 넘어가지도 않음)', () => {
+    const seen = new Set(['gemini.killFusionAkgwi', 'gemini.metExecutor', 'gemini.metMagiKaiser']);
+    expect(pick('bossKill', 'fusionAkgwi', new Set(), 1, seen)).toBeNull();
+    expect(pick('championMet', 'executor', new Set(), 1, seen)).toBeNull();
+    expect(pick('bossMet', 'magiKaiser', new Set(), 1, seen)).toBeNull();
+    expect(pick('bossMet', 'hectarChief', new Set(), 1, seen)?.def.id).toBe('metHectarChief');
+    // 시작·전직 대사는 매번
+    expect(pick('runStart', 'warrior', new Set(), 1, new Set(['gemini.runStartWarrior']))).not.toBeNull();
+  });
+  it('조우: 집행자·헥타르 수석 연구원·마기카이저만, 집정관은 대사 없음', () => {
+    expect(pick('championMet', 'executor')?.lines).toHaveLength(4);
+    expect(pick('championMet', 'archon')).toBeNull();
+    expect(pick('bossMet', 'hectarChief')?.lines).toHaveLength(3);
+    expect(pick('bossMet', 'magiKaiser')?.lines).toHaveLength(5);
+    expect(pick('bossMet', 'fusionAkgwi')).toBeNull();
+  });
+  it('같은 런에서 같은 이벤트는 한 번', () => {
     const said = new Set<string>();
-    const a = pick('bossKill', 'fusionAkgwi', said)!;
-    for (const k of saidKeys('bossKill', 'fusionAkgwi', a)) said.add(k);
-    expect(pick('bossKill', 'fusionAkgwi', said)).toBeNull();
-    const b = pick('bossKill', 'electricRing', said)!;
-    expect(b.index).not.toBe(a.index);
-    for (const k of saidKeys('bossKill', 'electricRing', b)) said.add(k);
-    // 후보를 다 쓰면 더는 띄우지 않는다
+    const a = pick('bossKill', 'hectarChief', said)!;
+    for (const k of saidKeys('bossKill', 'hectarChief', a)) said.add(k);
     expect(pick('bossKill', 'hectarChief', said)).toBeNull();
-  });
-  it('집행자·집정관 첫 조우: 두 문장을 차례로, 복선이라 기록', () => {
-    const p = pick('championMet')!;
-    expect(p.lines).toEqual(['gemini.mini.championMet.1', 'gemini.mini.championMet.2']);
-    expect(p.def.record).toBe(true);
-    expect(pick('championMet', undefined, new Set([instanceKey('championMet')]))).toBeNull();
+    expect(pick('championMet', 'executor', new Set([instanceKey('championMet', 'executor')]))).toBeNull();
   });
   it('내용이 빈 대사는 띄우지 않는다 (2장 종료·히든보스 등장)', () => {
     expect(pick('chapterEnd', '2')).toBeNull();
@@ -92,6 +115,13 @@ describe('미니 대사 순서', () => {
     q.push([L('high')], 3);
     expect(run(q, 4).filter((x) => x !== null)).toEqual(['high', 'low2']);
   });
+  it('긴 문장은 글자 수만큼 더 오래', () => {
+    const q = new MiniQueue(1, 0, 0.5);
+    q.push([L('abcd'), L('e')], 1);
+    // 'abcd': 1 + 4×0.5 = 3초
+    expect(run(q, 2.95).filter((x) => x !== null)).toEqual(['abcd']);
+    expect(run(q, 0.2)).toEqual([null, 'e']);
+  });
   it('시간을 흘리지 않으면(창이 열린 동안) 그대로', () => {
     const q = new MiniQueue(1, 0);
     q.push([L('a')], 1);
@@ -101,10 +131,13 @@ describe('미니 대사 순서', () => {
 });
 
 describe('현재의 기억 — 제미니 칸', () => {
-  it('스토리 대화 3개 + 복선 미니 대사 3개, 내용 있는 것만 준비됨', () => {
+  it('스토리 대화 + 복선(기록) 미니 대사, 내용 있는 것만 준비됨', () => {
     const slots = geminiSlots(G, T);
-    expect(slots.map((s) => s.id)).toEqual(['gemini.firstRun', 'gemini.eclipseKill', 'gemini.ending', 'gemini.championMet', 'gemini.chapterEnd2', 'gemini.hiddenBoss']);
-    expect(slots.filter((s) => s.ready).map((s) => s.id)).toEqual(['gemini.championMet']);
+    expect(slots.map((s) => s.id)).toEqual([
+      'gemini.firstRun', 'gemini.ending', 'gemini.killFusionAkgwi', 'gemini.killElectricRing', 'gemini.killMagiGolem', 'gemini.killEclipse',
+      'gemini.metExecutor', 'gemini.metHectarChief', 'gemini.metMagiKaiser', 'gemini.chapterEnd2', 'gemini.hiddenBoss',
+    ]);
+    expect(slots.filter((s) => !s.ready).map((s) => s.id)).toEqual(['gemini.chapterEnd2', 'gemini.hiddenBoss']);
   });
 });
 

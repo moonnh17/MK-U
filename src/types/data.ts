@@ -1477,10 +1477,17 @@ export interface LabData {
 
 // ---------- 미모사 제미니 대화 ----------
 
-/** 대사가 나오는 게임 이벤트. arg: 전직 학파 / 보스 id / 끝난 챕터 번호 */
-export type GeminiEventId = 'firstRun' | 'advancement' | 'bossKill' | 'championMet' | 'chapterEnd' | 'hiddenBoss';
+/**
+ * 대사가 나오는 게임 이벤트. arg: 시작 직업(runStart) / 전직 id / 보스 id(bossKill·bossMet) / 정예 id / 끝난 챕터 번호.
+ * runClear: 마지막 챕터 클리어 결산 화면을 닫은 뒤
+ */
+export type GeminiEventId = 'firstRun' | 'runStart' | 'advancement' | 'bossKill' | 'bossMet' | 'championMet' | 'chapterEnd' | 'hiddenBoss' | 'runClear';
+export const GEMINI_EVENTS: readonly GeminiEventId[] = ['firstRun', 'runStart', 'advancement', 'bossKill', 'bossMet', 'championMet', 'chapterEnd', 'hiddenBoss', 'runClear'];
 
-/** 게임을 멈추는 일반 스토리 대화. lines: 차례로 넘기는 문장(텍스트 키). 내용이 비어 있으면 띄우지 않는다 */
+/**
+ * 게임을 멈추는 일반 스토리 대화. lines: 차례로 넘기는 문장(텍스트 키). 내용이 비어 있으면 띄우지 않는다.
+ * 문장 키에 `<키>.speaker` 텍스트가 있으면 그 줄의 화자 이름(없으면 gemini.speaker). 문장 안 **…**은 붉은 강조
+ */
 export interface GeminiStoryDef {
   id: string;
   nameKey: string;
@@ -1500,13 +1507,17 @@ export interface GeminiMiniDef {
   when?: string;
   priority: number;
   record: boolean;
+  /** 저장 기준 평생 한 번 (현재의 기억에 남은 적이 있으면 다시 띄우지 않는다, record 필요) */
+  once?: boolean;
   mood: 'calm' | 'ominous';
   candidates: string[][];
 }
 
 export interface GeminiData {
-  /** 미니 대사 한 문장 표시 시간·페이드(초) */
-  mini: { showSec: number; fadeSec: number };
+  /** 미니 대사 한 문장 표시 시간 = showSec + 글자 수 × perCharSec, 페이드(초) */
+  mini: { showSec: number; perCharSec: number; fadeSec: number };
+  /** 타이핑 효과: 글자 하나가 나오는 시간(초) */
+  typeCharSec: number;
   /** 초상화·아이콘 색 (헥타르 연구원의 푸른 분위기) */
   color: string;
   stories: GeminiStoryDef[];

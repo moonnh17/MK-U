@@ -36,8 +36,9 @@ export interface MiniPick {
 }
 
 /**
- * 미니 대사 고르기. 스토리 대화가 정해진 이벤트(식광·마기카이저 처치)는 미니 대사를 띄우지 않는다.
+ * 미니 대사 고르기. 스토리 대화가 정해진 이벤트는 미니 대사를 띄우지 않는다.
  * said: 이번 런에 이미 쓴 이벤트·대사 키. 내용이 빈 후보와 이미 쓴 후보는 빼고 무작위.
+ * remembered: 저장에 남은 대사 칸 id(`gemini.<id>`). once 대사는 여기 있으면 다시 띄우지 않는다.
  */
 export function pickMini(
   data: GeminiData,
@@ -46,12 +47,14 @@ export function pickMini(
   said: ReadonlySet<string>,
   rng: Rng,
   text: Readonly<Record<string, string>>,
+  remembered: ReadonlySet<string> = new Set(),
 ): MiniPick | null {
   if (storyFor(data, event, arg)) return null;
   if (said.has(instanceKey(event, arg))) return null;
   const defs = data.minis.filter((m) => matches(m, event, arg));
   const def = defs.find((m) => m.when !== undefined) ?? defs[0];
   if (!def) return null;
+  if (def.once && remembered.has(`gemini.${def.id}`)) return null;
   const ok = def.candidates.map((lines, index) => ({ lines, index })).filter((c) => hasLines(c.lines, text) && !said.has(`${def.id}#${c.index}`));
   if (ok.length === 0) return null;
   const c = rng.pick(ok);
@@ -61,6 +64,30 @@ export function pickMini(
 /** 고른 미니 대사를 '이번 런에 썼다'로 남길 키 */
 export function saidKeys(event: GeminiEventId, arg: string | undefined, pick: MiniPick): string[] {
   return [instanceKey(event, arg), `${pick.def.id}#${pick.index}`];
+}
+
+/** 대화 한 줄: 화자 이름과 문장(**…** 강조 표시 포함) */
+export interface StoryLine {
+  speaker: string;
+  text: string;
+}
+
+/** 텍스트 키 → 화자·문장. `<키>.speaker`가 있으면 그 이름, 없으면 기본 화자 */
+export function storyLines(keys: readonly string[], text: Readonly<Record<string, string>>, defaultSpeaker: string): StoryLine[] {
+  return keys.map((k) => ({ speaker: text[`${k}.speaker`] || defaultSpeaker, text: text[k] ?? k }));
+}
+
+/** **…** 강조 구간 나누기 (짝이 없는 **는 강조가 끝까지 이어진다) */
+export function markedSegments(s: string): { text: string; hl: boolean }[] {
+  return s
+    .split('**')
+    .map((text, i) => ({ text, hl: i % 2 === 1 }))
+    .filter((x) => x.text !== '');
+}
+
+/** 화면에 보이는 글자 수 (강조 표시 제외) */
+export function plainLength(s: string): number {
+  return markedSegments(s).reduce((n, x) => n + [...x.text].length, 0);
 }
 
 export interface MiniLine {
@@ -76,7 +103,7 @@ interface QueuedMini {
 
 /**
  * 미니 대사 표시 순서. update(dt)는 표시할 문장이 바뀌었을 때만 그 문장(또는 null = 숨김)을 돌려준다.
- * 한 문장은 showSec 동안, 문장 사이에는 fadeSec 동안 비운다(페이드).
+ * 한 문장은 showSec + 글자 수 × perCharSec 동안, 문장 사이에는 fadeSec 동안 비운다(페이드).
  */
 export class MiniQueue {
   private queue: QueuedMini[] = [];
@@ -89,6 +116,7 @@ export class MiniQueue {
   constructor(
     private readonly showSec: number,
     private readonly fadeSec: number,
+    private readonly perCharSec = 0,
   ) {}
 
   push(lines: readonly MiniLine[], priority: number): void {
@@ -120,7 +148,7 @@ export class MiniQueue {
     }
     const line = this.current.shift()!;
     this.showing = true;
-    this.left = this.showSec;
+    this.left = this.showSec + plainLength(line.text) * this.perCharSec;
     return { line };
   }
 

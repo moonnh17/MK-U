@@ -23,6 +23,8 @@ export const artKeys = {
   awakenedIcon: (baseKey: string, has: (key: string) => boolean) => (has(`${baseKey}A`) ? `${baseKey}A` : baseKey),
   geminiIcon: 'icon_gemini',
   geminiPortrait: 'portrait_gemini',
+  /** 스토리 대화(시작·엔딩) 전신 그림 */
+  geminiFull: 'story_gemini_full',
   /** 챕터별 방 타일: 바닥·복도 바닥·벽 */
   tile: (part: TilePart, chapter: number) => `tile_${part}_c${chapter}`,
   door: 'tile_door',
@@ -160,6 +162,7 @@ export function collectAssets(d: GameData): AssetRef[] {
   for (const u of d.ultimates.ultimates) if (u.awakening) add('icon', { spriteKey: `${artKeys.ultimateIcon(u.id)}A`, color: u.color, size: ICON_SIZE }, u.awakening.nameKey);
   add('icon', { spriteKey: artKeys.geminiIcon, color: d.gemini.color, size: ICON_SIZE }, 'gemini.name', '#icon');
   add('icon', { spriteKey: artKeys.geminiPortrait, color: d.gemini.color, size: PORTRAIT_SIZE.w, height: PORTRAIT_SIZE.h }, 'gemini.name', '#portrait');
+  add('icon', { spriteKey: artKeys.geminiFull, color: d.gemini.color, size: 277, height: 406 }, 'gemini.name', '#full');
   // 방 타일 (한 타일 크기, 반복해서 깐다)
   const ts = d.mapgen.tileSize;
   for (let c = 1; c <= d.mapgen.chapters; c++) {

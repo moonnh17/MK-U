@@ -7,7 +7,7 @@
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { isSkillImplemented, isUltimateImplemented } from '../skills/registry';
-import { geminiSlots } from '../systems/gemini';
+import { geminiSlots, storyLines } from '../systems/gemini';
 import { cutsceneSlots, pastSlots } from '../systems/memories';
 import { buyUpgrade, nextCost, resetUpgrades, spentOn, upgradeLevel } from '../systems/upgrades';
 import type { UpgradeDef } from '../types/data';
@@ -125,7 +125,7 @@ export class ArchiveWindow {
       if (saved) {
         cell.addEventListener('click', () => {
           this.root.style.display = 'none';
-          bus.emit('storyShow', { lines: saved.lines.map((k) => t(k)) });
+          bus.emit('storyShow', { lines: storyLines(saved.lines, this.ctx.data.text, t('gemini.speaker')) });
         });
       }
       grid.appendChild(cell);
