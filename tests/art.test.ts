@@ -101,6 +101,11 @@ describe('애니메이션·좌우 반전', () => {
     expect(pickAnim({ idle: 1 }, true)).toBe('idle');
     expect(pickAnim({ move: 1 }, false)).toBe('move');
     expect(pickAnim(undefined, true)).toBeNull();
+    // 위로는 뒷모습, 아래로는 정면 걷기 (없으면 정면 걷기 → move 순으로)
+    const dirs = { idle: 1, move: 1, moveFront: 1, moveBack: 1 };
+    expect([pickAnim(dirs, true, 'up'), pickAnim(dirs, true, 'down'), pickAnim(dirs, true, 'side'), pickAnim(dirs, false, 'up')]).toEqual(['moveBack', 'moveFront', 'move', 'idle']);
+    expect(pickAnim({ idle: 1, move: 1, moveFront: 1 }, true, 'up')).toBe('moveFront');
+    expect(pickAnim(both, true, 'down')).toBe('move');
     expect(animKey('player_human', 'move')).toBe('player_human.move');
   });
   it('오른쪽을 보는 그림은 왼쪽으로 움직일 때 뒤집고, 거의 멈추면 그대로', async () => {

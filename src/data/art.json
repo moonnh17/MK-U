@@ -3,9 +3,9 @@
   "sprites": {
     "player_human": {
       "file": "mku/player_human.png",
-      "frameWidth": 42,
+      "frameWidth": 48,
       "frameHeight": 52,
-      "frames": 5,
+      "frames": 13,
       "density": 2,
       "anims": {
         "idle": {
@@ -13,18 +13,28 @@
           "to": 0,
           "fps": 4
         },
-        "move": {
+        "moveFront": {
           "from": 1,
           "to": 4,
+          "fps": 8
+        },
+        "moveBack": {
+          "from": 5,
+          "to": 8,
+          "fps": 8
+        },
+        "move": {
+          "from": 9,
+          "to": 12,
           "fps": 8
         }
       }
     },
     "player_hectar": {
       "file": "mku/player_hectar.png",
-      "frameWidth": 40,
+      "frameWidth": 48,
       "frameHeight": 52,
-      "frames": 5,
+      "frames": 13,
       "density": 2,
       "anims": {
         "idle": {
@@ -32,18 +42,28 @@
           "to": 0,
           "fps": 4
         },
-        "move": {
+        "moveFront": {
           "from": 1,
           "to": 4,
+          "fps": 8
+        },
+        "moveBack": {
+          "from": 5,
+          "to": 8,
+          "fps": 8
+        },
+        "move": {
+          "from": 9,
+          "to": 12,
           "fps": 8
         }
       }
     },
     "player_acro": {
       "file": "mku/player_acro.png",
-      "frameWidth": 46,
+      "frameWidth": 48,
       "frameHeight": 52,
-      "frames": 5,
+      "frames": 13,
       "density": 2,
       "anims": {
         "idle": {
@@ -51,9 +71,19 @@
           "to": 0,
           "fps": 4
         },
-        "move": {
+        "moveFront": {
           "from": 1,
           "to": 4,
+          "fps": 8
+        },
+        "moveBack": {
+          "from": 5,
+          "to": 8,
+          "fps": 8
+        },
+        "move": {
+          "from": 9,
+          "to": 12,
           "fps": 8
         }
       }
@@ -6549,28 +6579,67 @@
     },
     "player_warrior": {
       "file": "mku/player_warrior.png",
-      "frameWidth": 48,
+      "frameWidth": 46,
       "frameHeight": 52,
-      "frames": 10,
+      "frames": 13,
       "density": 2,
       "anims": {
         "idle": {
           "from": 0,
-          "to": 3,
+          "to": 0,
           "fps": 4
         },
+        "moveFront": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        },
+        "moveBack": {
+          "from": 5,
+          "to": 8,
+          "fps": 8
+        },
         "move": {
-          "from": 4,
-          "to": 9,
+          "from": 9,
+          "to": 12,
           "fps": 8
         }
       }
     },
     "player_barbarian": {
       "file": "mku/player_barbarian.png",
-      "frameWidth": 34,
+      "frameWidth": 38,
       "frameHeight": 52,
-      "frames": 3,
+      "frames": 13,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "moveFront": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        },
+        "moveBack": {
+          "from": 5,
+          "to": 8,
+          "fps": 8
+        },
+        "move": {
+          "from": 9,
+          "to": 12,
+          "fps": 8
+        }
+      }
+    },
+    "player_paladin": {
+      "file": "mku/player_paladin.png",
+      "frameWidth": 38,
+      "frameHeight": 52,
+      "frames": 9,
       "density": 2,
       "anims": {
         "idle": {
@@ -6580,25 +6649,11 @@
         },
         "move": {
           "from": 1,
-          "to": 2,
+          "to": 4,
           "fps": 8
-        }
-      }
-    },
-    "player_paladin": {
-      "file": "mku/player_paladin.png",
-      "frameWidth": 48,
-      "frameHeight": 52,
-      "frames": 9,
-      "density": 2,
-      "anims": {
-        "idle": {
-          "from": 0,
-          "to": 2,
-          "fps": 4
         },
-        "move": {
-          "from": 3,
+        "moveBack": {
+          "from": 5,
           "to": 8,
           "fps": 8
         }

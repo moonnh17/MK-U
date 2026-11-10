@@ -185,9 +185,14 @@ export function animKey(spriteKey: string, anim: ArtAnimId): string {
   return `${spriteKey}.${anim}`;
 }
 
-/** 지금 재생할 애니메이션: 움직이면 move, 아니면 idle. 그 애니메이션이 없으면 다른 하나, 둘 다 없으면 null */
-export function pickAnim(anims: Partial<Record<ArtAnimId, unknown>> | undefined, moving: boolean): ArtAnimId | null {
+/**
+ * 지금 재생할 애니메이션: 움직이면 move, 아니면 idle. 그 애니메이션이 없으면 다른 하나, 둘 다 없으면 null.
+ * 위아래로 더 많이 움직이면 moveBack(위, 뒷모습)·moveFront(아래, 정면)가 있을 때 그것을 쓴다 (마기학자 계열)
+ */
+export function pickAnim(anims: Partial<Record<ArtAnimId, unknown>> | undefined, moving: boolean, dir: 'side' | 'up' | 'down' = 'side'): ArtAnimId | null {
   if (!anims) return null;
+  if (moving && dir === 'up' && anims.moveBack) return 'moveBack';
+  if (moving && dir !== 'side' && anims.moveFront) return 'moveFront';
   const want: ArtAnimId = moving ? 'move' : 'idle';
   if (anims[want]) return want;
   const other: ArtAnimId = moving ? 'idle' : 'move';

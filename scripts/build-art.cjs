@@ -228,12 +228,10 @@ function actor(key, idle, move, fit, opts = {}) {
   sprites[key] = { ...s, anims, ...(opts.facing ? { facing: opts.facing } : {}) };
 }
 
-// ---------- 플레이어 (마기학자 · 전직 후 헥타르 · 아크로) ----------
-const SCH = 1448 / 4;
-['player_human', 'player_hectar', 'player_acro'].forEach((key, row) => {
-  const fr = cells('scholars.png', SCH, SCH, [row * 4, row * 4 + 1, row * 4 + 2, row * 4 + 3]);
-  actor(key, [fr[0]], fr, 26);
-});
+// ---------- 플레이어 (마기학자 · 전직 후 헥타르 · 아크로): 리메이크 원본 scripts/art-src/players ----------
+Object.assign(sprites, require('./build-players.cjs').buildPlayers(out));
+// pixelfx 이펙트: scripts/art-src/pixelfx
+Object.assign(sprites, require('./build-pixelfx.cjs').buildPixelfx(out));
 
 // ---------- 1장 (monsters.png 256 칸, 4열) ----------
 const M = (row) => cells('monsters.png', 256, 256, [row * 4, row * 4 + 1, row * 4 + 2, row * 4 + 3]);
@@ -1605,9 +1603,7 @@ bFx('05', 'vfx.boss.magi_kaiser.death', 'fx_kaiser_death', 110);
 
 // ---------- 전사 (기본 · 야만용사 · 성기사) ----------
 // 본체는 warrior/ 고해상도 스트립(빈 세로줄로 프레임 나눔). 야만용사는 오른쪽 보는 그림.
-actor('player_warrior', gaps('warrior/warrior-idle.png'), gaps('warrior/warrior-move.png'), 26);
-actor('player_barbarian', gaps('warrior/barbarian-idle-right.png'), gaps('warrior/barbarian-move-right.png'), 26);
-actor('player_paladin', gaps('warrior/paladin-idle.png'), gaps('warrior/paladin-move.png'), 26);
+// 전사·야만용사·성기사 본체는 build-players.cjs(리메이크 원본 scripts/art-src/players)가 만든다
 // 스킬 이펙트: 원본 게임의 칸 크기·프레임 수·FPS 그대로 (가로 스트립). 게임 Lv1·2·3 = 원본 Lv1·3·5
 const wStrip = (f, fw) => { const im = load(f); const n = Math.round(im.w / fw); return Array.from({ length: n }, (_, i) => k.crop(im, i * fw, 0, fw, im.h)); };
 const wFx = (key, f, fw, fit, fps, loop = false) => fxArt(key, wStrip(f, fw), fit, { fps, loop });

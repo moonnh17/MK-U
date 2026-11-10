@@ -14,11 +14,11 @@
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
-| `player_human` | 플레이어 | 10×10 | feet | #e8e2d0 | mku/player_human.png (5프레임) |
-| `player_hectar` | 플레이어 헥타르 | 10×10 | feet | #e8e2d0 | mku/player_hectar.png (5프레임) |
-| `player_acro` | 플레이어 아크로 | 10×10 | feet | #e8e2d0 | mku/player_acro.png (5프레임) |
-| `player_warrior` | 플레이어 전사 | 10×10 | feet | #e8e2d0 | mku/player_warrior.png (10프레임) |
-| `player_barbarian` | 플레이어 야만용사 | 10×10 | feet | #e8e2d0 | mku/player_barbarian.png (3프레임) |
+| `player_human` | 플레이어 | 10×10 | feet | #e8e2d0 | mku/player_human.png (13프레임) |
+| `player_hectar` | 플레이어 헥타르 | 10×10 | feet | #e8e2d0 | mku/player_hectar.png (13프레임) |
+| `player_acro` | 플레이어 아크로 | 10×10 | feet | #e8e2d0 | mku/player_acro.png (13프레임) |
+| `player_warrior` | 플레이어 전사 | 10×10 | feet | #e8e2d0 | mku/player_warrior.png (13프레임) |
+| `player_barbarian` | 플레이어 야만용사 | 10×10 | feet | #e8e2d0 | mku/player_barbarian.png (13프레임) |
 | `player_paladin` | 플레이어 성기사 | 10×10 | feet | #e8e2d0 | mku/player_paladin.png (9프레임) |
 
 ## weapon (37)

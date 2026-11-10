@@ -63,6 +63,7 @@ export function animateArt(data: GameData, sprite: Phaser.GameObjects.Sprite): v
   const key = sprite.texture.key;
   const def = data.art.sprites[key];
   sprite.setFlipX(facingFlip(body.velocity.x, sprite.flipX, def?.facing));
-  const anim = pickAnim(def?.anims, body.speed > MOVING_SPEED);
+  const v = body.velocity;
+  const anim = pickAnim(def?.anims, body.speed > MOVING_SPEED, Math.abs(v.y) <= Math.abs(v.x) ? 'side' : v.y < 0 ? 'up' : 'down');
   if (anim && sprite.scene.anims.exists(animKey(key, anim))) sprite.play(animKey(key, anim), true);
 }
