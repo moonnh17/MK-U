@@ -61,3 +61,9 @@ Cloudflare가 Pages 대신 Workers 만들기 화면(빌드 명령 + `npx wrangle
 - 저장(마기력 결정·도감 등)은 브라우저마다 따로 남는다(localStorage). 기기 사이에 이어지지 않는다.
 - `?seed=123&debug=1` 같은 디버그 주소도 배포된 사이트에서 그대로 쓸 수 있다.
 - 그림을 다시 뽑는 원본 폴더(Documents 쪽)는 저장소에 없다. 배포에는 필요 없다.
+
+## 배포 직후 링크가 안 열릴 때
+
+- 예전 설정(`not_found_handling: single-page-application`)은 없는 파일을 물으면 index.html을 돌려줬다. 브라우저에 남은 옛 index.html이 지워진 옛 코드 파일을 찾으면 HTML을 코드로 받아 빈 화면에서 멈췄다. 지금은 없는 파일은 404로 둔다.
+- `public/_headers`: index.html은 매번 새로 확인(no-cache)하고, 이름에 해시가 붙는 코드·스타일 파일만 오래 캐시한다.
+- 그래도 옛 화면이 보이면 Ctrl+F5(모바일은 새로고침).
