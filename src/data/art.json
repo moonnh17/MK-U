@@ -2018,12 +2018,6 @@
       "frames": 1,
       "density": 2
     },
-    "ult_first_law": {
-      "file": "mku/ult_first_law.png",
-      "frameWidth": 9,
-      "frameHeight": 9,
-      "frames": 1
-    },
     "item_orion_shield": {
       "file": "mku/item_orion_shield.png",
       "frameWidth": 64,
@@ -8068,6 +8062,36 @@
         "play": {
           "from": 0,
           "to": 4,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_first_law_core": {
+      "file": "mku/fx_first_law_core.png",
+      "frameWidth": 40,
+      "frameHeight": 28,
+      "frames": 9,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 8,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_first_law_blast": {
+      "file": "mku/fx_first_law_blast.png",
+      "frameWidth": 160,
+      "frameHeight": 160,
+      "frames": 23,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 22,
           "fps": 18,
           "loop": false
         }

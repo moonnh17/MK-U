@@ -203,6 +203,14 @@ export class WeaponCombat {
       sfx(weaponSfx(w), st.damage * (sig?.kind === 'bigSmash' ? sig.damageMul : 1));
       // 특무 인장: 순간 회피 직후 기본공격 피해 증가
       const emp = this.run.itemRt.consumeEmpowered();
+      // 체납자의 의수: 칠 때마다 마기 입자를 가져간다. 모자라면 맨손으로 친다
+      if (w.debt && !this.run.special.payDebt(w)) {
+        const fist = this.run.fistItem();
+        const fistStats = this.run.weaponStatsOf(fist);
+        this.fireCooldown = fistStats.fireIntervalSec;
+        this.melee(this.run.weaponDefOf(fist.defId), fistStats, aimAngle, 0, null, emp);
+        return;
+      }
       if (w.iaido) {
         this.iaido(w, w.iaido, st, aimAngle, sig, emp);
         return;

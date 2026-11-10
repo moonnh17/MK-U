@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 725개 · 그림 있음 692개
+전체 726개 · 그림 있음 693개
 
 ## player (6)
 
@@ -254,7 +254,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (216)
+## skill (217)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -443,7 +443,8 @@
 | `skill_pPrayer_prayer1` | 회생의 기도 (prayer1) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer1.png (6프레임) |
 | `skill_pPrayer_prayer2` | 회생의 기도 (prayer2) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer2.png (6프레임) |
 | `skill_pPrayer_prayer3` | 회생의 기도 (prayer3) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer3.png (6프레임) |
-| `ult_first_law` | 열역학 제1법칙 (particle) | 8×8 | center | #ff9a3c | mku/ult_first_law.png (1프레임) |
+| `fx_first_law_core` | 열역학 제1법칙 (particle) | 8×8 | center | #ff9a3c | mku/fx_first_law_core.png (9프레임) |
+| `fx_first_law_blast` | 열역학 제1법칙 (blast) | 40×40 | center | #ff9a3c | mku/fx_first_law_blast.png (23프레임) |
 | `ult_cut1` | 벼락 (cut1) | 20×20 | center | #6a9cff | mku/ult_cut1.png (1프레임) |
 | `ult_cut2` | 벼락 (cut2) | 20×20 | center | #6a9cff | mku/ult_cut2.png (1프레임) |
 | `ult_cut3` | 벼락 (cut3) | 20×20 | center | #6a9cff | mku/ult_cut3.png (1프레임) |

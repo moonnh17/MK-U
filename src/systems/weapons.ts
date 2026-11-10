@@ -17,7 +17,6 @@ export interface WeaponItem {
   grade: GradeId;
   options: WeaponOption[];
   /** 체납자의 의수: 이번 스테이지 징수를 못 냈다 (주먹 성능) */
-  unpaid?: boolean;
 }
 
 /** 옵션 없는 기본 무기 (시작 무기·테스트 무기) */

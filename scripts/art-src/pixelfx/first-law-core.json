@@ -1,0 +1,237 @@
+{
+ "frames": [
+  {
+   "filename": "first-law-core 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 44,
+    "h": 30
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 44,
+    "h": 30
+   },
+   "sourceSize": {
+    "w": 44,
+    "h": 30
+   },
+   "duration": 56
+  },
+  {
+   "filename": "first-law-core 1",
+   "frame": {
+    "x": 44,
+    "y": 0,
+    "w": 44,
+    "h": 30
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 44,
+    "h": 30
+   },
+   "sourceSize": {
+    "w": 44,
+    "h": 30
+   },
+   "duration": 56
+  },
+  {
+   "filename": "first-law-core 2",
+   "frame": {
+    "x": 88,
+    "y": 0,
+    "w": 44,
+    "h": 30
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 44,
+    "h": 30
+   },
+   "sourceSize": {
+    "w": 44,
+    "h": 30
+   },
+   "duration": 56
+  },
+  {
+   "filename": "first-law-core 3",
+   "frame": {
+    "x": 0,
+    "y": 30,
+    "w": 44,
+    "h": 30
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 44,
+    "h": 30
+   },
+   "sourceSize": {
+    "w": 44,
+    "h": 30
+   },
+   "duration": 56
+  },
+  {
+   "filename": "first-law-core 4",
+   "frame": {
+    "x": 44,
+    "y": 30,
+    "w": 44,
+    "h": 30
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 44,
+    "h": 30
+   },
+   "sourceSize": {
+    "w": 44,
+    "h": 30
+   },
+   "duration": 56
+  },
+  {
+   "filename": "first-law-core 5",
+   "frame": {
+    "x": 88,
+    "y": 30,
+    "w": 44,
+    "h": 30
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 44,
+    "h": 30
+   },
+   "sourceSize": {
+    "w": 44,
+    "h": 30
+   },
+   "duration": 56
+  },
+  {
+   "filename": "first-law-core 6",
+   "frame": {
+    "x": 0,
+    "y": 60,
+    "w": 44,
+    "h": 30
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 44,
+    "h": 30
+   },
+   "sourceSize": {
+    "w": 44,
+    "h": 30
+   },
+   "duration": 56
+  },
+  {
+   "filename": "first-law-core 7",
+   "frame": {
+    "x": 44,
+    "y": 60,
+    "w": 44,
+    "h": 30
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 44,
+    "h": 30
+   },
+   "sourceSize": {
+    "w": 44,
+    "h": 30
+   },
+   "duration": 56
+  },
+  {
+   "filename": "first-law-core 8",
+   "frame": {
+    "x": 88,
+    "y": 60,
+    "w": 44,
+    "h": 30
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 44,
+    "h": 30
+   },
+   "sourceSize": {
+    "w": 44,
+    "h": 30
+   },
+   "duration": 56
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "first-law-core.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 132,
+   "h": 90
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "first-law-core",
+    "from": 0,
+    "to": 8,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "mku/first-law-core",
+   "name": "MKU first-law core",
+   "fps": 18,
+   "loop": true,
+   "frames": 9,
+   "frameSize": [
+    44,
+    30
+   ],
+   "pivot": [
+    28,
+    15
+   ],
+   "columns": 3
+  }
+ }
+}

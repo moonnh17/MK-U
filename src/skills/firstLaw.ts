@@ -2,6 +2,7 @@
  * 열역학 제1법칙 (전직 전 기본 궁극기, 기술·원거리).
  * 마기 입자를 만들어 가장 가까운 적에게 던지고, 닿으면 폭발해 범위 피해를 준다.
  * 적이 없으면 마지막 조준 방향으로 사거리만큼 던진다.
+ * 그림: 에너지 핵(fx_first_law_core)이 날아가 터지면 열기가 빨려 들었다가 한꺼번에 터진다(fx_first_law_blast).
  */
 import { Explosive } from './explosive';
 import { nearestEnemy, type UltimateImpl } from './host';
@@ -22,6 +23,7 @@ export const firstLaw: UltimateImpl = {
         base: v.damage!,
         tags: def.sources.explosion!,
         sprite: def.sprites.particle!,
+        blasts: [def.sprites.blast!],
       }),
     );
     return true;

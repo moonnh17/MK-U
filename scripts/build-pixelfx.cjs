@@ -26,6 +26,9 @@ const FX = {
     [`fx_w_orb${t}`, { name: `w-orb${t}`, center: true, play: 'loop' }],
     [`fx_w_muzzle${t}`, { name: `w-muzzle${t}`, play: 'once' }],
   ])),
+  // 열역학 제1법칙 (마기학자 기본 궁극기): 던지는 에너지 핵과 폭발
+  fx_first_law_core: { name: 'first-law-core', center: true, play: 'loop' },
+  fx_first_law_blast: { name: 'first-law-blast', center: true, play: 'once' },
   fx_w_beam3: { name: 'w-beam3', play: 'once' },
   fx_w_beam4: { name: 'w-beam4', play: 'once' },
   fx_w_flame: { name: 'w-flame', center: true, play: 'loop' },

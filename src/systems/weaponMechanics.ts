@@ -51,7 +51,7 @@ export function rolledEnergyCost(rng: Rng, base: number, range: readonly [number
   return Math.round(base * rng.range(range[0], range[1]) * 100) / 100;
 }
 
-/** 체납자의 의수: 스테이지 진입 징수. 낼 수 있으면 coins를 빼고 paid */
+/** 체납자의 의수: 공격마다 징수. 낼 수 있으면 coins를 빼고 paid */
 export function collectDebt(coins: number, cost: number): { coins: number; paid: boolean } {
   return coins >= cost ? { coins: coins - cost, paid: true } : { coins, paid: false };
 }

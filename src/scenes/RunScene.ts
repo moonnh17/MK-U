@@ -310,8 +310,6 @@ export class RunScene extends Phaser.Scene {
     if (stage.chapter === 1 && stage.stage === 1 && this.ctx.config.testWeapons) this.world.placeTestWeapons();
     // 런 시작: 무기 대신 무기 상자
     if (newRun) this.loot.addChest('weapon', start.x, start.y + d.mapgen.startChestOffsetPx, d.loot.startChest);
-    // 체납자의 의수: 스테이지에 들어서면 징수 (등장 연출이 끝난 뒤 보이게 조금 늦춘다)
-    else this.time.delayedCall(d.weapons.debtDelaySec * 1000, () => this.special.collectDebts());
 
     this.physics.add.collider(this.player, this.walls);
     this.physics.add.collider(this.player, this.doorGroup);
@@ -683,12 +681,15 @@ export class RunScene extends Phaser.Scene {
     this.roarAura.update(dt);
 
     const weaponKey = this.shownWeaponKey();
-    const handAt = this.combat.handPos();
+    // 팔에 차는 무기는 어깨에서 뻗는다
+    const worn = this.weaponDef().worn;
+    const handAt = worn ? { x: this.player.x + worn.shoulderX, y: this.player.y + worn.shoulderY - this.condition.leapLift } : this.combat.handPos();
     const upright = this.weaponDef().upright === true;
     const pose = this.combat.heldPose(dt);
     this.weaponSprite
       .setTexture(weaponKey)
-      .setOrigin(d.art.sprites[weaponKey]?.gripX ?? 0.5, 0.5)
+      .setDepth(worn && this.aimDir.y < 0 ? 3.9 : 4)
+      .setOrigin(worn ? worn.gripX : (d.art.sprites[weaponKey]?.gripX ?? 0.5), 0.5)
       // 왼쪽을 겨눌 때 총이 거꾸로 서지 않게 (깃발은 세워 든 채 좌우만 뒤집는다)
       .setFlipY(!upright && this.aimDir.x < 0)
       .setFlipX(upright && this.aimDir.x < 0)
@@ -956,8 +957,6 @@ export class RunScene extends Phaser.Scene {
   /** 등급 배율·옵션을 반영한 무기 수치. 태그 보정은 hit()에서 */
   weaponStatsOf(item: WeaponItem): WeaponStats {
     const g = this.ctx.data.groupMultipliers;
-    // 징수를 못 낸 의수는 주먹과 같은 성능
-    if (item.unpaid) return this.weaponStatsOf(this.fistItem());
     const st = weaponStats(this.weaponDefOf(item.defId), item, gradeMultiplier(item.grade, g), gradeEnergyMultiplier(item.grade, g));
     // 쌍성 지팡이: 지금 상태(주성·반성·정렬)의 연사력·피해·탄속 (초당 에너지는 그대로)
     const ts = this.special.twinStarMode(this.weaponDefOf(item.defId));

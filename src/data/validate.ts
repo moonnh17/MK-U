@@ -213,6 +213,8 @@ export function validateGameData(d: GameData): Errors {
     if (wpn.energyRange && !(wpn.energyRange[0] > 0 && wpn.energyRange[0] <= wpn.energyRange[1])) errors.push(`${w}.energyRange: 0 < 최소 ≤ 최대`);
     if (wpn.selfDestruct && !(wpn.selfDestruct.chance > 0 && wpn.selfDestruct.chance < 1)) errors.push(`${w}.selfDestruct.chance: 0~1`);
     if (wpn.debt && !wpn.abilityNameKey) errors.push(`${w}: 징수에는 abilityNameKey가 필요`);
+    if (wpn.debt && wpn.category !== 'blade') errors.push(`${w}: 징수는 칼 무기만 (못 내면 맨손으로 친다)`);
+    if (wpn.worn && !(wpn.worn.gripX >= 0 && wpn.worn.gripX <= 1)) errors.push(`${w}.worn.gripX: 0~1`);
     if (wpn.beam) checkSprite(errors, `${w}.beam.gauge`, wpn.beam.gauge);
     if (wpn.spinUp && wpn.spinUp.maxMul < 1) errors.push(`${w}.spinUp.maxMul: 1 이상`);
     if ((p.kind === 'arc' || p.kind === 'line' || p.kind === 'smash') && wpn.category !== 'blade') errors.push(`${w}: ${p.kind}는 칼 패턴`);

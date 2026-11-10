@@ -462,42 +462,25 @@ export class SpecialWeapons {
 
   // ---------- 체납자의 의수 ----------
 
-  /** 스테이지에 들어설 때: 슬롯의 의수마다 마기 입자를 가져간다. 못 내면 그 스테이지 동안 주먹 성능 */
-  collectDebts(): void {
+  /** 공격 한 번의 징수: 낼 수 있으면 마기 입자를 가져가고 초록 불티가 튄다. 못 내면 false(맨손으로 친다) */
+  payDebt(def: WeaponDef): boolean {
     const p = this.run.session.player;
-    for (const item of p.weapons.slots) {
-      if (!item) continue;
-      const def = this.run.weaponDefOf(item.defId);
-      if (!def.debt) continue;
-      const r = collectDebt(p.coins, def.debt.coins);
-      p.coins = r.coins;
-      item.unpaid = !r.paid;
-      const t = this.run.ctx.t;
-      const at = { x: this.run.player.x, y: this.run.player.y };
-      if (!r.paid) {
-        bus.emit('toast', { text: t('weapon.debtFailed', { n: def.debt.coins }) });
-        continue;
-      }
-      bus.emit('toast', { text: t('weapon.debtPaid', { n: def.debt.coins }) });
-      this.run.floatLabel(at, t(def.abilityNameKey!), def.debt.color);
-      sfx('coin');
-      // 초록 파티클을 뿜으며 무기가 잠깐 커진다
-      this.run.juice.colorBurst(at, def.debt.color, this.run.ctx.data.juice.skillBurst);
-      for (let i = 0; i < 14; i++) this.spark({ x: at.x + this.fx.range(-8, 8), y: at.y + this.fx.range(-8, 4) }, def.debt.color, 22);
-      if (this.run.weaponItem() === item) {
-        const s = this.run.weaponSprite;
-        this.run.tweens.killTweensOf(s);
-        s.setScale(1);
-        this.run.tweens.add({ targets: s, scale: 1.35, duration: 160, yoyo: true, ease: 'Quad.easeOut', onComplete: () => s.setScale(1) });
-      }
+    const debt = def.debt!;
+    const r = collectDebt(p.coins, debt.coins);
+    if (!r.paid) {
+      this.run.toastThrottled(this.run.ctx.t('weapon.debtFailed', { n: debt.coins }));
+      return false;
     }
+    p.coins = r.coins;
+    const at = { x: this.run.weaponSprite.x, y: this.run.weaponSprite.y };
+    for (let i = 0; i < 5; i++) this.spark({ x: at.x + this.fx.range(-4, 4), y: at.y + this.fx.range(-4, 2) }, debt.color, 14);
+    return true;
   }
 
-  /** 들고 있는 무기의 이동속도 증가 (징수를 낸 의수) */
+  /** 들고 있는 무기의 이동속도 증가 (징수를 낼 수 있는 의수) */
   moveBonus(): number {
-    const item = this.run.weaponItem();
-    const def = this.run.weaponDefOf(item.defId);
-    return def.debt && !item.unpaid ? def.debt.moveSpeed : 0;
+    const def = this.run.weaponDefOf(this.run.weaponItem().defId);
+    return def.debt && this.run.session.player.coins >= def.debt.coins ? def.debt.moveSpeed : 0;
   }
 
   // ---------- 환국의 잔명 ----------

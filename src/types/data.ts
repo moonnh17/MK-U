@@ -264,8 +264,8 @@ export interface WeaponDef extends SpriteRef {
   /** 공격마다 chance 확률로 터지며 무기가 사라진다 (야시장 복제총) */
   selfDestruct?: { chance: number };
   /**
-   * 징수 (체납자의 의수): 스테이지에 들어설 때마다 들고 있으면 마기 입자 coins를 가져간다.
-   * 못 내면 그 스테이지 동안 주먹과 같은 성능. moveSpeed: 낸 동안 이동속도 증가
+   * 징수 (체납자의 의수): 공격할 때마다 마기 입자 coins를 가져간다. 모자라면 그 공격은 맨손(주먹).
+   * moveSpeed: 낼 수 있는 동안(마기 입자가 coins 이상) 이동속도 증가
    */
   debt?: { coins: number; moveSpeed: number; color: string };
   /**
@@ -304,6 +304,11 @@ export interface WeaponDef extends SpriteRef {
   selfBuff?: { sec: number; damage: number; color: string };
   /** 든 그림을 조준에 따라 돌리지 않고 세워 둔다 (깃발) */
   upright?: boolean;
+  /**
+   * 손에 들지 않고 팔에 차는 무기 (체납자의 의수): 그림의 gripX 자리를 몸 가운데에서 (shoulderX, shoulderY)
+   * 어깨에 붙이고 조준 쪽으로 뻗는다. 위를 겨누면 몸 뒤로 간다
+   */
+  worn?: { gripX: number; shoulderX: number; shoulderY: number };
   /** 칼: 참격·타격 이펙트 색 */
   fxColor?: string;
   /** 들고 있는 동안 효과 (신궁 환디) */
@@ -327,8 +332,6 @@ export interface WeaponsData {
   critMultiplier: number;
   /** 무기를 바꾼 뒤 공격할 수 없는 시간(초) */
   swapDelaySec: number;
-  /** 체납자의 의수 징수를 스테이지 시작 뒤 몇 초에 할지 */
-  debtDelaySec: number;
   /** 무기 분류 (산탄·레이저 등). 아이템 효과가 분류를 보고 붙는다 (산탄: 발사 탄수 +) */
   classes: { id: string; nameKey: string }[];
   /** 근접 이펙트: 흑백 그림에 무기 색을 입힌다. glowAlpha: 밝은 심을 더하는 겹 / buffSparkSec: 버프 불티 간격 */

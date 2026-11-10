@@ -858,7 +858,6 @@ sprites.prop_exit_portal = sheet('prop_exit_portal', single('rift/frame-1.png'),
 sprites.prop_encounter_core = sheet('prop_encounter_core', single('mimosa/frames/crystal.png'), 24);
 
 // 스킬 오브젝트 (탄은 오른쪽을 본다)
-dots('ult_first_law', ['...EEE...', '.EEeeeEE.', '.EeeyyeE.', 'EeeywyyeE', 'EeywwwyeE', 'EeeywyyeE', '.EeeyyeE.', '.EEeeeEE.', '...EEE...']);
 
 // 히든보스 세 명의 본체는 아래 '히든보스 팩'에서 만든다
 

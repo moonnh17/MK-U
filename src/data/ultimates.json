@@ -11,7 +11,8 @@
       "values": { "damage": 40, "radius": 40, "projectileSpeed": 220, "range": 220 },
       "color": "#ff9a3c",
       "sprites": {
-        "particle": { "spriteKey": "ult_first_law", "color": "#ff9a3c", "size": 8 }
+        "particle": { "spriteKey": "fx_first_law_core", "color": "#ff9a3c", "size": 8 },
+        "blast": { "spriteKey": "fx_first_law_blast", "color": "#ff9a3c", "size": 40 }
       }
     },
     {

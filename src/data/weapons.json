@@ -14,7 +14,6 @@
   "projectile": { "spriteKey": "projectile_player", "color": "#fff3a0", "size": 3 },
   "critMultiplier": 1.5,
   "swapDelaySec": 0.5,
-  "debtDelaySec": 0.6,
   "classes": [
     { "id": "single", "nameKey": "weaponClass.single" },
     { "id": "spread", "nameKey": "weaponClass.spread" },
@@ -313,8 +312,9 @@
       "id": "debtorArm", "codexNo": 32, "nameKey": "weapon.debtorArm", "category": "blade", "fxColor": "#ffc83a", "grade": "rare", "classes": ["slash"], "tags": ["physical", "melee"],
       "abilityNameKey": "weapon.ability.debtorArm",
       "baseDamage": 32, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 100, "radius": 48 },
-      "debt": { "coins": 10, "moveSpeed": 0.2, "color": "#4aff7a" },
+      "debt": { "coins": 3, "moveSpeed": 0.2, "color": "#4aff7a" },
       "projectileSpeed": 0, "range": 48, "cutsProjectiles": true, "droppable": true,
+      "worn": { "gripX": 0.04, "shoulderX": 3, "shoulderY": -5 },
       "spriteKey": "weapon_debtor_arm", "color": "#e0b030", "size": 10
     },
     {
