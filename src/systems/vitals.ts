@@ -47,6 +47,8 @@ export interface PlayerMods {
   flatDamage?: number;
   /** 스킬 쿨타임이 추가로 도는 배수 (광전사의 진노 3.5배 → 2.5) */
   cooldownRate?: number;
+  /** 모든 피해 증가 비율 (사르비스의 기억) */
+  damage?: number;
 }
 
 export const NO_MODS: PlayerMods = { moveSpeed: 0, damageReduction: 0 };
@@ -56,7 +58,7 @@ export function combineMods(list: readonly Partial<PlayerMods>[]): PlayerMods {
   let moveSpeed = 0;
   let keep = 1;
   let rooted = false;
-  const sum = { meleeDamage: 0, maxHpPct: 0, lifesteal: 0, flatDamage: 0, cooldownRate: 0 };
+  const sum = { meleeDamage: 0, maxHpPct: 0, lifesteal: 0, flatDamage: 0, cooldownRate: 0, damage: 0 };
   for (const m of list) {
     moveSpeed += m.moveSpeed ?? 0;
     keep *= 1 - Math.min(1, Math.max(0, m.damageReduction ?? 0));

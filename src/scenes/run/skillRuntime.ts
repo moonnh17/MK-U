@@ -12,8 +12,8 @@ import { refracts, tickShield, type ShieldState } from '../../systems/shield';
 import { applyCorruption, skillChance } from '../../systems/acro';
 import { combineMods, heal, payHp, type PlayerMods } from '../../systems/vitals';
 import { cooldownLeft, findSkill, refundCooldown, skillValues, ultimateCooldownSec } from '../../systems/skills';
-import { applyBleed, canAutoCast, skillTags } from '../../systems/tags';
-import type { BleedRule, SkillDef, SpaceRule, UltimateDef } from '../../types/data';
+import { applyBleed, applyBurn, canAutoCast, skillTags } from '../../systems/tags';
+import type { BleedRule, BurnRule, SkillDef, SpaceRule, UltimateDef } from '../../types/data';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
 import { shake } from '../../entities/juice';
@@ -91,6 +91,7 @@ export class SkillRuntime {
         if (e.dead) return;
         e.corruption = null;
         e.bleed = null;
+        e.burn = null;
         e.converted = true;
         this.run.onEnemyKilled(e);
       },
@@ -99,6 +100,7 @@ export class SkillRuntime {
         const p = this.run.session.player;
         const v = heal(p, amount);
         p.hp = v.hp;
+        this.run.itemRt.overheal(v.overflow);
         if (overflow) this.run.condition.setSanity({ sanity: Math.min(p.sanityMax, p.sanity + v.overflow), panic: p.panic });
       },
       payHp: (ratio) => {
@@ -129,6 +131,11 @@ export class SkillRuntime {
         if (e.dead) return;
         const perStack = calcDamage({ baseDamage: base, tags }, this.run.combat.tagBonus(), ctx.data.tags, this.run.combat.rangeBonus());
         e.bleed = applyBleed(e.bleed, perStack, stacks, this.run.tagRule<BleedRule>('bleed'));
+      },
+      burn: (e, base, stacks, tags) => {
+        if (e.dead) return;
+        const perStack = calcDamage({ baseDamage: base, tags }, this.run.combat.tagBonus(), ctx.data.tags, this.run.combat.rangeBonus());
+        e.burn = applyBurn(e.burn, perStack, stacks, this.run.tagRule<BurnRule>('burn'), e.rank === 'boss' || e.rank === 'hiddenBoss');
       },
       fireBullet: (from, angle, speed, range, base, tags, sprite, extra) =>
         this.run.combat.fireBullet(from, angle, speed, range, base, tags, source, { pierce: extra?.pierce ?? 0, crit: 0, sprite, hitSize: extra?.hitSize, tint: extra?.tint }),
@@ -336,7 +343,7 @@ export class SkillRuntime {
         usable: !active || this.skillUsable(def, owned.awakened, sv.values),
         followUp: active && (skillImpl(id)?.followUpReady?.(this.hostFor(id)) ?? false),
         color: def.color,
-        iconKey: artKeys.skillIcon(id),
+        iconKey: owned.awakened ? artKeys.awakenedIcon(artKeys.skillIcon(id), (k) => this.run.textures.exists(k)) : artKeys.skillIcon(id),
       };
     };
     const ult = this.ultimateDef();
@@ -354,7 +361,7 @@ export class SkillRuntime {
         cooldownLeft: p.ultimate.cooldownLeft,
         cooldownTotal: p.ultimate.cooldownTotal,
         color: ult.color,
-        iconKey: artKeys.ultimateIcon(ult.id),
+        iconKey: p.ultimate.awakened ? artKeys.awakenedIcon(artKeys.ultimateIcon(ult.id), (k) => this.run.textures.exists(k)) : artKeys.ultimateIcon(ult.id),
       },
       slot(p.loadout.passive, false),
     ];

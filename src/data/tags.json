@@ -96,6 +96,14 @@
       "damageGroup": "none",
       "rule": { "kind": "bleed", "durationSec": 4, "tickIntervalSec": 1, "maxStacks": 3, "refreshOnReapply": true },
       "badgeColor": "#a01e2a"
+    },
+    {
+      "id": "burn",
+      "nameKey": "tag.burn",
+      "descKey": "tag.burn.desc",
+      "damageGroup": "none",
+      "rule": { "kind": "burn", "tickIntervalSec": 1, "maxStacks": 99, "bossMaxStacks": 10 },
+      "badgeColor": "#e0701e"
     }
   ]
 }

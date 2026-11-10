@@ -12,9 +12,9 @@ describe('데이터 검증', () => {
     expect(validateGameData(gameData)).toEqual([]);
   });
 
-  it('태그는 기획서 표의 11종이다', () => {
+  it('태그는 기획서 표의 11종 + 화상이다', () => {
     expect(gameData.tags.tags.map((t) => t.id).sort()).toEqual([...TAG_IDS].sort());
-    expect(TAG_IDS).toHaveLength(11);
+    expect(TAG_IDS).toHaveLength(12);
   });
 
   it('챕터1 일반 적 5종이 있다 (유령 사수는 정예)', () => {

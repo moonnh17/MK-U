@@ -6,6 +6,7 @@
 import type { Vec2 } from '../core/actions';
 import type {
   BleedRule,
+  BurnRule,
   ChanceRule,
   SkillDef,
   TagDef,
@@ -104,4 +105,31 @@ export function tickBleed(state: BleedState, dt: number, rule: BleedRule): { sta
   }
   if (remainingSec <= EPS) return { state: null, damage };
   return { state: { ...state, tickTimer, remainingSec }, damage };
+}
+
+// ---------- 화상 ----------
+
+export interface BurnState {
+  stacks: number;
+  tickTimer: number;
+  /** 중첩 1개당 틱 피해 (태그 보정 적용 후) */
+  damagePerStack: number;
+}
+
+/** 화상을 건다. 지속시간이 없고, 중첩은 상한(보스는 따로)까지 쌓인다. 틱 피해는 센 쪽 */
+export function applyBurn(state: BurnState | null, damagePerStack: number, stacks: number, rule: BurnRule, boss: boolean): BurnState {
+  const cap = boss ? rule.bossMaxStacks : rule.maxStacks;
+  if (!state) return { stacks: Math.min(cap, stacks), tickTimer: 0, damagePerStack };
+  return { stacks: Math.min(cap, state.stacks + stacks), tickTimer: state.tickTimer, damagePerStack: Math.max(state.damagePerStack, damagePerStack) };
+}
+
+/** 시간을 흘려 이번에 들어갈 화상 피해 (끝나지 않는다) */
+export function tickBurn(state: BurnState, dt: number, rule: BurnRule): { state: BurnState; damage: number } {
+  let tickTimer = state.tickTimer + dt;
+  let damage = 0;
+  while (tickTimer >= rule.tickIntervalSec - EPS) {
+    tickTimer -= rule.tickIntervalSec;
+    damage += state.stacks * state.damagePerStack;
+  }
+  return { state: { ...state, tickTimer }, damage };
 }

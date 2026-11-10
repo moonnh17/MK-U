@@ -134,7 +134,10 @@ export class RoomProps {
   useStatue(s: Statue): void {
     const def = this.run.ctx.data.mapgen.roomProps.statues.find((x) => x.kind === s.kind)!;
     const p = this.run.session.player;
-    if (s.kind === 'heal') p.hp = Math.min(p.maxHp, p.hp + p.maxHp * def.value);
+    if (s.kind === 'heal') {
+      this.run.itemRt.overheal(p.hp + p.maxHp * def.value - p.maxHp);
+      p.hp = Math.min(p.maxHp, p.hp + p.maxHp * def.value);
+    }
     else if (s.kind === 'energy') p.energy = Math.min(p.energyMax, p.energy + p.energyMax * def.value);
     else p.sanity = Math.min(p.sanityMax, p.sanity + p.sanityMax * def.value);
     s.use();

@@ -26,12 +26,14 @@ import { masteryTotals } from '../../systems/skills';
 import { gradeEnergyMultiplier } from '../../systems/damage';
 import { chargedCrit, gunShots, inArc, projectilesCut, rollCrit, spendEnergy, spinUpMul, type WeaponItem, type WeaponStats } from '../../systems/weapons';
 import { contains, interiorRect } from '../../systems/worldLayout';
-import type { SpriteRef, WeaponSignature, SpaceRule, TagId, WeaponDef } from '../../types/data';
+import type { BurnRule, SpriteRef, WeaponSignature, SpaceRule, TagId, WeaponDef } from '../../types/data';
+import { applyBurn } from '../../systems/tags';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
 
 /** 신성한 이코르의 출혈 공격 태그 */
 const ITEM_BLEED_TAGS: readonly TagId[] = ['physical', 'bleed'];
+const ITEM_BURN_TAGS: readonly TagId[] = ['physical', 'burn'];
 
 export class WeaponCombat {
   /** 유니크 고유 효과: 지금 무기로 한 공격 수 */
@@ -838,8 +840,12 @@ export class WeaponCombat {
     // 어느 전사의 기억 · 아트로스 비석 필사본
     const sp = this.run.session.player;
     if (this.buffLeft > 0) dmg *= 1 + this.buffDamage;
+    dmg *= 1 + (this.run.skillRt.playerMods().damage ?? 0);
     const stance = this.run.itemRt.first('hpStance');
     if (stance) dmg *= 1 + hpStance(sp.hp, sp.maxHp, stance).damage;
+    // 선혈기수: 체력이 낮은 적에게 피해 증가
+    const lowHp = this.run.itemRt.first('lowHpEnemyDamage');
+    if (lowHp && enemy.hp <= enemy.maxHp * lowHp.threshold) dmg *= 1 + lowHp.value;
     const low = this.run.itemRt.first('lowSanityDamage');
     if (low) dmg *= 1 + lowSanityBonus(sp.sanity, sp.sanityMax, low.maxDamage);
     const space = tags.includes('space') || hm.space;
@@ -850,6 +856,9 @@ export class WeaponCombat {
     // 신성한 이코르: 근접 공격이 맞으면 확률로 출혈
     const mb = this.run.itemRt.first('meleeBleed');
     if (mb && !killed && tags.includes('melee') && this.run.rng.chance(mb.chance)) this.run.host.bleed(enemy, mb.damage, mb.stacks, ITEM_BLEED_TAGS);
+    // 새벽불길: 근접 공격이 맞으면 확률로 화상
+    const mf = this.run.itemRt.first('meleeBurn');
+    if (mf && !killed && tags.includes('melee') && this.run.rng.chance(mf.chance)) this.run.host.burn(enemy, mf.damage, mf.stacks, ITEM_BURN_TAGS);
     return killed;
   }
 
@@ -881,8 +890,35 @@ export class WeaponCombat {
     // 아이템 피해 흡혈 (과기전쟁의 일기) + 스킬 흡혈 (전장의 함성)
     const steal = this.run.itemRt.sums.lifesteal + (this.run.skillRt.playerMods().lifesteal ?? 0);
     if (steal > 0 && dealt > 0) this.run.host.heal(dealt * steal, false);
-    if (killed) this.run.onEnemyKilled(enemy);
+    if (killed) {
+      this.spreadBurn(enemy);
+      this.run.onEnemyKilled(enemy);
+    }
     return killed;
+  }
+
+  /** 새벽불길(번지는 불): 화상 걸린 적이 죽으면 그 중첩이 가장 가까운 적에게 옮겨붙는다 */
+  private spreadBurn(dead: Enemy): void {
+    const e = this.run.itemRt.first('burnSpread');
+    const b = dead.burn;
+    if (!e || !b) return;
+    let best: Enemy | null = null;
+    let bestD = e.radius;
+    for (const x of this.run.enemies) {
+      if (x.dead || x === dead) continue;
+      const d = Math.hypot(x.sprite.x - dead.sprite.x, x.sprite.y - dead.sprite.y) - x.radius;
+      if (d <= bestD) {
+        best = x;
+        bestD = d;
+      }
+    }
+    if (!best) return;
+    const rule = this.run.tagRule<BurnRule>('burn');
+    best.burn = applyBurn(best.burn, b.damagePerStack, b.stacks, rule, best.rank === 'boss' || best.rank === 'hiddenBoss');
+    // 불씨가 날아가 옮겨붙는 줄
+    const g = this.run.add.graphics().setDepth(5);
+    g.lineStyle(1, hexColor(this.run.ctx.data.juice.status.burnColors[1]!), 1).lineBetween(dead.sprite.x, dead.sprite.y, best.sprite.x, best.sprite.y);
+    this.run.tweens.add({ targets: g, alpha: 0, duration: 250, onComplete: () => g.destroy() });
   }
 
   /** 태그별 피해 증가: 아이템 + 들고 있는 무기 */

@@ -194,6 +194,8 @@ export class ItemRuntime {
   private shield: { id: string; e: Extract<ItemEffect, { kind: 'shieldThrow' }> } | null = null;
   /** 날아가는 방패 수 */
   private shieldsOut = 0;
+  /** 넘치는 은총(마스터 G 조각상): 넘친 회복으로 쌓인 보호막 */
+  private overShield = 0;
   /** 식광의 핵: 따라다니는 핵과 흡수 범위 표시 */
   private core: Phaser.GameObjects.Arc | null = null;
   private coreRing: Phaser.GameObjects.Arc | null = null;
@@ -291,6 +293,20 @@ export class ItemRuntime {
     for (const { e } of this.each('ultimateBurst')) {
       for (let i = 0; i < e.shots; i++) this.host.fireBullet(from, (i * Math.PI * 2) / e.shots, e.speed, e.range, e.damage, e.tags, 99);
     }
+  }
+
+  /** 회복이 최대 체력을 넘친 양 (넘치는 은총이 있으면 보호막으로 쌓는다) */
+  overheal(over: number): void {
+    const e = this.first('overhealShield');
+    if (!e || over <= 0) return;
+    this.overShield = Math.min(this.host.player().maxHp * e.capPct, this.overShield + over);
+  }
+
+  /** 받을 피해를 넘치는 은총 보호막이 먼저 막는다. 남은 피해 */
+  absorbOverheal(amount: number): number {
+    const used = Math.min(this.overShield, amount);
+    this.overShield -= used;
+    return amount - used;
   }
 
   /** 방패가 날아가는 동안 받는 피해 감소 */
@@ -393,6 +409,7 @@ export class ItemRuntime {
         if (!this.throwShield()) continue;
       } else if (e.kind === 'regen') {
         const pl = this.host.player();
+        this.overheal(pl.hp + e.value - pl.maxHp);
         pl.hp = Math.min(pl.maxHp, pl.hp + e.value);
       } else if (!this.gravityShot(e)) {
         continue;
@@ -613,6 +630,9 @@ export class ItemRuntime {
       const s = this.state(id);
       const base = { id: `item.${id}`, label: t(`item.${id}.buff`), color: color(id) };
       out.push(this.shieldsOut > 0 ? base : { ...base, cdSec: Math.max(0, e.everySec - s.timer), cdTotalSec: e.everySec });
+    }
+    for (const { id } of this.each('overhealShield')) {
+      if (this.overShield >= 1) out.push({ id: `item.${id}`, label: t(`item.${id}.buff`), color: color(id), count: Math.floor(this.overShield) });
     }
     for (const { id, e } of this.each('tempRoar')) {
       const s = this.state(id);

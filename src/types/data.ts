@@ -8,7 +8,7 @@
 /** [min, max] 정수 범위 (양끝 포함) */
 export type IntRange = readonly [number, number];
 
-/** 기획서 태그 표의 11종 (표 제목은 12종이지만 나열된 것은 11개) */
+/** 기획서 태그 표의 11종 + 화상(사용자 추가, 2026-11-10) */
 export const TAG_IDS = [
   'physical',
   'magic',
@@ -21,6 +21,7 @@ export const TAG_IDS = [
   'buff',
   'space',
   'bleed',
+  'burn',
 ] as const;
 export type TagId = (typeof TAG_IDS)[number];
 
@@ -66,11 +67,19 @@ export interface BleedRule {
   refreshOnReapply: boolean;
 }
 
+/** 화상: 지속시간 없이 죽을 때까지 탄다. 중첩 상한은 일반·보스 따로 */
+export interface BurnRule {
+  kind: 'burn';
+  tickIntervalSec: number;
+  maxStacks: number;
+  bossMaxStacks: number;
+}
+
 export interface NoScaling {
   kind: 'none';
 }
 
-export type TagRule = ChanceRule | SpaceRule | BleedRule | NoScaling;
+export type TagRule = ChanceRule | SpaceRule | BleedRule | BurnRule | NoScaling;
 
 /** 피해 계산에서 태그가 속하는 단계 */
 export type TagDamageGroup =
@@ -783,6 +792,8 @@ export interface WavesData {
 export type DodgeSchoolDef = { nameKey: string; descKey: string } & (
   | { kind: 'blink'; distancePx: number; invulnSec: number; stepPx: number; boltColor: string; boltSec: number; boltSegments: number; boltAmpPx: number }
   | { kind: 'leap'; distancePx: number; stepPx: number; airSec: number; heightPx: number; invulnSec: number; landRadius: number; landDamage: number; landKnockbackPx: number; tags: TagId[]; color: string }
+  /** 방패 돌격(성기사): 더 멀리·오래 돌진, 무적 대신 받는 피해 감소, 닿은 적을 밀친다 */
+  | { kind: 'charge'; speed: number; durationSec: number; damageReduction: number; hitRadius: number; knockbackPx: number; knockbackSec: number; color: string }
   | { kind: 'shot'; shots: number; spreadDeg: number; damage: number; projectileSpeed: number; range: number; tags: TagId[]; tint: string }
 );
 
@@ -1185,6 +1196,14 @@ export type ItemEffect =
   /** 궁극기를 쓸 때 관통 탄환 shots발 전방위 (고대병기의 코어) */
   /** 근접 공격이 맞으면 chance 확률로 출혈 (중첩당 틱 피해 damage). 신성한 이코르 */
   | { kind: 'meleeBleed'; chance: number; damage: number; stacks: number }
+  /** 근접 공격이 맞으면 chance 확률로 화상 (중첩당 틱 피해 damage). 새벽불길 */
+  | { kind: 'meleeBurn'; chance: number; damage: number; stacks: number }
+  /** 화상 걸린 적이 죽으면 그 중첩이 radius 안의 가장 가까운 적에게 옮겨붙는다. 새벽불길 */
+  | { kind: 'burnSpread'; radius: number }
+  /** 체력이 threshold 비율 이하인 적에게 피해 +value. 선혈기수 */
+  | { kind: 'lowHpEnemyDamage'; threshold: number; value: number }
+  /** 체력이 가득 찬 뒤 넘친 회복량이 보호막이 된다 (최대 체력 × capPct까지). 마스터 G 조각상 */
+  | { kind: 'overhealShield'; capPct: number }
   /** 체력이 threshold 아래로 떨어지면 durationSec 동안 받는 피해 −reduction, 재사용 cooldownSec. 시리우스의 갑주 */
   | { kind: 'lowHpGuard'; threshold: number; reduction: number; durationSec: number; cooldownSec: number }
   | { kind: 'ultimateBurst'; shots: number; damage: number; speed: number; range: number; tags: TagId[] };
@@ -1563,6 +1582,12 @@ export interface JuiceData {
   /** 함성 버프(스킬·아이템) 동안 몸에서 피어오르는 불씨와 발밑 고리. itemShoutWidth: 아이템 함성이 걸릴 때 함성 그림 폭 */
   roarAura: { color: string; everySec: number; lifeSec: number; risePx: number; spreadPx: number; size: number; ringRadius: number; ringAlpha: number; pulseSec: number; itemShoutWidth: number };
   playerDeath: { sec: number; zoom: number; flashMs: number; tint: string; shards: number };
+  /** 상태이상 겉모습: 화상(주황 물듦·머리 위 불 문양·불씨), 석화(회색·금·깨지는 파편), 처형(X표시) */
+  status: {
+    burnTint: string; burnColors: string[]; burnEmberEverySec: number; burnEmberLifeSec: number; burnEmberRisePx: number; burnMarkGapPx: number;
+    petrifyTint: string; petrifyColors: string[]; petrifyCrackSec: number; shatterShards: number; shatterSpeed: [number, number]; shatterLifeSec: number;
+    executeColor: string; executeSec: number; executeSize: number;
+  };
   death: { shards: IntRange; eliteShards: IntRange; shardSpeed: [number, number]; shardLifeSec: number; shardSize: number; flashSec: number; orbPopPx: [number, number]; orbPopSec: number };
   /** 플레이어 피격: 화면 가장자리 붉은 번쩍임, 낮은 체력 맥박 */
   playerHurt: { flashSec: number; flashAlpha: number; lowHpRatio: number; pulseSec: number; pulseAlpha: number; color: string; edgePx: number };

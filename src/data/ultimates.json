@@ -271,8 +271,19 @@
       "sources": { "judgment": ["physical", "ranged"] },
       "school": "paladin",
       "values": { "shieldPct": 0.65, "shieldSec": 8, "impactDelaySec": 0.9, "damage": 220, "radius": 108, "bossMaxHpPct": 0.02 },
+      "awakening": {
+        "requiredItem": "sarvisShield",
+        "nameKey": "ultimate.divineJudgment.awakened",
+        "shortKey": "ultimate.divineJudgment.awakened.short",
+        "descKey": "ultimate.divineJudgment.awakened.desc",
+        "tags": ["physical", "ranged", "buff"],
+        "values": { "radius": 124, "buffSec": 8, "buffDamage": 0.25, "buffCooldownRate": 0.5, "petrifySec": 3, "bossPetrifySec": 0.5 }
+      },
       "color": "#e8d24a",
       "sprites": {
+        "medusaA": { "spriteKey": "ult_judgment_medusaA", "color": "#c8a050", "size": 64 },
+        "impactA": { "spriteKey": "ult_judgment_impactA", "color": "#e8d24a", "size": 64 },
+        "buffA": { "spriteKey": "ult_judgment_buffA", "color": "#e8402a", "size": 32 },
         "sword": { "spriteKey": "ult_judgment_sword", "color": "#e8d24a", "size": 64 },
         "impact": { "spriteKey": "ult_judgment_impact", "color": "#e8d24a", "size": 64 },
         "shield": { "spriteKey": "ult_judgment_shield", "color": "#e8d24a", "size": 32 }

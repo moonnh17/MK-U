@@ -19,6 +19,8 @@ export const PORTRAIT_SIZE = { w: 48, h: 64 };
 export const artKeys = {
   skillIcon: (skillId: string) => `icon_skill_${skillId}`,
   ultimateIcon: (ultimateId: string) => `icon_ult_${ultimateId}`,
+  /** 각성 아이콘: 기본 아이콘 키 + A. 그림이 없으면(has false) 기본 아이콘 */
+  awakenedIcon: (baseKey: string, has: (key: string) => boolean) => (has(`${baseKey}A`) ? `${baseKey}A` : baseKey),
   geminiIcon: 'icon_gemini',
   geminiPortrait: 'portrait_gemini',
   /** 챕터별 방 타일: 바닥·복도 바닥·벽 */
@@ -153,6 +155,9 @@ export function collectAssets(d: GameData): AssetRef[] {
   // 화면 아이콘: 스킬·궁극기·제미니 (HUD 칸·카드·인벤토리·컷씬)
   for (const s of d.skills.skills) add('icon', { spriteKey: artKeys.skillIcon(s.id), color: s.color, size: ICON_SIZE }, s.nameKey);
   for (const u of d.ultimates.ultimates) add('icon', { spriteKey: artKeys.ultimateIcon(u.id), color: u.color, size: ICON_SIZE }, u.nameKey);
+  // 각성 아이콘 (없으면 기본 아이콘을 쓴다)
+  for (const s of d.skills.skills) if (s.awakening) add('icon', { spriteKey: `${artKeys.skillIcon(s.id)}A`, color: s.color, size: ICON_SIZE }, s.awakening.nameKey);
+  for (const u of d.ultimates.ultimates) if (u.awakening) add('icon', { spriteKey: `${artKeys.ultimateIcon(u.id)}A`, color: u.color, size: ICON_SIZE }, u.awakening.nameKey);
   add('icon', { spriteKey: artKeys.geminiIcon, color: d.gemini.color, size: ICON_SIZE }, 'gemini.name', '#icon');
   add('icon', { spriteKey: artKeys.geminiPortrait, color: d.gemini.color, size: PORTRAIT_SIZE.w, height: PORTRAIT_SIZE.h }, 'gemini.name', '#portrait');
   // 방 타일 (한 타일 크기, 반복해서 깐다)

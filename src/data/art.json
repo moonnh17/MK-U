@@ -7433,6 +7433,210 @@
       "frameHeight": 76,
       "frames": 30,
       "density": 2
+    },
+    "skill_pShield_shieldA": {
+      "file": "mku/skill_pShield_shieldA.png",
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 16,
+          "loop": true
+        }
+      }
+    },
+    "skill_pOath_oathA": {
+      "file": "mku/skill_pOath_oathA.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "skill_pAura_auraA": {
+      "file": "mku/skill_pAura_auraA.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "skill_pPrayer_prayerA": {
+      "file": "mku/skill_pPrayer_prayerA.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_pSwords_swordA": {
+      "file": "mku/skill_pSwords_swordA.png",
+      "frameWidth": 100,
+      "frameHeight": 100,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "skill_pSwords_pegasusA": {
+      "file": "mku/skill_pSwords_pegasusA.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "skill_pSmite_smiteA": {
+      "file": "mku/skill_pSmite_smiteA.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "ult_judgment_medusaA": {
+      "file": "mku/ult_judgment_medusaA.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 8,
+          "loop": false
+        }
+      }
+    },
+    "ult_judgment_impactA": {
+      "file": "mku/ult_judgment_impactA.png",
+      "frameWidth": 140,
+      "frameHeight": 140,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "ult_judgment_buffA": {
+      "file": "mku/ult_judgment_buffA.png",
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "frames": 6,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 5,
+          "fps": 10,
+          "loop": true
+        }
+      }
+    },
+    "item_hermes_herald": {
+      "file": "mku/item_hermes_herald.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_phantom_feather": {
+      "file": "mku/item_phantom_feather.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_holyBulwarkA": {
+      "file": "mku/icon_skill_holyBulwarkA.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_oathOfRetributionA": {
+      "file": "mku/icon_skill_oathOfRetributionA.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_sanctuaryAuraA": {
+      "file": "mku/icon_skill_sanctuaryAuraA.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_prayerOfRevivalA": {
+      "file": "mku/icon_skill_prayerOfRevivalA.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_holySwordsA": {
+      "file": "mku/icon_skill_holySwordsA.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_smiteA": {
+      "file": "mku/icon_skill_smiteA.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_ult_divineJudgmentA": {
+      "file": "mku/icon_ult_divineJudgmentA.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
     }
   }
 }

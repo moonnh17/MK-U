@@ -1346,8 +1346,17 @@
         { "cooldownSec": 9.9, "values": { "damage": 23, "bounces": 5, "guard": 0.12, "speed": 195, "range": 156, "maxSec": 4 } },
         { "cooldownSec": 9, "values": { "damage": 36, "bounces": 7, "guard": 0.22, "speed": 195, "range": 156, "maxSec": 4 } }
       ],
+      "awakening": {
+        "nameKey": "skill.holyBulwark.awakened",
+        "descKey": "skill.holyBulwark.awakened.desc",
+        "requiredItem": "hermesHerald",
+        "tags": ["physical", "ranged"],
+        "cooldownSec": 8,
+        "values": { "damage": 48, "bounces": 8, "speed": 250, "sweepRadius": 30, "sweepDamage": 36, "sweepSec": 0.45 }
+      },
       "color": "#e8d24a",
       "sprites": {
+        "shieldA": { "spriteKey": "skill_pShield_shieldA", "color": "#e8d24a", "size": 20 },
         "shield1": { "spriteKey": "skill_pShield_shield1", "color": "#e8d24a", "size": 14 },
         "shield2": { "spriteKey": "skill_pShield_shield2", "color": "#e8d24a", "size": 14 },
         "shield3": { "spriteKey": "skill_pShield_shield3", "color": "#e8d24a", "size": 14 }
@@ -1368,8 +1377,17 @@
         { "cooldownSec": 13, "values": { "damageReduction": 0.16, "counterDamage": 40, "counterRadius": 68, "durationSec": 6, "counterGapSec": 0.3 } },
         { "cooldownSec": 12, "values": { "damageReduction": 0.25, "counterDamage": 68, "counterRadius": 90, "durationSec": 6, "counterGapSec": 0.3 } }
       ],
+      "awakening": {
+        "nameKey": "skill.oathOfRetribution.awakened",
+        "descKey": "skill.oathOfRetribution.awakened.desc",
+        "requiredItem": "wonhonLump",
+        "tags": ["physical", "buff"],
+        "cooldownSec": 11,
+        "values": { "counterDamage": 110, "counterRadius": 108, "knockbackPx": 42 }
+      },
       "color": "#e8d24a",
       "sprites": {
+        "oathA": { "spriteKey": "skill_pOath_oathA", "color": "#e8d24a", "size": 48 },
         "oath1": { "spriteKey": "skill_pOath_oath1", "color": "#e8d24a", "size": 48 },
         "oath2": { "spriteKey": "skill_pOath_oath2", "color": "#e8d24a", "size": 48 },
         "oath3": { "spriteKey": "skill_pOath_oath3", "color": "#e8d24a", "size": 48 }
@@ -1384,14 +1402,23 @@
       "shortKey": "skill.sanctuaryAura.short",
       "descKey": "skill.sanctuaryAura.desc",
       "tags": ["physical", "buff"],
-      "sources": { "pulse": ["physical", "melee"] },
+      "sources": { "pulse": ["physical", "melee"], "burn": ["physical", "burn"] },
       "levels": [
         { "cooldownSec": 14, "values": { "damage": 7, "radius": 51, "intervalSec": 0.5, "lowHpReduction": 0.12, "durationSec": 6 } },
         { "cooldownSec": 13, "values": { "damage": 12.5, "radius": 65, "intervalSec": 0.5, "lowHpReduction": 0.2, "durationSec": 7 } },
         { "cooldownSec": 12, "values": { "damage": 20, "radius": 78, "intervalSec": 0.5, "lowHpReduction": 0.35, "durationSec": 8 } }
       ],
+      "awakening": {
+        "nameKey": "skill.sanctuaryAura.awakened",
+        "descKey": "skill.sanctuaryAura.awakened.desc",
+        "requiredItem": "dawnFlame",
+        "tags": ["physical", "buff", "burn"],
+        "cooldownSec": 12,
+        "values": { "radius": 100, "burnDamage": 4, "burnStacks": 1 }
+      },
       "color": "#e8d24a",
       "sprites": {
+        "auraA": { "spriteKey": "skill_pAura_auraA", "color": "#e8d24a", "size": 48 },
         "aura1": { "spriteKey": "skill_pAura_aura1", "color": "#e8d24a", "size": 48 },
         "aura2": { "spriteKey": "skill_pAura_aura2", "color": "#e8d24a", "size": 48 },
         "aura3": { "spriteKey": "skill_pAura_aura3", "color": "#e8d24a", "size": 48 }
@@ -1412,8 +1439,17 @@
         { "cooldownSec": 7, "values": { "damage": 58, "bossBonus": 0.85, "length": 216, "halfWidth": 5 } },
         { "cooldownSec": 6, "values": { "damage": 90, "bossBonus": 1.3, "length": 270, "halfWidth": 7 } }
       ],
+      "awakening": {
+        "nameKey": "skill.smite.awakened",
+        "descKey": "skill.smite.awakened.desc",
+        "requiredItem": "bloodRider",
+        "tags": ["physical", "ranged"],
+        "cooldownSec": 6,
+        "values": { "damage": 100, "bossBonus": 2, "executePct": 0.2, "waveSize": 56 }
+      },
       "color": "#e8d24a",
       "sprites": {
+        "smiteA": { "spriteKey": "skill_pSmite_smiteA", "color": "#ff5a2a", "size": 30 },
         "smite1": { "spriteKey": "skill_pSmite_smite1", "color": "#e8d24a", "size": 30 },
         "smite2": { "spriteKey": "skill_pSmite_smite2", "color": "#e8d24a", "size": 30 },
         "smite3": { "spriteKey": "skill_pSmite_smite3", "color": "#e8d24a", "size": 30 }
@@ -1434,8 +1470,18 @@
         { "cooldownSec": 9.7, "values": { "damage": 40, "count": 3, "range": 168, "radius": 24, "fallDelaySec": 0.4 } },
         { "cooldownSec": 8.6, "values": { "damage": 62, "count": 5, "range": 195, "radius": 33, "fallDelaySec": 0.4 } }
       ],
+      "awakening": {
+        "nameKey": "skill.holySwords.awakened",
+        "descKey": "skill.holySwords.awakened.desc",
+        "requiredItem": "phantomFeather",
+        "tags": ["physical", "ranged"],
+        "cooldownSec": 8,
+        "values": { "damage": 62, "count": 8, "range": 210, "radius": 30, "fallDelaySec": 0.3, "gapPx": 26, "stepSec": 0.08 }
+      },
       "color": "#e8d24a",
       "sprites": {
+        "swordA": { "spriteKey": "skill_pSwords_swordA", "color": "#e8d24a", "size": 24 },
+        "pegasusA": { "spriteKey": "skill_pSwords_pegasusA", "color": "#f0f0ff", "size": 40 },
         "sword1": { "spriteKey": "skill_pSwords_sword1", "color": "#e8d24a", "size": 24 },
         "sword2": { "spriteKey": "skill_pSwords_sword2", "color": "#e8d24a", "size": 24 },
         "sword3": { "spriteKey": "skill_pSwords_sword3", "color": "#e8d24a", "size": 24 }
@@ -1450,14 +1496,23 @@
       "shortKey": "skill.prayerOfRevival.short",
       "descKey": "skill.prayerOfRevival.desc",
       "tags": ["buff"],
-      "sources": {},
+      "sources": { "rain": ["physical"] },
       "levels": [
         { "cooldownSec": 0, "values": { "everySec": 14, "healPct": 0.07, "healFlat": 4, "guard": 0.12, "guardSec": 2 } },
         { "cooldownSec": 0, "values": { "everySec": 12, "healPct": 0.1, "healFlat": 8, "guard": 0.18, "guardSec": 2.5 } },
         { "cooldownSec": 0, "values": { "everySec": 10, "healPct": 0.15, "healFlat": 14, "guard": 0.28, "guardSec": 4 } }
       ],
+      "awakening": {
+        "nameKey": "skill.prayerOfRevival.awakened",
+        "descKey": "skill.prayerOfRevival.awakened.desc",
+        "requiredItem": "masterGStatue",
+        "tags": ["buff", "physical"],
+        "cooldownSec": 0,
+        "values": { "healPct": 0.2, "healFlat": 18, "rainRadius": 70, "rainDamage": 14, "rainTicks": 4, "rainTickSec": 0.3 }
+      },
       "color": "#e8d24a",
       "sprites": {
+        "prayerA": { "spriteKey": "skill_pPrayer_prayerA", "color": "#e02a2a", "size": 32 },
         "prayer1": { "spriteKey": "skill_pPrayer_prayer1", "color": "#e8d24a", "size": 32 },
         "prayer2": { "spriteKey": "skill_pPrayer_prayer2", "color": "#e8d24a", "size": 32 },
         "prayer3": { "spriteKey": "skill_pPrayer_prayer3", "color": "#e8d24a", "size": 32 }

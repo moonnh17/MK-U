@@ -9,7 +9,8 @@ import { spawnRise } from '../systems/juice';
 import type { CorruptionState } from '../systems/acro';
 import { effectiveRank, eliteMods, type EliteMods } from '../systems/elites';
 import { aimLocked, burstAngle, chainWindup, forceWindup, initialAi, keepDistanceStep, rootAngle, stepAi, type AiEvent, type AiState } from '../systems/enemyAi';
-import type { BleedState } from '../systems/tags';
+import type { BleedState, BurnState } from '../systems/tags';
+import { BurnLook, petrifyCrack, shatter } from './statusLook';
 import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank, SpriteRef } from '../types/data';
 import { Beams, DelayedBlast, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
 import { animateArt, fitArt } from './art';
@@ -77,6 +78,13 @@ export class Enemy {
   converted = false;
   /** 걸려 있는 출혈 */
   bleed: BleedState | null = null;
+  /** 걸려 있는 화상 (죽을 때까지) */
+  private burnState: BurnState | null = null;
+  private burnLook: BurnLook | null = null;
+  /** 석화 남은 시간(초): 움직이지도 공격하지도 않는다 */
+  petrifyLeft = 0;
+  /** 석화 동안 몸을 회색 돌로 바꾸는 색 행렬 (WebGL에서만) */
+  private stoneFx: ReturnType<NonNullable<Phaser.GameObjects.Sprite['preFX']>['addColorMatrix']> | null = null;
   /** 걸려 있는 마기 변질 */
   corruption: CorruptionState | null = null;
   readonly mods: EliteMods;
@@ -225,8 +233,68 @@ export class Enemy {
     this.onEvent({ type: 'windup', attackId }, host, { x: (p.x - this.sprite.x) / d, y: (p.y - this.sprite.y) / d }, d, false);
   }
 
+  get burn(): BurnState | null {
+    return this.burnState;
+  }
+
+  set burn(s: BurnState | null) {
+    const was = !!this.burnState;
+    this.burnState = s;
+    if (!!s === was || this.dead) return;
+    if (s) this.burnLook = new BurnLook(this.scene);
+    else {
+      this.burnLook?.destroy();
+      this.burnLook = null;
+    }
+    this.restoreTint();
+  }
+
+  get petrified(): boolean {
+    return this.petrifyLeft > 0;
+  }
+
+  /** 석화: sec 동안 굳는다 (다시 걸면 긴 쪽) */
+  petrify(sec: number): void {
+    if (this.dead || sec <= 0) return;
+    if (!this.petrified) petrifyCrack(this.scene, this.sprite.x, this.sprite.y, this.radius);
+    this.petrifyLeft = Math.max(this.petrifyLeft, sec);
+    this.sprite.setVelocity(0, 0);
+    this.sprite.anims.pause();
+    if (!this.stoneFx) {
+      this.stoneFx = this.sprite.preFX?.addColorMatrix() ?? null;
+      this.stoneFx?.grayscale(1).brightness(1.25, true);
+    }
+    this.restoreTint();
+  }
+
+  /** 피격 번쩍임·기절이 끝난 뒤 돌아갈 색: 석화 > 기절 > 화상 > 원래 색 */
+  restoreTint(): void {
+    if (!this.sprite.active) return;
+    const st = getContext().data.juice.status;
+    if (this.petrified) this.sprite.setTint(hexColor(st.petrifyTint));
+    else if (this.stunLeft > 0 && this.def.ai !== 'boss') this.sprite.setTint(0x8888ff);
+    else if (this.burnState) this.sprite.setTint(hexColor(st.burnTint));
+    else this.sprite.clearTint();
+  }
+
   update(dt: number, host: EnemyHost): void {
     if (this.dead) return;
+    if (this.burnLook) this.burnLook.update(dt, this.sprite.x, this.sprite.y - this.radius - (this.icon ? 8 : 2));
+    if (this.petrifyLeft > 0) {
+      this.petrifyLeft -= dt;
+      this.updateLook(dt);
+      this.sprite.setVelocity(0, 0);
+      if (this.petrifyLeft <= 0) {
+        this.petrifyLeft = 0;
+        shatter(this.scene, this.sprite.x, this.sprite.y, this.radius);
+        this.sprite.anims.resume();
+        // Phaser 타입 선언에서 FX.ColorMatrix가 Controller를 잇지 않아 맞춘다 (실제로는 Controller)
+        if (this.stoneFx) this.sprite.preFX?.remove(this.stoneFx as unknown as Phaser.FX.Controller);
+        this.stoneFx = null;
+        this.restoreTint();
+      }
+      return;
+    }
     // 지난 프레임 움직임으로 idle·move 애니메이션·좌우 반전
     const data = getContext().data;
     this.animate(data);
@@ -279,7 +347,7 @@ export class Enemy {
     if (this.stunLeft > 0) {
       this.stunLeft -= dt;
       this.sprite.setVelocity(0, 0);
-      if (this.stunLeft <= 0) this.sprite.clearTint();
+      if (this.stunLeft <= 0) this.restoreTint();
       return;
     }
     // 집행자: 끌어당긴 플레이어에게 도끼가 떨어질 때까지 제자리
@@ -670,7 +738,7 @@ export class Enemy {
   }
 
   knockback(dir: Vec2, distance: number, sec: number): void {
-    if (this.dead || this.knockbackImmune || sec <= 0) return;
+    if (this.dead || this.knockbackImmune || this.petrified || sec <= 0) return;
     this.kbLeft = sec;
     this.kbVel = { x: (dir.x * distance) / sec, y: (dir.y * distance) / sec };
   }
@@ -750,9 +818,11 @@ export class Enemy {
     if (this.dead) return false;
     this.hp -= amount;
     this.sprite.setTintFill(0xffffff);
-    this.sprite.scene.time.delayedCall(50, () => this.sprite.active && this.sprite.clearTint());
+    this.sprite.scene.time.delayedCall(50, () => this.restoreTint());
     if (this.hp <= 0) {
       this.dead = true;
+      this.burnLook?.destroy();
+      this.burnLook = null;
       return true;
     }
     return false;
@@ -764,6 +834,8 @@ export class Enemy {
     this.clearSpawn();
     this.halo?.destroy();
     this.icon?.destroy();
+    this.burnLook?.destroy();
+    this.burnLook = null;
     for (const r of this.rim) r.img.destroy();
     this.sprite.destroy();
   }

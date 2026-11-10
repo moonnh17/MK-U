@@ -276,5 +276,22 @@
     "flashMs": 140,
     "tint": "#ff3a3a",
     "shards": 22
+  },
+  "status": {
+    "burnTint": "#ff9a4a",
+    "burnColors": ["#ffd23f", "#ff8a1e", "#e0401e"],
+    "burnEmberEverySec": 0.12,
+    "burnEmberLifeSec": 0.5,
+    "burnEmberRisePx": 12,
+    "burnMarkGapPx": 4,
+    "petrifyTint": "#d8d4c8",
+    "petrifyColors": ["#d8d8d0", "#9a9a92", "#5a5a56"],
+    "petrifyCrackSec": 0.25,
+    "shatterShards": 14,
+    "shatterSpeed": [40, 110],
+    "shatterLifeSec": 0.55,
+    "executeColor": "#ff2a2a",
+    "executeSec": 0.7,
+    "executeSize": 9
   }
 }

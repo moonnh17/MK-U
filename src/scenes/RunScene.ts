@@ -56,10 +56,10 @@ import { absorbHit } from '../systems/shield';
 import { corruptedDamage, tickCorruption } from '../systems/acro';
 import { hpStance, takeDamage } from '../systems/vitals';
 import { masteryTotals, tickCooldowns } from '../systems/skills';
-import { tickBleed } from '../systems/tags';
+import { tickBleed, tickBurn } from '../systems/tags';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
-import type { BleedRule, SpriteRef, TagId, WeaponDef } from '../types/data';
+import type { BleedRule, BurnRule, SpriteRef, TagId, WeaponDef } from '../types/data';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -618,7 +618,8 @@ export class RunScene extends Phaser.Scene {
       if (e.def.absorb && this.enemyRoom.get(e) !== this.session.currentRoomId) e.resetAbsorb();
       e.update(dt, this.enemyHost);
     }
-    for (const b of this.bossControllers.values()) b.update(dt, this.bossHost);
+    // 석화된 보스는 잠깐 패턴이 멈춘다
+    for (const [e, b] of this.bossControllers) if (!e.petrified) b.update(dt, this.bossHost);
     this.condition.updateBossEnergy();
     for (const h of [...this.hazards]) {
       if (h.update(dt, this.enemyHost)) continue;
@@ -1129,6 +1130,13 @@ export class RunScene extends Phaser.Scene {
       e.bleed = out.state;
       if (out.damage > 0) this.combat.applyDamage(e, corruptedDamage(out.damage, e.corruption));
     }
+    const burnRule = this.tagRule<BurnRule>('burn');
+    for (const e of [...this.enemies]) {
+      if (!e.burn || e.dead) continue;
+      const out = tickBurn(e.burn, dt, burnRule);
+      e.burn = out.state;
+      if (out.damage > 0) this.combat.applyDamage(e, corruptedDamage(out.damage, e.corruption));
+    }
   }
 
   onContact(enemy: Enemy | undefined): void {
@@ -1168,7 +1176,7 @@ export class RunScene extends Phaser.Scene {
     }
     const p = this.session.player;
     const stance = this.itemRt.first('hpStance');
-    const taken = this.skillRt.absorb(amount * (1 - this.skillRt.playerMods().damageReduction) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard()) * (stance ? 1 - hpStance(p.hp, p.maxHp, stance).taken : 1));
+    const taken = this.itemRt.absorbOverheal(this.skillRt.absorb(amount * (1 - this.skillRt.playerMods().damageReduction) * (1 - this.condition.chargeGuard()) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard()) * (stance ? 1 - hpStance(p.hp, p.maxHp, stance).taken : 1)));
     // 정신 피해: 패닉 중이면 체력 피해로 바뀐다
     const mental = (mentalRaw ?? amount * (attacker?.def.mentalRatio ?? 0)) ;
     const m = applyMental(p, mental);

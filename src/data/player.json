@@ -43,6 +43,18 @@
         "tags": ["physical", "melee"],
         "color": "#e07a2a"
       },
+      "paladin": {
+        "kind": "charge",
+        "nameKey": "dodge.paladin",
+        "descKey": "dodge.paladin.desc",
+        "speed": 250,
+        "durationSec": 0.34,
+        "damageReduction": 0.5,
+        "hitRadius": 12,
+        "knockbackPx": 26,
+        "knockbackSec": 0.14,
+        "color": "#ffd86a"
+      },
       "acro": {
         "kind": "shot",
         "nameKey": "dodge.acro",

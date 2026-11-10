@@ -45,6 +45,8 @@ export interface SkillHost {
   noGreatFailure(): boolean;
   /** 출혈을 건다. base는 중첩 1개당 틱 피해(태그 보정 전), tags는 출혈 공격 source의 태그 */
   bleed(enemy: Enemy, base: number, stacks: number, tags: readonly TagId[]): void;
+  /** 화상을 건다 (죽을 때까지). base는 중첩 1개당 틱 피해(태그 보정 전) */
+  burn(enemy: Enemy, base: number, stacks: number, tags: readonly TagId[]): void;
   /** 탄 하나 (벽에 막히고, 사거리를 넘으면 사라진다) */
   fireBullet(from: Vec2, angle: number, speed: number, range: number, base: number, tags: readonly TagId[], sprite?: SpriteRef, extra?: { pierce?: number; hitSize?: number; tint?: string }): void;
   /** 장착한 액티브 스킬을 바로 쓴다 (쿨타임·대상이 맞을 때만, 알림 없음). 라스알게티의 기억 */

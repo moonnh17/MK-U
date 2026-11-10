@@ -3,13 +3,15 @@ import { gameData } from '../src/data/index';
 import { calcDamage, rangeMultiplier, spaceDamage } from '../src/systems/damage';
 import {
   applyBleed,
+  applyBurn,
   canAutoCast,
   skillTags,
   tagBadges,
   taggedChance,
   tickBleed,
+  tickBurn,
 } from '../src/systems/tags';
-import type { BleedRule, SpaceRule } from '../src/types/data';
+import type { BleedRule, BurnRule, SpaceRule } from '../src/types/data';
 
 const tags = gameData.tags;
 const rule = <T>(id: string) => tags.tags.find((t) => t.id === id)!.rule as T;
@@ -96,6 +98,27 @@ describe('출혈: 4초 / 1초 간격 / 최대 3중첩 / 재적용 시 갱신', (
     }
     expect(s).toBeNull();
     expect(total).toBeCloseTo(2 * 2 * 4);
+  });
+});
+
+describe('화상: 지속시간 없음 / 중첩 상한 (보스 따로)', () => {
+  const r = rule<BurnRule>('burn');
+  it('일반 적은 크게, 보스는 bossMaxStacks까지만 쌓인다', () => {
+    expect(applyBurn(applyBurn(null, 1, 30, r, false), 1, 30, r, false).stacks).toBe(Math.min(60, r.maxStacks));
+    expect(applyBurn(applyBurn(null, 1, 8, r, true), 1, 8, r, true).stacks).toBe(r.bossMaxStacks);
+  });
+  it('틱 피해는 센 쪽을 남긴다', () => {
+    expect(applyBurn(applyBurn(null, 3, 1, r, false), 1, 1, r, false).damagePerStack).toBe(3);
+  });
+  it('끝나지 않고 간격마다 중첩 × 피해', () => {
+    let s = applyBurn(null, 2, 3, r, false);
+    let total = 0;
+    for (let i = 0; i < 100; i++) {
+      const out = tickBurn(s, 0.1, r);
+      total += out.damage;
+      s = out.state;
+    }
+    expect(total).toBeCloseTo(2 * 3 * (10 / r.tickIntervalSec));
   });
 });
 

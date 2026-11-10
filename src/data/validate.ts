@@ -75,6 +75,11 @@ export function validateGameData(d: GameData): Errors {
         checkPositive(errors, `${w}.tickIntervalSec`, r.tickIntervalSec);
         checkPositive(errors, `${w}.maxStacks`, r.maxStacks);
         break;
+      case 'burn':
+        checkPositive(errors, `${w}.tickIntervalSec`, r.tickIntervalSec);
+        checkPositive(errors, `${w}.maxStacks`, r.maxStacks);
+        checkPositive(errors, `${w}.bossMaxStacks`, r.bossMaxStacks);
+        break;
       case 'none':
         break;
       default:

@@ -230,6 +230,8 @@ function actor(key, idle, move, fit, opts = {}) {
 
 // ---------- 플레이어 (마기학자 · 전직 후 헥타르 · 아크로): 리메이크 원본 scripts/art-src/players ----------
 Object.assign(sprites, require('./build-players.cjs').buildPlayers(out));
+// 성기사 각성 이펙트·아이콘: 원본 scripts/art-src/paladin-awakening
+Object.assign(sprites, require('./build-paladin-awakening.cjs').buildPaladinAwakening(out));
 // pixelfx 이펙트: scripts/art-src/pixelfx
 Object.assign(sprites, require('./build-pixelfx.cjs').buildPixelfx(out));
 

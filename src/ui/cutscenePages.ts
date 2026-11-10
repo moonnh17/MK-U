@@ -55,7 +55,7 @@ export function skillAwakeningCut(ctx: GameContext, skillId: string): Cutscene {
   const a = def.awakening!;
   return {
     id: `skill.${skillId}`,
-    cut: { kind: 'skillAwakening', icon: { label: t(def.shortKey), color: def.color, key: artKeys.skillIcon(def.id) }, flash: color },
+    cut: { kind: 'skillAwakening', icon: { label: t(def.shortKey), color: def.color, key: artKeys.awakenedIcon(artKeys.skillIcon(def.id), (k) => !!d.art.sprites[k]) }, flash: color },
     pages: [
       {
         title: `${t('cut.skillAwakening')} — ${t(def.nameKey)} → ${t(a.nameKey)}`,
@@ -78,7 +78,7 @@ export function ultimateAwakeningCut(ctx: GameContext, ult: UltimateDef): Cutsce
   const values = skillTextValues({ ...ult.values, ...a.values });
   return {
     id: `ultimate.${ult.id}`,
-    cut: { kind: 'ultimateAwakening', from: icons, to: { label: t(a.shortKey), color: ult.color, key: artKeys.ultimateIcon(ult.id) }, flash: ult.color },
+    cut: { kind: 'ultimateAwakening', from: icons, to: { label: t(a.shortKey), color: ult.color, key: artKeys.awakenedIcon(artKeys.ultimateIcon(ult.id), (k) => !!ctx.data.art.sprites[k]) }, flash: ult.color },
     pages: [
       {
         title: `${t('cut.ultimateAwakening')} — ${t(ult.nameKey)} → ${t(a.nameKey)}`,

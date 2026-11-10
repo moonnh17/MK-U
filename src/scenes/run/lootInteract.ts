@@ -437,6 +437,7 @@ export class LootInteract {
     this.potions = this.potions.filter((img) => {
       if (p.hp >= p.maxHp || Math.hypot(img.x - this.run.player.x, img.y - this.run.player.y) > v.pickupRadius) return true;
       const before = p.hp;
+      this.run.itemRt.overheal(p.hp + p.maxHp * v.healRatio - p.maxHp);
       p.hp = Math.min(p.maxHp, p.hp + p.maxHp * v.healRatio);
       sfx('heal');
       this.run.floatLabel({ x: this.run.player.x, y: this.run.player.y - 8 }, this.run.ctx.t('vending.heal', { n: Math.round(p.hp - before) }), '#7dff9a');

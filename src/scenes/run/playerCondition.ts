@@ -20,6 +20,8 @@ export class PlayerCondition {
   dodgeGhostIn = 0;
   dodgeBar: Phaser.GameObjects.Graphics | null = null;
   dodgeFxRng: Rng | null = null;
+  /** 방패 돌격 중: 설정과 이번 돌격에 밀친 적, 앞에 그리는 방패 빛 */
+  private charge: { s: Extract<DodgeSchoolDef, { kind: 'charge' }>; hit: Set<Enemy>; fx: Phaser.GameObjects.Graphics } | null = null;
   /** 도약 중 몸이 떠 있는 높이(px). 든 무기도 같이 뜬다 */
   leapLift = 0;
   panicFx: PanicFx | null = null;
@@ -47,12 +49,14 @@ export class PlayerCondition {
         const school = dodgeConfig(c, this.run.session.player.advancement).school;
         if (school?.kind === 'blink') this.blink(school, started.vel);
         else if (school?.kind === 'leap') this.leap(school, started.vel);
+        else if (school?.kind === 'charge') this.startCharge(school, started.vel);
         else {
           sfx('dash');
           if (school?.kind === 'shot') this.dodgeShot(school);
         }
       }
     }
+    this.updateCharge();
     this.run.session.dodgeView = { nameKey: dodgeConfig(c, this.run.session.player.advancement).nameKey, left: this.dodge.cooldown, total: this.dodgeCooldownSec() };
     if (this.dodge.left > 0) {
       this.dodgeGhostIn -= dt;
@@ -96,6 +100,54 @@ export class PlayerCondition {
     this.run.time.addEvent({ delay: (s.boltSec * 1000) / 4, repeat: 2, callback: draw });
     this.run.tweens.add({ targets: g, alpha: 0, delay: s.boltSec * 500, duration: s.boltSec * 500, onComplete: () => g.destroy() });
     this.run.cameras.main.flash(50, 150, 210, 255);
+  }
+
+  /** 방패 돌격 시작: 무적 없이 더 빠르고 길게 돈다 */
+  private startCharge(s: Extract<DodgeSchoolDef, { kind: 'charge' }>, dir: Vec2): void {
+    const len = Math.hypot(dir.x, dir.y) || 1;
+    this.dodge = { ...this.dodge, vel: { x: (dir.x / len) * s.speed, y: (dir.y / len) * s.speed }, left: s.durationSec, invuln: 0 };
+    this.charge?.fx.destroy();
+    this.charge = { s, hit: new Set(), fx: this.run.add.graphics().setDepth(5) };
+    sfx('dash');
+  }
+
+  /** 돌격 중 받는 피해 감소 */
+  chargeGuard(): number {
+    return this.charge && this.dodge.left > 0 ? this.charge.s.damageReduction : 0;
+  }
+
+  /** 돌격 중: 앞을 막는 방패 빛, 닿은 적 밀치기 */
+  private updateCharge(): void {
+    const c = this.charge;
+    if (!c) return;
+    if (this.dodge.left <= 0) {
+      c.fx.destroy();
+      this.charge = null;
+      return;
+    }
+    const p = this.run.player;
+    const v = this.dodge.vel;
+    const sp = Math.hypot(v.x, v.y) || 1;
+    const dir = { x: v.x / sp, y: v.y / sp };
+    const a = Math.atan2(dir.y, dir.x);
+    const col = hexColor(c.s.color);
+    const r = c.s.hitRadius;
+    c.fx.clear().lineStyle(3, col, 0.35).beginPath().arc(p.x, p.y, r, a - 0.9, a + 0.9).strokePath();
+    c.fx.lineStyle(1, 0xffffff, 0.9).beginPath().arc(p.x, p.y, r, a - 0.7, a + 0.7).strokePath();
+    for (const e of this.run.enemies) {
+      if (e.dead || c.hit.has(e)) continue;
+      const dx = e.sprite.x - p.x;
+      const dy = e.sprite.y - p.y;
+      if (Math.hypot(dx, dy) > r + e.radius) continue;
+      c.hit.add(e);
+      // 돌진 방향과 옆으로 비켜난 방향을 섞어 길을 연다
+      const d = Math.hypot(dx, dy) || 1;
+      const push = { x: dir.x + dx / d, y: dir.y + dy / d };
+      const pl = Math.hypot(push.x, push.y) || 1;
+      e.knockback({ x: push.x / pl, y: push.y / pl }, c.s.knockbackPx, c.s.knockbackSec);
+      e.squash();
+      sfx('hit', 10);
+    }
   }
 
   /** 플레이어 몸이 (x, y)에 서면 벽·문·소품에 걸리는지 */
