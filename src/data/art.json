@@ -4516,7 +4516,7 @@
       "file": "mku/enemy_hectar_chief.png",
       "frameWidth": 72,
       "frameHeight": 110,
-      "frames": 9,
+      "frames": 10,
       "density": 2,
       "anims": {
         "idle": {
@@ -4526,12 +4526,12 @@
         },
         "move": {
           "from": 3,
-          "to": 5,
+          "to": 6,
           "fps": 8
         },
         "cast": {
-          "from": 6,
-          "to": 8,
+          "from": 7,
+          "to": 9,
           "fps": 3,
           "loop": false
         }
