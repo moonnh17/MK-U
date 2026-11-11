@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 726개 · 그림 있음 693개
+전체 727개 · 그림 있음 694개
 
 ## player (6)
 
@@ -90,7 +90,7 @@
 | `fx_buff_aura` | 근접 이펙트 (fx) | 22×22 | center | #ffffff | mku/fx_buff_aura.png (8프레임) |
 | `fx_w_slash1` | 근접 이펙트 (slashTiers1) | 20×20 | center | #ffffff | mku/fx_w_slash1.png (12프레임) |
 | `fx_w_slash2` | 근접 이펙트 (slashTiers2) | 20×20 | center | #ffffff | mku/fx_w_slash2.png (12프레임) |
-| `fx_w_slash3` | 근접 이펙트 (slashTiers3) | 20×20 | center | #ffffff | mku/fx_w_slash3.png (12프레임) |
+| `fx_w_slash3` | 근접 이펙트 (slashTiers3) 외 1곳 | 20×20 | center | #ffffff | mku/fx_w_slash3.png (12프레임) |
 | `fx_w_slash4` | 근접 이펙트 (slashTiers4) 외 1곳 | 20×20 | center | #ffffff | mku/fx_w_slash4.png (12프레임) |
 | `fx_w_thrust1` | 근접 이펙트 (thrustTiers1) | 24×24 | center | #ffffff | mku/fx_w_thrust1.png (10프레임) |
 | `fx_w_thrust2` | 근접 이펙트 (thrustTiers2) | 24×24 | center | #ffffff | mku/fx_w_thrust2.png (10프레임) |
@@ -98,9 +98,9 @@
 | `fx_w_thrust4` | 근접 이펙트 (thrustTiers4) | 24×24 | center | #ffffff | mku/fx_w_thrust4.png (10프레임) |
 | `fx_w_smash1` | 근접 이펙트 (smashTiers1) | 20×20 | center | #ffffff | mku/fx_w_smash1.png (15프레임) |
 | `fx_w_smash2` | 근접 이펙트 (smashTiers2) | 20×20 | center | #ffffff | mku/fx_w_smash2.png (15프레임) |
-| `fx_w_smash3` | 근접 이펙트 (smashTiers3) | 20×20 | center | #ffffff | mku/fx_w_smash3.png (15프레임) |
+| `fx_w_smash3` | 근접 이펙트 (smashTiers3) 외 1곳 | 20×20 | center | #ffffff | mku/fx_w_smash3.png (15프레임) |
 | `fx_w_smash4` | 근접 이펙트 (smashTiers4) 외 1곳 | 20×20 | center | #ffffff | mku/fx_w_smash4.png (15프레임) |
-| `fx_w_beam3` | 근접 이펙트 (beamTiers1) | 12×12 | center | #ffffff | mku/fx_w_beam3.png (7프레임) |
+| `fx_w_beam3` | 근접 이펙트 (beamTiers1) 외 1곳 | 12×12 | center | #ffffff | mku/fx_w_beam3.png (7프레임) |
 | `fx_w_beam4` | 근접 이펙트 (beamTiers4) 외 1곳 | 12×12 | center | #ffffff | mku/fx_w_beam4.png (7프레임) |
 | `fx_w_bullet1` | 근접 이펙트 (bulletTiers1) | 4×4 | center | #ffffff | mku/fx_w_bullet1.png (4프레임) |
 | `fx_w_bullet2` | 근접 이펙트 (bulletTiers2) | 4×4 | center | #ffffff | mku/fx_w_bullet2.png (4프레임) |
@@ -254,7 +254,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (217)
+## skill (218)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -445,6 +445,7 @@
 | `skill_pPrayer_prayer3` | 회생의 기도 (prayer3) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer3.png (6프레임) |
 | `fx_first_law_core` | 열역학 제1법칙 (particle) | 8×8 | center | #ff9a3c | mku/fx_first_law_core.png (9프레임) |
 | `fx_first_law_blast` | 열역학 제1법칙 (blast) | 40×40 | center | #ff9a3c | mku/fx_first_law_blast.png (23프레임) |
+| `fx_bolt_strike` | 벼락 (skyBolt) | 60×60 | center | #9ac8ff | mku/fx_bolt_strike.png (34프레임) |
 | `ult_cut1` | 벼락 (cut1) | 20×20 | center | #6a9cff | mku/ult_cut1.png (1프레임) |
 | `ult_cut2` | 벼락 (cut2) | 20×20 | center | #6a9cff | mku/ult_cut2.png (1프레임) |
 | `ult_cut3` | 벼락 (cut3) | 20×20 | center | #6a9cff | mku/ult_cut3.png (1프레임) |

@@ -5,7 +5,8 @@
  * 각성 '케라우노스': 하늘에서 벼락이 내리꽂힘 → 그 자리를 지나 화면 전체가 사선으로 확 갈라짐(선 위 적 절단,
  * 보스는 최대 체력 비례) → 어긋난 양쪽이 서서히 미끄러져 돌아와 봉합된다.
  */
-import { playFx } from './skillFx';
+import { playFx, tintedFx } from './skillFx';
+import { animKey } from '../systems/art';
 import { bus } from '../core/events';
 import { riftTotalSec } from '../systems/spaceCut';
 import { shake } from '../entities/juice';
@@ -23,9 +24,6 @@ const CUT_STEP_MS = 70;
 const CUT_THICK = 3;
 /** 하늘 벼락이 시작하는 높이 (화면 위 끝보다 이만큼 위) */
 const BOLT_ABOVE_PX = 20;
-/** 하늘 벼락 꺾임 하나의 길이·흔들림 */
-const BOLT_STEP_PX = 14;
-const BOLT_JITTER_PX = 7;
 
 function isBoss(e: Enemy): boolean {
   return e.rank === 'boss' || e.rank === 'hiddenBoss';
@@ -95,7 +93,8 @@ function cut(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: nu
 }
 
 function area(host: SkillHost, u: UltimateCast, at: Vec2, radius: number, source: string, alpha = 0.4): void {
-  host.fx(host.scene.add.circle(at.x, at.y, radius, hexColor(u.def.color), alpha).setDepth(6), 0.2);
+  tintedFx(host.scene, host.ctx.data.juice.fx.hazardBlast, at.x, at.y, hexColor(u.def.color), { w: radius * 2.3, depth: 6 });
+  host.fx(host.scene.add.circle(at.x, at.y, radius, hexColor(u.def.color), alpha * 0.4).setDepth(6), 0.2);
   for (const e of [...host.enemies()]) {
     // 케라우노스: 보스에게는 절단선만 들어간다
     if (isBoss(e)) continue;
@@ -140,20 +139,25 @@ class Telegraph implements SkillObject {
   }
 }
 
-/** 하늘에서 target까지 지그재그 벼락 (몇 번 깜빡이며 사라진다) */
+/** 하늘 벼락 그림(pixelfx 번개)에서 땅에 닿는 자리와 벼락 꼭대기의 높이 (프레임 높이 비율) */
+const BOLT_FOOT = 228 / 264;
+const BOLT_TOP = 4 / 264;
+
+/** 하늘에서 target으로 내리꽂히는 픽셀 벼락: 화면 위 끝에서 target까지 닿게 키운다 */
 function skyBolt(host: SkillHost, u: UltimateCast, target: Vec2, sec: number): void {
   const top = host.scene.cameras.main.worldView.y - BOLT_ABOVE_PX;
-  const color = hexColor(u.def.color);
-  const draw = (g: Phaser.GameObjects.Graphics) => {
-    const n = Math.max(4, Math.ceil((target.y - top) / BOLT_STEP_PX));
-    const pts = Array.from({ length: n + 1 }, (_, i) => ({ x: target.x + (i === n ? 0 : host.rng.range(-BOLT_JITTER_PX, BOLT_JITTER_PX)), y: top + ((target.y - top) * i) / n }));
-    g.clear().lineStyle(5, color, 0.85).strokePoints(pts).lineStyle(2, 0xffffff, 1).strokePoints(pts);
-  };
-  const g = host.scene.add.graphics().setDepth(7);
-  draw(g);
-  // 두 번 다시 그려 번쩍이는 느낌
-  host.scene.time.delayedCall((sec * 1000) / 3, () => draw(g));
-  host.scene.tweens.add({ targets: g, alpha: 0, delay: (sec * 1000) / 2, duration: (sec * 1000) / 2, onComplete: () => g.destroy() });
+  const ref = u.def.sprites.skyBolt!;
+  const sp = host.scene.add.sprite(target.x, target.y, ref.spriteKey).setOrigin(0.5, BOLT_FOOT).setDepth(7);
+  const h = (target.y - top) / (BOLT_FOOT - BOLT_TOP);
+  sp.setDisplaySize((h * sp.width) / Math.max(1, sp.height), h);
+  const key = animKey(ref.spriteKey, 'play');
+  if (sp.scene.anims.exists(key)) {
+    sp.play(key);
+    // 벼락이 쪼개는 연출(sec) 안에 다 보이게 빠르게 돈다
+    const anim = sp.scene.anims.get(key);
+    sp.anims.timeScale = Math.max(1, anim.duration / 1000 / Math.max(0.1, sec * 2));
+    sp.once('animationcomplete', () => sp.destroy());
+  } else host.scene.tweens.add({ targets: sp, alpha: 0, duration: sec * 1000, onComplete: () => sp.destroy() });
 }
 
 /** 선 위(폭 width)의 적. 보스는 최대 체력 비례 */

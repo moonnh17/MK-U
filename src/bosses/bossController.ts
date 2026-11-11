@@ -44,13 +44,13 @@ const FREE_MINION = '';
 export class BossController {
   private brain: BossBrainState;
   private run: PatternRun | null = null;
-  private aura: Phaser.GameObjects.Arc | null = null;
+  private aura: Phaser.GameObjects.Sprite | null = null;
   private readonly body: BossBody;
   /** 자기 강화 */
   private buffLeft = 0;
   private buffDamage = 1;
   private buffSpeed = 1;
-  private buffFx: Phaser.GameObjects.Arc | Phaser.GameObjects.Sprite | null = null;
+  private buffFx: Phaser.GameObjects.Sprite | null = null;
   private minions: Minion[] = [];
   private rubble: { destroy(): void }[] = [];
   private host: BossHost | null = null;
@@ -187,10 +187,9 @@ export class BossController {
     else if (this.restrained) e.sprite.setVelocity(0, 0);
     else this.approach(dist, p);
     this.drawRestraint(host);
-    this.aura?.setPosition(e.sprite.x, e.sprite.y).setRadius(e.radius + 4);
+    this.aura?.setPosition(e.sprite.x, e.sprite.y + e.radius * 0.4);
     this.coreFx?.setPosition(e.sprite.x, e.sprite.y);
-    if (this.buffFx instanceof Phaser.GameObjects.Arc) this.buffFx.setPosition(e.sprite.x, e.sprite.y).setRadius(e.radius + 7);
-    else this.buffFx?.setPosition(e.sprite.x, e.sprite.y);
+    this.buffFx?.setPosition(e.sprite.x, e.sprite.y);
   }
 
   private get rules(): BossCore['patterns'] {
@@ -367,7 +366,7 @@ export class BossController {
       loopArt(sp, aura);
       this.buffFx = sp;
     }
-    this.buffFx ??= host.scene.add.circle(0, 0, this.enemy.radius + 7).setStrokeStyle(2, 0xff3a2a, 0.9).setDepth(2);
+    this.buffFx ??= this.auraSprite(host, '#ff3a2a');
   }
 
   private updateBuff(dt: number): void {
@@ -520,7 +519,7 @@ export class BossController {
       host.scene.tweens.add({ targets: burst, scale: 3, alpha: 0, duration: 400, onComplete: () => burst.destroy() });
     }
     this.aura?.destroy();
-    this.aura = host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius + 4).setStrokeStyle(stage, hexColor(this.def.enraged.auraColor), 0.8).setDepth(2);
+    this.aura = this.auraSprite(host, this.def.enraged.auraColor, 1 + stage * 0.15);
     shake(host.scene, 'heavy');
     // 구속 해제 그림 (있으면): 몸을 가로지르는 붉은 전선
     const unbound = this.def.art?.unlock;
@@ -537,9 +536,21 @@ export class BossController {
     e.invuln = this.def.enrageSec;
     e.sprite.setVelocity(0, 0);
     if (en.scale !== 1) e.setExtraScale(en.scale);
-    this.aura = host.scene.add.circle(e.sprite.x, e.sprite.y, e.radius + 4).setStrokeStyle(2, hexColor(en.auraColor), 0.8).setDepth(2);
+    this.aura?.destroy();
+    this.aura = this.auraSprite(host, en.auraColor);
     shake(host.scene, 'heavy');
     host.bossPhaseFx(host.t(`boss.enraged.${this.def.id}`), en.auraColor, { x: e.sprite.x, y: e.sprite.y });
+  }
+
+  /** 몸 뒤에서 일렁이는 픽셀 기운 (강화·체력 단계·자기 강화). 기운 그림을 그 색으로 물들인다 */
+  private auraSprite(host: BossHost, color: string, scale = 1): Phaser.GameObjects.Sprite {
+    const ref = getContext().data.weapons.meleeFx.buffAura;
+    const e = this.enemy;
+    const sp = host.scene.add.sprite(e.sprite.x, e.sprite.y, ref.spriteKey).setDepth(2.5).setAlpha(0.75).setTint(hexColor(color)).setBlendMode('ADD');
+    const w = e.radius * 3 * scale;
+    sp.setDisplaySize(w, (w * sp.height) / Math.max(1, sp.width));
+    loopArt(sp, ref);
+    return sp;
   }
 
   private label(host: BossHost, text: string, color = '#ffffff'): void {

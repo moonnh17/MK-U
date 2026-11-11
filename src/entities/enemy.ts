@@ -15,7 +15,7 @@ import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank, SpriteR
 import { Beams, DelayedBlast, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
 import { animateArt, fitArt } from './art';
 import { getContext } from '../core/context';
-import { playFx } from '../skills/skillFx';
+import { tintedFx } from '../skills/skillFx';
 
 /** 적이 전투 씬에 바라는 것 (원거리 탄·장판·전술 연계·밧줄) */
 export interface EnemyHost extends HazardHost {
@@ -733,11 +733,9 @@ export class Enemy {
       if (a.kind === 'slam') {
         const p = host.playerPos();
         if (Math.hypot(p.x - this.slamAt.x, p.y - this.slamAt.y) <= a.radius! + host.playerRadius) host.hurtPlayer(a.damage * this.damageMul, this);
+        // 그림이 따로 없으면 공용 내려찍기 이펙트를 적 색으로
         if (a.fx) this.attackFx(a.fx, this.slamAt.x, this.slamAt.y, { w: a.radius! * 2.3 });
-        else {
-          const flash = this.scene.add.circle(this.slamAt.x, this.slamAt.y, a.radius!, TELEGRAPH_COLOR, 0.5).setDepth(6);
-          this.scene.time.delayedCall(120, () => flash.destroy());
-        }
+        else this.attackFx(getContext().data.juice.fx.hazardBlast, this.slamAt.x, this.slamAt.y, { w: a.radius! * 2.3 }, this.def.color);
         if (a.ring) {
           for (let k = 0; k < a.ring.shots; k++) host.fireEnemyBullet(this.slamAt, (k / a.ring.shots) * Math.PI * 2, a.ring.speed, a.ring.range, a.ring.damage * this.damageMul, true);
         }
@@ -781,12 +779,8 @@ export class Enemy {
   }
 
   /** 공격 픽셀 이펙트 한 번: 이펙트 색으로 물들이고 밝은 심을 겹친다 */
-  private attackFx(ref: SpriteRef, x: number, y: number, o: { w: number; h?: number; rotation?: number; originX?: number }): void {
-    for (const core of [false, true]) {
-      const sp = playFx(this.scene, ref, x, y, { ...o, depth: 6 });
-      if (core) sp.setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.35);
-      else sp.setTint(hexColor(ref.color));
-    }
+  private attackFx(ref: SpriteRef, x: number, y: number, o: { w: number; h?: number; rotation?: number; originX?: number }, color = ref.color): void {
+    tintedFx(this.scene, ref, x, y, hexColor(color), { ...o, depth: 6 });
   }
 
   /** sec 뒤에 한 번 (쓰러졌으면 하지 않는다) */

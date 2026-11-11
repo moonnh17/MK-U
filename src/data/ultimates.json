@@ -39,6 +39,7 @@
       "spaceCut": { "compressPx": 1.5, "shiftPx": 6, "closeSec": 0.3, "bandPx": 30, "edgeFadePx": 40, "rimPx": 1.2, "hitStopSec": 0.05, "shards": 12, "afterSec": 0.35, "slidePx": 8 },
       "rift": { "angleDeg": 40, "openSec": 0.04, "holdSec": 0.08, "sealSec": 0.75, "gapPx": 6, "slidePx": 20, "rimPx": 1.5, "boltSec": 0.25 },
       "sprites": {
+        "skyBolt": { "spriteKey": "fx_bolt_strike", "color": "#9ac8ff", "size": 60 },
         "cut1": { "spriteKey": "ult_cut1", "color": "#6a9cff", "size": 20 },
         "cut2": { "spriteKey": "ult_cut2", "color": "#6a9cff", "size": 20 },
         "cut3": { "spriteKey": "ult_cut3", "color": "#6a9cff", "size": 20 },

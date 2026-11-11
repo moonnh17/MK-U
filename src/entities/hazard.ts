@@ -6,12 +6,19 @@ import { bus } from '../core/events';
 import { shake } from './juice';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
-import { loopArt, playFx } from '../skills/skillFx';
+import { loopArt, playFx, tintedFx } from '../skills/skillFx';
+import { getContext } from '../core/context';
 import { inGap } from '../systems/bossGeometry';
 import type { SpriteRef } from '../types/data';
 import { bounceStep } from '../systems/motion';
 import type { Enemy } from './enemy';
 import type { Rng } from '../core/rng';
+
+/** 그림이 따로 없는 공격이 터질 때 쓰는 공용 픽셀 이펙트 */
+function hazardFx(): { blast: SpriteRef; sector: SpriteRef; beam: SpriteRef } {
+  const fx = getContext().data.juice.fx;
+  return { blast: fx.hazardBlast, sector: fx.hazardSector, beam: fx.hazardBeam };
+}
 
 export interface HazardHost {
   readonly scene: Phaser.Scene;
@@ -92,8 +99,10 @@ export class SectorBlast implements Hazard {
       playFx(host.scene, this.hitArt, this.at.x + Math.cos(this.angle) * mid, this.at.y + Math.sin(this.angle) * mid, { w: this.radius * 1.3, rotation: this.angle });
       return false;
     }
+    const mid = this.radius * 0.5;
+    tintedFx(host.scene, hazardFx().sector, this.at.x + Math.cos(this.angle) * mid, this.at.y + Math.sin(this.angle) * mid, this.color, { w: this.radius * 1.4, rotation: this.angle, depth: 6 });
     const f = host.scene.add.graphics().setDepth(6);
-    f.fillStyle(this.color, 0.6).slice(this.at.x, this.at.y, this.radius, this.angle - half, this.angle + half, false).fillPath();
+    f.fillStyle(this.color, 0.25).slice(this.at.x, this.at.y, this.radius, this.angle - half, this.angle + half, false).fillPath();
     flash(host, f);
     return false;
   }
@@ -412,6 +421,8 @@ export class Beams implements Hazard {
   private readonly ticker: Ticker;
   private sprites: Phaser.GameObjects.Sprite[] = [];
   private spriteRef: SpriteRef | null = null;
+  /** 켜지는 순간의 픽셀 광선을 그렸다 */
+  private fired = false;
 
   constructor(
     scene: Phaser.Scene,
@@ -426,6 +437,8 @@ export class Beams implements Hazard {
     this.t += dt;
     if (this.t > s.telegraphSec + s.liveSec) return false;
     const live = this.t >= s.telegraphSec;
+    const firstLive = live && !this.fired;
+    if (firstLive) this.fired = true;
     const base = s.startAngle + s.spin * Math.max(0, this.t - s.telegraphSec - (s.spinDelaySec ?? 0));
     const c = s.center();
     const p = host.playerPos();
@@ -456,6 +469,7 @@ export class Beams implements Hazard {
         this.g.strokePoints(pts);
       } else this.g.lineBetween(c.x, c.y, end.x, end.y);
       this.sprites[i]?.setPosition(c.x, c.y).setRotation(a).setDisplaySize(s.length, live ? s.width * BEAM_ART_WIDTH : s.width);
+      if (firstLive && !s.art && !s.bare) tintedFx(host.scene, hazardFx().beam, c.x, c.y, s.color, { w: s.length, h: s.width * 3, rotation: a, originX: 0, depth: 6 });
       if (segDist(p, c, end) <= s.width / 2 + host.playerRadius) inside = true;
     }
     if (live && this.ticker.tick(dt, inside, host, s.damage, s.mental)) s.onHit?.();
@@ -531,7 +545,8 @@ export class DelayedBlast implements Hazard {
       playFx(host.scene, this.art.hit, this.at.x, this.at.y, { w: this.radius * 2.4 });
       return false;
     }
-    const flash = host.scene.add.circle(this.at.x, this.at.y, this.radius, this.color, 0.6).setDepth(6);
+    tintedFx(host.scene, hazardFx().blast, this.at.x, this.at.y, this.color, { w: this.radius * 2.3, depth: 6 });
+    const flash = host.scene.add.circle(this.at.x, this.at.y, this.radius, this.color, 0.25).setDepth(6);
     host.scene.time.delayedCall(150, () => flash.destroy());
     return false;
   }
@@ -638,6 +653,11 @@ export class RectBlast implements Hazard {
     if (p.x + pr >= r.x && p.x - pr <= r.x + r.w && p.y + pr >= r.y && p.y - pr <= r.y + r.h) host.hurtPlayer(this.damage);
     bus.emit('sfx', { id: 'explosion', size: Math.max(r.w, r.h) / 2 });
     if (this.hitArt) playFx(host.scene, this.hitArt, r.x + r.w / 2, r.y + r.h / 2, { w: r.w * 1.3, h: r.h, grow: 1 });
+    else {
+      const long = Math.max(r.w, r.h);
+      const rot = r.h > r.w ? Math.PI / 2 : 0;
+      tintedFx(host.scene, hazardFx().beam, r.x + r.w / 2 - (Math.cos(rot) * long) / 2, r.y + r.h / 2 - (Math.sin(rot) * long) / 2, this.color, { w: long, h: Math.min(r.w, r.h) * 2.2, rotation: rot, originX: 0, depth: 6 });
+    }
     const flash = host.scene.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, this.color, this.hitArt ? 0.25 : 0.6).setDepth(6);
     host.scene.time.delayedCall(150, () => flash.destroy());
     return false;
@@ -701,7 +721,10 @@ export class FollowBlast implements Hazard {
     if (Math.hypot(p.x - this.pos.x, p.y - this.pos.y) <= this.radius + host.playerRadius) host.hurtPlayer(this.damage);
     bus.emit('sfx', { id: 'explosion', size: this.radius });
     if (this.art?.hit) playFx(host.scene, this.art.hit, this.pos.x, this.pos.y, { w: this.radius * 2.4 });
-    else flash(host, host.scene.add.circle(this.pos.x, this.pos.y, this.radius, this.color, 0.6).setDepth(6));
+    else {
+      tintedFx(host.scene, hazardFx().blast, this.pos.x, this.pos.y, this.color, { w: this.radius * 2.3, depth: 6 });
+      flash(host, host.scene.add.circle(this.pos.x, this.pos.y, this.radius, this.color, 0.25).setDepth(6));
+    }
     return false;
   }
 

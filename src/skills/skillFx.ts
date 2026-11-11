@@ -48,6 +48,15 @@ export function playFx(scene: Phaser.Scene, ref: SpriteRef, x: number, y: number
   return sp;
 }
 
+/** 회색 픽셀 이펙트를 color로 물들이고, 같은 그림을 더해 밝은 심을 겹친다 (glow: 심의 진하기) */
+export function tintedFx(scene: Phaser.Scene, ref: SpriteRef, x: number, y: number, color: number, o: FxOpts = {}, glow = 0.35): void {
+  for (const core of [false, true]) {
+    const sp = playFx(scene, ref, x, y, o);
+    if (core) sp.setBlendMode('ADD').setAlpha(glow);
+    else sp.setTint(color);
+  }
+}
+
 /** 두 점 사이에 늘여 그리는 광선·번개. 한 장짜리는 굵기가 줄어들며 사라진다 */
 export function stretchFx(scene: Phaser.Scene, ref: SpriteRef, a: { x: number; y: number }, b: { x: number; y: number }, thickness: number, fadeSec = 0.2): Phaser.GameObjects.Sprite {
   const len = Math.hypot(b.x - a.x, b.y - a.y);

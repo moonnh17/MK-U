@@ -1,4 +1,4 @@
-import { loopArt, playFx } from './skillFx';
+import { loopArt, playFx, tintedFx } from './skillFx';
 import { bus } from '../core/events';
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
@@ -79,7 +79,7 @@ export class Explosive implements SkillObject {
     }
     if (this.spec.blasts?.length) {
       for (const b of this.spec.blasts) playFx(host.scene, b, this.x, this.y, { w: r * 2.2 });
-    } else host.fx(host.scene.add.circle(this.x, this.y, r, hexColor(this.spec.sprite.color), 0.35).setDepth(6), 0.25);
+    } else tintedFx(host.scene, host.ctx.data.juice.fx.hazardBlast, this.x, this.y, hexColor(this.spec.sprite.color), { w: r * 2.3, depth: 6 });
   }
 
   destroy(): void {

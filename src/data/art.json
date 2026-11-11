@@ -8096,6 +8096,21 @@
           "loop": false
         }
       }
+    },
+    "fx_bolt_strike": {
+      "file": "mku/fx_bolt_strike.png",
+      "frameWidth": 240,
+      "frameHeight": 264,
+      "frames": 34,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 33,
+          "fps": 18,
+          "loop": false
+        }
+      }
     }
   }
 }

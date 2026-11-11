@@ -32,22 +32,27 @@ const FX = {
   fx_w_beam3: { name: 'w-beam3', play: 'once' },
   fx_w_beam4: { name: 'w-beam4', play: 'once' },
   fx_w_flame: { name: 'w-flame', center: true, play: 'loop' },
+  // 케라우노스 하늘 벼락: pixelfx lightning/lightning-strike(기본 색). 모으는 0.7초는 빼고 내리꽂히는 프레임부터, 칸은 자르지 않는다(기준점 = 발밑 120,228)
+  fx_bolt_strike: { name: 'bolt-strike', play: 'once', from: 13, to: 46, keep: true },
 };
 
 function buildPixelfx(outDir) {
   const out = {};
-  for (const [key, { name, center, play }] of Object.entries(FX)) {
+  for (const [key, { name, center, play, from = 0, to, keep }] of Object.entries(FX)) {
     const meta = JSON.parse(fs.readFileSync(path.join(SRC, `${name}.json`), 'utf8')).meta.pixelfx;
     const sheet = k.read(path.join(SRC, `${name}.png`));
     const [fw, fh] = meta.frameSize;
-    const frames = Array.from({ length: meta.frames }, (_, i) => k.crop(sheet, (i % meta.columns) * fw, Math.floor(i / meta.columns) * fh, fw, fh));
+    const last = Math.min(meta.frames - 1, to ?? meta.frames - 1);
+    const frames = Array.from({ length: last - from + 1 }, (_, n) => n + from).map((i) => k.crop(sheet, (i % meta.columns) * fw, Math.floor(i / meta.columns) * fh, fw, fh));
     let x0 = fw, y0 = fh, x1 = 0, y1 = 0;
     for (const f of frames) {
       const b = k.bbox(f, 0);
       if (!b) continue;
       x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
     }
-    if (center) {
+    if (keep) {
+      x0 = 0; y0 = 0; x1 = fw; y1 = fh;
+    } else if (center) {
       // 기준점에서 가장 먼 쪽만큼 양쪽을 같게
       const [ox, oy] = meta.pivot ?? meta.origin;
       const hx = Math.max(ox - x0, x1 - ox), hy = Math.max(oy - y0, y1 - oy);

@@ -129,7 +129,10 @@
       "spriteKey": "fx_death_dark",
       "color": "#8e1a2e",
       "size": 30
-    }
+    },
+    "hazardBlast": { "spriteKey": "fx_w_smash3", "color": "#ffffff", "size": 20 },
+    "hazardSector": { "spriteKey": "fx_w_slash3", "color": "#ffffff", "size": 20 },
+    "hazardBeam": { "spriteKey": "fx_w_beam3", "color": "#ffffff", "size": 12 }
   },
   "spawn": {
     "ringColor": "#c08aff",
