@@ -40,7 +40,8 @@ export class PlayerCondition {
 
   updateDodge(dt: number, frame: ActionFrame): void {
     const c = this.run.ctx.data.player.dodge;
-    this.dodge = stepDodge(this.dodge, dt);
+    // 구르기·도약 체공·돌격이 끝나야 재사용 대기가 돈다
+    this.dodge = stepDodge(this.dodge, dt, this.dodge.left > 0 || this.run.dashLeft > 0);
     if (frame.pressed.has('dodge') && this.run.dashLeft <= 0) {
       const started = startDodge(this.dodge.cooldown, frame.move, this.run.aimDir, { ...c, cooldownSec: this.dodgeCooldownSec() });
       if (started) {

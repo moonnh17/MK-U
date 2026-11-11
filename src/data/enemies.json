@@ -233,10 +233,10 @@
       "maxHp": 1188, "moveSpeed": 40, "contactDamage": 25, "contactIntervalSec": 1.0,
       "energyOrbs": [5, 7], "coins": [5, 8],
       "attacks": [
-        { "id": "axe", "kind": "slam", "triggerRange": 34, "windupSec": 0.6, "actSec": 0.12, "recoverSec": 0.6, "cooldownSec": 2,
+        { "id": "axe", "kind": "slam", "fx": { "spriteKey": "fx_w_smash4", "color": "#d0484a", "size": 20 }, "triggerRange": 34, "windupSec": 0.05, "actSec": 0.12, "recoverSec": 0.6, "cooldownSec": 2,
           "damage": 49, "radius": 24, "reach": 16 },
-        { "id": "rope", "kind": "rope", "triggerRange": 170, "windupSec": 0.7, "actSec": 0.5, "recoverSec": 0.3, "cooldownSec": 4.5,
-          "damage": 8, "speed": 420, "range": 170, "pullSpeed": 360, "axeDelaySec": 0.6, "radius": 36, "arcDeg": 110, "axeDamage": 53 }
+        { "id": "rope", "kind": "rope", "fx": { "spriteKey": "fx_w_slash4", "color": "#d0484a", "size": 20 }, "triggerRange": 170, "windupSec": 0.35, "actSec": 0.5, "recoverSec": 0.3, "cooldownSec": 4.5,
+          "damage": 8, "speed": 420, "range": 170, "pullSpeed": 360, "axeDelaySec": 0.15, "radius": 36, "arcDeg": 110, "axeDamage": 53 }
       ],
       "spriteKey": "enemy_executor", "color": "#a0a8b8", "size": 24
     },
@@ -245,7 +245,7 @@
       "maxHp": 900, "moveSpeed": 28, "contactDamage": 20, "contactIntervalSec": 1.0,
       "energyOrbs": [5, 7], "coins": [5, 8], "keepDistance": 150,
       "attacks": [
-        { "id": "snipe", "kind": "snipe", "triggerRange": 260, "windupSec": 1.5, "lockSec": 0.3, "actSec": 0.25, "recoverSec": 0.6, "cooldownSec": 3.2,
+        { "id": "snipe", "kind": "snipe", "fx": { "spriteKey": "fx_w_beam4", "color": "#b07aff", "size": 12 }, "triggerRange": 260, "windupSec": 0.75, "lockSec": 0.15, "actSec": 0.25, "recoverSec": 0.6, "cooldownSec": 3.2,
           "damage": 45, "width": 6, "range": 340 }
       ],
       "absorb": {

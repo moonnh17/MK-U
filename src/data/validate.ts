@@ -418,7 +418,7 @@ export function validateGameData(d: GameData): Errors {
         for (const k of ['strikes', 'warnSec', 'range', 'width'] as const) checkPositive(errors, `${w}.${k}`, a[k]);
         checkPositive(errors, `${w}.strikeGapSec`, a.strikeGapSec, true);
       }
-      for (const k of ['shot', 'warnArt', 'hitArt'] as const) if (a[k]) checkSprite(errors, `${w}.${k}`, a[k]!);
+      for (const k of ['shot', 'warnArt', 'hitArt', 'fx'] as const) if (a[k]) checkSprite(errors, `${w}.${k}`, a[k]!);
     }
   };
   for (const e of d.enemies.enemies) {

@@ -215,6 +215,9 @@ export const oathOfRetribution: SkillImpl = {
 
 // ---------- 성역 오라 / 신성한 빛 ----------
 
+/** 신성한 빛(각성 오라) 그림에서 바닥 고리 가운데의 높이 (프레임 높이 비율) */
+const AURA_A_RING_Y = 0.71;
+
 class Aura extends Timed {
   private next = 0;
 
@@ -224,7 +227,11 @@ class Aura extends Timed {
     private readonly me: SkillHost,
   ) {
     super(s.def.id, host, host.buffDuration(s.values.durationSec!, s.def.tags), { key: 'buff.sanctuaryAura', color: s.def.color });
-    this.attach(host, artOf(s, 'aura'), host.area(s.values.radius!), s.owned.awakened ? 0.6 : 0.45);
+    if (s.owned.awakened) {
+      // 신성한 빛 그림은 비스듬히 본 바닥 고리라 고리 가운데가 그림 가운데보다 아래: 그 자리를 발밑에 맞춘다
+      this.attach(host, artOf(s, 'aura'), host.area(s.values.radius!), 0.6, 'floor');
+      this.follow?.setOrigin(0.5, AURA_A_RING_Y);
+    } else this.attach(host, artOf(s, 'aura'), host.area(s.values.radius!), 0.45);
   }
 
   protected override tick(dt: number, host: SkillHost): void {
@@ -308,12 +315,9 @@ function pegasusRun(host: SkillHost, s: SkillCast): boolean {
   host.scene.tweens.add({ targets: peg, x: end.x, y: end.y - 12, duration: Math.max(n * v.stepSec!, 0.4) * 1000 });
   for (let i = 1; i <= n; i++) {
     const at = { x: origin.x + dir.x * gap * i, y: origin.y + dir.y * gap * i };
+    // 예고 없이 천마가 지나간 자리에 바로 꽂힌다
     host.scene.time.delayedCall(i * v.stepSec! * 1000, () => {
-      const warn = host.scene.add.circle(at.x, at.y, r, 0xffe27a, 0.18).setStrokeStyle(1, 0xffe27a, 0.8).setDepth(2.5);
-      host.fx(warn, v.fallDelaySec!);
       for (let j = 0; j < 3; j++) mote(host, at.x + host.rng.range(-6, 6), at.y - 6, 0xffffff, 2, 1, host.rng.range(-8, 8), host.rng.range(4, 10), 0.4);
-    });
-    host.scene.time.delayedCall((i * v.stepSec! + v.fallDelaySec!) * 1000, () => {
       playFx(host.scene, s.def.sprites.swordA!, at.x, at.y - r * 0.5, { w: r * 1.8 });
       for (const x of enemiesWithin(host, at, r)) host.hit(x, v.damage!, s.def.sources.sword!);
     });
@@ -335,15 +339,11 @@ export const holySwords: SkillImpl = {
       .sort((a, b) => a.d - b.d)
       .slice(0, Math.round(v.count!));
     if (targets.length === 0) return false;
+    // 예고 없이 바로 떨어진다
     for (const { e } of targets) {
       const at = { x: e.sprite.x, y: e.sprite.y };
-      // 떨어질 자리 예고 원
-      const warn = host.scene.add.circle(at.x, at.y, r, 0xffe27a, 0.18).setStrokeStyle(1, 0xffe27a, 0.8).setDepth(2.5);
-      host.fx(warn, v.fallDelaySec!);
-      host.scene.time.delayedCall(v.fallDelaySec! * 1000, () => {
-        playFx(host.scene, levelRef(s, 'sword'), at.x, at.y - r * 0.6, { w: r * 1.6 });
-        for (const x of enemiesWithin(host, at, r)) host.hit(x, v.damage!, s.def.sources.sword!);
-      });
+      playFx(host.scene, levelRef(s, 'sword'), at.x, at.y - r * 0.6, { w: r * 1.6 });
+      for (const x of enemiesWithin(host, at, r)) host.hit(x, v.damage!, s.def.sources.sword!);
     }
     return true;
   },
@@ -375,11 +375,25 @@ class Prayer implements SkillObject {
     this.next += v.everySec!;
     this.count++;
     host.heal(host.maxHp() * v.healPct! + v.healFlat!, false);
-    const p = host.playerPos();
-    playFx(host.scene, artOf(this.s, 'prayer'), p.x, p.y - 6, { w: this.s.owned.awakened ? 44 : 30, depth: 6 });
+    this.prayFx(host);
     if (this.s.owned.awakened) this.redRain(host);
     if (this.count % 3 === 0) this.guardLeft = host.buffDuration(v.guardSec!, this.s.def.tags);
     return true;
+  }
+
+  /** 기도 발동: 머리 위 큰 기도 그림, 발밑에서 퍼지는 금빛 고리 둘, 위로 솟는 빛 기둥 알갱이 */
+  private prayFx(host: SkillHost): void {
+    const p = host.playerPos();
+    const big = this.s.owned.awakened;
+    const gold = big ? 0xff8a7a : 0xffe27a;
+    playFx(host.scene, artOf(this.s, 'prayer'), p.x, p.y - 12, { w: big ? 68 : 54, depth: 6 });
+    for (const [delay, to] of [[0, 30], [120, 44]] as const) {
+      const ring = host.scene.add.ellipse(p.x, p.y + 5, 8, 5).setStrokeStyle(2, gold, 0.95).setDepth(2.5);
+      host.scene.tweens.add({ targets: ring, displayWidth: to * 2, displayHeight: to * 1.24, alpha: 0, delay, duration: 520, ease: 'Quad.easeOut', onComplete: () => ring.destroy() });
+    }
+    const pool = host.scene.add.ellipse(p.x, p.y + 5, 40, 24, gold, 0.25).setDepth(2.4);
+    host.scene.tweens.add({ targets: pool, alpha: 0, duration: 600, onComplete: () => pool.destroy() });
+    for (let i = 0; i < 18; i++) mote(host, p.x + host.rng.range(-12, 12), p.y + host.rng.range(-2, 6), host.rng.chance(0.4) ? 0xffffff : gold, 1, 3, host.rng.range(-3, 3), -host.rng.range(22, 40), host.rng.range(0.45, 0.8));
   }
 
   /** 관리자의 응답: 둘레에 붉은 비가 rainTicks번 내리며 적에게 피해 */
@@ -389,11 +403,17 @@ class Prayer implements SkillObject {
       host.scene.time.delayedCall(i * v.rainTickSec! * 1000, () => {
         const p = host.playerPos();
         const r = host.area(v.rainRadius!);
-        for (let j = 0; j < 14; j++) {
+        for (let j = 0; j < 40; j++) {
           const a = host.rng.range(0, Math.PI * 2);
           const d = Math.sqrt(host.rng.next()) * r;
-          mote(host, p.x + Math.cos(a) * d, p.y + Math.sin(a) * d * 0.7 - 18, host.rng.chance(0.3) ? 0xff6a5a : 0xc8141e, 1, 5, 0, 16, 0.22);
+          const x = p.x + Math.cos(a) * d;
+          const y = p.y + Math.sin(a) * d * 0.7;
+          mote(host, x, y - 46, host.rng.chance(0.3) ? 0xff6a5a : 0xc8141e, 2, 9, 0, 44, 0.24);
+          // 땅에 닿으면 붉은 물방울이 튄다
+          if (j % 3 === 0) host.scene.time.delayedCall(230, () => mote(host, x, y, 0xff4a4a, 3, 1, host.rng.range(-5, 5), -3, 0.25));
         }
+        const pool = host.scene.add.ellipse(p.x, p.y + 4, r * 2, r * 1.3, 0xc8141e, 0.12).setDepth(2.3);
+        host.scene.tweens.add({ targets: pool, alpha: 0, duration: v.rainTickSec! * 1000 * 1.5, onComplete: () => pool.destroy() });
         for (const e of enemiesWithin(host, p, r)) host.hit(e, v.rainDamage!, this.s.def.sources.rain!);
       });
     }
@@ -427,7 +447,7 @@ class JudgmentShield extends Timed {
     super('divineJudgment', host, sec, { key: 'buff.divineJudgment', color });
     this.shield = amount;
     // 피해를 막아 주는 동안 문양을 머리 뒤 후광으로
-    this.attach(host, ref, 10, 0.85, true);
+    this.attach(host, ref, 10, 0.85, 'halo');
   }
 
   absorb(amount: number): number {

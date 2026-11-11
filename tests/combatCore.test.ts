@@ -22,12 +22,15 @@ describe('회피', () => {
     expect(dodgeReady(s.cooldown)).toBe(false);
     expect(startDodge(s.cooldown, { x: 1, y: 0 }, { x: 1, y: 0 }, cfg)).toBeNull();
   });
-  it('시간이 지나면 끝나고 재사용 대기가 줄어든다', () => {
+  it('시간이 지나면 끝나고, 재사용 대기는 회피 동작이 끝난 뒤부터 줄어든다', () => {
     let s = startDodge(0, { x: 1, y: 0 }, { x: 1, y: 0 }, cfg)!;
     s = stepDodge(s, 0.25);
     expect(s.left).toBe(0);
     expect(s.invuln).toBeCloseTo(0.05);
-    expect(s.cooldown).toBeCloseTo(0.75);
+    expect(s.cooldown).toBeCloseTo(1);
+    expect(stepDodge(s, 0.25).cooldown).toBeCloseTo(0.75);
+    // 도약 체공처럼 구르기 밖에서 움직이는 동안에도 멈춰 있다
+    expect(stepDodge(s, 0.25, true).cooldown).toBeCloseTo(1);
     s = stepDodge(s, 1);
     expect(s.invuln).toBe(0);
     expect(dodgeReady(s.cooldown)).toBe(true);

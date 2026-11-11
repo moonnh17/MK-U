@@ -1466,9 +1466,9 @@
       "tags": ["physical", "ranged"],
       "sources": { "sword": ["physical", "ranged"] },
       "levels": [
-        { "cooldownSec": 10.8, "values": { "damage": 23, "count": 1, "range": 150, "radius": 20, "fallDelaySec": 0.4 } },
-        { "cooldownSec": 9.7, "values": { "damage": 40, "count": 3, "range": 168, "radius": 24, "fallDelaySec": 0.4 } },
-        { "cooldownSec": 8.6, "values": { "damage": 62, "count": 5, "range": 195, "radius": 33, "fallDelaySec": 0.4 } }
+        { "cooldownSec": 10.8, "values": { "damage": 23, "count": 1, "range": 150, "radius": 20 } },
+        { "cooldownSec": 9.7, "values": { "damage": 40, "count": 3, "range": 168, "radius": 24 } },
+        { "cooldownSec": 8.6, "values": { "damage": 62, "count": 5, "range": 195, "radius": 33 } }
       ],
       "awakening": {
         "nameKey": "skill.holySwords.awakened",
@@ -1476,7 +1476,7 @@
         "requiredItem": "phantomFeather",
         "tags": ["physical", "ranged"],
         "cooldownSec": 8,
-        "values": { "damage": 62, "count": 8, "range": 210, "radius": 30, "fallDelaySec": 0.3, "gapPx": 26, "stepSec": 0.08 }
+        "values": { "damage": 62, "count": 8, "range": 210, "radius": 30, "gapPx": 26, "stepSec": 0.08 }
       },
       "color": "#e8d24a",
       "sprites": {
@@ -1498,9 +1498,9 @@
       "tags": ["buff"],
       "sources": { "rain": ["physical"] },
       "levels": [
-        { "cooldownSec": 0, "values": { "everySec": 7, "healPct": 0.06, "healFlat": 3, "guard": 0.12, "guardSec": 2 } },
-        { "cooldownSec": 0, "values": { "everySec": 6, "healPct": 0.08, "healFlat": 6, "guard": 0.18, "guardSec": 2.5 } },
-        { "cooldownSec": 0, "values": { "everySec": 5, "healPct": 0.12, "healFlat": 11, "guard": 0.28, "guardSec": 4 } }
+        { "cooldownSec": 0, "values": { "everySec": 7, "healPct": 0.045, "healFlat": 2, "guard": 0.12, "guardSec": 2 } },
+        { "cooldownSec": 0, "values": { "everySec": 6, "healPct": 0.06, "healFlat": 4, "guard": 0.18, "guardSec": 2.5 } },
+        { "cooldownSec": 0, "values": { "everySec": 5, "healPct": 0.09, "healFlat": 8, "guard": 0.28, "guardSec": 4 } }
       ],
       "awakening": {
         "nameKey": "skill.prayerOfRevival.awakened",
@@ -1508,7 +1508,7 @@
         "requiredItem": "masterGStatue",
         "tags": ["buff", "physical"],
         "cooldownSec": 0,
-        "values": { "healPct": 0.16, "healFlat": 14, "rainRadius": 70, "rainDamage": 14, "rainTicks": 4, "rainTickSec": 0.3 }
+        "values": { "healPct": 0.12, "healFlat": 10, "rainRadius": 110, "rainDamage": 14, "rainTicks": 4, "rainTickSec": 0.3 }
       },
       "color": "#e8d24a",
       "sprites": {

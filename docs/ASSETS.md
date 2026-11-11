@@ -91,7 +91,7 @@
 | `fx_w_slash1` | 근접 이펙트 (slashTiers1) | 20×20 | center | #ffffff | mku/fx_w_slash1.png (12프레임) |
 | `fx_w_slash2` | 근접 이펙트 (slashTiers2) | 20×20 | center | #ffffff | mku/fx_w_slash2.png (12프레임) |
 | `fx_w_slash3` | 근접 이펙트 (slashTiers3) | 20×20 | center | #ffffff | mku/fx_w_slash3.png (12프레임) |
-| `fx_w_slash4` | 근접 이펙트 (slashTiers4) | 20×20 | center | #ffffff | mku/fx_w_slash4.png (12프레임) |
+| `fx_w_slash4` | 근접 이펙트 (slashTiers4) 외 1곳 | 20×20 | center | #ffffff | mku/fx_w_slash4.png (12프레임) |
 | `fx_w_thrust1` | 근접 이펙트 (thrustTiers1) | 24×24 | center | #ffffff | mku/fx_w_thrust1.png (10프레임) |
 | `fx_w_thrust2` | 근접 이펙트 (thrustTiers2) | 24×24 | center | #ffffff | mku/fx_w_thrust2.png (10프레임) |
 | `fx_w_thrust3` | 근접 이펙트 (thrustTiers3) | 24×24 | center | #ffffff | mku/fx_w_thrust3.png (10프레임) |
@@ -99,9 +99,9 @@
 | `fx_w_smash1` | 근접 이펙트 (smashTiers1) | 20×20 | center | #ffffff | mku/fx_w_smash1.png (15프레임) |
 | `fx_w_smash2` | 근접 이펙트 (smashTiers2) | 20×20 | center | #ffffff | mku/fx_w_smash2.png (15프레임) |
 | `fx_w_smash3` | 근접 이펙트 (smashTiers3) | 20×20 | center | #ffffff | mku/fx_w_smash3.png (15프레임) |
-| `fx_w_smash4` | 근접 이펙트 (smashTiers4) | 20×20 | center | #ffffff | mku/fx_w_smash4.png (15프레임) |
+| `fx_w_smash4` | 근접 이펙트 (smashTiers4) 외 1곳 | 20×20 | center | #ffffff | mku/fx_w_smash4.png (15프레임) |
 | `fx_w_beam3` | 근접 이펙트 (beamTiers1) | 12×12 | center | #ffffff | mku/fx_w_beam3.png (7프레임) |
-| `fx_w_beam4` | 근접 이펙트 (beamTiers4) | 12×12 | center | #ffffff | mku/fx_w_beam4.png (7프레임) |
+| `fx_w_beam4` | 근접 이펙트 (beamTiers4) 외 1곳 | 12×12 | center | #ffffff | mku/fx_w_beam4.png (7프레임) |
 | `fx_w_bullet1` | 근접 이펙트 (bulletTiers1) | 4×4 | center | #ffffff | mku/fx_w_bullet1.png (4프레임) |
 | `fx_w_bullet2` | 근접 이펙트 (bulletTiers2) | 4×4 | center | #ffffff | mku/fx_w_bullet2.png (4프레임) |
 | `fx_w_bullet3` | 근접 이펙트 (bulletTiers3) | 4×4 | center | #ffffff | mku/fx_w_bullet3.png (4프레임) |

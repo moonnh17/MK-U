@@ -160,7 +160,7 @@
   "skill.smite.awakened.desc": "조준 방향으로 길이 {length}의 붉은 참격을 날려 닿은 적을 모두 벤다(피해 {damage}). 보스에게 피해 +{bossBonusPct}%. 일반 적은 체력이 {executePctPct}% 이하로 남으면 처형한다.",
   "skill.holySwords": "성검",
   "skill.holySwords.short": "성검",
-  "skill.holySwords.desc": "사거리 {range} 안의 가까운 적 {count}명 위로 성검이 떨어진다. {fallDelaySec}초 예고 뒤 반경 {radius}에 피해 {damage}.",
+  "skill.holySwords.desc": "사거리 {range} 안의 가까운 적 {count}명 위로 성검이 예고 없이 바로 떨어진다. 반경 {radius}에 피해 {damage}.",
   "skill.holySwords.awakened": "천마 강림",
   "skill.holySwords.awakened.desc": "천마가 사거리 {range} 안의 가장 가까운 적을 향해 하늘을 가로지르고, 그 궤적을 따라 성검 {count}자루가 줄지어 떨어진다(반경 {radius}, 피해 {damage}).",
   "skill.prayerOfRevival": "회생의 기도",

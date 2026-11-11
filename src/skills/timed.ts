@@ -7,8 +7,9 @@ import type { SpriteRef } from '../types/data';
 import { loopArt } from './skillFx';
 import type { BuffView, SkillHost, SkillObject } from './host';
 
-/** 후광 자리: 몸 가운데(키 26px 스프라이트)에서 머리 뒤까지 */
-const HALO_DY = 10;
+/** 키 26px 스프라이트는 발밑 기준이라 몸 자리(판정 가운데)에서 머리는 위로 약 17px, 발바닥은 아래로 5px */
+const HALO_DY = 17;
+const FLOOR_DY = -5;
 
 export abstract class Timed implements SkillObject {
   readonly createdAt: number;
@@ -27,11 +28,11 @@ export abstract class Timed implements SkillObject {
     this.left = total;
   }
 
-  /** 몸을 따라다니는 반복 그림 (반지름 r). halo면 머리 뒤(몸보다 아래 층)에 띄운다 */
-  protected attach(host: SkillHost, ref: SpriteRef, r: number, alpha = 0.7, halo = false): void {
+  /** 몸을 따라다니는 반복 그림 (반지름 r). halo: 머리 뒤(몸보다 아래 층) / floor: 발바닥 자리(그림 기준점은 호출한 쪽이 맞춘다) */
+  protected attach(host: SkillHost, ref: SpriteRef, r: number, alpha = 0.7, place: 'body' | 'halo' | 'floor' = 'body'): void {
     const p = host.playerPos();
-    this.followDy = halo ? HALO_DY : 0;
-    const sp = host.sprite(p.x, p.y - this.followDy, ref).setDepth(halo ? 3.9 : 2.6).setAlpha(alpha);
+    this.followDy = place === 'halo' ? HALO_DY : place === 'floor' ? FLOOR_DY : 0;
+    const sp = host.sprite(p.x, p.y - this.followDy, ref).setDepth(place === 'halo' ? 3.9 : place === 'floor' ? 2.4 : 2.6).setAlpha(alpha);
     sp.setDisplaySize(r * 2, (r * 2 * sp.height) / Math.max(1, sp.width));
     loopArt(sp, ref);
     this.follow = sp;

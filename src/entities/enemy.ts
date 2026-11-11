@@ -15,6 +15,7 @@ import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank, SpriteR
 import { Beams, DelayedBlast, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
 import { animateArt, fitArt } from './art';
 import { getContext } from '../core/context';
+import { playFx } from '../skills/skillFx';
 
 /** 적이 전투 씬에 바라는 것 (원거리 탄·장판·전술 연계·밧줄) */
 export interface EnemyHost extends HazardHost {
@@ -531,7 +532,9 @@ export class Enemy {
     const pullSec = host.pullPlayer(to, a.pullSpeed!);
     const delay = pullSec + a.axeDelaySec!;
     this.holdLeft = delay;
-    host.addHazard(new SectorBlast(this.scene, from, Math.atan2(this.aim.y, this.aim.x), a.radius!, a.arcDeg!, delay, a.axeDamage! * this.damageMul, TELEGRAPH_COLOR));
+    const ang = Math.atan2(this.aim.y, this.aim.x);
+    host.addHazard(new SectorBlast(this.scene, from, ang, a.radius!, a.arcDeg!, delay, a.axeDamage! * this.damageMul, TELEGRAPH_COLOR));
+    if (a.fx) this.later(delay, () => this.attackFx(a.fx!, from.x + this.aim.x * a.radius! * 0.5, from.y + this.aim.y * a.radius! * 0.5, { w: a.radius! * 1.6, rotation: ang }));
   }
 
   /**
@@ -725,12 +728,16 @@ export class Enemy {
             color: hexColor(this.def.color),
           }),
         );
+        if (a.fx) this.attackFx(a.fx, from.x, from.y, { w: a.range!, h: a.width! * 3, rotation: Math.atan2(this.aim.y, this.aim.x), originX: 0 });
       }
       if (a.kind === 'slam') {
         const p = host.playerPos();
         if (Math.hypot(p.x - this.slamAt.x, p.y - this.slamAt.y) <= a.radius! + host.playerRadius) host.hurtPlayer(a.damage * this.damageMul, this);
-        const flash = this.scene.add.circle(this.slamAt.x, this.slamAt.y, a.radius!, TELEGRAPH_COLOR, 0.5).setDepth(6);
-        this.scene.time.delayedCall(120, () => flash.destroy());
+        if (a.fx) this.attackFx(a.fx, this.slamAt.x, this.slamAt.y, { w: a.radius! * 2.3 });
+        else {
+          const flash = this.scene.add.circle(this.slamAt.x, this.slamAt.y, a.radius!, TELEGRAPH_COLOR, 0.5).setDepth(6);
+          this.scene.time.delayedCall(120, () => flash.destroy());
+        }
         if (a.ring) {
           for (let k = 0; k < a.ring.shots; k++) host.fireEnemyBullet(this.slamAt, (k / a.ring.shots) * Math.PI * 2, a.ring.speed, a.ring.range, a.ring.damage * this.damageMul, true);
         }
@@ -770,6 +777,15 @@ export class Enemy {
     for (let k = 0; k < n; k++) {
       const ang = n === 1 ? center : center - spread / 2 + (spread * k) / (n - 1);
       host.fireEnemyBullet(from, ang, speed, range, dmg, true, dmg * (this.def.mentalRatio ?? 0), shot, tint);
+    }
+  }
+
+  /** 공격 픽셀 이펙트 한 번: 이펙트 색으로 물들이고 밝은 심을 겹친다 */
+  private attackFx(ref: SpriteRef, x: number, y: number, o: { w: number; h?: number; rotation?: number; originX?: number }): void {
+    for (const core of [false, true]) {
+      const sp = playFx(this.scene, ref, x, y, { ...o, depth: 6 });
+      if (core) sp.setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.35);
+      else sp.setTint(hexColor(ref.color));
     }
   }
 

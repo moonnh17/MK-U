@@ -415,6 +415,8 @@ export interface ArchonAbsorbDef {
 export interface EnemyAttackDef {
   id: string;
   kind: 'lunge' | 'slam' | 'burst' | 'puddle' | 'fan' | 'rope' | 'snipe' | 'spikes' | 'roots';
+  /** 픽셀 이펙트 (color로 물들인다): slam 내려찍기 자리 · rope 끌어온 뒤 도끼 베기 · snipe 저격 광선 */
+  fx?: SpriteRef;
   triggerRange: number;
   windupSec: number;
   actSec: number;
@@ -564,6 +566,8 @@ export interface BossPatternDef {
   hpBelow?: number;
   /** 일반 순환이 아니라 독립 계승 주기로만 쓴다 */
   inherit?: boolean;
+  /** 본체가 직접 움직이는 패턴(돌진·순간이동·주먹 돌진). 겹쳐 쓰지 않는다 */
+  moves?: boolean;
 }
 
 /** 보스 행동 (스테이지 보스·히든보스 공통) */
@@ -591,6 +595,11 @@ export interface BossCore {
   lowHpStrike?: { at: number; afterSec: number; radius: number; delaySec: number; damage: number };
   /** 독립 계승 주기 (마기카이저): 마지막 단계에서 rollSec마다 chance로 시도, 끝난 뒤 minGapSec */
   inherit?: { rollSec: number; chance: number; minGapSec: number };
+  /**
+   * 겹쳐 쓰기: 패턴이 도는 동안 rollSec마다 chance로 두 번째 패턴을 같이 쓴다(동시에 최대 2개).
+   * 두 번째는 움직이지 않는 패턴(moves 없음)만, 쿨타임은 일반 순환과 같이 쓴다
+   */
+  overlap?: { rollSec: number; chance: number };
   /** 패턴 이펙트 그림: 슬롯 이름 → 그림. '패턴id.슬롯'이 있으면 그 패턴에서 우선. 없으면 도형으로 그린다 */
   art?: Record<string, SpriteRef>;
   /** 본체 자세 (art.json anims 이름). dashReady·dash·recover·transition·패턴 id */

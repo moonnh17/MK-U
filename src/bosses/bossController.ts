@@ -14,7 +14,7 @@ import { shake } from '../entities/juice';
 import { animKey, artKeys, bossArtPhase } from '../systems/art';
 import { loopArt, playFx } from '../skills/skillFx';
 import type { Enemy } from '../entities/enemy';
-import { initialBoss, stepBoss, type BossBrainState } from '../systems/bossBrain';
+import { availablePatterns, initialBoss, stepBoss, type BossBrainState } from '../systems/bossBrain';
 import { DelayedBlast } from '../entities/hazard';
 import type { BossCore } from '../types/data';
 import type { BossHost, PatternRun } from './host';
@@ -62,6 +62,11 @@ export class BossController {
   private artPhase = 0;
   /** 독립 계승 패턴 (일반 패턴과 겹쳐 돈다) */
   private inheritRun: PatternRun | null = null;
+  /** 겹쳐 쓰는 두 번째 패턴 */
+  private sideRun: PatternRun | null = null;
+  private sideId: string | null = null;
+  private sideLeft = 0;
+  private sideRoll = 0;
   private inheritLeft = 0;
   private inheritRoll = 0;
   private inheritGap = 0;
@@ -147,6 +152,7 @@ export class BossController {
     const hp = e.hp / e.maxHp;
     const blocked = new Set(this.minions.map((m) => m.pattern));
     for (const x of this.def.patterns) if (x.hpBelow !== undefined && hp > x.hpBelow) blocked.add(x.id);
+    if (this.sideId) blocked.add(this.sideId);
     const r = stepBoss(this.brain, dt, hp, dist, this.rules, this.def, host.rng, blocked);
     this.brain = r.state;
     for (const ev of r.events) {
@@ -156,6 +162,7 @@ export class BossController {
         this.patternId = null;
         e.shape = { sx: 1, sy: 1, lean: 0 };
       } else if (ev.type === 'unlock') {
+        this.endSide();
         this.unlock(host, ev.stage);
       } else if (ev.type === 'start') {
         this.run = makePattern(ev.id, this.patternCtx(host, ev.id, this.body));
@@ -167,9 +174,11 @@ export class BossController {
         this.spawnCompanions(host);
         if (this.def.lowHpStrike && hp <= this.def.lowHpStrike.at) this.lowStrike = this.def.lowHpStrike.afterSec;
       } else {
+        this.endSide();
         this.enrage(host);
       }
     }
+    this.updateSide(dt, host, dist, blocked);
     this.updateLowStrike(dt, host);
     this.updateInherit(dt, host);
     this.updatePose(dt);
@@ -266,6 +275,39 @@ export class BossController {
     if (this.lowStrike > 0) return;
     this.lowStrike = null;
     host.addHazard(new DelayedBlast(host.scene, host.playerPos(), s.radius, s.delaySec, s.damage * this.damageMul, this.body.color));
+  }
+
+  /** 겹쳐 쓰기: 일반 패턴이 도는 동안 움직이지 않는 패턴 하나를 더 쓴다. 몸은 일반 패턴 몫이라 건드리지 않는다 */
+  private updateSide(dt: number, host: BossHost, dist: number, blocked: ReadonlySet<string>): void {
+    const cfg = this.def.overlap;
+    if (!cfg) return;
+    if (this.sideRun) {
+      this.sideRun.update(dt);
+      this.sideLeft -= dt;
+      if (this.sideLeft <= 0) this.endSide();
+      return;
+    }
+    if (!this.run) return;
+    this.sideRoll -= dt;
+    if (this.sideRoll > 0) return;
+    this.sideRoll = cfg.rollSec;
+    if (!host.rng.chance(cfg.chance)) return;
+    const busy = new Set(blocked);
+    if (this.patternId) busy.add(this.patternId);
+    const pool = availablePatterns(this.brain, this.rules.filter((x) => !x.moves), dist, busy).filter((x) => x.id !== this.patternId);
+    if (pool.length === 0) return;
+    const p = host.rng.weighted(pool.map((x) => ({ item: x, weight: x.weight })));
+    this.sideRun = makePattern(p.id, this.patternCtx(host, p.id, { ...this.body, setVelocity: () => {}, teleport: () => {} }));
+    this.sideId = p.id;
+    this.sideLeft = p.durationSec;
+    this.brain = { ...this.brain, cooldowns: { ...this.brain.cooldowns, [p.id]: p.cooldownSec } };
+    this.label(host, host.t(`boss.pattern.${p.id}`));
+  }
+
+  private endSide(): void {
+    this.sideRun?.destroy();
+    this.sideRun = null;
+    this.sideId = null;
   }
 
   /** 독립 계승: 마지막 단계에서 일반 패턴과 겹쳐 돈다. 이동은 일반 패턴 몫이라 건드리지 않는다 */
@@ -522,6 +564,7 @@ export class BossController {
     this.run = null;
     this.inheritRun?.destroy();
     this.inheritRun = null;
+    this.endSide();
     this.aura?.destroy();
     this.aura = null;
     this.buffFx?.destroy();

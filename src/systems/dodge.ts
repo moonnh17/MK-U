@@ -80,6 +80,7 @@ export function zigzag(a: Vec2, b: Vec2, segments: number, amp: number, rng: Rng
   return pts;
 }
 
-export function stepDodge(s: DodgeState, dt: number): DodgeState {
-  return { vel: s.vel, left: Math.max(0, s.left - dt), invuln: Math.max(0, s.invuln - dt), cooldown: Math.max(0, s.cooldown - dt) };
+/** 재사용 대기는 회피 동작이 다 끝난 뒤(moving이 false일 때)부터 줄어든다 */
+export function stepDodge(s: DodgeState, dt: number, moving = s.left > 0): DodgeState {
+  return { vel: s.vel, left: Math.max(0, s.left - dt), invuln: Math.max(0, s.invuln - dt), cooldown: moving ? s.cooldown : Math.max(0, s.cooldown - dt) };
 }

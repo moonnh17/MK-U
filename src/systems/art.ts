@@ -129,7 +129,7 @@ export function collectAssets(d: GameData): AssetRef[] {
     });
   add('projectile', d.enemies.projectile, 'asset.enemyBullet');
   for (const e of d.enemies.enemies) add(e.rank === 'boss' || e.rank === 'hiddenBoss' ? 'boss' : 'enemy', e, e.nameKey);
-  for (const e of d.enemies.enemies) for (const a of e.attacks ?? []) for (const r of [a.shot, a.warnArt, a.hitArt]) if (r) add('projectile', r, e.nameKey, '#fx');
+  for (const e of d.enemies.enemies) for (const a of e.attacks ?? []) for (const r of [a.shot, a.warnArt, a.hitArt, a.fx]) if (r) add('projectile', r, e.nameKey, '#fx');
   // 보스 단계별 모습 (단계가 있는 보스만)
   for (const b of [...d.bosses.bosses, ...d.bosses.hiddenBosses]) {
     const e = d.enemies.enemies.find((x) => x.id === b.id);
