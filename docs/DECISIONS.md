@@ -792,3 +792,7 @@
 - 2026-11-16: 순간이동(임시 수치): 쿨 6/5/4초, 거리 80/96/112, 4px 단위로 벽 검사(점멸의 blinkTarget 재사용), 태그 없음. 연출은 임시 파동(D에서 pixelfx).
 - 2026-11-16: 학파 궁극기(원소 대합주·슬픈 처형)와 패시브(원소 순환·순수 전개)는 데이터만 두고 로직은 C·D. 그동안 전직 후 궁극기 버튼은 눌러도 아무 일 없음, 패시브는 카드에 안 나옴.
 - 2026-11-16: 디버그 패널에 '이 학파로 전직'(학파 선택 → advanceTo, 지금 직업 학파만). 기존 '전직'은 직업 판정 규칙대로(마기법사는 칸 판정).
+- 2026-11-17: 마기법사 그림: 사용자 시트(마기법사/players·summons, 배경 투명 1344×752)를 scripts/art-src/players(magiMage·baekon·hwigang.png)·art-src/mage로 복사해 build-players.cjs의 direct 방식으로 만든다. 서기 = 윗줄 0, 정면 걷기 = 윗줄 1~4, 옆 걷기 = 아랫줄 1~4, 뒷모습 = 정면 걷기(임시). 키 player_magiMage(전직 전)·player_baekon·player_hwigang, 키 52px(FIT 26).
+- 2026-11-17: 집행 의지체 소환체 그림도 같은 direct 방식(summon_will_construct 키 52, summon_magi_soldier 56, summon_imitation_golem 68 = 화면 26/28/34px, build-players의 항목별 fit). 크기는 임시.
+- 2026-11-17: 소환체 이펙트(scripts/build-mage-fx.cjs): 시트 줄마다 한 애니메이션, 프레임 bbox 합으로 같은 틀에 가운데 맞춤, 초록 찌꺼기 제거, 가장 큰 프레임의 3% 미만인 옅은 프레임은 뺌. fx_summon_will_shot(반복)·will_hit·soldier_thrust·soldier_burst·golem_crush·golem_shell.
+- 2026-11-17: 그림 키는 데이터가 참조해야 검증을 통과해서, 집행 의지체(executionWill) 스킬 데이터를 B에서 먼저 넣었다: 쿨 20초(임시), Lv별 count 1/2/1·lifeSec 8/10/14, 각인 「잔영 동행」 effect followUp 0.3/0.45/0.6. 구현이 없어 카드에 안 나온다(로직·나머지 수치는 D).

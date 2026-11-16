@@ -141,6 +141,15 @@ describe('전직·보스 단계 모습', () => {
     expect(keys.has(artKeys.bossPhase('enemy_eclipse', 2))).toBe(true);
     expect(keys.has(artKeys.bossPhase('enemy_eclipse', 3))).toBe(false);
   });
+  it('마기법사·백온파·휘강파와 집행 의지체 소환체는 정면·뒷모습·옆 걷기 그림이 있다', async () => {
+    const { artKeys } = await import('../src/systems/art');
+    const S = gameData.art.sprites;
+    for (const key of [...['magiMage', 'baekon', 'hwigang'].map(artKeys.playerSchool), 'summon_will_construct', 'summon_magi_soldier', 'summon_imitation_golem']) {
+      expect(Object.keys(S[key]?.anims ?? {}).sort(), key).toEqual(['idle', 'move', 'moveBack', 'moveFront']);
+    }
+    expect(S.player_magiMage!.frameHeight).toBe(S.player_warrior!.frameHeight);
+    for (const key of ['will_shot', 'will_hit', 'soldier_thrust', 'soldier_burst', 'golem_crush', 'golem_shell']) expect(S[`fx_summon_${key}`]?.anims?.play, key).toBeDefined();
+  });
   it('단계 수와 그림 단계', async () => {
     const { bossPhaseCount, bossArtPhase } = await import('../src/systems/art');
     expect(bossPhaseCount({ enrageAt: 0, unlocks: [0.7, 0.55, 0.4] })).toBe(4);

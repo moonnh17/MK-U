@@ -1570,6 +1570,40 @@
       "sprites": {}
     },
     {
+      "id": "executionWill",
+      "job": "magiMage",
+      "school": "hwigang",
+      "kind": "active",
+      "nameKey": "skill.executionWill",
+      "shortKey": "skill.executionWill.short",
+      "descKey": "skill.executionWill.desc",
+      "tags": [],
+      "sources": {},
+      "levels": [
+        { "cooldownSec": 20, "values": { "count": 1, "lifeSec": 8 } },
+        { "cooldownSec": 20, "values": { "count": 2, "lifeSec": 10 } },
+        { "cooldownSec": 20, "values": { "count": 1, "lifeSec": 14 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.executionWill",
+        "descKey": "imprint.executionWill.desc",
+        "effect": "followUp",
+        "levels": [{ "followUp": 0.3 }, { "followUp": 0.45 }, { "followUp": 0.6 }]
+      },
+      "color": "#b266ff",
+      "sprites": {
+        "will": { "spriteKey": "summon_will_construct", "color": "#b266ff", "size": 12, "height": 26 },
+        "soldier": { "spriteKey": "summon_magi_soldier", "color": "#2c1a45", "size": 12, "height": 28 },
+        "golem": { "spriteKey": "summon_imitation_golem", "color": "#6a6a78", "size": 20, "height": 34 },
+        "willShot": { "spriteKey": "fx_summon_will_shot", "color": "#e0b3ff", "size": 8 },
+        "willHit": { "spriteKey": "fx_summon_will_hit", "color": "#b266ff", "size": 24 },
+        "soldierThrust": { "spriteKey": "fx_summon_soldier_thrust", "color": "#b266ff", "size": 28 },
+        "soldierBurst": { "spriteKey": "fx_summon_soldier_burst", "color": "#b266ff", "size": 32 },
+        "golemCrush": { "spriteKey": "fx_summon_golem_crush", "color": "#6a6a78", "size": 48 },
+        "golemShell": { "spriteKey": "fx_summon_golem_shell", "color": "#b266ff", "size": 40 }
+      }
+    },
+    {
       "id": "elementCycle",
       "job": "magiMage",
       "school": "baekon",

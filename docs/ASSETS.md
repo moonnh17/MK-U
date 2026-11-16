@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 736개 · 그림 있음 694개
+전체 746개 · 그림 있음 706개
 
 ## player (9)
 
@@ -17,9 +17,9 @@
 | `player_human` | 플레이어 | 10×10 | feet | #e8e2d0 | mku/player_human.png (13프레임) |
 | `player_hectar` | 플레이어 헥타르 | 10×10 | feet | #e8e2d0 | mku/player_hectar.png (13프레임) |
 | `player_acro` | 플레이어 아크로 | 10×10 | feet | #e8e2d0 | mku/player_acro.png (13프레임) |
-| `player_magiMage` | 플레이어 마기법사 | 10×10 | feet | #e8e2d0 | — |
-| `player_hwigang` | 플레이어 휘강파 | 10×10 | feet | #e8e2d0 | — |
-| `player_baekon` | 플레이어 백온파 | 10×10 | feet | #e8e2d0 | — |
+| `player_magiMage` | 플레이어 마기법사 | 10×10 | feet | #e8e2d0 | mku/player_magiMage.png (13프레임) |
+| `player_hwigang` | 플레이어 휘강파 | 10×10 | feet | #e8e2d0 | mku/player_hwigang.png (13프레임) |
+| `player_baekon` | 플레이어 백온파 | 10×10 | feet | #e8e2d0 | mku/player_baekon.png (13프레임) |
 | `player_warrior` | 플레이어 전사 | 10×10 | feet | #e8e2d0 | mku/player_warrior.png (13프레임) |
 | `player_barbarian` | 플레이어 야만용사 | 10×10 | feet | #e8e2d0 | mku/player_barbarian.png (13프레임) |
 | `player_paladin` | 플레이어 성기사 | 10×10 | feet | #e8e2d0 | mku/player_paladin.png (9프레임) |
@@ -257,7 +257,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (218)
+## skill (227)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -446,6 +446,15 @@
 | `skill_pPrayer_prayer1` | 회생의 기도 (prayer1) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer1.png (6프레임) |
 | `skill_pPrayer_prayer2` | 회생의 기도 (prayer2) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer2.png (6프레임) |
 | `skill_pPrayer_prayer3` | 회생의 기도 (prayer3) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer3.png (6프레임) |
+| `summon_will_construct` | 집행 의지체 (will) | 12×26 | center | #b266ff | mku/summon_will_construct.png (13프레임) |
+| `summon_magi_soldier` | 집행 의지체 (soldier) | 12×28 | center | #2c1a45 | mku/summon_magi_soldier.png (13프레임) |
+| `summon_imitation_golem` | 집행 의지체 (golem) | 20×34 | center | #6a6a78 | mku/summon_imitation_golem.png (13프레임) |
+| `fx_summon_will_shot` | 집행 의지체 (willShot) | 8×8 | center | #e0b3ff | mku/fx_summon_will_shot.png (5프레임) |
+| `fx_summon_will_hit` | 집행 의지체 (willHit) | 24×24 | center | #b266ff | mku/fx_summon_will_hit.png (2프레임) |
+| `fx_summon_soldier_thrust` | 집행 의지체 (soldierThrust) | 28×28 | center | #b266ff | mku/fx_summon_soldier_thrust.png (4프레임) |
+| `fx_summon_soldier_burst` | 집행 의지체 (soldierBurst) | 32×32 | center | #b266ff | mku/fx_summon_soldier_burst.png (5프레임) |
+| `fx_summon_golem_crush` | 집행 의지체 (golemCrush) | 48×48 | center | #6a6a78 | mku/fx_summon_golem_crush.png (5프레임) |
+| `fx_summon_golem_shell` | 집행 의지체 (golemShell) | 40×40 | center | #b266ff | mku/fx_summon_golem_shell.png (5프레임) |
 | `fx_first_law_core` | 열역학 제1법칙 (particle) | 8×8 | center | #ff9a3c | mku/fx_first_law_core.png (9프레임) |
 | `fx_first_law_blast` | 열역학 제1법칙 (blast) | 40×40 | center | #ff9a3c | mku/fx_first_law_blast.png (23프레임) |
 | `fx_bolt_strike` | 벼락 (skyBolt) | 60×60 | center | #9ac8ff | mku/fx_bolt_strike.png (34프레임) |
@@ -545,7 +554,7 @@
 | `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | mku/item_orion_shield.png (1프레임) |
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | mku/item_hectar_ram.png (1프레임) |
 
-## icon (70)
+## icon (71)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -578,6 +587,7 @@
 | `icon_skill_prayerOfRevival` | 회생의 기도 | 16×16 | center | #e8d24a | mku/icon_skill_prayerOfRevival.png (1프레임) |
 | `icon_skill_fireWall` | 화염벽 | 16×16 | center | #ff6a2a | — |
 | `icon_skill_teleport` | 순간이동 | 16×16 | center | #b266ff | — |
+| `icon_skill_executionWill` | 집행 의지체 | 16×16 | center | #b266ff | — |
 | `icon_skill_elementCycle` | 원소 순환 | 16×16 | center | #ff6a2a | — |
 | `icon_skill_pureUnfolding` | 순수 전개 | 16×16 | center | #b266ff | — |
 | `icon_ult_firstLaw` | 열역학 제1법칙 | 16×16 | center | #ff9a3c | mku/icon_ult_firstLaw.png (1프레임) |

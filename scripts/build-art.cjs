@@ -232,6 +232,8 @@ function actor(key, idle, move, fit, opts = {}) {
 Object.assign(sprites, require('./build-players.cjs').buildPlayers(out));
 // 성기사 각성 이펙트·아이콘: 원본 scripts/art-src/paladin-awakening
 Object.assign(sprites, require('./build-paladin-awakening.cjs').buildPaladinAwakening(out));
+// 집행 의지체 소환체 이펙트: 원본 scripts/art-src/mage
+Object.assign(sprites, require('./build-mage-fx.cjs').buildMageFx(out));
 // pixelfx 이펙트: scripts/art-src/pixelfx
 Object.assign(sprites, require('./build-pixelfx.cjs').buildPixelfx(out));
 

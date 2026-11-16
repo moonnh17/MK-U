@@ -86,7 +86,7 @@ describe('데이터 검증', () => {
     });
 
     it('모든 스킬이 발동 함수를 가진다 (마기법사 남은 스킬은 C·D 단계)', () => {
-      const pending = ['elementCycle', 'pureUnfolding'];
+      const pending = ['elementCycle', 'pureUnfolding', 'executionWill'];
       expect(gameData.skills.skills.filter((s) => !isSkillImplemented(s.id) && !pending.includes(s.id)).map((s) => s.id)).toEqual([]);
     });
 

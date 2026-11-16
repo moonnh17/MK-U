@@ -8111,6 +8111,270 @@
           "loop": false
         }
       }
+    },
+    "player_magiMage": {
+      "file": "mku/player_magiMage.png",
+      "frameWidth": 46,
+      "frameHeight": 52,
+      "frames": 13,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "moveFront": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        },
+        "moveBack": {
+          "from": 5,
+          "to": 8,
+          "fps": 8
+        },
+        "move": {
+          "from": 9,
+          "to": 12,
+          "fps": 8
+        }
+      }
+    },
+    "player_baekon": {
+      "file": "mku/player_baekon.png",
+      "frameWidth": 44,
+      "frameHeight": 52,
+      "frames": 13,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "moveFront": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        },
+        "moveBack": {
+          "from": 5,
+          "to": 8,
+          "fps": 8
+        },
+        "move": {
+          "from": 9,
+          "to": 12,
+          "fps": 8
+        }
+      }
+    },
+    "player_hwigang": {
+      "file": "mku/player_hwigang.png",
+      "frameWidth": 44,
+      "frameHeight": 52,
+      "frames": 13,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "moveFront": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        },
+        "moveBack": {
+          "from": 5,
+          "to": 8,
+          "fps": 8
+        },
+        "move": {
+          "from": 9,
+          "to": 12,
+          "fps": 8
+        }
+      }
+    },
+    "summon_will_construct": {
+      "file": "mku/summon_will_construct.png",
+      "frameWidth": 42,
+      "frameHeight": 52,
+      "frames": 13,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "moveFront": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        },
+        "moveBack": {
+          "from": 5,
+          "to": 8,
+          "fps": 8
+        },
+        "move": {
+          "from": 9,
+          "to": 12,
+          "fps": 8
+        }
+      }
+    },
+    "summon_magi_soldier": {
+      "file": "mku/summon_magi_soldier.png",
+      "frameWidth": 42,
+      "frameHeight": 56,
+      "frames": 13,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "moveFront": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        },
+        "moveBack": {
+          "from": 5,
+          "to": 8,
+          "fps": 8
+        },
+        "move": {
+          "from": 9,
+          "to": 12,
+          "fps": 8
+        }
+      }
+    },
+    "summon_imitation_golem": {
+      "file": "mku/summon_imitation_golem.png",
+      "frameWidth": 54,
+      "frameHeight": 68,
+      "frames": 13,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 4
+        },
+        "moveFront": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        },
+        "moveBack": {
+          "from": 5,
+          "to": 8,
+          "fps": 8
+        },
+        "move": {
+          "from": 9,
+          "to": 12,
+          "fps": 8
+        }
+      }
+    },
+    "fx_summon_will_shot": {
+      "file": "mku/fx_summon_will_shot.png",
+      "frameWidth": 28,
+      "frameHeight": 18,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 14,
+          "loop": true
+        }
+      }
+    },
+    "fx_summon_will_hit": {
+      "file": "mku/fx_summon_will_hit.png",
+      "frameWidth": 48,
+      "frameHeight": 48,
+      "frames": 2,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 1,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_summon_soldier_thrust": {
+      "file": "mku/fx_summon_soldier_thrust.png",
+      "frameWidth": 56,
+      "frameHeight": 20,
+      "frames": 4,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 3,
+          "fps": 16,
+          "loop": false
+        }
+      }
+    },
+    "fx_summon_soldier_burst": {
+      "file": "mku/fx_summon_soldier_burst.png",
+      "frameWidth": 62,
+      "frameHeight": 64,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_summon_golem_crush": {
+      "file": "mku/fx_summon_golem_crush.png",
+      "frameWidth": 94,
+      "frameHeight": 96,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_summon_golem_shell": {
+      "file": "mku/fx_summon_golem_shell.png",
+      "frameWidth": 78,
+      "frameHeight": 80,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 10,
+          "loop": false
+        }
+      }
     }
   }
 }

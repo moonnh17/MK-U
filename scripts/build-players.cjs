@@ -1,4 +1,4 @@
-// 플레이어(마기학자·헥타르·아크로·전사·야만용사·성기사) 그림: scripts/art-src/players/*.png → public/assets/mku/player_*.png + art.json 항목
+// 플레이어(마기학자·헥타르·아크로·전사·야만용사·성기사·마기법사 계열)와 집행 의지체 소환체 그림: scripts/art-src/players·mage/*.png → public/assets/mku/<key>.png + art.json 항목
 //
 // 원본은 사용자가 준 5열×2줄 초록 배경 격자(2000×1116). 원본 프레임들은 늘 같은 발만 들려 있고 옆모습 다리는 거의 움직이지 않아
 // 방향마다 기준 프레임 하나만 쓰고, 걷기는 게임 크기(키 52px 시트)에서 만든다.
@@ -57,6 +57,16 @@ const PLAYERS = {
     front: [['warrior-3', 0, 1], ['warrior-3', 0, 3], ['warrior-3', 1, 1], ['warrior-3', 0, 3]],
     back: [['warrior-9', 0, 1], ['warrior-9', 1, 0], ['warrior-9', 1, 2], ['warrior-9', 1, 0]],
   },
+  // 마기법사 계열·집행 의지체 소환체(direct): 원본은 이미 배경이 투명한 1344×752 시트. 윗줄 = 서기 + 정면 걷기 4, 아랫줄 1~4 = 옆 걷기.
+  // 뒷모습 원본이 없어 정면 걷기를 그대로 쓴다(임시). fit: 화면 키(px)가 플레이어(26)와 다른 소환체
+  ...Object.fromEntries([
+    ['player_magiMage', 'magiMage'],
+    ['player_baekon', 'baekon'],
+    ['player_hwigang', 'hwigang'],
+    ['summon_will_construct', '../mage/summon_will_construct'],
+    ['summon_magi_soldier', '../mage/summon_magi_soldier', 28],
+    ['summon_imitation_golem', '../mage/summon_imitation_golem', 34],
+  ].map(([key, name, fit]) => [key, { direct: true, fit, idle: [name, 0, 0], front: row(name, 0, [1, 2, 3, 4]), back: row(name, 0, [1, 2, 3, 4]), side: row(name, 1, [1, 2, 3, 4]) }])),
 };
 
 // ---------- 원본 칸 ----------
@@ -361,14 +371,15 @@ function buildPlayers(outDir) {
       return { fs, b, cx: feetCenter(fs[0], bs[0]) };
     });
     // 같은 배율: 가장 큰 키를 52px로. 발 가운데를 프레임 가운데에
-    const s = H / Math.max(...dirs.map((x) => x.b.h));
+    const fh = (def.fit ?? FIT) * DENSITY;
+    const s = fh / Math.max(...dirs.map((x) => x.b.h));
     const half = Math.max(...dirs.map(({ b, cx }) => Math.max(cx - b.x, b.x + b.w - cx))) * s;
     const fw = Math.ceil((half * 2) / DENSITY) * DENSITY;
     // 원본 칸 하나를 게임 크기로: 가로는 방향의 상자·발 가운데에 맞추고, 세로는 crop 줄 범위의 아래를 시트 바닥에
     const shrink = (f, { b, cx }, y0 = b.y, h0 = b.h) => {
       const w = Math.max(1, Math.round(b.w * s)), h = Math.max(1, Math.round(h0 * s));
-      const im = k.blank(fw, H);
-      k.paste(im, k.resize(k.crop(f, b.x, y0, b.w, h0), w, h, 0.5), Math.round(fw / 2 - (cx - b.x) * s), H - h);
+      const im = k.blank(fw, fh);
+      k.paste(im, k.resize(k.crop(f, b.x, y0, b.w, h0), w, h, 0.5), Math.round(fw / 2 - (cx - b.x) * s), fh - h);
       return im;
     };
     let frames, anims;
@@ -402,13 +413,13 @@ function buildPlayers(outDir) {
         move: { from: 9, to: 12, fps: 8 },
       };
     }
-    const sheetImg = k.blank(fw * frames.length, H);
+    const sheetImg = k.blank(fw * frames.length, fh);
     frames.forEach((f, i) => k.paste(sheetImg, f, i * fw, 0));
     k.write(path.join(outDir, `${key}.png`), sheetImg);
     out[key] = {
       file: `mku/${key}.png`,
       frameWidth: fw,
-      frameHeight: H,
+      frameHeight: fh,
       frames: frames.length,
       density: DENSITY,
       anims,
