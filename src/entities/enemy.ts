@@ -10,6 +10,7 @@ import type { CorruptionState } from '../systems/acro';
 import { effectiveRank, eliteMods, type EliteMods } from '../systems/elites';
 import { aimLocked, burstAngle, chainWindup, forceWindup, initialAi, keepDistanceStep, rootAngle, stepAi, type AiEvent, type AiState } from '../systems/enemyAi';
 import type { BleedState, BurnState } from '../systems/tags';
+import { slowAmount, type FrostState } from '../systems/magiMage';
 import { petrifyCrack, shatter, StatusLook, type StatusKind } from './statusLook';
 import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank, SpriteRef } from '../types/data';
 import { Beams, DelayedBlast, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
@@ -88,6 +89,14 @@ export class Enemy {
   /** 굳어 가는 시선(사르비스의 방패): 이동 속도 감소 비율, 겨눈 시간 */
   gazeSlow = 0;
   gazeSec = 0;
+  /** 냉기 둔화(빙창·얼음 보주·서리): 비율과 남은 시간. 한파는 매 프레임 다시 정한다 */
+  chillSlow = 0;
+  chillSec = 0;
+  auraSlow = 0;
+  /** 서리 중첩 (마기법사 각성 「서리」) */
+  frost: FrostState | null = null;
+  /** 빙결 남은 시간(초): 움직이지도 공격하지도 않는다 (보스는 걸리지 않는다) */
+  freezeLeft = 0;
   /** 석화 동안 몸을 회색 돌로 바꾸는 색 행렬 (WebGL에서만) */
   private stoneFx: ReturnType<NonNullable<Phaser.GameObjects.Sprite['preFX']>['addColorMatrix']> | null = null;
   /** 걸려 있는 마기 변질 */
@@ -293,16 +302,43 @@ export class Enemy {
     this.restoreTint();
   }
 
-  /** 피격 번쩍임·기절이 끝난 뒤 돌아갈 색: 석화 > 기절 > 화상 > 원래 색 */
+  /** 냉기 둔화: 센 쪽, 긴 쪽 */
+  chill(slow: number, sec: number): void {
+    if (this.dead || slow <= 0) return;
+    const was = this.chillSec > 0;
+    this.chillSlow = this.chillSec > 0 ? Math.max(this.chillSlow, slow) : slow;
+    this.chillSec = Math.max(this.chillSec, sec);
+    if (!was) this.restoreTint();
+  }
+
+  /** 빙결 (보스·석화 중이면 무시, 다시 걸면 긴 쪽) */
+  freeze(sec: number): boolean {
+    if (this.dead || this.isBossRank || this.petrified || sec <= 0) return false;
+    this.freezeLeft = Math.max(this.freezeLeft, sec);
+    this.sprite.setVelocity(0, 0);
+    this.sprite.anims.pause();
+    this.restoreTint();
+    return true;
+  }
+
+  /** 이동 속도 배율: 시선·냉기 둔화 중 센 것 + 한파, 상한 */
+  get moveMul(): number {
+    const st = getContext().data.juice.status;
+    return 1 - slowAmount([this.gazeSlow, this.chillSec > 0 ? this.chillSlow : 0], this.auraSlow, st.slowCap);
+  }
+
+  /** 피격 번쩍임·기절이 끝난 뒤 돌아갈 색: 석화 > 빙결 > 기절 > 화상 > 원래 색 */
   restoreTint(): void {
     if (!this.sprite.active) return;
     const st = getContext().data.juice.status;
     if (this.petrified) this.sprite.setTint(hexColor(st.petrifyTint));
+    else if (this.freezeLeft > 0) this.sprite.setTint(hexColor(st.freezeTint));
     else if (this.stunLeft > 0 && this.def.ai !== 'boss') this.sprite.setTint(0x8888ff);
     // 보스는 물들지 않고 문양·입자만
     else if (this.burnState && !this.isBossRank) this.sprite.setTint(hexColor(st.burn.tint));
     else if (this.bleedState && !this.isBossRank) this.sprite.setTint(hexColor(st.bleed.tint));
     else if (this.gazeSlow > 0) this.sprite.setTint(hexColor(st.petrifyTint));
+    else if (this.chillSec > 0 && !this.isBossRank) this.sprite.setTint(hexColor(st.chillTint));
     else this.sprite.clearTint();
   }
 
@@ -387,6 +423,21 @@ export class Enemy {
     const dx = p.x - this.sprite.x;
     const dy = p.y - this.sprite.y;
     const dist = Math.hypot(dx, dy);
+    if (this.chillSec > 0) {
+      this.chillSec -= dt;
+      if (this.chillSec <= 0) this.restoreTint();
+    }
+    if (this.frost) this.frost = this.frost.leftSec > dt ? { ...this.frost, leftSec: this.frost.leftSec - dt } : null;
+    if (this.freezeLeft > 0) {
+      this.freezeLeft -= dt;
+      this.sprite.setVelocity(0, 0);
+      if (this.freezeLeft <= 0) {
+        this.freezeLeft = 0;
+        this.sprite.anims.resume();
+        this.restoreTint();
+      }
+      return;
+    }
     if (this.def.ai === 'idle') {
       this.sprite.setVelocity(0, 0);
       return;
@@ -425,7 +476,7 @@ export class Enemy {
 
     const attack = this.attacks.find((a) => a.id === this.ai.attackId);
     if (this.ai.phase === 'chase') {
-      const speed = this.def.moveSpeed * this.mods.moveSpeedMul * (1 - this.gazeSlow);
+      const speed = this.def.moveSpeed * this.mods.moveSpeedMul * this.moveMul;
       const len = dist || 1;
       // 원거리 적은 거리를 유지한다
       const k = this.def.keepDistance ? keepDistanceStep(dist, this.def.keepDistance, KEEP_BAND) : 1;

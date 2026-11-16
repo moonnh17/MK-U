@@ -9,7 +9,7 @@ import type { ItemState } from '../items/runtime';
 import type { ConversionLog } from '../systems/advancement';
 import { newRunRecord, type CrystalResult, type RunRecord } from '../systems/runRecord';
 import { upgradeBonus, type UpgradeLevels } from '../systems/upgrades';
-import type { EncounterKindId, GradeId, JobId, SchoolId } from '../types/data';
+import type { ElementId, EncounterKindId, GradeId, JobId, SchoolId } from '../types/data';
 
 /** 스테이지를 넘어가도 유지되는 플레이어 상태 */
 export interface PlayerState {
@@ -53,6 +53,8 @@ export interface PlayerState {
   hiddenBossesMet: string[];
   /** 이번 런에 띄운 제미니 미니 대사 (이벤트·대사 키, 같은 런에 반복하지 않는다) */
   geminiSaid: string[];
+  /** 이번 런에 쓴 원소 (마기법사 원소 대합주) */
+  elementsUsed: ElementId[];
   /** 결산용 런 기록 (스테이지를 넘어가도 유지) */
   record: RunRecord;
   /** 영구 강화로 더한 기본 체력·보호막 최대치 (스탯은 시작 스탯에 이미 들어 있다) */
@@ -185,6 +187,7 @@ export function newPlayerState(data: GameData, jobId: string = data.jobs.startJo
     lootShift: {},
     hiddenBossesMet: [],
     geminiSaid: [],
+    elementsUsed: [],
     record: newRunRecord(),
   };
 }

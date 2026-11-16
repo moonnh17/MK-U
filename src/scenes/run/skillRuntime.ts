@@ -122,6 +122,12 @@ export class SkillRuntime {
         this.run.dashLeft = sec;
       },
       teleport: (dir, distance, stepPx) => this.run.condition.teleport(dir, distance, stepPx),
+      elementsUsed: () => this.run.session.player.elementsUsed,
+      blocked: (x, y) => this.run.condition.blockedAt(1)(x, y),
+      chill: (e, slow, sec) => e.chill(slow, sec),
+      freeze: (e, sec) => {
+        if (e.freeze(sec)) this.run.mage.iceBurst(e);
+      },
       refundCooldown: (id, ratio) => {
         const p = this.run.session.player;
         const owned = p.loadout.owned[id];
@@ -249,6 +255,7 @@ export class SkillRuntime {
     const c = this.run.combat;
     if (c.buffLeft > 0) out.push({ id: 'weaponBuff', label: this.run.ctx.t('buff.warBanner'), color: c.buffColor, leftSec: c.buffLeft, totalSec: c.buffTotal });
     out.push(...this.run.itemRt.buffs());
+    out.push(...this.run.mage.buffs());
     return out;
   }
 
@@ -295,7 +302,8 @@ export class SkillRuntime {
       this.run.toastThrottled(this.run.ctx.t('skillMsg.noTarget'));
       return;
     }
-    if (impl.cast(this.hostFor(id), { def, owned, values: sv.values })) {
+    if (impl.cast(this.hostFor(id), { def, owned, values: this.run.mage.beforeCast(def, sv.values) })) {
+      this.run.mage.afterCast(def);
       p.cooldowns = { ...p.cooldowns, [id]: this.cooldownOf(sv.cooldownSec) };
       sfx('skill');
       // 스킬을 쓸 때마다 스킬 색 파동과 흔들림

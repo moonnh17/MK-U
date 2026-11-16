@@ -13,7 +13,7 @@ const SRC = path.join(REPO, 'scripts/art-src/pixelfx');
 const DENSITY = 2;
 /**
  * spriteKey → art-src/pixelfx 안의 시트 이름. 우리가 만든 이펙트의 원본 코드는 art-src/pixelfx/src(pixelfx의 src/fx/mku에 넣어 뽑는다).
- * center: 이펙트 기준점을 가운데에 두고 위아래·좌우를 같게 자른다(게임이 그림 가운데에 놓는 것). play: 'play' 애니메이션(once 한 번, loop 반복)
+ * ground: 기준점을 아래 가운데에(낙하·벼락). center: 이펙트 기준점을 가운데에 두고 위아래·좌우를 같게 자른다(게임이 그림 가운데에 놓는 것). play: 'play' 애니메이션(once 한 번, loop 반복)
  */
 const FX = {
   fx_death_dark: { name: 'death-dark', center: true },
@@ -34,11 +34,23 @@ const FX = {
   fx_w_flame: { name: 'w-flame', center: true, play: 'loop' },
   // 케라우노스 하늘 벼락: pixelfx lightning/lightning-strike(기본 색). 모으는 0.7초는 빼고 내리꽂히는 프레임부터, 칸은 자르지 않는다(기준점 = 발밑 120,228)
   fx_bolt_strike: { name: 'bolt-strike', play: 'once', from: 13, to: 46, keep: true },
+  // 마기법사 백온파: 원소색(화염 #ff6a2a·냉기 #5ad0f0·번개 #ffd83a)으로 다시 칠한 라이브러리 이펙트 + 연쇄 번개 줄기(mage-bolt, 자작)
+  fx_mage_fireball: { name: 'mage-fireball', center: true, play: 'loop' },
+  fx_mage_fire_blast: { name: 'mage-fire-blast', center: true, play: 'once' },
+  fx_mage_ice_spear: { name: 'mage-ice-spear', center: true, play: 'loop' },
+  fx_mage_ice_orb: { name: 'mage-ice-orb', center: true, play: 'loop' },
+  fx_mage_ice_burst: { name: 'mage-ice-burst', center: true, play: 'once', to: 19 },
+  fx_mage_bolt: { name: 'mage-bolt', play: 'once' },
+  fx_mage_zap: { name: 'mage-zap', center: true, play: 'once' },
+  fx_mage_strike: { name: 'mage-strike', ground: true, play: 'once', from: 13, to: 32 },
+  fx_mage_meteor: { name: 'mage-meteor', ground: true, play: 'once', to: 30 },
+  fx_mage_icicle: { name: 'mage-icicle', ground: true, play: 'once', from: 14, to: 32 },
+  fx_mage_ward: { name: 'mage-ward', center: true, play: 'loop' },
 };
 
 function buildPixelfx(outDir) {
   const out = {};
-  for (const [key, { name, center, play, from = 0, to, keep }] of Object.entries(FX)) {
+  for (const [key, { name, center, ground, play, from = 0, to, keep }] of Object.entries(FX)) {
     const meta = JSON.parse(fs.readFileSync(path.join(SRC, `${name}.json`), 'utf8')).meta.pixelfx;
     const sheet = k.read(path.join(SRC, `${name}.png`));
     const [fw, fh] = meta.frameSize;
@@ -57,6 +69,11 @@ function buildPixelfx(outDir) {
       const [ox, oy] = meta.pivot ?? meta.origin;
       const hx = Math.max(ox - x0, x1 - ox), hy = Math.max(oy - y0, y1 - oy);
       x0 = Math.max(0, ox - hx); x1 = Math.min(fw, ox + hx); y0 = Math.max(0, oy - hy); y1 = Math.min(fh, oy + hy);
+    } else if (ground) {
+      // 땅에 떨어지는 이펙트: 기준점(발밑)이 아래 가운데에 오게 좌우는 같게, 아래는 기준점에서 자른다 (게임은 origin 0.5,1로 놓는다)
+      const [ox, oy] = meta.pivot ?? meta.origin;
+      const hx = Math.max(ox - x0, x1 - ox);
+      x0 = Math.max(0, ox - hx); x1 = Math.min(fw, ox + hx); y1 = Math.min(fh, oy + 1);
     }
     // density로 나눠 떨어지게 짝수로 넓힌다
     const w = Math.ceil((x1 - x0) / DENSITY) * DENSITY, h = Math.ceil((y1 - y0) / DENSITY) * DENSITY;

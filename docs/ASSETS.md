@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 746개 · 그림 있음 706개
+전체 762개 · 그림 있음 717개
 
 ## player (9)
 
@@ -257,7 +257,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (227)
+## skill (238)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -446,6 +446,14 @@
 | `skill_pPrayer_prayer1` | 회생의 기도 (prayer1) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer1.png (6프레임) |
 | `skill_pPrayer_prayer2` | 회생의 기도 (prayer2) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer2.png (6프레임) |
 | `skill_pPrayer_prayer3` | 회생의 기도 (prayer3) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer3.png (6프레임) |
+| `fx_mage_fireball` | 화염구 (ball) | 22×22 | center | #ff6a2a | mku/fx_mage_fireball.png (22프레임) |
+| `fx_mage_fire_blast` | 화염구 (blast) 외 1곳 | 48×48 | center | #ff6a2a | mku/fx_mage_fire_blast.png (23프레임) |
+| `fx_mage_ice_spear` | 빙창 (spear) 외 1곳 | 26×26 | center | #5ad0f0 | mku/fx_mage_ice_spear.png (14프레임) |
+| `fx_mage_ice_burst` | 빙창 (hit) 외 1곳 | 18×18 | center | #5ad0f0 | mku/fx_mage_ice_burst.png (20프레임) |
+| `fx_mage_ice_orb` | 얼음 보주 (orb) | 18×18 | center | #5ad0f0 | mku/fx_mage_ice_orb.png (43프레임) |
+| `fx_mage_bolt` | 뇌격 (bolt) | 10×10 | center | #ffd83a | mku/fx_mage_bolt.png (7프레임) |
+| `fx_mage_zap` | 뇌격 (zap) | 22×22 | center | #ffd83a | mku/fx_mage_zap.png (17프레임) |
+| `fx_mage_ward` | 원소 가호 (aura) | 30×30 | center | #ff9a4a | mku/fx_mage_ward.png (72프레임) |
 | `summon_will_construct` | 집행 의지체 (will) | 12×26 | center | #b266ff | mku/summon_will_construct.png (13프레임) |
 | `summon_magi_soldier` | 집행 의지체 (soldier) | 12×28 | center | #2c1a45 | mku/summon_magi_soldier.png (13프레임) |
 | `summon_imitation_golem` | 집행 의지체 (golem) | 20×34 | center | #6a6a78 | mku/summon_imitation_golem.png (13프레임) |
@@ -488,6 +496,9 @@
 | `ult_judgment_sword` | 심판의 강림 (sword) | 64×64 | center | #e8d24a | mku/ult_judgment_sword.png (6프레임) |
 | `ult_judgment_impact` | 심판의 강림 (impact) | 64×64 | center | #e8d24a | mku/ult_judgment_impact.png (6프레임) |
 | `ult_judgment_shield` | 심판의 강림 (shield) | 32×32 | center | #e8d24a | mku/ult_judgment_shield.png (6프레임) |
+| `fx_mage_meteor` | 원소 대합주 (fire) | 80×80 | center | #ff6a2a | mku/fx_mage_meteor.png (31프레임) |
+| `fx_mage_icicle` | 원소 대합주 (ice) | 44×44 | center | #5ad0f0 | mku/fx_mage_icicle.png (19프레임) |
+| `fx_mage_strike` | 원소 대합주 (lightning) | 70×70 | center | #ffd83a | mku/fx_mage_strike.png (20프레임) |
 
 ## lab (7)
 
@@ -554,7 +565,7 @@
 | `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | mku/item_orion_shield.png (1프레임) |
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | mku/item_hectar_ram.png (1프레임) |
 
-## icon (71)
+## icon (76)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -585,7 +596,12 @@
 | `icon_skill_smite` | 강타 | 16×16 | center | #e8d24a | mku/icon_skill_smite.png (1프레임) |
 | `icon_skill_holySwords` | 성검 | 16×16 | center | #e8d24a | mku/icon_skill_holySwords.png (1프레임) |
 | `icon_skill_prayerOfRevival` | 회생의 기도 | 16×16 | center | #e8d24a | mku/icon_skill_prayerOfRevival.png (1프레임) |
+| `icon_skill_fireball` | 화염구 | 16×16 | center | #ff6a2a | — |
 | `icon_skill_fireWall` | 화염벽 | 16×16 | center | #ff6a2a | — |
+| `icon_skill_iceSpear` | 빙창 | 16×16 | center | #5ad0f0 | — |
+| `icon_skill_iceOrb` | 얼음 보주 | 16×16 | center | #5ad0f0 | — |
+| `icon_skill_chainLightning` | 뇌격 | 16×16 | center | #ffd83a | — |
+| `icon_skill_elementWard` | 원소 가호 | 16×16 | center | #ff9a4a | — |
 | `icon_skill_teleport` | 순간이동 | 16×16 | center | #b266ff | — |
 | `icon_skill_executionWill` | 집행 의지체 | 16×16 | center | #b266ff | — |
 | `icon_skill_elementCycle` | 원소 순환 | 16×16 | center | #ff6a2a | — |

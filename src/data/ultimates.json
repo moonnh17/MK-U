@@ -299,9 +299,20 @@
       "school": "baekon",
       "tags": ["magic", "ranged"],
       "sources": { "fall": ["magic", "ranged"] },
-      "values": { "damage": 30 },
+      "values": {
+        "strikes": 5, "fullStrikes": 8, "fullDamageMul": 1.5, "waveGapSec": 0.9, "strikeGapSec": 0.12, "radius": 30, "spreadPx": 110,
+        "fireDamage": 26, "burnStacks": 3, "fireDelaySec": 0.6,
+        "iceDamage": 22, "freezeSec": 1.2, "iceDelaySec": 0.25,
+        "lightningDamage": 32, "lightningDelaySec": 0.05
+      },
       "color": "#ff6a2a",
-      "sprites": {}
+      "sprites": {
+        "fire": { "spriteKey": "fx_mage_meteor", "color": "#ff6a2a", "size": 80 },
+        "ice": { "spriteKey": "fx_mage_icicle", "color": "#5ad0f0", "size": 44 },
+        "lightning": { "spriteKey": "fx_mage_strike", "color": "#ffd83a", "size": 70 },
+        "fireBlast": { "spriteKey": "fx_mage_fire_blast", "color": "#ff6a2a", "size": 60 },
+        "iceBurst": { "spriteKey": "fx_mage_ice_burst", "color": "#5ad0f0", "size": 50 }
+      }
     },
     {
       "id": "sadExecution",

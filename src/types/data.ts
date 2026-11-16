@@ -1010,7 +1010,7 @@ export type SkillSlotKind = 'active' | 'passive' | 'mastery';
 export const ELEMENT_IDS = ['fire', 'ice', 'lightning'] as const;
 export type ElementId = (typeof ELEMENT_IDS)[number];
 /** 개전 각인 효과 종류. 효과별 수치 이름은 levels 값 키 */
-export const IMPRINT_EFFECTS = ['fireDamage', 'staffDamage', 'followUp'] as const;
+export const IMPRINT_EFFECTS = ['fireDamage', 'staffDamage', 'ignite', 'frost', 'coldAura', 'staticCharge', 'purify', 'followUp'] as const;
 export type ImprintEffect = (typeof IMPRINT_EFFECTS)[number];
 
 /** 마기법사 개전 각인: 액티브 1번 칸 스킬의 각인만 상시 적용 */
@@ -1672,6 +1672,8 @@ export interface JuiceData {
     markGapPx: number; markSideGapPx: number; markMaxScale: number; markFullPulse: number; markFullParticleMul: number;
     petrifyTint: string; petrifyColors: string[]; petrifyCrackSec: number; shatterShards: number; shatterSpeed: [number, number]; shatterLifeSec: number;
     executeColor: string; executeSec: number; executeSize: number;
+    /** 냉기(마기법사 백온파): 빙결·둔화 물듦 색, 적 이동 감속 상한(시선·둔화·한파 합) */
+    freezeTint: string; chillTint: string; slowCap: number;
   };
   death: { shards: IntRange; eliteShards: IntRange; shardSpeed: [number, number]; shardLifeSec: number; shardSize: number; flashSec: number; orbPopPx: [number, number]; orbPopSec: number };
   /** 플레이어 피격: 화면 가장자리 붉은 번쩍임, 낮은 체력 맥박 */

@@ -866,6 +866,9 @@ export class WeaponCombat {
       if (source) dmg *= elementDamageMul(d.skills.skills.find((s) => s.id === source)?.element, im);
       else dmg *= staffDamageMul(this.run.weaponDef().category, im);
     }
+    // 시전 강화(대전·원소 순환), 원소 가호(원소 스킬 피해)
+    dmg *= this.run.mage.boostMul(source);
+    if (this.run.mage.elementOf(source)) for (const o of this.run.skillRt.skillObjects) dmg *= 1 + (o.elementDamage?.() ?? 0);
     // 아이템: 피해 %(더한 뒤 한 번), 보스·적이 받는 피해·스킬 피해, 적중 효과(신검 공간격·참마검)
     const boss = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss';
     const hm = this.run.itemRt.hitMods(this.run.rng, (c) => skillChance(c, 'success', ['chance'], d.tags));
@@ -891,6 +894,7 @@ export class WeaponCombat {
     const crit = this.pendingCrit;
     this.pendingCrit = false;
     const killed = this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption), source, { tags, crit, space });
+    this.run.mage.onHit(enemy, source, killed);
     // 신성한 이코르: 근접 공격이 맞으면 확률로 출혈
     const mb = this.run.itemRt.first('meleeBleed');
     if (mb && !killed && tags.includes('melee') && this.run.rng.chance(mb.chance)) this.run.host.bleed(enemy, mb.stacks);
@@ -929,6 +933,7 @@ export class WeaponCombat {
     const steal = this.run.itemRt.sums.lifesteal + (this.run.skillRt.playerMods().lifesteal ?? 0);
     if (steal > 0 && dealt > 0) this.run.host.heal(dealt * steal, false);
     if (killed) {
+      this.run.mage.onKill(enemy);
       this.spreadBurn(enemy);
       this.run.onEnemyKilled(enemy);
     }

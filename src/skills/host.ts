@@ -12,7 +12,7 @@ import type { CorruptionState } from '../systems/acro';
 import type { ShieldState } from '../systems/shield';
 import type { OwnedSkill } from '../systems/skills';
 import type { PlayerMods } from '../systems/vitals';
-import type { RiftDef, SkillDef, SpaceCutDef, SpriteRef, TagId, UltimateDef } from '../types/data';
+import type { ElementId, RiftDef, SkillDef, SpaceCutDef, SpriteRef, TagId, UltimateDef } from '../types/data';
 
 export interface SkillHost {
   readonly scene: Phaser.Scene;
@@ -91,6 +91,14 @@ export interface SkillHost {
   dash(dir: Vec2, speed: number, sec: number): void;
   /** 순간이동: dir 쪽으로 distance만큼, 벽 앞에서 멈춘다 */
   teleport(dir: Vec2, distance: number, stepPx: number): { from: Vec2; to: Vec2 };
+  /** 이번 런에 쓴 원소 (원소 대합주) */
+  elementsUsed(): readonly ElementId[];
+  /** 벽(지나갈 수 없는 칸)인지 */
+  blocked(x: number, y: number): boolean;
+  /** 냉기 둔화: slow 비율, sec초 (센 쪽·긴 쪽) */
+  chill(enemy: Enemy, slow: number, sec: number): void;
+  /** 빙결 sec초 (보스는 걸리지 않는다) */
+  freeze(enemy: Enemy, sec: number): void;
   /** 빛 입자가 사방으로 터지는 연출 */
   burst(at: Vec2, color: string): void;
   /** 짧은 이펙트를 fxSec 뒤에 지운다 */
@@ -128,6 +136,8 @@ export interface SkillObject {
   onKill?(host: SkillHost, enemy: Enemy): void;
   /** 이 오브젝트가 있는 동안 플레이어에게 주는 보정 (MK 슈트 등) */
   playerMods?(): Partial<PlayerMods>;
+  /** 원소 스킬 피해 증가 (원소 가호) */
+  elementDamage?(): number;
   /** 플레이어가 받을 피해를 먼저 흡수한다(심판의 강림 보호막). 남은 피해를 돌려준다 */
   absorb?(amount: number): number;
 }

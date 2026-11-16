@@ -160,9 +160,8 @@ export class PlayerCondition {
     return { from, to };
   }
 
-  /** 플레이어 몸이 (x, y)에 서면 벽·문·소품에 걸리는지 */
-  private blockedAt(): (x: number, y: number) => boolean {
-    const r = this.run.ctx.data.player.size / 2;
+  /** 반지름 r(기본: 플레이어 몸)인 것이 (x, y)에 서면 벽·문·소품에 걸리는지 */
+  blockedAt(r = this.run.ctx.data.player.size / 2): (x: number, y: number) => boolean {
     return (x, y) =>
       this.run.physics.overlapRect(x - r, y - r, r * 2, r * 2, false, true).some((b) => {
         const go = b.gameObject;

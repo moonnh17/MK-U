@@ -8375,6 +8375,171 @@
           "loop": false
         }
       }
+    },
+    "fx_mage_fireball": {
+      "file": "mku/fx_mage_fireball.png",
+      "frameWidth": 118,
+      "frameHeight": 54,
+      "frames": 22,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 21,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_mage_fire_blast": {
+      "file": "mku/fx_mage_fire_blast.png",
+      "frameWidth": 160,
+      "frameHeight": 160,
+      "frames": 23,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 22,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_mage_ice_spear": {
+      "file": "mku/fx_mage_ice_spear.png",
+      "frameWidth": 160,
+      "frameHeight": 50,
+      "frames": 14,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 13,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_mage_ice_orb": {
+      "file": "mku/fx_mage_ice_orb.png",
+      "frameWidth": 108,
+      "frameHeight": 110,
+      "frames": 43,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 42,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_mage_ice_burst": {
+      "file": "mku/fx_mage_ice_burst.png",
+      "frameWidth": 130,
+      "frameHeight": 118,
+      "frames": 20,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 19,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_mage_bolt": {
+      "file": "mku/fx_mage_bolt.png",
+      "frameWidth": 160,
+      "frameHeight": 36,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_mage_zap": {
+      "file": "mku/fx_mage_zap.png",
+      "frameWidth": 144,
+      "frameHeight": 106,
+      "frames": 17,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 16,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_mage_strike": {
+      "file": "mku/fx_mage_strike.png",
+      "frameWidth": 238,
+      "frameHeight": 228,
+      "frames": 20,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 19,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_mage_meteor": {
+      "file": "mku/fx_mage_meteor.png",
+      "frameWidth": 270,
+      "frameHeight": 186,
+      "frames": 31,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 30,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_mage_icicle": {
+      "file": "mku/fx_mage_icicle.png",
+      "frameWidth": 142,
+      "frameHeight": 98,
+      "frames": 19,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 18,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_mage_ward": {
+      "file": "mku/fx_mage_ward.png",
+      "frameWidth": 118,
+      "frameHeight": 96,
+      "frames": 72,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 71,
+          "fps": 18,
+          "loop": true
+        }
+      }
     }
   }
 }

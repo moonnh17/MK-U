@@ -4,7 +4,7 @@ import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
 import { skillAllowed } from '../src/systems/advancement';
 import { drawSkillCards } from '../src/systems/cards';
-import { activeImprint, elementDamageMul, judgeBySlots, staffDamageMul } from '../src/systems/magiMage';
+import { activeImprint, addElement, castBoost, chargeAfterMove, concertFull, elementDamageMul, frostHit, judgeBySlots, slowAmount, staffDamageMul } from '../src/systems/magiMage';
 import { awakeningReady, emptyLoadout, equipSkill, findSkill, setSkillLevel, type SkillLoadout } from '../src/systems/skills';
 import { tickBurn, applyBurn } from '../src/systems/tags';
 import type { BurnRule } from '../src/types/data';
@@ -130,5 +130,62 @@ describe('마기법사 카드 풀', () => {
     expect(skillAllowed(findSkill(S, 'fireWall'), scholar, null)).toBe(false);
     expect(skillAllowed(findSkill(S, 'fireWall'), scholar, 'hectar')).toBe(false);
     expect(skillAllowed(findSkill(S, 'railgun'), scholar, 'acro')).toBe(false);
+  });
+});
+
+describe('백온파: 서리·둔화', () => {
+  it('냉기 피해마다 서리 중첩, 3중첩이면 빙결하고 비운다', () => {
+    let st = frostHit(null, 3, 3);
+    expect(st).toEqual({ state: { stacks: 1, leftSec: 3 }, freeze: false });
+    st = frostHit(st.state, 3, 3);
+    expect(st.state?.stacks).toBe(2);
+    st = frostHit(st.state, 3, 3);
+    expect(st).toEqual({ state: null, freeze: true });
+  });
+  it('시간이 다 된 중첩은 처음부터', () => {
+    expect(frostHit({ stacks: 2, leftSec: 0 }, 3, 3).state?.stacks).toBe(1);
+  });
+  it('감속은 가장 센 것 + 한파, 상한', () => {
+    expect(slowAmount([0.3, 0.1], 0.15, 0.8)).toBeCloseTo(0.45);
+    expect(slowAmount([0.7], 0.2, 0.8)).toBeCloseTo(0.8);
+    expect(slowAmount([], 0, 0.8)).toBe(0);
+  });
+  it('빙창·얼음 보주는 냉기, 화염구는 화염, 뇌격은 번개, 원소 가호는 원소 없음', () => {
+    expect(['fireball', 'fireWall', 'iceSpear', 'iceOrb', 'chainLightning', 'elementWard'].map((id) => findSkill(S, id).element)).toEqual(['fire', 'fire', 'ice', 'ice', 'lightning', undefined]);
+  });
+});
+
+describe('백온파: 대전·원소 순환', () => {
+  const spark = activeImprint(loadout([['chainLightning', 3]]), S, mage, null);
+  const cycle = { damage: 0.18, windowSec: 3 };
+  it('이동한 거리만큼 충전, 가득 차면 멈춘다', () => {
+    expect(chargeAfterMove(0, 180, 360)).toBeCloseTo(0.5);
+    expect(chargeAfterMove(0.9, 360, 360)).toBe(1);
+  });
+  it('대전: 충전 비율만큼 피해, 가득 차면 연쇄 +2', () => {
+    expect(castBoost(0.5, spark, null, 'fire', null)).toEqual({ mul: 1.2, chains: 1, windowSec: 3 });
+    expect(castBoost(1, spark, null, 'fire', null)?.chains).toBe(2);
+    expect(castBoost(0, spark, null, 'fire', null)).toBeNull();
+  });
+  it('원소 순환: 앞서 쓴 원소와 다를 때만', () => {
+    expect(castBoost(0, null, cycle, 'ice', 'fire')?.mul).toBeCloseTo(1.18);
+    expect(castBoost(0, null, cycle, 'fire', 'fire')).toBeNull();
+    expect(castBoost(0, null, cycle, 'fire', null)).toBeNull();
+    expect(castBoost(0, null, cycle, undefined, 'fire')).toBeNull();
+  });
+  it('둘이 겹치면 곱한다', () => {
+    expect(castBoost(1, spark, cycle, 'ice', 'fire')?.mul).toBeCloseTo(1.4 * 1.18);
+  });
+});
+
+describe('원소 대합주', () => {
+  it('세 원소를 모두 써야 최대 강화', () => {
+    let used = addElement([], 'fire');
+    used = addElement(used, 'fire');
+    expect(used).toEqual(['fire']);
+    expect(concertFull(used)).toBe(false);
+    used = addElement(addElement(used, 'ice'), 'lightning');
+    expect(concertFull(used)).toBe(true);
+    expect(addElement(used, undefined)).toEqual(used);
   });
 });

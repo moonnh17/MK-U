@@ -1519,6 +1519,35 @@
       }
     },
     {
+      "id": "fireball",
+      "job": "magiMage",
+      "school": "baekon",
+      "kind": "active",
+      "nameKey": "skill.fireball",
+      "shortKey": "skill.fireball.short",
+      "descKey": "skill.fireball.desc",
+      "tags": ["magic", "ranged"],
+      "sources": { "blast": ["magic", "ranged"] },
+      "element": "fire",
+      "levels": [
+        { "cooldownSec": 4.5, "values": { "damage": 12, "radius": 22, "burnStacks": 2, "speed": 200, "range": 170 } },
+        { "cooldownSec": 4, "values": { "damage": 16, "radius": 26, "burnStacks": 2, "speed": 200, "range": 170 } },
+        { "cooldownSec": 3.5, "values": { "damage": 21, "radius": 30, "burnStacks": 3, "speed": 200, "range": 170 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.fireball",
+        "descKey": "imprint.fireball.desc",
+        "effect": "ignite",
+        "levels": [{ "ignite": 0.08 }, { "ignite": 0.12 }, { "ignite": 0.16 }],
+        "fixed": { "stacks": 1, "blastDamage": 6, "blastRadius": 24 }
+      },
+      "color": "#ff6a2a",
+      "sprites": {
+        "ball": { "spriteKey": "fx_mage_fireball", "color": "#ff6a2a", "size": 22 },
+        "blast": { "spriteKey": "fx_mage_fire_blast", "color": "#ff6a2a", "size": 48 }
+      }
+    },
+    {
       "id": "fireWall",
       "job": "magiMage",
       "school": "baekon",
@@ -1543,6 +1572,120 @@
       "color": "#ff6a2a",
       "sprites": {
         "flame": { "spriteKey": "fx_w_flame", "color": "#ff6a2a", "size": 14 }
+      }
+    },
+    {
+      "id": "iceSpear",
+      "job": "magiMage",
+      "school": "baekon",
+      "kind": "active",
+      "nameKey": "skill.iceSpear",
+      "shortKey": "skill.iceSpear.short",
+      "descKey": "skill.iceSpear.desc",
+      "tags": ["magic", "ranged"],
+      "sources": { "spear": ["magic", "ranged"] },
+      "element": "ice",
+      "levels": [
+        { "cooldownSec": 4, "values": { "damage": 10, "pierce": 2, "speed": 300, "range": 220, "slow": 0.3, "slowSec": 2 } },
+        { "cooldownSec": 3.5, "values": { "damage": 13, "pierce": 3, "speed": 300, "range": 220, "slow": 0.35, "slowSec": 2 } },
+        { "cooldownSec": 3, "values": { "damage": 17, "pierce": 4, "speed": 300, "range": 220, "slow": 0.4, "slowSec": 2 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.iceSpear",
+        "descKey": "imprint.iceSpear.desc",
+        "effect": "frost",
+        "levels": [{ "frost": 0.6 }, { "frost": 0.8 }, { "frost": 1 }],
+        "fixed": { "need": 3, "slowPerStack": 0.1, "stackSec": 3 }
+      },
+      "color": "#5ad0f0",
+      "sprites": {
+        "spear": { "spriteKey": "fx_mage_ice_spear", "color": "#5ad0f0", "size": 26 },
+        "hit": { "spriteKey": "fx_mage_ice_burst", "color": "#5ad0f0", "size": 18 }
+      }
+    },
+    {
+      "id": "iceOrb",
+      "job": "magiMage",
+      "school": "baekon",
+      "kind": "active",
+      "nameKey": "skill.iceOrb",
+      "shortKey": "skill.iceOrb.short",
+      "descKey": "skill.iceOrb.desc",
+      "tags": ["magic", "ranged"],
+      "sources": { "shard": ["magic", "ranged"] },
+      "element": "ice",
+      "levels": [
+        { "cooldownSec": 8, "values": { "lifeSec": 3, "speed": 36, "shards": 4, "volleySec": 0.4, "damage": 3, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } },
+        { "cooldownSec": 7.5, "values": { "lifeSec": 4, "speed": 36, "shards": 6, "volleySec": 0.4, "damage": 3.5, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } },
+        { "cooldownSec": 7, "values": { "lifeSec": 5, "speed": 36, "shards": 8, "volleySec": 0.4, "damage": 4, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.iceOrb",
+        "descKey": "imprint.iceOrb.desc",
+        "effect": "coldAura",
+        "levels": [{ "coldAura": 0.1 }, { "coldAura": 0.15 }, { "coldAura": 0.2 }],
+        "fixed": { "radius": 64 }
+      },
+      "color": "#5ad0f0",
+      "sprites": {
+        "orb": { "spriteKey": "fx_mage_ice_orb", "color": "#5ad0f0", "size": 18 },
+        "shard": { "spriteKey": "fx_mage_ice_spear", "color": "#5ad0f0", "size": 12 }
+      }
+    },
+    {
+      "id": "chainLightning",
+      "job": "magiMage",
+      "school": "baekon",
+      "kind": "active",
+      "nameKey": "skill.chainLightning",
+      "shortKey": "skill.chainLightning.short",
+      "descKey": "skill.chainLightning.desc",
+      "tags": ["magic", "ranged"],
+      "sources": { "bolt": ["magic", "ranged"] },
+      "element": "lightning",
+      "levels": [
+        { "cooldownSec": 5, "values": { "damage": 11, "range": 150, "chainRange": 80, "chains": 3, "chainGapSec": 0.06 } },
+        { "cooldownSec": 4.5, "values": { "damage": 14, "range": 150, "chainRange": 80, "chains": 4, "chainGapSec": 0.06 } },
+        { "cooldownSec": 4, "values": { "damage": 18, "range": 150, "chainRange": 80, "chains": 5, "chainGapSec": 0.06 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.chainLightning",
+        "descKey": "imprint.chainLightning.desc",
+        "effect": "staticCharge",
+        "levels": [{ "staticCharge": 0.2 }, { "staticCharge": 0.3 }, { "staticCharge": 0.4 }],
+        "fixed": { "fullPx": 360, "chains": 2, "windowSec": 3 }
+      },
+      "color": "#ffd83a",
+      "sprites": {
+        "bolt": { "spriteKey": "fx_mage_bolt", "color": "#ffd83a", "size": 10 },
+        "zap": { "spriteKey": "fx_mage_zap", "color": "#ffd83a", "size": 22 }
+      }
+    },
+    {
+      "id": "elementWard",
+      "job": "magiMage",
+      "school": "baekon",
+      "kind": "active",
+      "nameKey": "skill.elementWard",
+      "shortKey": "skill.elementWard.short",
+      "descKey": "skill.elementWard.desc",
+      "tags": ["buff"],
+      "sources": {},
+      "levels": [
+        { "cooldownSec": 16, "values": { "durationSec": 6, "elementDamage": 0.2, "shield": 8 } },
+        { "cooldownSec": 15, "values": { "durationSec": 8, "elementDamage": 0.25, "shield": 12 } },
+        { "cooldownSec": 14, "values": { "durationSec": 10, "elementDamage": 0.3, "shield": 16 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.elementWard",
+        "descKey": "imprint.elementWard.desc",
+        "effect": "purify",
+        "levels": [{ "purify": 2 }, { "purify": 3 }, { "purify": 4 }],
+        "fixed": { "everySec": 6 }
+      },
+      "color": "#ff9a4a",
+      "sprites": {
+        "aura": { "spriteKey": "fx_mage_ward", "color": "#ff9a4a", "size": 30 }
       }
     },
     {
@@ -1614,9 +1757,9 @@
       "tags": [],
       "sources": {},
       "levels": [
-        { "cooldownSec": 0, "values": { "damage": 0.12 } },
-        { "cooldownSec": 0, "values": { "damage": 0.18 } },
-        { "cooldownSec": 0, "values": { "damage": 0.25 } }
+        { "cooldownSec": 0, "values": { "damage": 0.12, "windowSec": 3 } },
+        { "cooldownSec": 0, "values": { "damage": 0.18, "windowSec": 3 } },
+        { "cooldownSec": 0, "values": { "damage": 0.25, "windowSec": 3 } }
       ],
       "color": "#ff6a2a",
       "sprites": {}

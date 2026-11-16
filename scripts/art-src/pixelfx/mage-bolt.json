@@ -1,0 +1,193 @@
+{
+ "frames": [
+  {
+   "filename": "mage-bolt 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 160,
+    "h": 44
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 160,
+    "h": 44
+   },
+   "sourceSize": {
+    "w": 160,
+    "h": 44
+   },
+   "duration": 56
+  },
+  {
+   "filename": "mage-bolt 1",
+   "frame": {
+    "x": 160,
+    "y": 0,
+    "w": 160,
+    "h": 44
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 160,
+    "h": 44
+   },
+   "sourceSize": {
+    "w": 160,
+    "h": 44
+   },
+   "duration": 56
+  },
+  {
+   "filename": "mage-bolt 2",
+   "frame": {
+    "x": 0,
+    "y": 44,
+    "w": 160,
+    "h": 44
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 160,
+    "h": 44
+   },
+   "sourceSize": {
+    "w": 160,
+    "h": 44
+   },
+   "duration": 56
+  },
+  {
+   "filename": "mage-bolt 3",
+   "frame": {
+    "x": 160,
+    "y": 44,
+    "w": 160,
+    "h": 44
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 160,
+    "h": 44
+   },
+   "sourceSize": {
+    "w": 160,
+    "h": 44
+   },
+   "duration": 56
+  },
+  {
+   "filename": "mage-bolt 4",
+   "frame": {
+    "x": 0,
+    "y": 88,
+    "w": 160,
+    "h": 44
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 160,
+    "h": 44
+   },
+   "sourceSize": {
+    "w": 160,
+    "h": 44
+   },
+   "duration": 56
+  },
+  {
+   "filename": "mage-bolt 5",
+   "frame": {
+    "x": 160,
+    "y": 88,
+    "w": 160,
+    "h": 44
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 160,
+    "h": 44
+   },
+   "sourceSize": {
+    "w": 160,
+    "h": 44
+   },
+   "duration": 56
+  },
+  {
+   "filename": "mage-bolt 6",
+   "frame": {
+    "x": 0,
+    "y": 132,
+    "w": 160,
+    "h": 44
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 160,
+    "h": 44
+   },
+   "sourceSize": {
+    "w": 160,
+    "h": 44
+   },
+   "duration": 56
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "mage-bolt.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 320,
+   "h": 176
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "mage-bolt",
+    "from": 0,
+    "to": 6,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "mku/mage-bolt",
+   "name": "MKU mage bolt",
+   "fps": 18,
+   "loop": false,
+   "frames": 7,
+   "frameSize": [
+    160,
+    44
+   ],
+   "pivot": [
+    0,
+    22
+   ],
+   "columns": 2
+  }
+ }
+}

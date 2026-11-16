@@ -7,6 +7,7 @@ import { RunDebug } from './run/runDebug';
 import { WorldBuilder } from './run/worldBuilder';
 import { LootInteract } from './run/lootInteract';
 import { SkillRuntime } from './run/skillRuntime';
+import { MageRuntime } from './run/mageRuntime';
 import { Encounters } from './run/encounters';
 import { Progression } from './run/progression';
 import { WeaponCombat } from './run/weaponCombat';
@@ -74,6 +75,8 @@ export class RunScene extends Phaser.Scene {
   progression!: Progression;
   encounters!: Encounters;
   skillRt!: SkillRuntime;
+  /** 마기법사 각인·시전 강화 */
+  mage!: MageRuntime;
   loot!: LootInteract;
   world!: WorldBuilder;
   debugTools!: RunDebug;
@@ -160,6 +163,7 @@ export class RunScene extends Phaser.Scene {
     this.world = new WorldBuilder(this);
     this.loot = new LootInteract(this);
     this.skillRt = new SkillRuntime(this);
+    this.mage = new MageRuntime(this);
     this.encounters = new Encounters(this);
     this.progression = new Progression(this);
     this.combat = new WeaponCombat(this);
@@ -595,6 +599,7 @@ export class RunScene extends Phaser.Scene {
     // 패닉: 방향이 뒤집힌다
     if (p.panic && !this.itemRt.first('panicCalm')) frame = { ...frame, move: { x: -frame.move.x, y: -frame.move.y } };
     this.itemRt.update(dt);
+    this.mage.update(dt);
     // 위압: 이동·회피 불가
     if (this.rootLeft > 0) {
       this.rootLeft -= dt;

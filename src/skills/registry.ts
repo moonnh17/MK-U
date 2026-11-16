@@ -10,7 +10,7 @@ import { experimentalWeapon } from './experimentalWeapon';
 import { firstLaw } from './firstLaw';
 import type { PassiveImpl, SkillImpl, UltimateImpl } from './host';
 import { magiCorruption } from './magiCorruption';
-import { fireWall, teleport } from './magiMage';
+import { chainLightning, elementConcert, elementCycle, elementWard, fireball, fireWall, iceOrb, iceSpear, teleport } from './magiMage';
 import { magiField } from './magiField';
 import { magiMine } from './magiMine';
 import { magiTurret } from './magiTurret';
@@ -43,7 +43,12 @@ const SKILLS: Readonly<Record<string, SkillImpl>> = {
   sanctuaryAura,
   smite,
   holySwords,
+  fireball,
   fireWall,
+  iceSpear,
+  iceOrb,
+  chainLightning,
+  elementWard,
   teleport,
 };
 
@@ -52,6 +57,7 @@ const PASSIVES: Readonly<Record<string, PassiveImpl>> = {
   reductionist,
   boilingHeart,
   prayerOfRevival,
+  elementCycle,
 };
 
 const ULTIMATES: Readonly<Record<string, UltimateImpl>> = {
@@ -61,6 +67,7 @@ const ULTIMATES: Readonly<Record<string, UltimateImpl>> = {
   sweep,
   berserkerRage,
   divineJudgment,
+  elementConcert,
 };
 
 export function skillImpl(id: string): SkillImpl | undefined {
