@@ -17,13 +17,17 @@
     {
       "id": "magiMage",
       "nameKey": "job.magiMage",
-      "enabled": false,
+      "enabled": true,
       "startUltimate": "firstLaw",
       "startWeapon": "pistol",
-      "preSchools": [],
+      "preSchools": ["baekon", "hwigang"],
+      "judge": "slots",
+      "afterAdvancePool": "allJobs",
+      "keepSkillsOnAdvance": true,
+      "imprint": { "slot": 0, "resonance": 0.5 },
       "advancements": [
-        { "id": "hwigang", "nameKey": "job.adv.hwigang", "color": "#9a9aff", "ultimate": null, "passive": null },
-        { "id": "baekon", "nameKey": "job.adv.baekon", "color": "#e0e0e0", "ultimate": null, "passive": null }
+        { "id": "hwigang", "nameKey": "job.adv.hwigang", "color": "#b266ff", "ultimate": "sadExecution", "passive": "pureUnfolding" },
+        { "id": "baekon", "nameKey": "job.adv.baekon", "color": "#e0e0e0", "ultimate": "elementConcert", "passive": "elementCycle" }
       ]
     },
     {

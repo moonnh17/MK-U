@@ -306,6 +306,11 @@ export class Hud {
         ui.cd.beginPath().arc(size / 2, size / 2, r, a, a + Math.PI * 0.6, false).strokePath();
         ui.cd.beginPath().arc(size / 2, size / 2, r, a + Math.PI, a + Math.PI * 1.6, false).strokePath();
       }
+      // 개전 각인: 칸 안쪽에 각인 색 테두리 (계열 공명이면 금색)
+      if (v.imprint) {
+        ui.cd.lineStyle(1, hexColor(v.imprint === 'resonance' ? sb.imprintResonanceColor : sb.imprintColor), 1);
+        ui.cd.strokeRect(2, 2, size - 4, size - 4);
+      }
       ui.container.setAlpha(filled && !v.usable && i !== ultIndex ? sb.disabledAlpha : 1);
     });
     // 보관 중인 스킬이 있으면 스킬바 옆에 개수 배지

@@ -1,6 +1,6 @@
 /** 카드 한 장을 화면에 그릴 문구·배지로 바꾼다 (카드 선택창과 테스트에서 쓴다). */
 import type { GameContext } from '../core/context';
-import { skillTextValues } from './skillText';
+import { imprintText, skillTextValues } from './skillText';
 import type { PlayerState } from '../core/session';
 import type { AnyCard } from '../systems/cards';
 import { findSkill, skillValues } from '../systems/skills';
@@ -16,6 +16,8 @@ export interface CardView {
   subName: string;
   levelText: string;
   desc: string;
+  /** 개전 각인 문구 (마기법사 스킬) */
+  imprint?: string;
   badges: TagBadge[];
   /** 테두리 강조 색 */
   accent: string;
@@ -35,7 +37,8 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
     const adv = job.advancements.find((a) => a.id === card.school)!;
     const ult = d.ultimates.ultimates.find((u) => u.id === adv.ultimate);
     const others = new Set(job.advancements.map((a) => a.id).filter((id) => id !== card.school));
-    const lose = Object.keys(player.loadout.owned).filter((id) => others.has(findSkill(d.skills, id).school)).length;
+    // 마기법사는 스킬 변환이 없어 사라지는 스킬이 없다
+    const lose = job.keepSkillsOnAdvance ? 0 : Object.keys(player.loadout.owned).filter((id) => others.has(findSkill(d.skills, id).school)).length;
     return {
       kindLabel: t('card.school'),
       name: t(adv.nameKey),
@@ -77,6 +80,7 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
     subName: '',
     levelText: card.kind === 'skillNew' ? `Lv${to}` : t('card.levelUp', { from, to }),
     desc: t(def.descKey, skillTextValues(v.values)),
+    imprint: imprintText(def, to, t) ?? undefined,
     badges: tagBadges(skillTags(def, false), d.tags),
     accent: sb.levelColors[to - 1] ?? '#ffffff',
     school,

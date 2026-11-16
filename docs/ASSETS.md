@@ -8,15 +8,18 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 727개 · 그림 있음 694개
+전체 736개 · 그림 있음 694개
 
-## player (6)
+## player (9)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `player_human` | 플레이어 | 10×10 | feet | #e8e2d0 | mku/player_human.png (13프레임) |
 | `player_hectar` | 플레이어 헥타르 | 10×10 | feet | #e8e2d0 | mku/player_hectar.png (13프레임) |
 | `player_acro` | 플레이어 아크로 | 10×10 | feet | #e8e2d0 | mku/player_acro.png (13프레임) |
+| `player_magiMage` | 플레이어 마기법사 | 10×10 | feet | #e8e2d0 | — |
+| `player_hwigang` | 플레이어 휘강파 | 10×10 | feet | #e8e2d0 | — |
+| `player_baekon` | 플레이어 백온파 | 10×10 | feet | #e8e2d0 | — |
 | `player_warrior` | 플레이어 전사 | 10×10 | feet | #e8e2d0 | mku/player_warrior.png (13프레임) |
 | `player_barbarian` | 플레이어 야만용사 | 10×10 | feet | #e8e2d0 | mku/player_barbarian.png (13프레임) |
 | `player_paladin` | 플레이어 성기사 | 10×10 | feet | #e8e2d0 | mku/player_paladin.png (9프레임) |
@@ -70,7 +73,7 @@
 | `fx_golem_laser` | 고대병기의 코어 (fx) | 12×12 | center | #a05aff | mku/fx_golem_laser.png (1프레임) |
 | `fx_eclipse_meteor` | 식광의 핵 (fx) 외 1곳 | 10×10 | center | #ff3a4a | mku/fx_eclipse_meteor.png (1프레임) |
 | `projectile_arrow` | 곡궁 (fx) 외 1곳 | 3×3 | center | #c8a070 | mku/projectile_arrow.png (1프레임) |
-| `fx_w_flame` | 보급형 마력사출기 (fx) | 8×8 | center | #ff7a2a | mku/fx_w_flame.png (7프레임) |
+| `fx_w_flame` | 보급형 마력사출기 (fx) 외 1곳 | 8×8 | center | #ff7a2a | mku/fx_w_flame.png (7프레임) |
 | `projectile_zephyr_arrow` | 서풍 (fx) | 3×3 | center | #7ae8f0 | mku/projectile_zephyr_arrow.png (1프레임) |
 | `fx_soul_burst` | 소울 칼리버 (fx) | 20×20 | center | #c060ff | mku/fx_soul_burst.png (1프레임) |
 | `skill_antimatter_shellA` | 반물질 권총 (fx) 외 1곳 | 9×9 | center | #5ab0ff | mku/skill_antimatter_shellA.png (6프레임) |
@@ -542,7 +545,7 @@
 | `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | mku/item_orion_shield.png (1프레임) |
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | mku/item_hectar_ram.png (1프레임) |
 
-## icon (64)
+## icon (70)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -573,12 +576,18 @@
 | `icon_skill_smite` | 강타 | 16×16 | center | #e8d24a | mku/icon_skill_smite.png (1프레임) |
 | `icon_skill_holySwords` | 성검 | 16×16 | center | #e8d24a | mku/icon_skill_holySwords.png (1프레임) |
 | `icon_skill_prayerOfRevival` | 회생의 기도 | 16×16 | center | #e8d24a | mku/icon_skill_prayerOfRevival.png (1프레임) |
+| `icon_skill_fireWall` | 화염벽 | 16×16 | center | #ff6a2a | — |
+| `icon_skill_teleport` | 순간이동 | 16×16 | center | #b266ff | — |
+| `icon_skill_elementCycle` | 원소 순환 | 16×16 | center | #ff6a2a | — |
+| `icon_skill_pureUnfolding` | 순수 전개 | 16×16 | center | #b266ff | — |
 | `icon_ult_firstLaw` | 열역학 제1법칙 | 16×16 | center | #ff9a3c | mku/icon_ult_firstLaw.png (1프레임) |
 | `icon_ult_thunderbolt` | 벼락 | 16×16 | center | #4ab0ff | mku/icon_ult_thunderbolt.png (1프레임) |
 | `icon_ult_singularity` | 특이점 실험 | 16×16 | center | #ff3a4a | mku/icon_ult_singularity.png (1프레임) |
 | `icon_ult_sweep` | 휩쓸기 | 16×16 | center | #c9ae79 | mku/icon_ult_sweep.png (1프레임) |
 | `icon_ult_berserkerRage` | 광전사의 진노 | 16×16 | center | #e07a2a | mku/icon_ult_berserkerRage.png (1프레임) |
 | `icon_ult_divineJudgment` | 심판의 강림 | 16×16 | center | #e8d24a | mku/icon_ult_divineJudgment.png (1프레임) |
+| `icon_ult_elementConcert` | 원소 대합주 | 16×16 | center | #ff6a2a | — |
+| `icon_ult_sadExecution` | 슬픈 처형 | 16×16 | center | #b266ff | — |
 | `icon_skill_magiTurretA` | 대형권역사수주포 | 16×16 | center | #4fb3d9 | — |
 | `icon_skill_magiMineA` | 무한연쇄기폭 | 16×16 | center | #d9a03b | — |
 | `icon_skill_antimatterCannonA` | 다연장반입자포 | 16×16 | center | #a05ad9 | — |

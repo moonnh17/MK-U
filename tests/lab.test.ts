@@ -51,16 +51,16 @@ describe('조사 대상', () => {
 });
 
 describe('직업 선택·포털', () => {
-  it('3직업이 보이고 마기학자·전사를 고를 수 있다', () => {
+  it('3직업이 보이고 모두 고를 수 있다', () => {
     expect(jobChoices(J).map((j) => [j.id, j.enabled])).toEqual([
       ['magiScholar', true],
-      ['magiMage', false],
+      ['magiMage', true],
       ['warrior', true],
     ]);
   });
   it('포털은 고를 수 있는 직업을 고른 뒤에만 켜진다', () => {
     expect(portalActive(J, null)).toBe(false);
-    expect(portalActive(J, 'magiMage')).toBe(false);
+    expect(portalActive(J, 'magiMage')).toBe(true);
     expect(portalActive(J, 'warrior')).toBe(true);
     expect(portalActive(J, 'magiScholar')).toBe(true);
   });

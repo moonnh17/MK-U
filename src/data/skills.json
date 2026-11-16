@@ -1517,6 +1517,93 @@
         "prayer2": { "spriteKey": "skill_pPrayer_prayer2", "color": "#e8d24a", "size": 32 },
         "prayer3": { "spriteKey": "skill_pPrayer_prayer3", "color": "#e8d24a", "size": 32 }
       }
+    },
+    {
+      "id": "fireWall",
+      "job": "magiMage",
+      "school": "baekon",
+      "kind": "active",
+      "nameKey": "skill.fireWall",
+      "shortKey": "skill.fireWall.short",
+      "descKey": "skill.fireWall.desc",
+      "tags": ["magic", "ranged"],
+      "sources": { "wall": ["magic", "ranged"] },
+      "element": "fire",
+      "levels": [
+        { "cooldownSec": 9.5, "values": { "lifeSec": 4, "tickSec": 0.5, "damage": 4, "burnStacks": 1, "burnEverySec": 1, "length": 64, "thickness": 14, "offset": 30 } },
+        { "cooldownSec": 8.5, "values": { "lifeSec": 5, "tickSec": 0.5, "damage": 5, "burnStacks": 1, "burnEverySec": 1, "length": 74, "thickness": 14, "offset": 30 } },
+        { "cooldownSec": 7.5, "values": { "lifeSec": 6, "tickSec": 0.5, "damage": 6.5, "burnStacks": 1, "burnEverySec": 1, "length": 86, "thickness": 16, "offset": 30 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.fireWall",
+        "descKey": "imprint.fireWall.desc",
+        "effect": "fireDamage",
+        "levels": [{ "fireDamage": 0.15 }, { "fireDamage": 0.25 }, { "fireDamage": 0.35 }]
+      },
+      "color": "#ff6a2a",
+      "sprites": {
+        "flame": { "spriteKey": "fx_w_flame", "color": "#ff6a2a", "size": 14 }
+      }
+    },
+    {
+      "id": "teleport",
+      "job": "magiMage",
+      "school": "hwigang",
+      "kind": "active",
+      "nameKey": "skill.teleport",
+      "shortKey": "skill.teleport.short",
+      "descKey": "skill.teleport.desc",
+      "tags": [],
+      "sources": {},
+      "levels": [
+        { "cooldownSec": 6, "values": { "distance": 80, "stepPx": 4 } },
+        { "cooldownSec": 5, "values": { "distance": 96, "stepPx": 4 } },
+        { "cooldownSec": 4, "values": { "distance": 112, "stepPx": 4 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.teleport",
+        "descKey": "imprint.teleport.desc",
+        "effect": "staffDamage",
+        "levels": [{ "staffDamage": 0.15 }, { "staffDamage": 0.25 }, { "staffDamage": 0.35 }]
+      },
+      "color": "#b266ff",
+      "sprites": {}
+    },
+    {
+      "id": "elementCycle",
+      "job": "magiMage",
+      "school": "baekon",
+      "kind": "passive",
+      "nameKey": "skill.elementCycle",
+      "shortKey": "skill.elementCycle.short",
+      "descKey": "skill.elementCycle.desc",
+      "tags": [],
+      "sources": {},
+      "levels": [
+        { "cooldownSec": 0, "values": { "damage": 0.12 } },
+        { "cooldownSec": 0, "values": { "damage": 0.18 } },
+        { "cooldownSec": 0, "values": { "damage": 0.25 } }
+      ],
+      "color": "#ff6a2a",
+      "sprites": {}
+    },
+    {
+      "id": "pureUnfolding",
+      "job": "magiMage",
+      "school": "hwigang",
+      "kind": "passive",
+      "nameKey": "skill.pureUnfolding",
+      "shortKey": "skill.pureUnfolding.short",
+      "descKey": "skill.pureUnfolding.desc",
+      "tags": [],
+      "sources": {},
+      "levels": [
+        { "cooldownSec": 0, "values": { "magicDamage": 0.1 } },
+        { "cooldownSec": 0, "values": { "magicDamage": 0.15 } },
+        { "cooldownSec": 0, "values": { "magicDamage": 0.2 } }
+      ],
+      "color": "#b266ff",
+      "sprites": {}
     }
   ]
 }

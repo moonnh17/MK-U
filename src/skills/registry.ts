@@ -10,6 +10,7 @@ import { experimentalWeapon } from './experimentalWeapon';
 import { firstLaw } from './firstLaw';
 import type { PassiveImpl, SkillImpl, UltimateImpl } from './host';
 import { magiCorruption } from './magiCorruption';
+import { fireWall, teleport } from './magiMage';
 import { magiField } from './magiField';
 import { magiMine } from './magiMine';
 import { magiTurret } from './magiTurret';
@@ -42,6 +43,8 @@ const SKILLS: Readonly<Record<string, SkillImpl>> = {
   sanctuaryAura,
   smite,
   holySwords,
+  fireWall,
+  teleport,
 };
 
 const PASSIVES: Readonly<Record<string, PassiveImpl>> = {

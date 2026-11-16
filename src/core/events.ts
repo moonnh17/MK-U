@@ -63,6 +63,7 @@ export interface GameEvents {
   geminiMini: { line: { text: string; mood: 'calm' | 'ominous' } | null };
   /** 디버그: 계열 집계를 정하고 바로 전직 */
   debugAdvance: { hectar: number; acro: number };
+  debugAdvanceTo: { school: string };
   /** 카드 선택창에 카드를 띄운다 */
   cardsShow: { titleKey: string; cards: AnyCard[]; reroll: { cost: number; enabled: boolean; used: boolean } | null };
   /** 카드창 리롤 (코인) */

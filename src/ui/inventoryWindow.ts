@@ -5,7 +5,8 @@
  * 스킬 교체: 끌어다 놓기(PC) 또는 스킬 탭 → 칸 탭. 모바일은 화면이 낮아 세 칸을 탭으로 나눈다.
  */
 import { applyArtIcon } from './artIcon';
-import { skillTextValues } from './skillText';
+import { imprintText, skillTextValues } from './skillText';
+import { activeImprint } from '../systems/magiMage';
 import type { GameContext } from '../core/context';
 import { buffText } from '../core/session';
 import { bus } from '../core/events';
@@ -183,7 +184,9 @@ export class InventoryWindow {
     const el = this.panel(t('inventory.skills'), 'iw-skills');
     const equipRow = document.createElement('div');
     equipRow.className = 'iw-row';
-    p.loadout.active.forEach((id, i) => equipRow.appendChild(this.slot(t('inventory.active') + ` ${i + 1}`, id, i)));
+    // 마기법사: 각인 칸에 '개전 각인' 표시
+    const imprintSlot = d.jobs.jobs.find((j) => j.id === p.job)?.imprint?.slot;
+    p.loadout.active.forEach((id, i) => equipRow.appendChild(this.slot(t('inventory.active') + ` ${i + 1}` + (i === imprintSlot ? ` · ${t('imprint.label')}` : ''), id, i)));
     equipRow.appendChild(this.slot(t('inventory.passive'), p.loadout.passive, 'passive'));
     const ult = d.ultimates.ultimates.find((u) => u.id === p.ultimate.id);
     const ultEl = document.createElement('div');
@@ -408,6 +411,15 @@ export class InventoryWindow {
       this.badges(skillTags(def, owned.awakened)),
       this.line('iw-desc', t(owned.awakened && def.awakening ? def.awakening.descKey : def.descKey, skillTextValues(sv.values))),
     );
+    // 개전 각인: 지금 1번 칸에서 적용 중이면 공명까지 반영하고 표시
+    const job = d.jobs.jobs.find((j) => j.id === p.job);
+    const im = job ? activeImprint(p.loadout, d.skills, job, p.advancement) : null;
+    const on = im?.skillId === id;
+    const imText = imprintText(def, owned.level, t, on && im!.resonance ? 1 + job!.imprint!.resonance : 1);
+    if (imText) {
+      const extra = on ? (im!.resonance ? ` (${t('imprint.resonance', { pct: Math.round(job!.imprint!.resonance * 100) })})` : '') : ` (${t('imprint.slotHint')})`;
+      box.append(this.line(`iw-desc iw-imprint${on && im!.resonance ? ' resonance' : ''}${on ? '' : ' dim'}`, imText + extra));
+    }
     if (!owned.awakened && owned.level < d.skills.maxLevel) {
       const next = skillValues(def, { level: owned.level + 1, awakened: false });
       box.append(this.line('iw-dsub', t('inventory.detailNext', { level: owned.level + 1 })), this.line('iw-desc dim', t(def.descKey, skillTextValues(next.values))));

@@ -59,7 +59,9 @@
       "cooldownAlpha": 0.65,
       "ultimateReadyColor": "#ff9a3c",
       "followUpColor": "#ffd23f",
-      "followUpSpinSec": 0.9
+      "followUpSpinSec": 0.9,
+      "imprintColor": "#7fd8ff",
+      "imprintResonanceColor": "#ffe27a"
     },
     "weapons": {
       "mainWidth": 52,

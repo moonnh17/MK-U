@@ -960,6 +960,9 @@ export interface HudLayoutData {
     /** 추가 스킬(다시 누르기)이 준비된 칸: 노란 테두리 조각이 이 주기로 한 바퀴 돈다 */
     followUpColor: string;
     followUpSpinSec: number;
+    /** 개전 각인이 걸린 칸(마기법사 1번 칸)의 안쪽 테두리, 계열 공명이면 다른 색 */
+    imprintColor: string;
+    imprintResonanceColor: string;
   };
   weapons: { mainWidth: number; mainHeight: number; subWidth: number; subHeight: number; gap: number };
 }
@@ -999,10 +1002,27 @@ export interface UiData {
 
 export type JobId = 'magiScholar' | 'magiMage' | 'warrior';
 /** 계열 태그. warrior는 전사 숙련(전직 전 카드)이다 */
-export const SCHOOL_IDS = ['hectar', 'acro', 'warrior', 'barbarian', 'paladin'] as const;
+export const SCHOOL_IDS = ['hectar', 'acro', 'warrior', 'barbarian', 'paladin', 'baekon', 'hwigang'] as const;
 export type SchoolId = (typeof SCHOOL_IDS)[number];
 /** mastery: 슬롯 없이 늘 켜져 있는 전사 숙련 (전직 후에도 유지) */
 export type SkillSlotKind = 'active' | 'passive' | 'mastery';
+/** 마기법사 백온파 공격의 원소 (태그가 아닌 별도 속성) */
+export const ELEMENT_IDS = ['fire', 'ice', 'lightning'] as const;
+export type ElementId = (typeof ELEMENT_IDS)[number];
+/** 개전 각인 효과 종류. 효과별 수치 이름은 levels 값 키 */
+export const IMPRINT_EFFECTS = ['fireDamage', 'staffDamage'] as const;
+export type ImprintEffect = (typeof IMPRINT_EFFECTS)[number];
+
+/** 마기법사 개전 각인: 액티브 1번 칸 스킬의 각인만 상시 적용 */
+export interface ImprintDef {
+  nameKey: string;
+  descKey: string;
+  effect: ImprintEffect;
+  /** Lv1~3 수치 (계열 공명이면 배율을 받는다) */
+  levels: Record<string, number>[];
+  /** 레벨·공명과 상관없는 값 (중첩 수 등) */
+  fixed?: Record<string, number>;
+}
 
 export interface SkillLevelDef {
   /** 쿨타임(초). 패시브는 0 */
@@ -1040,6 +1060,10 @@ export interface SkillDef {
   levels: SkillLevelDef[];
   /** 없으면 각성하지 않는다 (요구 아이템이 아직 정해지지 않은 스킬) */
   awakening?: SkillAwakeningDef;
+  /** 마기법사 개전 각인 */
+  imprint?: ImprintDef;
+  /** 원소 (백온파) */
+  element?: ElementId;
   /** 아이콘 자리 색 */
   color: string;
   /** 스킬이 만드는 오브젝트 모양 */
@@ -1387,6 +1411,14 @@ export interface JobDef {
   masteryJudge?: [string, string];
   /** 전직하면 새 학파 스킬을 이만큼 무작위로 준다 (전사, 사용자 지정) */
   advancementGrantSkills?: number;
+  /** 'slots': 액티브 1→2→3번 칸 스킬의 학파로 전직 (마기법사). 없으면 카드 계열 집계 */
+  judge?: 'slots';
+  /** 'allJobs': 전직 후 모든 직업 스킬이 카드로 (숙련 제외, 마기법사). 없으면 자기 학파만 */
+  afterAdvancePool?: 'allJobs';
+  /** 전직해도 반대 학파 스킬 제거·변환을 하지 않는다 (마기법사) */
+  keepSkillsOnAdvance?: boolean;
+  /** 개전 각인: 이 칸(0부터) 스킬의 각인 적용, 전직 학파 스킬이면 수치 × (1 + resonance) */
+  imprint?: { slot: number; resonance: number };
   advancements: AdvancementDef[];
 }
 

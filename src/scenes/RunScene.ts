@@ -398,6 +398,7 @@ export class RunScene extends Phaser.Scene {
         this.session.player.coins += amount;
       }),
       bus.on('debugAdvance', ({ hectar, acro }) => this.debugTools.debugAdvance(hectar, acro)),
+      bus.on('debugAdvanceTo', ({ school }) => this.debugTools.debugAdvanceTo(school)),
       bus.on('debugBossHp', ({ ratio }) => {
         for (const e of this.enemies) if (e.def.rank === 'boss' || e.def.rank === 'hiddenBoss') e.hp = Math.max(1, e.maxHp * ratio);
       }),

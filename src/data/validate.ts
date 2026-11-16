@@ -4,7 +4,7 @@
  */
 import { collectAssets, validateArt } from '../systems/art';
 import { BUTTON_ACTIONS } from '../core/actions';
-import { GEMINI_EVENTS, GRADE_IDS, SCHOOL_IDS, TAG_IDS } from '../types/data';
+import { ELEMENT_IDS, GEMINI_EVENTS, GRADE_IDS, IMPRINT_EFFECTS, SCHOOL_IDS, TAG_IDS } from '../types/data';
 import type { EnemyAttackDef, IntRange, SpriteRef } from '../types/data';
 import type { GameData } from './index';
 
@@ -651,6 +651,17 @@ export function validateGameData(d: GameData): Errors {
         if (Object.keys(lv.values).length > 0 && !isNum(lv.values.range)) errors.push(`${w}.levels[${i}]: 근접 스킬은 range 필요`);
       });
     }
+    const im = s.imprint;
+    if (im) {
+      needText(`${w}.imprint`, im.nameKey);
+      needText(`${w}.imprint`, im.descKey);
+      if (!(IMPRINT_EFFECTS as readonly string[]).includes(im.effect)) errors.push(`${w}.imprint.effect: '${String(im.effect)}' 잘못됨`);
+      if (im.levels.length !== d.skills.maxLevel) errors.push(`${w}.imprint: 레벨은 ${d.skills.maxLevel}개여야 함`);
+      im.levels.forEach((lv, i) => {
+        if (!isNum(lv[im.effect])) errors.push(`${w}.imprint.levels[${i}].${im.effect}: 숫자 필요`);
+      });
+    }
+    if (s.element !== undefined && !(ELEMENT_IDS as readonly string[]).includes(s.element)) errors.push(`${w}.element: '${String(s.element)}' 잘못됨`);
     for (const [k, sp] of Object.entries(s.sprites)) checkSprite(errors, `${w}.sprites.${k}`, sp);
   }
 
@@ -689,6 +700,7 @@ export function validateGameData(d: GameData): Errors {
     if (x.advancements.length !== 2) errors.push(`${w}: 전직 분기는 2개`);
     if (!d.weapons.weapons.some((y) => y.id === x.startWeapon)) errors.push(`${w}.startWeapon: '${x.startWeapon}' 없음`);
     for (const ps of x.preSchools) if (!(SCHOOL_IDS as readonly string[]).includes(ps)) errors.push(`${w}.preSchools: '${ps}' 잘못됨`);
+    if (x.imprint && (x.imprint.slot < 0 || x.imprint.slot >= d.skills.activeSlots)) errors.push(`${w}.imprint.slot: 칸 번호 범위 밖`);
     for (const m of x.masteryJudge ?? []) {
       if (d.skills.skills.find((s) => s.id === m)?.kind !== 'mastery') errors.push(`${w}.masteryJudge: '${m}'는 숙련이 아님`);
     }

@@ -16,6 +16,7 @@ import { weaponSfx } from '../../systems/sound';
 import { Explosive } from '../../skills/explosive';
 import { nearestEnemy } from '../../skills/host';
 import { calcDamage, spaceDamage, type RangeBonus, type TagBonus } from '../../systems/damage';
+import { elementDamageMul, staffDamageMul } from '../../systems/magiMage';
 import { itemDamageMultiplier } from '../../systems/items';
 import { chainTargets, lineHits, muzzleAngle, muzzlePoint, shotOrigin } from '../../systems/targeting';
 import { signatureFires, weaponPose, type WeaponMotionKind, type WeaponMotionParams } from '../../systems/motion';
@@ -859,6 +860,12 @@ export class WeaponCombat {
     let dmg = calcDamage({ baseDamage: base + (this.run.skillRt.playerMods().flatDamage ?? 0), tags }, this.tagBonus(), d.tags, this.rangeBonus());
     // 신앙 강화: 성기사 계열(성기사 스킬·궁극기) 피해
     if (source && this.schoolOf(source) === 'paladin') dmg *= 1 + (masteryTotals(this.run.session.player.loadout, d.skills).paladinDamage ?? 0);
+    // 개전 각인: 작열(화염 원소 직접 피해), 지팡이 공명(지팡이 무기)
+    const im = this.run.skillRt.imprint();
+    if (im) {
+      if (source) dmg *= elementDamageMul(d.skills.skills.find((s) => s.id === source)?.element, im);
+      else dmg *= staffDamageMul(this.run.weaponDef().category, im);
+    }
     // 아이템: 피해 %(더한 뒤 한 번), 보스·적이 받는 피해·스킬 피해, 적중 효과(신검 공간격·참마검)
     const boss = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss';
     const hm = this.run.itemRt.hitMods(this.run.rng, (c) => skillChance(c, 'success', ['chance'], d.tags));

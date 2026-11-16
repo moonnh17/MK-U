@@ -5,6 +5,7 @@ import { Rng } from '../../core/rng';
 import { fitArt } from '../../entities/art';
 import { findSkill, setSkillLevel } from '../../systems/skills';
 import type { RunScene } from '../RunScene';
+import type { SchoolId } from '../../types/data';
 
 export class RunDebug {
   constructor(private readonly run: RunScene) {}
@@ -25,6 +26,14 @@ export class RunDebug {
     if (this.run.modal || p.advancement !== null) return;
     p.schoolPicks = { ...p.schoolPicks, hectar, acro };
     this.run.progression.advance(() => {});
+  }
+
+  /** 디버그: 학파를 정해 바로 전직 (지금 직업의 학파일 때만, 한 런에 한 번) */
+  debugAdvanceTo(school: string): void {
+    const p = this.run.session.player;
+    const job = this.run.ctx.data.jobs.jobs.find((j) => j.id === p.job);
+    if (this.run.modal || p.advancement !== null || !job?.advancements.some((a) => a.id === school)) return;
+    this.run.progression.advanceTo(school as SchoolId, () => {});
   }
 
   debugSetSkill(id: string, level: number, awakened: boolean): void {

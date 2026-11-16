@@ -85,6 +85,12 @@ export class CardWindow {
       const desc = document.createElement('div');
       desc.className = 'cw-desc';
       desc.textContent = v.desc;
+      if (v.imprint) {
+        const im = document.createElement('div');
+        im.className = 'cw-imprint';
+        im.textContent = v.imprint;
+        desc.append(im);
+      }
       if (mobile) {
         // 모바일 가로 화면은 높이가 낮아 한 장을 두 줄로: [이름·레벨] [종류·계열·배지 / 설명]
         const left = document.createElement('div');

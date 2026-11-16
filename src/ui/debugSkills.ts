@@ -177,6 +177,9 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
       ),
     ),
   );
+  // 학파를 정해 바로 전직 (지금 직업의 학파만 받는다. 마기법사 등 판정 규칙을 건너뛴다)
+  const schoolSel = select(d.jobs.jobs.filter((j) => j.enabled).flatMap((j) => j.advancements.map((a): [string, string] => [a.id, `${t(j.nameKey)} · ${t(a.nameKey)}`])));
+  body.appendChild(row(schoolSel, button(t('debug.advanceTo'), () => bus.emit('debugAdvanceTo', { school: schoolSel.value }))));
   // 입력칸에서 친 키가 게임 조작(WASD 등)으로 새지 않게
   body.addEventListener('keydown', (e) => e.stopPropagation());
   return body;

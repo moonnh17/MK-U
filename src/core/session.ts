@@ -75,6 +75,8 @@ export interface SkillSlotView {
   usable: boolean;
   /** 다시 누르면 쓸 추가 스킬이 준비됨 (MK 각성 레이저 등): 쿨타임 동안 노란 테두리가 돈다 */
   followUp?: boolean;
+  /** 개전 각인이 걸린 칸: 'on' / 계열 공명 'resonance' */
+  imprint?: 'on' | 'resonance';
   color: string;
   /** 아이콘 그림 키 (그림이 있으면 짧은 이름 대신) */
   iconKey: string | null;

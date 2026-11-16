@@ -11,6 +11,7 @@ import { calcDamage, spaceDamage } from '../../systems/damage';
 import { refracts, tickShield, type ShieldState } from '../../systems/shield';
 import { applyCorruption, skillChance } from '../../systems/acro';
 import { combineMods, heal, payHp, type PlayerMods } from '../../systems/vitals';
+import { activeImprint, type ActiveImprint } from '../../systems/magiMage';
 import { cooldownLeft, findSkill, refundCooldown, skillValues, ultimateCooldownSec } from '../../systems/skills';
 import { applyBleed, applyBurn, canAutoCast, skillTags } from '../../systems/tags';
 import type { BleedRule, BurnRule, SkillDef, SpaceRule, UltimateDef } from '../../types/data';
@@ -120,6 +121,7 @@ export class SkillRuntime {
         this.run.dashVel = { x: dir.x * speed, y: dir.y * speed };
         this.run.dashLeft = sec;
       },
+      teleport: (dir, distance, stepPx) => this.run.condition.teleport(dir, distance, stepPx),
       refundCooldown: (id, ratio) => {
         const p = this.run.session.player;
         const owned = p.loadout.owned[id];
@@ -250,6 +252,13 @@ export class SkillRuntime {
     return out;
   }
 
+  /** 지금 적용 중인 개전 각인 (마기법사 1번 칸) */
+  imprint(): ActiveImprint | null {
+    const p = this.run.session.player;
+    const job = this.run.ctx.data.jobs.jobs.find((j) => j.id === p.job);
+    return job ? activeImprint(p.loadout, this.run.ctx.data.skills, job, p.advancement) : null;
+  }
+
   /** 스킬 범위 보정 (아이템) */
   area(radius: number): number {
     return radius * (1 + this.run.itemRt.sums.area);
@@ -346,9 +355,13 @@ export class SkillRuntime {
       };
     };
     const ult = this.ultimateDef();
+    const im = this.imprint();
     this.run.session.buffs = this.buffViews();
     this.run.session.skillView = [
-      ...p.loadout.active.map((id) => slot(id, true)),
+      ...p.loadout.active.map((id) => {
+        const v = slot(id, true);
+        return im && im.skillId === id ? { ...v, imprint: im.resonance ? ('resonance' as const) : ('on' as const) } : v;
+      }),
       {
         ...empty,
         skillId: ult.id,

@@ -89,6 +89,8 @@ export interface SkillHost {
   roarBoost(): number;
   /** 플레이어 돌진: sec 동안 입력 대신 dir 방향으로 speed로 움직인다(벽에는 막힘) */
   dash(dir: Vec2, speed: number, sec: number): void;
+  /** 순간이동: dir 쪽으로 distance만큼, 벽 앞에서 멈춘다 */
+  teleport(dir: Vec2, distance: number, stepPx: number): { from: Vec2; to: Vec2 };
   /** 빛 입자가 사방으로 터지는 연출 */
   burst(at: Vec2, color: string): void;
   /** 짧은 이펙트를 fxSec 뒤에 지운다 */

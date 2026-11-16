@@ -151,6 +151,15 @@ export class PlayerCondition {
     }
   }
 
+  /** 순간이동(마기법사): 벽을 뚫지 않는 데까지 곧장 옮긴다 */
+  teleport(dir: Vec2, distance: number, stepPx: number): { from: Vec2; to: Vec2 } {
+    const from = { x: this.run.player.x, y: this.run.player.y };
+    const to = blinkTarget(from, dir, distance, stepPx, this.blockedAt());
+    this.run.player.setPosition(to.x, to.y);
+    (this.run.player.body as Phaser.Physics.Arcade.Body).reset(to.x, to.y);
+    return { from, to };
+  }
+
   /** 플레이어 몸이 (x, y)에 서면 벽·문·소품에 걸리는지 */
   private blockedAt(): (x: number, y: number) => boolean {
     const r = this.run.ctx.data.player.size / 2;

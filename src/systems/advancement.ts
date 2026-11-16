@@ -93,7 +93,9 @@ export function convertSkills(
 }
 
 /** 카드로 내도 되는 스킬: 내 직업 스킬 중 전직 전에는 직업의 전직 전 계열(마기학자 두 학파, 전사 숙련), 전직 후에는 자기 학파만 */
-export function skillAllowed(def: SkillDef, job: Pick<JobDef, 'id' | 'preSchools'>, school: SchoolId | null): boolean {
+export function skillAllowed(def: SkillDef, job: Pick<JobDef, 'id' | 'preSchools' | 'afterAdvancePool'>, school: SchoolId | null): boolean {
+  // 마기법사: 전직 후 모든 직업 스킬 (숙련은 전사 전용이라 뺀다)
+  if (school !== null && job.afterAdvancePool === 'allJobs') return def.kind !== 'mastery';
   if (def.job !== job.id) return false;
   return school === null ? job.preSchools.includes(def.school) : def.school === school;
 }

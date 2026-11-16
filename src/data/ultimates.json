@@ -290,6 +290,30 @@
         "impact": { "spriteKey": "ult_judgment_impact", "color": "#e8d24a", "size": 64 },
         "shield": { "spriteKey": "ult_judgment_shield", "color": "#e8d24a", "size": 32 }
       }
+    },
+    {
+      "id": "elementConcert",
+      "nameKey": "ultimate.elementConcert",
+      "shortKey": "ultimate.elementConcert.short",
+      "descKey": "ultimate.elementConcert.desc",
+      "school": "baekon",
+      "tags": ["magic", "ranged"],
+      "sources": { "fall": ["magic", "ranged"] },
+      "values": { "damage": 30 },
+      "color": "#ff6a2a",
+      "sprites": {}
+    },
+    {
+      "id": "sadExecution",
+      "nameKey": "ultimate.sadExecution",
+      "shortKey": "ultimate.sadExecution.short",
+      "descKey": "ultimate.sadExecution.desc",
+      "school": "hwigang",
+      "tags": ["magic", "ranged"],
+      "sources": { "beam": ["magic", "ranged"] },
+      "values": { "damage": 60 },
+      "color": "#b266ff",
+      "sprites": {}
     }
   ]
 }

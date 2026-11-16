@@ -145,11 +145,11 @@ describe('학파 궁극기', () => {
 });
 
 describe('직업 데이터', () => {
-  it('마기학자·전사가 열려 있고, 마기법사는 틀만', () => {
+  it('세 직업이 모두 열려 있다', () => {
     const j = gameData.jobs.jobs;
     expect(j.map((x) => [x.id, x.enabled])).toEqual([
       ['magiScholar', true],
-      ['magiMage', false],
+      ['magiMage', true],
       ['warrior', true],
     ]);
     expect(j[2]!.advancements.map((a) => [a.id, a.ultimate, a.passive])).toEqual([

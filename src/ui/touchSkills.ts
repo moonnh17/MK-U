@@ -65,7 +65,7 @@ export class TouchSkills {
       if (!p) return;
       const cdSec = Math.ceil(v.cooldownLeft);
       const frac = v.cooldownTotal > 0 ? v.cooldownLeft / v.cooldownTotal : 0;
-      const sig = `${v.skillId}|${v.iconKey}|${v.level}|${v.awakened}|${v.usable}|${cdSec}|${frac.toFixed(2)}|${v.followUp ? 1 : 0}`;
+      const sig = `${v.skillId}|${v.iconKey}|${v.level}|${v.awakened}|${v.usable}|${cdSec}|${frac.toFixed(2)}|${v.followUp ? 1 : 0}|${v.imprint ?? ''}`;
       if (sig === p.sig) return;
       p.sig = sig;
 
@@ -76,6 +76,9 @@ export class TouchSkills {
       p.root.classList.toggle('ready', i === ULT && v.usable);
       // 추가 스킬이 준비됨: 노란 테두리가 돈다
       p.root.classList.toggle('followup', !!v.followUp);
+      // 개전 각인 칸
+      p.root.classList.toggle('imprint', v.imprint === 'on');
+      p.root.classList.toggle('resonance', v.imprint === 'resonance');
       // 아이콘 그림이 있으면 그림, 없으면 짧은 이름
       const art = filled && applyArtIcon(p.icon, getContext(), v.iconKey);
       p.label.textContent = art ? '' : filled ? v.label : (emptyLabels[i] ?? '');

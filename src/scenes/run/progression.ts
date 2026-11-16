@@ -4,7 +4,8 @@ import { bus } from '../../core/events';
 import { Rng } from '../../core/rng';
 import { isSkillImplemented } from '../../skills/registry';
 import { applyCard, drawSkillCards, type AnyCard, type Card } from '../../systems/cards';
-import { convertSkills, grantSchoolSkills, judgeMastery, judgeSchool, skillAllowed, topSchools } from '../../systems/advancement';
+import { convertSkills, grantSchoolSkills, judgeMastery, judgeSchool, skillAllowed, topSchools, type ConversionLog } from '../../systems/advancement';
+import { judgeBySlots } from '../../systems/magiMage';
 import { advancementCut, skillAwakeningCut, ultimateAwakeningCut, type Cutscene } from '../../ui/cutscenePages';
 import { type RoomNode } from '../../systems/mapgen';
 import { registerCutscene, registerGemini } from '../../core/save';
@@ -297,13 +298,18 @@ export class Progression {
     const p = this.run.session.player;
     const job = this.run.ctx.data.jobs.jobs.find((j) => j.id === p.job)!;
     const order = job.advancements.map((a) => a.id as SchoolId);
-    const school = job.masteryJudge ? judgeMastery(p.loadout.owned, job.masteryJudge, order) : judgeSchool(p.schoolPicks, order);
+    const school = job.judge === 'slots'
+      ? judgeBySlots(p.loadout.active, this.run.ctx.data.skills, order)
+      : job.masteryJudge
+        ? judgeMastery(p.loadout.owned, job.masteryJudge, order)
+        : judgeSchool(p.schoolPicks, order);
     if (school) {
       this.advanceTo(school, then);
       return;
     }
     this.pendingAdvance = then;
-    this.queueOffers([{ kind: 'school', boss: false, schools: topSchools(p.schoolPicks, order) }]);
+    // 칸 판정에 학파 스킬이 없으면 두 학파 중에서 직접 고른다
+    this.queueOffers([{ kind: 'school', boss: false, schools: job.judge === 'slots' ? order : topSchools(p.schoolPicks, order) }]);
   }
 
   /** 스킬 변환 → 궁극기 교체 → 연출 */
@@ -312,7 +318,10 @@ export class Progression {
     const p = this.run.session.player;
     const job = d.jobs.jobs.find((j) => j.id === p.job)!;
     const adv = job.advancements.find((a) => a.id === school)!;
-    const r = convertSkills(Rng.derive(this.run.ctx.config.seed, 'advancement'), p.loadout, d.skills, school);
+    // 마기법사: 스킬 변환 없이 그대로 둔다
+    const r = job.keepSkillsOnAdvance
+      ? { loadout: p.loadout, log: { school, removed: [], gains: [] } as ConversionLog }
+      : convertSkills(Rng.derive(this.run.ctx.config.seed, 'advancement'), p.loadout, d.skills, school);
     p.loadout = r.loadout;
     if (job.advancementGrantSkills) {
       const g = grantSchoolSkills(Rng.derive(this.run.ctx.config.seed, 'advancement-grant'), p.loadout, d.skills, job.id, school, job.advancementGrantSkills);
@@ -330,8 +339,13 @@ export class Progression {
     p.advancementLog = r.log;
     this.run.applyPlayerArt();
     const t = this.run.ctx.t;
-    // 판정 근거: 숙련 판정이면 두 숙련 레벨, 아니면 두 학파 카드 수
-    const judgeLine = job.masteryJudge
+    // 판정 근거: 칸 판정이면 그 칸 스킬, 숙련 판정이면 두 숙련 레벨, 아니면 두 학파 카드 수
+    const slotIdx = p.loadout.active.findIndex((id) => !!id && findSkill(d.skills, id).school === school);
+    const judgeLine = job.judge === 'slots'
+      ? slotIdx >= 0 && judgeBySlots(p.loadout.active, d.skills, job.advancements.map((a) => a.id as SchoolId)) === school
+        ? t('cut.advancement.judgeSlot', { slot: slotIdx + 1, skill: t(findSkill(d.skills, p.loadout.active[slotIdx]!).nameKey) })
+        : t('cut.advancement.judgeChoice')
+      : job.masteryJudge
       ? t('cut.advancement.judgeMastery', {
           a: t(findSkill(d.skills, job.masteryJudge[0]).nameKey),
           an: p.loadout.owned[job.masteryJudge[0]]?.level ?? 0,
