@@ -46,6 +46,13 @@ const FX = {
   fx_mage_meteor: { name: 'mage-meteor', ground: true, play: 'once', to: 30 },
   fx_mage_icicle: { name: 'mage-icicle', ground: true, play: 'once', from: 14, to: 32 },
   fx_mage_ward: { name: 'mage-ward', center: true, play: 'loop' },
+  // 마기법사 휘강파: 마기 보라(#2c1a45 #7a3fd1 #b266ff #e0b3ff)로 다시 칠한 이펙트
+  fx_hw_wave: { name: 'hw-wave', center: true, play: 'once' },
+  fx_hw_beam: { name: 'hw-beam', play: 'once' },
+  fx_hw_orb: { name: 'hw-orb', center: true, play: 'loop' },
+  fx_hw_blast: { name: 'hw-blast', center: true, play: 'once' },
+  fx_hw_pillar: { name: 'hw-pillar', ground: true, play: 'once', from: 6, to: 40 },
+  fx_hw_recoil: { name: 'hw-recoil', center: true, play: 'once' },
 };
 
 function buildPixelfx(outDir) {

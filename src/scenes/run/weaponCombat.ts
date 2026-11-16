@@ -585,7 +585,9 @@ export class WeaponCombat {
     }
     fitArt(this.run.ctx.data, b, opts.hitSize ?? proj.size, opts.hitSize ?? proj.height ?? proj.size);
     b.setDepth(5);
-    b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce: opts.pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>(), bounces: opts.ricochet?.bounces ?? 0, bounceRange: opts.ricochet?.range ?? 0, flame: opts.flame ?? 0, trail: opts.trail, ghost: !!opts.ghost });
+    // 관통 전개: 무기 탄 관통 + (스킬 탄은 시전 값에서 더한다)
+    const pierce = opts.pierce + (source === null ? this.run.mage.extraPierce() : 0);
+    b.setData({ base, tags, range, ox: from.x, oy: from.y, source, pierce, crit: opts.crit, homing: opts.homing ?? 0, hitSet: new Set<Enemy>(), bounces: opts.ricochet?.bounces ?? 0, bounceRange: opts.ricochet?.range ?? 0, flame: opts.flame ?? 0, trail: opts.trail, ghost: !!opts.ghost });
     if (opts.tint) b.setTint(hexColor(opts.tint));
     b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
   }
@@ -869,6 +871,15 @@ export class WeaponCombat {
     // 시전 강화(대전·원소 순환), 원소 가호(원소 스킬 피해)
     dmg *= this.run.mage.boostMul(source);
     if (this.run.mage.elementOf(source)) for (const o of this.run.skillRt.skillObjects) dmg *= 1 + (o.elementDamage?.() ?? 0);
+    // 관통 전개(마기 태그)·순수 전개(휘강파), 극단(스킬 치명)
+    const srcSchool = source ? this.schoolOf(source) : null;
+    dmg *= this.run.mage.damageMul(srcSchool, tags);
+    const sc = this.run.mage.skillCrit(srcSchool);
+    if (sc) {
+      const r = rollCrit(this.run.rng, dmg, sc.chance, d.weapons.critMultiplier + this.run.itemRt.total('critDamage') + sc.bonus);
+      dmg = r.damage;
+      if (r.crit) this.pendingCrit = true;
+    }
     // 아이템: 피해 %(더한 뒤 한 번), 보스·적이 받는 피해·스킬 피해, 적중 효과(신검 공간격·참마검)
     const boss = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss';
     const hm = this.run.itemRt.hitMods(this.run.rng, (c) => skillChance(c, 'success', ['chance'], d.tags));
@@ -894,7 +905,7 @@ export class WeaponCombat {
     const crit = this.pendingCrit;
     this.pendingCrit = false;
     const killed = this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption), source, { tags, crit, space });
-    this.run.mage.onHit(enemy, source, killed);
+    this.run.mage.onHit(enemy, source, killed, base, tags);
     // 신성한 이코르: 근접 공격이 맞으면 확률로 출혈
     const mb = this.run.itemRt.first('meleeBleed');
     if (mb && !killed && tags.includes('melee') && this.run.rng.chance(mb.chance)) this.run.host.bleed(enemy, mb.stacks);
@@ -929,6 +940,7 @@ export class WeaponCombat {
       if (fx.crit) this.run.hitStop.request(hs.crit);
     }
     for (const o of [...this.run.skillRt.skillObjects]) o.onDamageDealt?.(this.run.host, dealt, enemy);
+    this.run.mage.onDealt(source ? this.schoolOf(source) : null, dealt);
     // 아이템 피해 흡혈 (과기전쟁의 일기) + 스킬 흡혈 (전장의 함성)
     const steal = this.run.itemRt.sums.lifesteal + (this.run.skillRt.playerMods().lifesteal ?? 0);
     if (steal > 0 && dealt > 0) this.run.host.heal(dealt * steal, false);

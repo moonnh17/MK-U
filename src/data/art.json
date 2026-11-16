@@ -8540,6 +8540,96 @@
           "loop": true
         }
       }
+    },
+    "fx_hw_wave": {
+      "file": "mku/fx_hw_wave.png",
+      "frameWidth": 102,
+      "frameHeight": 100,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_hw_beam": {
+      "file": "mku/fx_hw_beam.png",
+      "frameWidth": 160,
+      "frameHeight": 30,
+      "frames": 7,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 6,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_hw_orb": {
+      "file": "mku/fx_hw_orb.png",
+      "frameWidth": 108,
+      "frameHeight": 110,
+      "frames": 43,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 42,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_hw_blast": {
+      "file": "mku/fx_hw_blast.png",
+      "frameWidth": 160,
+      "frameHeight": 160,
+      "frames": 23,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 22,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_hw_pillar": {
+      "file": "mku/fx_hw_pillar.png",
+      "frameWidth": 170,
+      "frameHeight": 200,
+      "frames": 35,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 34,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_hw_recoil": {
+      "file": "mku/fx_hw_recoil.png",
+      "frameWidth": 120,
+      "frameHeight": 114,
+      "frames": 15,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 14,
+          "fps": 18,
+          "loop": false
+        }
+      }
     }
   }
 }

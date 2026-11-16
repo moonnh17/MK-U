@@ -322,9 +322,11 @@
       "school": "hwigang",
       "tags": ["magic", "ranged"],
       "sources": { "beam": ["magic", "ranged"] },
-      "values": { "damage": 60 },
+      "values": { "damage": 60, "length": 260, "width": 26, "chargeSec": 0.25, "executeRatio": 0.3 },
       "color": "#b266ff",
-      "sprites": {}
+      "sprites": {
+        "beam": { "spriteKey": "fx_hw_beam", "color": "#b266ff", "size": 30 }
+      }
     }
   ]
 }

@@ -93,6 +93,8 @@ export interface SkillHost {
   teleport(dir: Vec2, distance: number, stepPx: number): { from: Vec2; to: Vec2 };
   /** 이번 런에 쓴 원소 (원소 대합주) */
   elementsUsed(): readonly ElementId[];
+  /** at 둘레 r 안의 적 탄을 지우고 그 피해 합을 돌려준다 (소환체가 맞는다) */
+  enemyBulletsAt(at: Vec2, r: number): number;
   /** 벽(지나갈 수 없는 칸)인지 */
   blocked(x: number, y: number): boolean;
   /** 냉기 둔화: slow 비율, sec초 (센 쪽·긴 쪽) */
@@ -136,6 +138,8 @@ export interface SkillObject {
   onKill?(host: SkillHost, enemy: Enemy): void;
   /** 이 오브젝트가 있는 동안 플레이어에게 주는 보정 (MK 슈트 등) */
   playerMods?(): Partial<PlayerMods>;
+  /** 장착 액티브를 쓴 직후 (집행 의지체가 따라 쓴다). values는 그 시전에 쓴 값 */
+  onSkillCast?(host: SkillHost, cast: SkillCast): void;
   /** 원소 스킬 피해 증가 (원소 가호) */
   elementDamage?(): number;
   /** 플레이어가 받을 피해를 먼저 흡수한다(심판의 강림 보호막). 남은 피해를 돌려준다 */

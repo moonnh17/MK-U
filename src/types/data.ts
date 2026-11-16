@@ -1010,7 +1010,7 @@ export type SkillSlotKind = 'active' | 'passive' | 'mastery';
 export const ELEMENT_IDS = ['fire', 'ice', 'lightning'] as const;
 export type ElementId = (typeof ELEMENT_IDS)[number];
 /** 개전 각인 효과 종류. 효과별 수치 이름은 levels 값 키 */
-export const IMPRINT_EFFECTS = ['fireDamage', 'staffDamage', 'ignite', 'frost', 'coldAura', 'staticCharge', 'purify', 'followUp'] as const;
+export const IMPRINT_EFFECTS = ['fireDamage', 'staffDamage', 'ignite', 'frost', 'coldAura', 'staticCharge', 'purify', 'overdrive', 'pierceUnfold', 'recoil', 'condense', 'extreme', 'followUp'] as const;
 export type ImprintEffect = (typeof IMPRINT_EFFECTS)[number];
 
 /** 마기법사 개전 각인: 액티브 1번 칸 스킬의 각인만 상시 적용 */

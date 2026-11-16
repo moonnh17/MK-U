@@ -1689,6 +1689,143 @@
       }
     },
     {
+      "id": "magiBolt",
+      "job": "magiMage",
+      "school": "hwigang",
+      "kind": "active",
+      "nameKey": "skill.magiBolt",
+      "shortKey": "skill.magiBolt.short",
+      "descKey": "skill.magiBolt.desc",
+      "tags": ["magic", "ranged"],
+      "sources": { "bolt": ["magic", "ranged"] },
+      "levels": [
+        { "cooldownSec": 3, "values": { "shots": 5, "gapSec": 0.07, "damage": 4, "speed": 320, "range": 200, "spreadDeg": 6, "pierce": 0 } },
+        { "cooldownSec": 2.6, "values": { "shots": 6, "gapSec": 0.07, "damage": 5, "speed": 320, "range": 200, "spreadDeg": 6, "pierce": 0 } },
+        { "cooldownSec": 2.2, "values": { "shots": 8, "gapSec": 0.07, "damage": 6, "speed": 320, "range": 200, "spreadDeg": 6, "pierce": 0 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.magiBolt",
+        "descKey": "imprint.magiBolt.desc",
+        "effect": "overdrive",
+        "levels": [{ "overdrive": 0.15 }, { "overdrive": 0.2 }, { "overdrive": 0.25 }],
+        "fixed": { "damageTaken": 0.2 }
+      },
+      "color": "#b266ff",
+      "sprites": {
+        "shot": { "spriteKey": "fx_summon_will_shot", "color": "#e0b3ff", "size": 10 }
+      }
+    },
+    {
+      "id": "magiBurst",
+      "job": "magiMage",
+      "school": "hwigang",
+      "kind": "active",
+      "nameKey": "skill.magiBurst",
+      "shortKey": "skill.magiBurst.short",
+      "descKey": "skill.magiBurst.desc",
+      "tags": ["magic", "ranged"],
+      "sources": { "beam": ["magic", "ranged"] },
+      "levels": [
+        { "cooldownSec": 6, "values": { "damage": 14, "length": 200, "width": 10 } },
+        { "cooldownSec": 5.5, "values": { "damage": 19, "length": 200, "width": 12 } },
+        { "cooldownSec": 5, "values": { "damage": 25, "length": 200, "width": 14 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.magiBurst",
+        "descKey": "imprint.magiBurst.desc",
+        "effect": "pierceUnfold",
+        "levels": [{ "pierceUnfold": 0.1 }, { "pierceUnfold": 0.15 }, { "pierceUnfold": 0.2 }],
+        "fixed": { "pierce": 1 }
+      },
+      "color": "#b266ff",
+      "sprites": {
+        "beam": { "spriteKey": "fx_hw_beam", "color": "#b266ff", "size": 12 }
+      }
+    },
+    {
+      "id": "magiWave",
+      "job": "magiMage",
+      "school": "hwigang",
+      "kind": "active",
+      "nameKey": "skill.magiWave",
+      "shortKey": "skill.magiWave.short",
+      "descKey": "skill.magiWave.desc",
+      "tags": ["magic", "ranged"],
+      "sources": { "wave": ["magic", "ranged"] },
+      "levels": [
+        { "cooldownSec": 5, "values": { "damage": 9, "radius": 56, "arcDeg": 100, "knockback": 30, "knockSec": 0.18 } },
+        { "cooldownSec": 4.5, "values": { "damage": 12, "radius": 62, "arcDeg": 110, "knockback": 30, "knockSec": 0.18 } },
+        { "cooldownSec": 4, "values": { "damage": 15, "radius": 68, "arcDeg": 120, "knockback": 30, "knockSec": 0.18 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.magiWave",
+        "descKey": "imprint.magiWave.desc",
+        "effect": "recoil",
+        "levels": [{ "recoil": 8 }, { "recoil": 12 }, { "recoil": 16 }],
+        "fixed": { "radius": 48, "knockback": 26, "knockSec": 0.16, "cooldownSec": 1.5 }
+      },
+      "color": "#b266ff",
+      "sprites": {
+        "wave": { "spriteKey": "fx_hw_wave", "color": "#b266ff", "size": 60 },
+        "recoil": { "spriteKey": "fx_hw_recoil", "color": "#b266ff", "size": 60 }
+      }
+    },
+    {
+      "id": "magiCondenser",
+      "job": "magiMage",
+      "school": "hwigang",
+      "kind": "active",
+      "nameKey": "skill.magiCondenser",
+      "shortKey": "skill.magiCondenser.short",
+      "descKey": "skill.magiCondenser.desc",
+      "tags": ["magic", "ranged"],
+      "sources": { "blast": ["magic", "ranged"] },
+      "levels": [
+        { "cooldownSec": 10, "values": { "speed": 40, "lifeSec": 2.2, "pullRadius": 70, "pullPx": 6, "pullEverySec": 0.15, "radius": 40, "damage": 22 } },
+        { "cooldownSec": 9, "values": { "speed": 40, "lifeSec": 2.4, "pullRadius": 76, "pullPx": 7, "pullEverySec": 0.15, "radius": 46, "damage": 30 } },
+        { "cooldownSec": 8, "values": { "speed": 40, "lifeSec": 2.6, "pullRadius": 82, "pullPx": 8, "pullEverySec": 0.15, "radius": 52, "damage": 40 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.magiCondenser",
+        "descKey": "imprint.magiCondenser.desc",
+        "effect": "condense",
+        "levels": [{ "condense": 0.3 }, { "condense": 0.45 }, { "condense": 0.6 }],
+        "fixed": { "fullSec": 8, "windowSec": 3 }
+      },
+      "color": "#b266ff",
+      "sprites": {
+        "orb": { "spriteKey": "fx_hw_orb", "color": "#b266ff", "size": 22 },
+        "blast": { "spriteKey": "fx_hw_blast", "color": "#b266ff", "size": 80 }
+      }
+    },
+    {
+      "id": "magiPillar",
+      "job": "magiMage",
+      "school": "hwigang",
+      "kind": "active",
+      "nameKey": "skill.magiPillar",
+      "shortKey": "skill.magiPillar.short",
+      "descKey": "skill.magiPillar.desc",
+      "tags": ["magic", "ranged", "space"],
+      "sources": { "pillar": ["magic", "ranged", "space"] },
+      "levels": [
+        { "cooldownSec": 12, "values": { "damage": 18, "range": 160, "ahead": 80, "radius": 16, "delaySec": 0.35 } },
+        { "cooldownSec": 11, "values": { "damage": 24, "range": 160, "ahead": 80, "radius": 18, "delaySec": 0.35 } },
+        { "cooldownSec": 10, "values": { "damage": 30, "range": 160, "ahead": 80, "radius": 20, "delaySec": 0.35 } }
+      ],
+      "imprint": {
+        "nameKey": "imprint.magiPillar",
+        "descKey": "imprint.magiPillar.desc",
+        "effect": "extreme",
+        "levels": [{ "extreme": 0.3 }, { "extreme": 0.45 }, { "extreme": 0.6 }],
+        "fixed": { "critChance": 0.15, "damageTaken": 0.2 }
+      },
+      "color": "#b266ff",
+      "sprites": {
+        "pillar": { "spriteKey": "fx_hw_pillar", "color": "#b266ff", "size": 40 }
+      }
+    },
+    {
       "id": "teleport",
       "job": "magiMage",
       "school": "hwigang",
@@ -1720,22 +1857,24 @@
       "nameKey": "skill.executionWill",
       "shortKey": "skill.executionWill.short",
       "descKey": "skill.executionWill.desc",
-      "tags": [],
-      "sources": {},
+      "tags": ["magic", "ranged"],
+      "sources": { "summon": ["magic", "ranged"], "echo": ["magic", "ranged"] },
       "levels": [
-        { "cooldownSec": 20, "values": { "count": 1, "lifeSec": 8 } },
-        { "cooldownSec": 20, "values": { "count": 2, "lifeSec": 10 } },
-        { "cooldownSec": 20, "values": { "count": 1, "lifeSec": 14 } }
+        { "cooldownSec": 20, "values": { "copyDelaySec": 0.5, "copyDamage": 0.4, "hp": 40, "speed": 70, "reach": 10, "attackSec": 0.8, "damage": 8, "slow": 0.3, "slowSec": 1, "knockback": 14, "burstDamage": 10, "burstRadius": 28, "contactEverySec": 0.5, "landDamage": 20, "crushEverySec": 3, "crushRadius": 56, "crushDamage": 14, "shells": 6, "shellEverySec": 5, "shellDamage": 12, "shellRadius": 20, "shellDelaySec": 0.8, "followPx": 16, "count": 1, "lifeSec": 8, "kind": 1 } },
+        { "cooldownSec": 20, "values": { "copyDelaySec": 0.5, "copyDamage": 0.4, "hp": 40, "speed": 70, "reach": 10, "attackSec": 0.8, "damage": 8, "slow": 0.3, "slowSec": 1, "knockback": 14, "burstDamage": 10, "burstRadius": 28, "contactEverySec": 0.5, "landDamage": 20, "crushEverySec": 3, "crushRadius": 56, "crushDamage": 14, "shells": 6, "shellEverySec": 5, "shellDamage": 12, "shellRadius": 20, "shellDelaySec": 0.8, "followPx": 16, "count": 2, "lifeSec": 10, "kind": 2 } },
+        { "cooldownSec": 20, "values": { "copyDelaySec": 0.5, "copyDamage": 0.4, "hp": 120, "speed": 40, "reach": 30, "attackSec": 0.8, "damage": 8, "slow": 0.3, "slowSec": 1, "knockback": 14, "burstDamage": 20, "burstRadius": 44, "contactEverySec": 0.5, "landDamage": 20, "crushEverySec": 3, "crushRadius": 56, "crushDamage": 14, "shells": 6, "shellEverySec": 5, "shellDamage": 12, "shellRadius": 20, "shellDelaySec": 0.8, "followPx": 16, "count": 1, "lifeSec": 14, "kind": 3 } }
       ],
       "imprint": {
         "nameKey": "imprint.executionWill",
         "descKey": "imprint.executionWill.desc",
         "effect": "followUp",
-        "levels": [{ "followUp": 0.3 }, { "followUp": 0.45 }, { "followUp": 0.6 }]
+        "levels": [{ "followUp": 0.3 }, { "followUp": 0.45 }, { "followUp": 0.6 }],
+        "fixed": { "delaySec": 0.25 }
       },
       "color": "#b266ff",
       "sprites": {
         "will": { "spriteKey": "summon_will_construct", "color": "#b266ff", "size": 12, "height": 26 },
+        "echo": { "spriteKey": "summon_will_construct", "color": "#b266ff", "size": 8, "height": 16 },
         "soldier": { "spriteKey": "summon_magi_soldier", "color": "#2c1a45", "size": 12, "height": 28 },
         "golem": { "spriteKey": "summon_imitation_golem", "color": "#6a6a78", "size": 20, "height": 34 },
         "willShot": { "spriteKey": "fx_summon_will_shot", "color": "#e0b3ff", "size": 8 },
@@ -1775,9 +1914,9 @@
       "tags": [],
       "sources": {},
       "levels": [
-        { "cooldownSec": 0, "values": { "magicDamage": 0.1 } },
-        { "cooldownSec": 0, "values": { "magicDamage": 0.15 } },
-        { "cooldownSec": 0, "values": { "magicDamage": 0.2 } }
+        { "cooldownSec": 0, "values": { "magicDamage": 0.1, "condensePerDamage": 0.005 } },
+        { "cooldownSec": 0, "values": { "magicDamage": 0.15, "condensePerDamage": 0.006 } },
+        { "cooldownSec": 0, "values": { "magicDamage": 0.2, "condensePerDamage": 0.007 } }
       ],
       "color": "#b266ff",
       "sprites": {}

@@ -4,7 +4,7 @@ import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
 import { skillAllowed } from '../src/systems/advancement';
 import { drawSkillCards } from '../src/systems/cards';
-import { activeImprint, addElement, castBoost, chargeAfterMove, concertFull, elementDamageMul, frostHit, judgeBySlots, slowAmount, staffDamageMul } from '../src/systems/magiMage';
+import { activeImprint, addElement, castBoost, chargeAfterMove, concertFull, condenseFill, elementDamageMul, executable, frostHit, imprintMods, judgeBySlots, slowAmount, staffDamageMul, willCopies } from '../src/systems/magiMage';
 import { awakeningReady, emptyLoadout, equipSkill, findSkill, setSkillLevel, type SkillLoadout } from '../src/systems/skills';
 import { tickBurn, applyBurn } from '../src/systems/tags';
 import type { BurnRule } from '../src/types/data';
@@ -187,5 +187,55 @@ describe('원소 대합주', () => {
     used = addElement(addElement(used, 'ice'), 'lightning');
     expect(concertFull(used)).toBe(true);
     expect(addElement(used, undefined)).toEqual(used);
+  });
+});
+
+describe('휘강파: 응축·과잉 전개·극단', () => {
+  it('응축은 시간과 순수 전개 피해로 차고 1에서 멈춘다', () => {
+    expect(condenseFill(0, 4, 8)).toBeCloseTo(0.5);
+    expect(condenseFill(0.5, 0, 0, 50, 0.005)).toBeCloseTo(0.75);
+    expect(condenseFill(0.9, 8, 8)).toBe(1);
+  });
+  it('응축 각인: 게이지 비율만큼 다음 스킬 피해', () => {
+    const im = activeImprint(loadout([['magiCondenser', 2]]), S, mage, null);
+    expect(castBoost(1, im, null, undefined, null)).toEqual({ mul: 1.45, chains: 0, windowSec: 3 });
+    expect(castBoost(0.5, im, null, undefined, null)?.mul).toBeCloseTo(1.225);
+  });
+  it('과잉 전개: 재사용 대기 빨리 + 받는 피해, 극단: 받는 피해', () => {
+    expect(imprintMods(activeImprint(loadout([['magiBolt', 3]]), S, mage, null))).toEqual({ cooldownRate: 0.25, damageTaken: 0.2 });
+    expect(imprintMods(activeImprint(loadout([['magiPillar', 1]]), S, mage, null))).toEqual({ damageTaken: 0.2 });
+    expect(imprintMods(null)).toEqual({});
+  });
+  it('계열 공명이면 과잉 전개 수치도 +50% (받는 피해는 고정)', () => {
+    const m = imprintMods(activeImprint(loadout([['magiBolt', 2]]), S, mage, 'hwigang'));
+    expect(m.cooldownRate).toBeCloseTo(0.3);
+    expect(m.damageTaken).toBe(0.2);
+  });
+});
+
+describe('슬픈 처형·집행 의지체', () => {
+  it('처형은 체력이 낮은 일반·엘리트만', () => {
+    expect(executable('normal', 20, 100, 0.3)).toBe(true);
+    expect(executable('elite', 30, 100, 0.3)).toBe(true);
+    expect(executable('normal', 31, 100, 0.3)).toBe(false);
+    for (const r of ['champion', 'boss', 'hiddenBoss']) expect(executable(r, 1, 100, 0.3)).toBe(false);
+  });
+  it('의지체는 마기법사 액티브만 따라 쓴다 (순간이동·원소 가호·집행 의지체 제외)', () => {
+    const ex = ['teleport', 'elementWard', 'executionWill'];
+    expect(willCopies(findSkill(S, 'fireball'), ex)).toBe(true);
+    expect(willCopies(findSkill(S, 'magiBurst'), ex)).toBe(true);
+    for (const id of ex) expect(willCopies(findSkill(S, id), ex)).toBe(false);
+    expect(willCopies(findSkill(S, 'magiTurret'), ex)).toBe(false);
+    expect(willCopies(findSkill(S, 'pureUnfolding'), ex)).toBe(false);
+  });
+  it('집행 의지체 레벨: 1기 8초 / 2기 10초 / 1기 14초, 쿨타임 20초', () => {
+    const d = findSkill(S, 'executionWill');
+    expect(d.levels.map((l) => [l.values.kind, l.values.count, l.values.lifeSec, l.cooldownSec])).toEqual([[1, 1, 8, 20], [2, 2, 10, 20], [3, 1, 14, 20]]);
+    expect(d.levels[0]!.values.copyDelaySec).toBe(0.5);
+    expect(d.levels[0]!.values.copyDamage).toBe(0.4);
+  });
+  it('휘강파 액티브 7종 모두 구현·각인', () => {
+    const hw = S.skills.filter((s) => s.school === 'hwigang' && s.kind === 'active').map((s) => s.id).sort();
+    expect(hw).toEqual(['executionWill', 'magiBolt', 'magiBurst', 'magiCondenser', 'magiPillar', 'magiWave', 'teleport']);
   });
 });

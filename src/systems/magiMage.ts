@@ -3,7 +3,7 @@
  * - 각인: 액티브 1번 칸 스킬의 각인만 적용, 수치는 스킬 레벨, 전직 학파 스킬이면 계열 공명 배율.
  * - 전직: 1번 → 2번 → 3번 칸에서 처음 나오는 전직 학파 스킬. 없으면 null(직접 선택).
  */
-import { ELEMENT_IDS, type ElementId, type ImprintEffect, type JobDef, type SchoolId, type SkillsData } from '../types/data';
+import { ELEMENT_IDS, type ElementId, type ImprintEffect, type JobDef, type SchoolId, type SkillDef, type SkillsData } from '../types/data';
 import { findSkill, type SkillLoadout } from './skills';
 
 export interface ActiveImprint {
@@ -87,7 +87,7 @@ export interface CastBoost {
 }
 
 /**
- * 시전할 때 정하는 강화. 대전(각인): 충전 비율 × 최대 피해, 가득 찬 만큼 연쇄 +.
+ * 시전할 때 정하는 강화. 대전(각인): 충전 비율 × 최대 피해, 가득 찬 만큼 연쇄 +. 응축(각인): 게이지 × 최대 피해.
  * 원소 순환(패시브): 앞서 쓴 원소와 다른 원소의 스킬이면 피해 +. 둘 다 없으면 null.
  */
 export function castBoost(
@@ -105,6 +105,11 @@ export function castBoost(
     chains += Math.floor(charge * im.values.chains!);
     windowSec = Math.max(windowSec, im.values.windowSec!);
   }
+  // 응축(각인): charge 자리에 응축 게이지를 받는다
+  if (im?.effect === 'condense' && charge > 0) {
+    mul *= 1 + im.values.condense! * charge;
+    windowSec = Math.max(windowSec, im.values.windowSec!);
+  }
   if (cycle && element && lastElement && element !== lastElement) {
     mul *= 1 + cycle.damage;
     windowSec = Math.max(windowSec, cycle.windowSec);
@@ -120,4 +125,28 @@ export function concertFull(used: readonly ElementId[]): boolean {
 /** 이번 런에 쓴 원소 목록에 더한다 (처음 쓴 것만) */
 export function addElement(used: readonly ElementId[], element: ElementId | undefined): ElementId[] {
   return element && !used.includes(element) ? [...used, element] : [...used];
+}
+
+// ---------- 휘강파 (순수 마기) ----------
+
+/** 응축: 시간(스킬을 쓰지 않는 동안)과 순수 전개 피해로 차는 게이지 (0~1) */
+export function condenseFill(gauge: number, dt: number, fullSec: number, dealt = 0, perDamage = 0): number {
+  return Math.min(1, gauge + (fullSec > 0 ? Math.max(0, dt) / fullSec : 0) + Math.max(0, dealt) * perDamage);
+}
+
+/** 각인이 플레이어에게 주는 보정: 과잉 전개(스킬 재사용 대기 빨리, 받는 피해 +), 극단(받는 피해 +) */
+export function imprintMods(im: ActiveImprint | null): { cooldownRate?: number; damageTaken?: number } {
+  if (im?.effect === 'overdrive') return { cooldownRate: im.values.overdrive!, damageTaken: im.values.damageTaken! };
+  if (im?.effect === 'extreme') return { damageTaken: im.values.damageTaken! };
+  return {};
+}
+
+/** 슬픈 처형: 맞은 뒤 체력 비율이 ratio 이하인 일반·엘리트만 (정예·보스 제외) */
+export function executable(rank: string, hp: number, maxHp: number, ratio: number): boolean {
+  return (rank === 'normal' || rank === 'elite') && hp > 0 && hp <= maxHp * ratio;
+}
+
+/** 집행 의지체가 따라 쓰는 스킬: 마기법사 액티브 중 이동·버프·소환이 아닌 것 */
+export function willCopies(def: Pick<SkillDef, 'id' | 'job' | 'kind'>, excluded: readonly string[]): boolean {
+  return def.job === 'magiMage' && def.kind === 'active' && !excluded.includes(def.id);
 }

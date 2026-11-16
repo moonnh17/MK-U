@@ -1189,7 +1189,7 @@ export class RunScene extends Phaser.Scene {
     }
     const p = this.session.player;
     const stance = this.itemRt.first('hpStance');
-    const taken = this.itemRt.absorbOverheal(this.skillRt.absorb(amount * (1 - this.skillRt.playerMods().damageReduction) * (1 - this.condition.chargeGuard()) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard()) * (stance ? 1 - hpStance(p.hp, p.maxHp, stance).taken : 1)));
+    const taken = this.itemRt.absorbOverheal(this.skillRt.absorb(amount * (1 - this.skillRt.playerMods().damageReduction) * (1 + (this.skillRt.playerMods().damageTaken ?? 0)) * (1 - this.condition.chargeGuard()) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard()) * (stance ? 1 - hpStance(p.hp, p.maxHp, stance).taken : 1)));
     // 정신 피해: 패닉 중이면 체력 피해로 바뀐다
     const mental = (mentalRaw ?? amount * (attacker?.def.mentalRatio ?? 0)) ;
     const m = applyMental(p, mental);
@@ -1200,6 +1200,7 @@ export class RunScene extends Phaser.Scene {
     shake(this, 'light');
     this.juice.hurt();
     sfx('playerHurt');
+    this.mage.onHurt();
     // 피격에 반응하는 스킬 오브젝트 (반물질포 충전 취소 등)
     for (const o of [...this.skillRt.skillObjects]) if (o.onPlayerHurt && !o.onPlayerHurt(this.host)) this.skillRt.removeObject(o);
     // 아이템: 피격 효과 → 낮은 체력 회복 → 부활

@@ -123,6 +123,15 @@ export class SkillRuntime {
       },
       teleport: (dir, distance, stepPx) => this.run.condition.teleport(dir, distance, stepPx),
       elementsUsed: () => this.run.session.player.elementsUsed,
+      enemyBulletsAt: (at, r) => {
+        let sum = 0;
+        for (const b of [...this.run.enemyBullets.getChildren()] as Phaser.Physics.Arcade.Image[]) {
+          if (Math.hypot(b.x - at.x, b.y - at.y) > r) continue;
+          sum += (b.getData('damage') as number | undefined) ?? 0;
+          b.destroy();
+        }
+        return sum;
+      },
       blocked: (x, y) => this.run.condition.blockedAt(1)(x, y),
       chill: (e, slow, sec) => e.chill(slow, sec),
       freeze: (e, sec) => {
@@ -302,8 +311,9 @@ export class SkillRuntime {
       this.run.toastThrottled(this.run.ctx.t('skillMsg.noTarget'));
       return;
     }
-    if (impl.cast(this.hostFor(id), { def, owned, values: this.run.mage.beforeCast(def, sv.values) })) {
-      this.run.mage.afterCast(def);
+    const cast = { def, owned, values: this.run.mage.beforeCast(def, sv.values) };
+    if (impl.cast(this.hostFor(id), cast)) {
+      this.run.mage.afterCast(cast);
       p.cooldowns = { ...p.cooldowns, [id]: this.cooldownOf(sv.cooldownSec) };
       sfx('skill');
       // 스킬을 쓸 때마다 스킬 색 파동과 흔들림
@@ -406,7 +416,7 @@ export class SkillRuntime {
       const m = impl.heldMods(this.hostFor(id), { def, owned, values: skillValues(def, owned).values });
       return m ? [m] : [];
     });
-    return combineMods([...this.skillObjects.flatMap((o) => (o.playerMods ? [o.playerMods()] : [])), ...held]);
+    return combineMods([...this.skillObjects.flatMap((o) => (o.playerMods ? [o.playerMods()] : [])), ...held, this.run.mage.mods()]);
   }
 
   /** 보호막 오브젝트가 피해를 먼저 흡수한다. 남은 피해 */

@@ -11,6 +11,8 @@ import { firstLaw } from './firstLaw';
 import type { PassiveImpl, SkillImpl, UltimateImpl } from './host';
 import { magiCorruption } from './magiCorruption';
 import { chainLightning, elementConcert, elementCycle, elementWard, fireball, fireWall, iceOrb, iceSpear, teleport } from './magiMage';
+import { magiBolt, magiBurst, magiCondenser, magiPillar, magiWave, pureUnfolding, sadExecution } from './hwigang';
+import { executionWill } from './executionWill';
 import { magiField } from './magiField';
 import { magiMine } from './magiMine';
 import { magiTurret } from './magiTurret';
@@ -49,7 +51,13 @@ const SKILLS: Readonly<Record<string, SkillImpl>> = {
   iceOrb,
   chainLightning,
   elementWard,
+  magiBolt,
+  magiBurst,
+  magiWave,
+  magiCondenser,
+  magiPillar,
   teleport,
+  executionWill,
 };
 
 const PASSIVES: Readonly<Record<string, PassiveImpl>> = {
@@ -58,6 +66,7 @@ const PASSIVES: Readonly<Record<string, PassiveImpl>> = {
   boilingHeart,
   prayerOfRevival,
   elementCycle,
+  pureUnfolding,
 };
 
 const ULTIMATES: Readonly<Record<string, UltimateImpl>> = {
@@ -68,6 +77,7 @@ const ULTIMATES: Readonly<Record<string, UltimateImpl>> = {
   berserkerRage,
   divineJudgment,
   elementConcert,
+  sadExecution,
 };
 
 export function skillImpl(id: string): SkillImpl | undefined {

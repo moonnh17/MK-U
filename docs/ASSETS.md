@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 762개 · 그림 있음 717개
+전체 773개 · 그림 있음 723개
 
 ## player (9)
 
@@ -257,7 +257,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (238)
+## skill (244)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -454,10 +454,16 @@
 | `fx_mage_bolt` | 뇌격 (bolt) | 10×10 | center | #ffd83a | mku/fx_mage_bolt.png (7프레임) |
 | `fx_mage_zap` | 뇌격 (zap) | 22×22 | center | #ffd83a | mku/fx_mage_zap.png (17프레임) |
 | `fx_mage_ward` | 원소 가호 (aura) | 30×30 | center | #ff9a4a | mku/fx_mage_ward.png (72프레임) |
-| `summon_will_construct` | 집행 의지체 (will) | 12×26 | center | #b266ff | mku/summon_will_construct.png (13프레임) |
+| `fx_summon_will_shot` | 마기탄 (shot) 외 1곳 | 10×10 | center | #e0b3ff | mku/fx_summon_will_shot.png (5프레임) |
+| `fx_hw_beam` | 마기 분출 (beam) 외 1곳 | 12×12 | center | #b266ff | mku/fx_hw_beam.png (7프레임) |
+| `fx_hw_wave` | 마기 파동 (wave) | 60×60 | center | #b266ff | mku/fx_hw_wave.png (12프레임) |
+| `fx_hw_recoil` | 마기 파동 (recoil) | 60×60 | center | #b266ff | mku/fx_hw_recoil.png (15프레임) |
+| `fx_hw_orb` | 마기 응축구 (orb) | 22×22 | center | #b266ff | mku/fx_hw_orb.png (43프레임) |
+| `fx_hw_blast` | 마기 응축구 (blast) | 80×80 | center | #b266ff | mku/fx_hw_blast.png (23프레임) |
+| `fx_hw_pillar` | 마기 기둥 (pillar) | 40×40 | center | #b266ff | mku/fx_hw_pillar.png (35프레임) |
+| `summon_will_construct` | 집행 의지체 (will) 외 1곳 | 12×26 | center | #b266ff | mku/summon_will_construct.png (13프레임) |
 | `summon_magi_soldier` | 집행 의지체 (soldier) | 12×28 | center | #2c1a45 | mku/summon_magi_soldier.png (13프레임) |
 | `summon_imitation_golem` | 집행 의지체 (golem) | 20×34 | center | #6a6a78 | mku/summon_imitation_golem.png (13프레임) |
-| `fx_summon_will_shot` | 집행 의지체 (willShot) | 8×8 | center | #e0b3ff | mku/fx_summon_will_shot.png (5프레임) |
 | `fx_summon_will_hit` | 집행 의지체 (willHit) | 24×24 | center | #b266ff | mku/fx_summon_will_hit.png (2프레임) |
 | `fx_summon_soldier_thrust` | 집행 의지체 (soldierThrust) | 28×28 | center | #b266ff | mku/fx_summon_soldier_thrust.png (4프레임) |
 | `fx_summon_soldier_burst` | 집행 의지체 (soldierBurst) | 32×32 | center | #b266ff | mku/fx_summon_soldier_burst.png (5프레임) |
@@ -565,7 +571,7 @@
 | `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | mku/item_orion_shield.png (1프레임) |
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | mku/item_hectar_ram.png (1프레임) |
 
-## icon (76)
+## icon (81)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -602,6 +608,11 @@
 | `icon_skill_iceOrb` | 얼음 보주 | 16×16 | center | #5ad0f0 | — |
 | `icon_skill_chainLightning` | 뇌격 | 16×16 | center | #ffd83a | — |
 | `icon_skill_elementWard` | 원소 가호 | 16×16 | center | #ff9a4a | — |
+| `icon_skill_magiBolt` | 마기탄 | 16×16 | center | #b266ff | — |
+| `icon_skill_magiBurst` | 마기 분출 | 16×16 | center | #b266ff | — |
+| `icon_skill_magiWave` | 마기 파동 | 16×16 | center | #b266ff | — |
+| `icon_skill_magiCondenser` | 마기 응축구 | 16×16 | center | #b266ff | — |
+| `icon_skill_magiPillar` | 마기 기둥 | 16×16 | center | #b266ff | — |
 | `icon_skill_teleport` | 순간이동 | 16×16 | center | #b266ff | — |
 | `icon_skill_executionWill` | 집행 의지체 | 16×16 | center | #b266ff | — |
 | `icon_skill_elementCycle` | 원소 순환 | 16×16 | center | #ff6a2a | — |
