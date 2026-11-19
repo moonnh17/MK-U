@@ -4,6 +4,7 @@ import { buildPathField, pathDir, segmentClear, type PathField } from '../system
 import { IDLE_DODGE } from '../systems/dodge';
 import Phaser from 'phaser';
 import { RunDebug } from './run/runDebug';
+import { bindRunEvents } from './run/busBindings';
 import { WorldBuilder } from './run/worldBuilder';
 import { LootInteract } from './run/lootInteract';
 import { SkillRuntime } from './run/skillRuntime';
@@ -44,7 +45,7 @@ import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { gradeEnergyMultiplier, gradeMultiplier } from '../systems/damage';
 import { assignElites, eliteCount } from '../systems/elites';
 import { championWaves, hiddenBossScale, raidChampions } from '../systems/champions';
-import { collectCoins, rollCoinDrops, rollOptions } from '../systems/loot';
+import { collectCoins, rollCoinDrops } from '../systems/loot';
 import { generateStage } from '../systems/mapgen';
 import { hiddenChapterMul } from '../systems/hiddenBoss';
 import { steerToward } from '../systems/motion';
@@ -348,65 +349,7 @@ export class RunScene extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.centerOn(start.x, start.y);
 
-    this.unsubs.push(
-      bus.on('debugClearRoom', () => this.debugTools.debugClearRoom()),
-      bus.on('restartRequested', () => this.restartRun()),
-      bus.on('cardPick', ({ index }) => this.progression.pickCard(index)),
-      bus.on('combinerPick', ({ a, b }) => this.loot.combine(a, b)),
-      bus.on('combinerClose', () => this.loot.closeCombiner()),
-      bus.on('inventoryEquip', ({ skillId, target }) => this.progression.equip(skillId, target)),
-      bus.on('inventoryDropWeapon', ({ slot }) => this.loot.dropFromSlot(slot)),
-      bus.on('inventoryOpenRequest', () => this.progression.openInventory()),
-      bus.on('inventoryCloseRequest', () => this.progression.closeInventory()),
-      bus.on('debugSetSkill', (e) => this.debugTools.debugSetSkill(e.skillId, e.level, e.awakened)),
-      bus.on('debugOpenCards', ({ kind }) => this.progression.queueOffers([{ kind, boss: false }])),
-      bus.on('debugFillUltimate', () => {
-        this.session.player.ultimate.cooldownLeft = 0;
-      }),
-      bus.on('debugSpawn', ({ enemyId, count, elite }) => this.debugTools.debugSpawn(enemyId, count, elite ?? null)),
-      bus.on('debugBarrage', () => this.debugTools.debugBarrage()),
-      bus.on('cutsceneDone', () => this.progression.showNextCut()),
-      bus.on('storyDone', () => this.progression.finishStory()),
-      bus.on('itemGetDone', () => {
-        if (this.modal === 'itemGet') this.setModal(null);
-      }),
-      bus.on('pauseResume', () => {
-        if (this.modal === 'pause') this.setModal(null);
-      }),
-      bus.on('cardReroll', () => this.progression.rerollCards()),
-      bus.on('debugForceEncounter', ({ kind }) => {
-        this.encounters.forcedEncounter = kind;
-      }),
-      bus.on('debugGoStage', ({ chapter, stage }) => {
-        if (this.modal || this.session.outcome) return;
-        this.scene.restart({ stage: { chapter, stage }, player: this.session.player, offers: [] } satisfies RunSceneData);
-      }),
-      bus.on('debugHiddenBoss', ({ id }) => {
-        this.encounters.forcedEncounter = 'hiddenBoss';
-        this.encounters.forcedHiddenBoss = id;
-      }),
-      bus.on('debugGiveWeapon', ({ defId }) => {
-        const d = this.ctx.data;
-        const def = this.weaponDefOf(defId);
-        const grade = def.grade;
-        const count = d.groupMultipliers.grades.find((g) => g.id === grade)?.randomOptions ?? 0;
-        const rng = Rng.derive(this.ctx.config.seed, `debug-weapon-${this.loot.lootSeq++}`);
-        const options = rollOptions(rng, def, count, d.weapons.options);
-        this.loot.dropWeapon({ defId, grade, options }, this.player.x + 16, this.player.y);
-      }),
-      bus.on('debugGiveItem', ({ itemId }) => {
-        this.loot.giveItem(itemId);
-        this.progression.checkAwakenings();
-      }),
-      bus.on('debugCoins', ({ amount }) => {
-        this.session.player.coins += amount;
-      }),
-      bus.on('debugAdvance', ({ hectar, acro }) => this.debugTools.debugAdvance(hectar, acro)),
-      bus.on('debugAdvanceTo', ({ school }) => this.debugTools.debugAdvanceTo(school)),
-      bus.on('debugBossHp', ({ ratio }) => {
-        for (const e of this.enemies) if (e.def.rank === 'boss' || e.def.rank === 'hiddenBoss') e.hp = Math.max(1, e.maxHp * ratio);
-      }),
-    );
+    this.unsubs.push(...bindRunEvents(this));
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.unsubs.forEach((u) => u());
       this.unsubs = [];
