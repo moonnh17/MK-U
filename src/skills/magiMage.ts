@@ -15,7 +15,7 @@ import { shake } from '../entities/juice';
 import { concertFull } from '../systems/magiMage';
 import { chainTargets } from '../systems/targeting';
 import type { ElementId, SpriteRef, TagId } from '../types/data';
-import { loopArt, playFx, stretchFx } from './skillFx';
+import { loopArt, playFx, ProjectileLook, sparks, stretchFx } from './skillFx';
 import { floatText, trimOldest, type PassiveImpl, type SkillCast, type SkillHost, type SkillImpl, type SkillObject, type UltimateCast, type UltimateImpl } from './host';
 
 // ---------- 화염벽 ----------
@@ -122,6 +122,8 @@ interface MissileSpec {
   speed: number;
   range: number;
   sprite: SpriteRef;
+  /** 몸 아래 ADD 빛 (움직이는 픽셀 이펙트) */
+  glow?: SpriteRef;
   /** 더 꿰뚫을 수 있는 적 수 (0이면 첫 적에서 멈춘다) */
   pierce: number;
   onHit(e: Enemy): void;
@@ -133,7 +135,7 @@ interface MissileSpec {
 class Missile implements SkillObject {
   readonly owner: string;
   readonly createdAt: number;
-  private readonly img: Phaser.GameObjects.Sprite;
+  private readonly look: ProjectileLook;
   private readonly dir: Vec2;
   private at: Vec2;
   private flown = 0;
@@ -149,16 +151,14 @@ class Missile implements SkillObject {
     this.dir = { x: Math.cos(spec.angle), y: Math.sin(spec.angle) };
     this.at = { ...spec.from };
     this.pierce = spec.pierce;
-    this.img = host.sprite(this.at.x, this.at.y, spec.sprite).setDepth(5).setRotation(spec.angle);
-    this.img.setDisplaySize(spec.sprite.size, (spec.sprite.size * this.img.height) / Math.max(1, this.img.width));
-    loopArt(this.img, spec.sprite);
+    this.look = new ProjectileLook(host.scene, this.at.x, this.at.y, spec.sprite, host.ctx.data.juice.projectileLook, { rotation: spec.angle, glow: spec.glow });
   }
 
   update(dt: number, host: SkillHost): boolean {
     const step = Math.min(this.spec.range - this.flown, this.spec.speed * dt);
     this.at = { x: this.at.x + this.dir.x * step, y: this.at.y + this.dir.y * step };
     this.flown += step;
-    this.img.setPosition(this.at.x, this.at.y);
+    this.look.place(this.at.x, this.at.y, dt);
     const hitR = this.spec.sprite.size / 4;
     for (const e of host.enemies()) {
       if (this.struck.has(e) || Math.hypot(e.sprite.x - this.at.x, e.sprite.y - this.at.y) > e.radius + hitR) continue;
@@ -176,7 +176,7 @@ class Missile implements SkillObject {
   }
 
   destroy(): void {
-    this.img.destroy();
+    this.look.destroy();
   }
 }
 
@@ -201,6 +201,7 @@ export const fireball: SkillImpl = {
         speed: v.speed!,
         range: v.range!,
         sprite: s.def.sprites.ball!,
+        glow: s.def.sprites.ballGlow,
         pierce: 0,
         onHit: () => {},
         onEnd: (at) => {
@@ -211,6 +212,8 @@ export const fireball: SkillImpl = {
             if (!host.hit(e, v.damage!, tags)) host.burn(e, v.burnStacks!);
           }
           playFx(host.scene, s.def.sprites.blast!, at.x, at.y, { w: r * 2.4 });
+          sparks(host.scene, at.x, at.y, s.def.color, host.ctx.data.juice.projectileLook, 1.5);
+          shake(host.scene, 'light');
         },
       }),
     );
@@ -233,9 +236,11 @@ export const iceSpear: SkillImpl = {
         speed: v.speed!,
         range: v.range!,
         sprite: s.def.sprites.spear!,
+        glow: s.def.sprites.spearGlow,
         pierce: v.pierce!,
         onHit: (e) => {
           playFx(host.scene, hit, e.sprite.x, e.sprite.y, { w: hit.size });
+          sparks(host.scene, e.sprite.x, e.sprite.y, s.def.color, host.ctx.data.juice.projectileLook);
           if (!host.hit(e, v.damage!, tags)) host.chill(e, v.slow!, v.slowSec!);
         },
       }),
@@ -249,7 +254,7 @@ export const iceSpear: SkillImpl = {
 class IceOrb implements SkillObject {
   readonly owner = 'iceOrb';
   readonly createdAt: number;
-  private readonly img: Phaser.GameObjects.Sprite;
+  private readonly look: ProjectileLook;
   private life: number;
   private volleyIn = 0;
   private turn = 0;
@@ -263,10 +268,7 @@ class IceOrb implements SkillObject {
   ) {
     this.createdAt = host.scene.time.now;
     this.life = s.values.lifeSec!;
-    const ref = s.def.sprites.orb!;
-    this.img = host.sprite(at.x, at.y, ref).setDepth(5);
-    this.img.setDisplaySize(ref.size, (ref.size * this.img.height) / Math.max(1, this.img.width));
-    loopArt(this.img, ref);
+    this.look = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orb!, host.ctx.data.juice.projectileLook, { glow: s.def.sprites.orbGlow, spin: true });
   }
 
   update(dt: number, host: SkillHost): boolean {
@@ -278,7 +280,7 @@ class IceOrb implements SkillObject {
       if (host.blocked(next.x, next.y)) this.stopped = true;
       else this.at = next;
     }
-    this.img.setPosition(this.at.x, this.at.y).setAlpha(Math.min(1, this.life / 0.3));
+    this.look.place(this.at.x, this.at.y, dt, 1, Math.min(1, this.life / 0.3));
     this.volleyIn -= dt;
     if (this.volleyIn <= 0 && this.life > 0) {
       this.volleyIn = v.volleySec!;
@@ -312,7 +314,7 @@ class IceOrb implements SkillObject {
   }
 
   destroy(): void {
-    this.img.destroy();
+    this.look.destroy();
   }
 }
 
@@ -346,6 +348,7 @@ export const chainLightning: SkillImpl = {
         const b = e.dead ? pts[i]! : { x: e.sprite.x, y: e.sprite.y };
         stretchFx(host.scene, bolt, a, b, bolt.size);
         playFx(host.scene, zap, b.x, b.y, { w: zap.size });
+        sparks(host.scene, b.x, b.y, s.def.color, host.ctx.data.juice.projectileLook, 0.75);
         if (!e.dead) host.hit(e, v.damage!, tags);
       });
     });

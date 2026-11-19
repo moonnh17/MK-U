@@ -5,8 +5,14 @@
 import type Phaser from 'phaser';
 import { hexColor } from '../core/scale';
 import { animKey } from '../systems/art';
-import type { SpriteRef } from '../types/data';
+import type { JuiceData, SpriteRef } from '../types/data';
+import { getContext } from '../core/context';
+import { Rng } from '../core/rng';
 import type { SkillCast } from './host';
+
+// 꾸밈용 난수(판정에 쓰지 않는다): 시드에서 따로 갈라 쓴다
+let fxRng: Rng | null = null;
+const rnd = () => (fxRng ??= Rng.derive(getContext().config.seed, 'skill-fx')).next();
 
 /** 레벨별 그림: sprites의 '이름+레벨'. 없으면 이름 그대로 */
 export function levelRef(s: Pick<SkillCast, 'def' | 'owned'>, name: string): SpriteRef {
@@ -91,4 +97,78 @@ export function arcSwipe(scene: Phaser.Scene, at: { x: number; y: number }, angl
   g.lineStyle(3, c, 0.9).beginPath().arc(at.x, at.y, r, angle - half, angle + half).strokePath();
   g.lineStyle(1, 0xffffff, 0.9).beginPath().arc(at.x, at.y, r - 1.5, angle - half * 0.7, angle + half * 0.7).strokePath();
   scene.tweens.add({ targets: g, alpha: 0, duration: sec * 1000, ease: 'Quad.easeIn', onComplete: () => g.destroy() });
+}
+
+export type ProjectileLookCfg = JuiceData['projectileLook'];
+
+/**
+ * 생성 그림 투사체의 꾸밈: 몸(body) 아래에 ADD로 움직이는 픽셀 빛(glow), 지나간 자리에 몸 잔상.
+ * spin이면 구체처럼 돌고 맥박친다. 위치·크기는 매 프레임 place로 맞춘다.
+ */
+export class ProjectileLook {
+  readonly body: Phaser.GameObjects.Sprite;
+  private readonly glow?: Phaser.GameObjects.Sprite;
+  private trailIn = 0;
+  private t = 0;
+
+  constructor(
+    private readonly scene: Phaser.Scene,
+    x: number,
+    y: number,
+    private readonly ref: SpriteRef,
+    private readonly cfg: ProjectileLookCfg,
+    private readonly o: { rotation?: number; glow?: SpriteRef; spin?: boolean; trail?: boolean; depth?: number } = {},
+  ) {
+    const depth = o.depth ?? 5;
+    if (o.glow) {
+      this.glow = scene.add.sprite(x, y, o.glow.spriteKey).setDepth(depth - 0.1).setBlendMode('ADD').setAlpha(cfg.glowAlpha).setRotation(o.rotation ?? 0);
+      loopArt(this.glow, o.glow);
+    }
+    this.body = scene.add.sprite(x, y, ref.spriteKey).setDepth(depth).setRotation(o.rotation ?? 0);
+    loopArt(this.body, ref);
+    this.place(x, y);
+  }
+
+  /** 자리·크기(배율 scale) 맞추기, dt만큼 잔상·회전 진행 */
+  place(x: number, y: number, dt = 0, scale = 1, alpha = 1): void {
+    this.t += dt;
+    const pulse = this.o.spin ? 1 + Math.sin(this.t * this.cfg.pulseHz * Math.PI * 2) * this.cfg.pulse : 1;
+    const w = this.ref.size * scale * pulse;
+    this.body.setPosition(x, y).setDisplaySize(w, (w * this.body.height) / Math.max(1, this.body.width)).setAlpha(alpha);
+    if (this.o.spin) this.body.rotation += this.cfg.spinPerSec * dt;
+    if (this.glow) {
+      const gw = this.ref.size * scale * this.cfg.glowScale;
+      this.glow.setPosition(x, y).setDisplaySize(gw, (gw * this.glow.height) / Math.max(1, this.glow.width)).setAlpha(this.cfg.glowAlpha * alpha);
+    }
+    if (this.o.trail === false || dt <= 0) return;
+    this.trailIn -= dt;
+    if (this.trailIn > 0) return;
+    this.trailIn = this.cfg.trailEverySec;
+    const ghost = this.scene.add.image(x, y, this.ref.spriteKey).setDepth(this.body.depth - 0.2).setBlendMode('ADD');
+    ghost.setRotation(this.body.rotation).setDisplaySize(this.body.displayWidth, this.body.displayHeight).setAlpha(this.cfg.trailAlpha * alpha);
+    this.scene.tweens.add({
+      targets: ghost, alpha: 0, scaleX: ghost.scaleX * this.cfg.trailShrink, scaleY: ghost.scaleY * this.cfg.trailShrink,
+      duration: this.cfg.trailFadeSec * 1000, ease: 'Quad.easeOut', onComplete: () => ghost.destroy(),
+    });
+  }
+
+  destroy(): void {
+    this.body.destroy();
+    this.glow?.destroy();
+  }
+}
+
+/** 터짐·맞힘 불티: color와 흰색 작은 사각형이 사방으로 튀며 사라진다 */
+export function sparks(scene: Phaser.Scene, x: number, y: number, color: string, cfg: ProjectileLookCfg, mul = 1): void {
+  const c = hexColor(color);
+  const n = Math.round(cfg.sparks * mul);
+  for (let i = 0; i < n; i++) {
+    const a = rnd() * Math.PI * 2;
+    const v = cfg.sparkSpeed[0] + rnd() * (cfg.sparkSpeed[1] - cfg.sparkSpeed[0]);
+    const r = scene.add.rectangle(x, y, cfg.sparkSize, cfg.sparkSize, i % 3 === 0 ? 0xffffff : c).setDepth(7).setBlendMode('ADD');
+    scene.tweens.add({
+      targets: r, x: x + Math.cos(a) * v * cfg.sparkLifeSec, y: y + Math.sin(a) * v * cfg.sparkLifeSec, alpha: 0, scale: 0.3,
+      duration: cfg.sparkLifeSec * 1000, ease: 'Quad.easeOut', onComplete: () => r.destroy(),
+    });
+  }
 }

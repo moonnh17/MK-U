@@ -134,6 +134,21 @@
     "hazardSector": { "spriteKey": "fx_w_slash3", "color": "#ffffff", "size": 20 },
     "hazardBeam": { "spriteKey": "fx_w_beam3", "color": "#ffffff", "size": 12 }
   },
+  "projectileLook": {
+    "trailEverySec": 0.03,
+    "trailFadeSec": 0.22,
+    "trailAlpha": 0.45,
+    "trailShrink": 0.55,
+    "glowAlpha": 0.75,
+    "glowScale": 1.35,
+    "spinPerSec": 2.4,
+    "pulse": 0.08,
+    "pulseHz": 3,
+    "sparks": 8,
+    "sparkSpeed": [40, 110],
+    "sparkLifeSec": 0.35,
+    "sparkSize": 2
+  },
   "spawn": {
     "ringColor": "#c08aff",
     "ringRadiusMul": 1.6,

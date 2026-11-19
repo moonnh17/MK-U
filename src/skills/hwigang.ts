@@ -13,7 +13,7 @@ import { shake } from '../entities/juice';
 import { executable } from '../systems/magiMage';
 import { lineHits } from '../systems/targeting';
 import { inArc } from '../systems/weapons';
-import { loopArt, playFx, stretchFx } from './skillFx';
+import { playFx, ProjectileLook, sparks, stretchFx } from './skillFx';
 import { nearestEnemy, type PassiveImpl, type SkillCast, type SkillHost, type SkillImpl, type SkillObject, type UltimateImpl } from './host';
 
 const RAY_STEP_PX = 4;
@@ -86,7 +86,7 @@ export const magiWave: SkillImpl = {
 class Condenser implements SkillObject {
   readonly owner = 'magiCondenser';
   readonly createdAt: number;
-  private readonly img: Phaser.GameObjects.Sprite;
+  private readonly look: ProjectileLook;
   private life: number;
   private pullIn = 0;
 
@@ -98,10 +98,7 @@ class Condenser implements SkillObject {
   ) {
     this.createdAt = host.scene.time.now;
     this.life = s.values.lifeSec!;
-    const ref = s.def.sprites.orb!;
-    this.img = host.sprite(at.x, at.y, ref).setDepth(5);
-    this.img.setDisplaySize(ref.size, (ref.size * this.img.height) / Math.max(1, this.img.width));
-    loopArt(this.img, ref);
+    this.look = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orb!, host.ctx.data.juice.projectileLook, { glow: s.def.sprites.orbGlow, spin: true, trail: false });
   }
 
   update(dt: number, host: SkillHost): boolean {
@@ -111,8 +108,7 @@ class Condenser implements SkillObject {
     if (!host.blocked(next.x, next.y)) this.at = next;
     // 터질 때가 다가올수록 부푼다
     const grow = 1 + 0.4 * (1 - Math.max(0, this.life) / v.lifeSec!);
-    const ref = this.s.def.sprites.orb!;
-    this.img.setPosition(this.at.x, this.at.y).setDisplaySize(ref.size * grow, ((ref.size * this.img.height) / Math.max(1, this.img.width)) * grow);
+    this.look.place(this.at.x, this.at.y, dt, grow);
     this.pullIn -= dt;
     if (this.pullIn <= 0) {
       this.pullIn = v.pullEverySec!;
@@ -137,11 +133,12 @@ class Condenser implements SkillObject {
     host.blastProps(this.at, r, v.damage!);
     for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - this.at.x, e.sprite.y - this.at.y) <= r + e.radius) host.hit(e, v.damage!, this.s.def.sources.blast!);
     playFx(host.scene, this.s.def.sprites.blast!, this.at.x, this.at.y, { w: r * 2.4 });
+    sparks(host.scene, this.at.x, this.at.y, this.s.def.color, host.ctx.data.juice.projectileLook, 2);
     shake(host.scene, 'light');
   }
 
   destroy(): void {
-    this.img.destroy();
+    this.look.destroy();
   }
 }
 
@@ -165,6 +162,7 @@ export const magiPillar: SkillImpl = {
     const ref = s.def.sprites.pillar!;
     playFx(host.scene, ref, at.x, at.y + r * 0.3, { w: Math.max(ref.size, r * 2.4) }).setOrigin(0.5, 1);
     host.scene.time.delayedCall(v.delaySec! * 1000, () => {
+      sparks(host.scene, at.x, at.y, s.def.color, host.ctx.data.juice.projectileLook, 1.5);
       for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= r + e.radius) host.hit(e, v.damage!, s.def.sources.pillar!);
     });
     return true;

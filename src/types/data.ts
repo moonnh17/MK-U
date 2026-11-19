@@ -1683,6 +1683,15 @@ export interface JuiceData {
   /** hazardBlast·hazardSector·hazardBeam: 그림이 따로 없는 적 공격(원·부채꼴·직사각·추적 폭발, 광선)이 터질 때 위험 색으로 물들여 쓰는 픽셀 이펙트 */
   fx: Record<'hitTech' | 'hitMagic' | 'hitPhysical' | 'explosion' | 'eliteBurst' | 'spawn' | 'death' | 'hazardBlast' | 'hazardSector' | 'hazardBeam', SpriteRef>;
   /** 적 소환: 바닥 원(몸 반지름 × ringRadiusMul), 작게(startScale) 아래(risePx)에서 솟아오른다 */
+  /**
+   * 생성 그림 투사체(마기법사): trailEverySec마다 몸 그림 잔상(ADD, trailAlpha에서 trailFadeSec 동안 trailShrink배로 줄며 사라짐),
+   * 아래에 움직이는 픽셀 빛(glowAlpha·몸 폭 × glowScale), 구체는 초당 spinPerSec 라디안 돌고 pulseHz로 ±pulse 맥박.
+   * 터지거나 맞힐 때 sparks개 불티(속도 sparkSpeed, sparkLifeSec, sparkSize px)
+   */
+  projectileLook: {
+    trailEverySec: number; trailFadeSec: number; trailAlpha: number; trailShrink: number; glowAlpha: number; glowScale: number;
+    spinPerSec: number; pulse: number; pulseHz: number; sparks: number; sparkSpeed: [number, number]; sparkLifeSec: number; sparkSize: number;
+  };
   spawn: { ringColor: string; ringRadiusMul: number; startScale: number; risePx: number };
   /** 보스 등장 컷: 카메라 이동(panSec) → 내려찍기(dropSec, dropHeight) → 이름 띠(nameSec) → 복귀(returnSec) */
   /** zoom: 기본 확대에 곱하는 배율 */

@@ -234,6 +234,8 @@ Object.assign(sprites, require('./build-players.cjs').buildPlayers(out));
 Object.assign(sprites, require('./build-paladin-awakening.cjs').buildPaladinAwakening(out));
 // 집행 의지체 소환체 이펙트: 원본 scripts/art-src/mage
 Object.assign(sprites, require('./build-mage-fx.cjs').buildMageFx(out));
+// 마기법사 스킬 아이콘·투사체(힉스필드 생성): 원본 scripts/art-src/mage-icons·mage-proj
+Object.assign(sprites, require('./build-mage-art.cjs').buildMageArt(out));
 // pixelfx 이펙트: scripts/art-src/pixelfx
 Object.assign(sprites, require('./build-pixelfx.cjs').buildPixelfx(out));
 

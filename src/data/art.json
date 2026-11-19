@@ -8630,6 +8630,143 @@
           "loop": false
         }
       }
+    },
+    "icon_skill_chainLightning": {
+      "file": "mku/icon_skill_chainLightning.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_ult_elementConcert": {
+      "file": "mku/icon_ult_elementConcert.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_elementCycle": {
+      "file": "mku/icon_skill_elementCycle.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_elementWard": {
+      "file": "mku/icon_skill_elementWard.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_executionWill": {
+      "file": "mku/icon_skill_executionWill.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_fireWall": {
+      "file": "mku/icon_skill_fireWall.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_fireball": {
+      "file": "mku/icon_skill_fireball.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_iceOrb": {
+      "file": "mku/icon_skill_iceOrb.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_iceSpear": {
+      "file": "mku/icon_skill_iceSpear.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_magiBolt": {
+      "file": "mku/icon_skill_magiBolt.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_magiBurst": {
+      "file": "mku/icon_skill_magiBurst.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_magiCondenser": {
+      "file": "mku/icon_skill_magiCondenser.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_magiPillar": {
+      "file": "mku/icon_skill_magiPillar.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_magiWave": {
+      "file": "mku/icon_skill_magiWave.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_pureUnfolding": {
+      "file": "mku/icon_skill_pureUnfolding.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_ult_sadExecution": {
+      "file": "mku/icon_ult_sadExecution.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "icon_skill_teleport": {
+      "file": "mku/icon_skill_teleport.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "skill_mage_fireball": {
+      "file": "mku/skill_mage_fireball.png",
+      "frameWidth": 56,
+      "frameHeight": 23,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_mage_ice_spear": {
+      "file": "mku/skill_mage_ice_spear.png",
+      "frameWidth": 60,
+      "frameHeight": 12,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_mage_ice_shard": {
+      "file": "mku/skill_mage_ice_shard.png",
+      "frameWidth": 28,
+      "frameHeight": 6,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_mage_ice_orb": {
+      "file": "mku/skill_mage_ice_orb.png",
+      "frameWidth": 44,
+      "frameHeight": 44,
+      "frames": 1,
+      "density": 2
+    },
+    "skill_hw_condenser": {
+      "file": "mku/skill_hw_condenser.png",
+      "frameWidth": 48,
+      "frameHeight": 47,
+      "frames": 1,
+      "density": 2
     }
   }
 }

@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 773개 · 그림 있음 723개
+전체 778개 · 그림 있음 745개
 
 ## player (9)
 
@@ -257,7 +257,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (244)
+## skill (249)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -446,11 +446,15 @@
 | `skill_pPrayer_prayer1` | 회생의 기도 (prayer1) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer1.png (6프레임) |
 | `skill_pPrayer_prayer2` | 회생의 기도 (prayer2) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer2.png (6프레임) |
 | `skill_pPrayer_prayer3` | 회생의 기도 (prayer3) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer3.png (6프레임) |
-| `fx_mage_fireball` | 화염구 (ball) | 22×22 | center | #ff6a2a | mku/fx_mage_fireball.png (22프레임) |
+| `skill_mage_fireball` | 화염구 (ball) | 24×24 | center | #ff6a2a | mku/skill_mage_fireball.png (1프레임) |
+| `fx_mage_fireball` | 화염구 (ballGlow) | 24×24 | center | #ff6a2a | mku/fx_mage_fireball.png (22프레임) |
 | `fx_mage_fire_blast` | 화염구 (blast) 외 1곳 | 48×48 | center | #ff6a2a | mku/fx_mage_fire_blast.png (23프레임) |
-| `fx_mage_ice_spear` | 빙창 (spear) 외 1곳 | 26×26 | center | #5ad0f0 | mku/fx_mage_ice_spear.png (14프레임) |
+| `skill_mage_ice_spear` | 빙창 (spear) | 28×28 | center | #5ad0f0 | mku/skill_mage_ice_spear.png (1프레임) |
+| `fx_mage_ice_spear` | 빙창 (spearGlow) | 28×28 | center | #5ad0f0 | mku/fx_mage_ice_spear.png (14프레임) |
 | `fx_mage_ice_burst` | 빙창 (hit) 외 1곳 | 18×18 | center | #5ad0f0 | mku/fx_mage_ice_burst.png (20프레임) |
-| `fx_mage_ice_orb` | 얼음 보주 (orb) | 18×18 | center | #5ad0f0 | mku/fx_mage_ice_orb.png (43프레임) |
+| `skill_mage_ice_orb` | 얼음 보주 (orb) | 18×18 | center | #5ad0f0 | mku/skill_mage_ice_orb.png (1프레임) |
+| `fx_mage_ice_orb` | 얼음 보주 (orbGlow) | 18×18 | center | #5ad0f0 | mku/fx_mage_ice_orb.png (43프레임) |
+| `skill_mage_ice_shard` | 얼음 보주 (shard) | 12×12 | center | #5ad0f0 | mku/skill_mage_ice_shard.png (1프레임) |
 | `fx_mage_bolt` | 뇌격 (bolt) | 10×10 | center | #ffd83a | mku/fx_mage_bolt.png (7프레임) |
 | `fx_mage_zap` | 뇌격 (zap) | 22×22 | center | #ffd83a | mku/fx_mage_zap.png (17프레임) |
 | `fx_mage_ward` | 원소 가호 (aura) | 30×30 | center | #ff9a4a | mku/fx_mage_ward.png (72프레임) |
@@ -458,7 +462,8 @@
 | `fx_hw_beam` | 마기 분출 (beam) 외 1곳 | 12×12 | center | #b266ff | mku/fx_hw_beam.png (7프레임) |
 | `fx_hw_wave` | 마기 파동 (wave) | 60×60 | center | #b266ff | mku/fx_hw_wave.png (12프레임) |
 | `fx_hw_recoil` | 마기 파동 (recoil) | 60×60 | center | #b266ff | mku/fx_hw_recoil.png (15프레임) |
-| `fx_hw_orb` | 마기 응축구 (orb) | 22×22 | center | #b266ff | mku/fx_hw_orb.png (43프레임) |
+| `skill_hw_condenser` | 마기 응축구 (orb) | 20×20 | center | #b266ff | mku/skill_hw_condenser.png (1프레임) |
+| `fx_hw_orb` | 마기 응축구 (orbGlow) | 20×20 | center | #b266ff | mku/fx_hw_orb.png (43프레임) |
 | `fx_hw_blast` | 마기 응축구 (blast) | 80×80 | center | #b266ff | mku/fx_hw_blast.png (23프레임) |
 | `fx_hw_pillar` | 마기 기둥 (pillar) | 40×40 | center | #b266ff | mku/fx_hw_pillar.png (35프레임) |
 | `summon_will_construct` | 집행 의지체 (will) 외 1곳 | 12×26 | center | #b266ff | mku/summon_will_construct.png (13프레임) |
@@ -602,29 +607,29 @@
 | `icon_skill_smite` | 강타 | 16×16 | center | #e8d24a | mku/icon_skill_smite.png (1프레임) |
 | `icon_skill_holySwords` | 성검 | 16×16 | center | #e8d24a | mku/icon_skill_holySwords.png (1프레임) |
 | `icon_skill_prayerOfRevival` | 회생의 기도 | 16×16 | center | #e8d24a | mku/icon_skill_prayerOfRevival.png (1프레임) |
-| `icon_skill_fireball` | 화염구 | 16×16 | center | #ff6a2a | — |
-| `icon_skill_fireWall` | 화염벽 | 16×16 | center | #ff6a2a | — |
-| `icon_skill_iceSpear` | 빙창 | 16×16 | center | #5ad0f0 | — |
-| `icon_skill_iceOrb` | 얼음 보주 | 16×16 | center | #5ad0f0 | — |
-| `icon_skill_chainLightning` | 뇌격 | 16×16 | center | #ffd83a | — |
-| `icon_skill_elementWard` | 원소 가호 | 16×16 | center | #ff9a4a | — |
-| `icon_skill_magiBolt` | 마기탄 | 16×16 | center | #b266ff | — |
-| `icon_skill_magiBurst` | 마기 분출 | 16×16 | center | #b266ff | — |
-| `icon_skill_magiWave` | 마기 파동 | 16×16 | center | #b266ff | — |
-| `icon_skill_magiCondenser` | 마기 응축구 | 16×16 | center | #b266ff | — |
-| `icon_skill_magiPillar` | 마기 기둥 | 16×16 | center | #b266ff | — |
-| `icon_skill_teleport` | 순간이동 | 16×16 | center | #b266ff | — |
-| `icon_skill_executionWill` | 집행 의지체 | 16×16 | center | #b266ff | — |
-| `icon_skill_elementCycle` | 원소 순환 | 16×16 | center | #ff6a2a | — |
-| `icon_skill_pureUnfolding` | 순수 전개 | 16×16 | center | #b266ff | — |
+| `icon_skill_fireball` | 화염구 | 16×16 | center | #ff6a2a | mku/icon_skill_fireball.png (1프레임) |
+| `icon_skill_fireWall` | 화염벽 | 16×16 | center | #ff6a2a | mku/icon_skill_fireWall.png (1프레임) |
+| `icon_skill_iceSpear` | 빙창 | 16×16 | center | #5ad0f0 | mku/icon_skill_iceSpear.png (1프레임) |
+| `icon_skill_iceOrb` | 얼음 보주 | 16×16 | center | #5ad0f0 | mku/icon_skill_iceOrb.png (1프레임) |
+| `icon_skill_chainLightning` | 뇌격 | 16×16 | center | #ffd83a | mku/icon_skill_chainLightning.png (1프레임) |
+| `icon_skill_elementWard` | 원소 가호 | 16×16 | center | #ff9a4a | mku/icon_skill_elementWard.png (1프레임) |
+| `icon_skill_magiBolt` | 마기탄 | 16×16 | center | #b266ff | mku/icon_skill_magiBolt.png (1프레임) |
+| `icon_skill_magiBurst` | 마기 분출 | 16×16 | center | #b266ff | mku/icon_skill_magiBurst.png (1프레임) |
+| `icon_skill_magiWave` | 마기 파동 | 16×16 | center | #b266ff | mku/icon_skill_magiWave.png (1프레임) |
+| `icon_skill_magiCondenser` | 마기 응축구 | 16×16 | center | #b266ff | mku/icon_skill_magiCondenser.png (1프레임) |
+| `icon_skill_magiPillar` | 마기 기둥 | 16×16 | center | #b266ff | mku/icon_skill_magiPillar.png (1프레임) |
+| `icon_skill_teleport` | 순간이동 | 16×16 | center | #b266ff | mku/icon_skill_teleport.png (1프레임) |
+| `icon_skill_executionWill` | 집행 의지체 | 16×16 | center | #b266ff | mku/icon_skill_executionWill.png (1프레임) |
+| `icon_skill_elementCycle` | 원소 순환 | 16×16 | center | #ff6a2a | mku/icon_skill_elementCycle.png (1프레임) |
+| `icon_skill_pureUnfolding` | 순수 전개 | 16×16 | center | #b266ff | mku/icon_skill_pureUnfolding.png (1프레임) |
 | `icon_ult_firstLaw` | 열역학 제1법칙 | 16×16 | center | #ff9a3c | mku/icon_ult_firstLaw.png (1프레임) |
 | `icon_ult_thunderbolt` | 벼락 | 16×16 | center | #4ab0ff | mku/icon_ult_thunderbolt.png (1프레임) |
 | `icon_ult_singularity` | 특이점 실험 | 16×16 | center | #ff3a4a | mku/icon_ult_singularity.png (1프레임) |
 | `icon_ult_sweep` | 휩쓸기 | 16×16 | center | #c9ae79 | mku/icon_ult_sweep.png (1프레임) |
 | `icon_ult_berserkerRage` | 광전사의 진노 | 16×16 | center | #e07a2a | mku/icon_ult_berserkerRage.png (1프레임) |
 | `icon_ult_divineJudgment` | 심판의 강림 | 16×16 | center | #e8d24a | mku/icon_ult_divineJudgment.png (1프레임) |
-| `icon_ult_elementConcert` | 원소 대합주 | 16×16 | center | #ff6a2a | — |
-| `icon_ult_sadExecution` | 슬픈 처형 | 16×16 | center | #b266ff | — |
+| `icon_ult_elementConcert` | 원소 대합주 | 16×16 | center | #ff6a2a | mku/icon_ult_elementConcert.png (1프레임) |
+| `icon_ult_sadExecution` | 슬픈 처형 | 16×16 | center | #b266ff | mku/icon_ult_sadExecution.png (1프레임) |
 | `icon_skill_magiTurretA` | 대형권역사수주포 | 16×16 | center | #4fb3d9 | — |
 | `icon_skill_magiMineA` | 무한연쇄기폭 | 16×16 | center | #d9a03b | — |
 | `icon_skill_antimatterCannonA` | 다연장반입자포 | 16×16 | center | #a05ad9 | — |

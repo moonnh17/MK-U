@@ -1543,7 +1543,8 @@
       },
       "color": "#ff6a2a",
       "sprites": {
-        "ball": { "spriteKey": "fx_mage_fireball", "color": "#ff6a2a", "size": 22 },
+        "ball": { "spriteKey": "skill_mage_fireball", "color": "#ff6a2a", "size": 24 },
+        "ballGlow": { "spriteKey": "fx_mage_fireball", "color": "#ff6a2a", "size": 24 },
         "blast": { "spriteKey": "fx_mage_fire_blast", "color": "#ff6a2a", "size": 48 }
       }
     },
@@ -1599,7 +1600,8 @@
       },
       "color": "#5ad0f0",
       "sprites": {
-        "spear": { "spriteKey": "fx_mage_ice_spear", "color": "#5ad0f0", "size": 26 },
+        "spear": { "spriteKey": "skill_mage_ice_spear", "color": "#5ad0f0", "size": 28 },
+        "spearGlow": { "spriteKey": "fx_mage_ice_spear", "color": "#5ad0f0", "size": 28 },
         "hit": { "spriteKey": "fx_mage_ice_burst", "color": "#5ad0f0", "size": 18 }
       }
     },
@@ -1628,8 +1630,9 @@
       },
       "color": "#5ad0f0",
       "sprites": {
-        "orb": { "spriteKey": "fx_mage_ice_orb", "color": "#5ad0f0", "size": 18 },
-        "shard": { "spriteKey": "fx_mage_ice_spear", "color": "#5ad0f0", "size": 12 }
+        "orb": { "spriteKey": "skill_mage_ice_orb", "color": "#5ad0f0", "size": 18 },
+        "orbGlow": { "spriteKey": "fx_mage_ice_orb", "color": "#5ad0f0", "size": 18 },
+        "shard": { "spriteKey": "skill_mage_ice_shard", "color": "#5ad0f0", "size": 12 }
       }
     },
     {
@@ -1794,7 +1797,8 @@
       },
       "color": "#b266ff",
       "sprites": {
-        "orb": { "spriteKey": "fx_hw_orb", "color": "#b266ff", "size": 22 },
+        "orb": { "spriteKey": "skill_hw_condenser", "color": "#b266ff", "size": 20 },
+        "orbGlow": { "spriteKey": "fx_hw_orb", "color": "#b266ff", "size": 20 },
         "blast": { "spriteKey": "fx_hw_blast", "color": "#b266ff", "size": 80 }
       }
     },
