@@ -142,12 +142,14 @@ const SCENES = {
     await startRun('warrior', { chapter: 1, stage: 2 });
     await bossFight(8);
   },
-  /** 마기학자 스킬 6종 + 궁극기 */
+  /** 마기학자 액티브 10종 + 궁극기 */
   scholarSkills: async () => {
     await startRun('magiScholar');
     await fight('akgwi', 3, 1);
     await castAll(['magiTurret', 'magiMine', 'railgun']);
     await castAll(['magiField', 'antimatterCannon', 'unstableSubject']);
+    await castAll(['magiCorruption', 'experimentalWeapon', 'purifyingWings']);
+    await castAll(['mkPrototype']);
   },
   /** 마기법사 백온파·휘강파 스킬 */
   mageSkills: async () => {
@@ -156,6 +158,17 @@ const SCENES = {
     await castAll(['fireball', 'iceOrb', 'chainLightning']);
     await castAll(['magiBolt', 'magiWave', 'magiPillar']);
     await castAll(['magiCondenser', 'executionWill', 'iceSpear']);
+    await castAll(['fireWall', 'elementWard', 'magiBurst']);
+    await castAll(['teleport']);
+  },
+  /** 전사 바바리안·성기사 스킬 */
+  warriorSkills: async () => {
+    await startRun('warrior');
+    await fight('akgwi', 4, 1);
+    await castAll(['frenzySlash', 'chainThrow', 'earthShatter']);
+    await castAll(['whirlwind', 'warCry', 'holyBulwark']);
+    await castAll(['oathOfRetribution', 'sanctuaryAura', 'smite']);
+    await castAll(['holySwords']);
   },
   /** 2장 보스·3장 보스 */
   boss2: async () => {
