@@ -147,7 +147,13 @@
     "sparks": 8,
     "sparkSpeed": [40, 110],
     "sparkLifeSec": 0.35,
-    "sparkSize": 2
+    "sparkSize": 2,
+    "levelScale": [1, 1.12, 1.4],
+    "ringFromLevel": 3,
+    "ringSec": 0.32,
+    "ringWidth": 2,
+    "ringAlpha": 0.9,
+    "ringShake": "medium"
   },
   "spawn": {
     "ringColor": "#c08aff",

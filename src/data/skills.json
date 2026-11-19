@@ -1617,9 +1617,9 @@
       "sources": { "shard": ["magic", "ranged"] },
       "element": "ice",
       "levels": [
-        { "cooldownSec": 8, "values": { "lifeSec": 3, "speed": 36, "shards": 4, "volleySec": 0.4, "damage": 3, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } },
-        { "cooldownSec": 7.5, "values": { "lifeSec": 4, "speed": 36, "shards": 6, "volleySec": 0.4, "damage": 3.5, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } },
-        { "cooldownSec": 7, "values": { "lifeSec": 5, "speed": 36, "shards": 8, "volleySec": 0.4, "damage": 4, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } }
+        { "cooldownSec": 8, "values": { "lifeSec": 3, "speed": 36, "shards": 4, "volleySec": 0.4, "spinDeg": 40, "novaShards": 8, "damage": 3, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } },
+        { "cooldownSec": 7.5, "values": { "lifeSec": 4, "speed": 36, "shards": 6, "volleySec": 0.4, "spinDeg": 40, "novaShards": 10, "damage": 3.5, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } },
+        { "cooldownSec": 7, "values": { "lifeSec": 5, "speed": 36, "shards": 8, "volleySec": 0.4, "spinDeg": 40, "novaShards": 12, "damage": 4, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } }
       ],
       "imprint": {
         "nameKey": "imprint.iceOrb",

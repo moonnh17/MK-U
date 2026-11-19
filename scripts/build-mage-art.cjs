@@ -20,6 +20,9 @@ const PROJ = {
   skill_hw_condenser: ['condenser', 24],
 };
 
+const FRAME = 128;
+const FRAMES = { hud_imprint_frame: 'imprint', hud_imprint_frame_gold: 'resonance' };
+
 function trimmed(f) {
   const im = k.read(f);
   const b = k.bbox(im, 24);
@@ -44,6 +47,12 @@ function buildMageArt(outDir) {
     const fh = Math.max(1, Math.round((fw * im.h) / im.w));
     k.write(path.join(outDir, `${key}.png`), k.resize(im, fw, fh, 0.5));
     out[key] = { file: `mku/${key}.png`, frameWidth: fw, frameHeight: fh, frames: 1, density: DENSITY };
+  }
+  // 개전 각인 칸 장식 틀: 정사각 128px (화면에서 31px로 줄여 쓴다)
+  for (const [key, f] of Object.entries(FRAMES)) {
+    const im = trimmed(path.join(SRC, 'mage-frame', `${f}.png`));
+    k.write(path.join(outDir, `${key}.png`), k.resize(im, FRAME, FRAME, 0.5));
+    out[key] = { file: `mku/${key}.png`, frameWidth: FRAME, frameHeight: FRAME, frames: 1 };
   }
   return out;
 }

@@ -61,7 +61,11 @@
       "followUpColor": "#ffd23f",
       "followUpSpinSec": 0.9,
       "imprintColor": "#7fd8ff",
-      "imprintResonanceColor": "#ffe27a"
+      "imprintResonanceColor": "#ffe27a",
+      "imprintFrame": { "spriteKey": "hud_imprint_frame", "color": "#7fd8ff", "size": 31 },
+      "imprintFrameResonance": { "spriteKey": "hud_imprint_frame_gold", "color": "#ffe27a", "size": 31 },
+      "imprintPulseHz": 0.8,
+      "imprintPulse": 0.2
     },
     "weapons": {
       "mainWidth": 52,

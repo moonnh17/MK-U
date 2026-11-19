@@ -37,6 +37,7 @@ interface SlotUi {
   container: Phaser.GameObjects.Container;
   /** 스킬 아이콘 그림 (없으면 숨기고 짧은 이름) */
   icon: Phaser.GameObjects.Image;
+  frame: Phaser.GameObjects.Image;
 }
 
 /**
@@ -130,9 +131,11 @@ export class Hud {
       const key = text(1, 0, slot.keyLabel, small).setAlpha(0.7);
       const star = text(size - 1, 0, '★', small).setOrigin(1, 0).setColor(sb.awakenedColor);
       const dots = [0, 1, 2].map((k) => scene.add.rectangle(size / 2 - 5 + k * 4, size - 3, 3, 2, 0x333333).setOrigin(0));
-      const container = scene.add.container(x, y, [bg, icon, label, cd, cdText, key, star, ...dots]);
+      // 개전 각인 칸 장식 틀 (각인이 걸린 칸만 보인다)
+      const frame = scene.add.image(size / 2, size / 2, '__DEFAULT').setVisible(false);
+      const container = scene.add.container(x, y, [bg, icon, label, cd, cdText, frame, key, star, ...dots]);
       if (DISABLED_ACTIONS.has(slot.action as ButtonAction)) container.setAlpha(sb.disabledAlpha);
-      this.slots.push({ x, y, bg, label, cd, cdText, dots, star, container, icon });
+      this.slots.push({ x, y, bg, label, cd, cdText, dots, star, container, icon, frame });
       this.pcOnly.add(container);
       x += size + sb.gap;
     });
@@ -306,8 +309,12 @@ export class Hud {
         ui.cd.beginPath().arc(size / 2, size / 2, r, a, a + Math.PI * 0.6, false).strokePath();
         ui.cd.beginPath().arc(size / 2, size / 2, r, a + Math.PI, a + Math.PI * 1.6, false).strokePath();
       }
-      // 개전 각인: 칸 안쪽에 각인 색 테두리 (계열 공명이면 금색)
-      if (v.imprint) {
+      // 개전 각인: 마법진 장식 틀이 칸을 두르고 천천히 맥박친다 (계열 공명이면 금빛 틀). 그림이 없으면 안쪽 색 테두리
+      const fref = v.imprint === 'resonance' ? sb.imprintFrameResonance : sb.imprintFrame;
+      const framed = !!v.imprint && this.ctx.artLoaded.has(fref.spriteKey);
+      if (framed && ui.frame.texture.key !== fref.spriteKey) ui.frame.setTexture(fref.spriteKey, 0).setDisplaySize(fref.size, fref.size);
+      ui.frame.setVisible(framed).setAlpha(1 - sb.imprintPulse * (0.5 + 0.5 * Math.sin((now / 1000) * sb.imprintPulseHz * Math.PI * 2)));
+      if (v.imprint && !framed) {
         ui.cd.lineStyle(1, hexColor(v.imprint === 'resonance' ? sb.imprintResonanceColor : sb.imprintColor), 1);
         ui.cd.strokeRect(2, 2, size - 4, size - 4);
       }

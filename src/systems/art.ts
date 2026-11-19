@@ -165,6 +165,8 @@ export function collectAssets(d: GameData): AssetRef[] {
   // 각성 아이콘 (없으면 기본 아이콘을 쓴다)
   for (const s of d.skills.skills) if (s.awakening) add('icon', { spriteKey: `${artKeys.skillIcon(s.id)}A`, color: s.color, size: ICON_SIZE }, s.awakening.nameKey);
   for (const u of d.ultimates.ultimates) if (u.awakening) add('icon', { spriteKey: `${artKeys.ultimateIcon(u.id)}A`, color: u.color, size: ICON_SIZE }, u.awakening.nameKey);
+  add('icon', d.ui.hud.skillbar.imprintFrame, 'asset.imprintFrame');
+  add('icon', d.ui.hud.skillbar.imprintFrameResonance, 'asset.imprintFrameResonance');
   add('icon', { spriteKey: artKeys.geminiIcon, color: d.gemini.color, size: ICON_SIZE }, 'gemini.name', '#icon');
   add('icon', { spriteKey: artKeys.geminiPortrait, color: d.gemini.color, size: PORTRAIT_SIZE.w, height: PORTRAIT_SIZE.h }, 'gemini.name', '#portrait');
   add('icon', { spriteKey: artKeys.geminiFull, color: d.gemini.color, size: 277, height: 406 }, 'gemini.name', '#full');

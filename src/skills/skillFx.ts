@@ -5,10 +5,11 @@
 import type Phaser from 'phaser';
 import { hexColor } from '../core/scale';
 import { animKey } from '../systems/art';
+import { shake } from '../entities/juice';
 import type { JuiceData, SpriteRef } from '../types/data';
 import { getContext } from '../core/context';
 import { Rng } from '../core/rng';
-import type { SkillCast } from './host';
+import type { SkillCast, SkillHost } from './host';
 
 // 꾸밈용 난수(판정에 쓰지 않는다): 시드에서 따로 갈라 쓴다
 let fxRng: Rng | null = null;
@@ -117,7 +118,8 @@ export class ProjectileLook {
     y: number,
     private readonly ref: SpriteRef,
     private readonly cfg: ProjectileLookCfg,
-    private readonly o: { rotation?: number; glow?: SpriteRef; spin?: boolean; trail?: boolean; depth?: number } = {},
+    /** scale: 그림 배율(레벨 꾸밈, 판정과 무관) */
+    private readonly o: { rotation?: number; glow?: SpriteRef; spin?: boolean; trail?: boolean; depth?: number; scale?: number } = {},
   ) {
     const depth = o.depth ?? 5;
     if (o.glow) {
@@ -133,6 +135,7 @@ export class ProjectileLook {
   place(x: number, y: number, dt = 0, scale = 1, alpha = 1): void {
     this.t += dt;
     const pulse = this.o.spin ? 1 + Math.sin(this.t * this.cfg.pulseHz * Math.PI * 2) * this.cfg.pulse : 1;
+    scale *= this.o.scale ?? 1;
     const w = this.ref.size * scale * pulse;
     this.body.setPosition(x, y).setDisplaySize(w, (w * this.body.height) / Math.max(1, this.body.width)).setAlpha(alpha);
     if (this.o.spin) this.body.rotation += this.cfg.spinPerSec * dt;
@@ -171,4 +174,25 @@ export function sparks(scene: Phaser.Scene, x: number, y: number, color: string,
       duration: cfg.sparkLifeSec * 1000, ease: 'Quad.easeOut', onComplete: () => r.destroy(),
     });
   }
+}
+
+/** 스킬 레벨별 그림 배율 (판정과 무관) */
+export function fxScale(host: SkillHost, level: number): number {
+  return host.ctx.data.juice.projectileLook.levelScale[level - 1] ?? 1;
+}
+
+/**
+ * 맞힘·터짐 꾸밈: 불티(레벨 배율 × mul). ringFromLevel 레벨부터는 반지름 r로 퍼지는 고리와 화면 흔들림을 더한다.
+ */
+export function impactFx(host: SkillHost, level: number, x: number, y: number, color: string, r: number, mul = 1): void {
+  const cfg = host.ctx.data.juice.projectileLook;
+  const k = fxScale(host, level);
+  sparks(host.scene, x, y, color, cfg, mul * k);
+  if (level < cfg.ringFromLevel) return;
+  const g = host.scene.add.graphics({ x, y }).setDepth(6).setBlendMode('ADD');
+  g.lineStyle(cfg.ringWidth, hexColor(color), cfg.ringAlpha).strokeCircle(0, 0, r);
+  g.lineStyle(1, 0xffffff, cfg.ringAlpha).strokeCircle(0, 0, r - cfg.ringWidth);
+  g.setScale(0.25);
+  host.scene.tweens.add({ targets: g, scale: 1, alpha: 0, duration: cfg.ringSec * 1000, ease: 'Cubic.easeOut', onComplete: () => g.destroy() });
+  shake(host.scene, cfg.ringShake);
 }

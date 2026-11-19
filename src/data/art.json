@@ -8767,6 +8767,18 @@
       "frameHeight": 47,
       "frames": 1,
       "density": 2
+    },
+    "hud_imprint_frame": {
+      "file": "mku/hud_imprint_frame.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
+    },
+    "hud_imprint_frame_gold": {
+      "file": "mku/hud_imprint_frame_gold.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1
     }
   }
 }

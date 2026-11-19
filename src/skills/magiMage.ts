@@ -15,7 +15,7 @@ import { shake } from '../entities/juice';
 import { concertFull } from '../systems/magiMage';
 import { chainTargets } from '../systems/targeting';
 import type { ElementId, SpriteRef, TagId } from '../types/data';
-import { loopArt, playFx, ProjectileLook, sparks, stretchFx } from './skillFx';
+import { fxScale, impactFx, loopArt, playFx, ProjectileLook, sparks, stretchFx } from './skillFx';
 import { floatText, trimOldest, type PassiveImpl, type SkillCast, type SkillHost, type SkillImpl, type SkillObject, type UltimateCast, type UltimateImpl } from './host';
 
 // ---------- 화염벽 ----------
@@ -49,7 +49,8 @@ class FireWall implements SkillObject {
     for (let i = 0; i < n; i++) {
       const t = (i / (n - 1) - 0.5) * this.len;
       const sp = host.sprite(at.x - dir.y * t, at.y + dir.x * t, ref).setDepth(4);
-      sp.setDisplaySize(ref.size * 1.4, ref.size * 1.4);
+      const k = 1.4 * fxScale(host, s.owned.level);
+      sp.setDisplaySize(ref.size * k, ref.size * k);
       loopArt(sp, ref);
       this.flames.push(sp);
     }
@@ -124,6 +125,8 @@ interface MissileSpec {
   sprite: SpriteRef;
   /** 몸 아래 ADD 빛 (움직이는 픽셀 이펙트) */
   glow?: SpriteRef;
+  /** 그림 배율 (레벨 꾸밈, 판정과 무관) */
+  scale?: number;
   /** 더 꿰뚫을 수 있는 적 수 (0이면 첫 적에서 멈춘다) */
   pierce: number;
   onHit(e: Enemy): void;
@@ -151,7 +154,7 @@ class Missile implements SkillObject {
     this.dir = { x: Math.cos(spec.angle), y: Math.sin(spec.angle) };
     this.at = { ...spec.from };
     this.pierce = spec.pierce;
-    this.look = new ProjectileLook(host.scene, this.at.x, this.at.y, spec.sprite, host.ctx.data.juice.projectileLook, { rotation: spec.angle, glow: spec.glow });
+    this.look = new ProjectileLook(host.scene, this.at.x, this.at.y, spec.sprite, host.ctx.data.juice.projectileLook, { rotation: spec.angle, glow: spec.glow, scale: spec.scale });
   }
 
   update(dt: number, host: SkillHost): boolean {
@@ -202,6 +205,7 @@ export const fireball: SkillImpl = {
         range: v.range!,
         sprite: s.def.sprites.ball!,
         glow: s.def.sprites.ballGlow,
+        scale: fxScale(host, s.owned.level),
         pierce: 0,
         onHit: () => {},
         onEnd: (at) => {
@@ -211,8 +215,8 @@ export const fireball: SkillImpl = {
             if (Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) > r + e.radius) continue;
             if (!host.hit(e, v.damage!, tags)) host.burn(e, v.burnStacks!);
           }
-          playFx(host.scene, s.def.sprites.blast!, at.x, at.y, { w: r * 2.4 });
-          sparks(host.scene, at.x, at.y, s.def.color, host.ctx.data.juice.projectileLook, 1.5);
+          playFx(host.scene, s.def.sprites.blast!, at.x, at.y, { w: r * 2.4 * fxScale(host, s.owned.level) });
+          impactFx(host, s.owned.level, at.x, at.y, s.def.color, r * 1.3, 1.5);
           shake(host.scene, 'light');
         },
       }),
@@ -237,10 +241,11 @@ export const iceSpear: SkillImpl = {
         range: v.range!,
         sprite: s.def.sprites.spear!,
         glow: s.def.sprites.spearGlow,
+        scale: fxScale(host, s.owned.level),
         pierce: v.pierce!,
         onHit: (e) => {
-          playFx(host.scene, hit, e.sprite.x, e.sprite.y, { w: hit.size });
-          sparks(host.scene, e.sprite.x, e.sprite.y, s.def.color, host.ctx.data.juice.projectileLook);
+          playFx(host.scene, hit, e.sprite.x, e.sprite.y, { w: hit.size * fxScale(host, s.owned.level) });
+          impactFx(host, s.owned.level, e.sprite.x, e.sprite.y, s.def.color, hit.size);
           if (!host.hit(e, v.damage!, tags)) host.chill(e, v.slow!, v.slowSec!);
         },
       }),
@@ -251,13 +256,17 @@ export const iceSpear: SkillImpl = {
 
 // ---------- 얼음 보주 ----------
 
+/**
+ * 얼음 보주 (디아블로 2 서리 보주처럼): 느리게 나아가며 파편을 한 개씩 돌려 가며 흩뿌린다(나선).
+ * volleySec마다 shards개 꼴, 한 개마다 spinDeg씩 돈다. 시간이 다 되면 사방으로 novaShards개를 한꺼번에 터뜨린다.
+ */
 class IceOrb implements SkillObject {
   readonly owner = 'iceOrb';
   readonly createdAt: number;
   private readonly look: ProjectileLook;
   private life: number;
-  private volleyIn = 0;
-  private turn = 0;
+  private emitIn = 0;
+  private turn: number;
   private stopped = false;
 
   constructor(
@@ -268,7 +277,12 @@ class IceOrb implements SkillObject {
   ) {
     this.createdAt = host.scene.time.now;
     this.life = s.values.lifeSec!;
-    this.look = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orb!, host.ctx.data.juice.projectileLook, { glow: s.def.sprites.orbGlow, spin: true });
+    this.turn = Math.atan2(dir.y, dir.x);
+    this.look = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orb!, host.ctx.data.juice.projectileLook, {
+      glow: s.def.sprites.orbGlow,
+      spin: true,
+      scale: fxScale(host, s.owned.level),
+    });
   }
 
   update(dt: number, host: SkillHost): boolean {
@@ -281,36 +295,39 @@ class IceOrb implements SkillObject {
       else this.at = next;
     }
     this.look.place(this.at.x, this.at.y, dt, 1, Math.min(1, this.life / 0.3));
-    this.volleyIn -= dt;
-    if (this.volleyIn <= 0 && this.life > 0) {
-      this.volleyIn = v.volleySec!;
-      this.volley(host);
+    const every = v.volleySec! / v.shards!;
+    this.emitIn -= dt;
+    while (this.emitIn <= 0 && this.life > 0) {
+      this.emitIn += every;
+      this.turn += (v.spinDeg! * Math.PI) / 180;
+      this.shoot(host, this.turn);
     }
-    return this.life > 0;
+    if (this.life > 0) return true;
+    // 끝: 사방으로 한꺼번에
+    const n = v.novaShards!;
+    for (let i = 0; i < n; i++) this.shoot(host, this.turn + (i / n) * Math.PI * 2);
+    impactFx(host, this.s.owned.level, this.at.x, this.at.y, this.s.def.color, this.s.def.sprites.orb!.size * 1.6, 1.5);
+    return false;
   }
 
-  /** 사방으로 파편 (뿌릴 때마다 반 칸씩 돌린다) */
-  private volley(host: SkillHost): void {
+  private shoot(host: SkillHost, angle: number): void {
     const v = this.s.values;
-    const n = v.shards!;
     const tags = this.s.def.sources.shard!;
-    this.turn += Math.PI / n;
-    for (let i = 0; i < n; i++) {
-      host.addObject(
-        new Missile(host, {
-          owner: 'iceOrb.shard',
-          from: this.at,
-          angle: this.turn + (i / n) * Math.PI * 2,
-          speed: v.shardSpeed!,
-          range: v.shardRange!,
-          sprite: this.s.def.sprites.shard!,
-          pierce: 0,
-          onHit: (e) => {
-            if (!host.hit(e, v.damage!, tags)) host.chill(e, v.slow!, v.slowSec!);
-          },
-        }),
-      );
-    }
+    host.addObject(
+      new Missile(host, {
+        owner: 'iceOrb.shard',
+        from: this.at,
+        angle,
+        speed: v.shardSpeed!,
+        range: v.shardRange!,
+        sprite: this.s.def.sprites.shard!,
+        scale: fxScale(host, this.s.owned.level),
+        pierce: 0,
+        onHit: (e) => {
+          if (!host.hit(e, v.damage!, tags)) host.chill(e, v.slow!, v.slowSec!);
+        },
+      }),
+    );
   }
 
   destroy(): void {
@@ -346,9 +363,10 @@ export const chainLightning: SkillImpl = {
       from = { x: e.sprite.x, y: e.sprite.y };
       host.scene.time.delayedCall(n * v.chainGapSec! * 1000, () => {
         const b = e.dead ? pts[i]! : { x: e.sprite.x, y: e.sprite.y };
-        stretchFx(host.scene, bolt, a, b, bolt.size);
-        playFx(host.scene, zap, b.x, b.y, { w: zap.size });
-        sparks(host.scene, b.x, b.y, s.def.color, host.ctx.data.juice.projectileLook, 0.75);
+        const k = fxScale(host, s.owned.level);
+        stretchFx(host.scene, bolt, a, b, bolt.size * k);
+        playFx(host.scene, zap, b.x, b.y, { w: zap.size * k });
+        impactFx(host, s.owned.level, b.x, b.y, s.def.color, zap.size * 0.8, 0.75);
         if (!e.dead) host.hit(e, v.damage!, tags);
       });
     });
@@ -376,7 +394,8 @@ class ElementWard implements SkillObject {
     const ref = s.def.sprites.aura!;
     const p = host.playerPos();
     this.aura = host.sprite(p.x, p.y, ref).setDepth(3);
-    this.aura.setDisplaySize(ref.size, (ref.size * this.aura.height) / Math.max(1, this.aura.width));
+    const w = ref.size * fxScale(host, s.owned.level);
+    this.aura.setDisplaySize(w, (w * this.aura.height) / Math.max(1, this.aura.width));
     loopArt(this.aura, ref);
   }
 

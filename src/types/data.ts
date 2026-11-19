@@ -963,6 +963,11 @@ export interface HudLayoutData {
     /** 개전 각인이 걸린 칸(마기법사 1번 칸)의 안쪽 테두리, 계열 공명이면 다른 색 */
     imprintColor: string;
     imprintResonanceColor: string;
+    /** 각인 칸 장식 틀 그림(size = 화면 폭, 띠 가운데가 칸 테두리에 오게), 공명이면 금빛 틀. 맥박 주기·알파 폭 */
+    imprintFrame: SpriteRef;
+    imprintFrameResonance: SpriteRef;
+    imprintPulseHz: number;
+    imprintPulse: number;
   };
   weapons: { mainWidth: number; mainHeight: number; subWidth: number; subHeight: number; gap: number };
 }
@@ -1691,6 +1696,10 @@ export interface JuiceData {
   projectileLook: {
     trailEverySec: number; trailFadeSec: number; trailAlpha: number; trailShrink: number; glowAlpha: number; glowScale: number;
     spinPerSec: number; pulse: number; pulseHz: number; sparks: number; sparkSpeed: [number, number]; sparkLifeSec: number; sparkSize: number;
+    /** 스킬 레벨별 그림 배율(판정과 무관): [Lv1, Lv2, Lv3]. 불티 수에도 곱한다 */
+    levelScale: number[];
+    /** ringFromLevel 이상이면 맞힘·터짐마다 퍼지는 고리(ringSec, 굵기 ringWidth, 알파 ringAlpha) + 화면 흔들림 ringShake */
+    ringFromLevel: number; ringSec: number; ringWidth: number; ringAlpha: number; ringShake: ShakeLevel;
   };
   spawn: { ringColor: string; ringRadiusMul: number; startScale: number; risePx: number };
   /** 보스 등장 컷: 카메라 이동(panSec) → 내려찍기(dropSec, dropHeight) → 이름 띠(nameSec) → 복귀(returnSec) */

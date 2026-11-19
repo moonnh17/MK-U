@@ -13,7 +13,7 @@ import { shake } from '../entities/juice';
 import { executable } from '../systems/magiMage';
 import { lineHits } from '../systems/targeting';
 import { inArc } from '../systems/weapons';
-import { playFx, ProjectileLook, sparks, stretchFx } from './skillFx';
+import { fxScale, impactFx, playFx, ProjectileLook, stretchFx } from './skillFx';
 import { nearestEnemy, type PassiveImpl, type SkillCast, type SkillHost, type SkillImpl, type SkillObject, type UltimateImpl } from './host';
 
 const RAY_STEP_PX = 4;
@@ -54,7 +54,8 @@ export const magiBurst: SkillImpl = {
     const hits = lineHits(p, dir, len, v.width! / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
     for (const i of hits) host.hit(enemies[i]!, v.damage!, s.def.sources.beam!);
     // 그림의 광선 몸통은 칸 높이의 절반쯤이라 판정 폭의 두 배로 그린다
-    stretchFx(host.scene, s.def.sprites.beam!, p, { x: p.x + dir.x * len, y: p.y + dir.y * len }, v.width! * 2, 0.25);
+    stretchFx(host.scene, s.def.sprites.beam!, p, { x: p.x + dir.x * len, y: p.y + dir.y * len }, v.width! * 2 * fxScale(host, s.owned.level), 0.25);
+    impactFx(host, s.owned.level, p.x + dir.x * len, p.y + dir.y * len, s.def.color, v.width! * 1.5);
     return true;
   },
 };
@@ -76,7 +77,8 @@ export const magiWave: SkillImpl = {
       const n = Math.hypot(dx, dy) || 1;
       e.knockback({ x: dx / n, y: dy / n }, v.knockback!, v.knockSec!);
     }
-    playFx(host.scene, s.def.sprites.wave!, p.x + d.x * r * 0.35, p.y + d.y * r * 0.35, { w: r * 1.5, rotation: a });
+    playFx(host.scene, s.def.sprites.wave!, p.x + d.x * r * 0.35, p.y + d.y * r * 0.35, { w: r * 1.5 * fxScale(host, s.owned.level), rotation: a });
+    if (s.owned.level >= host.ctx.data.juice.projectileLook.ringFromLevel) impactFx(host, s.owned.level, p.x + d.x * r * 0.5, p.y + d.y * r * 0.5, s.def.color, r * 0.6);
     return true;
   },
 };
@@ -98,7 +100,7 @@ class Condenser implements SkillObject {
   ) {
     this.createdAt = host.scene.time.now;
     this.life = s.values.lifeSec!;
-    this.look = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orb!, host.ctx.data.juice.projectileLook, { glow: s.def.sprites.orbGlow, spin: true, trail: false });
+    this.look = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orb!, host.ctx.data.juice.projectileLook, { glow: s.def.sprites.orbGlow, spin: true, trail: false, scale: fxScale(host, s.owned.level) });
   }
 
   update(dt: number, host: SkillHost): boolean {
@@ -132,8 +134,8 @@ class Condenser implements SkillObject {
     bus.emit('sfx', { id: 'explosion', size: r });
     host.blastProps(this.at, r, v.damage!);
     for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - this.at.x, e.sprite.y - this.at.y) <= r + e.radius) host.hit(e, v.damage!, this.s.def.sources.blast!);
-    playFx(host.scene, this.s.def.sprites.blast!, this.at.x, this.at.y, { w: r * 2.4 });
-    sparks(host.scene, this.at.x, this.at.y, this.s.def.color, host.ctx.data.juice.projectileLook, 2);
+    playFx(host.scene, this.s.def.sprites.blast!, this.at.x, this.at.y, { w: r * 2.4 * fxScale(host, this.s.owned.level) });
+    impactFx(host, this.s.owned.level, this.at.x, this.at.y, this.s.def.color, r * 1.2, 2);
     shake(host.scene, 'light');
   }
 
@@ -160,9 +162,9 @@ export const magiPillar: SkillImpl = {
     const at = target ? { x: target.sprite.x, y: target.sprite.y } : { x: p.x + d.x * v.ahead!, y: p.y + d.y * v.ahead! };
     const r = host.area(v.radius!);
     const ref = s.def.sprites.pillar!;
-    playFx(host.scene, ref, at.x, at.y + r * 0.3, { w: Math.max(ref.size, r * 2.4) }).setOrigin(0.5, 1);
+    playFx(host.scene, ref, at.x, at.y + r * 0.3, { w: Math.max(ref.size, r * 2.4) * fxScale(host, s.owned.level) }).setOrigin(0.5, 1);
     host.scene.time.delayedCall(v.delaySec! * 1000, () => {
-      sparks(host.scene, at.x, at.y, s.def.color, host.ctx.data.juice.projectileLook, 1.5);
+      impactFx(host, s.owned.level, at.x, at.y, s.def.color, r * 1.4, 1.5);
       for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= r + e.radius) host.hit(e, v.damage!, s.def.sources.pillar!);
     });
     return true;
