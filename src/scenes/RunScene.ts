@@ -1,11 +1,11 @@
 import { loopArt, playFx } from '../skills/skillFx';
 import { recordCodex, type CodexKind } from '../systems/codex';
-import { buildPathField, pathDir, segmentClear, type PathField } from '../systems/pathField';
+import { type PathField } from '../systems/pathField';
 import { IDLE_DODGE } from '../systems/dodge';
 import Phaser from 'phaser';
 import { RunDebug } from './run/runDebug';
-import { bindRunEvents } from './run/busBindings';
 import { buildHosts } from './run/hosts';
+import { bindRunEvents } from './run/busBindings';
 import { WorldBuilder } from './run/worldBuilder';
 import { LootInteract } from './run/lootInteract';
 import { SkillRuntime } from './run/skillRuntime';
@@ -37,22 +37,20 @@ import { animateArt, fitArt } from '../entities/art';
 import { Juice, shake } from '../entities/juice';
 import { cameraFocus, viewSize } from '../systems/camera';
 import { HitStop, slowMoScale } from '../systems/juice';
-import { playerArtKey, artKeys } from '../systems/art';
+import { playerArtKey } from '../systems/art';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
 import { Pickup } from '../entities/pickup';
 import type { SkillHost } from '../skills/host';
 import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { gradeEnergyMultiplier, gradeMultiplier } from '../systems/damage';
-import { assignElites, eliteCount } from '../systems/elites';
-import { championWaves, hiddenBossScale, raidChampions } from '../systems/champions';
+import { hiddenBossScale } from '../systems/champions';
 import { collectCoins, rollCoinDrops } from '../systems/loot';
 import { generateStage } from '../systems/mapgen';
-import { hiddenChapterMul } from '../systems/hiddenBoss';
 import { crystalBreakdown, rollShard } from '../systems/runRecord';
 import { MiniQueue } from '../systems/gemini';
 import { inSpireCircle } from '../systems/spire';
-import { RoomState, type RoomEvent, type Wave } from '../systems/roomState';
+import { RoomState } from '../systems/roomState';
 import { advanceStage, playableChapters, firstStage } from '../systems/run';
 import { absorbHit } from '../systems/shield';
 import { corruptedDamage, tickCorruption } from '../systems/acro';
@@ -60,9 +58,10 @@ import { hpStance, takeDamage } from '../systems/vitals';
 import { masteryTotals, tickCooldowns } from '../systems/skills';
 import { tickBleed, tickBurn } from '../systems/tags';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
-import { contains, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
+import { mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
 import type { BleedRule, BurnRule, TagId, WeaponDef } from '../types/data';
 import { BulletRuntime } from './run/bullets';
+import { RoomRuntime } from './run/roomRuntime';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -72,6 +71,7 @@ export class RunScene extends Phaser.Scene {
   condition!: PlayerCondition;
   roarAura!: RoarAura;
   bulletRt!: BulletRuntime;
+  roomRt!: RoomRuntime;
   stageFx!: StageFx;
   combat!: WeaponCombat;
   special!: SpecialWeapons;
@@ -178,6 +178,7 @@ export class RunScene extends Phaser.Scene {
     this.special = new SpecialWeapons(this);
     this.roarAura = new RoarAura(this);
     this.bulletRt = new BulletRuntime(this);
+    this.roomRt = new RoomRuntime(this);
     this.resetFields();
 
     const stage = this.initData.stage ?? firstStage();
@@ -506,7 +507,7 @@ export class RunScene extends Phaser.Scene {
     }
     const moving = frame.move.x !== 0 || frame.move.y !== 0;
 
-    this.updateRooms(dt);
+    this.roomRt.updateRooms(dt);
     this.encounters.updateSpires(dt);
 
     for (const e of this.enemies) {
@@ -603,169 +604,9 @@ export class RunScene extends Phaser.Scene {
     if (frame.pressed.has('inventory')) this.progression.openInventory();
   }
 
-  updateRooms(dt: number): void {
-    const { map, visited } = this.session;
-    const rid = roomAt(map, this.m, this.player.x, this.player.y);
-    if (rid !== null) {
-      this.session.currentRoomId = rid;
-      visited.add(rid);
-      const state = this.rooms.get(rid)!;
-      const inner = interiorRect(map.rooms[rid]!, this.m, this.ctx.data.mapgen.lockInsetPx);
-      // 조우 칸: 안쪽에 들어서면 유형이 정해진다
-      if (map.rooms[rid]!.kind === 'encounterRoom' && !this.session.encounters.has(rid) && contains(inner, this.player.x, this.player.y)) {
-        this.encounters.resolveEncounter(rid);
-      }
-      if (this.rooms.get(rid)!.phase === 'idle' && contains(inner, this.player.x, this.player.y)) {
-        // 보스방: 경고 배너를 띄우고 그동안 보스 소환을 미룬다
-        const boss = state.kind === 'bossRoom' ? state.waves[0]?.[0] : undefined;
-        const bossDef = boss ? this.ctx.data.enemies.enemies.find((e) => e.id === boss) : undefined;
-        if (bossDef) this.stageFx.showBossWarning(this.ctx.t(bossDef.nameKey));
-        this.handleRoomEvents(rid, state.enter(bossDef ? this.ctx.data.bosses.bannerSec : 0));
-        // 바바리안 데스 휘슬: 전투 칸에 들어갈 때 함성
-        if (state.kind === 'combatRoom') this.itemRt.triggerRoar();
-      }
-    }
-    for (const [id, state] of this.rooms) {
-      if (state.phase === 'locked') this.handleRoomEvents(id, state.update(dt));
-    }
-  }
-
-  handleRoomEvents(roomId: number, events: RoomEvent[]): void {
-    for (const e of events) {
-      if (e.type === 'lock') {
-        this.setRoomLocked(roomId, true);
-        // 보스는 등장 연출이 따로 있다
-        if (this.rooms.get(roomId)?.kind !== 'bossRoom' && !this.encounters.hiddenBossRooms.has(roomId)) {
-          bus.emit('combatBanner', { kind: 'start' });
-          sfx('combatStart');
-          shake(this, 'light');
-        }
-      }
-      else if (e.type === 'spawn') this.spawnWave(roomId, e.wave, e.index);
-      else {
-        this.setRoomLocked(roomId, false);
-        const node = this.session.map.rooms[roomId]!;
-        const rc = this.ctx.data.juice.roomClear;
-        bus.emit('combatBanner', { kind: 'clear' });
-        sfx('roomClear');
-        this.juice.colorBurst({ x: this.player.x, y: this.player.y }, rc.color, rc);
-        const cam = this.cameras.main;
-        const base = this.ctx.data.ui.camera.zoom * this.ctx.renderScale;
-        this.tweens.add({ targets: cam, zoom: base * rc.zoom, duration: (rc.zoomSec * 1000) / 2, yoyo: true, onComplete: () => cam.setZoom(base) });
-        if (node.kind === 'combatRoom') this.encounters.combatRoomDrop(roomId);
-        if (this.encounters.raidRooms.has(roomId)) this.encounters.raidReward(roomId);
-        if (this.encounters.hiddenBossRooms.has(roomId)) this.encounters.hiddenBossReward(roomId);
-        // 보스 스테이지: 보스방에서 스킬 카드를 1회 더 고른 뒤 포털이 생긴다(보스방이 출구를 겸함)
-        if (node.kind === 'bossRoom') {
-          const end = stageEndOffers(this.session.stage, this.ctx.data.mapgen, this.ctx.data.cards);
-          const bossId = this.rooms.get(roomId)?.waves[0]?.[0];
-          // 식광·마기카이저: 처치 후 일반 스토리 대화 (내용이 비어 있으면 건너뜀)
-          this.progression.playStory('bossKill', bossId, () =>
-            this.progression.queueOffers(
-              end.bossRoom.map((kind) => ({ kind, boss: true })),
-              () => this.progression.afterBossRoom(node),
-            ),
-          );
-        }
-      }
-    }
-  }
-
-  setRoomLocked(roomId: number, locked: boolean): void {
-    const doors = this.doorsByRoom.get(roomId) ?? [];
-    if (doors.length > 0 && doors.some((d) => d.rect.visible !== locked)) sfx(locked ? 'doorLock' : 'doorOpen');
-    for (const door of doors) door.setLocked(locked);
-  }
-
-  spawnWave(roomId: number, wave: Wave, index: number): void {
-    const { map } = this.session;
-    const rng = Rng.derive(this.ctx.config.seed, `spawn-${map.chapter}-${map.stage}-${roomId}-${index}`);
-    // 전투 칸 웨이브의 일반 적 일부를 엘리트로 (보스방 제외)
-    const node = map.rooms[roomId]!;
-    const d = this.ctx.data;
-    const elites =
-      node.kind === 'combatRoom' || this.encounters.raidRooms.has(roomId)
-        ? assignElites(
-            Rng.derive(this.ctx.config.seed, `elite-${map.chapter}-${map.stage}-${roomId}-${index}`),
-            wave,
-            this.encounters.raidRooms.has(roomId)
-              ? d.loot.raid.elitesPerWave
-              : eliteCount(Rng.derive(this.ctx.config.seed, `elite-count-${map.chapter}-${map.stage}-${roomId}-${index}`), map.chapter, map.stage, d.elites),
-            (id) => d.enemies.enemies.find((e) => e.id === id)!.rank,
-            d.elites,
-          )
-        : wave.map(() => null);
-    wave.forEach((id, i) => this.spawnEnemy(id, roomId, rng, true, elites[i] ?? null));
-    // 정예(집행자·집정관): 3장 일부 전투 칸 웨이브에 1마리, 습격은 한 웨이브에 하나 또는 둘 (엘리트 없음)
-    const total = this.rooms.get(roomId)?.waves.length ?? 0;
-    const champLabel = `champion-${map.chapter}-${map.stage}-${roomId}`;
-    const champs = this.encounters.raidRooms.has(roomId)
-      ? (raidChampions(Rng.derive(this.ctx.config.seed, champLabel), map.chapter, total, d.waves.champions)[index] ?? [])
-      : node.kind === 'combatRoom'
-        ? [championWaves(Rng.derive(this.ctx.config.seed, champLabel), map.chapter, map.stage, total, d.waves.champions)[index] ?? null].filter((x): x is string => x !== null)
-        : [];
-    for (const id of champs) this.spawnEnemy(id, roomId, rng, true);
-    for (const id of champs) this.progression.say('championMet', id);
-    this.rooms.get(roomId)?.addAlive(champs.length);
-  }
-
-  /** extraEliteId: 두 번째 엘리트 (중형 첨탑 강적) */
-  spawnEnemy(id: string, roomId: number, rng: Rng, countForRoom: boolean, eliteId: string | null = null, extraEliteId: string | null = null): void {
-    const d = this.ctx.data;
-    const node = this.session.map.rooms[roomId]!;
-    const def = d.enemies.enemies.find((e) => e.id === id)!;
-    const pos = def.ai === 'idle' ? roomCenter(node, this.m) : this.world.spawnPoint(node, rng, def.size / 2);
-    const elite = eliteId ? (d.elites.elites.find((x) => x.id === eliteId) ?? null) : null;
-    const extra = extraEliteId ? (d.elites.elites.find((x) => x.id === extraEliteId) ?? null) : null;
-    const icon = [elite, extra].filter((x) => x !== null).map((x) => this.ctx.t(x!.iconKey)).join('');
-    const enemy = new Enemy(this, def, pos.x, pos.y, d.waves.spawnWarnSec, elite, d.elites, icon, extra);
-    if (!def.summon) this.discover('enemies', def.id);
-    // 몬스터는 고정 스탯, 히든보스만 장에 따라 (1장 기준 ×1·×2·×3)
-    if (def.rank === 'hiddenBoss') enemy.scaleHp(hiddenBossScale(this.session.stage.chapter, d.enemies.hiddenBossScale));
-    enemy.jitterFirstAttack(rng);
-    this.enemyGroup.add(enemy.sprite);
-    if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
-    this.enemies.push(enemy);
-    if (countForRoom) this.enemyRoom.set(enemy, roomId);
-    if (def.ai === 'boss') {
-      // 히든보스: 어느 챕터든 같은 패턴, 체력·피해만 챕터 배율
-      const hidden = d.bosses.hiddenBosses.find((b) => b.id === def.id);
-      const core = hidden ?? d.bosses.bosses.find((b) => b.id === def.id);
-      const mul = hidden ? hiddenChapterMul(d.bosses, this.session.stage.chapter) : 1;
-      if (hidden) {
-        enemy.setMaxHp(enemy.maxHp * mul);
-        enemy.damageMul = mul;
-      }
-      if (core) {
-        this.bossControllers.set(enemy, new BossController(enemy, core, mul));
-        if (!this.stageFx.intro) this.stageFx.startBossIntro(enemy);
-      }
-      // 식광: 일식 어둠
-      const dk = core?.darkness;
-      if (dk) {
-        this.darkness?.destroy();
-        this.darkness = new Darkness(this, dk.lightRadius, dk.alpha, dk.color);
-        this.darknessBoss = enemy;
-      }
-    }
-  }
-
-  /** 지금 챕터 웨이브에 나오는 일반 적 (중복 없이) */
-  chapterRoster(): string[] {
-    const d = this.ctx.data;
-    const ids = new Set(d.waves.waves.filter((w) => w.chapter === this.session.stage.chapter).flatMap((w) => w.spawns.map((s) => s.enemy)));
-    return [...ids].filter((id) => d.enemies.enemies.find((e) => e.id === id)?.rank === 'normal');
-  }
-
-  /** 플레이어가 있는 방 안쪽 */
-  currentArena(): Rect {
-    const rid = this.session.currentRoomId ?? this.session.map.startId;
-    return interiorRect(this.session.map.rooms[rid]!, this.m);
-  }
-
   /** 특무 인장: 방 안, 벽·잔해가 없는 쪽으로 짧게 순간이동 */
   blinkPlayer(distance: number): void {
-    const a = this.currentArena();
+    const a = this.roomRt.currentArena();
     const r = this.ctx.data.player.size / 2;
     const base = this.rng.range(0, Math.PI * 2);
     for (let i = 0; i < 8; i++) {
@@ -780,31 +621,6 @@ export class RunScene extends Phaser.Scene {
       break;
     }
     this.floatLabel({ x: this.player.x, y: this.player.y }, this.ctx.t('item.dodged'), '#b0a0ff');
-  }
-
-  /** 전술 연계: 같은 방의 같은 적 중 연계 거리 안에 있는 것이 함께 조준한다 */
-  linkWindup(src: Enemy, attackId: string): void {
-    const a = src.def.attacks?.find((x) => x.id === attackId);
-    const r = a?.linkRadius;
-    if (!r) return;
-    const room = this.enemyRoom.get(src);
-    for (const e of this.enemies) {
-      if (e === src || e.def.id !== src.def.id || this.enemyRoom.get(e) !== room) continue;
-      if (Math.hypot(e.sprite.x - src.sprite.x, e.sprite.y - src.sprite.y) <= r) e.tryLink(attackId, this.enemyHost);
-    }
-  }
-
-  /** 보스가 부르는 적(분신): 방 웨이브 수에 들어가지 않는다 */
-  spawnMinion(id: string, at: Vec2, maxHp?: number): Enemy {
-    const d = this.ctx.data;
-    const def = d.enemies.enemies.find((e) => e.id === id)!;
-    const enemy = new Enemy(this, def, at.x, at.y, 0, null, d.elites);
-    if (maxHp !== undefined) enemy.setMaxHp(maxHp);
-    enemy.noReward = true;
-    this.enemyGroup.add(enemy.sprite);
-    if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
-    this.enemies.push(enemy);
-    return enemy;
   }
 
   // ---------- 전투 ----------
@@ -866,21 +682,6 @@ export class RunScene extends Phaser.Scene {
 
   tagRule<T>(id: TagId): T {
     return this.ctx.data.tags.tags.find((t) => t.id === id)!.rule as T;
-  }
-
-  /** 적 길 찾기: 곧장 갈 수 있으면 null, 막혔으면 이 방 격자로 돌아가는 방향 */
-  enemyPathDir(from: Vec2, radius: number): Vec2 | null {
-    const rid = this.session.currentRoomId;
-    if (rid === null) return null;
-    const obs = this.obstacles.get(rid);
-    if (!obs || obs.length === 0 || segmentClear(from, this.player, obs, radius)) return null;
-    let field = this.pathFields.get(rid);
-    if (!field) {
-      const mg = this.ctx.data.mapgen;
-      field = buildPathField(interiorRect(this.session.map.rooms[rid]!, this.m), obs, mg.pathCellPx, mg.pathMarginPx);
-      this.pathFields.set(rid, field);
-    }
-    return pathDir(field, from, this.player);
   }
 
   onEnemyKilled(e: Enemy): void {

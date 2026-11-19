@@ -75,7 +75,7 @@ export class Encounters {
       const state = new RoomState('encounterRoom', waves, d.waves.waveDelaySec);
       this.run.rooms.set(roomId, state);
       this.raidRooms.add(roomId);
-      this.run.handleRoomEvents(roomId, state.enter());
+      this.run.roomRt.handleRoomEvents(roomId, state.enter());
     } else if (kind === 'hiddenBoss') {
       // 경고 없이 바로 보스전: 아직 안 나온 히든보스 중 하나 (디버그 지정이면 그것)
       const p = this.run.session.player;
@@ -87,10 +87,10 @@ export class Encounters {
       const state = new RoomState('encounterRoom', [[hb.id]], d.waves.waveDelaySec);
       this.run.rooms.set(roomId, state);
       this.hiddenBossRooms.set(roomId, hb);
-      this.run.handleRoomEvents(roomId, state.enter());
+      this.run.roomRt.handleRoomEvents(roomId, state.enter());
     } else if (kind === 'magiSpire') {
       // 첨탑이 방 가운데로 떨어지고 문이 잠긴다
-      this.run.setRoomLocked(roomId, true);
+      this.run.roomRt.setRoomLocked(roomId, true);
       const size = spireSize(rng, stage.chapter, stage.stage, d.loot.spire);
       const spire = new Spire(this.run, roomId, c.x, c.y, d.loot.spire, size);
       // 중형·대형: 75% 확률로 강적 1마리 (첫 무리와 함께)
@@ -123,7 +123,7 @@ export class Encounters {
         for (const en of this.run.enemies.filter((x) => this.run.enemyRoom.get(x) === sp.roomId)) this.run.removeEnemy(en);
         sp.rise();
       } else {
-        this.run.setRoomLocked(sp.roomId, false);
+        this.run.roomRt.setRoomLocked(sp.roomId, false);
         this.run.session.player.record.spires++;
         this.offerSpireItems(sp);
       }
@@ -146,12 +146,12 @@ export class Encounters {
       d.elites,
     );
     const rng = Rng.derive(seed, label);
-    wave.forEach((id, i) => this.run.spawnEnemy(id, sp.roomId, rng, true, elites[i] ?? null));
+    wave.forEach((id, i) => this.run.roomRt.spawnEnemy(id, sp.roomId, rng, true, elites[i] ?? null));
     if (this.spireStrong.delete(sp)) this.spawnSpireStrong(sp, rng);
     // 원본 첨탑 규칙: 헥타르 전투원이 항상 섞여 나온다
     const tr = d.loot.spire.troopers;
     const n = rng.int(tr.count[0], tr.count[1]);
-    for (let i = 0; i < n; i++) this.run.spawnEnemy(tr.enemy, sp.roomId, rng, true);
+    for (let i = 0; i < n; i++) this.run.roomRt.spawnEnemy(tr.enemy, sp.roomId, rng, true);
   }
 
   /** 중형 첨탑 강적: 정예가 나오는 챕터면 그 챕터 정예, 아니면 엘리트 2종이 겹친 지금 챕터 일반 적 */
@@ -159,14 +159,14 @@ export class Encounters {
     const d = this.run.ctx.data;
     if (d.waves.champions.stages[String(this.run.session.stage.chapter)]) {
       const id = rng.pick(championIds(this.run.session.stage.chapter, d.waves.champions));
-      this.run.spawnEnemy(id, sp.roomId, rng, true);
+      this.run.roomRt.spawnEnemy(id, sp.roomId, rng, true);
       this.run.progression.say('championMet', id);
       return;
     }
-    const roster = this.run.chapterRoster();
+    const roster = this.run.roomRt.chapterRoster();
     if (roster.length === 0) return;
     const [a, b] = pickTwoElites(rng, d.elites);
-    this.run.spawnEnemy(rng.pick(roster), sp.roomId, rng, true, a, b);
+    this.run.roomRt.spawnEnemy(rng.pick(roster), sp.roomId, rng, true, a, b);
   }
 
   /** 충전 완료 보상: 크기별 횟수만큼 아이템 카드 3장 중 1장 (아이템 상자 가중치) */

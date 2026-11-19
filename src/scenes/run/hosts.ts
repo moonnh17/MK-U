@@ -19,7 +19,7 @@ export function buildHosts(run: RunScene): void {
     buffDuration: (sec) => run.skillRt.hostFor('item').buffDuration(sec, ['buff']),
     area: (r) => run.skillRt.area(r),
     toast: (text) => bus.emit('toast', { text }),
-    arena: () => run.currentArena(),
+    arena: () => run.roomRt.currentArena(),
     blink: (distance) => run.blinkPlayer(distance),
     absorbEnemyBullets: (at, radius) => run.bulletRt.absorbEnemyBullets(at, radius),
   });
@@ -31,10 +31,10 @@ export function buildHosts(run: RunScene): void {
     fireEnemyBullet: (from, angle, speed, range, damage, refractable, mental, sprite, tint) =>
       run.bulletRt.fireEnemyBullet(from, angle, speed, range, damage * run.enemyDamageMul(), refractable, 0, (mental ?? 0) * run.enemyDamageMul(), sprite, tint),
     addHazard: (h) => run.hazards.push(h),
-    linkWindup: (e, attackId) => run.linkWindup(e, attackId),
+    linkWindup: (e, attackId) => run.roomRt.linkWindup(e, attackId),
     rng: run.rng,
     pullPlayer: (to, speed) => run.pullPlayer(to, speed),
-    pathDir: (from, radius) => run.enemyPathDir(from, radius),
+    pathDir: (from, radius) => run.roomRt.enemyPathDir(from, radius),
   };
   run.bossHost = {
     ...run.enemyHost,
@@ -58,13 +58,13 @@ export function buildHosts(run: RunScene): void {
       if (run.rootLeft <= 0) run.floatLabel({ x: run.player.x, y: run.player.y - 14 }, run.ctx.t('boss.rooted'), '#ff5a5a');
       run.rootLeft = Math.max(run.rootLeft, sec);
     },
-    spawnMinion: (id, at, maxHp) => run.spawnMinion(id, at, maxHp),
+    spawnMinion: (id, at, maxHp) => run.roomRt.spawnMinion(id, at, maxHp),
     removeMinion: (e) => {
       if (!e.dead) run.removeEnemy(e);
     },
     addObstacle: (at, radius, doorClear, art) => run.world.addObstacle(at, radius, doorClear, art),
-    chapterRoster: () => run.chapterRoster(),
-    arena: () => run.currentArena(),
+    chapterRoster: () => run.roomRt.chapterRoster(),
+    arena: () => run.roomRt.currentArena(),
     bossPhaseFx: (text, color, at) => run.stageFx.bossPhaseFx(text, color, at),
   };
 }

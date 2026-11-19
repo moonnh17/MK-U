@@ -15,7 +15,7 @@ export class RunDebug {
     if (rid === null) return;
     for (const e of this.run.enemies.filter((x) => this.run.enemyRoom.get(x) === rid)) this.run.removeEnemy(e);
     const state = this.run.rooms.get(rid);
-    if (state) this.run.handleRoomEvents(rid, state.forceClear());
+    if (state) this.run.roomRt.handleRoomEvents(rid, state.forceClear());
     const sp = this.run.encounters.spires.find((x) => x.roomId === rid);
     if (sp) for (const e of sp.state.forceCharge()) this.run.encounters.spireEvents.push({ sp, e });
   }
@@ -53,7 +53,7 @@ export class RunDebug {
     if (rid === null || this.run.modal) return;
     const rng = Rng.derive(this.run.ctx.config.seed, `debug-spawn-${this.run.time.now}`);
     // 방 웨이브와 무관하게 소환(방 클리어 판정에 넣지 않음)
-    for (let i = 0; i < count; i++) this.run.spawnEnemy(enemyId, rid, rng, false, elite);
+    for (let i = 0; i < count; i++) this.run.roomRt.spawnEnemy(enemyId, rid, rng, false, elite);
   }
 
   /** 플레이어 둘레에서 플레이어를 향해 일반 적 탄을 쏜다 (적 공격은 M3, 역장 확인용) */
