@@ -20,6 +20,14 @@ const PROJ = {
   skill_hw_condenser: ['condenser', 24],
 };
 
+/** 힉스필드 무기·탄 그림(scripts/art-src/weapons-hf, 오른쪽을 보는 그림) key: [파일, 화면 폭 px, 알파 기준, 손잡이 위치] */
+const WEAPONS = {
+  weapon_wooden_staff: ['woodenStaff', 30, 0.5, 0.3],
+  weapon_spirit_fist: ['spiritFist', 30, 0.5, 0.25],
+  proj_spirit_fist: ['spiritFistShot', 20, 0.35],
+  fx_spirit_fist_blast: ['spiritFistBlast', 48, 0.35],
+};
+
 const FRAME = 128;
 const FRAMES = { hud_imprint_frame: 'imprint', hud_imprint_frame_gold: 'resonance' };
 
@@ -47,6 +55,13 @@ function buildMageArt(outDir) {
     const fh = Math.max(1, Math.round((fw * im.h) / im.w));
     k.write(path.join(outDir, `${key}.png`), k.resize(im, fw, fh, 0.5));
     out[key] = { file: `mku/${key}.png`, frameWidth: fw, frameHeight: fh, frames: 1, density: DENSITY };
+  }
+  for (const [key, [f, w, cut, gripX]] of Object.entries(WEAPONS)) {
+    const im = trimmed(path.join(SRC, 'weapons-hf', `${f}.png`));
+    const fw = w * DENSITY;
+    const fh = Math.max(1, Math.round((fw * im.h) / im.w));
+    k.write(path.join(outDir, `${key}.png`), k.resize(im, fw, fh, cut));
+    out[key] = { file: `mku/${key}.png`, frameWidth: fw, frameHeight: fh, frames: 1, density: DENSITY, ...(gripX !== undefined ? { gripX } : {}) };
   }
   // 개전 각인 칸 장식 틀: 정사각 128px (화면에서 31px로 줄여 쓴다)
   for (const [key, f] of Object.entries(FRAMES)) {

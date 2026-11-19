@@ -1,9 +1,9 @@
 {
   "codexLore": {
-    "old": ["pistol", "shotgun", "smg", "sniper", "grenadeLauncher", "dagger", "greatsword", "spear", "curvedBow"],
+    "old": ["pistol", "shotgun", "smg", "sniper", "grenadeLauncher", "dagger", "greatsword", "spear", "curvedBow", "woodenStaff"],
     "standard": ["flameStaff", "zephyr", "antimatterPistol", "spaceNeedle", "soulCalibur"],
     "systemple": ["mg70", "orbitalDisc"],
-    "historyArms": ["algiebaSling", "nekkarCleaver", "argoBanner", "alGulBlade", "mintakaStaff"],
+    "historyArms": ["algiebaSling", "nekkarCleaver", "argoBanner", "alGulBlade", "mintakaStaff", "spiritFist"],
     "starRelic": ["rasalgethiClub", "aviorStaff", "rasalhagueSword"],
     "ancient": ["brokenBlade", "ancientCore", "eclipseCore", "hwanRemnant", "magiFang", "hanabi"],
     "bossRemains": ["gihwanArm"],
@@ -340,6 +340,20 @@
       },
       "projectileSpeed": 300, "range": 300, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_mintaka_primary", "color": "#4a8aff", "size": 12
+    },
+    {
+      "id": "woodenStaff", "codexNo": 35, "nameKey": "weapon.woodenStaff", "category": "staff", "grade": "common", "classes": ["single"], "tags": ["magic", "ranged"],
+      "baseDamage": 6, "fireIntervalSec": 0.3, "energyCost": 2, "pattern": { "kind": "single" },
+      "projectileSpeed": 260, "range": 260, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_wooden_staff", "color": "#a07a4a", "size": 9
+    },
+    {
+      "id": "spiritFist", "codexNo": 36, "flavor": "codex.itemFlavor.spiritFist", "nameKey": "weapon.spiritFist", "category": "staff", "grade": "rare", "classes": ["explosive"], "tags": ["magic", "ranged"],
+      "baseDamage": 14, "fireIntervalSec": 0.85, "energyCost": 4, "pattern": { "kind": "lob", "radius": 32 },
+      "shot": { "spriteKey": "proj_spirit_fist", "color": "#5adf8a", "size": 10 },
+      "lobBlast": { "spriteKey": "fx_spirit_fist_blast", "color": "#5adf8a", "size": 24 },
+      "projectileSpeed": 230, "range": 230, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_spirit_fist", "color": "#6a4a2a", "size": 11
     },
     {
       "id": "fist", "nameKey": "weapon.fist", "category": "blade", "fxColor": "#ffe0c0", "grade": "common", "classes": ["slash"], "tags": ["physical", "melee"],

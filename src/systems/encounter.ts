@@ -4,4 +4,9 @@
  */
 import type { EncounterKindId } from '../types/data';
 
+/** 챕터 가중치: 기본표에 그 챕터의 덮어쓰기를 얹는다 */
+export function encounterWeights(e: { weights: Record<EncounterKindId, number>; chapterWeights: Record<string, Partial<Record<EncounterKindId, number>>> }, chapter: number): Record<EncounterKindId, number> {
+  return { ...e.weights, ...e.chapterWeights[String(chapter)] };
+}
+
 export const IMPLEMENTED_ENCOUNTERS: ReadonlySet<EncounterKindId> = new Set<EncounterKindId>(['treasure', 'merchant', 'skillShop', 'raid', 'magiSpire', 'hiddenBoss', 'combiner']);

@@ -196,7 +196,8 @@ export function validateGameData(d: GameData): Errors {
       errors.push(`${w}: 알 수 없는 pattern.kind`);
     }
     if (p.kind === 'single' && wpn.category === 'blade') errors.push(`${w}: single은 쏘는 무기 패턴`);
-    if ((p.kind === 'lob' || p.kind === 'spread') && wpn.category !== 'gun') errors.push(`${w}: ${p.kind}는 총 패턴`);
+    if (p.kind === 'spread' && wpn.category !== 'gun') errors.push(`${w}: spread는 총 패턴`);
+    if (p.kind === 'lob' && wpn.category !== 'gun' && wpn.category !== 'staff') errors.push(`${w}: lob은 총·지팡이 패턴`);
     if (wpn.category === 'bow' && !wpn.charge) errors.push(`${w}: 활은 차징 무기`);
     if (wpn.shot) checkSprite(errors, `${w}.shot`, wpn.shot);
     if (wpn.fireFlash) checkSprite(errors, `${w}.fireFlash`, wpn.fireFlash);
@@ -264,6 +265,10 @@ export function validateGameData(d: GameData): Errors {
   for (const k of ['treasure', 'merchant', 'skillShop', 'combiner', 'raid', 'magiSpire', 'hiddenBoss'] as const) {
     checkPositive(errors, `loot.encounter.weights.${k}`, lt.encounter.weights[k], true);
     needText(`loot.encounter.${k}`, `encounter.${k}`);
+  }
+  for (const [ch, w] of Object.entries(lt.encounter.chapterWeights)) for (const [k, v] of Object.entries(w)) {
+    if (!(k in lt.encounter.weights)) errors.push(`loot.encounter.chapterWeights.${ch}: 없는 유형 '${k}'`);
+    checkPositive(errors, `loot.encounter.chapterWeights.${ch}.${k}`, v, true);
   }
   checkRange(errors, 'loot.raid.waves', lt.raid.waves, 1);
   checkRange(errors, 'loot.raid.coins', lt.raid.coins);

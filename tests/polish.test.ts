@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Rng } from '../src/core/rng';
 import { gameData } from '../src/data/index';
 import { generateStage } from '../src/systems/mapgen';
+import { encounterWeights } from '../src/systems/encounter';
 import { availablePatterns, initialBoss } from '../src/systems/bossBrain';
 import { bossHalfOrbs } from '../src/systems/bossEnergy';
 import { cardPrice, cardStock, collectCoins, encounterPool, rollCoinDrops, rollWeapon } from '../src/systems/loot';
@@ -75,6 +76,14 @@ describe('전투 없는 방', () => {
     const w = D.loot.encounter.weights;
     const sum = Object.values(w).reduce((a, b) => a + b, 0);
     expect(D.mapgen.encounterPeaceful.chance).toBeCloseTo((w.treasure + w.merchant + w.skillShop + w.combiner) / sum, 2);
+  });
+  it('1장은 상점·스킬 상점·조합기가 드물고, 평화로운 칸 합은 같다', () => {
+    const peace = (w: Record<string, number>) => w.treasure! + w.merchant! + w.skillShop! + w.combiner!;
+    const c1 = encounterWeights(D.loot.encounter, 1);
+    const c2 = encounterWeights(D.loot.encounter, 2);
+    expect(c2).toEqual(D.loot.encounter.weights);
+    expect(peace(c1)).toBeCloseTo(peace(c2), 5);
+    for (const k of ['merchant', 'skillShop', 'combiner'] as const) expect(c1[k]).toBeLessThan(c2[k]);
   });
   it('평화로운 칸은 아이템 상자·상점만, 아니면 전투 유형만', () => {
     const all = new Set(Object.keys(D.loot.encounter.weights) as (keyof typeof D.loot.encounter.weights)[]);

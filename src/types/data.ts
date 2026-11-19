@@ -1342,7 +1342,8 @@ export interface LootData {
   cardStandIconPx: number;
   /** 스킬 상점: 카드 종류별 가격 */
   skillShop: { count: number; prices: { skillNew: number; skillLevelUp: number } };
-  encounter: { weights: Record<EncounterKindId, number> };
+  /** chapterWeights: 챕터별로 덮어쓸 가중치(평화로운 칸 합은 그대로 둔다) */
+  encounter: { weights: Record<EncounterKindId, number>; chapterWeights: Record<string, Partial<Record<EncounterKindId, number>>> };
   raid: { waves: IntRange; sizeMul: number; elitesPerWave: number; coins: IntRange };
   /** weapon = 시작 무기 상자, boss = 보스·히든보스 무기 상자 */
   chest: { weapon: SpriteRef; item: SpriteRef; boss: SpriteRef; bossItem: SpriteRef; openRadius: number };

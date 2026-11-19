@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 780개 · 그림 있음 747개
+전체 784개 · 그림 있음 751개
 
 ## player (9)
 
@@ -24,7 +24,7 @@
 | `player_barbarian` | 플레이어 야만용사 | 10×10 | feet | #e8e2d0 | mku/player_barbarian.png (13프레임) |
 | `player_paladin` | 플레이어 성기사 | 10×10 | feet | #e8e2d0 | mku/player_paladin.png (9프레임) |
 
-## weapon (37)
+## weapon (39)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -64,9 +64,11 @@
 | `weapon_mintaka_primary` | 민타카의 쌍성 지팡이 | 12×12 | center | #4a8aff | mku/weapon_mintaka_primary.png (1프레임) |
 | `weapon_mintaka_eclipse` | 민타카의 쌍성 지팡이 | 12×12 | center | #2a3a8a | mku/weapon_mintaka_eclipse.png (1프레임) |
 | `weapon_mintaka_align` | 민타카의 쌍성 지팡이 | 12×12 | center | #6a9aff | mku/weapon_mintaka_align.png (1프레임) |
+| `weapon_wooden_staff` | 나무 지팡이 | 9×9 | center | #a07a4a | mku/weapon_wooden_staff.png (1프레임) |
+| `weapon_spirit_fist` | 정령의 주먹 | 11×11 | center | #6a4a2a | mku/weapon_spirit_fist.png (1프레임) |
 | `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | mku/weapon_fist.png (1프레임) |
 
-## projectile (59)
+## projectile (61)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -85,6 +87,8 @@
 | `fx_mintaka_gravity` | 민타카의 쌍성 지팡이 (fx) | 15×15 | center | #3a6aff | mku/fx_mintaka_gravity.png (4프레임) |
 | `fx_mintaka_align` | 민타카의 쌍성 지팡이 (fx) | 19×19 | center | #e0f4ff | mku/fx_mintaka_align.png (4프레임) |
 | `fx_mintaka_burst` | 민타카의 쌍성 지팡이 (fx) | 90×90 | center | #9ad8ff | mku/fx_mintaka_burst.png (6프레임) |
+| `proj_spirit_fist` | 정령의 주먹 (fx) | 10×10 | center | #5adf8a | mku/proj_spirit_fist.png (1프레임) |
+| `fx_spirit_fist_blast` | 정령의 주먹 (fx) | 24×24 | center | #5adf8a | mku/fx_spirit_fist_blast.png (1프레임) |
 | `projectile_player` | 플레이어 탄 | 3×3 | center | #fff3a0 | mku/projectile_player.png (1프레임) |
 | `fx_melee_slash` | 근접 이펙트 (fx) | 20×20 | center | #ffffff | mku/fx_melee_slash.png (6프레임) |
 | `fx_melee_slam` | 근접 이펙트 (fx) | 20×20 | center | #ffffff | mku/fx_melee_slam.png (8프레임) |
