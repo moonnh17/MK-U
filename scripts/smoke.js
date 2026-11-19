@@ -188,6 +188,41 @@ SCENES.death = async () => {
   rs().restartRun();
   await waitFor(() => mku().game.scene.getScenes(true).some((s) => s.sys.settings.key === 'Lab'), 300);
 };
+/** 전투 칸에 들어가 웨이브를 실제로 처치해 방을 깬다 (적 체력을 1로 낮춰 빨리) */
+SCENES.combatClear = async () => {
+  await startRun('magiScholar');
+  const { roomCenter } = await import('/src/systems/worldLayout.ts');
+  const id = rs().session.map.rooms.findIndex((n) => n.kind === 'combatRoom');
+  const c = roomCenter(rs().session.map.rooms[id], rs().m);
+  rs().player.setPosition(c.x, c.y);
+  await waitFor(() => rs().rooms.get(id).phase === 'locked', 300);
+  for (let t = 0; t < 40 && rs().rooms.get(id).phase !== 'cleared'; t++) {
+    for (const e of rs().enemies) if (!e.dead) e.hp = Math.min(e.hp, 1);
+    await fight(null, 0, 1);
+    // 웨이브 사이 대기는 실제 흐른 시간으로 센다
+    await sleep(150);
+  }
+  if (rs().rooms.get(id).phase !== 'cleared') throw new Error(`방이 안 깨짐: ${rs().rooms.get(id).phase}`);
+  await frames(60);
+};
+/** 보스 처치 → 슬로모션·대사·보스 카드 → 포털 */
+SCENES.bossKill = async () => {
+  await startRun('warrior', { chapter: 1, stage: 2 });
+  await enterRoom('bossRoom');
+  const b = await bus();
+  for (let t = 0; t < 40 && rs().session.player.record.bossKills.length === 0; t++) {
+    b.emit('debugBossHp', { ratio: 0.0001 });
+    await fight(null, 0, 1);
+    await sleep(50);
+  }
+  if (rs().session.player.record.bossKills.length === 0) throw new Error('보스가 안 죽음');
+  for (let t = 0; t < 60 && (rs().modal || rs().portals.length === 0); t++) {
+    if (rs().modal) await clearModals();
+    await sleep(100);
+    await frames(5);
+  }
+  if (rs().portals.length === 0) throw new Error('포털이 안 생김');
+};
 /** 스테이지 끝 → 이동 화면 카드 → 다음 스테이지 */
 SCENES.nextStage = async () => {
   await startRun('warrior');
