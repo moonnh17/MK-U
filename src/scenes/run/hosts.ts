@@ -21,7 +21,7 @@ export function buildHosts(run: RunScene): void {
     toast: (text) => bus.emit('toast', { text }),
     arena: () => run.currentArena(),
     blink: (distance) => run.blinkPlayer(distance),
-    absorbEnemyBullets: (at, radius) => run.absorbEnemyBullets(at, radius),
+    absorbEnemyBullets: (at, radius) => run.bulletRt.absorbEnemyBullets(at, radius),
   });
   run.enemyHost = {
     scene: run,
@@ -29,7 +29,7 @@ export function buildHosts(run: RunScene): void {
     playerRadius: d.player.size / 2,
     hurtPlayer: (amount, attacker, mental) => run.hurtPlayer(amount * run.enemyDamageMul(), attacker ?? null, mental === undefined ? undefined : mental * run.enemyDamageMul()),
     fireEnemyBullet: (from, angle, speed, range, damage, refractable, mental, sprite, tint) =>
-      run.fireEnemyBullet(from, angle, speed, range, damage * run.enemyDamageMul(), refractable, 0, (mental ?? 0) * run.enemyDamageMul(), sprite, tint),
+      run.bulletRt.fireEnemyBullet(from, angle, speed, range, damage * run.enemyDamageMul(), refractable, 0, (mental ?? 0) * run.enemyDamageMul(), sprite, tint),
     addHazard: (h) => run.hazards.push(h),
     linkWindup: (e, attackId) => run.linkWindup(e, attackId),
     rng: run.rng,
@@ -42,8 +42,8 @@ export function buildHosts(run: RunScene): void {
     t: (key) => run.ctx.t(key),
     addHazard: (h) => run.hazards.push(h),
     fireEnemyBullet: (from, angle, speed, range, damage, refractable, sprite) =>
-      run.fireEnemyBullet(from, angle, speed, range, damage * run.enemyDamageMul(), refractable, 0, 0, sprite),
-    fireEnemyMissile: (from, angle, speed, range, damage, turnRate, sprite) => run.fireEnemyBullet(from, angle, speed, range, damage * run.enemyDamageMul(), true, turnRate, 0, sprite),
+      run.bulletRt.fireEnemyBullet(from, angle, speed, range, damage * run.enemyDamageMul(), refractable, 0, 0, sprite),
+    fireEnemyMissile: (from, angle, speed, range, damage, turnRate, sprite) => run.bulletRt.fireEnemyBullet(from, angle, speed, range, damage * run.enemyDamageMul(), true, turnRate, 0, sprite),
     pushPlayer: (v) => {
       const body = run.player.body as Phaser.Physics.Arcade.Body;
       body.velocity.x += v.x;

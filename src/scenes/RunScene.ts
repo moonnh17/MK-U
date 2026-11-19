@@ -41,7 +41,7 @@ import { playerArtKey, artKeys } from '../systems/art';
 import { ItemRuntime } from '../items/runtime';
 import { DelayedBlast, type Hazard } from '../entities/hazard';
 import { Pickup } from '../entities/pickup';
-import { nearestEnemy, type SkillHost } from '../skills/host';
+import type { SkillHost } from '../skills/host';
 import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { gradeEnergyMultiplier, gradeMultiplier } from '../systems/damage';
 import { assignElites, eliteCount } from '../systems/elites';
@@ -49,7 +49,6 @@ import { championWaves, hiddenBossScale, raidChampions } from '../systems/champi
 import { collectCoins, rollCoinDrops } from '../systems/loot';
 import { generateStage } from '../systems/mapgen';
 import { hiddenChapterMul } from '../systems/hiddenBoss';
-import { steerToward } from '../systems/motion';
 import { crystalBreakdown, rollShard } from '../systems/runRecord';
 import { MiniQueue } from '../systems/gemini';
 import { inSpireCircle } from '../systems/spire';
@@ -62,7 +61,8 @@ import { masteryTotals, tickCooldowns } from '../systems/skills';
 import { tickBleed, tickBurn } from '../systems/tags';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { contains, interiorRect, mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
-import type { BleedRule, BurnRule, SpriteRef, TagId, WeaponDef } from '../types/data';
+import type { BleedRule, BurnRule, TagId, WeaponDef } from '../types/data';
+import { BulletRuntime } from './run/bullets';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -71,6 +71,7 @@ export class RunScene extends Phaser.Scene {
   roomProps!: RoomProps;
   condition!: PlayerCondition;
   roarAura!: RoarAura;
+  bulletRt!: BulletRuntime;
   stageFx!: StageFx;
   combat!: WeaponCombat;
   special!: SpecialWeapons;
@@ -176,6 +177,7 @@ export class RunScene extends Phaser.Scene {
     const d = this.ctx.data;
     this.special = new SpecialWeapons(this);
     this.roarAura = new RoarAura(this);
+    this.bulletRt = new BulletRuntime(this);
     this.resetFields();
 
     const stage = this.initData.stage ?? firstStage();
@@ -280,7 +282,7 @@ export class RunScene extends Phaser.Scene {
     this.physics.add.collider(this.bullets, this.roomProps.propGroup, (b, s) => propHit(b, s, (x) => x.getData('base') as number));
     this.physics.add.collider(this.enemyBullets, this.roomProps.propGroup, (b, s) => propHit(b, s, (x) => x.getData('damage') as number));
     this.physics.add.overlap(this.bullets, this.enemyGroup, (b, e) => this.combat.onBulletHit(b as Phaser.Physics.Arcade.Image, e as Phaser.Physics.Arcade.Image));
-    this.physics.add.overlap(this.player, this.enemyBullets, (_p, b) => this.onEnemyBulletHit(b as Phaser.Physics.Arcade.Image));
+    this.physics.add.overlap(this.player, this.enemyBullets, (_p, b) => this.bulletRt.onEnemyBulletHit(b as Phaser.Physics.Arcade.Image));
     this.physics.add.overlap(this.player, this.enemyGroup, (_p, e) =>
       this.onContact((e as Phaser.GameObjects.GameObject).getData('enemy') as Enemy),
     );
@@ -561,7 +563,7 @@ export class RunScene extends Phaser.Scene {
     this.updateBleeds(dt);
     this.updateCorruption(dt);
 
-    this.updateBullets(dt);
+    this.bulletRt.updateBullets(dt);
     this.updatePickups(dt);
     this.condition.updateInvuln(dt);
     this.loot.updatePotions();
@@ -1095,52 +1097,6 @@ export class RunScene extends Phaser.Scene {
     return true;
   }
 
-  updateBullets(dt: number): void {
-    for (const b of this.bullets.getChildren() as Phaser.Physics.Arcade.Image[]) {
-      const dist = Math.hypot(b.x - (b.getData('ox') as number), b.y - (b.getData('oy') as number));
-      if (dist > (b.getData('range') as number)) {
-        b.destroy();
-        continue;
-      }
-      this.combat.bulletLook(b, dist, dt);
-      // 유도탄(지팡이): 남은 사거리 안 가장 가까운 적 쪽으로 휜다
-      const turn = b.getData('homing') as number;
-      if (turn > 0) {
-        const t = nearestEnemy(this.skillRt.hostFor('weapon'), b, (b.getData('range') as number) - dist);
-        if (t) {
-          const body = b.body as Phaser.Physics.Arcade.Body;
-          const v = steerToward(body.velocity, b, t.sprite, turn, dt);
-          b.setVelocity(v.x, v.y);
-        }
-      }
-    }
-    for (const b of this.enemyBullets.getChildren() as Phaser.Physics.Arcade.Image[]) {
-      const range = b.getData('range') as number | undefined;
-      if (range !== undefined && Math.hypot(b.x - (b.getData('ox') as number), b.y - (b.getData('oy') as number)) > range) {
-        b.destroy();
-        continue;
-      }
-      const turn = (b.getData('homing') as number | undefined) ?? 0;
-      if (turn > 0) {
-        const v = steerToward((b.body as Phaser.Physics.Arcade.Body).velocity, b, this.player, turn, dt);
-        b.setVelocity(v.x, v.y);
-        // 휘는 동안에도 머리가 날아가는 쪽을 본다
-        b.setRotation(Math.atan2(v.y, v.x));
-      }
-    }
-  }
-
-  /** 식광의 핵: at 둘레의 약한 적 탄(굴절 가능)을 지운다 */
-  absorbEnemyBullets(at: Vec2, radius: number): number {
-    let n = 0;
-    for (const b of [...(this.enemyBullets.getChildren() as Phaser.Physics.Arcade.Image[])]) {
-      if (b.getData('refractable') === false || Math.hypot(b.x - at.x, b.y - at.y) > radius) continue;
-      b.destroy();
-      n++;
-    }
-    return n;
-  }
-
   /** 집행자 밧줄: 플레이어를 to까지 끌어당긴다 (그동안 입력 무시). 걸리는 시간 */
   pullPlayer(to: Vec2, speed: number): number {
     const dx = to.x - this.player.x;
@@ -1151,26 +1107,6 @@ export class RunScene extends Phaser.Scene {
     this.dashVel = { x: (dx / dist) * speed, y: (dy / dist) * speed };
     this.dashLeft = sec;
     return sec;
-  }
-
-  /** 적 탄. refractable=false면 굴절·탄 베기 불가(보스 대형 레이저 등). homing: 플레이어 쪽으로 휘는 속도(rad/s, 유도 미사일) */
-  fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, homing = 0, mental = 0, sprite?: SpriteRef, tint?: string): void {
-    const ep = this.ctx.data.enemies.projectile;
-    const b = this.enemyBullets.create(from.x, from.y, sprite?.spriteKey ?? ep.spriteKey) as Phaser.Physics.Arcade.Sprite;
-    this.enemyBulletLayer.add(b);
-    if (tint) b.setTint(hexColor(tint));
-    fitArt(this.ctx.data, b, ep.size, ep.height ?? ep.size);
-    // 보스 전용 탄: 날아가는 쪽을 보고 프레임이 돈다
-    if (sprite) {
-      b.setRotation(angle);
-      loopArt(b, sprite);
-    }
-    b.setDepth(5);
-    b.setData({ damage, mental, refractable, cuttable: refractable, range, ox: from.x, oy: from.y, homing });
-    // 굴절 불가 탄은 붉게, 유도 미사일은 크게
-    if (!refractable && !sprite) b.setTint(0xff2a2a);
-    if (homing > 0 && !sprite) b.setScale(1.5);
-    b.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
   }
 
   updatePickups(dt: number): void {
@@ -1196,28 +1132,6 @@ export class RunScene extends Phaser.Scene {
 
   fxAt(obj: Phaser.GameObjects.GameObject): void {
     this.time.delayedCall(this.ctx.data.ui.slashFxSec * 1000, () => obj.destroy());
-  }
-
-  onEnemyBulletHit(b: Phaser.Physics.Arcade.Image): void {
-    if (!b.active) return;
-    // 구르는 동안에는 탄이 몸을 지나간다 (헥타르 RAM: 스칠 때 에너지)
-    if (this.condition.dodge.invuln > 0) {
-      if (!b.getData('grazed')) {
-        b.setData('grazed', true);
-        this.itemRt.onDodgeAvoid();
-        const graze = this.itemRt.first('grazeEnergy');
-        if (graze) {
-          const p = this.session.player;
-          p.energy = Math.min(p.energyMax, p.energy + graze.value);
-          this.floatLabel({ x: this.player.x, y: this.player.y - 6 }, `+${graze.value}`, this.ctx.data.ui.hud.bars.energyColor);
-        }
-      }
-      return;
-    }
-    const damage = b.getData('damage') as number;
-    const mental = b.getData('mental') as number | undefined;
-    b.destroy();
-    this.hurtPlayer(damage, null, mental);
   }
 
   /** 최대 체력 = (기본(+영구 강화) + 아이템 + 신체 숙련) × (1 + 숙련·스킬 비율). 늘면 그만큼 현재 체력도 채운다 */
