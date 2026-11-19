@@ -34,7 +34,3 @@ export interface ActionFrame {
   /** 이번 프레임에 새로 눌린 버튼 */
   pressed: ReadonlySet<ButtonAction>;
 }
-
-export function isButtonAction(v: string): v is ButtonAction {
-  return (BUTTON_ACTIONS as readonly string[]).includes(v);
-}

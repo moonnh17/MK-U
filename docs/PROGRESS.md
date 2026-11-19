@@ -321,3 +321,7 @@
 
 - [x] 기준선: `npm test` 49파일·1006개, `npm run typecheck` 통과
 - [x] 브라우저 장면 점검 `scripts/smoke.js`(전사 전투·1/2/3장 보스·마기학자 액티브 6종·마기법사 액티브 9종+궁극기), 6장면 모두 오류 0
+
+### 1 — 안 쓰는 코드
+
+- [x] 빈 파일 `types/future.ts`, 안 쓰는 `isButtonAction`·`NO_MODS`, 안 쓰는 UI 문구 12개 삭제(테스트·타입·장면 점검 통과)

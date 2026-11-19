@@ -53,8 +53,6 @@ export interface PlayerMods {
   damageTaken?: number;
 }
 
-export const NO_MODS: PlayerMods = { moveSpeed: 0, damageReduction: 0 };
-
 /** 이동속도는 더하고, 피해 감소는 곱해서 합친다(100%가 되지 않음) */
 export function combineMods(list: readonly Partial<PlayerMods>[]): PlayerMods {
   let moveSpeed = 0;
