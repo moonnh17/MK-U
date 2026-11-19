@@ -5,6 +5,7 @@ import { IDLE_DODGE } from '../systems/dodge';
 import Phaser from 'phaser';
 import { RunDebug } from './run/runDebug';
 import { bindRunEvents } from './run/busBindings';
+import { buildHosts } from './run/hosts';
 import { WorldBuilder } from './run/worldBuilder';
 import { LootInteract } from './run/lootInteract';
 import { SkillRuntime } from './run/skillRuntime';
@@ -221,67 +222,7 @@ export class RunScene extends Phaser.Scene {
     this.m = metrics(d.mapgen);
     this.skillRt.hosts = new Map();
     this.host = this.skillRt.hostFor(null);
-    this.itemRt = new ItemRuntime({
-      scene: this,
-      ctx: this.ctx,
-      player: () => this.session.player,
-      skill: () => this.skillRt.hostFor('item'),
-      skillFor: (id) => this.skillRt.hostFor(id),
-      fireBullet: (from, angle, speed, range, base, tags, pierce) => this.combat.fireBullet(from, angle, speed, range, base, tags, 'item', { pierce, crit: 0 }),
-      setInvuln: (sec) => {
-        this.invuln = Math.max(this.invuln, sec);
-      },
-      buffDuration: (sec) => this.skillRt.hostFor('item').buffDuration(sec, ['buff']),
-      area: (r) => this.skillRt.area(r),
-      toast: (text) => bus.emit('toast', { text }),
-      arena: () => this.currentArena(),
-      blink: (distance) => this.blinkPlayer(distance),
-      absorbEnemyBullets: (at, radius) => this.absorbEnemyBullets(at, radius),
-    });
-    this.enemyHost = {
-      scene: this,
-      playerPos: () => ({ x: this.player.x, y: this.player.y }),
-      playerRadius: d.player.size / 2,
-      hurtPlayer: (amount, attacker, mental) => this.hurtPlayer(amount * this.enemyDamageMul(), attacker ?? null, mental === undefined ? undefined : mental * this.enemyDamageMul()),
-      fireEnemyBullet: (from, angle, speed, range, damage, refractable, mental, sprite, tint) =>
-        this.fireEnemyBullet(from, angle, speed, range, damage * this.enemyDamageMul(), refractable, 0, (mental ?? 0) * this.enemyDamageMul(), sprite, tint),
-      addHazard: (h) => this.hazards.push(h),
-      linkWindup: (e, attackId) => this.linkWindup(e, attackId),
-      rng: this.rng,
-      pullPlayer: (to, speed) => this.pullPlayer(to, speed),
-      pathDir: (from, radius) => this.enemyPathDir(from, radius),
-    };
-    this.bossHost = {
-      ...this.enemyHost,
-      rng: this.rng,
-      t: (key) => this.ctx.t(key),
-      addHazard: (h) => this.hazards.push(h),
-      fireEnemyBullet: (from, angle, speed, range, damage, refractable, sprite) =>
-        this.fireEnemyBullet(from, angle, speed, range, damage * this.enemyDamageMul(), refractable, 0, 0, sprite),
-      fireEnemyMissile: (from, angle, speed, range, damage, turnRate, sprite) => this.fireEnemyBullet(from, angle, speed, range, damage * this.enemyDamageMul(), true, turnRate, 0, sprite),
-      pushPlayer: (v) => {
-        const body = this.player.body as Phaser.Physics.Arcade.Body;
-        body.velocity.x += v.x;
-        body.velocity.y += v.y;
-      },
-      playerVel: () => {
-        const v = (this.player.body as Phaser.Physics.Arcade.Body).velocity;
-        return { x: v.x, y: v.y };
-      },
-      playerSanity: () => this.session.player.sanity,
-      rootPlayer: (sec) => {
-        if (this.rootLeft <= 0) this.floatLabel({ x: this.player.x, y: this.player.y - 14 }, this.ctx.t('boss.rooted'), '#ff5a5a');
-        this.rootLeft = Math.max(this.rootLeft, sec);
-      },
-      spawnMinion: (id, at, maxHp) => this.spawnMinion(id, at, maxHp),
-      removeMinion: (e) => {
-        if (!e.dead) this.removeEnemy(e);
-      },
-      addObstacle: (at, radius, doorClear, art) => this.world.addObstacle(at, radius, doorClear, art),
-      chapterRoster: () => this.chapterRoster(),
-      arena: () => this.currentArena(),
-      bossPhaseFx: (text, color, at) => this.stageFx.bossPhaseFx(text, color, at),
-    };
+    buildHosts(this);
 
     this.walls = this.physics.add.staticGroup();
     this.doorGroup = this.physics.add.staticGroup();
