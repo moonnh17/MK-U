@@ -947,7 +947,7 @@ export class WeaponCombat {
     if (killed) {
       this.run.mage.onKill(enemy);
       this.spreadBurn(enemy);
-      this.run.onEnemyKilled(enemy);
+      this.run.enemyLife.onEnemyKilled(enemy);
     }
     return killed;
   }

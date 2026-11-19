@@ -60,7 +60,7 @@ export function buildHosts(run: RunScene): void {
     },
     spawnMinion: (id, at, maxHp) => run.roomRt.spawnMinion(id, at, maxHp),
     removeMinion: (e) => {
-      if (!e.dead) run.removeEnemy(e);
+      if (!e.dead) run.enemyLife.removeEnemy(e);
     },
     addObstacle: (at, radius, doorClear, art) => run.world.addObstacle(at, radius, doorClear, art),
     chapterRoster: () => run.roomRt.chapterRoster(),

@@ -94,7 +94,7 @@ export class SkillRuntime {
         e.bleed = null;
         e.burn = null;
         e.converted = true;
-        this.run.onEnemyKilled(e);
+        this.run.enemyLife.onEnemyKilled(e);
       },
       blastProps: (at, radius, damage) => this.run.roomProps.blastProps(at, radius, damage),
       heal: (amount, overflow) => {

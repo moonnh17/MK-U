@@ -1,4 +1,4 @@
-import { loopArt, playFx } from '../skills/skillFx';
+import { playFx } from '../skills/skillFx';
 import { recordCodex, type CodexKind } from '../systems/codex';
 import { type PathField } from '../systems/pathField';
 import { IDLE_DODGE } from '../systems/dodge';
@@ -39,29 +39,27 @@ import { cameraFocus, viewSize } from '../systems/camera';
 import { HitStop, slowMoScale } from '../systems/juice';
 import { playerArtKey } from '../systems/art';
 import { ItemRuntime } from '../items/runtime';
-import { DelayedBlast, type Hazard } from '../entities/hazard';
+import { type Hazard } from '../entities/hazard';
 import { Pickup } from '../entities/pickup';
 import type { SkillHost } from '../skills/host';
 import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { gradeEnergyMultiplier, gradeMultiplier } from '../systems/damage';
 import { hiddenBossScale } from '../systems/champions';
-import { collectCoins, rollCoinDrops } from '../systems/loot';
+import { collectCoins } from '../systems/loot';
 import { generateStage } from '../systems/mapgen';
-import { crystalBreakdown, rollShard } from '../systems/runRecord';
+import { crystalBreakdown } from '../systems/runRecord';
 import { MiniQueue } from '../systems/gemini';
-import { inSpireCircle } from '../systems/spire';
 import { RoomState } from '../systems/roomState';
 import { advanceStage, playableChapters, firstStage } from '../systems/run';
 import { absorbHit } from '../systems/shield';
-import { corruptedDamage, tickCorruption } from '../systems/acro';
 import { hpStance, takeDamage } from '../systems/vitals';
 import { masteryTotals, tickCooldowns } from '../systems/skills';
-import { tickBleed, tickBurn } from '../systems/tags';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
-import type { BleedRule, BurnRule, TagId, WeaponDef } from '../types/data';
+import type { TagId, WeaponDef } from '../types/data';
 import { BulletRuntime } from './run/bullets';
 import { RoomRuntime } from './run/roomRuntime';
+import { EnemyLife } from './run/enemyLife';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -72,6 +70,7 @@ export class RunScene extends Phaser.Scene {
   roarAura!: RoarAura;
   bulletRt!: BulletRuntime;
   roomRt!: RoomRuntime;
+  enemyLife!: EnemyLife;
   stageFx!: StageFx;
   combat!: WeaponCombat;
   special!: SpecialWeapons;
@@ -179,6 +178,7 @@ export class RunScene extends Phaser.Scene {
     this.roarAura = new RoarAura(this);
     this.bulletRt = new BulletRuntime(this);
     this.roomRt = new RoomRuntime(this);
+    this.enemyLife = new EnemyLife(this);
     this.resetFields();
 
     const stage = this.initData.stage ?? firstStage();
@@ -561,8 +561,8 @@ export class RunScene extends Phaser.Scene {
     this.skillRt.syncPassive();
     this.skillRt.updateShield(dt);
     for (const o of [...this.skillRt.skillObjects]) if (!o.update(dt, this.skillRt.hostFor(o.owner))) this.skillRt.removeObject(o);
-    this.updateBleeds(dt);
-    this.updateCorruption(dt);
+    this.enemyLife.updateBleeds(dt);
+    this.enemyLife.updateCorruption(dt);
 
     this.bulletRt.updateBullets(dt);
     this.updatePickups(dt);
@@ -684,92 +684,6 @@ export class RunScene extends Phaser.Scene {
     return this.ctx.data.tags.tags.find((t) => t.id === id)!.rule as T;
   }
 
-  onEnemyKilled(e: Enemy): void {
-    const d = this.ctx.data;
-    const roomId = this.enemyRoom.get(e);
-    const { x, y } = e.sprite;
-    const drop = (kind: 'energy' | 'coin', count: number) => {
-      const n = kind === 'coin' ? rollCoinDrops(this.rng, count, d.pickups.coin.dropRate) : count;
-      // 보스가 부른 적은 보상이 없다
-      if (e.noReward) return;
-      const pop = d.juice.death;
-      for (let i = 0; i < n; i++) {
-        const a = this.rng.range(0, Math.PI * 2);
-        const r = this.rng.range(0, d.pickups.scatterRadius);
-        // 쓰러진 자리에서 사방으로 튀어 나가 내려앉는다
-        const pk = new Pickup(this, kind, x, y, d.pickups);
-        const pr = Math.max(r, pop.orbPopPx[0]) + this.rng.range(0, pop.orbPopPx[1] - pop.orbPopPx[0]);
-        this.tweens.add({ targets: pk.sprite, x: x + Math.cos(a) * pr, y: y + Math.sin(a) * pr, duration: pop.orbPopSec * 1000, ease: 'Back.easeOut' });
-        this.pickups.push(pk);
-      }
-    };
-    // 처치 연출: 번쩍임·파편, 엘리트·정예·보스는 폭발·흔들림·히트스톱
-    const big = e.elites.length > 0 || e.rank === 'champion' || e.rank === 'boss' || e.rank === 'hiddenBoss';
-    this.juice.death(e.sprite, e.def.color, big);
-    sfx(big ? 'killBig' : 'kill');
-    if (big) this.hitStop.request(e.rank === 'boss' || e.rank === 'hiddenBoss' ? d.juice.hitStop.bossKill : d.juice.hitStop.eliteKill);
-    if (this.bossControllers.has(e)) this.stageFx.startBossKill({ x, y });
-    this.recordKill(e);
-    // 집정관: 같은 방에서 죽은 적의 에너지를 흡수한다 (그 적의 에너지 구슬은 떨어지지 않음)
-    const absorbed = this.archonAbsorb(e, roomId);
-    if (!absorbed) drop('energy', this.rng.int(e.def.energyOrbs[0], e.def.energyOrbs[1]));
-    drop('coin', this.rng.int(e.def.coins[0], e.def.coins[1]));
-    // 엘리트마다 추가 보상 (2종이 겹친 개체는 두 번)
-    for (const _ of e.elites) {
-      const c = d.elites.common;
-      if (!absorbed) drop('energy', this.rng.int(c.bonusEnergyOrbs[0], c.bonusEnergyOrbs[1]));
-      drop('coin', this.rng.int(c.bonusCoins[0], c.bonusCoins[1]));
-    }
-    // 정예·엘리트: 낮은 확률로 무기 상자 (보스가 부른 적은 보상 없음)
-    if ((e.rank === 'champion' || e.elites.length > 0) && !e.noReward) {
-      const { stage } = this.session;
-      const chestRng = Rng.derive(this.ctx.config.seed, `champion-chest-${stage.chapter}-${stage.stage}-${this.loot.lootSeq++}`);
-      if (chestRng.chance(d.waves.champions.weaponChestChance)) this.loot.addCombatChest(x, y, 'champion');
-    }
-    // 첨탑: 원 안에서 잡으면 충전 (결과는 다음 프레임에 처리)
-    const sp = roomId === undefined ? undefined : this.encounters.spires.find((x) => x.roomId === roomId);
-    if (sp) {
-      for (const ev of sp.state.onKill(e.rank, inSpireCircle(x - sp.x, y - sp.y, sp.radius, e.radius))) this.encounters.spireEvents.push({ sp, e: ev });
-    }
-    this.removeEnemy(e);
-    if (roomId !== undefined) this.rooms.get(roomId)?.enemyKilled();
-    for (const o of [...this.skillRt.skillObjects]) o.onKill?.(this.host, e);
-    this.itemRt.onKill(e.elite !== null);
-    // 폭발 엘리트: 예고 원 후 지연 폭발 (반역 개체가 된 경우는 제외)
-    const bl = e.elites.find((x) => x.deathBlast);
-    if (bl?.deathBlast && !e.converted) {
-      this.hazards.push(new DelayedBlast(this, { x, y }, bl.deathBlast.radius, bl.deathBlast.delaySec, bl.deathBlast.damage, hexColor(bl.color)));
-    }
-    // 마기 변질: 변질된 채 죽으면 폭발
-    const c = e.corruption;
-    if (c) {
-      e.corruption = null;
-      if (c.fx) {
-        playFx(this, c.fx.burst, x, y, { w: c.burstRadius * 2.2 });
-        if (c.fx.shards) playFx(this, c.fx.shards, x, y, { w: c.burstRadius * 2.6 });
-      } else this.fxAt(this.add.circle(x, y, c.burstRadius, hexColor(d.ui.corruptionColor), 0.4).setDepth(6));
-      for (const o of [...this.enemies]) {
-        if (Math.hypot(o.sprite.x - x, o.sprite.y - y) <= c.burstRadius + o.radius) this.combat.hit(o, c.burstDamage, c.burstTags);
-      }
-      const b = c.bullets;
-      if (b) for (let k = 0; k < b.count; k++) this.combat.fireBullet({ x, y }, (k / b.count) * Math.PI * 2, b.speed, b.range, b.damage, c.burstTags, 'magiCorruption', { pierce: 0, crit: 0, sprite: b.sprite });
-    }
-  }
-
-  /** 집정관 흡수: 같은 방의 살아 있는 집정관 중 가장 가까운 하나가 죽은 적의 최대 체력만큼. 흡수했으면 true */
-  archonAbsorb(dead: Enemy, roomId: number | undefined): boolean {
-    if (roomId === undefined) return false;
-    const { x, y } = dead.sprite;
-    const archons = this.enemies.filter((a) => a !== dead && !a.dead && a.def.absorb && this.enemyRoom.get(a) === roomId);
-    const a = archons.sort((p, q) => Math.hypot(p.sprite.x - x, p.sprite.y - y) - Math.hypot(q.sprite.x - x, q.sprite.y - y))[0];
-    if (!a) return false;
-    const stage = a.absorb(dead.maxHp);
-    const line = this.add.line(0, 0, x, y, a.sprite.x, a.sprite.y, hexColor(a.def.absorb!.haloColor), 0.6).setOrigin(0, 0).setDepth(6);
-    this.fxAt(line);
-    if (stage !== null) this.floatLabel({ x: a.sprite.x, y: a.sprite.y - a.radius - 6 }, this.ctx.t('enemy.archon.stage', { n: stage }), a.def.absorb!.haloColor);
-    return true;
-  }
-
   /** 도감: 처음 만난 것을 기록하고 저장한다 */
   discover(kind: CodexKind, id: string): void {
     if (recordCodex(this.ctx.save.data, kind, id)) this.ctx.save.write();
@@ -778,65 +692,6 @@ export class RunScene extends Phaser.Scene {
   /** MK 슈트를 벗긴다: 사망·포탈 연출은 플레이어 그림으로 한다 */
   private dropSuit(): void {
     for (const o of this.skillRt.skillObjects.filter((x) => x.owner === 'mkPrototype')) this.skillRt.removeObject(o);
-  }
-
-  /** 변질 시간, 변질된 적 색·표식 */
-  updateCorruption(dt: number): void {
-    const color = hexColor(this.ctx.data.ui.corruptionColor);
-    for (const e of this.enemies) {
-      if (!e.corruption || e.dead) continue;
-      const fx = e.corruption.fx;
-      e.corruption = tickCorruption(e.corruption, dt);
-      if (!e.corruption) {
-        e.sprite.clearTint();
-        if (fx?.end) playFx(this, fx.end, e.sprite.x, e.sprite.y, { w: e.radius * 3 });
-        continue;
-      }
-      if (!e.sprite.tintFill) e.sprite.setTint(color);
-      if (fx && !this.corruptMarks.has(e)) {
-        const m = this.add.sprite(e.sprite.x, e.sprite.y, fx.mark.spriteKey).setDepth(5).setAlpha(0.85);
-        m.setDisplaySize(Math.max(e.radius * 2.6, 14), Math.max(e.radius * 2.6, 14));
-        loopArt(m, fx.mark);
-        this.corruptMarks.set(e, m);
-      }
-    }
-    for (const [e, m] of this.corruptMarks) {
-      if (e.corruption && !e.dead && e.sprite.active) m.setPosition(e.sprite.x, e.sprite.y);
-      else {
-        m.destroy();
-        this.corruptMarks.delete(e);
-      }
-    }
-  }
-
-  removeEnemy(e: Enemy): void {
-    if (e === this.darknessBoss) {
-      this.darkness?.lift();
-      this.darkness = null;
-      this.darknessBoss = null;
-    }
-    this.bossControllers.get(e)?.destroy();
-    this.bossControllers.delete(e);
-    this.enemies = this.enemies.filter((x) => x !== e);
-    this.enemyRoom.delete(e);
-    e.destroy();
-  }
-
-  updateBleeds(dt: number): void {
-    const rule = this.tagRule<BleedRule>('bleed');
-    for (const e of [...this.enemies]) {
-      if (!e.bleed || e.dead) continue;
-      const out = tickBleed(e.bleed, dt, rule);
-      e.bleed = out.state;
-      if (out.damage > 0) this.combat.applyDamage(e, corruptedDamage(out.damage, e.corruption));
-    }
-    const burnRule = this.tagRule<BurnRule>('burn');
-    for (const e of [...this.enemies]) {
-      if (!e.burn || e.dead) continue;
-      const out = tickBurn(e.burn, dt, burnRule);
-      e.burn = out.state;
-      if (out.damage > 0) this.combat.applyDamage(e, corruptedDamage(out.damage, e.corruption));
-    }
   }
 
   onContact(enemy: Enemy | undefined): void {
@@ -992,34 +847,6 @@ export class RunScene extends Phaser.Scene {
       }
     }
     return best;
-  }
-
-  /** 결산 기록: 처치·엘리트·보스·히든보스, 보스는 과거의 기억 조각 판정 (분신 등 소환된 적은 세지 않는다) */
-  recordKill(e: Enemy): void {
-    if (e.def.summon || e.noReward) return;
-    const r = this.session.player.record;
-    r.kills++;
-    if (e.elite) r.eliteKills++;
-    const { stage } = this.session;
-    let shardKind: 'boss' | 'hiddenBoss' | null = null;
-    if (e.rank === 'boss' && this.ctx.data.bosses.bosses.some((b) => b.id === e.def.id)) {
-      r.bossKills.push({ id: e.def.id, stage: stage.stage });
-      this.progression.say('bossKill', e.def.id);
-      shardKind = 'boss';
-    } else if (e.rank === 'hiddenBoss') {
-      r.hiddenBossKills.push(e.def.id);
-      shardKind = 'hiddenBoss';
-    }
-    if (!shardKind) return;
-    const save = this.ctx.save;
-    const mem = this.ctx.data.meta.memory;
-    const rng = Rng.derive(this.ctx.config.seed, `shard-${stage.chapter}-${stage.stage}-${e.def.id}`);
-    if (!rollShard(rng, shardKind, save.data.pastShards, mem)) return;
-    // 과거의 기억: 얻는 즉시 영구 보관
-    save.data.pastShards++;
-    save.write();
-    r.shards++;
-    bus.emit('toast', { text: this.ctx.t('memory.shardGot', { have: save.data.pastShards, slots: mem.pastSlots }) });
   }
 
   // ---------- 조우 칸 ----------

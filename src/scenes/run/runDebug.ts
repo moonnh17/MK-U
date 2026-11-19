@@ -13,7 +13,7 @@ export class RunDebug {
   debugClearRoom(): void {
     const rid = this.run.session.currentRoomId;
     if (rid === null) return;
-    for (const e of this.run.enemies.filter((x) => this.run.enemyRoom.get(x) === rid)) this.run.removeEnemy(e);
+    for (const e of this.run.enemies.filter((x) => this.run.enemyRoom.get(x) === rid)) this.run.enemyLife.removeEnemy(e);
     const state = this.run.rooms.get(rid);
     if (state) this.run.roomRt.handleRoomEvents(rid, state.forceClear());
     const sp = this.run.encounters.spires.find((x) => x.roomId === rid);

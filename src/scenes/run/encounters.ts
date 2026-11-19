@@ -120,7 +120,7 @@ export class Encounters {
       } else if (e.type === 'charged') {
         // 상승: 남은 적은 보상 없이 사라진다
         bus.emit('toast', { text: t('spire.charged') });
-        for (const en of this.run.enemies.filter((x) => this.run.enemyRoom.get(x) === sp.roomId)) this.run.removeEnemy(en);
+        for (const en of this.run.enemies.filter((x) => this.run.enemyRoom.get(x) === sp.roomId)) this.run.enemyLife.removeEnemy(en);
         sp.rise();
       } else {
         this.run.roomRt.setRoomLocked(sp.roomId, false);
