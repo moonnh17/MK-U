@@ -175,6 +175,48 @@ for (const [c, s] of [[1, 2], [1, 5], [2, 2], [2, 5], [3, 2], [3, 5]]) {
     await forceAllPatterns();
   };
 }
+/** 사망 → 결산 → 실험장 (로컬 저장의 결정 수가 늘어난다) */
+SCENES.death = async () => {
+  await startRun('warrior');
+  await fight('tomakki', 3, 1);
+  rs().invuln = 0;
+  for (let i = 0; i < 20 && !rs().dying; i++) {
+    rs().hurtPlayer(9999);
+    await frames(10);
+  }
+  await waitFor(() => rs().session.settlement, 600);
+  rs().restartRun();
+  await waitFor(() => mku().game.scene.getScenes(true).some((s) => s.sys.settings.key === 'Lab'), 300);
+};
+/** 스테이지 끝 → 이동 화면 카드 → 다음 스테이지 */
+SCENES.nextStage = async () => {
+  await startRun('warrior');
+  rs().nextStage();
+  for (let i = 0; i < 100 && rs().session.stage.stage === 1; i++) {
+    if (rs().modal === 'cards') (await bus()).emit('cardPick', { index: 0 });
+    // 포탈 연출은 실제 흐른 시간으로 움직이는 트윈이라 진짜로 기다린다
+    await sleep(100);
+    await frames(5);
+  }
+  if (rs().session.stage.stage !== 2) throw new Error('다음 스테이지로 안 넘어감');
+  await frames(60);
+};
+// 조우 칸 종류마다: 강제로 정하고 들어가 본다
+for (const kind of ['treasure', 'merchant', 'combiner', 'skillShop', 'raid', 'magiSpire']) {
+  SCENES[`encounter_${kind}`] = async () => {
+    await startRun('warrior');
+    (await bus()).emit('debugForceEncounter', { kind });
+    const { roomCenter } = await import('/src/systems/worldLayout.ts');
+    const id = rs().session.map.rooms.findIndex((n) => n.kind === 'encounterRoom');
+    const c = roomCenter(rs().session.map.rooms[id], rs().m);
+    rs().player.setPosition(c.x, c.y);
+    await waitFor(() => rs().session.encounters.has(id), 300);
+    if (rs().session.encounters.get(id) !== kind) throw new Error(`조우 종류가 다름: ${rs().session.encounters.get(id)}`);
+    await frames(60);
+    await clearModals();
+    await fight(null, 0, 4);
+  };
+}
 for (const id of ['ancestorEcho', 'royalMage', 'orionCrusader']) {
   SCENES[`hidden_${id}`] = async () => {
     await startRun('warrior');
@@ -213,4 +255,14 @@ export async function run(name) {
     forced,
     bossHp: r ? [...r.bossControllers.keys()].map((e) => Math.round(e.hp)) : [],
   };
+}
+
+/** 여러 장면을 차례로: 실패한 것만 자세히 (한 번에 2~3개, 도구 45초 제한) */
+export async function runMany(list) {
+  const out = [];
+  for (const n of list) {
+    const r = await run(n);
+    out.push(r.ok ? `${n} ok` : `${n} 실패: ${r.threw ?? r.errors.join(' | ')}`);
+  }
+  return out;
 }
