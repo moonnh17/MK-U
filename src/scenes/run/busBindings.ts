@@ -8,7 +8,7 @@ import type { RunSceneData } from './shared';
 export function bindRunEvents(run: RunScene): (() => void)[] {
   return [
     bus.on('debugClearRoom', () => run.debugTools.debugClearRoom()),
-    bus.on('restartRequested', () => run.restartRun()),
+    bus.on('restartRequested', () => run.playerLife.restartRun()),
     bus.on('cardPick', ({ index }) => run.progression.pickCard(index)),
     bus.on('combinerPick', ({ a, b }) => run.loot.combine(a, b)),
     bus.on('combinerClose', () => run.loot.closeCombiner()),

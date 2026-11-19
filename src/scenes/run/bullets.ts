@@ -97,6 +97,6 @@ export class BulletRuntime {
     const damage = b.getData('damage') as number;
     const mental = b.getData('mental') as number | undefined;
     b.destroy();
-    this.run.hurtPlayer(damage, null, mental);
+    this.run.playerLife.hurtPlayer(damage, null, mental);
   }
 }

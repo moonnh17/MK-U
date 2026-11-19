@@ -194,12 +194,32 @@ SCENES.death = async () => {
   await fight('tomakki', 3, 1);
   rs().invuln = 0;
   for (let i = 0; i < 20 && !rs().dying; i++) {
-    rs().hurtPlayer(9999);
+    rs().playerLife.hurtPlayer(9999);
     await frames(10);
   }
   await waitFor(() => rs().session.settlement, 600);
-  rs().restartRun();
+  rs().playerLife.restartRun();
   await waitFor(() => mku().game.scene.getScenes(true).some((s) => s.sys.settings.key === 'Lab'), 300);
+};
+/** 부활 아이템: 쓰러졌다가 체력 가득 일어난다 (결산으로 가지 않음) */
+SCENES.revive = async () => {
+  await startRun('warrior');
+  (await bus()).emit('debugGiveItem', { itemId: 'acruxCross' });
+  await clearModals();
+  rs().invuln = 0;
+  for (let i = 0; i < 20 && !rs().dying; i++) {
+    rs().playerLife.hurtPlayer(9999);
+    await frames(10);
+  }
+  if (!rs().dying) throw new Error('안 쓰러짐');
+  for (let t = 0; t < 80 && rs().dying; t++) {
+    // 사망·부활 연출은 실제 흐른 시간으로 움직인다
+    await sleep(100);
+    await frames(5);
+  }
+  if (rs().dying || rs().session.settlement) throw new Error('부활 안 함');
+  const p = rs().session.player;
+  if (p.hp !== p.maxHp) throw new Error(`체력이 가득이 아님: ${p.hp}/${p.maxHp}`);
 };
 /** 전투 칸에 들어가 웨이브를 실제로 처치해 방을 깬다 (적 체력을 1로 낮춰 빨리) */
 SCENES.combatClear = async () => {

@@ -1,4 +1,3 @@
-import { playFx } from '../skills/skillFx';
 import { recordCodex, type CodexKind } from '../systems/codex';
 import { type PathField } from '../systems/pathField';
 import { IDLE_DODGE } from '../systems/dodge';
@@ -32,9 +31,8 @@ import { Door } from '../entities/door';
 import { Enemy, type EnemyHost } from '../entities/enemy';
 import { Darkness } from '../entities/darkness';
 import { BreakableProp } from '../entities/roomProp';
-import { applyMental } from '../systems/sanity';
 import { animateArt, fitArt } from '../entities/art';
-import { Juice, shake } from '../entities/juice';
+import { Juice } from '../entities/juice';
 import { cameraFocus, viewSize } from '../systems/camera';
 import { HitStop, slowMoScale } from '../systems/juice';
 import { playerArtKey } from '../systems/art';
@@ -44,15 +42,11 @@ import { Pickup } from '../entities/pickup';
 import type { SkillHost } from '../skills/host';
 import { runStartOffers, stageEndOffers } from '../systems/cards';
 import { gradeEnergyMultiplier, gradeMultiplier } from '../systems/damage';
-import { hiddenBossScale } from '../systems/champions';
 import { collectCoins } from '../systems/loot';
 import { generateStage } from '../systems/mapgen';
-import { crystalBreakdown } from '../systems/runRecord';
 import { MiniQueue } from '../systems/gemini';
 import { RoomState } from '../systems/roomState';
 import { advanceStage, playableChapters, firstStage } from '../systems/run';
-import { absorbHit } from '../systems/shield';
-import { hpStance, takeDamage } from '../systems/vitals';
 import { masteryTotals, tickCooldowns } from '../systems/skills';
 import { activeWeapon, autoAim, gainEnergy, normalize, plainWeapon, canFire, swapWeapon, weaponStats, type WeaponItem, type WeaponStats } from '../systems/weapons';
 import { mapBounds, metrics, roomAt, roomCenter, roomRect, type Rect, type WorldMetrics } from '../systems/worldLayout';
@@ -60,6 +54,7 @@ import type { TagId, WeaponDef } from '../types/data';
 import { BulletRuntime } from './run/bullets';
 import { RoomRuntime } from './run/roomRuntime';
 import { EnemyLife } from './run/enemyLife';
+import { PlayerLife } from './run/playerLife';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -71,6 +66,7 @@ export class RunScene extends Phaser.Scene {
   bulletRt!: BulletRuntime;
   roomRt!: RoomRuntime;
   enemyLife!: EnemyLife;
+  playerLife!: PlayerLife;
   stageFx!: StageFx;
   combat!: WeaponCombat;
   special!: SpecialWeapons;
@@ -179,6 +175,7 @@ export class RunScene extends Phaser.Scene {
     this.bulletRt = new BulletRuntime(this);
     this.roomRt = new RoomRuntime(this);
     this.enemyLife = new EnemyLife(this);
+    this.playerLife = new PlayerLife(this);
     this.resetFields();
 
     const stage = this.initData.stage ?? firstStage();
@@ -285,7 +282,7 @@ export class RunScene extends Phaser.Scene {
     this.physics.add.overlap(this.bullets, this.enemyGroup, (b, e) => this.combat.onBulletHit(b as Phaser.Physics.Arcade.Image, e as Phaser.Physics.Arcade.Image));
     this.physics.add.overlap(this.player, this.enemyBullets, (_p, b) => this.bulletRt.onEnemyBulletHit(b as Phaser.Physics.Arcade.Image));
     this.physics.add.overlap(this.player, this.enemyGroup, (_p, e) =>
-      this.onContact((e as Phaser.GameObjects.GameObject).getData('enemy') as Enemy),
+      this.playerLife.onContact((e as Phaser.GameObjects.GameObject).getData('enemy') as Enemy),
     );
 
     const b = mapBounds(map, this.m);
@@ -445,7 +442,7 @@ export class RunScene extends Phaser.Scene {
 
     if (this.dying && !this.session.outcome) return;
     if (this.session.outcome) {
-      if (frame.pressed.has('attack') || frame.pressed.has('interact')) this.restartRun();
+      if (frame.pressed.has('attack') || frame.pressed.has('interact')) this.playerLife.restartRun();
       return;
     }
     if (!this.modal && this.loot.itemGets.length > 0) {
@@ -604,25 +601,6 @@ export class RunScene extends Phaser.Scene {
     if (frame.pressed.has('inventory')) this.progression.openInventory();
   }
 
-  /** 특무 인장: 방 안, 벽·잔해가 없는 쪽으로 짧게 순간이동 */
-  blinkPlayer(distance: number): void {
-    const a = this.roomRt.currentArena();
-    const r = this.ctx.data.player.size / 2;
-    const base = this.rng.range(0, Math.PI * 2);
-    for (let i = 0; i < 8; i++) {
-      const ang = base + (i * Math.PI) / 4;
-      const x = this.player.x + Math.cos(ang) * distance;
-      const y = this.player.y + Math.sin(ang) * distance;
-      if (x < a.x + r || x > a.x + a.w - r || y < a.y + r || y > a.y + a.h - r) continue;
-      if (this.physics.overlapRect(x - r, y - r, r * 2, r * 2, false, true).length > 0) continue;
-      const from = { x: this.player.x, y: this.player.y };
-      this.fxAt(this.add.circle(from.x, from.y, r + 3, 0x8a6aff, 0.5).setDepth(6));
-      (this.player.body as Phaser.Physics.Arcade.Body).reset(x, y);
-      break;
-    }
-    this.floatLabel({ x: this.player.x, y: this.player.y }, this.ctx.t('item.dodged'), '#b0a0ff');
-  }
-
   // ---------- 전투 ----------
 
   weaponDefOf(id: string): WeaponDef {
@@ -690,79 +668,8 @@ export class RunScene extends Phaser.Scene {
   }
 
   /** MK 슈트를 벗긴다: 사망·포탈 연출은 플레이어 그림으로 한다 */
-  private dropSuit(): void {
+  dropSuit(): void {
     for (const o of this.skillRt.skillObjects.filter((x) => x.owner === 'mkPrototype')) this.skillRt.removeObject(o);
-  }
-
-  onContact(enemy: Enemy | undefined): void {
-    if (!enemy || enemy.dead || enemy.warn > 0 || enemy.def.contactDamage <= 0) return;
-    const now = this.time.now;
-    if (now - enemy.lastContactAt < enemy.def.contactIntervalSec * 1000) return;
-    if (this.hurtPlayer(enemy.def.contactDamage * enemy.damageMul * this.enemyDamageMul(), enemy)) enemy.lastContactAt = now;
-  }
-
-  /** 적 피해 배율: 몬스터는 고정 스탯(1), 히든보스와 싸우는 동안만 장 배율 (히든보스 방에는 그 보스와 부른 것만 있다) */
-  enemyDamageMul(): number {
-    if (!this.enemies.some((e) => !e.dead && e.rank === 'hiddenBoss')) return 1;
-    return hiddenBossScale(this.session.stage.chapter, this.ctx.data.enemies.hiddenBossScale);
-  }
-
-  /** 피해를 받았으면 true. attacker: 때린 적(반사용, 모르면 null) */
-  hurtPlayer(amount: number, attacker: Enemy | null = null, mentalRaw?: number): boolean {
-    // 구르기로 피한 공격 (투르비용: 원심 가속)
-    if (this.condition.dodge.invuln > 0 && amount > 0 && !this.session.outcome) this.itemRt.onDodgeAvoid();
-    if (this.invuln > 0 || this.condition.dodge.invuln > 0 || this.dying || this.ctx.debugFlags.invincible || this.session.outcome || this.modal) return false;
-    // 특무 인장: 피해를 받기 직전 순간이동으로 피한다 (피격 무적과 같은 시간)
-    if (this.itemRt.tryDodge()) {
-      this.invuln = this.ctx.data.player.hurtInvulnSec;
-      return true;
-    }
-    // 마기역장: 공격을 막고 잠깐 무적
-    const absorbed = absorbHit(this.skillRt.shield);
-    if (absorbed.blocked) {
-      this.skillRt.shield = absorbed.shield;
-      this.invuln = this.skillRt.shieldOpts?.blockInvulnSec ?? 0;
-      this.cameras.main.flash(60, 140, 170, 210);
-      if (this.skillRt.shieldOpts?.look?.block) {
-        const at = this.player.getCenter();
-        playFx(this, this.skillRt.shieldOpts.look.block, at.x, at.y);
-      }
-      return true;
-    }
-    const p = this.session.player;
-    const stance = this.itemRt.first('hpStance');
-    const taken = this.itemRt.absorbOverheal(this.skillRt.absorb(amount * (1 - this.skillRt.playerMods().damageReduction) * (1 + (this.skillRt.playerMods().damageTaken ?? 0)) * (1 - this.condition.chargeGuard()) * (1 - this.itemRt.sums.damageTaken - this.itemRt.guard()) * (stance ? 1 - hpStance(p.hp, p.maxHp, stance).taken : 1)));
-    // 정신 피해: 패닉 중이면 체력 피해로 바뀐다
-    const mental = (mentalRaw ?? amount * (attacker?.def.mentalRatio ?? 0)) ;
-    const m = applyMental(p, mental);
-    this.condition.setSanity(m);
-    const v = takeDamage(p, taken + m.hpDamage);
-    p.hp = v.hp;
-    this.invuln = this.ctx.data.player.hurtInvulnSec;
-    shake(this, 'light');
-    this.juice.hurt();
-    sfx('playerHurt');
-    this.mage.onHurt();
-    // 피격에 반응하는 스킬 오브젝트 (반물질포 충전 취소 등)
-    for (const o of [...this.skillRt.skillObjects]) if (o.onPlayerHurt && !o.onPlayerHurt(this.host)) this.skillRt.removeObject(o);
-    // 아이템: 피격 효과 → 낮은 체력 회복 → 부활
-    this.itemRt.onHurt(taken, attacker);
-    if (p.hp > 0) this.itemRt.tryHeal();
-    // 부활 아이템이 있으면 죽는 연출 뒤 부활 연출로 일어난다
-    if (p.hp <= 0) this.beginDeath(this.itemRt.takeRevive());
-    return true;
-  }
-
-  /** 집행자 밧줄: 플레이어를 to까지 끌어당긴다 (그동안 입력 무시). 걸리는 시간 */
-  pullPlayer(to: Vec2, speed: number): number {
-    const dx = to.x - this.player.x;
-    const dy = to.y - this.player.y;
-    const dist = Math.hypot(dx, dy);
-    if (dist < 1) return 0;
-    const sec = dist / speed;
-    this.dashVel = { x: (dx / dist) * speed, y: (dy / dist) * speed };
-    this.dashLeft = sec;
-    return sec;
   }
 
   updatePickups(dt: number): void {
@@ -889,73 +796,11 @@ export class RunScene extends Phaser.Scene {
       );
     } else if (adv.chapter >= d.mapgen.chapters) {
       // 3-5 런 클리어: 더 쓸 곳이 없는 카드는 건너뛰고 바로 결산
-      this.endRun({ type: 'chapterClear', chapter: adv.chapter });
+      this.playerLife.endRun({ type: 'chapterClear', chapter: adv.chapter });
     } else {
       // 임시 마지막 챕터: 카드를 고른 뒤 클리어 화면
-      this.progression.queueOffers([{ kind: afterStage, boss: false }], () => this.endRun({ type: 'chapterClear', chapter: adv.chapter }));
+      this.progression.queueOffers([{ kind: afterStage, boss: false }], () => this.playerLife.endRun({ type: 'chapterClear', chapter: adv.chapter }));
     }
-  }
-
-  /** 사망: 연출을 보여 준 뒤 결산으로 */
-  beginDeath(revive: { invulnSec: number; look?: 'hectar' | 'holy' } | null = null): void {
-    if (this.dying) return;
-    this.dying = true;
-    this.loot.setInteractHint(null);
-    bus.emit('weaponTip', { item: null });
-    bus.emit('cardTip', { card: null });
-    this.physics.pause();
-    this.dropSuit();
-    this.stageFx.playDeath(() => {
-      if (!revive) return this.endRun({ type: 'dead' });
-      this.stageFx.playRevive(revive.look ?? 'holy', () => this.finishRevive(revive.invulnSec));
-    });
-  }
-
-  /** 부활 연출이 끝나면: 체력 가득, 쓰러진 모습·카메라를 되돌리고 잠깐 무적 */
-  private finishRevive(invulnSec: number): void {
-    const p = this.session.player;
-    p.hp = p.maxHp;
-    this.dying = false;
-    this.physics.resume();
-    this.tweens.killTweensOf(this.player);
-    this.player.setAngle(0).setAlpha(1).clearTint();
-    this.weaponSprite.setVisible(true);
-    this.cameras.main.zoomTo(this.ctx.data.ui.camera.zoom * this.ctx.renderScale, 300, 'Sine.easeOut');
-    this.invuln = Math.max(this.invuln, invulnSec);
-    bus.emit('toast', { text: this.ctx.t('item.revived') });
-  }
-
-  endRun(outcome: NonNullable<RunSession['outcome']>): void {
-    this.session.outcome = outcome;
-    // 결산: 결정을 계산해 바로 저장에 더한다 (결산 화면을 닫지 않고 꺼도 남게)
-    const d = this.ctx.data;
-    const save = this.ctx.save;
-    const runClear = outcome.type === 'chapterClear' && outcome.chapter >= d.mapgen.chapters;
-    const crystals = crystalBreakdown(this.session.player.record, runClear, d.meta.crystals);
-    save.data.crystals += crystals.total;
-    save.write();
-    this.session.settlement = { runClear, crystals, balance: save.data.crystals, shardsOwned: save.data.pastShards };
-    this.physics.pause();
-    this.player.setAlpha(1);
-    this.loot.setInteractHint(null);
-    bus.emit('overlay', { open: true });
-  }
-
-  /** 결산 확인 → 실험장으로 돌아간다 */
-  restartRun(): void {
-    if (this.modal === 'story') return;
-    // 마지막 챕터 클리어: 결산 화면을 닫고 엔딩 대화를 본 뒤 실험장으로 (대화가 비어 있으면 바로)
-    if (this.session.settlement?.runClear && !this.endingPlayed) {
-      this.endingPlayed = true;
-      bus.emit('overlay', { open: false });
-      this.progression.playStory('runClear', undefined, () => this.restartRun());
-      return;
-    }
-    this.time.paused = false;
-    bus.emit('overlay', { open: false });
-    if (this.modal) bus.emit('modal', { kind: null });
-    this.ctx.session = null;
-    this.scene.start('Lab');
   }
 
   // ---------- 디버그 ----------

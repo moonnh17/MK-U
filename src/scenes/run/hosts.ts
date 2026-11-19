@@ -20,20 +20,20 @@ export function buildHosts(run: RunScene): void {
     area: (r) => run.skillRt.area(r),
     toast: (text) => bus.emit('toast', { text }),
     arena: () => run.roomRt.currentArena(),
-    blink: (distance) => run.blinkPlayer(distance),
+    blink: (distance) => run.playerLife.blinkPlayer(distance),
     absorbEnemyBullets: (at, radius) => run.bulletRt.absorbEnemyBullets(at, radius),
   });
   run.enemyHost = {
     scene: run,
     playerPos: () => ({ x: run.player.x, y: run.player.y }),
     playerRadius: d.player.size / 2,
-    hurtPlayer: (amount, attacker, mental) => run.hurtPlayer(amount * run.enemyDamageMul(), attacker ?? null, mental === undefined ? undefined : mental * run.enemyDamageMul()),
+    hurtPlayer: (amount, attacker, mental) => run.playerLife.hurtPlayer(amount * run.playerLife.enemyDamageMul(), attacker ?? null, mental === undefined ? undefined : mental * run.playerLife.enemyDamageMul()),
     fireEnemyBullet: (from, angle, speed, range, damage, refractable, mental, sprite, tint) =>
-      run.bulletRt.fireEnemyBullet(from, angle, speed, range, damage * run.enemyDamageMul(), refractable, 0, (mental ?? 0) * run.enemyDamageMul(), sprite, tint),
+      run.bulletRt.fireEnemyBullet(from, angle, speed, range, damage * run.playerLife.enemyDamageMul(), refractable, 0, (mental ?? 0) * run.playerLife.enemyDamageMul(), sprite, tint),
     addHazard: (h) => run.hazards.push(h),
     linkWindup: (e, attackId) => run.roomRt.linkWindup(e, attackId),
     rng: run.rng,
-    pullPlayer: (to, speed) => run.pullPlayer(to, speed),
+    pullPlayer: (to, speed) => run.playerLife.pullPlayer(to, speed),
     pathDir: (from, radius) => run.roomRt.enemyPathDir(from, radius),
   };
   run.bossHost = {
@@ -42,8 +42,8 @@ export function buildHosts(run: RunScene): void {
     t: (key) => run.ctx.t(key),
     addHazard: (h) => run.hazards.push(h),
     fireEnemyBullet: (from, angle, speed, range, damage, refractable, sprite) =>
-      run.bulletRt.fireEnemyBullet(from, angle, speed, range, damage * run.enemyDamageMul(), refractable, 0, 0, sprite),
-    fireEnemyMissile: (from, angle, speed, range, damage, turnRate, sprite) => run.bulletRt.fireEnemyBullet(from, angle, speed, range, damage * run.enemyDamageMul(), true, turnRate, 0, sprite),
+      run.bulletRt.fireEnemyBullet(from, angle, speed, range, damage * run.playerLife.enemyDamageMul(), refractable, 0, 0, sprite),
+    fireEnemyMissile: (from, angle, speed, range, damage, turnRate, sprite) => run.bulletRt.fireEnemyBullet(from, angle, speed, range, damage * run.playerLife.enemyDamageMul(), true, turnRate, 0, sprite),
     pushPlayer: (v) => {
       const body = run.player.body as Phaser.Physics.Arcade.Body;
       body.velocity.x += v.x;

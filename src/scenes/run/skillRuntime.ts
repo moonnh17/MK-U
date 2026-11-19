@@ -67,7 +67,7 @@ export class SkillRuntime {
         return this.run.combat.applyDamage(e, dmg, source);
       },
       hurtSelf: (amount) => {
-        this.run.hurtPlayer(amount);
+        this.run.playerLife.hurtPlayer(amount);
       },
       greatSuccess: () => {},
       buffDuration: (sec, tags) => sec * (tags.includes('buff') ? 1 + this.run.itemRt.sums.buffDuration : 1),
