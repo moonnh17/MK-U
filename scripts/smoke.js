@@ -67,7 +67,36 @@ async function bossFight(sec) {
   await fight(null, 0, sec);
 }
 
+/** 그 방 한가운데로 옮겨 보스(히든보스)를 불러낸다 */
+async function enterRoom(kind) {
+  const { roomCenter } = await import('/src/systems/worldLayout.ts');
+  const node = rs().session.map.rooms.find((n) => n.kind === kind);
+  const c = roomCenter(node, rs().m);
+  rs().player.setPosition(c.x, c.y);
+  await waitFor(() => rs().bossControllers.size > 0 || rs().modal, 300);
+  await clearModals();
+  await waitFor(() => rs().bossControllers.size > 0, 300);
+}
+
+/** 보스의 패턴을 하나씩 강제로 실행한다 (보스 두뇌가 고르기를 기다리지 않고 전부 돌려 보려고) */
+async function forceAllPatterns(perPatternFrames = 150) {
+  const { makePattern } = await import('/src/bosses/patterns/index.ts');
+  const [enemy, bc] = [...rs().bossControllers.entries()][0];
+  await waitFor(() => bc.host && enemy.warn <= 0, 300);
+  for (const { id } of bc.def.patterns) {
+    if (enemy.dead) break;
+    bc.run?.destroy();
+    bc.run = makePattern(id, bc.patternCtx(bc.host, id, bc.body));
+    if (!bc.run) errors.push(`패턴 없음: ${id}`);
+    bc.patternId = id;
+    forced.push(id);
+    await frames(perPatternFrames);
+  }
+}
+
 let spawned = 0;
+/** 강제로 돌린 보스 패턴 */
+let forced = [];
 /** 실제로 칸에 들어가 쓴 스킬 */
 let cast = new Set();
 async function fight(enemyId, count, sec) {
@@ -138,12 +167,29 @@ const SCENES = {
     await bossFight(8);
   },
 };
+// 보스 패턴 전부: 챕터 보스 6종(X-2·X-5)과 히든보스 3종
+for (const [c, s] of [[1, 2], [1, 5], [2, 2], [2, 5], [3, 2], [3, 5]]) {
+  SCENES[`patterns${c}_${s}`] = async () => {
+    await startRun('warrior', { chapter: c, stage: s });
+    await enterRoom('bossRoom');
+    await forceAllPatterns();
+  };
+}
+for (const id of ['ancestorEcho', 'royalMage', 'orionCrusader']) {
+  SCENES[`hidden_${id}`] = async () => {
+    await startRun('warrior');
+    (await bus()).emit('debugHiddenBoss', { id });
+    await enterRoom('encounterRoom');
+    await forceAllPatterns();
+  };
+}
 
 export const names = Object.keys(SCENES);
 
 export async function run(name) {
   errors.length = 0;
   spawned = 0;
+  forced = [];
   cast = new Set();
   let threw = null;
   try {
@@ -164,6 +210,7 @@ export async function run(name) {
     kills: r?.session?.player.record.kills,
     left: r?.enemies?.length,
     cast: [...cast],
+    forced,
     bossHp: r ? [...r.bossControllers.keys()].map((e) => Math.round(e.hp)) : [],
   };
 }
