@@ -24,6 +24,8 @@ export interface SkillHost {
   playerSprite(): Phaser.Physics.Arcade.Sprite;
   /** 마지막 조준 방향 (단위 벡터) */
   aimDir(): Vec2;
+  /** 모든 스킬이 노릴 적 (변인통제로 묶인 보스). 없으면 null */
+  focus?(): Enemy | null;
   /** 순간이동 방향: 마우스 커서 쪽(없으면 이동 방향, 서 있으면 조준 방향) */
   teleportDir(): Vec2;
   /** 살아 있는 적 */
@@ -186,6 +188,9 @@ export interface UltimateImpl {
 
 /** 가장 가까운 적 (최대 거리 안, 적 몸 반지름 포함) */
 export function nearestEnemy(host: SkillHost, from: Vec2, maxDist = Infinity): Enemy | null {
+  // 변인통제로 보스가 묶인 동안은 모든 스킬이 그 보스를 노린다
+  const f = host.focus?.();
+  if (f && !f.dead) return f;
   let best: Enemy | null = null;
   let bestD = Infinity;
   for (const e of host.enemies()) {

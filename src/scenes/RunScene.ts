@@ -524,7 +524,8 @@ export class RunScene extends Phaser.Scene {
       e.update(dt, this.enemyHost);
     }
     // 석화된 보스는 잠깐 패턴이 멈춘다
-    for (const [e, b] of this.bossControllers) if (!e.petrified) b.update(dt, this.bossHost);
+    // 석화·묶임(변인통제) 중인 보스는 패턴이 멈춘다
+    for (const [e, b] of this.bossControllers) if (!e.petrified && !e.bound) b.update(dt, this.bossHost);
     this.condition.updateBossEnergy();
     for (const h of [...this.hazards]) {
       if (h.update(dt, this.enemyHost)) continue;
@@ -534,9 +535,11 @@ export class RunScene extends Phaser.Scene {
     this.session.enemiesAlive = this.enemies.length;
 
     // 조준: 가장 가까운 적. 적이 없으면 마지막 방향(이동 중이면 이동 방향으로 갱신)
+    // 변인통제로 보스가 묶였으면 그 보스만 조준한다
+    const focus = this.weaponSkills.focusEnemy();
     const aim = autoAim(
       this.player,
-      this.enemies.map((e) => e.sprite),
+      (focus ? [focus] : this.enemies).map((e) => e.sprite),
       this.aimDir,
     );
     this.aimDir = aim.target ? aim.dir : moving ? normalize(frame.move) : this.aimDir;

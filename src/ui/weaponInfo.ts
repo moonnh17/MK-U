@@ -62,7 +62,8 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
   if (def.charge?.minRatio) out.push({ text: t('weapon.sigDesc.minCharge'), sig: true });
   if (def.category !== 'blade' && def.pattern.kind === 'lob') out.push({ text: t('weapon.sigDesc.explosive'), sig: true });
   if (def.chargeMoveSpeed) out.push(main(t('weapon.sigDesc.chargeMove', { v: Math.round(def.chargeMoveSpeed * 100) })));
-  if (def.meleeShot) out.push(main(t('weapon.sigDesc.meleeShot', { n: def.meleeShot.damageMul, e: Math.round(def.meleeShot.energyCost * gradeEnergyMultiplier(item.grade, d.groupMultipliers) * 100) / 100 })));
+  if (def.meleeShot && (def.meleeShot.pellets ?? 1) > 1) out.push({ text: t('weapon.sigDesc.whipShot'), sig: true });
+  else if (def.meleeShot) out.push(main(t('weapon.sigDesc.meleeShot', { n: def.meleeShot.damageMul, e: Math.round(def.meleeShot.energyCost * gradeEnergyMultiplier(item.grade, d.groupMultipliers) * 100) / 100 })));
   if (def.ricochet) out.push(main(t('weapon.sigDesc.ricochet', { n: def.ricochet.bounces })));
   if (def.bleed) out.push(main(t('weapon.sigDesc.bleed')));
   if (def.selfBuff) out.push(main(t('weapon.sigDesc.gust', { dmg: Math.round(def.selfBuff.damage * 100), sec: def.selfBuff.sec })));

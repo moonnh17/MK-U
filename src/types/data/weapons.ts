@@ -109,7 +109,10 @@ export interface WeaponDef extends SpriteRef {
   /** 화염: 날아가며 커지고 흐려진다 */
   flame?: { scaleTo: number };
   /** 근접 공격과 함께 탄을 쏜다. 에너지가 모자라면 탄만 나가지 않는다 */
-  meleeShot?: { damageMul: number; speed: number; range: number; energyCost: number; color: string };
+  /** 칼을 휘두를 때 쏘는 탄. pellets발을 spreadDeg 부채꼴로 (산탄), shot이 있으면 그 그림 */
+  meleeShot?: { damageMul: number; speed: number; range: number; energyCost: number; color: string; pellets?: number; spreadDeg?: number; shot?: SpriteRef; tags?: TagId[] };
+  /** 사복검: 휘두를 때 칼날이 마디마디 풀려 늘어난 그림이 부채꼴을 쓸고 지나간다 */
+  whip?: { sprite: SpriteRef; sec: number };
   /** 칼: 공격할 때 조준한 적 쪽으로 돌진한 뒤 벤다 (최대 distance, sec초) */
   lunge?: { distance: number; sec: number };
   /**
@@ -235,4 +238,8 @@ export type WeaponQSkill =
    * 정화의 불길(아비오르의 지팡이): durationSec 동안 volleySec마다 둘레로 불길, laserEverySec마다 조준 방향으로 굵은 직선 레이저 연사.
    * 레이저는 lanes줄의 나란한 길을 차례로 돌아 옆면이 맞닿는다(같은 길에 겹치지 않음)
    */
+  /** 판결(칠성신의 법봉): 가까운 적 자리(없으면 앞)에 하늘이 열리며 빛기둥이 내려와 durationSec 동안 tickSec마다 반지름 안 피해 */
+  | { kind: 'judgment'; nameKey: string; descKey: string; cooldownSec: number; school?: string; range: number; ahead: number; durationSec: number; tickSec: number; radius: number; damageMul: number; color: string; beam: SpriteRef; sigil: SpriteRef }
+  /** 변인통제(데네볼라의 사복검, 헥타르만): 가까운 적 targets명(보스 먼저)을 묶고 그동안 묶인 적에게 탄막 난사. 보스가 묶인 동안 모든 스킬·조준이 보스를 노린다 */
+  | { kind: 'variableControl'; nameKey: string; descKey: string; cooldownSec: number; school?: string; range: number; targets: number; bindSec: number; bossBindSec: number; barrageEverySec: number; barrageDamageMul: number; barrageSpeed: number; color: string; shot: SpriteRef }
   | { kind: 'purifyingFlame'; nameKey: string; descKey: string; cooldownSec: number; durationSec: number; volleySec: number; laserEverySec: number; lanes: number; jitterDeg: number; beamLength: number; beamWidth: number; beamDamageMul: number; flameRadius: number; flameDamageMul: number; burnStacks: number; color: string; flame: SpriteRef };

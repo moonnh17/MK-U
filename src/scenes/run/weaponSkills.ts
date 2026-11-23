@@ -2,8 +2,9 @@
  * 무기 Q 스킬 (weapons.json qSkill). 재사용 대기는 무기마다 따로 센다.
  * - 3식 제미니(라스알하게의 검): 둘레에 푸른 분신이 나타나 본체와 함께 strikes번 벤다. 마지막 베기는 공간격 +
  *   케라우노스처럼 화면이 벤 선을 따라 갈라졌다가 봉합된다.
- * - 정화의 불길(아비오르의 지팡이): 사방으로 불길을 내뿜으며 굵은 직선 레이저를 난사한다. 한 번에 beams줄을 고르게,
- *   다음 번에는 반 칸 돌려 쏴서 레이저끼리 겹치지 않고 옆면만 맞닿는다.
+ * - 정화의 불길(아비오르의 지팡이): 둘레로 불길을 내뿜으며 조준한 쪽으로 굵은 레이저 연사(나란한 길을 돌아 옆면만 맞닿음).
+ * - 판결(칠성신의 법봉): 하늘이 열리며 빛기둥이 내려와 durationSec 동안 그 자리를 태운다.
+ * - 변인통제(데네볼라의 사복검, 헥타르만): 적을 묶어 탄막을 퍼붓는다. 보스가 묶인 동안 모든 스킬·조준이 보스로.
  */
 import Phaser from 'phaser';
 import type { Vec2 } from '../../core/actions';
@@ -16,20 +17,55 @@ import { lineHits } from '../../systems/targeting';
 import { inArc, type WeaponStats } from '../../systems/weapons';
 import { signatureFires } from '../../systems/motion';
 import type { TagId, WeaponDef, WeaponQSkill } from '../../types/data';
+import type { Enemy } from '../../entities/enemy';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
 
 type Gemini = Extract<WeaponQSkill, { kind: 'gemini' }>;
 type Flame = Extract<WeaponQSkill, { kind: 'purifyingFlame' }>;
+type Judgment = Extract<WeaponQSkill, { kind: 'judgment' }>;
+type Control = Extract<WeaponQSkill, { kind: 'variableControl' }>;
 
 export class WeaponSkills {
   /** 무기 id → 남은 재사용 대기(초) */
   private cd = new Map<string, number>();
+  /** 변인통제로 묶은 적과 이어 그리는 줄 */
+  private bound: Enemy[] = [];
+  private tether: Phaser.GameObjects.Graphics | null = null;
+  private tetherColor = 0xffffff;
 
   constructor(private readonly run: RunScene) {}
 
   update(dt: number): void {
     for (const [id, s] of this.cd) this.cd.set(id, Math.max(0, s - dt));
+    this.bound = this.bound.filter((e) => !e.dead && e.bound);
+    // 묶인 적에게 이어진 빛줄 (흔들리며 깜박인다)
+    if (this.bound.length > 0) {
+      this.tether ??= this.run.add.graphics().setDepth(6).setBlendMode(Phaser.BlendModes.ADD);
+      const g = this.tether.clear();
+      const p = this.run.player;
+      const t = this.run.time.now / 1000;
+      for (const e of this.bound) {
+        const mid = { x: (p.x + e.sprite.x) / 2 + Math.sin(t * 30) * 2, y: (p.y + e.sprite.y) / 2 + Math.cos(t * 27) * 2 };
+        g.lineStyle(3, this.tetherColor, 0.35 + 0.15 * Math.sin(t * 40)).beginPath().moveTo(p.x, p.y).lineTo(mid.x, mid.y).lineTo(e.sprite.x, e.sprite.y).strokePath();
+        g.lineStyle(1, 0xffffff, 0.9).lineBetween(p.x, p.y, e.sprite.x, e.sprite.y);
+        g.lineStyle(1.5, this.tetherColor, 0.9).strokeCircle(e.sprite.x, e.sprite.y, e.radius + 3 + Math.sin(t * 12) * 1.5);
+      }
+    } else if (this.tether) {
+      this.tether.destroy();
+      this.tether = null;
+    }
+  }
+
+  /** 변인통제로 묶인 보스 (모든 스킬·조준이 노린다) */
+  focusEnemy(): Enemy | null {
+    return this.bound.find((e) => (e.rank === 'boss' || e.rank === 'hiddenBoss') && !e.dead && e.bound) ?? null;
+  }
+
+  /** 이 무기의 Q 스킬을 지금 직업으로 쓸 수 있는지 (학파 전용) */
+  usable(w: WeaponDef): boolean {
+    const school = w.qSkill && 'school' in w.qSkill ? w.qSkill.school : undefined;
+    return !!w.qSkill && (!school || this.run.session.player.advancement === school);
   }
 
   /** 남은 재사용 대기 (HUD·토스트) */
@@ -40,7 +76,7 @@ export class WeaponSkills {
   /** Q: 들고 있는 무기의 스킬을 쓴다. 이 무기에 스킬이 있으면 true(재사용 대기 중이어도) */
   use(w: WeaponDef): boolean {
     const q = w.qSkill;
-    if (!q) return false;
+    if (!q || !this.usable(w)) return false;
     const left = this.cooldownOf(w.id);
     if (left > 0) {
       this.run.toastThrottled(this.run.ctx.t('weapon.qCooldown', { name: this.run.ctx.t(q.nameKey), s: Math.ceil(left) }));
@@ -50,7 +86,9 @@ export class WeaponSkills {
     const st = this.run.weaponStatsOf(this.run.weaponItem());
     this.run.floatLabel({ x: this.run.player.x, y: this.run.player.y }, this.run.ctx.t(q.nameKey), q.color);
     if (q.kind === 'gemini') this.gemini(w, q, st);
-    else this.purifyingFlame(w, q, st);
+    else if (q.kind === 'purifyingFlame') this.purifyingFlame(w, q, st);
+    else if (q.kind === 'judgment') this.judgment(w, q, st);
+    else this.variableControl(w, q, st);
     return true;
   }
 
@@ -201,6 +239,104 @@ export class WeaponSkills {
       });
     }
     shake(this.run, 'light');
+  }
+
+  // ---------- 판결 ----------
+
+  private judgment(w: WeaponDef, q: Judgment, st: WeaponStats): void {
+    const p = this.run.player;
+    const t = this.nearestEnemy({ x: p.x, y: p.y }, q.range);
+    const aim = this.run.aimDir;
+    const at = t ? { x: t.sprite.x, y: t.sprite.y } : { x: p.x + aim.x * q.ahead, y: p.y + aim.y * q.ahead };
+    const r = q.radius * (1 + this.run.itemRt.sums.area);
+    // 하늘이 열린다: 화면이 하얗게 번쩍, 바닥에 칠성 법진이 펼쳐지고 빛기둥이 위에서 내려꽂힌다
+    this.run.cameras.main.flash(160, 255, 244, 210);
+    const sigil = this.run.add.image(at.x, at.y, q.sigil.spriteKey).setDepth(2.6).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0);
+    sigil.setDisplaySize(r * 2.4, r * 2.4 * 0.55);
+    const sw = sigil.scaleX;
+    const sh = sigil.scaleY;
+    sigil.setScale(sw * 0.3, sh * 0.3);
+    this.run.tweens.add({ targets: sigil, scaleX: sw, scaleY: sh, alpha: 0.95, duration: 220, ease: 'Back.easeOut' });
+    const beam = this.run.add.image(at.x, at.y + r * 0.25, q.beam.spriteKey).setOrigin(0.5, 1).setDepth(7).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.95);
+    const bh = Math.max(220, this.run.cameras.main.worldView.height);
+    beam.setDisplaySize(r * 2.2, 1);
+    this.run.tweens.add({ targets: beam, displayHeight: bh, duration: 180, ease: 'Quad.easeIn', onComplete: () => shake(this.run, 'medium') });
+    sfx('awaken');
+    const ticks = Math.max(1, Math.round(q.durationSec / q.tickSec));
+    for (let k = 0; k < ticks; k++) {
+      this.run.time.delayedCall((0.18 + k * q.tickSec) * 1000, () => {
+        // 일렁임
+        beam.setAlpha(0.75 + 0.25 * (k % 2));
+        for (const e of [...this.run.enemies]) {
+          if (!e.dead && Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= r + e.radius) this.run.damage.hit(e, this.run.combat.critRoll(st.damage * q.damageMul, st.critChance, e.sprite), w.tags);
+        }
+        // 빛 알갱이가 솟는다
+        for (let i = 0; i < 3; i++) this.run.combat.spark(at.x + this.run.rng.range(-r, r) * 0.8, at.y + this.run.rng.range(-r, r) * 0.4, i % 2 ? '#ffffff' : q.color, 0, -30);
+      });
+    }
+    this.run.time.delayedCall((0.18 + q.durationSec) * 1000, () => {
+      this.run.tweens.add({ targets: beam, scaleX: 0, alpha: 0, duration: 260, ease: 'Quad.easeIn', onComplete: () => beam.destroy() });
+      this.run.tweens.add({ targets: sigil, alpha: 0, duration: 400, onComplete: () => sigil.destroy() });
+    });
+  }
+
+  // ---------- 변인통제 ----------
+
+  private variableControl(w: WeaponDef, q: Control, st: WeaponStats): void {
+    const p = { x: this.run.player.x, y: this.run.player.y };
+    const isBoss = (e: Enemy) => e.rank === 'boss' || e.rank === 'hiddenBoss';
+    // 보스 먼저, 그다음 가까운 순
+    const near = this.run.enemies
+      .filter((e) => !e.dead && Math.hypot(e.sprite.x - p.x, e.sprite.y - p.y) <= q.range + e.radius)
+      .sort((a, b) => Number(isBoss(b)) - Number(isBoss(a)) || Math.hypot(a.sprite.x - p.x, a.sprite.y - p.y) - Math.hypot(b.sprite.x - p.x, b.sprite.y - p.y))
+      .slice(0, q.targets);
+    if (near.length === 0) {
+      this.run.toastThrottled(this.run.ctx.t('weapon.q.noTarget'));
+      this.cd.set(w.id, 0);
+      return;
+    }
+    this.tetherColor = hexColor(q.color);
+    let longest = 0;
+    for (const e of near) {
+      const sec = isBoss(e) ? q.bossBindSec : q.bindSec;
+      e.bind(sec);
+      longest = Math.max(longest, sec);
+      // 묶이는 순간: 고리가 조여든다
+      const ring = this.run.add.circle(e.sprite.x, e.sprite.y, e.radius * 2.4).setStrokeStyle(2, this.tetherColor, 1).setDepth(7);
+      this.run.tweens.add({ targets: ring, scale: 0.45, alpha: 0.2, duration: 220, ease: 'Quad.easeIn', onComplete: () => ring.destroy() });
+    }
+    this.bound = [...new Set([...this.bound, ...near])];
+    if (near.some(isBoss)) this.run.floatLabel({ x: p.x, y: p.y - 14 }, this.run.ctx.t('weapon.q.bossLocked'), q.color);
+    sfx('awaken');
+    shake(this.run, 'light');
+    // 묶인 동안 묶인 적들에게 탄막을 번갈아 퍼붓는다 (헥타르 육각 탄)
+    const shots = Math.max(1, Math.round(longest / q.barrageEverySec));
+    for (let n = 0; n < shots; n++) {
+      this.run.time.delayedCall(n * q.barrageEverySec * 1000, () => {
+        const live = near.filter((e) => !e.dead && e.bound);
+        if (live.length === 0 || this.run.session.outcome) return;
+        const e = live[n % live.length]!;
+        const from = this.run.combat.firePoint();
+        const a = Math.atan2(e.sprite.y - from.y, e.sprite.x - from.x) + this.run.rng.range(-0.12, 0.12);
+        this.run.combat.fireBullet(from, a, q.barrageSpeed, q.range * 1.5, st.damage * q.barrageDamageMul, ['tech', 'ranged'], null, { pierce: 0, crit: st.critChance, sprite: q.shot, trail: q.color });
+        if (n % 3 === 0) sfx('shotSmg');
+      });
+    }
+  }
+
+  private nearestEnemy(from: Vec2, range: number): Enemy | null {
+    const f = this.focusEnemy();
+    if (f) return f;
+    let best: Enemy | null = null;
+    let d = Infinity;
+    for (const e of this.run.enemies) {
+      const k = Math.hypot(e.sprite.x - from.x, e.sprite.y - from.y);
+      if (!e.dead && k <= range + e.radius && k < d) {
+        d = k;
+        best = e;
+      }
+    }
+    return best;
   }
 
   /** 사방으로 퍼지는 불길: 반지름 안 적에게 피해 + 화상 */

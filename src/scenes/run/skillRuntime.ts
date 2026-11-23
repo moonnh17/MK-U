@@ -59,6 +59,7 @@ export class SkillRuntime {
       burst: (at, color) => this.run.juice.colorBurst(at, color, this.run.ctx.data.juice.skillBurst),
       aimDir: () => this.run.aimDir,
       teleportDir: () => this.run.moveAimDir,
+      focus: () => this.run.weaponSkills.focusEnemy(),
       enemies: () => this.run.enemies.filter((e) => !e.dead),
       area: (r) => this.area(r),
       hit: (e, base, tags) => this.run.damage.hit(e, base, tags, source),

@@ -97,6 +97,8 @@ export class Enemy {
   frost: FrostState | null = null;
   /** 빙결 남은 시간(초): 움직이지도 공격하지도 않는다 (보스는 걸리지 않는다) */
   freezeLeft = 0;
+  /** 묶임(변인통제): 보스도 걸린다. 움직이지 않고 보스 패턴도 멈춘다 */
+  boundLeft = 0;
   /** 석화 동안 몸을 회색 돌로 바꾸는 색 행렬 (WebGL에서만) */
   private stoneFx: ReturnType<NonNullable<Phaser.GameObjects.Sprite['preFX']>['addColorMatrix']> | null = null;
   /** 걸려 있는 마기 변질 */
@@ -284,6 +286,17 @@ export class Enemy {
     if (was !== slow > 0) this.restoreTint();
   }
 
+  get bound(): boolean {
+    return this.boundLeft > 0;
+  }
+
+  /** 묶기: sec 동안 제자리 (다시 걸면 긴 쪽) */
+  bind(sec: number): void {
+    if (this.dead || sec <= 0) return;
+    this.boundLeft = Math.max(this.boundLeft, sec);
+    this.sprite.setVelocity(0, 0);
+  }
+
   get petrified(): boolean {
     return this.petrifyLeft > 0;
   }
@@ -428,6 +441,11 @@ export class Enemy {
       if (this.chillSec <= 0) this.restoreTint();
     }
     if (this.frost) this.frost = this.frost.leftSec > dt ? { ...this.frost, leftSec: this.frost.leftSec - dt } : null;
+    if (this.boundLeft > 0) {
+      this.boundLeft = Math.max(0, this.boundLeft - dt);
+      this.sprite.setVelocity(0, 0);
+      return;
+    }
     if (this.freezeLeft > 0) {
       this.freezeLeft -= dt;
       this.sprite.setVelocity(0, 0);

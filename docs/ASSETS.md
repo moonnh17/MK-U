@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 794개 · 그림 있음 761개
+전체 802개 · 그림 있음 769개
 
 ## player (9)
 
@@ -24,7 +24,7 @@
 | `player_barbarian` | 플레이어 야만용사 | 10×10 | feet | #e8e2d0 | mku/player_barbarian.png (13프레임) |
 | `player_paladin` | 플레이어 성기사 | 10×10 | feet | #e8e2d0 | mku/player_paladin.png (9프레임) |
 
-## weapon (41)
+## weapon (43)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -68,9 +68,11 @@
 | `weapon_spirit_fist` | 정령의 주먹 | 11×11 | center | #6a4a2a | mku/weapon_spirit_fist.png (1프레임) |
 | `weapon_elder_wand` | 딱총나무 지팡이 | 12×12 | center | #fff0c0 | mku/weapon_elder_wand.png (1프레임) |
 | `weapon_unstable_shard` | 불안정 마기 조각 | 9×9 | center | #b266ff | mku/weapon_unstable_shard.png (1프레임) |
+| `weapon_seven_star_gavel` | 칠성신의 법봉 | 12×12 | center | #ffd76a | mku/weapon_seven_star_gavel.png (1프레임) |
+| `weapon_denebola_blade` | 데네볼라의 사복검 | 11×11 | center | #3a7bff | mku/weapon_denebola_blade.png (1프레임) |
 | `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | mku/weapon_fist.png (1프레임) |
 
-## projectile (62)
+## projectile (68)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -92,6 +94,12 @@
 | `proj_spirit_fist` | 정령의 주먹 (fx) | 10×10 | center | #5adf8a | mku/proj_spirit_fist.png (1프레임) |
 | `fx_spirit_fist_blast` | 정령의 주먹 (fx) | 24×24 | center | #5adf8a | mku/fx_spirit_fist_blast.png (1프레임) |
 | `fx_hw_recoil` | 불안정 마기 조각 (fx) 외 1곳 | 60×60 | center | #b266ff | mku/fx_hw_recoil.png (15프레임) |
+| `proj_seven_star_orb` | 칠성신의 법봉 (fx) | 9×9 | center | #ffe9a8 | mku/proj_seven_star_orb.png (1프레임) |
+| `fx_seven_star_blast` | 칠성신의 법봉 (fx) | 30×30 | center | #ffe9a8 | mku/fx_seven_star_blast.png (1프레임) |
+| `fx_judgment_beam` | 칠성신의 법봉 (fx) | 60×60 | center | #ffe9a8 | mku/fx_judgment_beam.png (1프레임) |
+| `fx_judgment_sigil` | 칠성신의 법봉 (fx) | 80×80 | center | #ffe9a8 | mku/fx_judgment_sigil.png (1프레임) |
+| `proj_denebola_shard` | 데네볼라의 사복검 (fx) 외 1곳 | 9×9 | center | #5ad0ff | mku/proj_denebola_shard.png (1프레임) |
+| `fx_denebola_whip` | 데네볼라의 사복검 (fx) | 64×64 | center | #5ad0ff | mku/fx_denebola_whip.png (1프레임) |
 | `projectile_player` | 플레이어 탄 | 3×3 | center | #fff3a0 | mku/projectile_player.png (1프레임) |
 | `fx_melee_slash` | 근접 이펙트 (fx) | 20×20 | center | #ffffff | mku/fx_melee_slash.png (6프레임) |
 | `fx_melee_slam` | 근접 이펙트 (fx) | 20×20 | center | #ffffff | mku/fx_melee_slam.png (8프레임) |

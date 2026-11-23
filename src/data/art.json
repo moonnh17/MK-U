@@ -8868,6 +8868,64 @@
       "frames": 1,
       "density": 2,
       "gripX": 0.2
+    },
+    "weapon_seven_star_gavel": {
+      "file": "mku/weapon_seven_star_gavel.png",
+      "frameWidth": 68,
+      "frameHeight": 28,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.25
+    },
+    "proj_seven_star_orb": {
+      "file": "mku/proj_seven_star_orb.png",
+      "frameWidth": 28,
+      "frameHeight": 30,
+      "frames": 1,
+      "density": 2
+    },
+    "fx_seven_star_blast": {
+      "file": "mku/fx_seven_star_blast.png",
+      "frameWidth": 120,
+      "frameHeight": 120,
+      "frames": 1,
+      "density": 2
+    },
+    "fx_judgment_beam": {
+      "file": "mku/fx_judgment_beam.png",
+      "frameWidth": 80,
+      "frameHeight": 145,
+      "frames": 1,
+      "density": 2
+    },
+    "fx_judgment_sigil": {
+      "file": "mku/fx_judgment_sigil.png",
+      "frameWidth": 160,
+      "frameHeight": 160,
+      "frames": 1,
+      "density": 2
+    },
+    "weapon_denebola_blade": {
+      "file": "mku/weapon_denebola_blade.png",
+      "frameWidth": 60,
+      "frameHeight": 12,
+      "frames": 1,
+      "density": 2,
+      "gripX": 0.15
+    },
+    "proj_denebola_shard": {
+      "file": "mku/proj_denebola_shard.png",
+      "frameWidth": 24,
+      "frameHeight": 6,
+      "frames": 1,
+      "density": 2
+    },
+    "fx_denebola_whip": {
+      "file": "mku/fx_denebola_whip.png",
+      "frameWidth": 140,
+      "frameHeight": 19,
+      "frames": 1,
+      "density": 2
     }
   }
 }

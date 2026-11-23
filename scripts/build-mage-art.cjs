@@ -30,6 +30,14 @@ const WEAPONS = {
   weapon_unstable_shard: ['unstableShard', 22, 0.5, 0.2],
   weapon_rasalhague_sword: ['rasalhagueSword', 40, 0.5, 0.15],
   weapon_avior_staff: ['aviorStaff', 32, 0.5, 0.3],
+  weapon_seven_star_gavel: ['bukduStaff', 34, 0.5, 0.25],
+  proj_seven_star_orb: ['bukduOrb', 14, 0.35],
+  fx_seven_star_blast: ['bukduBlast', 60, 0.3],
+  fx_judgment_beam: ['judgmentBeam', 40, 0.25],
+  fx_judgment_sigil: ['judgmentSigil', 80, 0.3],
+  weapon_denebola_blade: ['denebolaBlade', 30, 0.5, 0.15],
+  proj_denebola_shard: ['denebolaShard', 12, 0.35],
+  fx_denebola_whip: ['denebolaWhip', 70, 0.5],
 };
 
 /** 힉스필드 아이템 아이콘 (scripts/art-src/items-hf): key → 파일 */

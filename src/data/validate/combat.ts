@@ -173,7 +173,11 @@ export function validateWeapons(v: V): void {
       needText(`${w}.qSkill`, q.nameKey);
       needText(`${w}.qSkill`, q.descKey);
       if (q.kind === 'gemini') q.cut.forEach((c, i) => checkSprite(errors, `${w}.qSkill.cut.${i}`, c));
-      else checkSprite(errors, `${w}.qSkill.flame`, q.flame);
+      else if (q.kind === 'purifyingFlame') checkSprite(errors, `${w}.qSkill.flame`, q.flame);
+      else if (q.kind === 'judgment') {
+        checkSprite(errors, `${w}.qSkill.beam`, q.beam);
+        checkSprite(errors, `${w}.qSkill.sigil`, q.sigil);
+      } else checkSprite(errors, `${w}.qSkill.shot`, q.shot);
     }
     if (wpn.boomerang) {
       checkSprite(errors, `${w}.boomerang.shot`, wpn.boomerang.shot);

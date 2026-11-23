@@ -15,7 +15,7 @@ describe('무기 종류 (기획서 무기 표)', () => {
   it('총 6종·칼 5종 + 신궁 환디', () => {
     const by = (c: string) => W.weapons.filter((w) => w.category === c && w.droppable).map((w) => w.id).sort();
     expect(by('gun')).toEqual(['algiebaSling', 'antimatterPistol', 'bootlegGun', 'grenadeLauncher', 'mg70', 'orbitalDisc', 'pistol', 'shotgun', 'smg', 'sniper', 'soulCalibur', 'spaceNeedle']);
-    expect(by('blade')).toEqual(['argoBanner', 'brokenBlade', 'dagger', 'debtorArm', 'greatsword', 'hanabi', 'magiFang', 'nekkarCleaver', 'rasalgethiClub', 'rasalhagueSword', 'spear']);
+    expect(by('blade')).toEqual(['argoBanner', 'brokenBlade', 'dagger', 'debtorArm', 'denebolaWhipSword', 'greatsword', 'hanabi', 'magiFang', 'nekkarCleaver', 'rasalgethiClub', 'rasalhagueSword', 'spear']);
     const handi = def('handi');
     expect(handi.grade).toBe('mythic');
     expect(handi.droppable).toBe(false);
@@ -66,7 +66,7 @@ describe('등급·신화', () => {
       expect(w.options).toEqual([]);
       seen.add(w.defId);
     }
-    expect([...seen].sort()).toEqual(['algiebaSling', 'argoBanner', 'aviorStaff', 'mintakaStaff', 'nekkarCleaver', 'rasalgethiClub', 'rasalhagueSword']);
+    expect([...seen].sort()).toEqual(['algiebaSling', 'aviorStaff', 'denebolaWhipSword', 'mintakaStaff', 'nekkarCleaver', 'rasalgethiClub', 'rasalhagueSword']);
   });
 
   it('옵션 뽑기: 서로 다르고 분류에 맞는 것만 (지금은 어떤 등급도 옵션 수가 0)', () => {

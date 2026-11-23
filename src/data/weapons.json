@@ -4,7 +4,7 @@
     "standard": ["flameStaff", "zephyr", "antimatterPistol", "spaceNeedle", "soulCalibur"],
     "systemple": ["mg70", "orbitalDisc"],
     "historyArms": ["algiebaSling", "nekkarCleaver", "argoBanner", "alGulBlade", "mintakaStaff", "spiritFist"],
-    "starRelic": ["rasalgethiClub", "aviorStaff", "rasalhagueSword"],
+    "starRelic": ["rasalgethiClub", "aviorStaff", "rasalhagueSword", "sevenStarGavel", "denebolaWhipSword"],
     "ancient": ["brokenBlade", "ancientCore", "eclipseCore", "hwanRemnant", "magiFang", "hanabi", "elderWand"],
     "bossRemains": ["gihwanArm"],
     "street": ["bootlegGun", "debtorArm", "unstableShard"],
@@ -224,10 +224,10 @@
       "spriteKey": "weapon_nekkar_cleaver", "color": "#a03a3a", "size": 9
     },
     {
-      "id": "argoBanner", "codexNo": 21, "fxColor": "#ffd8c8", "nameKey": "weapon.argoBanner", "abilityNameKey": "weapon.ability.argoBanner", "category": "blade", "grade": "unique", "classes": ["gust"], "tags": ["physical", "melee"],
-      "baseDamage": 9, "fireIntervalSec": 2.4, "energyCost": 0, "pattern": { "kind": "gust", "radius": 119 },
+      "id": "argoBanner", "codexNo": 21, "fxColor": "#ffd8c8", "nameKey": "weapon.argoBanner", "abilityNameKey": "weapon.ability.argoBanner", "category": "blade", "grade": "legendary", "classes": ["gust"], "tags": ["physical", "melee"],
+      "baseDamage": 9, "fireIntervalSec": 7, "energyCost": 0, "pattern": { "kind": "gust", "radius": 119 },
       "knockback": { "distance": 80, "sec": 0.28 },
-      "selfBuff": { "sec": 6, "damage": 0.4, "color": "#ff4a4a" },
+      "selfBuff": { "sec": 10, "damage": 0.4, "color": "#ff4a4a" },
       "upright": true,
       "projectileSpeed": 0, "range": 119, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_argo_banner", "color": "#d02a3a", "size": 14
@@ -377,6 +377,26 @@
       "selfHarm": { "chance": 0.1, "damage": 3 },
       "projectileSpeed": 200, "range": 56, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_unstable_shard", "color": "#b266ff", "size": 9
+    },
+    {
+      "id": "sevenStarGavel", "codexNo": 39, "flavor": "codex.itemFlavor.sevenStarGavel", "nameKey": "weapon.sevenStarGavel", "category": "staff", "grade": "legendary", "classes": ["explosive"], "tags": ["magic", "ranged"],
+      "baseDamage": 20, "fireIntervalSec": 0.7, "energyCost": 4, "pattern": { "kind": "lob", "radius": 34 },
+      "shot": { "spriteKey": "proj_seven_star_orb", "color": "#ffe9a8", "size": 9 },
+      "lobBlast": { "spriteKey": "fx_seven_star_blast", "color": "#ffe9a8", "size": 30 },
+      "qSkill": { "kind": "judgment", "nameKey": "weapon.q.judgment", "descKey": "weapon.q.judgment.desc", "cooldownSec": 16, "range": 200, "ahead": 80, "durationSec": 3, "tickSec": 0.25, "radius": 40, "damageMul": 0.45, "color": "#ffe9a8",
+        "beam": { "spriteKey": "fx_judgment_beam", "color": "#ffe9a8", "size": 60 }, "sigil": { "spriteKey": "fx_judgment_sigil", "color": "#ffe9a8", "size": 80 } },
+      "projectileSpeed": 280, "range": 240, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_seven_star_gavel", "color": "#ffd76a", "size": 12
+    },
+    {
+      "id": "denebolaWhipSword", "codexNo": 40, "flavor": "codex.itemFlavor.denebolaWhipSword", "nameKey": "weapon.denebolaWhipSword", "category": "blade", "fxColor": "#5ad0ff", "critChance": 0.2, "grade": "unique", "classes": ["slash"], "tags": ["physical", "melee"],
+      "baseDamage": 14, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 140, "radius": 64 },
+      "meleeShot": { "damageMul": 0.35, "speed": 300, "range": 170, "energyCost": 2, "color": "#5ad0ff", "pellets": 5, "spreadDeg": 40, "tags": ["tech", "ranged"], "shot": { "spriteKey": "proj_denebola_shard", "color": "#5ad0ff", "size": 9 } },
+      "whip": { "sprite": { "spriteKey": "fx_denebola_whip", "color": "#5ad0ff", "size": 64 }, "sec": 0.18 },
+      "qSkill": { "kind": "variableControl", "nameKey": "weapon.q.variableControl", "descKey": "weapon.q.variableControl.desc", "cooldownSec": 14, "school": "hectar", "range": 170, "targets": 3, "bindSec": 3, "bossBindSec": 2, "barrageEverySec": 0.05, "barrageDamageMul": 0.3, "barrageSpeed": 360, "color": "#5ad0ff",
+        "shot": { "spriteKey": "proj_denebola_shard", "color": "#5ad0ff", "size": 9 } },
+      "projectileSpeed": 0, "range": 64, "cutsProjectiles": true, "droppable": true,
+      "spriteKey": "weapon_denebola_blade", "color": "#3a7bff", "size": 11
     },
     {
       "id": "fist", "nameKey": "weapon.fist", "category": "blade", "fxColor": "#ffe0c0", "grade": "common", "classes": ["slash"], "tags": ["physical", "melee"],
