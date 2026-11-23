@@ -56,6 +56,7 @@ import { RoomRuntime } from './run/roomRuntime';
 import { EnemyLife } from './run/enemyLife';
 import { PlayerLife } from './run/playerLife';
 import { DamageRuntime } from './run/damage';
+import { MeleeAttack } from './run/meleeAttack';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -71,6 +72,7 @@ export class RunScene extends Phaser.Scene {
   stageFx!: StageFx;
   combat!: WeaponCombat;
   damage!: DamageRuntime;
+  meleeRt!: MeleeAttack;
   special!: SpecialWeapons;
   progression!: Progression;
   encounters!: Encounters;
@@ -168,6 +170,7 @@ export class RunScene extends Phaser.Scene {
     this.progression = new Progression(this);
     this.combat = new WeaponCombat(this);
     this.damage = new DamageRuntime(this);
+    this.meleeRt = new MeleeAttack(this);
     this.stageFx = new StageFx(this);
     this.condition = new PlayerCondition(this);
     this.roomProps = new RoomProps(this);
