@@ -821,3 +821,5 @@
 - 2026-11-20: 보스 패턴 파일 구조: 보스마다 `bosses/patterns/<보스 id>.ts`, 여러 보스가 함께 쓰는 바탕 클래스·도구(Timed·Channeled·Dash·beam·ring·blast·clampTo·around·muzzle 등)는 `base.ts`. 보스끼리 패턴을 빌려 쓰면(마기카이저 → 마기골렘 Heavy) 그 파일에서 import한다. `extends` 순환 import는 로드 때 깨지므로 base는 보스 파일을 import하지 않는다. 새 패턴은 보스 파일에 클래스를 더하고 `index.ts` 등록표에 id를 단다.
 - 2026-11-20: 전투 씬 부품은 지금까지처럼 `new 부품(this)`로 씬을 받고 `this.run.X`로 쓴다(좁은 인터페이스나 상태 객체는 만들지 않음 — 참조 수백 곳을 바꿔야 해서). 씬에 남은 것: 생성·매 프레임 순서(update), 카메라, 무기 도우미(5단계에서 weaponCombat과 함께), 스테이지 넘기기, 도감 기록(discover)·dropSuit 같은 여러 부품이 함께 쓰는 작은 것.
 - 2026-11-20: 장면 점검(`scripts/smoke.js`)의 대기: 트윈·방 웨이브 지연·사망 연출은 실제 흐른 시간으로 움직여서, 그런 장면은 프레임을 돌리는 사이 `sleep`으로 진짜 기다린다.
+- 2026-11-23: 무기 공격 부품 나누기: `WeaponCombat`(발사·차지·자세·탄)에서 피해 처리(`DamageRuntime`, `run.damage`)와 칼 무기(`MeleeAttack`, `run.meleeRt`)를 떼었다. 둘이 함께 쓰는 `swingFlip`·`startMeleeMotion`·`spark`·`applyBuff`는 private을 뺐다. hazard.ts는 작은 클래스들로 이미 나뉘어 있어 그대로 둔다.
+- 2026-11-23: 장면 점검의 적 장면은 적이 5초 안에 플레이어 피해·적 탄·위험 지대 중 하나를 만들면 공격한 것으로 본다(결과의 `quiet`가 그러지 못한 적). 실패로 치지는 않는다(거인 엘리트는 느려서 가끔 빠진다).

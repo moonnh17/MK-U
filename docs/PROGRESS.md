@@ -340,3 +340,9 @@
 
 - [x] 장면 점검 추가: 사망·결산, 부활 아이템, 전투 칸 클리어, 보스 처치→포털, 다음 스테이지, 조우 칸 6종, 액티브 스킬 33종 (모두 27장면)
 - [x] `RunScene.ts` 1545줄 → 816줄. 새 부품: `busBindings`(이벤트 연결)·`hosts`(아이템·적·보스 Host)·`bullets`(탄)·`roomRuntime`(방·웨이브·소환)·`enemyLife`(적 처치·상태)·`playerLife`(피해·사망·런 종료)
+
+### 5 — 큰 파일 정리
+
+- [x] 장면 점검 추가: 무기 37종을 하나씩 들고 공격, 적 16종·엘리트 3종이 실제로 공격하는지(모두 36장면)
+- [x] `run/weaponCombat.ts` 999줄 → 570줄: 피해 처리는 `run/damage.ts`, 칼 무기 공격은 `run/meleeAttack.ts`
+- [ ] `entities/enemy.ts` 공격 종류 분리: 보류(옮기면 Enemy의 private 멤버 14개를 공개해야 함 — 결정 대기)
