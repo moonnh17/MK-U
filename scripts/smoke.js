@@ -97,6 +97,10 @@ async function forceAllPatterns(perPatternFrames = 150) {
 let spawned = 0;
 /** 강제로 돌린 보스 패턴 */
 let forced = [];
+/** 들어 본 무기·불러 본 적 */
+let tried = [];
+/** 시간 안에 공격하지 않은 적 */
+let quiet = [];
 /** 실제로 칸에 들어가 쓴 스킬 */
 let cast = new Set();
 async function fight(enemyId, count, sec) {
@@ -201,6 +205,75 @@ SCENES.death = async () => {
   rs().playerLife.restartRun();
   await waitFor(() => mku().game.scene.getScenes(true).some((s) => s.sys.settings.key === 'Lab'), 300);
 };
+/** 실제 시간 ms 동안 공격 키를 누른 채 가장 가까운 적 옆에서 싸운다 (발사 간격·탄 비행이 실제 시간 기준이라) */
+async function fightReal(ms) {
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: 'Space' }));
+  const end = performance.now() + ms;
+  while (performance.now() < end) {
+    const e = rs().enemies[0];
+    if (e) rs().player.setPosition(e.sprite.x - 14, e.sprite.y);
+    await frames(2);
+    await sleep(16);
+  }
+  window.dispatchEvent(new KeyboardEvent('keyup', { code: 'Space' }));
+  await frames(2);
+}
+/** 무기를 차례로 들고 공격한다 (특수 동작도 한 번씩). 표적이 줄면 다시 부른다 */
+async function tryWeapons(ids) {
+  await startRun('warrior');
+  const b = await bus();
+  for (const defId of ids) {
+    const def = rs().ctx.data.weapons.weapons.find((w) => w.id === defId);
+    rs().session.player.weapons = { slots: [{ defId, grade: def.grade, options: [] }, null], active: 0 };
+    rs().session.player.energy = rs().session.player.energyMax;
+    if (rs().enemies.length < 3) b.emit('debugSpawn', { enemyId: 'akgwi', count: 3 });
+    tried.push(defId);
+    await fightReal(900);
+    rs().useWeaponSpecial();
+    await frames(15);
+  }
+}
+const WEAPON_IDS = ['pistol', 'shotgun', 'smg', 'sniper', 'grenadeLauncher', 'dagger', 'greatsword', 'spear', 'handi', 'rasalgethiClub', 'aviorStaff', 'rasalhagueSword', 'brokenBlade', 'hanabi', 'alGulBlade', 'gihwanArm', 'ancientCore', 'eclipseCore', 'algiebaSling', 'nekkarCleaver', 'argoBanner', 'curvedBow', 'mg70', 'flameStaff', 'zephyr', 'soulCalibur', 'magiFang', 'antimatterPistol', 'orbitalDisc', 'spaceNeedle', 'bootlegGun', 'debtorArm', 'hwanRemnant', 'mintakaStaff', 'woodenStaff', 'spiritFist', 'fist'];
+for (let i = 0; i < 4; i++) SCENES[`weapons${i + 1}`] = () => tryWeapons(WEAPON_IDS.slice(i * 10, i * 10 + 10));
+/** 적(보스 말고)을 한 종씩 전투 칸에 불러 무적 플레이어를 공격하게 둔다, 엘리트 3종도 */
+async function tryEnemies(ids, elites) {
+  await startRun('warrior');
+  const { roomCenter } = await import('/src/systems/worldLayout.ts');
+  const room = rs().session.map.rooms.findIndex((n) => n.kind === 'combatRoom');
+  const c = roomCenter(rs().session.map.rooms[room], rs().m);
+  rs().player.setPosition(c.x, c.y);
+  await waitFor(() => rs().session.currentRoomId === room, 100);
+  const b = await bus();
+  const pairs = [...ids.map((id) => [id, null]), ...elites.map((el) => ['akgwi', el])];
+  for (const [enemyId, elite] of pairs) {
+    b.emit('debugSpawn', { enemyId, count: 2, elite });
+    const name = elite ? `${enemyId}+${elite}` : enemyId;
+    tried.push(name);
+    // 공격이 실제로 나왔는지: 플레이어 피해 호출·적 탄·위험 지대 중 하나라도
+    const life = rs().playerLife;
+    const hurt0 = life.hurtPlayer;
+    let acted = false;
+    life.hurtPlayer = (...a) => ((acted = true), hurt0.apply(life, a));
+    // 스폰 예고·공격 대기는 실제 시간이라 실제로 기다린다 (맞지 않고 곁에 서 있는다)
+    const end = performance.now() + 5000;
+    while (performance.now() < end && !acted) {
+      const e = rs().enemies[0];
+      if (e) rs().player.setPosition(e.sprite.x - 20, e.sprite.y);
+      if (rs().enemyBullets.getLength() > 0 || rs().hazards.length > 0) acted = true;
+      await frames(2);
+      await sleep(16);
+    }
+    life.hurtPlayer = hurt0;
+    // 공격이 없는 적(몸통 박치기만)은 무적이면 피해 호출이 없다
+    const def = rs().ctx.data.enemies.enemies.find((x) => x.id === enemyId);
+    if (!acted && (def.attacks?.length ?? 0) > 0) quiet.push(name);
+    for (const e of [...rs().enemies]) if (!e.dead) rs().enemyLife.removeEnemy(e);
+    for (const x of [...rs().enemyBullets.getChildren()]) x.destroy();
+  }
+}
+const ENEMY_IDS = ['tomakki', 'gaedeulgae', 'akgwi', 'ghostShooter', 'hectarTrooper', 'magiBeetle', 'aMemory', 'ancientOne', 'hatredShard', 'executor', 'archon', 'vesselTree', 'pulseSac', 'gazeBell', 'clusterAlveoli', 'magiColonyFusion'];
+for (let i = 0; i < 4; i++) SCENES[`enemies${i + 1}`] = () => tryEnemies(ENEMY_IDS.slice(i * 4, i * 4 + 4), []);
+SCENES.elites = () => tryEnemies([], ['giant', 'swift', 'explosive']);
 /** 부활 아이템: 쓰러졌다가 체력 가득 일어난다 (결산으로 가지 않음) */
 SCENES.revive = async () => {
   await startRun('warrior');
@@ -300,6 +373,8 @@ export async function run(name) {
   errors.length = 0;
   spawned = 0;
   forced = [];
+  tried = [];
+  quiet = [];
   cast = new Set();
   let threw = null;
   try {
@@ -321,6 +396,8 @@ export async function run(name) {
     left: r?.enemies?.length,
     cast: [...cast],
     forced,
+    tried,
+    quiet,
     bossHp: r ? [...r.bossControllers.keys()].map((e) => Math.round(e.hp)) : [],
   };
 }
