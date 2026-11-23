@@ -1826,7 +1826,9 @@
       },
       "color": "#b266ff",
       "sprites": {
-        "pillar": { "spriteKey": "fx_hw_pillar", "color": "#b266ff", "size": 40 }
+        "pillar": { "spriteKey": "fx_hw_pillar", "color": "#b266ff", "size": 40 },
+        "column": { "spriteKey": "fx_hw_pillar_column", "color": "#b266ff", "size": 40 },
+        "crater": { "spriteKey": "fx_hw_pillar_crater", "color": "#b266ff", "size": 64 }
       }
     },
     {
@@ -1886,7 +1888,8 @@
         "soldierThrust": { "spriteKey": "fx_summon_soldier_thrust", "color": "#b266ff", "size": 28 },
         "soldierBurst": { "spriteKey": "fx_summon_soldier_burst", "color": "#b266ff", "size": 32 },
         "golemCrush": { "spriteKey": "fx_summon_golem_crush", "color": "#6a6a78", "size": 48 },
-        "golemShell": { "spriteKey": "fx_summon_golem_shell", "color": "#b266ff", "size": 40 }
+        "golemShell": { "spriteKey": "fx_summon_golem_shell", "color": "#b266ff", "size": 40 },
+        "golemCrater": { "spriteKey": "fx_hw_pillar_crater", "color": "#b266ff", "size": 64 }
       }
     },
     {
@@ -1918,9 +1921,9 @@
       "tags": [],
       "sources": { "spirit": ["magic", "ranged"] },
       "levels": [
-        { "cooldownSec": 0, "values": { "elementDamage": 0.15, "maxSpirits": 2, "lifeSec": 6, "attackSec": 1, "spiritDamage": 5, "range": 140, "radius": 18, "burnStacks": 1, "slow": 0.25, "slowSec": 1.2 } },
-        { "cooldownSec": 0, "values": { "elementDamage": 0.2, "maxSpirits": 3, "lifeSec": 7, "attackSec": 0.9, "spiritDamage": 6.5, "range": 150, "radius": 20, "burnStacks": 1, "slow": 0.3, "slowSec": 1.2 } },
-        { "cooldownSec": 0, "values": { "elementDamage": 0.25, "maxSpirits": 4, "lifeSec": 8, "attackSec": 0.8, "spiritDamage": 8, "range": 160, "radius": 22, "burnStacks": 2, "slow": 0.35, "slowSec": 1.2 } }
+        { "cooldownSec": 0, "values": { "elementDamage": 0.15, "shots": 1, "spiritDamage": 7, "range": 160, "radius": 18, "burnStacks": 1, "slow": 0.25, "slowSec": 1.2 } },
+        { "cooldownSec": 0, "values": { "elementDamage": 0.2, "shots": 2, "spiritDamage": 9, "range": 170, "radius": 20, "burnStacks": 1, "slow": 0.3, "slowSec": 1.2 } },
+        { "cooldownSec": 0, "values": { "elementDamage": 0.25, "shots": 3, "spiritDamage": 11, "range": 180, "radius": 22, "burnStacks": 2, "slow": 0.35, "slowSec": 1.2 } }
       ],
       "color": "#b266ff",
       "sprites": {

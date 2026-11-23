@@ -141,13 +141,15 @@ describe('전직·보스 단계 모습', () => {
     expect(keys.has(artKeys.bossPhase('enemy_eclipse', 2))).toBe(true);
     expect(keys.has(artKeys.bossPhase('enemy_eclipse', 3))).toBe(false);
   });
-  it('마기법사·백온파·휘강파는 정면·뒷모습·옆 걷기 그림, 집행 의지체 소환체·원소 정령은 한 장(움직임은 코드)', async () => {
+  it('마기법사·백온파·휘강파는 정면·뒷모습·옆 걷기 그림, 집행 의지체 소환체는 서기·걷기·공격 시트, 원소 정령은 한 장', async () => {
     const { artKeys } = await import('../src/systems/art');
     const S = gameData.art.sprites;
     for (const key of ['magiMage', 'baekon', 'hwigang'].map(artKeys.playerSchool)) {
       expect(Object.keys(S[key]?.anims ?? {}).sort(), key).toEqual(['idle', 'move', 'moveBack', 'moveFront']);
     }
-    for (const key of ['summon_will_construct', 'summon_magi_soldier', 'summon_imitation_golem', 'summon_spirit_fire', 'summon_spirit_ice', 'summon_spirit_lightning', 'summon_spirit_magi']) expect(S[key]?.frames, key).toBe(1);
+    expect(Object.keys(S.summon_will_construct?.anims ?? {}).sort()).toEqual(['cast', 'idle', 'move']);
+    for (const key of ['summon_magi_soldier', 'summon_imitation_golem']) expect(Object.keys(S[key]?.anims ?? {}).sort(), key).toEqual(['attack', 'idle', 'move']);
+    for (const key of ['summon_spirit_fire', 'summon_spirit_ice', 'summon_spirit_lightning', 'summon_spirit_magi']) expect(S[key]?.frames, key).toBe(1);
     expect(S.player_magiMage!.frameHeight).toBe(S.player_warrior!.frameHeight);
     for (const key of ['will_shot', 'will_hit', 'soldier_thrust', 'soldier_burst', 'golem_crush', 'golem_shell']) expect(S[`fx_summon_${key}`]?.anims?.play, key).toBeDefined();
   });

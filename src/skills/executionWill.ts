@@ -4,13 +4,14 @@
  *   순간이동·원소 가호·집행 의지체·궁극기·기본공격은 따라 쓰지 않는다. 피해를 받지 않는다.
  * - Lv2 마기 병정 count기: 가까운 적에게 달라붙어 찌르고 둔화·밀치기. 적 탄·몸에 닿으면 체력이 깎이고, 부서지면 소폭발.
  * - Lv3 모조 마기골렘: 내려앉으며 충격파, 주기적 원형 충격파·밀치기, 가까운 적 자리에 마기 포격. 체력이 깎이고 사라질 때 마기 폭발.
- * 그림은 한 장(힉스필드)이고 움직임(떠다님·걸음·기울기·찌르기·내려찍기)과 등장 연출은 코드로 준다.
+ * 그림은 힉스필드로 뽑은 움직임 시트(idle·move·attack/cast). 떠다님·숨쉬기·등장 연출은 코드로 얹는다.
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
 import type { BuffView } from '../core/session';
 import type { Enemy } from '../entities/enemy';
 import { shake } from '../entities/juice';
+import { animKey } from '../systems/art';
 import { willCopies } from '../systems/magiMage';
 import type { SpriteRef } from '../types/data';
 import { playFx } from './skillFx';
@@ -47,6 +48,10 @@ class Summon implements SkillObject {
   private moving = false;
   /** 등장 연출 동안 움직이지 않는다 */
   protected busy = 0;
+  /** 공격·시전 동작이 끝나기 전에는 걷기·서기로 바꾸지 않는다 */
+  private actingUntil = 0;
+  /** 땅에서 솟는 정도 (0: 땅속, 1: 다 나옴) */
+  protected rise = 1;
 
   constructor(
     protected readonly host: SkillHost,
@@ -68,6 +73,29 @@ class Summon implements SkillObject {
     else this.img.setDisplaySize(ref.size, ref.height ?? ref.size);
     this.baseSX = this.img.scaleX;
     this.baseSY = this.img.scaleY;
+    this.play('idle');
+  }
+
+  /** 반복 동작 (공격 중이면 미룬다) */
+  protected play(name: string): void {
+    if (this.host.scene.time.now < this.actingUntil) return;
+    const key = animKey(this.ref.spriteKey, name);
+    if (this.img.anims.currentAnim?.key !== key && this.img.scene.anims.exists(key)) this.img.play(key);
+  }
+
+  /** 한 번 도는 동작(공격·시전). 끝나면 서기로. 걸리는 초를 돌려준다 */
+  protected act1(name: string): number {
+    const key = animKey(this.ref.spriteKey, name);
+    const anim = this.img.scene.anims.get(key);
+    if (!anim) return 0;
+    const sec = anim.frames.length / anim.frameRate;
+    this.actingUntil = this.host.scene.time.now + sec * 1000;
+    this.img.play(key);
+    this.img.once('animationcomplete', () => {
+      this.actingUntil = 0;
+      if (!this.gone) this.play('idle');
+    });
+    return sec;
   }
 
   /** to 쪽으로 걷는다(벽이면 서 있는다). 움직였으면 true */
@@ -78,6 +106,7 @@ class Summon implements SkillObject {
     if ((dx === 0 && dy === 0) || this.host.blocked(next.x, next.y)) return false;
     this.at = next;
     this.moving = true;
+    this.play('move');
     if (Math.abs(dx) > 0.01) this.img.setFlipX(dx < 0);
     return true;
   }
@@ -121,6 +150,7 @@ class Summon implements SkillObject {
     this.takeHits(dt);
     this.moving = false;
     if (this.busy <= 0) this.act(dt);
+    if (!this.moving) this.play('idle');
     this.draw();
     if (this.life > 0 && this.hp > 0) return true;
     this.end(this.hp <= 0);
@@ -136,14 +166,15 @@ class Summon implements SkillObject {
     if (this.floating) {
       bob = -2 - Math.sin(t * 2.4) * 2;
       lean = Math.sin(t * 1.3) * 0.05;
-    } else if (this.moving) {
-      bob = -Math.abs(Math.sin(t * 11)) * 2.5;
-      lean = Math.sin(t * 11) * 0.07;
-    } else breath = 1 + Math.sin(t * 2.6) * 0.025;
+    } else if (!this.moving) breath = 1 + Math.sin(t * 2.6) * 0.02;
     const p = this.pose;
     const fade = Math.min(1, Math.max(0, this.life) / 0.4 + 0.2);
+    // 땅에서 솟는 중: 땅 아래로 내리고 땅 위로 나온 만큼만 보인다
+    if (this.rise < 1) this.img.setCrop(0, 0, this.img.frame.width, this.img.frame.height * this.rise);
+    else if (this.img.isCropped) this.img.setCrop();
+    const sink = (1 - this.rise) * this.img.displayHeight;
     this.img
-      .setPosition(this.at.x + p.ox, this.at.y + p.oy + bob)
+      .setPosition(this.at.x + p.ox, this.at.y + p.oy + bob + sink)
       .setScale(this.baseSX * p.sx * (2 - breath), this.baseSY * p.sy * breath)
       .setRotation(p.rot + lean)
       .setAlpha(fade * p.alpha);
@@ -221,7 +252,7 @@ class WillConstruct extends Summon {
       // 의지체 자리에서, 본체가 쏜 방향으로, 피해만 줄여서. 쏘는 쪽으로 몸을 젖힌다
       const from = { x: this.at.x, y: this.at.y - 12 };
       this.img.setFlipX(aim.x < 0);
-      this.tween({ sx: 1.15, sy: 0.9, ox: -aim.x * 3 }, 0.1, 'Quad.easeOut', true);
+      this.act1('cast');
       const copy: SkillHost = { ...host, playerPos: () => ({ ...from }), aimDir: () => aim };
       const values = cast.values.damage !== undefined ? { ...cast.values, damage: cast.values.damage * v.copyDamage! } : cast.values;
       impl.cast(copy, { ...cast, values });
@@ -274,7 +305,8 @@ class MagiSoldier extends Summon {
     const dx = e.sprite.x - this.at.x;
     const dy = e.sprite.y - this.at.y;
     const d = Math.hypot(dx, dy) || 1;
-    this.lunge({ x: e.sprite.x, y: e.sprite.y }, 7, 0.09);
+    this.act1('attack');
+    this.lunge({ x: e.sprite.x, y: e.sprite.y }, 4, 0.08);
     const fx = this.s.def.sprites.soldierThrust!;
     playFx(this.host.scene, fx, this.at.x + (dx / d) * fx.size * 0.45, this.at.y - 14 + (dy / d) * fx.size * 0.4, { w: fx.size, rotation: Math.atan2(dy, dx) });
     if (this.host.hit(e, v.damage!, this.s.def.sources.summon!)) return;
@@ -287,10 +319,9 @@ class MagiSoldier extends Summon {
   }
 }
 
-const GOLEM_DROP_PX = 150;
-const GOLEM_DROP_SEC = 0.42;
+const GOLEM_RISE_SEC = 0.9;
 
-/** Lv3: 하늘에서 떨어져 내려앉으며 충격파, 주기적 충격파와 마기 포격 */
+/** Lv3: 땅을 가르고 솟아오르며 충격파, 주기적 내려찍기 충격파와 마기 포격 */
 class ImitationGolem extends Summon {
   private crushIn: number;
   private shellIn: number;
@@ -299,19 +330,24 @@ class ImitationGolem extends Summon {
     super(host, s, ref, at, true);
     this.crushIn = s.values.crushEverySec!;
     this.shellIn = s.values.shellEverySec! / 2;
-    this.busy = GOLEM_DROP_SEC + 0.25;
-    this.pose.oy = -GOLEM_DROP_PX;
-    // 떨어질 자리에 그림자가 커진다
-    const shadow = host.scene.add.ellipse(at.x, at.y, ref.size * 1.4, ref.size * 0.45, 0x000000, 0.4).setDepth(2.4).setScale(0.3);
-    host.scene.tweens.add({ targets: shadow, scale: 1, duration: GOLEM_DROP_SEC * 1000, ease: 'Quad.easeIn', onComplete: () => shadow.destroy() });
-    this.tween({ oy: 0 }, GOLEM_DROP_SEC, 'Quad.easeIn', false, () => {
+    this.busy = GOLEM_RISE_SEC + 0.2;
+    this.rise = 0;
+    // 땅이 갈라지고(균열) 흔들리며 몸이 솟는다. 다 나오면 충격파
+    const crater = s.def.sprites.golemCrater;
+    if (crater) {
+      const c = host.sprite(at.x, at.y + 2, crater).setDepth(2.5).setScale(0.2).setAlpha(0.95);
+      const w = ref.size * 2.2;
+      host.scene.tweens.add({ targets: c, displayWidth: w, displayHeight: (w * c.height) / Math.max(1, c.width), duration: 260, ease: 'Back.easeOut' });
+      host.scene.tweens.add({ targets: c, alpha: 0, delay: (GOLEM_RISE_SEC + 1.2) * 1000, duration: 600, onComplete: () => c.destroy() });
+    }
+    shake(host.scene, 'rumble');
+    host.scene.tweens.add({ targets: this, rise: 1, duration: GOLEM_RISE_SEC * 1000, ease: 'Quad.easeOut', onComplete: () => {
       if (this.gone) return;
-      // 내려앉는 충격파 + 찌그러졌다 펴진다
       this.crush(s.values.landDamage!, 'medium');
-      this.pose.sx = 1.3;
-      this.pose.sy = 0.7;
-      this.tween({ sx: 1, sy: 1 }, 0.3, 'Back.easeOut');
-    });
+      this.act1('attack');
+    } });
+    // 솟는 동안 돌 부스러기가 튄다
+    for (let i = 0; i < 4; i++) host.scene.time.delayedCall(i * 180, () => !this.gone && host.burst({ x: at.x + host.rng.range(-10, 10), y: at.y }, '#8a8a96'));
   }
 
   private crush(damage: number, power: 'light' | 'medium' = 'light'): void {
@@ -322,16 +358,11 @@ class ImitationGolem extends Summon {
     shake(this.host.scene, power);
   }
 
-  /** 들썩 뛰어올랐다 내려찍는다 */
+  /** 두 주먹을 들어 내려찍는다 (내려찍는 칸에서 충격파) */
   private stomp(): void {
-    this.busy = 0.3;
-    this.tween({ oy: -10, sy: 1.12, sx: 0.92 }, 0.14, 'Quad.easeOut', false, () => {
-      this.tween({ oy: 0, sy: 0.78, sx: 1.2 }, 0.08, 'Quad.easeIn', false, () => {
-        if (this.gone) return;
-        this.crush(this.s.values.crushDamage!);
-        this.tween({ sy: 1, sx: 1 }, 0.2, 'Back.easeOut');
-      });
-    });
+    const sec = this.act1('attack') || 0.3;
+    this.busy = sec;
+    this.host.scene.time.delayedCall(sec * 0.6 * 1000, () => !this.gone && this.crush(this.s.values.crushDamage!));
   }
 
   private bombard(): void {

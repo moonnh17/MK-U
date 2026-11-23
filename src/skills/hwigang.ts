@@ -14,7 +14,7 @@ import { executable, type PureElement } from '../systems/magiMage';
 import { lineHits } from '../systems/targeting';
 import { inArc } from '../systems/weapons';
 import type { Enemy } from '../entities/enemy';
-import { fxScale, impactFx, loopArt, playFx, ProjectileLook, stretchFx } from './skillFx';
+import { fxScale, impactFx, loopArt, playFx, ProjectileLook, sparks, stretchFx } from './skillFx';
 import { nearestEnemy, trimOldest, type PassiveImpl, type SkillCast, type SkillHost, type SkillImpl, type SkillObject, type UltimateImpl } from './host';
 
 const RAY_STEP_PX = 4;
@@ -154,6 +154,43 @@ export const magiCondenser: SkillImpl = {
 
 // ---------- 마기 기둥 ----------
 
+/**
+ * 기둥 연출: 땅이 갈라지며 빛이 새고(예고) → 거대한 마기 기둥이 솟구친다(늘어나며 튀어나옴, 빛 덧칠, 파편, 흔들림)
+ * → 잠깐 버티다 가늘어지며 사라진다. 균열은 조금 더 남는다
+ */
+function pillarFx(host: SkillHost, s: SkillCast, at: Vec2, r: number, delaySec: number): void {
+  const k = fxScale(host, s.owned.level);
+  const sc = host.scene;
+  const crater = s.def.sprites.crater!;
+  const c = host.sprite(at.x, at.y + 2, crater).setDepth(2.5).setAlpha(0.9);
+  const cw = r * 3.2 * k;
+  c.setDisplaySize(cw * 0.3, (cw * 0.3 * c.height) / Math.max(1, c.width));
+  sc.tweens.add({ targets: c, displayWidth: cw, displayHeight: (cw * c.height) / Math.max(1, c.width), duration: delaySec * 1000, ease: 'Quad.easeOut' });
+  sc.tweens.add({ targets: c, alpha: 0, delay: (delaySec + 1.2) * 1000, duration: 500, onComplete: () => c.destroy() });
+  shake(sc, 'rumble');
+  sc.time.delayedCall(delaySec * 1000, () => {
+    const ref = s.def.sprites.column!;
+    const w = Math.max(30, r * 2.4) * k;
+    const h = w * 2.6;
+    // 몸통 + 같은 그림을 넓게 겹친 빛
+    const glow = host.sprite(at.x, at.y + 3, ref).setOrigin(0.5, 1).setDepth(6).setBlendMode('ADD').setAlpha(0.55);
+    const body = host.sprite(at.x, at.y + 3, ref).setOrigin(0.5, 1).setDepth(6);
+    body.setDisplaySize(w, 1);
+    glow.setDisplaySize(w * 1.6, 1);
+    sc.tweens.add({ targets: body, displayHeight: h, duration: 160, ease: 'Back.easeOut' });
+    sc.tweens.add({ targets: glow, displayHeight: h * 1.08, duration: 160, ease: 'Back.easeOut' });
+    // 버티는 동안 가볍게 일렁이다가 가늘어지며 사라진다
+    sc.tweens.add({ targets: glow, alpha: 0.25, duration: 90, yoyo: true, repeat: 2, delay: 160 });
+    sc.tweens.add({ targets: [body, glow], displayWidth: 0, alpha: 0, delay: 560, duration: 300, ease: 'Quad.easeIn', onComplete: () => (body.destroy(), glow.destroy()) });
+    playFx(sc, s.def.sprites.pillar!, at.x, at.y + r * 0.3, { w: w * 1.2 }).setOrigin(0.5, 1);
+    shake(sc, 'medium');
+    host.hitStop?.(0.04);
+    sparks(sc, at.x, at.y - 4, '#8a8a96', host.ctx.data.juice.projectileLook, 2 * k);
+    sparks(sc, at.x, at.y - h * 0.4, s.def.color, host.ctx.data.juice.projectileLook, 2.5 * k);
+    host.burst(at, s.def.color);
+  });
+}
+
 export const magiPillar: SkillImpl = {
   cast(host, s) {
     const v = s.values;
@@ -162,8 +199,7 @@ export const magiPillar: SkillImpl = {
     const d = host.aimDir();
     const at = target ? { x: target.sprite.x, y: target.sprite.y } : { x: p.x + d.x * v.ahead!, y: p.y + d.y * v.ahead! };
     const r = host.area(v.radius!);
-    const ref = s.def.sprites.pillar!;
-    playFx(host.scene, ref, at.x, at.y + r * 0.3, { w: Math.max(ref.size, r * 2.4) * fxScale(host, s.owned.level) }).setOrigin(0.5, 1);
+    pillarFx(host, s, at, r, v.delaySec!);
     host.scene.time.delayedCall(v.delaySec! * 1000, () => {
       impactFx(host, s.owned.level, at.x, at.y, s.def.color, r * 1.4, 1.5);
       for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= r + e.radius) host.hit(e, v.damage!, s.def.sources.pillar!);
@@ -180,29 +216,26 @@ const SPIRIT_OWNER = 'pureUnfolding.spirit';
 const SPIRIT_SHOT_PXPS = 230;
 
 /**
- * 원소 정령: 장착한 공격 스킬이 모두 한 원소일 때 그 원소 스킬을 쓰면 하나 나온다(최대 maxSpirits, 넘치면 오래된 것부터).
- * 플레이어 둘레를 떠다니며 attackSec마다 사거리 안 가장 가까운 적을 친다.
+ * 원소 정령: 장착한 공격 스킬이 모두 한 원소인 동안 하나가 플레이어 둘레를 떠다닌다(MageRuntime이 부르고 치운다).
+ * 그 원소 스킬을 쓸 때마다 사거리 안 가까운 적들에게 shots발 추가 공격(적이 적으면 같은 적에게 여러 발).
  * 화염: 불덩이 → 작은 폭발·화상. 냉기: 얼음창 → 둔화. 번개: 즉시 번개. 순수 마기: 마기 구슬 → 작은 폭발.
  */
-class ElementSpirit implements SkillObject {
+export class ElementSpirit implements SkillObject {
   readonly owner = SPIRIT_OWNER;
   readonly createdAt: number;
   private readonly img: Phaser.GameObjects.Sprite;
   private readonly scale: number;
-  private life: number;
-  private attackIn: number;
+  private alive = true;
   private t: number;
   private at: Vec2;
 
   constructor(
     host: SkillHost,
     private readonly def: SkillCast['def'],
-    private readonly v: Record<string, number>,
-    private readonly el: PureElement,
+    private v: Record<string, number>,
+    readonly el: PureElement,
   ) {
     this.createdAt = host.scene.time.now;
-    this.life = v.lifeSec!;
-    this.attackIn = v.attackSec! * 0.5;
     this.t = host.rng.range(0, Math.PI * 2);
     const p = host.playerPos();
     this.at = { x: p.x, y: p.y - 10 };
@@ -217,24 +250,39 @@ class ElementSpirit implements SkillObject {
   }
 
   update(dt: number, host: SkillHost): boolean {
-    this.life -= dt;
     this.t += dt;
     // 플레이어 둘레를 천천히 돌며 떠다닌다
     const p = host.playerPos();
     const to = { x: p.x + Math.cos(this.t * 0.9) * 18, y: p.y - 14 + Math.sin(this.t * 0.9) * 8 + Math.sin(this.t * 3) * 2 };
     const k = Math.min(1, dt * 5);
     this.at = { x: this.at.x + (to.x - this.at.x) * k, y: this.at.y + (to.y - this.at.y) * k };
-    this.img.setPosition(this.at.x, this.at.y).setAlpha(Math.min(1, Math.max(0, this.life) / 0.4));
-    this.attackIn -= dt;
-    if (this.attackIn <= 0) {
-      const target = nearestEnemy(host, this.at, this.v.range!);
-      if (target) {
-        this.attackIn = this.v.attackSec!;
+    this.img.setPosition(this.at.x, this.at.y);
+    return this.alive;
+  }
+
+  /** 순수 전개 레벨이 바뀌면 수치만 갈아 끼운다 */
+  setValues(v: Record<string, number>): void {
+    this.v = v;
+  }
+
+  dismiss(): void {
+    this.alive = false;
+  }
+
+  /** 맞춘 원소 스킬을 썼다: 가까운 적부터 shots발 (0.1초 간격) */
+  volley(host: SkillHost): void {
+    const list = [...host.enemies()]
+      .filter((e) => Math.hypot(e.sprite.x - this.at.x, e.sprite.y - this.at.y) <= this.v.range! + e.radius)
+      .sort((a, b) => Math.hypot(a.sprite.x - this.at.x, a.sprite.y - this.at.y) - Math.hypot(b.sprite.x - this.at.x, b.sprite.y - this.at.y));
+    if (list.length === 0) return;
+    for (let i = 0; i < this.v.shots!; i++) {
+      const target = list[i % list.length]!;
+      host.scene.time.delayedCall(i * 100, () => {
+        if (!this.alive || target.dead) return;
         this.img.setFlipX(target.sprite.x < this.at.x);
         this.attack(host, target);
-      }
+      });
     }
-    return this.life > 0;
   }
 
   private attack(host: SkillHost, target: Enemy): void {
@@ -286,10 +334,12 @@ class ElementSpirit implements SkillObject {
   }
 }
 
-/** 원소 정령 하나를 부른다 (maxSpirits를 넘으면 오래된 것부터 사라진다) */
-export function summonSpirit(host: SkillHost, def: SkillCast['def'], values: Record<string, number>, el: PureElement): void {
-  trimOldest(host, SPIRIT_OWNER, values.maxSpirits! - 1);
-  host.addObject(new ElementSpirit(host, def, values, el));
+/** 원소 정령을 부른다 (이미 있던 정령은 치운다) */
+export function summonSpirit(host: SkillHost, def: SkillCast['def'], values: Record<string, number>, el: PureElement): ElementSpirit {
+  trimOldest(host, SPIRIT_OWNER, 0);
+  const sp = new ElementSpirit(host, def, values, el);
+  host.addObject(sp);
+  return sp;
 }
 
 // ---------- 슬픈 처형 (휘강파 궁극기) ----------

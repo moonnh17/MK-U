@@ -212,7 +212,7 @@
   "skill.elementCycle.desc": "패시브. 앞서 쓴 스킬과 다른 원소의 스킬을 쓰면 그 스킬 피해 +{damagePct}%.",
   "skill.pureUnfolding": "순수 전개",
   "skill.pureUnfolding.short": "순수",
-  "skill.pureUnfolding.desc": "패시브. 장착한 공격 스킬이 모두 같은 원소(화염·냉기·번개·순수 마기)면 그 원소 스킬 피해 +{elementDamagePct}%. 그 원소 스킬을 쓸 때마다 원소 정령이 나와 {lifeSec}초 동안 {attackSec}초마다 적을 친다(피해 {spiritDamage}, 최대 {maxSpirits}기).",
+  "skill.pureUnfolding.desc": "패시브. 장착한 공격 스킬이 모두 같은 원소(화염·냉기·번개·순수 마기)면 그 원소 스킬 피해 +{elementDamagePct}%. 그동안 그 원소의 정령 하나가 곁을 떠다니며, 그 원소 스킬을 쓸 때마다 가까운 적에게 {shots}발 추가 공격(피해 {spiritDamage}).",
   "imprint.label": "개전 각인",
   "imprint.slotHint": "1번 칸 스킬의 각인이 적용된다",
   "imprint.none": "각인 없음",

@@ -8201,24 +8201,78 @@
     },
     "summon_will_construct": {
       "file": "mku/summon_will_construct.png",
-      "frameWidth": 60,
-      "frameHeight": 80,
-      "frames": 1,
-      "density": 2
+      "frameWidth": 82,
+      "frameHeight": 81,
+      "frames": 8,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 6
+        },
+        "move": {
+          "from": 0,
+          "to": 3,
+          "fps": 8
+        },
+        "cast": {
+          "from": 4,
+          "to": 7,
+          "fps": 12,
+          "loop": false
+        }
+      }
     },
     "summon_magi_soldier": {
       "file": "mku/summon_magi_soldier.png",
-      "frameWidth": 62,
+      "frameWidth": 178,
       "frameHeight": 80,
-      "frames": 1,
-      "density": 2
+      "frames": 9,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 1
+        },
+        "move": {
+          "from": 1,
+          "to": 4,
+          "fps": 8
+        },
+        "attack": {
+          "from": 5,
+          "to": 8,
+          "fps": 16,
+          "loop": false
+        }
+      }
     },
     "summon_imitation_golem": {
       "file": "mku/summon_imitation_golem.png",
-      "frameWidth": 113,
-      "frameHeight": 120,
-      "frames": 1,
-      "density": 2
+      "frameWidth": 112,
+      "frameHeight": 134,
+      "frames": 9,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 0,
+          "fps": 1
+        },
+        "move": {
+          "from": 1,
+          "to": 4,
+          "fps": 6
+        },
+        "attack": {
+          "from": 5,
+          "to": 8,
+          "fps": 10,
+          "loop": false
+        }
+      }
     },
     "fx_summon_will_shot": {
       "file": "mku/fx_summon_will_shot.png",
@@ -8769,6 +8823,20 @@
       "file": "mku/summon_spirit_magi.png",
       "frameWidth": 34,
       "frameHeight": 40,
+      "frames": 1,
+      "density": 2
+    },
+    "fx_hw_pillar_column": {
+      "file": "mku/fx_hw_pillar_column.png",
+      "frameWidth": 80,
+      "frameHeight": 148,
+      "frames": 1,
+      "density": 2
+    },
+    "fx_hw_pillar_crater": {
+      "file": "mku/fx_hw_pillar_crater.png",
+      "frameWidth": 128,
+      "frameHeight": 53,
       "frames": 1,
       "density": 2
     }

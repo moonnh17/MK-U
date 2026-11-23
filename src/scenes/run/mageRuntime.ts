@@ -10,7 +10,7 @@ import type { Enemy } from '../../entities/enemy';
 import type { SkillCast } from '../../skills/host';
 import { playFx } from '../../skills/skillFx';
 import { addElement, attackElement, castBoost, chargeAfterMove, condenseFill, frostHit, imprintMods, unifiedElement, type PureElement } from '../../systems/magiMage';
-import { summonSpirit } from '../../skills/hwigang';
+import { summonSpirit, type ElementSpirit } from '../../skills/hwigang';
 import { findSkill, skillValues } from '../../systems/skills';
 import type { BurnRule, ElementId, SkillDef, TagId } from '../../types/data';
 import type { PlayerMods } from '../../systems/vitals';
@@ -35,6 +35,8 @@ export class MageRuntime {
   private echoScale = 1;
   private echoT = 0;
   private echoLunge: { to: Vec2; until: number } | null = null;
+  /** 순수 전개 원소 정령 (한 원소로 맞춘 동안만) */
+  private spirit: ElementSpirit | null = null;
 
   constructor(private readonly run: RunScene) {}
 
@@ -58,6 +60,21 @@ export class MageRuntime {
     } else this.purifyIn = 0;
     this.recoilIn = Math.max(0, this.recoilIn - dt);
     this.updateEcho(im?.effect === 'followUp', dt);
+    this.updateSpirit();
+  }
+
+  /** 순수 전개: 한 원소로 맞춘 동안 정령 하나. 원소가 바뀌거나 풀리면 치운다(스테이지가 바뀌어 치워졌으면 다시 부른다) */
+  private updateSpirit(): void {
+    const el = this.pureElement();
+    const live = this.spirit && this.run.skillRt.skillObjects.includes(this.spirit) ? this.spirit : null;
+    if (live && live.el !== el) live.dismiss();
+    if (!el) {
+      this.spirit = null;
+      return;
+    }
+    const v = this.passiveValues('pureUnfolding', true)!;
+    if (live && live.el === el) live.setValues(v);
+    else this.spirit = summonSpirit(this.run.skillRt.hostFor('pureUnfolding'), findSkill(this.run.ctx.data.skills, 'pureUnfolding'), v, el);
   }
 
   /** 해로운 상태(위압 속박) 해제 + 회복 */
@@ -149,7 +166,7 @@ export class MageRuntime {
     for (const o of [...this.run.skillRt.skillObjects]) o.onSkillCast?.(this.run.skillRt.hostFor(def.id), cast);
     // 순수 전개: 맞춘 원소의 스킬을 쓸 때마다 원소 정령
     const el = this.pureElement();
-    if (el && attackElement(def) === el) summonSpirit(this.run.skillRt.hostFor('pureUnfolding'), findSkill(this.run.ctx.data.skills, 'pureUnfolding'), this.passiveValues('pureUnfolding', true)!, el);
+    if (el && attackElement(def) === el) this.spirit?.volley(this.run.skillRt.hostFor('pureUnfolding'));
   }
 
   /** 시전 강화로 그 스킬 피해에 곱하는 값 */

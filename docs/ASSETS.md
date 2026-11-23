@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 788개 · 그림 있음 755개
+전체 790개 · 그림 있음 757개
 
 ## player (9)
 
@@ -261,7 +261,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (253)
+## skill (255)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -470,9 +470,11 @@
 | `fx_hw_orb` | 마기 응축구 (orbGlow) 외 1곳 | 20×20 | center | #b266ff | mku/fx_hw_orb.png (43프레임) |
 | `fx_hw_blast` | 마기 응축구 (blast) 외 1곳 | 80×80 | center | #b266ff | mku/fx_hw_blast.png (23프레임) |
 | `fx_hw_pillar` | 마기 기둥 (pillar) | 40×40 | center | #b266ff | mku/fx_hw_pillar.png (35프레임) |
-| `summon_will_construct` | 집행 의지체 (will) 외 1곳 | 18×40 | center | #b266ff | mku/summon_will_construct.png (1프레임) |
-| `summon_magi_soldier` | 집행 의지체 (soldier) | 18×40 | center | #2c1a45 | mku/summon_magi_soldier.png (1프레임) |
-| `summon_imitation_golem` | 집행 의지체 (golem) | 34×60 | center | #6a6a78 | mku/summon_imitation_golem.png (1프레임) |
+| `fx_hw_pillar_column` | 마기 기둥 (column) | 40×40 | center | #b266ff | mku/fx_hw_pillar_column.png (1프레임) |
+| `fx_hw_pillar_crater` | 마기 기둥 (crater) 외 1곳 | 64×64 | center | #b266ff | mku/fx_hw_pillar_crater.png (1프레임) |
+| `summon_will_construct` | 집행 의지체 (will) 외 1곳 | 18×40 | center | #b266ff | mku/summon_will_construct.png (8프레임) |
+| `summon_magi_soldier` | 집행 의지체 (soldier) | 18×40 | center | #2c1a45 | mku/summon_magi_soldier.png (9프레임) |
+| `summon_imitation_golem` | 집행 의지체 (golem) | 34×60 | center | #6a6a78 | mku/summon_imitation_golem.png (9프레임) |
 | `fx_summon_will_hit` | 집행 의지체 (willHit) | 24×24 | center | #b266ff | mku/fx_summon_will_hit.png (2프레임) |
 | `fx_summon_soldier_thrust` | 집행 의지체 (soldierThrust) | 28×28 | center | #b266ff | mku/fx_summon_soldier_thrust.png (4프레임) |
 | `fx_summon_soldier_burst` | 집행 의지체 (soldierBurst) | 32×32 | center | #b266ff | mku/fx_summon_soldier_burst.png (5프레임) |
