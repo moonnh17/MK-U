@@ -9,6 +9,7 @@ import { artKeys } from '../systems/art';
 import { plainLength, type StoryLine } from '../systems/gemini';
 import { applyArtIcon } from './artIcon';
 import { renderMarked } from './markedText';
+import { el } from './dom';
 
 /** 연속 입력으로 문장이 한꺼번에 넘어가지 않게 */
 const ADVANCE_GUARD_MS = 120;
@@ -32,12 +33,6 @@ export class StoryWindow {
 
   constructor(private readonly ctx: GameContext) {
     const t = ctx.t;
-    const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, txt = '') => {
-      const e = document.createElement(tag);
-      e.className = cls;
-      e.textContent = txt;
-      return e;
-    };
     this.root = document.createElement('div');
     this.root.id = 'story';
     this.root.style.setProperty('--gemini', ctx.data.gemini.color);

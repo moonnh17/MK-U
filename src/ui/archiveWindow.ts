@@ -11,6 +11,7 @@ import { geminiSlots, storyLines } from '../systems/gemini';
 import { cutsceneSlots, pastSlots } from '../systems/memories';
 import { buyUpgrade, nextCost, resetUpgrades, spentOn, upgradeLevel } from '../systems/upgrades';
 import type { UpgradeDef } from '../types/data';
+import { el } from './dom';
 
 type Tab = 'past' | 'present' | 'subject';
 
@@ -46,34 +47,27 @@ export class ArchiveWindow {
     });
   }
 
-  private el(tag: string, cls: string, text = ''): HTMLElement {
-    const x = document.createElement(tag);
-    x.className = cls;
-    x.textContent = text;
-    return x;
-  }
-
   private render(): void {
     const t = this.ctx.t;
     this.root.className = this.ctx.uiMode;
     this.root.replaceChildren();
 
-    const head = this.el('div', 'iw-head');
-    const tabs = this.el('div', 'iw-tabs');
+    const head = el('div', 'iw-head');
+    const tabs = el('div', 'iw-tabs');
     for (const id of ['past', 'present', 'subject'] as const) {
-      const b = this.el('button', this.tab === id ? 'on' : '', t(`archive.tab.${id}`));
+      const b = el('button', this.tab === id ? 'on' : '', t(`archive.tab.${id}`));
       b.addEventListener('click', () => {
         this.tab = id;
         this.render();
       });
       tabs.appendChild(b);
     }
-    const close = this.el('button', '', t('archive.close'));
+    const close = el('button', '', t('archive.close'));
     close.addEventListener('click', () => bus.emit('archiveClose', {}));
-    head.append(this.el('b', '', t('archive.title')), tabs, close);
+    head.append(el('b', '', t('archive.title')), tabs, close);
 
     const body = this.tab === 'past' ? this.pastTab() : this.tab === 'present' ? this.presentTab() : this.subjectTab();
-    this.root.append(head, body, this.el('div', 'iw-hint', t(this.ctx.uiMode === 'mobile' ? 'archive.hint.mobile' : 'archive.hint.pc')));
+    this.root.append(head, body, el('div', 'iw-hint', t(this.ctx.uiMode === 'mobile' ? 'archive.hint.mobile' : 'archive.hint.pc')));
     this.root.style.display = 'flex';
   }
 
@@ -81,14 +75,14 @@ export class ArchiveWindow {
     const t = this.ctx.t;
     const mem = this.ctx.data.meta.memory;
     const have = this.ctx.save.data.pastShards;
-    const wrap = this.el('div', 'ar-body');
-    wrap.appendChild(this.el('div', 'iw-sub', t('archive.past.count', { have: Math.min(have, mem.pastSlots), slots: mem.pastSlots })));
-    const grid = this.el('div', 'ar-grid');
+    const wrap = el('div', 'ar-body');
+    wrap.appendChild(el('div', 'iw-sub', t('archive.past.count', { have: Math.min(have, mem.pastSlots), slots: mem.pastSlots })));
+    const grid = el('div', 'ar-grid');
     for (const s of pastSlots(mem.pastSlots, have)) {
-      const cell = this.el('div', s.open ? 'ar-cell open' : 'ar-cell');
-      cell.append(this.el('b', '', s.open ? t('archive.past.open', { n: s.index + 1 }) : t('archive.past.locked')));
+      const cell = el('div', s.open ? 'ar-cell open' : 'ar-cell');
+      cell.append(el('b', '', s.open ? t('archive.past.open', { n: s.index + 1 }) : t('archive.past.locked')));
       // 과거의 기억 내용은 미공개 설정이라 비워 둔다
-      if (s.open) cell.append(this.el('small', '', t('archive.past.sealed')));
+      if (s.open) cell.append(el('small', '', t('archive.past.sealed')));
       grid.appendChild(cell);
     }
     wrap.appendChild(grid);
@@ -98,14 +92,14 @@ export class ArchiveWindow {
   private presentTab(): HTMLElement {
     const t = this.ctx.t;
     const seen = this.ctx.save.data.cutscenes;
-    const wrap = this.el('div', 'ar-body');
-    wrap.appendChild(this.el('div', 'iw-sub', t('archive.present.hint')));
-    const grid = this.el('div', 'ar-grid');
+    const wrap = el('div', 'ar-body');
+    wrap.appendChild(el('div', 'iw-sub', t('archive.present.hint')));
+    const grid = el('div', 'ar-grid');
     for (const s of cutsceneSlots(this.ctx.data, { skill: isSkillImplemented, ultimate: isUltimateImplemented })) {
       const saved = s.id ? seen[s.id] : undefined;
-      const cell = this.el('div', saved ? 'ar-cell open' : 'ar-cell');
-      cell.append(this.el('small', '', t(`archive.group.${s.group}`)));
-      cell.append(this.el('b', '', !s.id ? t('archive.present.notReady') : saved ? t(s.nameKey) : t('archive.present.unseen')));
+      const cell = el('div', saved ? 'ar-cell open' : 'ar-cell');
+      cell.append(el('small', '', t(`archive.group.${s.group}`)));
+      cell.append(el('b', '', !s.id ? t('archive.present.notReady') : saved ? t(s.nameKey) : t('archive.present.unseen')));
       if (saved) {
         cell.addEventListener('click', () => {
           // 저장해 둔 컷인·설명창 그대로 다시 본다 (보관대는 잠깐 숨김)
@@ -119,9 +113,9 @@ export class ArchiveWindow {
     const said = this.ctx.save.data.gemini;
     for (const s of geminiSlots(this.ctx.data.gemini, this.ctx.data.text)) {
       const saved = said[s.id];
-      const cell = this.el('div', saved ? 'ar-cell open' : 'ar-cell');
-      cell.append(this.el('small', '', t('archive.group.gemini')));
-      cell.append(this.el('b', '', !s.ready ? t('archive.present.notReady') : saved ? t(s.nameKey) : t('archive.present.unseen')));
+      const cell = el('div', saved ? 'ar-cell open' : 'ar-cell');
+      cell.append(el('small', '', t('archive.group.gemini')));
+      cell.append(el('b', '', !s.ready ? t('archive.present.notReady') : saved ? t(s.nameKey) : t('archive.present.unseen')));
       if (saved) {
         cell.addEventListener('click', () => {
           this.root.style.display = 'none';
@@ -138,11 +132,11 @@ export class ArchiveWindow {
     const t = this.ctx.t;
     const d = this.ctx.data;
     const save = this.ctx.save.data;
-    const wrap = this.el('div', 'ar-body');
+    const wrap = el('div', 'ar-body');
     // 직업 탭: 고를 수 있는 직업만 열림
-    const jobs = this.el('div', 'iw-tabs');
+    const jobs = el('div', 'iw-tabs');
     for (const j of d.jobs.jobs) {
-      const b = this.el('button', j.id === this.job ? 'on' : '', j.enabled ? t(j.nameKey) : `${t(j.nameKey)} · ${t('archive.subject.locked')}`) as HTMLButtonElement;
+      const b = el('button', j.id === this.job ? 'on' : '', j.enabled ? t(j.nameKey) : `${t(j.nameKey)} · ${t('archive.subject.locked')}`) as HTMLButtonElement;
       b.disabled = !j.enabled;
       b.addEventListener('click', () => {
         this.job = j.id;
@@ -151,10 +145,10 @@ export class ArchiveWindow {
       jobs.appendChild(b);
     }
     const levels = save.upgrades[this.job];
-    const list = this.el('div', 'ar-upgrades');
+    const list = el('div', 'ar-upgrades');
     for (const u of d.meta.upgrades) list.appendChild(this.upgradeRow(u, upgradeLevel(levels, u.id)));
     const spent = spentOn(levels, d.meta.upgrades);
-    const reset = this.el('button', 'iw-drop', t('upgrade.reset', { n: spent })) as HTMLButtonElement;
+    const reset = el('button', 'iw-drop', t('upgrade.reset', { n: spent })) as HTMLButtonElement;
     reset.disabled = spent === 0;
     reset.addEventListener('click', () => {
       const n = resetUpgrades(save, this.job, d.meta.upgrades);
@@ -163,9 +157,9 @@ export class ArchiveWindow {
       bus.emit('saveChanged', {});
       this.render();
     });
-    const foot = this.el('div', 'ar-foot');
-    foot.append(this.el('b', 'ar-crystals', t('archive.crystals', { n: save.crystals })), reset);
-    wrap.append(jobs, this.el('div', 'iw-sub', t('archive.subject.hint')), list, foot);
+    const foot = el('div', 'ar-foot');
+    foot.append(el('b', 'ar-crystals', t('archive.crystals', { n: save.crystals })), reset);
+    wrap.append(jobs, el('div', 'iw-sub', t('archive.subject.hint')), list, foot);
     return wrap;
   }
 
@@ -174,13 +168,13 @@ export class ArchiveWindow {
     const save = this.ctx.save.data;
     const max = u.costs.length;
     const name = t(`upgrade.${u.kind}`);
-    const row = this.el('div', 'ar-row');
+    const row = el('div', 'ar-row');
     const effect = t(`upgrade.effect.${u.kind}`, { v: u.perLevel });
-    const info = this.el('div', 'ar-info');
-    info.append(this.el('b', '', name), this.el('small', '', `${effect} · ${t('upgrade.level', { lv, max })}`));
-    const dots = this.el('span', 'ar-dots', '●'.repeat(lv) + '○'.repeat(max - lv));
+    const info = el('div', 'ar-info');
+    info.append(el('b', '', name), el('small', '', `${effect} · ${t('upgrade.level', { lv, max })}`));
+    const dots = el('span', 'ar-dots', '●'.repeat(lv) + '○'.repeat(max - lv));
     const cost = nextCost(u, lv);
-    const buy = this.el('button', 'ar-buy', cost === null ? t('upgrade.max') : t('upgrade.buy', { cost })) as HTMLButtonElement;
+    const buy = el('button', 'ar-buy', cost === null ? t('upgrade.max') : t('upgrade.buy', { cost })) as HTMLButtonElement;
     buy.disabled = cost === null || save.crystals < cost;
     buy.addEventListener('click', () => {
       if (!buyUpgrade(save, this.job, u)) return;

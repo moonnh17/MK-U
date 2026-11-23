@@ -9,6 +9,7 @@ import { findSkill } from '../systems/skills';
 import { formatPlayTime } from '../systems/runRecord';
 import { playerArtKey, artKeys } from '../systems/art';
 import { applyArtIcon } from './artIcon';
+import { el } from './dom';
 
 export class SettlementWindow {
   private readonly root: HTMLDivElement;
@@ -35,12 +36,6 @@ export class SettlementWindow {
     this.root.className = this.ctx.uiMode;
     this.root.replaceChildren();
 
-    const el = (tag: string, cls: string, text = '') => {
-      const x = document.createElement(tag);
-      x.className = cls;
-      x.textContent = text;
-      return x;
-    };
     const section = (title: string, ...children: HTMLElement[]) => {
       const sec = el('div', 'st-sec');
       sec.append(el('div', 'st-sub', title), ...children);

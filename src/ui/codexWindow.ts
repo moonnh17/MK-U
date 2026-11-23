@@ -20,6 +20,7 @@ import { applyArtIcon } from './artIcon';
 import { munEmblemSvg } from './munEmblem';
 import { itemDescParams } from './itemCard';
 import { weaponInfoLines } from './weaponInfo';
+import { el } from './dom';
 
 const TABS: CodexTab[] = ['monsters', 'characters', 'items', 'weapons'];
 /** 머리말에서 불꽃이 피어오르는 등급과 불꽃 수 */
@@ -94,13 +95,6 @@ export class CodexWindow {
     });
   }
 
-  private el(tag: string, cls: string, text = ''): HTMLElement {
-    const x = document.createElement(tag);
-    x.className = cls;
-    x.textContent = text;
-    return x;
-  }
-
   private render(): void {
     const t = this.ctx.t;
     // 다시 그려도 목록 스크롤은 그대로 둔다 (같은 탭일 때)
@@ -117,10 +111,10 @@ export class CodexWindow {
     if (key !== this.shownKey) this.altView = false;
     this.shownKey = key;
 
-    const head = this.el('div', 'cx-head');
-    const tabs = this.el('div', 'cx-tabs');
+    const head = el('div', 'cx-head');
+    const tabs = el('div', 'cx-tabs');
     for (const id of TABS) {
-      const b = this.el('button', `cx-btn${this.tab === id ? ' on' : ''}`, t(`codex.tab.${id}`));
+      const b = el('button', `cx-btn${this.tab === id ? ' on' : ''}`, t(`codex.tab.${id}`));
       b.addEventListener('click', () => {
         this.tab = id;
         this.selected = null;
@@ -129,30 +123,30 @@ export class CodexWindow {
       tabs.appendChild(b);
     }
     const p = codexProgress(this.ctx.data, this.ctx.save.data, this.tab);
-    const close = this.el('button', 'cx-btn', t('codex.close'));
+    const close = el('button', 'cx-btn', t('codex.close'));
     close.addEventListener('click', () => bus.emit('codexClose', {}));
-    const progress = this.el('div', 'cx-progress');
-    const bar = this.el('i', '');
+    const progress = el('div', 'cx-progress');
+    const bar = el('i', '');
     bar.style.setProperty('--p', `${p.total ? (p.known / p.total) * 100 : 0}%`);
-    progress.append(this.el('span', '', t('codex.progress', { known: p.known, total: p.total })), bar);
-    const unlock = this.el('button', 'cx-btn cx-unlock', t('codex.unlockAll'));
+    progress.append(el('span', '', t('codex.progress', { known: p.known, total: p.total })), bar);
+    const unlock = el('button', 'cx-btn cx-unlock', t('codex.unlockAll'));
     unlock.addEventListener('click', () => this.unlockAll());
-    head.append(this.el('b', 'cx-heading', t('codex.title')), tabs, unlock, progress, close);
+    head.append(el('b', 'cx-heading', t('codex.title')), tabs, unlock, progress, close);
 
-    const list = this.el('div', 'cx-list');
-    const scroll = this.el('div', 'cx-scroll');
+    const list = el('div', 'cx-list');
+    const scroll = el('div', 'cx-scroll');
     for (const s of sections) {
       scroll.appendChild(this.sectionHead(s));
-      const grid = this.el('div', 'cx-grid');
+      const grid = el('div', 'cx-grid');
       for (const e of s.entries) grid.appendChild(this.cell(e, flat.indexOf(e)));
       scroll.appendChild(grid);
     }
-    list.append(this.el('div', 'cx-list-title', t('codex.list', { tab: t(`codex.tab.${this.tab}`) })));
+    list.append(el('div', 'cx-list-title', t('codex.list', { tab: t(`codex.tab.${this.tab}`) })));
     // 정렬: 기본 / 도감 번호순 / 이름순 / 세계관 분류 (캐릭터 탭은 없음)
     if (codexLore(this.ctx.data, this.tab)) {
-      const bar = this.el('div', 'cx-sort');
+      const bar = el('div', 'cx-sort');
       for (const id of CODEX_SORTS) {
-        const b = this.el('button', `cx-sort-btn${this.sort === id ? ' on' : ''}`, t(`codex.sort.${id}`));
+        const b = el('button', `cx-sort-btn${this.sort === id ? ' on' : ''}`, t(`codex.sort.${id}`));
         b.addEventListener('click', () => {
           this.sort = id;
           this.render();
@@ -162,21 +156,21 @@ export class CodexWindow {
       list.appendChild(bar);
     }
     list.appendChild(scroll);
-    const body = this.el('div', 'cx-body');
+    const body = el('div', 'cx-body');
     body.append(this.detail(index), list);
 
-    const foot = this.el('div', 'cx-foot');
+    const foot = el('div', 'cx-foot');
     const step = (d: number) => () => {
       this.selected = flat[(index + d + flat.length) % flat.length] ?? null;
       this.render();
     };
-    const prev = this.el('button', 'cx-btn cx-arrow', '◀');
+    const prev = el('button', 'cx-btn cx-arrow', '◀');
     prev.addEventListener('click', step(-1));
-    const next = this.el('button', 'cx-btn cx-arrow', '▶');
+    const next = el('button', 'cx-btn cx-arrow', '▶');
     next.addEventListener('click', step(1));
-    foot.append(prev, this.el('span', 'cx-page', `${index + 1} / ${flat.length}`), next, this.el('span', 'cx-hint', t(this.ctx.uiMode === 'mobile' ? 'codex.hint.mobile' : 'codex.hint.pc')));
+    foot.append(prev, el('span', 'cx-page', `${index + 1} / ${flat.length}`), next, el('span', 'cx-hint', t(this.ctx.uiMode === 'mobile' ? 'codex.hint.mobile' : 'codex.hint.pc')));
 
-    const frame = this.el('div', 'cx-frame');
+    const frame = el('div', 'cx-frame');
     frame.append(head, body, foot);
     this.root.appendChild(frame);
     this.root.style.display = 'flex';
@@ -190,8 +184,8 @@ export class CodexWindow {
    */
   private sectionHead(s: CodexSection): HTMLElement {
     const t = this.ctx.t;
-    const head = this.el('div', 'cx-section');
-    const title = this.el('span', 'cx-stitle', t(s.titleKey));
+    const head = el('div', 'cx-section');
+    const title = el('span', 'cx-stitle', t(s.titleKey));
     const grade = s.grade && this.ctx.data.groupMultipliers.grades.find((g) => g.id === s.grade);
     if (grade) {
       head.classList.add('graded', `grade-${grade.id}`);
@@ -199,7 +193,7 @@ export class CodexWindow {
       if (SPARK_GRADES.has(grade.id)) {
         // 그림 위치·박자는 칸 번호로 정한다 (꾸밈이라 시드 RNG를 쓰지 않아도 매번 같게)
         for (let i = 0; i < SPARKS; i++) {
-          const sp = this.el('i', 'cx-spark');
+          const sp = el('i', 'cx-spark');
           sp.style.left = `${(i * 37) % 100}%`;
           sp.style.animationDelay = `${((i * 0.29) % 1.6).toFixed(2)}s`;
           sp.style.animationDuration = `${(1.1 + ((i * 0.17) % 0.7)).toFixed(2)}s`;
@@ -210,7 +204,7 @@ export class CodexWindow {
     }
     head.appendChild(title);
     if (grade && (this.tab === 'items' || this.tab === 'weapons')) {
-      const b = this.el('button', 'cx-rate-btn', t('codex.rateShort'));
+      const b = el('button', 'cx-rate-btn', t('codex.rateShort'));
       b.addEventListener('click', () => {
         if (!s.entries.some((e) => e.kind === this.selected?.kind && e.id === this.selected.id)) this.selected = s.entries[0] ?? this.selected;
         this.shownKey = `${this.selected?.kind}:${this.selected?.id}`;
@@ -235,21 +229,21 @@ export class CodexWindow {
   private cell(e: CodexEntry, i: number): HTMLElement {
     const known = this.known(e);
     const on = this.selected?.kind === e.kind && this.selected.id === e.id;
-    const c = this.el('button', `cx-cell${known ? '' : ' unknown'}${this.locked(e) ? ' locked' : ''}${on ? ' on' : ''}`);
-    const icon = this.el('span', 'cx-icon');
+    const c = el('button', `cx-cell${known ? '' : ' unknown'}${this.locked(e) ? ' locked' : ''}${on ? ' on' : ''}`);
+    const icon = el('span', 'cx-icon');
     const a = this.art(e);
     applyArtIcon(icon, this.ctx, a.key, a.color);
-    const name = this.el('small', '', known ? this.name(e) : '???');
+    const name = el('small', '', known ? this.name(e) : '???');
     const mun = known ? this.mun(e, 18) : null;
     if (mun) name.prepend(mun);
-    c.append(icon, this.el('i', '', this.no(e)), name);
+    c.append(icon, el('i', '', this.no(e)), name);
     if (a.ring) c.style.setProperty('--ring', a.ring);
     if (a.grade && SPARK_GRADES.has(a.grade)) {
       // 전설·유니크: 테두리에서 등급 색 불꽃이 피어오른다 (왼쪽 변·오른쪽 변·아랫변을 돌아가며)
       c.classList.add('fx-spark');
-      const fx = this.el('span', 'cx-cell-fx');
+      const fx = el('span', 'cx-cell-fx');
       for (let k = 0; k < CELL_SPARKS; k++) {
-        const sp = this.el('i', 'cx-spark');
+        const sp = el('i', 'cx-spark');
         const side = k % 3;
         sp.style.left = side === 0 ? '0%' : side === 1 ? '100%' : `${(k * 37) % 100}%`;
         sp.style.bottom = side === 2 ? '0%' : `${(k * 29) % 90}%`;
@@ -261,7 +255,7 @@ export class CodexWindow {
     } else if (a.grade === 'mythic') {
       // 신화: 칸 뒤에서 빛줄기가 사방으로 뿜어져 나온다
       c.classList.add('fx-mythic');
-      c.appendChild(this.el('span', 'cx-rays'));
+      c.appendChild(el('span', 'cx-rays'));
     }
     c.addEventListener('click', () => {
       this.selected = e;
@@ -302,7 +296,7 @@ export class CodexWindow {
     if (def?.codexNo === undefined) return null;
     // 문양: 숫자 등급은 1~6, unknown과 미분류는 같은 문양 / 이름은 N문·N문급·unknown·미분류를 구별한다
     const grade = typeof def.mun === 'number' ? String(def.mun) : 'unknown';
-    const span = this.el('span', `cx-mun mun-${grade}`);
+    const span = el('span', `cx-mun mun-${grade}`);
     span.innerHTML = munEmblemSvg(grade, d.enemies.munGrades[grade]!, size, typeof def.mun === 'number' && !def.munClass);
     const t = this.ctx.t;
     span.title = typeof def.mun === 'number' ? t(def.munClass ? 'codex.munClass' : 'codex.mun', { n: def.mun }) : t(def.mun === 'unknown' ? 'codex.mun.unknown' : 'codex.mun.unclassified');
@@ -324,30 +318,30 @@ export class CodexWindow {
   /** 위: 번호·분류, 이름, 그림 + 수치 / 아래: 설명과 세부 항목 (길면 이 칸만 스크롤) */
   private detail(index: number): HTMLElement {
     const t = this.ctx.t;
-    const box = this.el('div', 'cx-detail');
+    const box = el('div', 'cx-detail');
     const e = this.selected;
     if (!e) return box;
     const known = this.known(e);
-    const chips = this.el('div', 'cx-chips');
-    chips.appendChild(this.el('span', 'cx-no', t('codex.no', { n: this.no(e) })));
-    const hero = this.el('div', 'cx-hero');
-    const icon = this.el('span', `cx-big${known ? '' : ' unknown'}`);
+    const chips = el('div', 'cx-chips');
+    chips.appendChild(el('span', 'cx-no', t('codex.no', { n: this.no(e) })));
+    const hero = el('div', 'cx-hero');
+    const icon = el('span', `cx-big${known ? '' : ' unknown'}`);
     const a = this.art(e);
     // 보스 패턴 보기: 2단계에서 모습이 바뀌는 보스는 그 모습으로
     const phase2 = artKeys.bossPhase(a.key, 2);
     applyArtIcon(icon, this.ctx, e.kind === 'enemy' && this.altView && this.ctx.data.art.sprites[phase2] ? phase2 : a.key, a.color);
-    this.side = this.el('div', 'cx-side');
-    const stage = this.el('div', 'cx-stage');
+    this.side = el('div', 'cx-side');
+    const stage = el('div', 'cx-stage');
     stage.appendChild(icon);
     hero.append(stage, this.side);
-    const record = this.el('div', 'cx-record');
-    record.appendChild(this.el('div', 'cx-sub', t('codex.record')));
-    const name = this.el('b', 'cx-name', known ? this.name(e) : '???');
+    const record = el('div', 'cx-record');
+    record.appendChild(el('div', 'cx-sub', t('codex.record')));
+    const name = el('b', 'cx-name', known ? this.name(e) : '???');
     const mun = known ? this.mun(e, 34) : null;
-    if (mun) name.append(mun, this.el('span', 'cx-mun-label', mun.title));
+    if (mun) name.append(mun, el('span', 'cx-mun-label', mun.title));
     box.append(chips, name, hero, record);
     if (!known) {
-      record.appendChild(this.el('p', 'cx-desc dim', t(e.kind === 'enemy' ? 'codex.unknown.enemy' : 'codex.unknown.item')));
+      record.appendChild(el('p', 'cx-desc dim', t(e.kind === 'enemy' ? 'codex.unknown.enemy' : 'codex.unknown.item')));
       return box;
     }
     if (e.kind === 'enemy') this.enemyDetail(e.id, record, chips);
@@ -359,7 +353,7 @@ export class CodexWindow {
   }
 
   private chip(parent: HTMLElement, text: string, color?: string): void {
-    const c = this.el('span', 'cx-chip', text);
+    const c = el('span', 'cx-chip', text);
     if (color) c.style.setProperty('--chip', color);
     parent.appendChild(c);
   }
@@ -367,10 +361,10 @@ export class CodexWindow {
   /** 그림 옆 수치 칸 */
   private stats(rows: [string, string][]): void {
     if (rows.length === 0) return;
-    const g = this.el('div', 'cx-stats');
+    const g = el('div', 'cx-stats');
     for (const [k, v] of rows) {
-      const s = this.el('div', 'cx-stat');
-      s.append(this.el('span', '', k), this.el('b', '', v));
+      const s = el('div', 'cx-stat');
+      s.append(el('span', '', k), el('b', '', v));
       g.appendChild(s);
     }
     this.side.appendChild(g);
@@ -378,10 +372,10 @@ export class CodexWindow {
 
   private block(box: HTMLElement, titleKey: string, lines: (string | HTMLElement)[]): void {
     if (lines.length === 0) return;
-    box.appendChild(this.el('div', 'cx-sub', this.ctx.t(titleKey)));
-    const ul = this.el('ul', 'cx-lines');
+    box.appendChild(el('div', 'cx-sub', this.ctx.t(titleKey)));
+    const ul = el('ul', 'cx-lines');
     for (const l of lines) {
-      const li = this.el('li', '');
+      const li = el('li', '');
       if (typeof l === 'string') li.textContent = l;
       else li.appendChild(l);
       ul.appendChild(li);
@@ -391,9 +385,9 @@ export class CodexWindow {
 
   private badges(tags: readonly TagId[]): void {
     if (tags.length === 0) return;
-    const row = this.el('div', 'cw-badges');
+    const row = el('div', 'cw-badges');
     for (const b of tagBadges(tags, this.ctx.data.tags)) {
-      const s = this.el('span', '', this.ctx.t(b.nameKey));
+      const s = el('span', '', this.ctx.t(b.nameKey));
       s.style.background = b.color;
       row.appendChild(s);
     }
@@ -415,10 +409,10 @@ export class CodexWindow {
     ]);
     const flavor = () => this.flavor(box, def.flavor, 'cx-flavor');
     if (!boss) {
-      box.appendChild(this.el('p', 'cx-desc', t(`codex.enemy.${id}`)));
+      box.appendChild(el('p', 'cx-desc', t(`codex.enemy.${id}`)));
       flavor();
-      box.appendChild(this.el('div', 'cx-sub', t('codex.sub.attacks')));
-      if (!def.attacks?.length) box.appendChild(this.el('p', 'cx-desc dim', t('codex.noAttack')));
+      box.appendChild(el('div', 'cx-sub', t('codex.sub.attacks')));
+      if (!def.attacks?.length) box.appendChild(el('p', 'cx-desc dim', t('codex.noAttack')));
       for (const a of def.attacks ?? []) {
         box.appendChild(this.card(t(`codex.attackName.${id}.${a.id}`), t(`codex.attack.${id}.${a.id}`, skillTextValues(flatNumbers(a))), [t('codex.chip.damage', { n: a.damage })]));
       }
@@ -427,15 +421,15 @@ export class CodexWindow {
     this.altToggle('codex.showPatterns');
     const phaseName = (i: number) => (i === 0 ? t(`boss.enraged.${id}`) : t(`boss.unlock.${id}.${i}`));
     if (!this.altView) {
-      box.appendChild(this.el('p', 'cx-desc', t(`codex.enemy.${id}`)));
+      box.appendChild(el('p', 'cx-desc', t(`codex.enemy.${id}`)));
       flavor();
       const flow = [t('codex.phase.start')];
       if (boss.enrageAt > 0) flow.push(t('codex.phase.enrage', { hp: Math.round(boss.enrageAt * 100), name: phaseName(0) }));
       (boss.unlocks ?? []).forEach((hp, i) => flow.push(t('codex.phase.enrage', { hp: Math.round(hp * 100), name: phaseName(i + 1) })));
       if (flow.length > 1) {
-        box.appendChild(this.el('div', 'cx-sub', t('codex.sub.phaseFlow')));
-        const steps = this.el('div', 'cx-flow');
-        for (const f of flow) steps.appendChild(this.el('span', '', f));
+        box.appendChild(el('div', 'cx-sub', t('codex.sub.phaseFlow')));
+        const steps = el('div', 'cx-flow');
+        for (const f of flow) steps.appendChild(el('span', '', f));
         box.appendChild(steps);
       }
       return;
@@ -452,7 +446,7 @@ export class CodexWindow {
     for (const [title, test] of groups) {
       const list = boss.patterns.filter(test);
       if (list.length === 0) continue;
-      box.appendChild(this.el('div', 'cx-group', title));
+      box.appendChild(el('div', 'cx-group', title));
       for (const p of list) {
         const tags: string[] = [];
         if (p.values.damage) tags.push(t('codex.chip.damage', { n: p.values.damage }));
@@ -465,15 +459,15 @@ export class CodexWindow {
 
   /** 스킬 한 줄: 아이콘 + 설명, 아래 Lv1~3·각성 단추로 그 자리에서 설명만 바꾼다 (기록 스크롤은 그대로) */
   private skillRow(iconKey: string, color: string, variants: SkillVariant[]): HTMLElement {
-    const line = this.el('div', 'cx-skill');
-    const icon = this.el('span', 'cx-mini');
+    const line = el('div', 'cx-skill');
+    const icon = el('span', 'cx-mini');
     applyArtIcon(icon, this.ctx, iconKey, color);
-    const text = this.el('div', '');
-    const title = this.el('b', '');
-    const desc = this.el('span', '');
-    const note = this.el('small', '');
-    const tagRow = this.el('div', 'cw-badges cx-skill-tags');
-    const tabs = this.el('div', 'cx-lv');
+    const text = el('div', '');
+    const title = el('b', '');
+    const desc = el('span', '');
+    const note = el('small', '');
+    const tagRow = el('div', 'cw-badges cx-skill-tags');
+    const tabs = el('div', 'cx-lv');
     const show = (i: number) => {
       const v = variants[i]!;
       title.textContent = v.title;
@@ -481,16 +475,16 @@ export class CodexWindow {
       note.textContent = v.note;
       tagRow.replaceChildren(
         ...tagBadges(v.tags ?? [], this.ctx.data.tags).map((b) => {
-          const el = this.el('span', '', this.ctx.t(b.nameKey));
-          el.style.background = b.color;
-          return el;
+          const chip = el('span', '', this.ctx.t(b.nameKey));
+          chip.style.background = b.color;
+          return chip;
         }),
       );
       tabs.querySelectorAll('button').forEach((b, k) => b.classList.toggle('on', k === i));
       line.classList.toggle('awakened', !!v.awakened);
     };
     variants.forEach((v, i) => {
-      const b = this.el('button', '', v.label);
+      const b = el('button', '', v.label);
       b.addEventListener('click', () => show(i));
       tabs.appendChild(b);
     });
@@ -515,7 +509,7 @@ export class CodexWindow {
 
   /** 그림 옆 '기록 보기 ↔ 다른 보기' 단추 */
   private altToggle(showKey: string): void {
-    const b = this.el('button', `cx-toggle${this.altView ? ' on' : ''}`, this.ctx.t(this.altView ? 'codex.showRecord' : showKey));
+    const b = el('button', `cx-toggle${this.altView ? ' on' : ''}`, this.ctx.t(this.altView ? 'codex.showRecord' : showKey));
     b.addEventListener('click', () => {
       this.altView = !this.altView;
       this.render();
@@ -532,60 +526,60 @@ export class CodexWindow {
     const d = this.ctx.data;
     const sub = box.querySelector('.cx-sub')!;
     sub.textContent = t('codex.showRates');
-    const back = this.el('button', 'cx-rate-btn back', t('codex.showRecord'));
+    const back = el('button', 'cx-rate-btn back', t('codex.showRecord'));
     back.addEventListener('click', () => {
       this.altView = false;
       this.render();
     });
     sub.appendChild(back);
     const src = (s: DropSource) => t(s.key, s.vars);
-    if (fixed) box.appendChild(this.el('p', 'cx-desc', t('codex.rate.fixed', { source: fixed })));
+    if (fixed) box.appendChild(el('p', 'cx-desc', t('codex.rate.fixed', { source: fixed })));
     else {
-      const list = this.el('div', 'cx-rates');
+      const list = el('div', 'cx-rates');
       for (const s of sources) {
-        const row = this.el('div', 'cx-rate');
-        row.append(this.el('span', '', src(s)), this.el('b', '', pct(chanceOf(s.rates, s))));
+        const row = el('div', 'cx-rate');
+        row.append(el('span', '', src(s)), el('b', '', pct(chanceOf(s.rates, s))));
         list.appendChild(row);
       }
-      box.append(this.el('div', 'cx-group', t('codex.rate.this')), list);
+      box.append(el('div', 'cx-group', t('codex.rate.this')), list);
     }
-    box.appendChild(this.el('div', 'cx-group', t('codex.rate.grades')));
-    const table = this.el('table', 'cx-grade-table');
-    const head = this.el('tr', '');
-    head.appendChild(this.el('th', '', ''));
+    box.appendChild(el('div', 'cx-group', t('codex.rate.grades')));
+    const table = el('table', 'cx-grade-table');
+    const head = el('tr', '');
+    head.appendChild(el('th', '', ''));
     // 신화는 가중치 표 밖의 고정 확률이라 표 아래 한 줄로 따로 보인다
     const grades = d.groupMultipliers.grades.filter((g) => g.id !== 'mythic');
     for (const g of grades) {
-      const th = this.el('th', '', t(g.nameKey));
+      const th = el('th', '', t(g.nameKey));
       th.style.setProperty('--grade', g.color);
       head.appendChild(th);
     }
     table.appendChild(head);
     for (const s of sources) {
-      const tr = this.el('tr', '');
-      tr.appendChild(this.el('td', '', src(s)));
-      for (const g of grades) tr.appendChild(this.el('td', s.shares[g.id] > 0 ? '' : 'zero', pct(s.shares[g.id])));
+      const tr = el('tr', '');
+      tr.appendChild(el('td', '', src(s)));
+      for (const g of grades) tr.appendChild(el('td', s.shares[g.id] > 0 ? '' : 'zero', pct(s.shares[g.id])));
       table.appendChild(tr);
     }
-    const wrap = this.el('div', 'cx-table-wrap');
+    const wrap = el('div', 'cx-table-wrap');
     wrap.appendChild(table);
-    box.append(wrap, this.el('p', 'cx-desc dim cx-note', t('codex.rate.mythic', { pct: d.loot.mythicChance * 100 })), this.el('p', 'cx-desc dim cx-note', t(noteKey, { n: d.items.transferPerPickup })));
+    box.append(wrap, el('p', 'cx-desc dim cx-note', t('codex.rate.mythic', { pct: d.loot.mythicChance * 100 })), el('p', 'cx-desc dim cx-note', t(noteKey, { n: d.items.transferPerPickup })));
   }
 
   /** 플레이버 문구 문단. 문구가 이미 따옴표로 시작하면(인용 + 출처) 더 붙이지 않는다 */
   private flavor(box: HTMLElement, key: string | undefined, cls: string): void {
     if (!key) return;
     const text = this.ctx.t(key);
-    box.appendChild(this.el('p', cls, /^["“]/.test(text) ? text : `“${text}”`));
+    box.appendChild(el('p', cls, /^["“]/.test(text) ? text : `“${text}”`));
   }
 
   /** 패턴 한 칸: 이름 + 꼬리표, 아래 설명 */
   private card(name: string, desc: string, tags: string[]): HTMLElement {
-    const c = this.el('div', 'cx-card');
-    const head = this.el('div', 'cx-card-head');
-    head.appendChild(this.el('b', '', name));
-    for (const x of tags) head.appendChild(this.el('span', 'cx-tag', x));
-    c.append(head, this.el('p', '', desc));
+    const c = el('div', 'cx-card');
+    const head = el('div', 'cx-card-head');
+    head.appendChild(el('b', '', name));
+    for (const x of tags) head.appendChild(el('span', 'cx-tag', x));
+    c.append(head, el('p', '', desc));
     return c;
   }
 
@@ -594,7 +588,7 @@ export class CodexWindow {
     const d = this.ctx.data;
     const job = d.jobs.jobs.find((x) => x.id === id)!;
     this.chip(chips, t(job.enabled ? 'codex.job.open' : 'job.locked'));
-    box.appendChild(this.el('p', 'cx-desc', t(`codex.job.${id}`)));
+    box.appendChild(el('p', 'cx-desc', t(`codex.job.${id}`)));
     if (!job.enabled) {
       this.block(box, 'codex.sub.advancements', job.advancements.map((a) => t(a.nameKey)));
       return;
@@ -627,7 +621,7 @@ export class CodexWindow {
     const d = this.ctx.data;
     const adv = d.jobs.jobs.flatMap((j) => j.advancements).find((a) => a.id === id)!;
     this.chip(chips, t('codex.school.chip'), adv.color);
-    box.appendChild(this.el('p', 'cx-desc', t(`codex.school.${id}`)));
+    box.appendChild(el('p', 'cx-desc', t(`codex.school.${id}`)));
     const itemName = (iid?: string) => t(d.items.items.find((x) => x.id === iid)?.nameKey ?? '-');
     const skills = d.skills.skills.filter((s) => s.school === id).map((s) => findSkill(d.skills, s.id));
     this.block(
@@ -693,13 +687,13 @@ export class CodexWindow {
     }
     // 무기처럼: 일반 능력은 기록에, 그 아래 추가 능력을 굵은 제목과 함께
     const params = itemDescParams(def, d.groupMultipliers);
-    if (def.descKey) box.appendChild(this.el('p', 'cx-desc', t(def.descKey, params)));
+    if (def.descKey) box.appendChild(el('p', 'cx-desc', t(def.descKey, params)));
     if (def.abilityDescKey) {
       // 제목: 능력 이름, 없으면 버프 이름(화면 왼쪽 버프 목록과 같은 이름). 태세처럼 둘이면 '/'로
       const bk = `item.${id}.buff`;
       const names = def.abilityNameKey ? [t(def.abilityNameKey)] : [bk, `${bk}.attack`, `${bk}.defense`].filter((k) => t(k) !== k).map((k) => t(k));
-      if (names.length) box.appendChild(this.el('b', 'cx-buff-name', names.join(' / ')));
-      box.appendChild(this.el('p', 'cx-desc', t(def.abilityDescKey, params)));
+      if (names.length) box.appendChild(el('b', 'cx-buff-name', names.join(' / ')));
+      box.appendChild(el('p', 'cx-desc', t(def.abilityDescKey, params)));
     }
     this.flavor(box, def.flavor, 'cx-flavor small');
     const links: string[] = [];
@@ -755,7 +749,7 @@ export class CodexWindow {
     const lines = weaponInfoLines(this.ctx, plainWeapon(w));
     this.block(box, 'codex.sub.weapon', lines.filter((l) => !l.title).map((l) => l.text));
     // 이름 있는 특수공격은 따로: 굵은 제목 + 설명 (아이템 버프 이름과 같은 모양)
-    for (const l of lines.filter((x) => x.title)) box.append(this.el('b', 'cx-buff-name', l.title), this.el('p', 'cx-desc', l.desc));
+    for (const l of lines.filter((x) => x.title)) box.append(el('b', 'cx-buff-name', l.title), el('p', 'cx-desc', l.desc));
     this.flavor(box, w.flavor, 'cx-flavor small');
   }
 }
