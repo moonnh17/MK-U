@@ -389,10 +389,10 @@
       "spriteKey": "weapon_seven_star_gavel", "color": "#ffd76a", "size": 12
     },
     {
-      "id": "denebolaWhipSword", "codexNo": 40, "flavor": "codex.itemFlavor.denebolaWhipSword", "nameKey": "weapon.denebolaWhipSword", "category": "blade", "fxColor": "#5ad0ff", "critChance": 0.2, "grade": "unique", "classes": ["slash"], "tags": ["physical", "melee"],
+      "id": "denebolaWhipSword", "codexNo": 40, "flavor": "codex.itemFlavor.denebolaWhipSword", "nameKey": "weapon.denebolaWhipSword", "category": "blade", "fxColor": "#5ad0ff", "critChance": 0.2, "grade": "unique", "classes": ["slash"], "tags": ["tech", "melee"],
       "baseDamage": 14, "fireIntervalSec": 0.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 140, "radius": 64 },
       "meleeShot": { "damageMul": 0.35, "speed": 300, "range": 170, "energyCost": 2, "color": "#5ad0ff", "pellets": 5, "spreadDeg": 40, "tags": ["tech", "ranged"], "shot": { "spriteKey": "proj_denebola_shard", "color": "#5ad0ff", "size": 9 } },
-      "whip": { "sprite": { "spriteKey": "fx_denebola_whip", "color": "#5ad0ff", "size": 64 }, "sec": 0.18 },
+      "whip": { "sprite": { "spriteKey": "fx_denebola_whip", "color": "#5ad0ff", "size": 64 } },
       "qSkill": { "kind": "variableControl", "nameKey": "weapon.q.variableControl", "descKey": "weapon.q.variableControl.desc", "cooldownSec": 14, "school": "hectar", "range": 170, "targets": 3, "bindSec": 3, "bossBindSec": 2, "barrageEverySec": 0.05, "barrageDamageMul": 0.3, "barrageSpeed": 360, "color": "#5ad0ff",
         "shot": { "spriteKey": "proj_denebola_shard", "color": "#5ad0ff", "size": 9 } },
       "projectileSpeed": 0, "range": 64, "cutsProjectiles": true, "droppable": true,

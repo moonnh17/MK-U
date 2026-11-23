@@ -111,8 +111,8 @@ export interface WeaponDef extends SpriteRef {
   /** 근접 공격과 함께 탄을 쏜다. 에너지가 모자라면 탄만 나가지 않는다 */
   /** 칼을 휘두를 때 쏘는 탄. pellets발을 spreadDeg 부채꼴로 (산탄), shot이 있으면 그 그림 */
   meleeShot?: { damageMul: number; speed: number; range: number; energyCost: number; color: string; pellets?: number; spreadDeg?: number; shot?: SpriteRef; tags?: TagId[] };
-  /** 사복검: 휘두를 때 칼날이 마디마디 풀려 늘어난 그림이 부채꼴을 쓸고 지나간다 */
-  whip?: { sprite: SpriteRef; sec: number };
+  /** 사복검: 휘두르는 동안 손에 든 칼 자체가 마디마디 풀린 채찍 모양(sprite)으로 바뀌어 뻗었다가 다시 칼로 감긴다 */
+  whip?: { sprite: SpriteRef };
   /** 칼: 공격할 때 조준한 적 쪽으로 돌진한 뒤 벤다 (최대 distance, sec초) */
   lunge?: { distance: number; sec: number };
   /**

@@ -340,6 +340,11 @@ export class WeaponCombat {
     this.motion = { kind, t: 0, sec: Math.min(sec, intervalSec * this.run.ctx.data.juice.weaponMotion.fitInterval), params, ghost, lastRot: null, particles: this.run.weaponDef().attackParticles?.color ?? null };
   }
 
+  /** 휘두르기 진행도 0~1 (휘두르는 중이 아니면 null). heldPose 뒤에 읽는다 */
+  swingProgress(): number | null {
+    return this.motion?.kind === 'swing' ? Math.min(1, this.motion.t) : null;
+  }
+
   /** 이번 프레임 든 무기의 자세 (조준이 왼쪽이면 호출한 쪽이 각도를 뒤집는다) */
   heldPose(dt: number): { rot: number; push: number } {
     const m = this.motion;

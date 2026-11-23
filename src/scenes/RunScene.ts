@@ -594,15 +594,25 @@ export class RunScene extends Phaser.Scene {
     const handAt = worn ? { x: this.player.x + worn.shoulderX, y: this.player.y + worn.shoulderY - this.condition.leapLift } : this.combat.handPos();
     const upright = this.weaponDef().upright === true;
     const pose = this.combat.heldPose(dt);
+    // 사복검: 휘두르는 동안 칼날이 마디마디 풀려 채찍처럼 뻗었다가(앞 1/4) 끝에서 다시 칼로 감긴다(뒤 1/5)
+    const whip = this.weaponDef().whip;
+    const swingT = whip ? this.combat.swingProgress() : null;
+    const shownKey = whip && swingT !== null ? whip.sprite.spriteKey : weaponKey;
     this.weaponSprite
-      .setTexture(weaponKey)
+      .setTexture(shownKey)
+      .setScale(1)
       .setDepth(worn && this.aimDir.y < 0 ? 3.9 : 4)
-      .setOrigin(worn ? worn.gripX : (d.art.sprites[weaponKey]?.gripX ?? 0.5), 0.5)
+      .setOrigin(worn ? worn.gripX : (d.art.sprites[shownKey]?.gripX ?? 0.5), 0.5)
       // 왼쪽을 겨눌 때 총이 거꾸로 서지 않게 (깃발은 세워 든 채 좌우만 뒤집는다)
       .setFlipY(!upright && this.aimDir.x < 0)
       .setFlipX(upright && this.aimDir.x < 0)
       .setPosition(handAt.x + this.aimDir.x * pose.push, handAt.y + this.aimDir.y * pose.push)
       .setRotation((upright ? 0 : aimAngle) + (this.aimDir.x < 0 ? -pose.rot : pose.rot));
+    if (whip && swingT !== null) {
+      const reach = this.weaponDef().pattern.kind === 'arc' ? (this.weaponDef().pattern as { radius: number }).radius : whip.sprite.size;
+      const out = Math.min(1, 0.25 + swingT * 3) * (swingT > 0.8 ? 1 - ((swingT - 0.8) / 0.2) * 0.75 : 1);
+      this.weaponSprite.setScale((reach * (1 + this.itemRt.sums.area) * out) / Math.max(1, this.weaponSprite.width), 1);
+    }
     this.combat.trailHeld(this.weaponSprite, pose.push);
 
     animateArt(d, this.player);

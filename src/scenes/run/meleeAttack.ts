@@ -131,7 +131,6 @@ export class MeleeAttack {
       this.run.roomProps.meleeProps(st.damage * dmgMul, (b) => inArc(origin, aimAngle, p.arcDeg, radius, b, 6));
       this.run.combat.swingFlip = !this.run.combat.swingFlip;
       this.meleeFx(this.run.combat.tierFx(fx.slashTiers, w, strong), color, st.fireIntervalSec, origin.x + dir.x * radius * 0.5, origin.y + dir.y * radius * 0.5, { w: radius * (strong ? 1.5 : 1.2), rotation: aimAngle, flipY: this.run.combat.swingFlip });
-      if (w.whip) this.whipSwing(w.whip, origin, aimAngle, p.arcDeg, radius, this.run.combat.swingFlip);
     } else if (p.kind === 'line') {
       const len = p.length * radMul;
       const idx = lineHits(origin, dir, len, p.width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
@@ -190,37 +189,6 @@ export class MeleeAttack {
   }
 
   /** 베면서 쏘는 탄 (에너지가 모자라면 베기만 한다) */
-  /**
-   * 사복검 휘두르기: 마디마디 풀린 칼날이 손에서 뻗어 나가며 부채꼴을 쓸고(잔상), 끝나면 다시 감겨 들어온다.
-   * 그림의 왼쪽 끝이 손잡이 (origin 0.05)
-   */
-  private whipSwing(wh: NonNullable<WeaponDef['whip']>, origin: { x: number; y: number }, ang: number, arcDeg: number, radius: number, flip: boolean): void {
-    const half = ((arcDeg / 2) * Math.PI) / 180;
-    const a0 = ang + (flip ? half : -half);
-    const a1 = ang - (flip ? half : -half);
-    const img = this.run.add.image(origin.x, origin.y, wh.sprite.spriteKey).setOrigin(0.05, 0.5).setDepth(6).setRotation(a0).setFlipY(flip);
-    img.setDisplaySize(radius * 1.08, (radius * 1.08 * img.height) / Math.max(1, img.width));
-    const full = img.scaleX;
-    img.scaleX = full * 0.3;
-    const ms = wh.sec * 1000;
-    let ghostAt = 0;
-    this.run.tweens.add({
-      targets: img,
-      rotation: a1,
-      scaleX: full,
-      duration: ms,
-      ease: 'Quad.easeOut',
-      onUpdate: (tw) => {
-        // 지나간 자리에 옅은 잔상
-        if (tw.elapsed - ghostAt < 28) return;
-        ghostAt = tw.elapsed;
-        const g = this.run.add.image(img.x, img.y, img.texture.key).setOrigin(0.05, 0.5).setRotation(img.rotation).setScale(img.scaleX, img.scaleY).setFlipY(flip).setDepth(5.9).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.35);
-        this.run.tweens.add({ targets: g, alpha: 0, duration: 160, onComplete: () => g.destroy() });
-      },
-      onComplete: () => this.run.tweens.add({ targets: img, scaleX: full * 0.25, alpha: 0, duration: 110, ease: 'Quad.easeIn', onComplete: () => img.destroy() }),
-    });
-  }
-
   fireMeleeShot(w: WeaponDef, s: NonNullable<WeaponDef['meleeShot']>, st: WeaponStats, aimAngle: number): void {
     const p = this.run.session.player;
     const cost = s.energyCost * gradeEnergyMultiplier(w.grade, this.run.ctx.data.groupMultipliers);

@@ -37,7 +37,7 @@ const WEAPONS = {
   fx_judgment_sigil: ['judgmentSigil', 80, 0.3],
   weapon_denebola_blade: ['denebolaBlade', 30, 0.5, 0.15],
   proj_denebola_shard: ['denebolaShard', 12, 0.35],
-  fx_denebola_whip: ['denebolaWhip', 70, 0.5],
+  fx_denebola_whip: ['denebolaWhip', 70, 0.5, 0.04],
 };
 
 /** 힉스필드 아이템 아이콘 (scripts/art-src/items-hf): key → 파일 */
