@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 790개 · 그림 있음 757개
+전체 794개 · 그림 있음 761개
 
 ## player (9)
 
@@ -24,7 +24,7 @@
 | `player_barbarian` | 플레이어 야만용사 | 10×10 | feet | #e8e2d0 | mku/player_barbarian.png (13프레임) |
 | `player_paladin` | 플레이어 성기사 | 10×10 | feet | #e8e2d0 | mku/player_paladin.png (9프레임) |
 
-## weapon (39)
+## weapon (41)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -66,9 +66,11 @@
 | `weapon_mintaka_align` | 민타카의 쌍성 지팡이 | 12×12 | center | #6a9aff | mku/weapon_mintaka_align.png (1프레임) |
 | `weapon_wooden_staff` | 나무 지팡이 | 9×9 | center | #a07a4a | mku/weapon_wooden_staff.png (1프레임) |
 | `weapon_spirit_fist` | 정령의 주먹 | 11×11 | center | #6a4a2a | mku/weapon_spirit_fist.png (1프레임) |
+| `weapon_elder_wand` | 딱총나무 지팡이 | 12×12 | center | #fff0c0 | mku/weapon_elder_wand.png (1프레임) |
+| `weapon_unstable_shard` | 불안정 마기 조각 | 9×9 | center | #b266ff | mku/weapon_unstable_shard.png (1프레임) |
 | `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | mku/weapon_fist.png (1프레임) |
 
-## projectile (61)
+## projectile (62)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -89,6 +91,7 @@
 | `fx_mintaka_burst` | 민타카의 쌍성 지팡이 (fx) | 90×90 | center | #9ad8ff | mku/fx_mintaka_burst.png (6프레임) |
 | `proj_spirit_fist` | 정령의 주먹 (fx) | 10×10 | center | #5adf8a | mku/proj_spirit_fist.png (1프레임) |
 | `fx_spirit_fist_blast` | 정령의 주먹 (fx) | 24×24 | center | #5adf8a | mku/fx_spirit_fist_blast.png (1프레임) |
+| `fx_hw_recoil` | 불안정 마기 조각 (fx) 외 1곳 | 60×60 | center | #b266ff | mku/fx_hw_recoil.png (15프레임) |
 | `projectile_player` | 플레이어 탄 | 3×3 | center | #fff3a0 | mku/projectile_player.png (1프레임) |
 | `fx_melee_slash` | 근접 이펙트 (fx) | 20×20 | center | #ffffff | mku/fx_melee_slash.png (6프레임) |
 | `fx_melee_slam` | 근접 이펙트 (fx) | 20×20 | center | #ffffff | mku/fx_melee_slam.png (8프레임) |
@@ -261,7 +264,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (255)
+## skill (254)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -465,7 +468,6 @@
 | `fx_summon_will_shot` | 마기탄 (shot) 외 1곳 | 10×10 | center | #e0b3ff | mku/fx_summon_will_shot.png (5프레임) |
 | `fx_hw_beam` | 마기 분출 (beam) 외 1곳 | 12×12 | center | #b266ff | mku/fx_hw_beam.png (7프레임) |
 | `fx_hw_wave` | 마기 파동 (wave) | 60×60 | center | #b266ff | mku/fx_hw_wave.png (12프레임) |
-| `fx_hw_recoil` | 마기 파동 (recoil) | 60×60 | center | #b266ff | mku/fx_hw_recoil.png (15프레임) |
 | `skill_hw_condenser` | 마기 응축구 (orb) | 20×20 | center | #b266ff | mku/skill_hw_condenser.png (1프레임) |
 | `fx_hw_orb` | 마기 응축구 (orbGlow) 외 1곳 | 20×20 | center | #b266ff | mku/fx_hw_orb.png (43프레임) |
 | `fx_hw_blast` | 마기 응축구 (blast) 외 1곳 | 80×80 | center | #b266ff | mku/fx_hw_blast.png (23프레임) |
@@ -533,7 +535,7 @@
 | `lab_gemini` | 미모사 제미니 | 14×22 | feet | #7ae0e0 | mku/lab_gemini.png (1프레임) |
 | `lab_window` | 관측창 | 100×12 | feet | #06090c | mku/lab_window.png (1프레임) |
 
-## item (48)
+## item (50)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -573,6 +575,8 @@
 | `item_phantom_feather` | 환상의 깃털 | 8×8 | center | #f0f0ff | mku/item_phantom_feather.png (1프레임) |
 | `item_master_g_statue` | 마스터 G 조각상 | 8×8 | center | #c8a050 | mku/item_master_g_statue.png (1프레임) |
 | `item_sarvis_shield` | 사르비스의 방패 | 8×8 | center | #8a6a3a | mku/item_sarvis_shield.png (1프레임) |
+| `item_magi_stone` | 마력이 담긴 돌 | 8×8 | center | #8a5ad9 | mku/item_magi_stone.png (1프레임) |
+| `item_gray_dumbbell` | 회색 아령 | 8×8 | center | #8a8a96 | mku/item_gray_dumbbell.png (1프레임) |
 | `item_hela_cell` | 헬라 세포 | 8×8 | center | #5a8ad9 | mku/item_hela_cell.png (1프레임) |
 | `item_forbidden_virus` | 금지된 바이러스 | 8×8 | center | #5a8ad9 | mku/item_forbidden_virus.png (1프레임) |
 | `item_forbidden_gift` | 열어선 안되는 선물 | 8×8 | center | #ffd23f | mku/item_forbidden_gift.png (1프레임) |

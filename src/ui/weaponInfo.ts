@@ -47,6 +47,8 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
     out.push(titled(t('weapon.sigDesc.twinAlign', { sec: ts.align.sec, dmg: pc(ts.align.damageMul), cd: ts.align.cooldownSec })));
   }
   if (def.pattern.kind === 'meteor') out.push({ text: t('weapon.sigDesc.meteor'), sig: true });
+  if (def.pattern.kind === 'nova') out.push({ text: t('weapon.sigDesc.nova'), sig: true });
+  if (def.selfHarm) out.push(main(t('weapon.sigDesc.selfHarm', { pct: Math.round(def.selfHarm.chance * 100), dmg: def.selfHarm.damage })));
   if (def.pierce) out.push({ text: t('weapon.sigDesc.pierce'), sig: true });
   if (def.flame) out.push({ text: t('weapon.sigDesc.flame'), sig: true });
   if (def.spinUp) out.push(main(t('weapon.sigDesc.spinUp', { n: def.spinUp.maxMul })));

@@ -28,9 +28,9 @@ const totals = (ids: string[], school: 'hectar' | 'acro' | null = null) =>
   itemTotals(ids, I, { school, job: 'magiScholar' }, G);
 
 describe('아이템 목록 (기획서 표)', () => {
-  it('일반 5·레어 17·전설 11·유니크 8·신화 1 + 세트 1 + 보스 전용', () => {
+  it('일반 7·레어 17·전설 11·유니크 8·신화 1 + 세트 1 + 보스 전용', () => {
     const by = (g: string) => I.items.filter((x) => x.pool === 'normal' && x.grade === g).length;
-    expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([5, 17, 11, 8, 1]);
+    expect([by('common'), by('rare'), by('legendary'), by('unique'), by('mythic')]).toEqual([7, 17, 11, 8, 1]);
     expect(I.items.filter((x) => x.pool === 'set').map((x) => x.id)).toEqual(['warriorMemory']);
     expect(I.items.filter((x) => x.pool === 'boss').map((x) => [x.id, x.bossId])).toEqual([
       ['wonhonLump', 'fusionAkgwi'],
@@ -133,7 +133,7 @@ describe('등급 가중치', () => {
 describe('아이템 뽑기', () => {
   it('같은 아이템은 한 런에 한 번만', () => {
     const obtained = new Set<string>();
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 8; i++) {
       const id = pickItem(new Rng(i), 'common', I, obtained)!;
       expect(obtained.has(id)).toBe(false);
       obtained.add(id);

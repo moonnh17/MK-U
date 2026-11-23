@@ -1,6 +1,6 @@
 {
   "codexLore": {
-    "commoner": ["slimeStew", "magicasol", "steelCastleFigure", "afroBelt", "chainRing"],
+    "commoner": ["slimeStew", "magicasol", "steelCastleFigure", "afroBelt", "chainRing", "magiStone", "grayDumbbell"],
     "elite": ["leeSeal", "hanwooSteak"],
     "books": ["elegantMagi", "combatTheory", "magowikiCodex", "atrosCodex", "gisupStone", "warDiary", "snellLaw"],
     "warRelic": ["namelessSword", "namelessHelm", "brokenHilt", "warriorMemory", "wonhonLump", "bloodRider"],
@@ -188,6 +188,12 @@
     { "id": "sarvisShield", "codexNo": 48, "nameKey": "item.sarvisShield", "descKey": "item.sarvisShield.desc", "flavor": "codex.itemFlavor.sarvisShield", "abilityNameKey": "item.sarvisShield.ability", "abilityDescKey": "item.sarvisShield.abilityDesc", "grade": "unique", "pool": "normal", "tags": [],
       "effects": [{ "kind": "damageTaken", "value": 0.1, "group": "damagePct" }, { "kind": "maxHp", "value": 20, "group": "hpFlat" }, { "kind": "gazePetrify", "slow": 0.5, "afterSec": 2, "durationSec": 1.5 }],
       "spriteKey": "item_sarvis_shield", "color": "#8a6a3a", "size": 8 },
+    { "id": "magiStone", "codexNo": 49, "nameKey": "item.magiStone", "descKey": "item.magiStone.desc", "flavor": "codex.itemFlavor.magiStone", "grade": "common", "pool": "normal", "tags": ["magic"],
+      "effects": [{ "kind": "damage", "scope": "magic", "value": 0.1, "group": "damagePct" }],
+      "spriteKey": "item_magi_stone", "color": "#8a5ad9", "size": 8 },
+    { "id": "grayDumbbell", "codexNo": 50, "nameKey": "item.grayDumbbell", "descKey": "item.grayDumbbell.desc", "flavor": "codex.itemFlavor.grayDumbbell", "grade": "common", "pool": "normal", "tags": ["physical"],
+      "effects": [{ "kind": "damage", "scope": "physical", "value": 0.1, "group": "damagePct" }],
+      "spriteKey": "item_gray_dumbbell", "color": "#8a8a96", "size": 8 },
     { "id": "helaCell", "codexNo": 31, "nameKey": "item.helaCell", "descKey": "item.helaCell.desc", "flavor": "codex.itemFlavor.helaCell", "grade": "rare", "pool": "normal", "tags": [],
       "effects": [{ "kind": "maxSanity", "value": -5, "group": "hpFlat" }, { "kind": "skillCooldown", "value": 0.1, "group": "damagePct" }],
       "spriteKey": "item_hela_cell", "color": "#5a8ad9", "size": 8 },

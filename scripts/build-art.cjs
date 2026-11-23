@@ -572,15 +572,7 @@ weapon('weapon_spear', 0.3, [
   '....................KmdK..',
   '.....................KK...',
 ]);
-weapon('weapon_avior_staff', 0.3, [
-  '................KKK.',
-  '...............KPpK.',
-  '..............KPpPpK',
-  'KKKKKKKKKKKKKKKPwPpK',
-  'KbBBBBBBBBBBBBgKPpPK',
-  'KKKKKKKKKKKKKKKgKpPK',
-  '................KKK.',
-]);
+// 아비오르의 지팡이·라스알하게의 검은 힉스필드 그림으로 바꿨다(build-mage-art.cjs WEAPONS)
 weapon('weapon_curved_bow', 0.8, [
   '.lKK.......',
   '.l.KbK.....',
@@ -635,7 +627,6 @@ function bigWeapon(key, f, deg, fit, gripX, dim) {
 // 환디는 원본이 어두워 바닥에 묻히므로 밝힌다
 bigWeapon('weapon_handi', 'items/bow-hwandi.png', 45, 26, 0.5, 1.9);
 bigWeapon('weapon_rasalgethi_club', 'items/rasalgethi.png', 45, 22, 0.2);
-bigWeapon('weapon_rasalhague_sword', 'warrior/p-sword-single.png', 90, 26, 0.15);
 bigWeapon('weapon_broken_blade', 'items/broken-blade.png', 45, 14, 0.3);
 bigWeapon('weapon_al_gul_blade', 'items/al-ghul.png', -90, 28, 0.2);
 bigWeapon('weapon_hanabi', 'items/hanabi.png', 135, 28, 0.2);

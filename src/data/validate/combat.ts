@@ -150,6 +150,10 @@ export function validateWeapons(v: V): void {
       if (wpn.category !== 'blade') errors.push(`${w}: gust는 칼 패턴`);
     } else if (p.kind === 'homing') {
       checkPositive(errors, `${w}.pattern.turnRate`, p.turnRate);
+    } else if (p.kind === 'nova') {
+      checkPositive(errors, `${w}.pattern.radius`, p.radius);
+      if (wpn.category !== 'staff') errors.push(`${w}: nova는 지팡이 패턴`);
+      if (!wpn.shot) errors.push(`${w}: nova는 파동 그림(shot)이 필요`);
     } else if (p.kind === 'meteor') {
       checkPositive(errors, `${w}.pattern.radius`, p.radius);
       if (wpn.category !== 'staff') errors.push(`${w}: meteor는 지팡이 패턴`);

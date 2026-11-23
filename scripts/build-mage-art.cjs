@@ -26,7 +26,14 @@ const WEAPONS = {
   weapon_spirit_fist: ['spiritFist', 30, 0.5, 0.25],
   proj_spirit_fist: ['spiritFistShot', 20, 0.35],
   fx_spirit_fist_blast: ['spiritFistBlast', 48, 0.35],
+  weapon_elder_wand: ['elderWand', 30, 0.5, 0.2],
+  weapon_unstable_shard: ['unstableShard', 22, 0.5, 0.2],
+  weapon_rasalhague_sword: ['rasalhagueSword', 52, 0.5, 0.1],
+  weapon_avior_staff: ['aviorStaff', 32, 0.5, 0.3],
 };
+
+/** 힉스필드 아이템 아이콘 (scripts/art-src/items-hf): key → 파일 */
+const ITEMS = { item_magi_stone: 'magiStone', item_gray_dumbbell: 'grayDumbbell' };
 
 /** 집행 의지체 소환체·순수 전개 정령 (scripts/art-src/summons-hf, 오른쪽을 보는 한 장): key: [파일, 화면 키 px, 좌우 뒤집기] */
 const SUMMONS = {
@@ -150,6 +157,14 @@ function buildMageArt(outDir) {
     const fh = Math.max(1, Math.round((fw * im.h) / im.w));
     k.write(path.join(outDir, `${key}.png`), k.resize(im, fw, fh, 0.5));
     out[key] = { file: `mku/${key}.png`, frameWidth: fw, frameHeight: fh, frames: 1, density: DENSITY };
+  }
+  for (const [key, f] of Object.entries(ITEMS)) {
+    const im = trimmed(path.join(SRC, 'items-hf', `${f}.png`));
+    const side = Math.max(im.w, im.h);
+    const sq = k.blank(side, side);
+    k.paste(sq, im, Math.round((side - im.w) / 2), Math.round((side - im.h) / 2));
+    k.write(path.join(outDir, `${key}.png`), k.resize(sq, ICON, ICON, 0.5));
+    out[key] = { file: `mku/${key}.png`, frameWidth: ICON, frameHeight: ICON, frames: 1 };
   }
   for (const [key, [f, w, cut, gripX]] of Object.entries(WEAPONS)) {
     const im = trimmed(path.join(SRC, 'weapons-hf', `${f}.png`));

@@ -5,9 +5,9 @@
     "systemple": ["mg70", "orbitalDisc"],
     "historyArms": ["algiebaSling", "nekkarCleaver", "argoBanner", "alGulBlade", "mintakaStaff", "spiritFist"],
     "starRelic": ["rasalgethiClub", "aviorStaff", "rasalhagueSword"],
-    "ancient": ["brokenBlade", "ancientCore", "eclipseCore", "hwanRemnant", "magiFang", "hanabi"],
+    "ancient": ["brokenBlade", "ancientCore", "eclipseCore", "hwanRemnant", "magiFang", "hanabi", "elderWand"],
     "bossRemains": ["gihwanArm"],
-    "street": ["bootlegGun", "debtorArm"],
+    "street": ["bootlegGun", "debtorArm", "unstableShard"],
     "creator": ["handi"]
   },
   "fistWeapon": "fist",
@@ -138,14 +138,14 @@
       "baseDamage": 16, "fireIntervalSec": 0.75, "energyCost": 0, "pattern": { "kind": "smash", "reach": 31, "radius": 43 },
       "knockback": { "distance": 34, "sec": 0.15 },
       "signature": { "every": 3, "kind": "bigSmash", "nameKey": "weapon.sig.bigSmash", "damageMul": 3, "radiusMul": 1.6 },
-      "projectileSpeed": 0, "range": 74, "cutsProjectiles": false, "droppable": false,
+      "projectileSpeed": 0, "range": 74, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_rasalgethi_club", "color": "#b0583a", "size": 11
     },
     {
       "id": "aviorStaff", "codexNo": 11, "nameKey": "weapon.aviorStaff", "category": "staff", "grade": "unique", "classes": ["homing"], "tags": ["magic", "ranged"],
       "baseDamage": 6, "fireIntervalSec": 0.25, "energyCost": 1, "pattern": { "kind": "homing", "turnRate": 5 },
       "signature": { "every": 5, "kind": "laser", "nameKey": "weapon.sig.aviorStaff", "damageMul": 2.5, "length": 240, "width": 8 },
-      "projectileSpeed": 260, "range": 300, "cutsProjectiles": false, "droppable": false,
+      "projectileSpeed": 260, "range": 300, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_avior_staff", "color": "#8a6aff", "size": 11
     },
     {
@@ -153,7 +153,7 @@
       "baseDamage": 39, "fireIntervalSec": 1.5, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 150, "radius": 56 },
       "iaido": { "maxDistance": 130, "behindPx": 26, "sec": 0.07, "width": 30, "cutDelaySec": 0.24, "color": "#ffe85a" },
       "signature": { "every": 3, "kind": "space", "nameKey": "weapon.sig.rasalhagueSword" },
-      "projectileSpeed": 0, "range": 56, "cutsProjectiles": true, "droppable": false,
+      "projectileSpeed": 0, "range": 56, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_rasalhague_sword", "color": "#e8d24a", "size": 11
     },
     {
@@ -354,6 +354,21 @@
       "lobBlast": { "spriteKey": "fx_spirit_fist_blast", "color": "#5adf8a", "size": 24 },
       "projectileSpeed": 230, "range": 230, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_spirit_fist", "color": "#6a4a2a", "size": 11
+    },
+    {
+      "id": "elderWand", "codexNo": 37, "flavor": "codex.itemFlavor.elderWand", "nameKey": "weapon.elderWand", "category": "staff", "grade": "legendary", "classes": ["laser"], "tags": ["magic", "ranged"],
+      "baseDamage": 16, "fireIntervalSec": 0.55, "energyCost": 3, "pattern": { "kind": "single" },
+      "signature": { "every": 1, "kind": "laser", "damageMul": 1, "length": 280, "width": 6 },
+      "projectileSpeed": 400, "range": 280, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_elder_wand", "color": "#fff0c0", "size": 12
+    },
+    {
+      "id": "unstableShard", "codexNo": 38, "flavor": "codex.itemFlavor.unstableShard", "nameKey": "weapon.unstableShard", "abilityNameKey": "weapon.ability.unstableShard", "category": "staff", "grade": "rare", "classes": ["explosive"], "tags": ["magic", "ranged"],
+      "baseDamage": 9, "fireIntervalSec": 0.7, "energyCost": 3, "pattern": { "kind": "nova", "radius": 56 },
+      "shot": { "spriteKey": "fx_hw_recoil", "color": "#b266ff", "size": 60 },
+      "selfHarm": { "chance": 0.1, "damage": 3 },
+      "projectileSpeed": 200, "range": 56, "cutsProjectiles": false, "droppable": true,
+      "spriteKey": "weapon_unstable_shard", "color": "#b266ff", "size": 9
     },
     {
       "id": "fist", "nameKey": "weapon.fist", "category": "blade", "fxColor": "#ffe0c0", "grade": "common", "classes": ["slash"], "tags": ["physical", "melee"],

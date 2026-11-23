@@ -90,7 +90,7 @@ export function validateBosses(v: V): void {
     const w = `bosses.hiddenBosses.${h.id}`;
     const wpn = d.weapons.weapons.find((x) => x.id === h.weaponId);
     if (!wpn) errors.push(`${w}: 없는 무기 '${h.weaponId}'`);
-    else if (wpn.droppable) errors.push(`${w}: 전용 무기 '${h.weaponId}'는 droppable false여야 함`);
+
     const it = d.items.items.find((x) => x.id === h.itemId);
     if (!it || it.pool !== 'hiddenBoss' || it.bossId !== h.id) errors.push(`${w}: 전용 아이템 '${h.itemId}'는 pool hiddenBoss·bossId ${h.id}여야 함`);
   }

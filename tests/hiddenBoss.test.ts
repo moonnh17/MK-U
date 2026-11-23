@@ -60,12 +60,11 @@ describe('등장 규칙', () => {
 });
 
 describe('전용 무기·아이템은 다른 곳에서 나오지 않는다', () => {
-  it('무기: 상자·상인 뽑기에 없다 (유니크는 전설 대체)', () => {
+  it('무기: 히든보스 무기는 필드(상자·상인 유니크 뽑기)에서도 나온다', () => {
     const d = gameData.weapons;
-    for (let s = 0; s < 200; s++) {
-      const w = rollWeapon(new Rng(s), 'unique', d.weapons, d.options, G, gameData.loot.uniqueWeaponFallback);
-      expect(['rasalgethiClub', 'aviorStaff', 'rasalhagueSword']).not.toContain(w.defId);
-    }
+    const seen = new Set<string>();
+    for (let s = 0; s < 400; s++) seen.add(rollWeapon(new Rng(s), 'unique', d.weapons, d.options, G, gameData.loot.uniqueWeaponFallback).defId);
+    for (const id of ['rasalgethiClub', 'aviorStaff', 'rasalhagueSword']) expect(seen.has(id), id).toBe(true);
   });
   it('아이템: 상자·첨탑 뽑기에 없다', () => {
     const seen = new Set<string>();

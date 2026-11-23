@@ -247,6 +247,10 @@ export class WeaponCombat {
       this.dropMeteor(w, st, w.pattern, st.damage * emp);
       return;
     }
+    if (w.pattern.kind === 'nova') {
+      this.novaWave(w, st, w.pattern.radius, st.damage * emp);
+      return;
+    }
     const muzzle = this.firePoint();
     const shotAngle = muzzleAngle(muzzle, this.run.aimTarget, aimAngle, this.run.ctx.data.player.muzzleMinTargetPx);
     if (w.boomerang) {
@@ -405,6 +409,22 @@ export class WeaponCombat {
   }
 
   /** 식광의 핵: 가까운 적 자리에 운석이 떨어져 터진다 */
+  /** 사방 파동: 반지름 안 적 모두. selfHarm이면 확률로 자신도 다친다 */
+  novaWave(w: WeaponDef, st: WeaponStats, radius: number, base: number): void {
+    const at = { x: this.run.player.x, y: this.run.player.y };
+    const r = radius * (1 + this.run.itemRt.sums.area);
+    for (const e of [...this.run.enemies]) {
+      if (!e.dead && Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= r + e.radius) this.run.damage.hit(e, this.critRoll(base, st.critChance, { x: e.sprite.x, y: e.sprite.y }), w.tags);
+    }
+    this.run.roomProps.blastProps(at, r, base);
+    playFx(this.run, w.shot!, at.x, at.y, { w: r * 2.2, depth: 6 });
+    const harm = w.selfHarm;
+    if (harm && this.run.rng.chance(harm.chance)) {
+      this.run.playerLife.hurtPlayer(harm.damage);
+      shake(this.run, 'light');
+    }
+  }
+
   dropMeteor(w: WeaponDef, st: WeaponStats, p: Extract<WeaponDef['pattern'], { kind: 'meteor' }>, base: number): void {
     const host = this.run.skillRt.hostFor('weapon');
     const target = nearestEnemy(host, this.run.player, w.range);

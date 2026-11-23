@@ -37,7 +37,9 @@ export type WeaponPattern =
   /** 가까운 적 자리에 delaySec 뒤 운석이 떨어져 터진다 */
   | { kind: 'meteor'; radius: number; delaySec: number; fallPx: number; color: string; sprite: SpriteRef }
   /** 몸 둘레로 바람을 일으킨다 (knockback으로 밀어낸다) */
-  | { kind: 'gust'; radius: number };
+  | { kind: 'gust'; radius: number }
+  /** 지팡이: 몸에서 사방으로 퍼지는 파동 (반지름 안 적 모두, 그림은 shot) */
+  | { kind: 'nova'; radius: number };
 
 /** 무기 무작위 옵션 (레어 1개·전설 2개) */
 export interface WeaponOptionDef {
@@ -132,6 +134,8 @@ export interface WeaponDef extends SpriteRef {
   energyRange?: [number, number];
   /** 공격마다 chance 확률로 터지며 무기가 사라진다 (야시장 복제총) */
   selfDestruct?: { chance: number };
+  /** 쏠 때마다 chance 확률로 자신도 damage 피해 (불안정 마기 조각) */
+  selfHarm?: { chance: number; damage: number };
   /**
    * 징수 (체납자의 의수): 공격할 때마다 마기 입자 coins를 가져간다. 모자라면 그 공격은 맨손(주먹).
    * moveSpeed: 낼 수 있는 동안(마기 입자가 coins 이상) 이동속도 증가
