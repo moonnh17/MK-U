@@ -74,6 +74,8 @@ export class MeleeAttack {
     this.run.time.delayedCall(ia.cutDelaySec * 1000, () => {
       streak.destroy();
       const tags: readonly TagId[] = sig?.kind === 'space' ? [...w.tags, 'space'] : w.tags;
+      // 공간격 차례: 벤 길을 따라 공간이 갈라진다 (3식 제미니와 같은 연출)
+      if (sig?.kind === 'space' && w.qSkill?.kind === 'gemini') this.run.weaponSkills.spaceSlash(w.qSkill, from, to, true);
       const enemies = this.run.enemies.filter((e) => !e.dead);
       const hits = lineHits(from, dir, len, ia.width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
       const lined = new Set(lineHits(from, dir, len, ia.width / 2, this.run.roomProps.breakables.map((b) => ({ x: b.x, y: b.y, radius: 6 }))).map((i) => this.run.roomProps.breakables[i]!));

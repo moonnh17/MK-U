@@ -48,6 +48,11 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
   }
   if (def.pattern.kind === 'meteor') out.push({ text: t('weapon.sigDesc.meteor'), sig: true });
   if (def.pattern.kind === 'nova') out.push({ text: t('weapon.sigDesc.nova'), sig: true });
+  if (def.qSkill) {
+    const title = t(def.qSkill.nameKey);
+    const desc = t(def.qSkill.descKey, { cd: def.qSkill.cooldownSec });
+    out.push({ text: t('weapon.qLine', { title, desc }), sig: true, title, desc });
+  }
   if (def.selfHarm) out.push(main(t('weapon.sigDesc.selfHarm', { pct: Math.round(def.selfHarm.chance * 100), dmg: def.selfHarm.damage })));
   if (def.pierce) out.push({ text: t('weapon.sigDesc.pierce'), sig: true });
   if (def.flame) out.push({ text: t('weapon.sigDesc.flame'), sig: true });

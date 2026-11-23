@@ -1,5 +1,6 @@
 import type { IntRange, TagId, GradeId, SpriteRef } from './common';
 import type { CodexLore } from './enemies';
+import type { RiftDef, SpaceCutDef } from './skills';
 
 // ---------- 무기 ----------
 
@@ -147,6 +148,8 @@ export interface WeaponDef extends SpriteRef {
    */
   /** 민타카의 쌍성 지팡이: phaseSec마다 주성↔반성, 무기 특수공격으로 align(둘을 겹친 식 최대)을 sec 동안 */
   twinStar?: { phaseSec: number; primary: TwinStarMode; eclipse: TwinStarMode; align: TwinStarMode & { sec: number; cooldownSec: number; burst: SpriteRef; color: string } };
+  /** 무기 특수공격(Q) 스킬 */
+  qSkill?: WeaponQSkill;
   beam?: {
     length: number;
     width: number;
@@ -223,3 +226,10 @@ export interface WeaponsData {
   options: WeaponOptionDef[];
   weapons: WeaponDef[];
 }
+
+/** 무기 Q 스킬 */
+export type WeaponQSkill =
+  /** 3식 제미니(라스알하게의 검): 둘레에 분신 clones기가 나타나 함께 strikes번 벤다. 마지막 베기는 공간격(화면이 갈라진다) */
+  | { kind: 'gemini'; nameKey: string; descKey: string; cooldownSec: number; clones: number; strikes: number; gapSec: number; damageMul: number; radiusMul: number; cloneDistPx: number; color: string; spaceLength: number; spaceWidth: number; spaceCut: SpaceCutDef; rift: RiftDef; cut: SpriteRef[] }
+  /** 정화의 불길(아비오르의 지팡이): durationSec 동안 volleySec마다 사방으로 불길 + 굵은 직선 레이저 beams줄(번갈아 반 칸씩 돌려 옆면이 맞닿게) */
+  | { kind: 'purifyingFlame'; nameKey: string; descKey: string; cooldownSec: number; durationSec: number; volleySec: number; beams: number; beamLength: number; beamWidth: number; beamDamageMul: number; flameRadius: number; flameDamageMul: number; burnStacks: number; color: string; flame: SpriteRef };

@@ -167,6 +167,14 @@ export function validateWeapons(v: V): void {
     if (wpn.shot) checkSprite(errors, `${w}.shot`, wpn.shot);
     if (wpn.fireFlash) checkSprite(errors, `${w}.fireFlash`, wpn.fireFlash);
     if (wpn.lobBlast) checkSprite(errors, `${w}.lobBlast`, wpn.lobBlast);
+    if (wpn.qSkill) {
+      const q = wpn.qSkill;
+      checkPositive(errors, `${w}.qSkill.cooldownSec`, q.cooldownSec);
+      needText(`${w}.qSkill`, q.nameKey);
+      needText(`${w}.qSkill`, q.descKey);
+      if (q.kind === 'gemini') q.cut.forEach((c, i) => checkSprite(errors, `${w}.qSkill.cut.${i}`, c));
+      else checkSprite(errors, `${w}.qSkill.flame`, q.flame);
+    }
     if (wpn.boomerang) {
       checkSprite(errors, `${w}.boomerang.shot`, wpn.boomerang.shot);
       if (wpn.boomerang.charges < 1) errors.push(`${w}.boomerang.charges: 1 이상`);

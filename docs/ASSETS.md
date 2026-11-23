@@ -39,7 +39,7 @@
 | `weapon_handi` | 신궁 환디 | 12×12 | center | #ff3b3b | mku/weapon_handi.png (1프레임) |
 | `weapon_rasalgethi_club` | 라스알게티의 곤봉 | 11×11 | center | #b0583a | mku/weapon_rasalgethi_club.png (1프레임) |
 | `weapon_avior_staff` | 아비오르의 지팡이 | 11×11 | center | #8a6aff | mku/weapon_avior_staff.png (1프레임) |
-| `weapon_rasalhague_sword` | 라스알히게의 검 | 11×11 | center | #e8d24a | mku/weapon_rasalhague_sword.png (1프레임) |
+| `weapon_rasalhague_sword` | 라스알히게의 검 | 11×11 | center | #4a9aff | mku/weapon_rasalhague_sword.png (1프레임) |
 | `weapon_broken_blade` | 부러진 칼날 | 6×6 | center | #b8bcc8 | mku/weapon_broken_blade.png (1프레임) |
 | `weapon_hanabi` | 한아비 | 11×11 | center | #ffb04a | mku/weapon_hanabi.png (1프레임) |
 | `weapon_al_gul_blade` | 알 굴 참마검 | 11×11 | center | #c8ccd8 | mku/weapon_al_gul_blade.png (1프레임) |

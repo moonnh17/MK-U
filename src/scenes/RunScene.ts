@@ -13,6 +13,7 @@ import { Encounters } from './run/encounters';
 import { Progression } from './run/progression';
 import { WeaponCombat } from './run/weaponCombat';
 import { SpecialWeapons } from './run/specialWeapons';
+import { WeaponSkills } from './run/weaponSkills';
 import { StageFx } from './run/stageFx';
 import { RoarAura } from './run/roarAura';
 import { PlayerCondition } from './run/playerCondition';
@@ -74,6 +75,7 @@ export class RunScene extends Phaser.Scene {
   damage!: DamageRuntime;
   meleeRt!: MeleeAttack;
   special!: SpecialWeapons;
+  weaponSkills!: WeaponSkills;
   progression!: Progression;
   encounters!: Encounters;
   skillRt!: SkillRuntime;
@@ -179,6 +181,7 @@ export class RunScene extends Phaser.Scene {
     this.ctx = getContext();
     const d = this.ctx.data;
     this.special = new SpecialWeapons(this);
+    this.weaponSkills = new WeaponSkills(this);
     this.roarAura = new RoarAura(this);
     this.bulletRt = new BulletRuntime(this);
     this.roomRt = new RoomRuntime(this);
@@ -557,6 +560,7 @@ export class RunScene extends Phaser.Scene {
     // 무기 특수공격 (Q): 지금은 공간봉합침 회수
     if (frame.pressed.has('weaponSpecial')) this.useWeaponSpecial();
     this.special.update(dt);
+    this.weaponSkills.update(dt);
 
     // 스킬
     // 광전사의 진노: 스킬 쿨타임이 더 빨리 돈다 (궁극기 대기는 그대로)
@@ -644,6 +648,7 @@ export class RunScene extends Phaser.Scene {
     const def = this.weaponDef();
     if (def.needle && this.special.recallNeedles(def)) return;
     if (def.twinStar && this.special.alignTwinStar(def)) return;
+    if (this.weaponSkills.use(def)) return;
     this.toastThrottled(this.ctx.t(def.needle ? 'weapon.noNeedles' : 'weapon.noSpecial'));
   }
 
