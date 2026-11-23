@@ -1539,7 +1539,7 @@
         "descKey": "imprint.fireball.desc",
         "effect": "ignite",
         "levels": [{ "ignite": 0.08 }, { "ignite": 0.12 }, { "ignite": 0.16 }],
-        "fixed": { "stacks": 1, "blastDamage": 6, "blastRadius": 24 }
+        "fixed": { "stacks": 1, "blastDamage": 6, "blastRadius": 24, "fullBurn": 0.5 }
       },
       "color": "#ff6a2a",
       "sprites": {
@@ -1560,9 +1560,9 @@
       "sources": { "wall": ["magic", "ranged"] },
       "element": "fire",
       "levels": [
-        { "cooldownSec": 9.5, "values": { "lifeSec": 4, "tickSec": 0.5, "damage": 4, "burnStacks": 1, "burnEverySec": 1, "length": 64, "thickness": 14, "offset": 30 } },
-        { "cooldownSec": 8.5, "values": { "lifeSec": 5, "tickSec": 0.5, "damage": 5, "burnStacks": 1, "burnEverySec": 1, "length": 74, "thickness": 14, "offset": 30 } },
-        { "cooldownSec": 7.5, "values": { "lifeSec": 6, "tickSec": 0.5, "damage": 6.5, "burnStacks": 1, "burnEverySec": 1, "length": 86, "thickness": 16, "offset": 30 } }
+        { "cooldownSec": 9.5, "values": { "lifeSec": 4, "tickSec": 0.5, "damage": 4, "burnStacks": 1, "burnEverySec": 1, "length": 64, "thickness": 14, "offset": 24, "speed": 45 } },
+        { "cooldownSec": 8.5, "values": { "lifeSec": 5, "tickSec": 0.5, "damage": 5, "burnStacks": 1, "burnEverySec": 1, "length": 74, "thickness": 14, "offset": 24, "speed": 45 } },
+        { "cooldownSec": 7.5, "values": { "lifeSec": 6, "tickSec": 0.5, "damage": 6.5, "burnStacks": 1, "burnEverySec": 1, "length": 86, "thickness": 16, "offset": 24, "speed": 45 } }
       ],
       "imprint": {
         "nameKey": "imprint.fireWall",
@@ -1587,9 +1587,9 @@
       "sources": { "spear": ["magic", "ranged"] },
       "element": "ice",
       "levels": [
-        { "cooldownSec": 4, "values": { "damage": 10, "pierce": 2, "speed": 300, "range": 220, "slow": 0.3, "slowSec": 2 } },
-        { "cooldownSec": 3.5, "values": { "damage": 13, "pierce": 3, "speed": 300, "range": 220, "slow": 0.35, "slowSec": 2 } },
-        { "cooldownSec": 3, "values": { "damage": 17, "pierce": 4, "speed": 300, "range": 220, "slow": 0.4, "slowSec": 2 } }
+        { "cooldownSec": 4, "values": { "damage": 15, "pierce": 2, "speed": 300, "range": 220, "slow": 0.3, "slowSec": 2 } },
+        { "cooldownSec": 3.5, "values": { "damage": 20, "pierce": 3, "speed": 300, "range": 220, "slow": 0.35, "slowSec": 2 } },
+        { "cooldownSec": 3, "values": { "damage": 26, "pierce": 4, "speed": 300, "range": 220, "slow": 0.4, "slowSec": 2 } }
       ],
       "imprint": {
         "nameKey": "imprint.iceSpear",
@@ -1600,9 +1600,9 @@
       },
       "color": "#5ad0f0",
       "sprites": {
-        "spear": { "spriteKey": "skill_mage_ice_spear", "color": "#5ad0f0", "size": 28 },
-        "spearGlow": { "spriteKey": "fx_mage_ice_spear", "color": "#5ad0f0", "size": 28 },
-        "hit": { "spriteKey": "fx_mage_ice_burst", "color": "#5ad0f0", "size": 18 }
+        "spear": { "spriteKey": "skill_mage_ice_spear", "color": "#5ad0f0", "size": 42 },
+        "spearGlow": { "spriteKey": "fx_mage_ice_spear", "color": "#5ad0f0", "size": 42 },
+        "hit": { "spriteKey": "fx_mage_ice_burst", "color": "#5ad0f0", "size": 26 }
       }
     },
     {
@@ -1617,9 +1617,9 @@
       "sources": { "shard": ["magic", "ranged"] },
       "element": "ice",
       "levels": [
-        { "cooldownSec": 8, "values": { "lifeSec": 3, "speed": 36, "shards": 4, "volleySec": 0.4, "spinDeg": 40, "novaShards": 8, "damage": 3, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } },
-        { "cooldownSec": 7.5, "values": { "lifeSec": 4, "speed": 36, "shards": 6, "volleySec": 0.4, "spinDeg": 40, "novaShards": 10, "damage": 3.5, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } },
-        { "cooldownSec": 7, "values": { "lifeSec": 5, "speed": 36, "shards": 8, "volleySec": 0.4, "spinDeg": 40, "novaShards": 12, "damage": 4, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } }
+        { "cooldownSec": 8, "values": { "lifeSec": 3, "speed": 36, "shards": 8, "volleySec": 0.4, "spinDeg": 40, "novaShards": 14, "damage": 3, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } },
+        { "cooldownSec": 7.5, "values": { "lifeSec": 4, "speed": 36, "shards": 10, "volleySec": 0.4, "spinDeg": 40, "novaShards": 18, "damage": 3.5, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } },
+        { "cooldownSec": 7, "values": { "lifeSec": 5, "speed": 36, "shards": 12, "volleySec": 0.4, "spinDeg": 40, "novaShards": 22, "damage": 4, "shardSpeed": 160, "shardRange": 90, "slow": 0.15, "slowSec": 1 } }
       ],
       "imprint": {
         "nameKey": "imprint.iceOrb",
@@ -1756,9 +1756,9 @@
       "tags": ["magic", "ranged"],
       "sources": { "wave": ["magic", "ranged"] },
       "levels": [
-        { "cooldownSec": 5, "values": { "damage": 9, "radius": 56, "arcDeg": 100, "knockback": 30, "knockSec": 0.18 } },
-        { "cooldownSec": 4.5, "values": { "damage": 12, "radius": 62, "arcDeg": 110, "knockback": 30, "knockSec": 0.18 } },
-        { "cooldownSec": 4, "values": { "damage": 15, "radius": 68, "arcDeg": 120, "knockback": 30, "knockSec": 0.18 } }
+        { "cooldownSec": 5, "values": { "damage": 9, "radius": 92, "arcDeg": 110, "knockback": 30, "knockSec": 0.18 } },
+        { "cooldownSec": 4.5, "values": { "damage": 12, "radius": 104, "arcDeg": 120, "knockback": 30, "knockSec": 0.18 } },
+        { "cooldownSec": 4, "values": { "damage": 15, "radius": 118, "arcDeg": 130, "knockback": 30, "knockSec": 0.18 } }
       ],
       "imprint": {
         "nameKey": "imprint.magiWave",
@@ -1877,10 +1877,10 @@
       },
       "color": "#b266ff",
       "sprites": {
-        "will": { "spriteKey": "summon_will_construct", "color": "#b266ff", "size": 12, "height": 26 },
-        "echo": { "spriteKey": "summon_will_construct", "color": "#b266ff", "size": 8, "height": 16 },
-        "soldier": { "spriteKey": "summon_magi_soldier", "color": "#2c1a45", "size": 12, "height": 28 },
-        "golem": { "spriteKey": "summon_imitation_golem", "color": "#6a6a78", "size": 20, "height": 34 },
+        "will": { "spriteKey": "summon_will_construct", "color": "#b266ff", "size": 18, "height": 40 },
+        "echo": { "spriteKey": "summon_will_construct", "color": "#b266ff", "size": 12, "height": 26 },
+        "soldier": { "spriteKey": "summon_magi_soldier", "color": "#2c1a45", "size": 18, "height": 40 },
+        "golem": { "spriteKey": "summon_imitation_golem", "color": "#6a6a78", "size": 34, "height": 60 },
         "willShot": { "spriteKey": "fx_summon_will_shot", "color": "#e0b3ff", "size": 8 },
         "willHit": { "spriteKey": "fx_summon_will_hit", "color": "#b266ff", "size": 24 },
         "soldierThrust": { "spriteKey": "fx_summon_soldier_thrust", "color": "#b266ff", "size": 28 },
@@ -1916,14 +1916,27 @@
       "shortKey": "skill.pureUnfolding.short",
       "descKey": "skill.pureUnfolding.desc",
       "tags": [],
-      "sources": {},
+      "sources": { "spirit": ["magic", "ranged"] },
       "levels": [
-        { "cooldownSec": 0, "values": { "magicDamage": 0.1, "condensePerDamage": 0.005 } },
-        { "cooldownSec": 0, "values": { "magicDamage": 0.15, "condensePerDamage": 0.006 } },
-        { "cooldownSec": 0, "values": { "magicDamage": 0.2, "condensePerDamage": 0.007 } }
+        { "cooldownSec": 0, "values": { "elementDamage": 0.15, "maxSpirits": 2, "lifeSec": 6, "attackSec": 1, "spiritDamage": 5, "range": 140, "radius": 18, "burnStacks": 1, "slow": 0.25, "slowSec": 1.2 } },
+        { "cooldownSec": 0, "values": { "elementDamage": 0.2, "maxSpirits": 3, "lifeSec": 7, "attackSec": 0.9, "spiritDamage": 6.5, "range": 150, "radius": 20, "burnStacks": 1, "slow": 0.3, "slowSec": 1.2 } },
+        { "cooldownSec": 0, "values": { "elementDamage": 0.25, "maxSpirits": 4, "lifeSec": 8, "attackSec": 0.8, "spiritDamage": 8, "range": 160, "radius": 22, "burnStacks": 2, "slow": 0.35, "slowSec": 1.2 } }
       ],
       "color": "#b266ff",
-      "sprites": {}
+      "sprites": {
+        "fire": { "spriteKey": "summon_spirit_fire", "color": "#ff6a2a", "size": 14, "height": 20 },
+        "ice": { "spriteKey": "summon_spirit_ice", "color": "#5ad0f0", "size": 14, "height": 20 },
+        "lightning": { "spriteKey": "summon_spirit_lightning", "color": "#ffd83a", "size": 14, "height": 20 },
+        "magi": { "spriteKey": "summon_spirit_magi", "color": "#b266ff", "size": 14, "height": 20 },
+        "fireShot": { "spriteKey": "fx_mage_fireball", "color": "#ff6a2a", "size": 14 },
+        "fireHit": { "spriteKey": "fx_mage_fire_blast", "color": "#ff6a2a", "size": 36 },
+        "iceShot": { "spriteKey": "fx_mage_ice_spear", "color": "#5ad0f0", "size": 18 },
+        "iceHit": { "spriteKey": "fx_mage_ice_burst", "color": "#5ad0f0", "size": 22 },
+        "lightningShot": { "spriteKey": "fx_mage_bolt", "color": "#ffd83a", "size": 10 },
+        "lightningHit": { "spriteKey": "fx_mage_zap", "color": "#ffd83a", "size": 22 },
+        "magiShot": { "spriteKey": "fx_hw_orb", "color": "#b266ff", "size": 14 },
+        "magiHit": { "spriteKey": "fx_hw_blast", "color": "#b266ff", "size": 32 }
+      }
     }
   ]
 }

@@ -4,6 +4,8 @@ import type { ActionFrame, ButtonAction, Vec2 } from '../core/actions';
 export interface InputSourceState {
   move: Vec2;
   held: ReadonlySet<ButtonAction>;
+  /** 마우스 커서 (화면 비율 0~1) */
+  pointer?: Vec2 | null;
 }
 
 export interface InputSource {
@@ -19,7 +21,9 @@ export function combineInputs(prevHeld: ReadonlySet<ButtonAction>, states: reado
   let move: Vec2 = { x: 0, y: 0 };
   let best = 0;
   const held = new Set<ButtonAction>();
+  let pointer: Vec2 | null = null;
   for (const s of states) {
+    pointer ??= s.pointer ?? null;
     const mag = Math.hypot(s.move.x, s.move.y);
     if (mag > best) {
       best = mag;
@@ -31,7 +35,7 @@ export function combineInputs(prevHeld: ReadonlySet<ButtonAction>, states: reado
 
   const pressed = new Set<ButtonAction>();
   for (const a of held) if (!prevHeld.has(a)) pressed.add(a);
-  return { move: { x: move.x, y: move.y }, held, pressed };
+  return { move: { x: move.x, y: move.y }, held, pressed, pointer };
 }
 
 const EMPTY: ActionFrame = { move: { x: 0, y: 0 }, held: new Set(), pressed: new Set() };

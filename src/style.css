@@ -420,6 +420,7 @@ body {
 
 /* 개전 각인 문구 (마기법사) */
 .cw-imprint,
+.cx-imprint,
 .iw-imprint {
   margin-top: 4px;
   color: #7fd8ff;

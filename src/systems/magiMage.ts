@@ -150,3 +150,20 @@ export function executable(rank: string, hp: number, maxHp: number, ratio: numbe
 export function willCopies(def: Pick<SkillDef, 'id' | 'job' | 'kind'>, excluded: readonly string[]): boolean {
   return def.job === 'magiMage' && def.kind === 'active' && !excluded.includes(def.id);
 }
+
+// ---------- 순수 전개 ----------
+
+/** 순수 전개가 보는 원소: 백온파 원소, 휘강파 공격 스킬은 순수 마기 */
+export type PureElement = ElementId | 'magi';
+
+/** 공격 스킬의 원소 (이동·버프·소환은 null) */
+export function attackElement(def: Pick<SkillDef, 'element' | 'school' | 'tags' | 'sources'>): PureElement | null {
+  if (def.element) return def.element;
+  return def.school === 'hwigang' && def.tags.includes('magic') && !def.sources.summon ? 'magi' : null;
+}
+
+/** 장착한 공격 스킬이 모두 같은 원소면 그 원소 (하나도 없으면 null) */
+export function unifiedElement(defs: readonly Pick<SkillDef, 'element' | 'school' | 'tags' | 'sources'>[]): PureElement | null {
+  const els = new Set(defs.map(attackElement).filter((e): e is PureElement => e !== null));
+  return els.size === 1 ? [...els][0]! : null;
+}

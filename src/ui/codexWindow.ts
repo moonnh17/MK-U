@@ -4,7 +4,7 @@
  * 만나지 않은 칸은 실루엣과 ???만 보이고, 고르면 '아직 기록이 없다'만 나온다.
  */
 import type { GameContext } from '../core/context';
-import { skillTextValues } from './skillText';
+import { imprintText, skillTextValues } from './skillText';
 import { bus } from '../core/events';
 import type { GameData } from '../data/index';
 import { playerArtKey, artKeys } from '../systems/art';
@@ -38,6 +38,8 @@ interface SkillVariant {
   awakened?: boolean;
   /** 이 단계의 태그 (각성하면 바뀔 수 있다) */
   tags?: readonly TagId[];
+  /** 개전 각인 한 줄 (마기법사) */
+  imprint?: string;
 }
 
 /** 아이템의 늘 켜진 수치 효과를 그림 옆 수치 칸으로 (발동형·조건부 효과는 설명에만) */
@@ -465,6 +467,7 @@ export class CodexWindow {
     const text = el('div', '');
     const title = el('b', '');
     const desc = el('span', '');
+    const imprint = el('span', 'cx-imprint');
     const note = el('small', '');
     const tagRow = el('div', 'cw-badges cx-skill-tags');
     const tabs = el('div', 'cx-lv');
@@ -472,6 +475,8 @@ export class CodexWindow {
       const v = variants[i]!;
       title.textContent = v.title;
       desc.textContent = v.desc;
+      imprint.textContent = v.imprint ?? '';
+      imprint.style.display = v.imprint ? '' : 'none';
       note.textContent = v.note;
       tagRow.replaceChildren(
         ...tagBadges(v.tags ?? [], this.ctx.data.tags).map((b) => {
@@ -488,7 +493,7 @@ export class CodexWindow {
       b.addEventListener('click', () => show(i));
       tabs.appendChild(b);
     });
-    text.append(title, tagRow, desc, note, tabs);
+    text.append(title, tagRow, desc, imprint, note, tabs);
     line.append(icon, text);
     show(0);
     return line;
@@ -632,7 +637,7 @@ export class CodexWindow {
         const cd = (sec: number) => (passive ? '' : t('inventory.detailCooldown', { sec: Math.round(sec * 10) / 10 }));
         const levels = s.levels.map((_, i): SkillVariant => {
           const v = skillValues(s, { level: i + 1, awakened: false });
-          return { label: `Lv${i + 1}`, title: `${t(s.nameKey)}${passive ? ` (${t(`card.${s.kind}`)})` : ''}`, desc: t(s.descKey, skillTextValues(v.values)), note: cd(v.cooldownSec), tags: s.tags };
+          return { label: `Lv${i + 1}`, title: `${t(s.nameKey)}${passive ? ` (${t(`card.${s.kind}`)})` : ''}`, desc: t(s.descKey, skillTextValues(v.values)), note: cd(v.cooldownSec), tags: s.tags, imprint: imprintText(s, i + 1, t) ?? undefined };
         });
         if (!s.awakening) return this.skillRow(artKeys.skillIcon(s.id), s.color, levels);
         const aw = skillValues(s, { level: s.levels.length, awakened: true });

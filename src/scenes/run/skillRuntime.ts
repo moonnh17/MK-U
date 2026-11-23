@@ -11,7 +11,7 @@ import { calcDamage, spaceDamage } from '../../systems/damage';
 import { refracts, tickShield, type ShieldState } from '../../systems/shield';
 import { applyCorruption, skillChance } from '../../systems/acro';
 import { combineMods, heal, payHp, type PlayerMods } from '../../systems/vitals';
-import { activeImprint, type ActiveImprint } from '../../systems/magiMage';
+import { activeImprint, unifiedElement, type ActiveImprint } from '../../systems/magiMage';
 import { cooldownLeft, findSkill, refundCooldown, skillValues, ultimateCooldownSec } from '../../systems/skills';
 import { applyBleed, applyBurn, canAutoCast, skillTags } from '../../systems/tags';
 import type { BleedRule, BurnRule, SkillDef, SpaceRule, UltimateDef } from '../../types/data';
@@ -58,6 +58,7 @@ export class SkillRuntime {
       playerSprite: () => this.run.player,
       burst: (at, color) => this.run.juice.colorBurst(at, color, this.run.ctx.data.juice.skillBurst),
       aimDir: () => this.run.aimDir,
+      teleportDir: () => this.run.moveAimDir,
       enemies: () => this.run.enemies.filter((e) => !e.dead),
       area: (r) => this.area(r),
       hit: (e, base, tags) => this.run.damage.hit(e, base, tags, source),
@@ -123,6 +124,7 @@ export class SkillRuntime {
       },
       teleport: (dir, distance, stepPx) => this.run.condition.teleport(dir, distance, stepPx),
       elementsUsed: () => this.run.session.player.elementsUsed,
+      equippedElement: () => unifiedElement(this.run.session.player.loadout.active.filter((id): id is string => !!id).map((id) => findSkill(ctx.data.skills, id))),
       enemyBulletsAt: (at, r) => {
         let sum = 0;
         for (const b of [...this.run.enemyBullets.getChildren()] as Phaser.Physics.Arcade.Image[]) {

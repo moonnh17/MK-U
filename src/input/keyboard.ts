@@ -63,6 +63,16 @@ export class KeyboardSource {
     this.down.delete(e.code);
   };
   private readonly onBlur = () => this.down.clear();
+  /** 마우스 커서: 게임 캔버스 안 비율 (마우스만, 터치는 무시) */
+  private pointer: Vec2 | null = null;
+  private readonly onPointerMove = (e: PointerEvent) => {
+    if (e.pointerType !== 'mouse') return;
+    const canvas = document.querySelector('canvas');
+    if (!canvas) return;
+    const r = canvas.getBoundingClientRect();
+    if (r.width <= 0 || r.height <= 0) return;
+    this.pointer = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+  };
 
   /** 키보드를 쓰기 시작했을 때(UI 모드 자동 전환용) */
   onActivity?: () => void;
@@ -72,15 +82,17 @@ export class KeyboardSource {
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
     window.addEventListener('blur', this.onBlur);
+    window.addEventListener('pointermove', this.onPointerMove);
   }
 
   state(): InputSourceState {
-    return resolveKeyboard(this.down, this.bindings);
+    return { ...resolveKeyboard(this.down, this.bindings), pointer: this.pointer };
   }
 
   destroy(): void {
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);
     window.removeEventListener('blur', this.onBlur);
+    window.removeEventListener('pointermove', this.onPointerMove);
   }
 }

@@ -9,10 +9,10 @@ import type { BuffView } from '../../core/session';
 import type { Enemy } from '../../entities/enemy';
 import type { SkillCast } from '../../skills/host';
 import { playFx } from '../../skills/skillFx';
-import { animKey } from '../../systems/art';
-import { addElement, castBoost, chargeAfterMove, condenseFill, frostHit, imprintMods } from '../../systems/magiMage';
+import { addElement, attackElement, castBoost, chargeAfterMove, condenseFill, frostHit, imprintMods, unifiedElement, type PureElement } from '../../systems/magiMage';
+import { summonSpirit } from '../../skills/hwigang';
 import { findSkill, skillValues } from '../../systems/skills';
-import type { ElementId, SkillDef, TagId } from '../../types/data';
+import type { BurnRule, ElementId, SkillDef, TagId } from '../../types/data';
 import type { PlayerMods } from '../../systems/vitals';
 import type { RunScene } from '../RunScene';
 
@@ -32,6 +32,9 @@ export class MageRuntime {
   private pending: { skillId: string; mul: number; windowSec: number } | null = null;
   /** 잔영 동행: 플레이어를 따라다니는 작은 잔영 */
   private echo: Phaser.GameObjects.Sprite | null = null;
+  private echoScale = 1;
+  private echoT = 0;
+  private echoLunge: { to: Vec2; until: number } | null = null;
 
   constructor(private readonly run: RunScene) {}
 
@@ -74,13 +77,35 @@ export class MageRuntime {
     const ref = findSkill(this.run.ctx.data.skills, 'executionWill').sprites.echo!;
     const back = { x: this.run.player.x - this.run.aimDir.x * 14, y: this.run.player.y - this.run.aimDir.y * 14 - 4 };
     if (!this.echo) {
-      this.echo = this.run.add.sprite(back.x, back.y, ref.spriteKey).setAlpha(0.55).setDepth(4);
-      this.echo.setDisplaySize(ref.size * 1.6, ref.height ?? ref.size);
-      const idle = animKey(ref.spriteKey, 'idle');
-      if (this.run.anims.exists(idle)) this.echo.play(idle);
+      this.echo = this.run.add.sprite(back.x, back.y, ref.spriteKey).setAlpha(0.55).setDepth(4).setOrigin(0.5, 1);
+      const h = ref.height ?? ref.size;
+      this.echo.setDisplaySize((h * this.echo.width) / Math.max(1, this.echo.height), h);
+      this.echoScale = this.echo.scaleY;
     }
-    const k = Math.min(1, dt * 8);
-    this.echo.setPosition(this.echo.x + (back.x - this.echo.x) * k, this.echo.y + (back.y - this.echo.y) * k).setFlipX(this.run.aimDir.x < 0);
+    this.echoT += dt;
+    // 덤벼드는 중이면 적 쪽으로 빠르게, 아니면 플레이어 뒤로 천천히 (떠다니며)
+    const lunging = this.echoLunge && this.run.time.now < this.echoLunge.until;
+    const to = lunging ? this.echoLunge!.to : { x: back.x, y: back.y + 8 - 2 - Math.sin(this.echoT * 2.4) * 2 };
+    const k = Math.min(1, dt * (lunging ? 22 : 8));
+    this.echo.setPosition(this.echo.x + (to.x - this.echo.x) * k, this.echo.y + (to.y - this.echo.y) * k);
+    if (!lunging) this.echo.setFlipX(this.run.aimDir.x < 0).setAlpha(0.55).setRotation(Math.sin(this.echoT * 1.3) * 0.05);
+  }
+
+  /** 잔영 동행 공격 동작: 적에게 덤벼들어 베고 돌아온다 */
+  private echoStrike(enemy: Enemy, sec: number): void {
+    const e = this.echo;
+    // 빠른 무기는 덤벼드는 중에 또 맞히므로 동작은 한 번만
+    if (!e || (this.echoLunge && this.run.time.now < this.echoLunge.until + 120)) return;
+    const dx = enemy.sprite.x - e.x;
+    const dy = enemy.sprite.y - e.y;
+    const d = Math.hypot(dx, dy) || 1;
+    // 적 앞까지 (몸에 겹치지 않게)
+    const stop = Math.max(0, d - enemy.radius - 6);
+    this.echoLunge = { to: { x: e.x + (dx / d) * stop, y: e.y + (dy / d) * stop + enemy.radius * 0.5 }, until: this.run.time.now + sec * 1000 + 90 };
+    e.setFlipX(dx < 0).setAlpha(0.9);
+    this.run.tweens.add({ targets: e, rotation: (dx < 0 ? -1 : 1) * 0.35, scaleX: e.scaleX * 1.2, scaleY: this.echoScale * 0.85, duration: sec * 1000, ease: 'Quad.easeIn', yoyo: true, onComplete: () => this.echo?.setScale(this.echoScale) });
+    const ghost = this.run.add.image(e.x, e.y, e.texture.key).setOrigin(0.5, 1).setScale(e.scaleX, e.scaleY).setFlipX(e.flipX).setAlpha(0.35).setTint(0xb266ff).setDepth(3.9);
+    this.run.tweens.add({ targets: ghost, alpha: 0, duration: 260, onComplete: () => ghost.destroy() });
   }
 
   /** 각인이 주는 플레이어 보정 (과잉 전개·극단) */
@@ -122,6 +147,9 @@ export class MageRuntime {
       p.elementsUsed = addElement(p.elementsUsed, def.element);
     }
     for (const o of [...this.run.skillRt.skillObjects]) o.onSkillCast?.(this.run.skillRt.hostFor(def.id), cast);
+    // 순수 전개: 맞춘 원소의 스킬을 쓸 때마다 원소 정령
+    const el = this.pureElement();
+    if (el && attackElement(def) === el) summonSpirit(this.run.skillRt.hostFor('pureUnfolding'), findSkill(this.run.ctx.data.skills, 'pureUnfolding'), this.passiveValues('pureUnfolding', true)!, el);
   }
 
   /** 시전 강화로 그 스킬 피해에 곱하는 값 */
@@ -135,13 +163,21 @@ export class MageRuntime {
     return b.mul;
   }
 
-  /** 관통 전개(마기 태그 피해)·순수 전개(휘강파 피해) 배율 */
-  damageMul(school: string | null, tags: readonly TagId[]): number {
+  /** 관통 전개(마기 태그 피해)·순수 전개(한 원소로 맞춘 그 원소 스킬 피해) 배율 */
+  damageMul(source: string | null, tags: readonly TagId[]): number {
     const im = this.run.skillRt.imprint();
     let mul = im?.effect === 'pierceUnfold' && tags.includes('magic') ? 1 + im.values.pierceUnfold! : 1;
-    const pure = school === 'hwigang' ? this.passiveValues('pureUnfolding', true) : null;
-    if (pure) mul *= 1 + pure.magicDamage!;
+    const el = this.pureElement();
+    const def = source ? this.run.ctx.data.skills.skills.find((s) => s.id === source) : undefined;
+    if (el && def && attackElement(def) === el) mul *= 1 + this.passiveValues('pureUnfolding', true)!.elementDamage!;
     return mul;
+  }
+
+  /** 순수 전개: 패시브를 장착했고 장착한 공격 스킬이 모두 한 원소면 그 원소 */
+  pureElement(): PureElement | null {
+    if (!this.passiveValues('pureUnfolding', true)) return null;
+    const skills = this.run.ctx.data.skills;
+    return unifiedElement(this.run.session.player.loadout.active.filter((id): id is string => !!id).map((id) => findSkill(skills, id)));
   }
 
   /** 극단: 스킬(학파가 있는 출처) 치명 확률·치명 피해 추가. 아니면 null */
@@ -150,18 +186,13 @@ export class MageRuntime {
     return school && im?.effect === 'extreme' ? { chance: im.values.critChance!, bonus: im.values.extreme! } : null;
   }
 
-  /** 실제로 깎인 피해: 순수 전개는 휘강파 피해만큼 응축을 채운다 */
-  onDealt(school: string | null, dealt: number): void {
-    const pure = school === 'hwigang' ? this.passiveValues('pureUnfolding', true) : null;
-    if (pure) this.condense = condenseFill(this.condense, 0, 0, dealt, pure.condensePerDamage!);
-  }
-
   /** 피해를 준 뒤: 점화(모든 피해에 확률 화상), 서리(냉기 피해 중첩 → 빙결), 잔영 동행(무기 공격을 늦게 따라 친다) */
   onHit(enemy: Enemy, source: string | null, killed: boolean, base: number, tags: readonly TagId[]): void {
     const im = this.run.skillRt.imprint();
     if (!im) return;
     if (im.effect === 'followUp' && source === null) {
       const ratio = im.values.followUp!;
+      if (!enemy.dead) this.echoStrike(enemy, im.values.delaySec!);
       this.run.time.delayedCall(im.values.delaySec! * 1000, () => {
         if (enemy.dead) return;
         const shot = findSkill(this.run.ctx.data.skills, 'executionWill').sprites.willHit;
@@ -171,7 +202,17 @@ export class MageRuntime {
     }
     if (killed || enemy.dead) return;
     const host = this.run.skillRt.hostFor(im.skillId);
-    if (im.effect === 'ignite' && this.run.rng.chance(im.values.ignite!)) host.burn(enemy, im.values.stacks!);
+    if (im.effect === 'ignite') {
+      // 화상이 꽉 찬 적: 불 피해를 한 번 더 (지속 피해처럼 각인 효과를 다시 부르지 않는다)
+      const rule = this.run.tagRule<BurnRule>('burn');
+      const cap = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss' ? rule.bossMaxStacks : rule.maxStacks;
+      if (enemy.burn && enemy.burn.stacks >= cap) {
+        const fire = findSkill(this.run.ctx.data.skills, im.skillId);
+        if (fire.sprites.blast) playFx(this.run, fire.sprites.blast, enemy.sprite.x, enemy.sprite.y, { w: Math.max(16, enemy.radius * 2.2) });
+        if (this.run.damage.applyDamage(enemy, base * im.values.fullBurn!, im.skillId, { tags: fire.sources.blast ?? fire.tags, crit: false, space: false })) return;
+      }
+      if (this.run.rng.chance(im.values.ignite!)) host.burn(enemy, im.values.stacks!);
+    }
     if (im.effect === 'frost' && this.elementOf(source) === 'ice') {
       const r = frostHit(enemy.frost, im.values.need!, im.values.stackSec!);
       enemy.frost = r.state;
@@ -241,7 +282,9 @@ export class MageRuntime {
     const im = this.run.skillRt.imprint();
     const out: BuffView[] = [];
     if (im?.effect === 'staticCharge' && this.charge > 0) out.push({ id: 'staticCharge', label: this.run.ctx.t('buff.staticCharge', { pct: Math.round(this.charge * 100) }), color: findSkill(this.run.ctx.data.skills, im.skillId).color });
-    if ((im?.effect === 'condense' || this.passiveValues('pureUnfolding', true)) && this.condense > 0) out.push({ id: 'condense', label: this.run.ctx.t('buff.condense', { pct: Math.round(this.condense * 100) }), color: '#b266ff' });
+    const pure = this.pureElement();
+    if (pure) out.push({ id: 'pureUnfolding', label: this.run.ctx.t('buff.pureUnfolding', { element: this.run.ctx.t(`pureElement.${pure}`) }), color: findSkill(this.run.ctx.data.skills, 'pureUnfolding').sprites[pure]!.color });
+    if (im?.effect === 'condense' && this.condense > 0) out.push({ id: 'condense', label: this.run.ctx.t('buff.condense', { pct: Math.round(this.condense * 100) }), color: '#b266ff' });
     return out;
   }
 }

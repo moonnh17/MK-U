@@ -1,6 +1,6 @@
 /**
  * 마기법사 스킬. 백온파(원소)·휘강파(순수 마기).
- * - 화염벽: 조준 방향 앞에 조준과 직각인 불길 벽을 세운다. 벽 안 적은 tickSec마다 피해, burnEverySec마다 화상.
+ * - 화염벽: 조준 방향 앞에 조준과 직각인 불길 벽을 세워 앞으로 밀고 나간다(벽에 닿으면 멈춤). 벽 안 적은 tickSec마다 피해, burnEverySec마다 화상.
  * - 순간이동: 조준 방향으로 곧장 옮긴다(벽 앞에서 멈춤, 도착 폭발 없음).
  * - 화염구: 적·벽·사거리에서 폭발(피해 + 화상). 빙창: 꿰뚫으며 둔화. 얼음 보주: 느리게 나아가며 사방으로 파편(둔화).
  * - 뇌격: 가까운 적부터 연쇄. 원소 가호: 원소 스킬 피해 + 보호막. 원소 대합주: 화염·냉기·번개가 차례로 쏟아진다.
@@ -8,7 +8,9 @@
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
+import { getContext } from '../core/context';
 import { bus } from '../core/events';
+import { hexColor } from '../core/scale';
 import type { BuffView } from '../core/session';
 import type { Enemy } from '../entities/enemy';
 import { shake } from '../entities/juice';
@@ -27,14 +29,15 @@ class FireWall implements SkillObject {
   private tick = 0;
   private readonly lastBurn = new Map<Enemy, number>();
   private age = 0;
-  private readonly flames: Phaser.GameObjects.Sprite[] = [];
+  private readonly flames: { sp: Phaser.GameObjects.Sprite; t: number }[] = [];
   private readonly len: number;
   private readonly thick: number;
+  private stopped = false;
 
   constructor(
     host: SkillHost,
     private readonly s: SkillCast,
-    private readonly at: { x: number; y: number },
+    private at: { x: number; y: number },
     /** 조준 방향 (벽 두께 방향) */
     private readonly dir: { x: number; y: number },
   ) {
@@ -52,7 +55,7 @@ class FireWall implements SkillObject {
       const k = 1.4 * fxScale(host, s.owned.level);
       sp.setDisplaySize(ref.size * k, ref.size * k);
       loopArt(sp, ref);
-      this.flames.push(sp);
+      this.flames.push({ sp, t });
     }
   }
 
@@ -70,6 +73,12 @@ class FireWall implements SkillObject {
     this.age += dt;
     this.life -= dt;
     this.tick -= dt;
+    // 앞으로 밀고 나간다. 가운데가 벽에 닿으면 그 자리에 선다
+    if (!this.stopped) {
+      const next = { x: this.at.x + this.dir.x * v.speed! * dt, y: this.at.y + this.dir.y * v.speed! * dt };
+      if (host.blocked(next.x, next.y)) this.stopped = true;
+      else this.at = next;
+    }
     const hitNow = this.tick <= 0;
     if (hitNow) this.tick = v.tickSec!;
     for (const e of host.enemies()) {
@@ -83,12 +92,12 @@ class FireWall implements SkillObject {
     }
     // 마지막 0.4초는 옅어진다
     const fade = Math.min(1, this.life / 0.4);
-    for (const f of this.flames) f.setAlpha(fade);
+    for (const f of this.flames) f.sp.setPosition(this.at.x - this.dir.y * f.t, this.at.y + this.dir.x * f.t).setAlpha(fade);
     return this.life > 0;
   }
 
   destroy(): void {
-    for (const f of this.flames) f.destroy();
+    for (const f of this.flames) f.sp.destroy();
   }
 }
 
@@ -106,7 +115,7 @@ export const fireWall: SkillImpl = {
 
 export const teleport: SkillImpl = {
   cast(host, s) {
-    const { from, to } = host.teleport(host.aimDir(), s.values.distance!, s.values.stepPx!);
+    const { from, to } = host.teleport(host.teleportDir(), s.values.distance!, s.values.stepPx!);
     // 임시 연출: 떠난 자리·도착한 자리에 보라 파동 (pixelfx는 D 단계)
     host.burst(from, s.def.color);
     host.burst(to, s.def.color);
@@ -383,27 +392,63 @@ class ElementWard implements SkillObject {
   private readonly total: number;
   private shieldLeft: number;
   private readonly aura: Phaser.GameObjects.Sprite;
+  /** 보호막 방울·남은 양 고리·도는 원소 구슬 */
+  private readonly g: Phaser.GameObjects.Graphics;
+  private t = 0;
+  /** 막았을 때 번쩍임 (1 → 0) */
+  private flash = 0;
+  private readonly scene: Phaser.Scene;
 
   constructor(
     host: SkillHost,
     private readonly s: SkillCast,
   ) {
     this.createdAt = host.scene.time.now;
+    this.scene = host.scene;
     this.total = this.left = host.buffDuration(s.values.durationSec!, s.def.tags);
     this.shieldLeft = s.values.shield!;
     const ref = s.def.sprites.aura!;
     const p = host.playerPos();
-    this.aura = host.sprite(p.x, p.y, ref).setDepth(3);
-    const w = ref.size * fxScale(host, s.owned.level);
+    this.aura = host.sprite(p.x, p.y, ref).setDepth(3).setBlendMode('ADD');
+    const w = ref.size * 1.5 * fxScale(host, s.owned.level);
     this.aura.setDisplaySize(w, (w * this.aura.height) / Math.max(1, this.aura.width));
     loopArt(this.aura, ref);
+    this.g = host.scene.add.graphics().setDepth(6);
+    // 펼칠 때 세 원소 빛이 터진다
+    for (const c of WARD_COLORS) host.burst(p, c);
+    impactFx(host, 3, p.x, p.y, s.def.color, WARD_RADIUS * 1.6, 1.5);
   }
 
   update(dt: number, host: SkillHost): boolean {
     this.left -= dt;
+    this.t += dt;
+    this.flash = Math.max(0, this.flash - dt * 4);
     const p = host.playerPos();
+    const fade = Math.min(1, this.left / 0.4);
+    const on = this.shieldLeft > 0;
     // 보호막을 다 쓰면 옅어진다
-    this.aura.setPosition(p.x, p.y).setAlpha(Math.min(1, this.left / 0.4) * (this.shieldLeft > 0 ? 1 : 0.6));
+    this.aura.setPosition(p.x, p.y + 4).setAlpha(fade * (on ? 1 : 0.5));
+    const g = this.g.clear();
+    const cy = p.y - 6;
+    if (on) {
+      const r = WARD_RADIUS + Math.sin(this.t * 4) * 0.8;
+      const frac = this.shieldLeft / this.s.values.shield!;
+      // 방울: 옅은 막 + 테두리, 막을 때 하얗게 번쩍
+      g.fillStyle(0xffe6a8, (0.12 + 0.25 * this.flash) * fade).fillCircle(p.x, cy, r);
+      g.lineStyle(1.5, this.flash > 0 ? 0xffffff : 0xffd27a, (0.75 + 0.25 * this.flash) * fade).strokeCircle(p.x, cy, r);
+      // 남은 보호막 양: 바깥 고리
+      g.lineStyle(2, 0xfff2c8, 0.9 * fade).beginPath();
+      g.arc(p.x, cy, r + 3, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * frac, false).strokePath();
+    }
+    // 세 원소 구슬이 돈다
+    WARD_COLORS.forEach((c, i) => {
+      const a = this.t * 3 + (i * Math.PI * 2) / 3;
+      const x = p.x + Math.cos(a) * (WARD_RADIUS + 1);
+      const y = cy + Math.sin(a) * (WARD_RADIUS + 1) * 0.5;
+      const col = hexColor(c);
+      g.fillStyle(col, 0.35 * fade).fillCircle(x, y, 4);
+      g.fillStyle(col, fade).fillCircle(x, y, 2);
+    });
     return this.left > 0;
   }
 
@@ -412,8 +457,16 @@ class ElementWard implements SkillObject {
   }
 
   absorb(amount: number): number {
+    if (this.shieldLeft <= 0) return amount;
     const took = Math.min(this.shieldLeft, amount);
     this.shieldLeft -= took;
+    this.flash = 1;
+    // 깨지면 조각이 흩어진다
+    if (this.shieldLeft <= 0) {
+      const at = { x: this.aura.x, y: this.aura.y - 10 };
+      sparks(this.scene, at.x, at.y, this.s.def.color, getContext().data.juice.projectileLook, 3);
+      shake(this.scene, 'light');
+    }
     return amount - took;
   }
 
@@ -423,8 +476,13 @@ class ElementWard implements SkillObject {
 
   destroy(): void {
     this.aura.destroy();
+    this.g.destroy();
   }
 }
+
+const WARD_RADIUS = 15;
+/** 원소 가호 구슬: 화염·냉기·번개 */
+const WARD_COLORS = ['#ff6a2a', '#5ad0f0', '#ffd83a'];
 
 export const elementWard: SkillImpl = {
   cast(host, s) {
@@ -449,11 +507,27 @@ const CONCERT: { el: ElementId; sprite: string; damage: string; delay: string }[
 export const elementConcert: UltimateImpl = {
   cast(host, u) {
     const v = u.values;
+    const tags = u.def.sources.fall!;
+    // 장착한 공격 스킬이 한 원소뿐이면 그 원소만 크게 휘몰아친다
+    const solo = CONCERT.find((w) => w.el === host.equippedElement());
+    if (solo) {
+      const r = host.area(v.radius! * v.soloRadiusMul!);
+      for (let k = 0; k < v.soloStrikes!; k++) {
+        host.scene.time.delayedCall(k * v.soloGapSec! * 1000, () => {
+          const at = concertTarget(host, v.spreadPx!);
+          const ref = u.def.sprites[solo.sprite]!;
+          playFx(host.scene, ref, at.x, at.y, { w: ref.size * v.soloRadiusMul! }).setOrigin(0.5, 1);
+          host.scene.time.delayedCall(v[solo.delay]! * 1000, () => concertLand(host, u, solo.el, at, r, v[solo.damage]! * v.soloDamageMul!, tags));
+        });
+      }
+      floatText(host, host.playerPos().x, host.playerPos().y - 18, host.ctx.t(`skillMsg.concertSolo.${solo.el}`), u.def.color);
+      shake(host.scene, 'heavy');
+      return true;
+    }
     const full = concertFull(host.elementsUsed());
     const strikes = full ? v.fullStrikes! : v.strikes!;
     const mul = full ? v.fullDamageMul! : 1;
     const r = host.area(v.radius!);
-    const tags = u.def.sources.fall!;
     CONCERT.forEach((w, wi) => {
       for (let k = 0; k < strikes; k++) {
         host.scene.time.delayedCall((wi * v.waveGapSec! + k * v.strikeGapSec!) * 1000, () => {

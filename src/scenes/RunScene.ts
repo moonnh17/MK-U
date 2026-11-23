@@ -139,6 +139,8 @@ export class RunScene extends Phaser.Scene {
   dashVel: Vec2 = { x: 0, y: 0 };
 
   aimDir: Vec2 = { x: 1, y: 0 };
+  /** 순간이동 방향: 마우스 커서 쪽, 마우스가 없으면 회피처럼 이동 방향(서 있으면 조준 방향) */
+  moveAimDir: Vec2 = { x: 1, y: 0 };
   invuln = 0;
   pathFields = new Map<number, PathField>();
   toastTimes = new Map<string, number>();
@@ -536,6 +538,9 @@ export class RunScene extends Phaser.Scene {
     );
     this.aimDir = aim.target ? aim.dir : moving ? normalize(frame.move) : this.aimDir;
     this.aimTarget = aim.target ? { x: aim.target.x, y: aim.target.y } : null;
+    const cur = frame.pointer ? this.cameras.main.getWorldPoint(frame.pointer.x * this.scale.width, frame.pointer.y * this.scale.height) : null;
+    const toCur = cur ? { x: cur.x - this.player.x, y: cur.y - this.player.y } : null;
+    this.moveAimDir = toCur && Math.hypot(toCur.x, toCur.y) > 1 ? normalize(toCur) : moving ? normalize(frame.move) : this.aimDir;
     this.itemRt.gaze(aim.target ? (this.enemies.find((e) => e.sprite === aim.target) ?? null) : null, dt);
     const aimAngle = Math.atan2(this.aimDir.y, this.aimDir.x);
 

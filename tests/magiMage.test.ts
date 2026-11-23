@@ -4,7 +4,7 @@ import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
 import { skillAllowed } from '../src/systems/advancement';
 import { drawSkillCards } from '../src/systems/cards';
-import { activeImprint, addElement, castBoost, chargeAfterMove, concertFull, condenseFill, elementDamageMul, executable, frostHit, imprintMods, judgeBySlots, slowAmount, staffDamageMul, willCopies } from '../src/systems/magiMage';
+import { activeImprint, addElement, attackElement, unifiedElement, castBoost, chargeAfterMove, concertFull, condenseFill, elementDamageMul, executable, frostHit, imprintMods, judgeBySlots, slowAmount, staffDamageMul, willCopies } from '../src/systems/magiMage';
 import { awakeningReady, emptyLoadout, equipSkill, findSkill, setSkillLevel, type SkillLoadout } from '../src/systems/skills';
 import { tickBurn, applyBurn } from '../src/systems/tags';
 import type { BurnRule } from '../src/types/data';
@@ -237,5 +237,22 @@ describe('슬픈 처형·집행 의지체', () => {
   it('휘강파 액티브 7종 모두 구현·각인', () => {
     const hw = S.skills.filter((s) => s.school === 'hwigang' && s.kind === 'active').map((s) => s.id).sort();
     expect(hw).toEqual(['executionWill', 'magiBolt', 'magiBurst', 'magiCondenser', 'magiPillar', 'magiWave', 'teleport']);
+  });
+});
+
+describe('순수 전개 원소 판정', () => {
+  const d = (id: string) => findSkill(S, id);
+  it('백온파는 제 원소, 휘강파 공격은 순수 마기, 이동·버프·소환은 없음', () => {
+    expect(attackElement(d('fireball'))).toBe('fire');
+    expect(attackElement(d('magiWave'))).toBe('magi');
+    expect(attackElement(d('teleport'))).toBeNull();
+    expect(attackElement(d('elementWard'))).toBeNull();
+    expect(attackElement(d('executionWill'))).toBeNull();
+  });
+  it('공격 스킬이 모두 같은 원소일 때만', () => {
+    expect(unifiedElement([d('fireball'), d('fireWall'), d('teleport')])).toBe('fire');
+    expect(unifiedElement([d('magiWave'), d('magiBurst'), d('executionWill')])).toBe('magi');
+    expect(unifiedElement([d('fireball'), d('iceSpear')])).toBeNull();
+    expect(unifiedElement([d('teleport')])).toBeNull();
   });
 });

@@ -33,4 +33,6 @@ export interface ActionFrame {
   held: ReadonlySet<ButtonAction>;
   /** 이번 프레임에 새로 눌린 버튼 */
   pressed: ReadonlySet<ButtonAction>;
+  /** 마우스 커서 자리: 게임 화면 안 비율(0~1). 마우스를 쓰지 않으면 없음 (순간이동 방향) */
+  pointer?: Vec2 | null;
 }

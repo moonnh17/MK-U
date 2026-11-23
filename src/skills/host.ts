@@ -10,6 +10,7 @@ import type { Rng } from '../core/rng';
 import type { Enemy } from '../entities/enemy';
 import type { CorruptionState } from '../systems/acro';
 import type { ShieldState } from '../systems/shield';
+import type { PureElement } from '../systems/magiMage';
 import type { OwnedSkill } from '../systems/skills';
 import type { PlayerMods } from '../systems/vitals';
 import type { ElementId, RiftDef, SkillDef, SpaceCutDef, SpriteRef, TagId, UltimateDef } from '../types/data';
@@ -23,6 +24,8 @@ export interface SkillHost {
   playerSprite(): Phaser.Physics.Arcade.Sprite;
   /** 마지막 조준 방향 (단위 벡터) */
   aimDir(): Vec2;
+  /** 순간이동 방향: 마우스 커서 쪽(없으면 이동 방향, 서 있으면 조준 방향) */
+  teleportDir(): Vec2;
   /** 살아 있는 적 */
   enemies(): readonly Enemy[];
   /** 스킬 범위(반지름) 보정: 마기력 */
@@ -93,6 +96,8 @@ export interface SkillHost {
   teleport(dir: Vec2, distance: number, stepPx: number): { from: Vec2; to: Vec2 };
   /** 이번 런에 쓴 원소 (원소 대합주) */
   elementsUsed(): readonly ElementId[];
+  /** 장착한 공격 스킬이 모두 한 원소면 그 원소(휘강파 공격은 순수 마기) */
+  equippedElement(): PureElement | null;
   /** at 둘레 r 안의 적 탄을 지우고 그 피해 합을 돌려준다 (소환체가 맞는다) */
   enemyBulletsAt(at: Vec2, r: number): number;
   /** 벽(지나갈 수 없는 칸)인지 */

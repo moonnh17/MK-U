@@ -28,6 +28,17 @@ const WEAPONS = {
   fx_spirit_fist_blast: ['spiritFistBlast', 48, 0.35],
 };
 
+/** 집행 의지체 소환체·순수 전개 정령 (scripts/art-src/summons-hf, 오른쪽을 보는 한 장): key: [파일, 화면 키 px, 좌우 뒤집기] */
+const SUMMONS = {
+  summon_will_construct: ['will', 40, true],
+  summon_magi_soldier: ['soldier', 40],
+  summon_imitation_golem: ['golem', 60],
+  summon_spirit_fire: ['spiritFire', 20],
+  summon_spirit_ice: ['spiritIce', 20],
+  summon_spirit_lightning: ['spiritLightning', 20],
+  summon_spirit_magi: ['spiritMagi', 20],
+};
+
 const FRAME = 128;
 const FRAMES = { hud_imprint_frame: 'imprint', hud_imprint_frame_gold: 'resonance' };
 
@@ -62,6 +73,14 @@ function buildMageArt(outDir) {
     const fh = Math.max(1, Math.round((fw * im.h) / im.w));
     k.write(path.join(outDir, `${key}.png`), k.resize(im, fw, fh, cut));
     out[key] = { file: `mku/${key}.png`, frameWidth: fw, frameHeight: fh, frames: 1, density: DENSITY, ...(gripX !== undefined ? { gripX } : {}) };
+  }
+  for (const [key, [f, h, flip]] of Object.entries(SUMMONS)) {
+    let im = trimmed(path.join(SRC, 'summons-hf', `${f}.png`));
+    if (flip) im = k.flipX(im);
+    const fh = h * DENSITY;
+    const fw = Math.max(1, Math.round((fh * im.w) / im.h));
+    k.write(path.join(outDir, `${key}.png`), k.resize(im, fw, fh, 0.5));
+    out[key] = { file: `mku/${key}.png`, frameWidth: fw, frameHeight: fh, frames: 1, density: DENSITY };
   }
   // 개전 각인 칸 장식 틀: 정사각 128px (화면에서 31px로 줄여 쓴다)
   for (const [key, f] of Object.entries(FRAMES)) {

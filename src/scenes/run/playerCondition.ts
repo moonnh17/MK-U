@@ -1,7 +1,7 @@
 /** 플레이어 상태: 회피(점멸·진격), 정신력·패닉, 보스전 에너지 구슬, 피격 깜빡임. */
 import { bossHalfOrbs, bossOrbDrops } from '../../systems/bossEnergy';
 import { IDLE_DODGE, blinkTarget, dodgeConfig, leapTarget, startDodge, stepDodge, zigzag, type DodgeState } from '../../systems/dodge';
-import { contains, interiorRect } from '../../systems/worldLayout';
+import { contains, corridors, interiorRect } from '../../systems/worldLayout';
 import Phaser from 'phaser';
 import type { ActionFrame, Vec2 } from '../../core/actions';
 import { Rng } from '../../core/rng';
@@ -151,10 +151,21 @@ export class PlayerCondition {
     }
   }
 
-  /** 순간이동(마기법사): 벽을 뚫지 않는 데까지 곧장 옮긴다 */
+  /**
+   * 순간이동(마기법사): 벽·장애물을 넘어 가장 먼 내려설 수 있는 바닥(방 안·복도)으로. 맵 밖·벽 속에는 서지 않는다.
+   * 전투로 잠긴 방 안에서는 그 방 바닥 안에서만 (잠긴 문을 넘어 빠져나가지 않게)
+   */
   teleport(dir: Vec2, distance: number, stepPx: number): { from: Vec2; to: Vec2 } {
-    const from = { x: this.run.player.x, y: this.run.player.y };
-    const to = blinkTarget(from, dir, distance, stepPx, this.blockedAt());
+    const run = this.run;
+    const from = { x: run.player.x, y: run.player.y };
+    const half = run.ctx.data.player.size / 2;
+    const blocked = this.blockedAt();
+    const rid = run.session.currentRoomId;
+    const locked = rid !== null && run.rooms.get(rid)?.phase === 'locked';
+    const floors = locked
+      ? [interiorRect(run.session.map.rooms[rid]!, run.m, half)]
+      : [...run.session.map.rooms.map((n) => interiorRect(n, run.m, half)), ...corridors(run.session.map, run.m).map((c) => ({ x: c.floor.x + half, y: c.floor.y + half, w: c.floor.w - half * 2, h: c.floor.h - half * 2 }))];
+    const to = leapTarget(from, dir, distance, stepPx, (x, y) => floors.some((f) => contains(f, x, y)) && !blocked(x, y));
     this.run.player.setPosition(to.x, to.y);
     (this.run.player.body as Phaser.Physics.Arcade.Body).reset(to.x, to.y);
     return { from, to };

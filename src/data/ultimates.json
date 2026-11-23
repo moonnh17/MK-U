@@ -300,7 +300,7 @@
       "tags": ["magic", "ranged"],
       "sources": { "fall": ["magic", "ranged"] },
       "values": {
-        "strikes": 5, "fullStrikes": 8, "fullDamageMul": 1.5, "waveGapSec": 0.9, "strikeGapSec": 0.12, "radius": 30, "spreadPx": 110,
+        "strikes": 5, "fullStrikes": 8, "fullDamageMul": 1.5, "soloStrikes": 18, "soloGapSec": 0.08, "soloRadiusMul": 1.5, "soloDamageMul": 1.4, "waveGapSec": 0.9, "strikeGapSec": 0.12, "radius": 30, "spreadPx": 110,
         "fireDamage": 26, "burnStacks": 3, "fireDelaySec": 0.6,
         "iceDamage": 22, "freezeSec": 1.2, "iceDelaySec": 0.25,
         "lightningDamage": 32, "lightningDelaySec": 0.05

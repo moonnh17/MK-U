@@ -80,7 +80,7 @@ export class DamageRuntime {
     if (this.run.mage.elementOf(source)) for (const o of this.run.skillRt.skillObjects) dmg *= 1 + (o.elementDamage?.() ?? 0);
     // 관통 전개(마기 태그)·순수 전개(휘강파), 극단(스킬 치명)
     const srcSchool = source ? this.schoolOf(source) : null;
-    dmg *= this.run.mage.damageMul(srcSchool, tags);
+    dmg *= this.run.mage.damageMul(source, tags);
     const sc = this.run.mage.skillCrit(srcSchool);
     if (sc) {
       const r = rollCrit(this.run.rng, dmg, sc.chance, d.weapons.critMultiplier + this.run.itemRt.total('critDamage') + sc.bonus);
@@ -147,7 +147,6 @@ export class DamageRuntime {
       if (fx.crit) this.run.hitStop.request(hs.crit);
     }
     for (const o of [...this.run.skillRt.skillObjects]) o.onDamageDealt?.(this.run.host, dealt, enemy);
-    this.run.mage.onDealt(source ? this.schoolOf(source) : null, dealt);
     // 아이템 피해 흡혈 (과기전쟁의 일기) + 스킬 흡혈 (전장의 함성)
     const steal = this.run.itemRt.sums.lifesteal + (this.run.skillRt.playerMods().lifesteal ?? 0);
     if (steal > 0 && dealt > 0) this.run.host.heal(dealt * steal, false);

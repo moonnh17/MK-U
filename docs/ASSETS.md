@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 784개 · 그림 있음 751개
+전체 788개 · 그림 있음 755개
 
 ## player (9)
 
@@ -261,7 +261,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (249)
+## skill (253)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -451,33 +451,37 @@
 | `skill_pPrayer_prayer2` | 회생의 기도 (prayer2) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer2.png (6프레임) |
 | `skill_pPrayer_prayer3` | 회생의 기도 (prayer3) | 32×32 | center | #e8d24a | mku/skill_pPrayer_prayer3.png (6프레임) |
 | `skill_mage_fireball` | 화염구 (ball) | 24×24 | center | #ff6a2a | mku/skill_mage_fireball.png (1프레임) |
-| `fx_mage_fireball` | 화염구 (ballGlow) | 24×24 | center | #ff6a2a | mku/fx_mage_fireball.png (22프레임) |
-| `fx_mage_fire_blast` | 화염구 (blast) 외 1곳 | 48×48 | center | #ff6a2a | mku/fx_mage_fire_blast.png (23프레임) |
-| `skill_mage_ice_spear` | 빙창 (spear) | 28×28 | center | #5ad0f0 | mku/skill_mage_ice_spear.png (1프레임) |
-| `fx_mage_ice_spear` | 빙창 (spearGlow) | 28×28 | center | #5ad0f0 | mku/fx_mage_ice_spear.png (14프레임) |
-| `fx_mage_ice_burst` | 빙창 (hit) 외 1곳 | 18×18 | center | #5ad0f0 | mku/fx_mage_ice_burst.png (20프레임) |
+| `fx_mage_fireball` | 화염구 (ballGlow) 외 1곳 | 24×24 | center | #ff6a2a | mku/fx_mage_fireball.png (22프레임) |
+| `fx_mage_fire_blast` | 화염구 (blast) 외 2곳 | 48×48 | center | #ff6a2a | mku/fx_mage_fire_blast.png (23프레임) |
+| `skill_mage_ice_spear` | 빙창 (spear) | 42×42 | center | #5ad0f0 | mku/skill_mage_ice_spear.png (1프레임) |
+| `fx_mage_ice_spear` | 빙창 (spearGlow) 외 1곳 | 42×42 | center | #5ad0f0 | mku/fx_mage_ice_spear.png (14프레임) |
+| `fx_mage_ice_burst` | 빙창 (hit) 외 2곳 | 26×26 | center | #5ad0f0 | mku/fx_mage_ice_burst.png (20프레임) |
 | `skill_mage_ice_orb` | 얼음 보주 (orb) | 18×18 | center | #5ad0f0 | mku/skill_mage_ice_orb.png (1프레임) |
 | `fx_mage_ice_orb` | 얼음 보주 (orbGlow) | 18×18 | center | #5ad0f0 | mku/fx_mage_ice_orb.png (43프레임) |
 | `skill_mage_ice_shard` | 얼음 보주 (shard) | 12×12 | center | #5ad0f0 | mku/skill_mage_ice_shard.png (1프레임) |
-| `fx_mage_bolt` | 뇌격 (bolt) | 10×10 | center | #ffd83a | mku/fx_mage_bolt.png (7프레임) |
-| `fx_mage_zap` | 뇌격 (zap) | 22×22 | center | #ffd83a | mku/fx_mage_zap.png (17프레임) |
+| `fx_mage_bolt` | 뇌격 (bolt) 외 1곳 | 10×10 | center | #ffd83a | mku/fx_mage_bolt.png (7프레임) |
+| `fx_mage_zap` | 뇌격 (zap) 외 1곳 | 22×22 | center | #ffd83a | mku/fx_mage_zap.png (17프레임) |
 | `fx_mage_ward` | 원소 가호 (aura) | 30×30 | center | #ff9a4a | mku/fx_mage_ward.png (72프레임) |
 | `fx_summon_will_shot` | 마기탄 (shot) 외 1곳 | 10×10 | center | #e0b3ff | mku/fx_summon_will_shot.png (5프레임) |
 | `fx_hw_beam` | 마기 분출 (beam) 외 1곳 | 12×12 | center | #b266ff | mku/fx_hw_beam.png (7프레임) |
 | `fx_hw_wave` | 마기 파동 (wave) | 60×60 | center | #b266ff | mku/fx_hw_wave.png (12프레임) |
 | `fx_hw_recoil` | 마기 파동 (recoil) | 60×60 | center | #b266ff | mku/fx_hw_recoil.png (15프레임) |
 | `skill_hw_condenser` | 마기 응축구 (orb) | 20×20 | center | #b266ff | mku/skill_hw_condenser.png (1프레임) |
-| `fx_hw_orb` | 마기 응축구 (orbGlow) | 20×20 | center | #b266ff | mku/fx_hw_orb.png (43프레임) |
-| `fx_hw_blast` | 마기 응축구 (blast) | 80×80 | center | #b266ff | mku/fx_hw_blast.png (23프레임) |
+| `fx_hw_orb` | 마기 응축구 (orbGlow) 외 1곳 | 20×20 | center | #b266ff | mku/fx_hw_orb.png (43프레임) |
+| `fx_hw_blast` | 마기 응축구 (blast) 외 1곳 | 80×80 | center | #b266ff | mku/fx_hw_blast.png (23프레임) |
 | `fx_hw_pillar` | 마기 기둥 (pillar) | 40×40 | center | #b266ff | mku/fx_hw_pillar.png (35프레임) |
-| `summon_will_construct` | 집행 의지체 (will) 외 1곳 | 12×26 | center | #b266ff | mku/summon_will_construct.png (13프레임) |
-| `summon_magi_soldier` | 집행 의지체 (soldier) | 12×28 | center | #2c1a45 | mku/summon_magi_soldier.png (13프레임) |
-| `summon_imitation_golem` | 집행 의지체 (golem) | 20×34 | center | #6a6a78 | mku/summon_imitation_golem.png (13프레임) |
+| `summon_will_construct` | 집행 의지체 (will) 외 1곳 | 18×40 | center | #b266ff | mku/summon_will_construct.png (1프레임) |
+| `summon_magi_soldier` | 집행 의지체 (soldier) | 18×40 | center | #2c1a45 | mku/summon_magi_soldier.png (1프레임) |
+| `summon_imitation_golem` | 집행 의지체 (golem) | 34×60 | center | #6a6a78 | mku/summon_imitation_golem.png (1프레임) |
 | `fx_summon_will_hit` | 집행 의지체 (willHit) | 24×24 | center | #b266ff | mku/fx_summon_will_hit.png (2프레임) |
 | `fx_summon_soldier_thrust` | 집행 의지체 (soldierThrust) | 28×28 | center | #b266ff | mku/fx_summon_soldier_thrust.png (4프레임) |
 | `fx_summon_soldier_burst` | 집행 의지체 (soldierBurst) | 32×32 | center | #b266ff | mku/fx_summon_soldier_burst.png (5프레임) |
 | `fx_summon_golem_crush` | 집행 의지체 (golemCrush) | 48×48 | center | #6a6a78 | mku/fx_summon_golem_crush.png (5프레임) |
 | `fx_summon_golem_shell` | 집행 의지체 (golemShell) | 40×40 | center | #b266ff | mku/fx_summon_golem_shell.png (5프레임) |
+| `summon_spirit_fire` | 순수 전개 (fire) | 14×20 | center | #ff6a2a | mku/summon_spirit_fire.png (1프레임) |
+| `summon_spirit_ice` | 순수 전개 (ice) | 14×20 | center | #5ad0f0 | mku/summon_spirit_ice.png (1프레임) |
+| `summon_spirit_lightning` | 순수 전개 (lightning) | 14×20 | center | #ffd83a | mku/summon_spirit_lightning.png (1프레임) |
+| `summon_spirit_magi` | 순수 전개 (magi) | 14×20 | center | #b266ff | mku/summon_spirit_magi.png (1프레임) |
 | `fx_first_law_core` | 열역학 제1법칙 (particle) | 8×8 | center | #ff9a3c | mku/fx_first_law_core.png (9프레임) |
 | `fx_first_law_blast` | 열역학 제1법칙 (blast) | 40×40 | center | #ff9a3c | mku/fx_first_law_blast.png (23프레임) |
 | `fx_bolt_strike` | 벼락 (skyBolt) | 60×60 | center | #9ac8ff | mku/fx_bolt_strike.png (34프레임) |

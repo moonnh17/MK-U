@@ -63,9 +63,7 @@ const PLAYERS = {
     ['player_magiMage', 'magiMage'],
     ['player_baekon', 'baekon'],
     ['player_hwigang', 'hwigang'],
-    ['summon_will_construct', '../mage/summon_will_construct'],
-    ['summon_magi_soldier', '../mage/summon_magi_soldier', 28],
-    ['summon_imitation_golem', '../mage/summon_imitation_golem', 34],
+    // 집행 의지체 소환체는 힉스필드 그림으로 바꿨다(build-mage-art.cjs SUMMONS)
   ].map(([key, name, fit]) => [key, { direct: true, fit, idle: [name, 0, 0], front: row(name, 0, [1, 2, 3, 4]), back: row(name, 0, [1, 2, 3, 4]), side: row(name, 1, [1, 2, 3, 4]) }])),
 };
 
