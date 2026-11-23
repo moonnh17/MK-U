@@ -305,8 +305,11 @@
         "iceDamage": 22, "freezeSec": 1.2, "iceDelaySec": 0.25,
         "lightningDamage": 32, "lightningDelaySec": 0.05
       },
+      "awakening": {"requiredItem": "orionBelt", "nameKey": "ultimate.elementConcert.awakened", "shortKey": "ultimate.elementConcert.awakened.short", "descKey": "ultimate.elementConcert.awakened.desc", "tags": ["magic", "ranged"], "values": {"unionDelaySec": 0.5, "convergeSec": 0.55, "unionRadius": 64, "unionDamage": 60, "burnStacks": 3, "slow": 0.5, "slowSec": 2, "shockDamage": 20, "soloUnionMul": 1.6}},
       "color": "#ff6a2a",
       "sprites": {
+        "converge": { "spriteKey": "fx_awk_union_converge", "color": "#ffffff", "size": 80 },
+        "union": { "spriteKey": "fx_awk_union_burst", "color": "#ffffff", "size": 140 },
         "fire": { "spriteKey": "fx_mage_meteor", "color": "#ff6a2a", "size": 80 },
         "ice": { "spriteKey": "fx_mage_icicle", "color": "#5ad0f0", "size": 44 },
         "lightning": { "spriteKey": "fx_mage_strike", "color": "#ffd83a", "size": 70 },

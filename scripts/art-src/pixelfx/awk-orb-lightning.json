@@ -1,0 +1,149 @@
+{
+ "frames": [
+  {
+   "filename": "awk-ward-orb 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 16
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 16
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 16
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ward-orb 1",
+   "frame": {
+    "x": 24,
+    "y": 0,
+    "w": 24,
+    "h": 16
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 16
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 16
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ward-orb 2",
+   "frame": {
+    "x": 0,
+    "y": 16,
+    "w": 24,
+    "h": 16
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 16
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 16
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ward-orb 3",
+   "frame": {
+    "x": 24,
+    "y": 16,
+    "w": 24,
+    "h": 16
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 16
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 16
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ward-orb 4",
+   "frame": {
+    "x": 0,
+    "y": 32,
+    "w": 24,
+    "h": 16
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 16
+   },
+   "sourceSize": {
+    "w": 24,
+    "h": 16
+   },
+   "duration": 56
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "awk-ward-orb.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 48,
+   "h": 48
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "awk-ward-orb",
+    "from": 0,
+    "to": 4,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "mku/awk-ward-orb",
+   "name": "MKU awakening ward orb",
+   "fps": 18,
+   "loop": true,
+   "frames": 5,
+   "frameSize": [
+    24,
+    16
+   ],
+   "pivot": [
+    14,
+    8
+   ],
+   "columns": 2
+  }
+ }
+}

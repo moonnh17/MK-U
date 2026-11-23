@@ -8927,6 +8927,265 @@
       "frames": 1,
       "density": 2,
       "gripX": 0.04
+    },
+    "item_golden_ember_fruit": {
+      "file": "mku/item_golden_ember_fruit.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_volcano_furnace_ember": {
+      "file": "mku/item_volcano_furnace_ember.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_great_wall_icicle": {
+      "file": "mku/item_great_wall_icicle.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_cold_of_cold": {
+      "file": "mku/item_cold_of_cold.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_astrape": {
+      "file": "mku/item_astrape.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_element_compass": {
+      "file": "mku/item_element_compass.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "fx_awk_blizzard": {
+      "file": "mku/fx_awk_blizzard.png",
+      "frameWidth": 192,
+      "frameHeight": 192,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 10
+        }
+      }
+    },
+    "fx_awk_thundercloud": {
+      "file": "mku/fx_awk_thundercloud.png",
+      "frameWidth": 112,
+      "frameHeight": 141,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 8
+        }
+      }
+    },
+    "fx_awk_thunder_strike": {
+      "file": "mku/fx_awk_thunder_strike.png",
+      "frameWidth": 112,
+      "frameHeight": 142,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 14,
+          "loop": false
+        }
+      }
+    },
+    "fx_awk_union_converge": {
+      "file": "mku/fx_awk_union_converge.png",
+      "frameWidth": 160,
+      "frameHeight": 169,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 10,
+          "loop": false
+        }
+      }
+    },
+    "fx_awk_union_burst": {
+      "file": "mku/fx_awk_union_burst.png",
+      "frameWidth": 240,
+      "frameHeight": 251,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 12,
+          "loop": false
+        }
+      }
+    },
+    "fx_awk_ember": {
+      "file": "mku/fx_awk_ember.png",
+      "frameWidth": 20,
+      "frameHeight": 14,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_awk_fire_zone": {
+      "file": "mku/fx_awk_fire_zone.png",
+      "frameWidth": 42,
+      "frameHeight": 44,
+      "frames": 9,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 8,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_awk_ice_shatter": {
+      "file": "mku/fx_awk_ice_shatter.png",
+      "frameWidth": 70,
+      "frameHeight": 66,
+      "frames": 9,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 8,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_awk_ring_cold": {
+      "file": "mku/fx_awk_ring_cold.png",
+      "frameWidth": 110,
+      "frameHeight": 100,
+      "frames": 10,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 9,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_awk_ring_gold": {
+      "file": "mku/fx_awk_ring_gold.png",
+      "frameWidth": 110,
+      "frameHeight": 100,
+      "frames": 10,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 9,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_awk_orb_fire": {
+      "file": "mku/fx_awk_orb_fire.png",
+      "frameWidth": 20,
+      "frameHeight": 12,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_awk_orb_ice": {
+      "file": "mku/fx_awk_orb_ice.png",
+      "frameWidth": 20,
+      "frameHeight": 12,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_awk_orb_lightning": {
+      "file": "mku/fx_awk_orb_lightning.png",
+      "frameWidth": 20,
+      "frameHeight": 12,
+      "frames": 5,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 4,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_awk_ward_burst": {
+      "file": "mku/fx_awk_ward_burst.png",
+      "frameWidth": 82,
+      "frameHeight": 82,
+      "frames": 10,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 9,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_awk_cycle_ring": {
+      "file": "mku/fx_awk_cycle_ring.png",
+      "frameWidth": 52,
+      "frameHeight": 42,
+      "frames": 12,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 11,
+          "fps": 18,
+          "loop": false
+        }
+      }
     }
   }
 }

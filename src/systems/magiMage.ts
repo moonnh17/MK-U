@@ -12,6 +12,8 @@ export interface ActiveImprint {
   /** 레벨·공명 반영한 수치 + 고정값 */
   values: Record<string, number>;
   resonance: boolean;
+  /** 스킬이 각성해 각인이 확장됐다 */
+  awakened: boolean;
 }
 
 export function activeImprint(
@@ -32,7 +34,9 @@ export function activeImprint(
   const mul = resonance ? 1 + rule.resonance : 1;
   const values: Record<string, number> = { ...im.fixed };
   for (const [k, v] of Object.entries(lv)) values[k] = v * mul;
-  return { skillId: id, effect: im.effect, values, resonance };
+  const awakened = !!owned.awakened && !!im.awakened;
+  if (awakened) Object.assign(values, im.awakened!.values);
+  return { skillId: id, effect: im.effect, values, resonance, awakened };
 }
 
 /** 칸 순서(1→2→3)에서 처음 나오는 전직 학파 스킬의 학파. 없으면 null */
@@ -44,9 +48,25 @@ export function judgeBySlots(active: readonly (string | null)[], data: SkillsDat
   return null;
 }
 
-/** 작열: 화염 원소 직접 피해 배율 (화상 틱은 이 경로를 지나지 않는다) */
-export function elementDamageMul(element: ElementId | undefined, im: ActiveImprint | null): number {
-  return element === 'fire' && im?.effect === 'fireDamage' ? 1 + (im.values.fireDamage ?? 0) : 1;
+/** 작열: 화염 원소 직접 피해 배율 (화상 틱은 이 경로를 지나지 않는다). 각성(불길의 행군): 불길 장판 위면 작열 수치 ×zoneMul */
+export function elementDamageMul(element: ElementId | undefined, im: ActiveImprint | null, onFireZone = false): number {
+  if (element !== 'fire' || im?.effect !== 'fireDamage') return 1;
+  const k = im.awakened && onFireZone ? (im.values.zoneMul ?? 1) : 1;
+  return 1 + (im.values.fireDamage ?? 0) * k;
+}
+
+/** 원소 일주 순서: 화염 → 냉기 → 번개 → (화염) */
+const CYCLE_ORDER: readonly ElementId[] = ['fire', 'ice', 'lightning'];
+
+/**
+ * 원소 일주(원소 순환 각성): 원소 스킬을 쓸 때마다 진행. 직전 원소의 다음 차례면 이어 가고, 아니면 이 원소부터 다시.
+ * 세 원소를 이어 돌면 한 바퀴(complete)이고 진행은 비운다.
+ */
+export function cycleStep(progress: readonly ElementId[], element: ElementId): { progress: ElementId[]; complete: boolean } {
+  const last = progress[progress.length - 1];
+  const next = last ? CYCLE_ORDER[(CYCLE_ORDER.indexOf(last) + 1) % CYCLE_ORDER.length] : undefined;
+  const p = last && element === next ? [...progress, element] : [element];
+  return p.length >= CYCLE_ORDER.length ? { progress: [], complete: true } : { progress: p, complete: false };
 }
 
 /** 지팡이 공명: 지팡이 계열 무기 피해 배율 */

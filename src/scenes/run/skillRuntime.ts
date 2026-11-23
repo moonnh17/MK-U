@@ -136,7 +136,8 @@ export class SkillRuntime {
         return sum;
       },
       blocked: (x, y) => this.run.condition.blockedAt(1)(x, y),
-      chill: (e, slow, sec) => e.chill(slow, sec),
+      // 그레이트 월 고드름(둔화 지속 +)·냉기의 냉기(둔화 세기 +)
+      chill: (e, slow, sec) => e.chill(slow * (1 + this.run.itemRt.total('slowPower')), sec * (1 + this.run.itemRt.total('slowDuration'))),
       freeze: (e, sec) => {
         if (e.freeze(sec)) this.run.mage.iceBurst(e);
       },
@@ -156,7 +157,8 @@ export class SkillRuntime {
       burn: (e, stacks) => {
         if (e.dead) return;
         const rule = this.run.tagRule<BurnRule>('burn');
-        e.burn = applyBurn(e.burn, rule.damagePerStack, stacks, rule, e.rank === 'boss' || e.rank === 'hiddenBoss');
+        // 금빛 불씨나무 열매: 화상 틱 피해 +
+        e.burn = applyBurn(e.burn, rule.damagePerStack * (1 + this.run.itemRt.total('burnDamage')), stacks, rule, e.rank === 'boss' || e.rank === 'hiddenBoss');
       },
       fireBullet: (from, angle, speed, range, base, tags, sprite, extra) =>
         this.run.combat.fireBullet(from, angle, speed, range, base, tags, source, { pierce: extra?.pierce ?? 0, crit: 0, sprite, hitSize: extra?.hitSize, tint: extra?.tint }),
@@ -316,8 +318,9 @@ export class SkillRuntime {
     }
     const cast = { def, owned, values: this.run.mage.beforeCast(def, sv.values) };
     if (impl.cast(this.hostFor(id), cast)) {
-      this.run.mage.afterCast(cast);
+      // 재사용 대기를 먼저 건다 (afterCast의 원소 일주 환급이 이를 줄인다)
       p.cooldowns = { ...p.cooldowns, [id]: this.cooldownOf(sv.cooldownSec) };
+      this.run.mage.afterCast(cast);
       sfx('skill');
       // 스킬을 쓸 때마다 스킬 색 파동과 흔들림
       this.run.juice.colorBurst({ x: this.run.player.x, y: this.run.player.y }, def.color, this.run.ctx.data.juice.skillCast);

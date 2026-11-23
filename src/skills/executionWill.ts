@@ -255,7 +255,8 @@ class WillConstruct extends Summon {
       this.act1('cast');
       const copy: SkillHost = { ...host, playerPos: () => ({ ...from }), aimDir: () => aim };
       const values = cast.values.damage !== undefined ? { ...cast.values, damage: cast.values.damage * v.copyDamage! } : cast.values;
-      impl.cast(copy, { ...cast, values });
+      // 각성 동작은 따라 쓰지 않는다 (기획 결정)
+      impl.cast(copy, { ...cast, values, owned: { ...cast.owned, awakened: false } });
       host.burst(from, this.s.def.color);
     });
   }

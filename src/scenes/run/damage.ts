@@ -11,7 +11,8 @@ import { itemDamageMultiplier } from '../../systems/items';
 import { chainTargets } from '../../systems/targeting';
 import { corruptedDamage, skillChance } from '../../systems/acro';
 import { hpStance } from '../../systems/vitals';
-import { masteryTotals } from '../../systems/skills';
+import { findSkill, masteryTotals } from '../../systems/skills';
+import { addFireZone, FireZone } from '../../skills/baekonAwaken';
 import { rollCrit } from '../../systems/weapons';
 import type { BurnRule, SpaceRule, TagId } from '../../types/data';
 import { applyBurn } from '../../systems/tags';
@@ -61,6 +62,12 @@ export class DamageRuntime {
     b.setData({ bounces: bounces - 1, ox: b.x, oy: b.y });
   }
 
+  /** 플레이어가 불길 장판 위에 서 있는지 (불길의 행군 각인 확장) */
+  private onFireZone(): boolean {
+    const p = this.run.player;
+    return this.run.skillRt.skillObjects.some((o) => o instanceof FireZone && o.contains(p.x, p.y));
+  }
+
   /** 피해 한 번. 태그 보정은 이 공격(source)의 태그로 계산한다 */
   hit(enemy: Enemy, base: number, tags: readonly TagId[], source: string | null = null): boolean {
     if (enemy.dead) return false;
@@ -72,9 +79,12 @@ export class DamageRuntime {
     // 개전 각인: 작열(화염 원소 직접 피해), 지팡이 공명(지팡이 무기)
     const im = this.run.skillRt.imprint();
     if (im) {
-      if (source) dmg *= elementDamageMul(d.skills.skills.find((s) => s.id === source)?.element, im);
+      if (source) dmg *= elementDamageMul(d.skills.skills.find((s) => s.id === source)?.element, im, this.onFireZone());
       else dmg *= staffDamageMul(this.run.weaponDef().category, im);
     }
+    // 원소 피해 아이템 (불씨나무 열매·고드름·아스트라페·나침반 등)
+    const srcElement = this.run.mage.elementOf(source);
+    if (srcElement) dmg *= 1 + this.run.itemRt.elementDamage(srcElement);
     // 시전 강화(대전·원소 순환), 원소 가호(원소 스킬 피해)
     dmg *= this.run.mage.boostMul(source);
     if (this.run.mage.elementOf(source)) for (const o of this.run.skillRt.skillObjects) dmg *= 1 + (o.elementDamage?.() ?? 0);
@@ -152,6 +162,14 @@ export class DamageRuntime {
     if (steal > 0 && dealt > 0) this.run.host.heal(dealt * steal, false);
     if (killed) {
       this.run.mage.onKill(enemy);
+      // 화산 용광로의 잔불: 화염 공격으로 쓰러뜨린 자리에 잔불 장판
+      const kz = this.run.itemRt.first('fireKillZone');
+      if (kz && this.run.mage.elementOf(source) === 'fire') {
+        const host = this.run.skillRt.hostFor('volcanoFurnaceEmber');
+        const zone = findSkill(this.run.ctx.data.skills, 'fireWall').sprites.zone!;
+        const at = { x: enemy.sprite.x, y: enemy.sprite.y };
+        addFireZone(host, 10, (h) => new FireZone(h, zone, at, { sec: kz.durationSec, tickSec: kz.everySec, damage: kz.damage, burnStacks: 1, tags: ['magic', 'ranged'], radius: kz.radius }));
+      }
       this.spreadBurn(enemy);
       this.run.enemyLife.onEnemyKilled(enemy);
     }

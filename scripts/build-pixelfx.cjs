@@ -53,6 +53,17 @@ const FX = {
   fx_hw_blast: { name: 'hw-blast', center: true, play: 'once' },
   fx_hw_pillar: { name: 'hw-pillar', ground: true, play: 'once', from: 6, to: 40 },
   fx_hw_recoil: { name: 'hw-recoil', center: true, play: 'once' },
+  // 백온파 각성(자작 awk-*): 불씨·불길 장판·얼음 파열·냉기/황금 고리·3색 반격 구슬·보호막 파열·일주 고리
+  fx_awk_ember: { name: 'awk-ember', center: true, play: 'loop' },
+  fx_awk_fire_zone: { name: 'awk-fire-zone', center: true, play: 'loop' },
+  fx_awk_ice_shatter: { name: 'awk-ice-shatter', center: true, play: 'once' },
+  fx_awk_ring_cold: { name: 'awk-ring-cold', center: true, play: 'once' },
+  fx_awk_ring_gold: { name: 'awk-ring-gold', center: true, play: 'once' },
+  fx_awk_orb_fire: { name: 'awk-orb-fire', center: true, play: 'loop' },
+  fx_awk_orb_ice: { name: 'awk-orb-ice', center: true, play: 'loop' },
+  fx_awk_orb_lightning: { name: 'awk-orb-lightning', center: true, play: 'loop' },
+  fx_awk_ward_burst: { name: 'awk-ward-burst', center: true, play: 'once' },
+  fx_awk_cycle_ring: { name: 'awk-cycle-ring', center: true, play: 'once' },
 };
 
 function buildPixelfx(outDir) {

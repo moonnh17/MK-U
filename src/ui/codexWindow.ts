@@ -647,6 +647,7 @@ export class CodexWindow {
           title: `★ ${t(s.awakening.nameKey)}`,
           tags: s.awakening.tags,
           desc: t(s.awakening.descKey, skillTextValues(aw.values)),
+          imprint: imprintText(s, s.levels.length, t, 1, true) ?? undefined,
           note: [cd(aw.cooldownSec), t('codex.needItem', { item: itemName(s.awakening.requiredItem) })].filter(Boolean).join(' · '),
         };
         return this.skillRow(artKeys.skillIcon(s.id), s.color, [...levels, awakened]);

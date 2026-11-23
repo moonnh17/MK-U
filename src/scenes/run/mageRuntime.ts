@@ -9,8 +9,10 @@ import type { BuffView } from '../../core/session';
 import type { Enemy } from '../../entities/enemy';
 import type { SkillCast } from '../../skills/host';
 import { playFx } from '../../skills/skillFx';
-import { addElement, attackElement, castBoost, chargeAfterMove, condenseFill, frostHit, imprintMods, unifiedElement, type PureElement } from '../../systems/magiMage';
+import { addElement, attackElement, castBoost, chargeAfterMove, condenseFill, cycleStep, frostHit, imprintMods, unifiedElement, type PureElement } from '../../systems/magiMage';
 import { summonSpirit, type ElementSpirit } from '../../skills/hwigang';
+import { CLOUD_OWNER, fireWardOrb, spawnEmbers } from '../../skills/baekonAwaken';
+import { blizzards } from '../../skills/magiMage';
 import { findSkill, skillValues } from '../../systems/skills';
 import type { BurnRule, ElementId, SkillDef, TagId } from '../../types/data';
 import type { PlayerMods } from '../../systems/vitals';
@@ -37,25 +39,40 @@ export class MageRuntime {
   private echoLunge: { to: Vec2; until: number } | null = null;
   /** 순수 전개 원소 정령 (한 원소로 맞춘 동안만) */
   private spirit: ElementSpirit | null = null;
+  /** 원소 일주(원소 순환 각성): 이어 돈 원소, 한 바퀴를 돌아 다음 스킬이 강화될 차례인지, 강화를 받은 스킬 */
+  private cycleProgress: ElementId[] = [];
+  private cycleReady = false;
+  private cycleConsume: string | null = null;
 
   constructor(private readonly run: RunScene) {}
 
   update(dt: number): void {
     const im = this.run.skillRt.imprint();
     const p = { x: this.run.player.x, y: this.run.player.y };
-    if (im?.effect === 'staticCharge' && this.lastPos) this.charge = chargeAfterMove(this.charge, Math.hypot(p.x - this.lastPos.x, p.y - this.lastPos.y), im.values.fullPx!);
+    if (im?.effect === 'staticCharge' && this.lastPos) {
+      // 각성(뇌운): 뇌운이 떠 있는 동안 이동 충전이 빨라진다
+      const cloud = im.awakened && this.run.skillRt.skillObjects.some((o) => o.owner === CLOUD_OWNER) ? im.values.cloudChargeMul! : 1;
+      this.charge = chargeAfterMove(this.charge, Math.hypot(p.x - this.lastPos.x, p.y - this.lastPos.y) * cloud, im.values.fullPx!);
+    }
     this.lastPos = p;
     // 응축: 스킬을 쓰지 않는 동안 찬다 (쓰면 afterCast에서 비운다)
     if (im?.effect === 'condense') this.condense = condenseFill(this.condense, dt, im.values.fullSec!);
     // 한파: 플레이어 둘레 적 감속 (매 프레임 다시)
     const r = im?.effect === 'coldAura' ? this.run.skillRt.area(im.values.radius!) : 0;
-    for (const e of this.run.enemies) e.auraSlow = r > 0 && Math.hypot(e.sprite.x - p.x, e.sprite.y - p.y) <= r + e.radius ? im!.values.coldAura! : 0;
+    // 각성(절대영도): 눈보라 안 적에게도 한파
+    const storms = im?.effect === 'coldAura' && im.awakened ? blizzards(this.run.skillRt.hostFor('iceOrb')) : [];
+    for (const e of this.run.enemies) {
+      const near = (r > 0 && Math.hypot(e.sprite.x - p.x, e.sprite.y - p.y) <= r + e.radius) || storms.some((b) => Math.hypot(e.sprite.x - b.x, e.sprite.y - b.y) <= b.r + e.radius);
+      e.auraSlow = near ? im!.values.coldAura! : 0;
+    }
     // 정화: 주기적으로 해로운 상태 해제 + 회복
     if (im?.effect === 'purify') {
       this.purifyIn -= dt;
       if (this.purifyIn <= 0) {
         this.purifyIn = im.values.everySec!;
         this.purify(im.values.purify!);
+        // 각성(삼원소 수호): 정화와 함께 원소 구슬 1발
+        if (im.awakened) this.wardOrb();
       }
     } else this.purifyIn = 0;
     this.recoilIn = Math.max(0, this.recoilIn - dt);
@@ -75,6 +92,14 @@ export class MageRuntime {
     const v = this.passiveValues('pureUnfolding', true)!;
     if (live && live.el === el) live.setValues(v);
     else this.spirit = summonSpirit(this.run.skillRt.hostFor('pureUnfolding'), findSkill(this.run.ctx.data.skills, 'pureUnfolding'), v, el);
+  }
+
+  /** 원소 가호 각성 구슬 하나 (정화 각인 확장) */
+  private wardOrb(): void {
+    const owned = this.run.session.player.loadout.owned.elementWard;
+    if (!owned) return;
+    const def = findSkill(this.run.ctx.data.skills, 'elementWard');
+    fireWardOrb(this.run.skillRt.hostFor('elementWard'), def, skillValues(def, { ...owned, awakened: true }).values, { x: this.run.player.x, y: this.run.player.y });
   }
 
   /** 해로운 상태(위압 속박) 해제 + 회복 */
@@ -142,10 +167,22 @@ export class MageRuntime {
     const im = this.run.skillRt.imprint();
     const cycle = p.loadout.passive === 'elementCycle' ? this.passiveValues('elementCycle') : null;
     const gauge = im?.effect === 'condense' ? this.condense : this.charge;
-    const b = castBoost(gauge, im, cycle ? { damage: cycle.damage!, windowSec: cycle.windowSec! } : null, def.element, this.lastElement);
+    const window = cycle ? cycle.windowSec! + this.run.itemRt.total('cycleWindow') : 0;
+    const b = castBoost(gauge, im, cycle ? { damage: cycle.damage!, windowSec: window } : null, def.element, this.lastElement);
     this.pending = b ? { skillId: def.id, mul: b.mul, windowSec: b.windowSec } : null;
+    // 원소 일주로 강화될 차례: 이 스킬 피해 + (재사용 대기 환급은 afterCast)
+    this.cycleConsume = null;
+    if (this.cycleReady && cycle) {
+      this.cycleConsume = def.id;
+      const mul = (this.pending?.mul ?? 1) * (1 + cycle.cycleDamage!);
+      this.pending = { skillId: def.id, mul, windowSec: Math.max(this.pending?.windowSec ?? 0, window) };
+    }
     const out = { ...values };
     if (b?.chains && out.chains !== undefined) out.chains += b.chains;
+    // 각성(뇌운): 충전이 가득일 때 쓰면 낙뢰가 연쇄
+    if (im?.effect === 'staticCharge' && this.charge >= 1) out.fullCharge = 1;
+    // 아스트라페: 연쇄 거리 +
+    if (out.chainRange !== undefined) out.chainRange *= 1 + this.run.itemRt.total('chainRange');
     if (out.pierce !== undefined) out.pierce += this.extraPierce();
     return out;
   }
@@ -164,9 +201,34 @@ export class MageRuntime {
       p.elementsUsed = addElement(p.elementsUsed, def.element);
     }
     for (const o of [...this.run.skillRt.skillObjects]) o.onSkillCast?.(this.run.skillRt.hostFor(def.id), cast);
+    this.elementCircuit(def);
     // 순수 전개: 맞춘 원소의 스킬을 쓸 때마다 원소 정령
     const el = this.pureElement();
     if (el && attackElement(def) === el) this.spirit?.volley(this.run.skillRt.hostFor('pureUnfolding'));
+  }
+
+  /** 원소 일주(원소 순환 각성): 강화를 받은 스킬은 재사용 대기 환급, 화염→냉기→번개를 돌면 다음 스킬 강화 */
+  private elementCircuit(def: SkillDef): void {
+    const p = this.run.session.player;
+    const owned = p.loadout.owned.elementCycle;
+    if (p.loadout.passive !== 'elementCycle' || !owned?.awakened) return;
+    const cycleDef = findSkill(this.run.ctx.data.skills, 'elementCycle');
+    const v = skillValues(cycleDef, owned).values;
+    const host = this.run.skillRt.hostFor('elementCycle');
+    const at = { x: this.run.player.x, y: this.run.player.y };
+    if (this.cycleConsume === def.id) {
+      this.cycleReady = false;
+      this.cycleConsume = null;
+      host.refundCooldown(def.id, v.refund!);
+      playFx(this.run, cycleDef.sprites.refund!, at.x, at.y, { w: cycleDef.sprites.refund!.size });
+    }
+    if (!def.element) return;
+    const st = cycleStep(this.cycleProgress, def.element);
+    this.cycleProgress = st.progress;
+    if (!st.complete) return;
+    this.cycleReady = true;
+    playFx(this.run, cycleDef.sprites.ring!, at.x, at.y - 6, { w: cycleDef.sprites.ring!.size * 1.6 });
+    this.run.floatLabel({ x: at.x, y: at.y - 18 }, this.run.ctx.t('skillMsg.cycleComplete'), '#ffd27a');
   }
 
   /** 시전 강화로 그 스킬 피해에 곱하는 값 */
@@ -266,12 +328,15 @@ export class MageRuntime {
     const at = { x: enemy.sprite.x, y: enemy.sprite.y };
     const r = host.area(im.values.blastRadius!);
     const def = findSkill(this.run.ctx.data.skills, im.skillId);
+    const fbOwned = this.run.session.player.loadout.owned[im.skillId];
     const tags: TagId[] = def.sources.blast ?? def.tags;
     // 쓰러진 적 처리 중이라 다음 틱에 터뜨린다
     this.run.time.delayedCall(0, () => {
       for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= r + e.radius) host.hit(e, im.values.blastDamage!, tags);
       const blast = def.sprites.blast;
       if (blast) playFx(this.run, blast, at.x, at.y, { w: r * 2.2 });
+      // 각성(백열 연쇄): 점화 소폭발이 불씨 1개를 남긴다
+      if (im.awakened && fbOwned) spawnEmbers(host, def, skillValues(def, fbOwned).values, at, 1);
     });
   }
 

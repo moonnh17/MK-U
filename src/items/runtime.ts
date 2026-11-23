@@ -399,8 +399,13 @@ export class ItemRuntime {
     return e && this.hasteLeft > 0 ? e.value : 0;
   }
 
+  /** 원소 스킬 피해 보너스 합 (그 원소 + 모든 원소) */
+  elementDamage(element: string): number {
+    return this.each('elementDamage').reduce((s, { e }) => s + (e.element === element || e.element === 'all' ? e.value : 0), 0);
+  }
+
   /** 값만 있는 효과의 합 (치명타 확률·치명타 피해·회피 재사용 감소) */
-  total(kind: 'critChance' | 'critDamage' | 'dodgeCdReduce' | 'ultimateCooldown' | 'roarBoost'): number {
+  total(kind: 'critChance' | 'critDamage' | 'dodgeCdReduce' | 'ultimateCooldown' | 'roarBoost' | 'burnDamage' | 'slowDuration' | 'slowPower' | 'chainRange' | 'cycleWindow'): number {
     return this.each(kind).reduce((s, { e }) => s + e.value, 0);
   }
 

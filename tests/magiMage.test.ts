@@ -4,7 +4,7 @@ import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
 import { skillAllowed } from '../src/systems/advancement';
 import { drawSkillCards } from '../src/systems/cards';
-import { activeImprint, addElement, attackElement, unifiedElement, castBoost, chargeAfterMove, concertFull, condenseFill, elementDamageMul, executable, frostHit, imprintMods, judgeBySlots, slowAmount, staffDamageMul, willCopies } from '../src/systems/magiMage';
+import { activeImprint, addElement, attackElement, cycleStep, unifiedElement, castBoost, chargeAfterMove, concertFull, condenseFill, elementDamageMul, executable, frostHit, imprintMods, judgeBySlots, slowAmount, staffDamageMul, willCopies } from '../src/systems/magiMage';
 import { awakeningReady, emptyLoadout, equipSkill, findSkill, setSkillLevel, type SkillLoadout } from '../src/systems/skills';
 import { tickBurn, applyBurn } from '../src/systems/tags';
 import type { BurnRule } from '../src/types/data';
@@ -34,10 +34,27 @@ describe('마기법사 데이터', () => {
       expect(s.imprint!.levels.length).toBe(S.maxLevel);
     }
   });
-  it('각성 없는 스킬도 허용되고 각성 대상이 되지 않는다', () => {
-    const lo = loadout([['fireWall', 3], ['teleport', 3]]);
-    expect(findSkill(S, 'fireWall').awakening).toBeUndefined();
+  it('각성 없는 스킬(순간이동)도 허용되고 각성 대상이 되지 않는다', () => {
+    const lo = loadout([['teleport', 3]]);
+    expect(findSkill(S, 'teleport').awakening).toBeUndefined();
     expect(awakeningReady(lo, S, gameData.items.items.map((i) => i.id))).toEqual([]);
+  });
+  it('백온파 각성 8종: 요구 아이템과 Lv3면 각성 대상', () => {
+    const need: [string, string][] = [['fireball', 'goldenEmberFruit'], ['fireWall', 'volcanoFurnaceEmber'], ['iceSpear', 'greatWallIcicle'], ['iceOrb', 'coldOfCold'], ['chainLightning', 'astrape'], ['elementWard', 'chantforetSpirit'], ['elementCycle', 'elementCompass']];
+    for (const [id, item] of need) {
+      expect(findSkill(S, id).awakening?.requiredItem, id).toBe(item);
+      expect(awakeningReady(loadout([[id, 3]]), S, [item]), id).toEqual([id]);
+      expect(awakeningReady(loadout([[id, 2]]), S, [item]), id).toEqual([]);
+    }
+    expect(gameData.ultimates.ultimates.find((u) => u.id === 'elementConcert')!.awakening?.requiredItem).toBe('orionBelt');
+  });
+  it('각성한 스킬이 1번 칸이면 각인이 확장된다', () => {
+    let lo = loadout([['fireWall', 3], ['teleport', 1]]);
+    expect(activeImprint(lo, S, mage, null)!.awakened).toBe(false);
+    lo = { ...lo, owned: { ...lo.owned, fireWall: { ...lo.owned.fireWall!, awakened: true } } };
+    const im = activeImprint(lo, S, mage, null)!;
+    expect(im.awakened).toBe(true);
+    expect(im.values.zoneMul).toBe(1.5);
   });
 });
 
@@ -254,5 +271,24 @@ describe('순수 전개 원소 판정', () => {
     expect(unifiedElement([d('magiWave'), d('magiBurst'), d('executionWill')])).toBe('magi');
     expect(unifiedElement([d('fireball'), d('iceSpear')])).toBeNull();
     expect(unifiedElement([d('teleport')])).toBeNull();
+  });
+});
+
+describe('원소 일주 (원소 순환 각성)', () => {
+  it('화염→냉기→번개를 이어 돌면 한 바퀴, 어긋나면 그 원소부터 다시', () => {
+    let st = cycleStep([], 'fire');
+    expect(st).toEqual({ progress: ['fire'], complete: false });
+    st = cycleStep(st.progress, 'ice');
+    expect(st.progress).toEqual(['fire', 'ice']);
+    expect(cycleStep(st.progress, 'lightning')).toEqual({ progress: [], complete: true });
+    expect(cycleStep(['fire', 'ice'], 'fire')).toEqual({ progress: ['fire'], complete: false });
+    // 어디서 시작해도 순서만 맞으면 된다 (번개 → 화염 → 냉기)
+    expect(cycleStep(cycleStep(['lightning'], 'fire').progress, 'ice').complete).toBe(true);
+  });
+  it('불길 장판 위 작열은 각성했을 때만 커진다', () => {
+    const im = { skillId: 'fireWall', effect: 'fireDamage' as const, values: { fireDamage: 0.2, zoneMul: 1.5 }, resonance: false, awakened: true };
+    expect(elementDamageMul('fire', im, true)).toBeCloseTo(1.3);
+    expect(elementDamageMul('fire', im, false)).toBeCloseTo(1.2);
+    expect(elementDamageMul('fire', { ...im, awakened: false }, true)).toBeCloseTo(1.2);
   });
 });

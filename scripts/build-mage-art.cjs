@@ -41,7 +41,46 @@ const WEAPONS = {
 };
 
 /** 힉스필드 아이템 아이콘 (scripts/art-src/items-hf): key → 파일 */
-const ITEMS = { item_magi_stone: 'magiStone', item_gray_dumbbell: 'grayDumbbell' };
+const ITEMS = {
+  item_magi_stone: 'magiStone',
+  item_gray_dumbbell: 'grayDumbbell',
+  item_golden_ember_fruit: 'goldenEmberFruit',
+  item_volcano_furnace_ember: 'volcanoFurnaceEmber',
+  item_great_wall_icicle: 'greatWallIcicle',
+  item_cold_of_cold: 'coldOfCold',
+  item_astrape: 'astrape',
+  item_element_compass: 'elementCompass',
+};
+
+/**
+ * 백온파 각성 힉스필드 시트(scripts/art-src/awaken-hf, 5열 × 2행 투명): 한 줄을 애니메이션 하나로.
+ * 줄의 5칸을 모두 덮는 상자로 잘라(칸끼리 기준점이 같게) 화면 폭 w로 줄인다. key: [파일, 줄, fps, 반복, w]
+ */
+const AWAKEN_SHEETS = {
+  fx_awk_blizzard: ['blizzard', 1, 10, true, 96],
+  fx_awk_thundercloud: ['thundercloud', 0, 8, true, 56],
+  fx_awk_thunder_strike: ['thundercloud', 1, 14, false, 56],
+  fx_awk_union_converge: ['triple-union', 0, 10, false, 80],
+  fx_awk_union_burst: ['triple-union', 1, 12, false, 120],
+};
+
+function buildAwakenSheet(outDir, key, [file, row, fps, loop, w]) {
+  const im = k.read(path.join(SRC, 'awaken-hf', `${file}.png`));
+  const cw = im.w / 5, ch = im.h / 2;
+  const cells = [0, 1, 2, 3, 4].map((c) => k.crop(im, Math.round(c * cw), Math.round(row * ch), Math.round(cw), Math.round(ch)));
+  let x0 = Infinity, y0 = Infinity, x1 = 0, y1 = 0;
+  for (const c of cells) {
+    const b = k.bbox(c, 16);
+    if (b.w <= 0) continue;
+    x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + b.w); y1 = Math.max(y1, b.y + b.h);
+  }
+  const fw = w * DENSITY;
+  const fh = Math.max(1, Math.round((fw * (y1 - y0)) / (x1 - x0)));
+  const sheet = k.blank(fw * 5, fh);
+  cells.forEach((c, i) => k.paste(sheet, k.resize(k.crop(c, x0, y0, x1 - x0, y1 - y0), fw, fh, null), i * fw, 0));
+  k.write(path.join(outDir, `${key}.png`), sheet);
+  return { file: `mku/${key}.png`, frameWidth: fw, frameHeight: fh, frames: 5, density: DENSITY, anims: { play: { from: 0, to: 4, fps, ...(loop ? {} : { loop: false }) } } };
+}
 
 /** 집행 의지체 소환체·순수 전개 정령 (scripts/art-src/summons-hf, 오른쪽을 보는 한 장): key: [파일, 화면 키 px, 좌우 뒤집기] */
 const SUMMONS = {
@@ -190,6 +229,7 @@ function buildMageArt(outDir) {
     out[key] = { file: `mku/${key}.png`, frameWidth: fw, frameHeight: fh, frames: 1, density: DENSITY };
   }
   for (const [key, spec] of Object.entries(SUMMON_ANIMS)) out[key] = buildSummonSheet(outDir, key, spec);
+  for (const [key, spec] of Object.entries(AWAKEN_SHEETS)) out[key] = buildAwakenSheet(outDir, key, spec);
   for (const [key, [f, w]] of Object.entries(PILLAR)) {
     const im = trimmed(path.join(SRC, 'summons-hf', `${f}.png`));
     const fw = w * DENSITY;

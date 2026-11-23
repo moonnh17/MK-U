@@ -10,6 +10,20 @@ import type { SchoolId } from './skills';
  */
 export type ItemEffect =
   | { kind: 'maxHp'; value: number; group: 'hpFlat' }
+  /** 원소 스킬 피해 + (all: 세 원소 모두) */
+  | { kind: 'elementDamage'; element: 'fire' | 'ice' | 'lightning' | 'all'; value: number; group: 'damagePct' }
+  /** 화상 틱 피해 + (화상은 지속시간이 없어 틱 피해로 바꿔 적용) */
+  | { kind: 'burnDamage'; value: number; group: 'damagePct' }
+  /** 화염 원소 공격으로 적을 쓰러뜨리면 그 자리에 잔불 장판 */
+  | { kind: 'fireKillZone'; durationSec: number; radius: number; damage: number; everySec: number }
+  /** 둔화 지속 + */
+  | { kind: 'slowDuration'; value: number; group: 'damagePct' }
+  /** 둔화 세기 + */
+  | { kind: 'slowPower'; value: number; group: 'damagePct' }
+  /** 연쇄 번개 연쇄 거리 + */
+  | { kind: 'chainRange'; value: number; group: 'damagePct' }
+  /** 원소 순환 유지 시간 +초 */
+  | { kind: 'cycleWindow'; value: number }
   /** 피해 증가. all·melee·ranged·boss(보스에게) */
   | { kind: 'damage'; scope: 'all' | 'melee' | 'ranged' | 'boss' | 'physical' | 'magic' | 'tech'; value: number; group: 'damagePct' }
   | { kind: 'maxSanity'; value: number; group: 'hpFlat' }

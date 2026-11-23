@@ -4,7 +4,7 @@
  * - 순간이동: 조준 방향으로 곧장 옮긴다(벽 앞에서 멈춤, 도착 폭발 없음).
  * - 화염구: 적·벽·사거리에서 폭발(피해 + 화상). 빙창: 꿰뚫으며 둔화. 얼음 보주: 느리게 나아가며 사방으로 파편(둔화).
  * - 뇌격: 가까운 적부터 연쇄. 원소 가호: 원소 스킬 피해 + 보호막. 원소 대합주: 화염·냉기·번개가 차례로 쏟아진다.
- * - 각인 상시 효과·시전 강화(대전·원소 순환)는 scenes/run/mageRuntime.
+ * - 각인 상시 효과·시전 강화(대전·원소 순환)는 scenes/run/mageRuntime. 각성 동작의 오브젝트는 baekonAwaken.ts.
  */
 import type Phaser from 'phaser';
 import type { Vec2 } from '../core/actions';
@@ -18,6 +18,7 @@ import { concertFull } from '../systems/magiMage';
 import { chainTargets } from '../systems/targeting';
 import type { ElementId, SpriteRef, TagId } from '../types/data';
 import { fxScale, impactFx, loopArt, playFx, ProjectileLook, sparks, stretchFx } from './skillFx';
+import { addFireZone, CLOUD_OWNER, FireZone, fireWardOrb, LodgedSpear, spawnEmbers, ThunderCloud, wardBurst } from './baekonAwaken';
 import { floatText, trimOldest, type PassiveImpl, type SkillCast, type SkillHost, type SkillImpl, type SkillObject, type UltimateCast, type UltimateImpl } from './host';
 
 // ---------- 화염벽 ----------
@@ -33,6 +34,8 @@ class FireWall implements SkillObject {
   private readonly len: number;
   private readonly thick: number;
   private stopped = false;
+  /** 각성(불길의 행군): 다음 장판까지 */
+  private zoneIn = 0;
 
   constructor(
     host: SkillHost,
@@ -93,7 +96,23 @@ class FireWall implements SkillObject {
     // 마지막 0.4초는 옅어진다
     const fade = Math.min(1, this.life / 0.4);
     for (const f of this.flames) f.sp.setPosition(this.at.x - this.dir.y * f.t, this.at.y + this.dir.x * f.t).setAlpha(fade);
+    if (this.s.owned.awakened) this.march(dt, host);
     return this.life > 0;
+  }
+
+  /** 각성: 지나간 자리에 불길 장판을 남기고, 벽에 닿은 적 탄을 태운다 */
+  private march(dt: number, host: SkillHost): void {
+    const v = this.s.values;
+    this.zoneIn -= dt;
+    if (this.zoneIn <= 0) {
+      this.zoneIn = v.zoneEverySec!;
+      const at = { ...this.at };
+      addFireZone(host, v.maxZones!, (h) => new FireZone(h, this.s.def.sprites.zone!, at, { sec: v.zoneSec!, tickSec: v.zoneTickSec!, damage: v.zoneDamage!, burnStacks: v.zoneBurnStacks!, tags: this.s.def.sources.wall!, rect: { len: this.len, thick: this.thick, dir: this.dir } }));
+    }
+    const ref = this.s.def.sprites.flame!;
+    for (const f of this.flames) {
+      if (host.enemyBulletsAt({ x: f.sp.x, y: f.sp.y }, ref.size * 0.6) > 0) sparks(host.scene, f.sp.x, f.sp.y, this.s.def.color, host.ctx.data.juice.projectileLook, 0.4);
+    }
   }
 
   destroy(): void {
@@ -141,6 +160,8 @@ interface MissileSpec {
   onHit(e: Enemy): void;
   /** 멈춘 자리 (적·벽·사거리) */
   onEnd?(at: Vec2): void;
+  /** 멈출 때(관통이 다하거나 벽·사거리) 마지막으로 맞힌 적 (맞힌 적이 없으면 부르지 않는다) */
+  onLast?(e: Enemy, angle: number): void;
 }
 
 /** 조준 방향으로 곧게 날아가 적에 닿으면 onHit, 벽·사거리·관통이 다하면 onEnd */
@@ -153,6 +174,7 @@ class Missile implements SkillObject {
   private flown = 0;
   private pierce: number;
   private readonly struck = new Set<Enemy>();
+  private lastStruck: Enemy | null = null;
 
   constructor(
     host: SkillHost,
@@ -176,6 +198,7 @@ class Missile implements SkillObject {
       if (this.struck.has(e) || Math.hypot(e.sprite.x - this.at.x, e.sprite.y - this.at.y) > e.radius + hitR) continue;
       this.struck.add(e);
       this.spec.onHit(e);
+      this.lastStruck = e;
       if (this.pierce-- <= 0) return this.end();
     }
     if (this.flown >= this.spec.range || host.blocked(this.at.x, this.at.y)) return this.end();
@@ -183,6 +206,7 @@ class Missile implements SkillObject {
   }
 
   private end(): false {
+    if (this.lastStruck) this.spec.onLast?.(this.lastStruck, this.spec.angle);
     this.spec.onEnd?.(this.at);
     return false;
   }
@@ -227,6 +251,8 @@ export const fireball: SkillImpl = {
           playFx(host.scene, s.def.sprites.blast!, at.x, at.y, { w: r * 2.4 * fxScale(host, s.owned.level) });
           impactFx(host, s.owned.level, at.x, at.y, s.def.color, r * 1.3, 1.5);
           shake(host.scene, 'light');
+          // 각성(백열 연쇄): 폭발 뒤 불씨가 근처 적에게 튄다
+          if (s.owned.awakened) spawnEmbers(host, s.def, v, at, v.embers!);
         },
       }),
     );
@@ -257,6 +283,10 @@ export const iceSpear: SkillImpl = {
           impactFx(host, s.owned.level, e.sprite.x, e.sprite.y, s.def.color, hit.size);
           if (!host.hit(e, v.damage!, tags)) host.chill(e, v.slow!, v.slowSec!);
         },
+        // 각성(쇄빙): 꿰뚫기가 다한 마지막 적에 박힌다
+        onLast: (e, angle) => {
+          if (s.owned.awakened && !e.dead) host.addObject(new LodgedSpear(host, s.def, v, e, angle));
+        },
       }),
     );
     return true;
@@ -277,6 +307,12 @@ class IceOrb implements SkillObject {
   private emitIn = 0;
   private turn: number;
   private stopped = false;
+  /** 각성(절대영도): 냉기 파장·눈보라 */
+  private waveIn = 0;
+  private stormIn = 0;
+  private readonly storm: Phaser.GameObjects.Sprite | null = null;
+  /** 이 보주가 쌓은 빙결 중첩 */
+  private readonly frost = new Map<Enemy, number>();
 
   constructor(
     host: SkillHost,
@@ -287,6 +323,13 @@ class IceOrb implements SkillObject {
     this.createdAt = host.scene.time.now;
     this.life = s.values.lifeSec!;
     this.turn = Math.atan2(dir.y, dir.x);
+    if (s.owned.awakened) {
+      const ref = s.def.sprites.blizzard!;
+      const r = host.area(s.values.blizzardRadius!);
+      this.storm = host.sprite(at.x, at.y, ref).setDepth(3).setAlpha(0.75);
+      this.storm.setDisplaySize(r * 2.2, r * 2.2);
+      loopArt(this.storm, ref);
+    }
     this.look = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orb!, host.ctx.data.juice.projectileLook, {
       glow: s.def.sprites.orbGlow,
       spin: true,
@@ -304,6 +347,7 @@ class IceOrb implements SkillObject {
       else this.at = next;
     }
     this.look.place(this.at.x, this.at.y, dt, 1, Math.min(1, this.life / 0.3));
+    if (this.s.owned.awakened) this.absoluteZero(dt, host);
     const every = v.volleySec! / v.shards!;
     this.emitIn -= dt;
     while (this.emitIn <= 0 && this.life > 0) {
@@ -317,6 +361,48 @@ class IceOrb implements SkillObject {
     for (let i = 0; i < n; i++) this.shoot(host, this.turn + (i / n) * Math.PI * 2);
     impactFx(host, this.s.owned.level, this.at.x, this.at.y, this.s.def.color, this.s.def.sprites.orb!.size * 1.6, 1.5);
     return false;
+  }
+
+  /** 각성 눈보라: 보주 둘레 (한파 각인 확장이 쓴다) */
+  blizzard(host: SkillHost): { x: number; y: number; r: number } | null {
+    return this.storm ? { x: this.at.x, y: this.at.y, r: host.area(this.s.values.blizzardRadius!) } : null;
+  }
+
+  /** 빙결 중첩 하나 (보스는 둔화만, 빙결에 면역) */
+  private addFrost(host: SkillHost, e: Enemy): void {
+    const v = this.s.values;
+    const n = (this.frost.get(e) ?? 0) + 1;
+    if (n >= v.freezeNeed!) {
+      this.frost.delete(e);
+      host.freeze(e, v.freezeSec!);
+    } else this.frost.set(e, n);
+  }
+
+  /** 절대영도: 주기적 냉기 파장(피해·둔화·빙결 중첩), 따라다니는 눈보라(둔화 유지·빙결 중첩) */
+  private absoluteZero(dt: number, host: SkillHost): void {
+    const v = this.s.values;
+    const tags = this.s.def.sources.shard!;
+    this.storm?.setPosition(this.at.x, this.at.y).setRotation(this.storm.rotation + dt * 1.5).setAlpha(0.75 * Math.min(1, this.life / 0.4));
+    const sr = host.area(v.blizzardRadius!);
+    this.stormIn -= dt;
+    const stormTick = this.stormIn <= 0;
+    if (stormTick) this.stormIn = v.blizzardTickSec!;
+    for (const e of [...host.enemies()]) {
+      if (Math.hypot(e.sprite.x - this.at.x, e.sprite.y - this.at.y) > sr + e.radius) continue;
+      host.chill(e, v.blizzardSlow!, 0.4);
+      if (stormTick) this.addFrost(host, e);
+    }
+    this.waveIn -= dt;
+    if (this.waveIn > 0) return;
+    this.waveIn = v.waveEverySec!;
+    const wr = host.area(v.waveRadius!);
+    playFx(host.scene, this.s.def.sprites.wave!, this.at.x, this.at.y, { w: wr * 2.2 }).setBlendMode('ADD');
+    for (const e of [...host.enemies()]) {
+      if (Math.hypot(e.sprite.x - this.at.x, e.sprite.y - this.at.y) > wr + e.radius) continue;
+      if (host.hit(e, v.waveDamage!, tags)) continue;
+      host.chill(e, v.waveSlow!, v.waveSlowSec!);
+      this.addFrost(host, e);
+    }
   }
 
   private shoot(host: SkillHost, angle: number): void {
@@ -341,7 +427,13 @@ class IceOrb implements SkillObject {
 
   destroy(): void {
     this.look.destroy();
+    this.storm?.destroy();
   }
+}
+
+/** 지금 떠 있는 절대영도 눈보라들 (한파 각인 확장) */
+export function blizzards(host: SkillHost): { x: number; y: number; r: number }[] {
+  return host.objects().flatMap((o) => (o instanceof IceOrb ? [o.blizzard(host)].filter((b): b is { x: number; y: number; r: number } => !!b) : []));
 }
 
 export const iceOrb: SkillImpl = {
@@ -377,6 +469,11 @@ export const chainLightning: SkillImpl = {
         playFx(host.scene, zap, b.x, b.y, { w: zap.size * k });
         impactFx(host, s.owned.level, b.x, b.y, s.def.color, zap.size * 0.8, 0.75);
         if (!e.dead) host.hit(e, v.damage!, tags);
+        // 각성(뇌운): 마지막 적 위에 뇌운이 머문다
+        if (s.owned.awakened && n === order.length - 1) {
+          trimOldest(host, CLOUD_OWNER, v.maxClouds! - 1);
+          host.addObject(new ThunderCloud(host, s.def, v, e.dead ? null : e, b, (v.fullCharge ?? 0) > 0));
+        }
       });
     });
     return true;
@@ -398,6 +495,9 @@ class ElementWard implements SkillObject {
   /** 막았을 때 번쩍임 (1 → 0) */
   private flash = 0;
   private readonly scene: Phaser.Scene;
+  private readonly host: SkillHost;
+  /** 각성(삼원소 수호): 다음 구슬까지 */
+  private orbIn = 0;
 
   constructor(
     host: SkillHost,
@@ -405,6 +505,7 @@ class ElementWard implements SkillObject {
   ) {
     this.createdAt = host.scene.time.now;
     this.scene = host.scene;
+    this.host = host;
     this.total = this.left = host.buffDuration(s.values.durationSec!, s.def.tags);
     this.shieldLeft = s.values.shield!;
     const ref = s.def.sprites.aura!;
@@ -422,6 +523,7 @@ class ElementWard implements SkillObject {
   update(dt: number, host: SkillHost): boolean {
     this.left -= dt;
     this.t += dt;
+    this.orbIn = Math.max(0, this.orbIn - dt);
     this.flash = Math.max(0, this.flash - dt * 4);
     const p = host.playerPos();
     const fade = Math.min(1, this.left / 0.4);
@@ -461,6 +563,15 @@ class ElementWard implements SkillObject {
     const took = Math.min(this.shieldLeft, amount);
     this.shieldLeft -= took;
     this.flash = 1;
+    // 각성: 막을 때마다 원소 구슬 (짧은 간격), 깨지면 세 원소 폭발
+    if (this.s.owned.awakened) {
+      const p = this.host.playerPos();
+      if (this.orbIn <= 0) {
+        this.orbIn = this.s.values.orbGapSec!;
+        fireWardOrb(this.host, this.s.def, this.s.values, p);
+      }
+      if (this.shieldLeft <= 0) wardBurst(this.host, this.s.def, this.s.values, p);
+    }
     // 깨지면 조각이 흩어진다
     if (this.shieldLeft <= 0) {
       const at = { x: this.aura.x, y: this.aura.y - 10 };
@@ -522,6 +633,8 @@ export const elementConcert: UltimateImpl = {
       }
       floatText(host, host.playerPos().x, host.playerPos().y - 18, host.ctx.t(`skillMsg.concertSolo.${solo.el}`), u.def.color);
       shake(host.scene, 'heavy');
+      // 각성(삼원 합일): 독주면 그 원소만 모여 폭주
+      if (u.awakened) host.scene.time.delayedCall(((v.soloStrikes! - 1) * v.soloGapSec! + v[solo.delay]! + v.unionDelaySec!) * 1000, () => concertUnion(host, u, solo.el));
       return true;
     }
     const full = concertFull(host.elementsUsed());
@@ -540,9 +653,56 @@ export const elementConcert: UltimateImpl = {
       }
     });
     if (full) floatText(host, host.playerPos().x, host.playerPos().y - 18, host.ctx.t('skillMsg.concertFull'), u.def.color);
+    // 각성(삼원 합일): 세 원소가 다 쏟아진 뒤 한 점에 모여 합일 폭발
+    if (u.awakened) {
+      const end = (CONCERT.length - 1) * v.waveGapSec! + (strikes - 1) * v.strikeGapSec! + Math.max(...CONCERT.map((w) => v[w.delay]!));
+      host.scene.time.delayedCall((end + v.unionDelaySec!) * 1000, () => concertUnion(host, u, null));
+    }
     return true;
   },
 };
+
+/**
+ * 합일: 적이 가장 많이 모인 자리에 원소가 모여들었다가(수렴) 한꺼번에 터진다. 화상·둔화·감전(추가 번개 피해)을 함께.
+ * solo면 그 원소만 모여 피해 ×soloUnionMul로 폭주 (그 원소 효과만)
+ */
+function concertUnion(host: SkillHost, u: UltimateCast, solo: ElementId | null): void {
+  const v = u.values;
+  const list = [...host.enemies()];
+  const r = host.area(v.unionRadius!);
+  // 둘레에 적이 가장 많은 적 자리 (없으면 플레이어 앞)
+  let at: Vec2 = { x: host.playerPos().x + host.aimDir().x * 60, y: host.playerPos().y + host.aimDir().y * 60 };
+  let best = -1;
+  for (const e of list) {
+    const n = list.filter((x) => Math.hypot(x.sprite.x - e.sprite.x, x.sprite.y - e.sprite.y) <= r).length;
+    if (n > best) {
+      best = n;
+      at = { x: e.sprite.x, y: e.sprite.y };
+    }
+  }
+  const conv = u.def.sprites.converge!;
+  const c = playFx(host.scene, conv, at.x, at.y, { w: conv.size });
+  if (solo) c.setTint(hexColor(CONCERT_COLOR[solo]));
+  host.scene.time.delayedCall(v.convergeSec! * 1000, () => {
+    const ref = u.def.sprites.union!;
+    const b = playFx(host.scene, ref, at.x, at.y, { w: Math.max(ref.size, r * 2.4) });
+    if (solo) b.setTint(hexColor(CONCERT_COLOR[solo]));
+    host.scene.cameras.main.flash(140, 255, 250, 235);
+    shake(host.scene, 'heavy');
+    const tags = u.def.sources.fall!;
+    const mul = solo ? v.soloUnionMul! : 1;
+    for (const e of [...host.enemies()]) {
+      if (Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) > r + e.radius) continue;
+      if (host.hit(e, v.unionDamage! * mul, tags)) continue;
+      if (!solo || solo === 'fire') host.burn(e, v.burnStacks!);
+      if (!solo || solo === 'ice') host.chill(e, v.slow!, v.slowSec!);
+      if ((!solo || solo === 'lightning') && !e.dead) host.hit(e, v.shockDamage! * mul, tags);
+    }
+    if (solo) floatText(host, at.x, at.y - 20, host.ctx.t('skillMsg.unionSolo'), CONCERT_COLOR[solo]);
+  });
+}
+
+const CONCERT_COLOR: Record<ElementId, string> = { fire: '#ff6a2a', ice: '#5ad0f0', lightning: '#ffd83a' };
 
 /** 떨어질 자리: 살아 있는 적 중 무작위, 없으면 플레이어 둘레 */
 function concertTarget(host: SkillHost, spread: number): Vec2 {

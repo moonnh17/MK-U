@@ -1,0 +1,237 @@
+{
+ "frames": [
+  {
+   "filename": "awk-ice-shatter 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 72
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 72
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 72
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ice-shatter 1",
+   "frame": {
+    "x": 72,
+    "y": 0,
+    "w": 72,
+    "h": 72
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 72
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 72
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ice-shatter 2",
+   "frame": {
+    "x": 144,
+    "y": 0,
+    "w": 72,
+    "h": 72
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 72
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 72
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ice-shatter 3",
+   "frame": {
+    "x": 0,
+    "y": 72,
+    "w": 72,
+    "h": 72
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 72
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 72
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ice-shatter 4",
+   "frame": {
+    "x": 72,
+    "y": 72,
+    "w": 72,
+    "h": 72
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 72
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 72
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ice-shatter 5",
+   "frame": {
+    "x": 144,
+    "y": 72,
+    "w": 72,
+    "h": 72
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 72
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 72
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ice-shatter 6",
+   "frame": {
+    "x": 0,
+    "y": 144,
+    "w": 72,
+    "h": 72
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 72
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 72
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ice-shatter 7",
+   "frame": {
+    "x": 72,
+    "y": 144,
+    "w": 72,
+    "h": 72
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 72
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 72
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ice-shatter 8",
+   "frame": {
+    "x": 144,
+    "y": 144,
+    "w": 72,
+    "h": 72
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 72,
+    "h": 72
+   },
+   "sourceSize": {
+    "w": 72,
+    "h": 72
+   },
+   "duration": 56
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "awk-ice-shatter.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 216,
+   "h": 216
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "awk-ice-shatter",
+    "from": 0,
+    "to": 8,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "mku/awk-ice-shatter",
+   "name": "MKU awakening ice shatter",
+   "fps": 18,
+   "loop": false,
+   "frames": 9,
+   "frameSize": [
+    72,
+    72
+   ],
+   "pivot": [
+    36,
+    36
+   ],
+   "columns": 3
+  }
+ }
+}

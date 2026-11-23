@@ -25,6 +25,8 @@ export interface ImprintDef {
   levels: Record<string, number>[];
   /** 레벨·공명과 상관없는 값 (중첩 수 등) */
   fixed?: Record<string, number>;
+  /** 스킬이 각성했을 때 각인에 덧붙는 한 줄 (값은 fixed에 더한다) */
+  awakened?: { descKey: string; values?: Record<string, number> };
 }
 
 export interface SkillLevelDef {

@@ -415,7 +415,7 @@ export class InventoryWindow {
     const job = d.jobs.jobs.find((j) => j.id === p.job);
     const im = job ? activeImprint(p.loadout, d.skills, job, p.advancement) : null;
     const on = im?.skillId === id;
-    const imText = imprintText(def, owned.level, t, on && im!.resonance ? 1 + job!.imprint!.resonance : 1);
+    const imText = imprintText(def, owned.level, t, on && im!.resonance ? 1 + job!.imprint!.resonance : 1, owned.awakened);
     if (imText) {
       const extra = on ? (im!.resonance ? ` (${t('imprint.resonance', { pct: Math.round(job!.imprint!.resonance * 100) })})` : '') : ` (${t('imprint.slotHint')})`;
       box.append(this.line(`iw-desc iw-imprint${on && im!.resonance ? ' resonance' : ''}${on ? '' : ' dim'}`, imText + extra));

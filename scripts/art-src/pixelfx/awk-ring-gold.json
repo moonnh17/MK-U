@@ -1,0 +1,259 @@
+{
+ "frames": [
+  {
+   "filename": "awk-ring 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "sourceSize": {
+    "w": 112,
+    "h": 112
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ring 1",
+   "frame": {
+    "x": 112,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "sourceSize": {
+    "w": 112,
+    "h": 112
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ring 2",
+   "frame": {
+    "x": 224,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "sourceSize": {
+    "w": 112,
+    "h": 112
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ring 3",
+   "frame": {
+    "x": 336,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "sourceSize": {
+    "w": 112,
+    "h": 112
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ring 4",
+   "frame": {
+    "x": 0,
+    "y": 112,
+    "w": 112,
+    "h": 112
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "sourceSize": {
+    "w": 112,
+    "h": 112
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ring 5",
+   "frame": {
+    "x": 112,
+    "y": 112,
+    "w": 112,
+    "h": 112
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "sourceSize": {
+    "w": 112,
+    "h": 112
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ring 6",
+   "frame": {
+    "x": 224,
+    "y": 112,
+    "w": 112,
+    "h": 112
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "sourceSize": {
+    "w": 112,
+    "h": 112
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ring 7",
+   "frame": {
+    "x": 336,
+    "y": 112,
+    "w": 112,
+    "h": 112
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "sourceSize": {
+    "w": 112,
+    "h": 112
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ring 8",
+   "frame": {
+    "x": 0,
+    "y": 224,
+    "w": 112,
+    "h": 112
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "sourceSize": {
+    "w": 112,
+    "h": 112
+   },
+   "duration": 56
+  },
+  {
+   "filename": "awk-ring 9",
+   "frame": {
+    "x": 112,
+    "y": 224,
+    "w": 112,
+    "h": 112
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 112,
+    "h": 112
+   },
+   "sourceSize": {
+    "w": 112,
+    "h": 112
+   },
+   "duration": 56
+  }
+ ],
+ "meta": {
+  "app": "https://github.com/patch-gg/pixelfx",
+  "version": "1",
+  "image": "awk-ring.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 448,
+   "h": 336
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "awk-ring",
+    "from": 0,
+    "to": 9,
+    "direction": "forward"
+   }
+  ],
+  "pixelfx": {
+   "id": "mku/awk-ring",
+   "name": "MKU awakening ring",
+   "fps": 18,
+   "loop": false,
+   "frames": 10,
+   "frameSize": [
+    112,
+    112
+   ],
+   "pivot": [
+    56,
+    56
+   ],
+   "columns": 4
+  }
+ }
+}
