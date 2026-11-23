@@ -249,21 +249,28 @@ async function tryEnemies(ids, elites) {
     b.emit('debugSpawn', { enemyId, count: 2, elite });
     const name = elite ? `${enemyId}+${elite}` : enemyId;
     tried.push(name);
-    // 공격이 실제로 나왔는지: 플레이어 피해 호출·적 탄·위험 지대 중 하나라도
+    // 공격이 실제로 나왔는지: 공격 발동·플레이어 피해 호출·적 탄·위험 지대 중 하나라도
     const life = rs().playerLife;
     const hurt0 = life.hurtPlayer;
     let acted = false;
     life.hurtPlayer = (...a) => ((acted = true), hurt0.apply(life, a));
+    // 몸통 돌진처럼 닿아야 맞는 공격도 있어서, 공격 발동(Enemy.strikeAttack) 자체도 센다 (살아 있는 적의 클래스에서 가져와야 같은 모듈이다)
+    await frames(1);
+    const proto = rs().enemies[0] && Object.getPrototypeOf(rs().enemies[0]);
+    const strike0 = proto?.strikeAttack;
+    if (proto) proto.strikeAttack = function (...a) { acted = true; return strike0.apply(this, a); };
     // 스폰 예고·공격 대기는 실제 시간이라 실제로 기다린다 (맞지 않고 곁에 서 있는다)
     const end = performance.now() + 5000;
     while (performance.now() < end && !acted) {
       const e = rs().enemies[0];
-      if (e) rs().player.setPosition(e.sprite.x - 20, e.sprite.y);
+      // 너무 멀 때만 당겨 둔다 (매 프레임 붙이면 큰 적과 몸이 겹쳐 공격 거리가 흔들린다)
+      if (e && Math.hypot(e.sprite.x - rs().player.x, e.sprite.y - rs().player.y) > 60) rs().player.setPosition(e.sprite.x - 40, e.sprite.y);
       if (rs().enemyBullets.getLength() > 0 || rs().hazards.length > 0) acted = true;
       await frames(2);
       await sleep(16);
     }
     life.hurtPlayer = hurt0;
+    if (proto) proto.strikeAttack = strike0;
     // 공격이 없는 적(몸통 박치기만)은 무적이면 피해 호출이 없다
     const def = rs().ctx.data.enemies.enemies.find((x) => x.id === enemyId);
     if (!acted && (def.attacks?.length ?? 0) > 0) quiet.push(name);
