@@ -229,7 +229,10 @@ export interface WeaponsData {
 
 /** 무기 Q 스킬 */
 export type WeaponQSkill =
-  /** 3식 제미니(라스알하게의 검): 둘레에 분신 clones기가 나타나 함께 strikes번 벤다. 마지막 베기는 공간격(화면이 갈라진다) */
-  | { kind: 'gemini'; nameKey: string; descKey: string; cooldownSec: number; clones: number; strikes: number; gapSec: number; damageMul: number; radiusMul: number; cloneDistPx: number; color: string; spaceLength: number; spaceWidth: number; spaceCut: SpaceCutDef; rift: RiftDef; cut: SpriteRef[] }
-  /** 정화의 불길(아비오르의 지팡이): durationSec 동안 volleySec마다 사방으로 불길 + 굵은 직선 레이저 beams줄(번갈아 반 칸씩 돌려 옆면이 맞닿게) */
-  | { kind: 'purifyingFlame'; nameKey: string; descKey: string; cooldownSec: number; durationSec: number; volleySec: number; beams: number; beamLength: number; beamWidth: number; beamDamageMul: number; flameRadius: number; flameDamageMul: number; burnStacks: number; color: string; flame: SpriteRef };
+  /** 3식 제미니(라스알히게의 검): 노린 적을 사이에 두고 flankPx 떨어진 곳에 분신 clones기가 나타나 함께 strikes번 벤다. 검의 공간격 차례에 쓰면 마지막 베기가 공간격(화면이 갈라진다) */
+  | { kind: 'gemini'; nameKey: string; descKey: string; cooldownSec: number; clones: number; strikes: number; gapSec: number; damageMul: number; lastMul: number; radiusMul: number; flankPx: number; color: string; spaceLength: number; spaceWidth: number; spaceCut: SpaceCutDef; rift: RiftDef; cut: SpriteRef[] }
+  /**
+   * 정화의 불길(아비오르의 지팡이): durationSec 동안 volleySec마다 둘레로 불길, laserEverySec마다 조준 방향으로 굵은 직선 레이저 연사.
+   * 레이저는 lanes줄의 나란한 길을 차례로 돌아 옆면이 맞닿는다(같은 길에 겹치지 않음)
+   */
+  | { kind: 'purifyingFlame'; nameKey: string; descKey: string; cooldownSec: number; durationSec: number; volleySec: number; laserEverySec: number; lanes: number; jitterDeg: number; beamLength: number; beamWidth: number; beamDamageMul: number; flameRadius: number; flameDamageMul: number; burnStacks: number; color: string; flame: SpriteRef };

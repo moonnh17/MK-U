@@ -28,7 +28,7 @@ const WEAPONS = {
   fx_spirit_fist_blast: ['spiritFistBlast', 48, 0.35],
   weapon_elder_wand: ['elderWand', 30, 0.5, 0.2],
   weapon_unstable_shard: ['unstableShard', 22, 0.5, 0.2],
-  weapon_rasalhague_sword: ['rasalhagueSword', 52, 0.5, 0.1],
+  weapon_rasalhague_sword: ['rasalhagueSword', 40, 0.5, 0.15],
   weapon_avior_staff: ['aviorStaff', 32, 0.5, 0.3],
 };
 

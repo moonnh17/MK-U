@@ -145,7 +145,7 @@
       "id": "aviorStaff", "codexNo": 11, "flavor": "codex.itemFlavor.aviorStaff", "nameKey": "weapon.aviorStaff", "category": "staff", "grade": "unique", "classes": ["homing"], "tags": ["magic", "ranged"],
       "baseDamage": 6, "fireIntervalSec": 0.25, "energyCost": 1, "pattern": { "kind": "homing", "turnRate": 5 },
       "signature": { "every": 5, "kind": "laser", "nameKey": "weapon.sig.aviorStaff", "damageMul": 2.5, "length": 240, "width": 8 },
-      "qSkill": { "kind": "purifyingFlame", "nameKey": "weapon.q.purifyingFlame", "descKey": "weapon.q.purifyingFlame.desc", "cooldownSec": 14, "durationSec": 2, "volleySec": 0.25, "beams": 16, "beamLength": 170, "beamWidth": 13, "beamDamageMul": 0.8, "flameRadius": 64, "flameDamageMul": 0.6, "burnStacks": 1, "color": "#c9b8ff", "flame": { "spriteKey": "fx_w_flame", "color": "#c9b8ff", "size": 14 } },
+      "qSkill": { "kind": "purifyingFlame", "nameKey": "weapon.q.purifyingFlame", "descKey": "weapon.q.purifyingFlame.desc", "cooldownSec": 14, "durationSec": 2, "volleySec": 0.25, "laserEverySec": 0.06, "lanes": 3, "jitterDeg": 2, "beamLength": 230, "beamWidth": 6, "beamDamageMul": 0.45, "flameRadius": 64, "flameDamageMul": 0.6, "burnStacks": 1, "color": "#c9b8ff", "flame": { "spriteKey": "fx_w_flame", "color": "#c9b8ff", "size": 14 } },
       "projectileSpeed": 260, "range": 300, "cutsProjectiles": false, "droppable": true,
       "spriteKey": "weapon_avior_staff", "color": "#8a6aff", "size": 11
     },
@@ -155,7 +155,7 @@
       "iaido": { "maxDistance": 130, "behindPx": 26, "sec": 0.07, "width": 30, "cutDelaySec": 0.24, "color": "#8ac8ff" },
       "signature": { "every": 3, "kind": "space", "nameKey": "weapon.sig.rasalhagueSword" },
       "qSkill": {
-        "kind": "gemini", "nameKey": "weapon.q.gemini", "descKey": "weapon.q.gemini.desc", "cooldownSec": 10, "clones": 2, "strikes": 3, "gapSec": 0.22, "damageMul": 1.2, "radiusMul": 1.3, "cloneDistPx": 26, "color": "#6ab8ff",
+        "kind": "gemini", "nameKey": "weapon.q.gemini", "descKey": "weapon.q.gemini.desc", "cooldownSec": 10, "clones": 2, "strikes": 3, "gapSec": 0.22, "damageMul": 1.2, "lastMul": 1.5, "radiusMul": 1.3, "flankPx": 46, "color": "#6ab8ff",
         "spaceLength": 150, "spaceWidth": 14,
         "spaceCut": { "compressPx": 1.5, "shiftPx": 6, "closeSec": 0.3, "bandPx": 30, "edgeFadePx": 40, "rimPx": 1.2, "hitStopSec": 0.05, "shards": 12, "afterSec": 0.35, "slidePx": 8 },
         "rift": { "angleDeg": 40, "openSec": 0.04, "holdSec": 0.08, "sealSec": 0.6, "gapPx": 5, "slidePx": 16, "rimPx": 1.5, "boltSec": 0.2 },

@@ -14,6 +14,7 @@ import { playFx, tintedFx } from '../../skills/skillFx';
 import { animKey } from '../../systems/art';
 import { lineHits } from '../../systems/targeting';
 import { inArc, type WeaponStats } from '../../systems/weapons';
+import { signatureFires } from '../../systems/motion';
 import type { TagId, WeaponDef, WeaponQSkill } from '../../types/data';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
@@ -58,62 +59,83 @@ export class WeaponSkills {
   private gemini(w: WeaponDef, q: Gemini, st: WeaponStats): void {
     const p = this.run.player;
     const color = hexColor(q.color);
-    // 분신: 본체 둘레에 고르게, 푸른 빛으로 물든 모습이 번쩍이며 나타난다
+    // 공간격 차례(검의 다음 공격이 공간격)에 쓰면 마지막 베기가 공간격이 되고 그 차례를 쓴다
+    const c = this.run.combat;
+    const sig = w.signature;
+    const space = !!sig && sig.kind === 'space' && c.sigItem === this.run.weaponItem() && signatureFires(c.sigCount + 1, sig.every);
+    if (space) {
+      c.sigCount = 0;
+      this.run.floatLabel({ x: p.x, y: p.y - 14 }, this.run.ctx.t('weapon.q.geminiSpace'), q.color);
+    }
+    // 노릴 적: 가장 가까운 적(없으면 조준 방향 앞). 분신은 그 적을 사이에 두고 멀리 다른 쪽에 나타나 에워싼다
+    const t0 = this.nearest(p);
+    const aim = Math.atan2(this.run.aimDir.y, this.run.aimDir.x);
+    const focus = t0 ?? { x: p.x + Math.cos(aim) * q.flankPx, y: p.y + Math.sin(aim) * q.flankPx };
+    const from = Math.atan2(p.y - focus.y, p.x - focus.x);
     const clones: Phaser.GameObjects.Image[] = [];
     for (let i = 0; i < q.clones; i++) {
-      const a = (i / q.clones) * Math.PI * 2 + Math.PI / 2;
-      const c = this.run.add
-        .image(p.x + Math.cos(a) * q.cloneDistPx, p.y + Math.sin(a) * q.cloneDistPx * 0.6, p.texture.key, p.frame.name)
+      const a = from + ((i + 1) / (q.clones + 1)) * Math.PI * 2;
+      let at = { x: focus.x + Math.cos(a) * q.flankPx, y: focus.y + Math.sin(a) * q.flankPx };
+      // 벽 속이면 적 쪽으로 당긴다
+      for (let k = 0; k < 6 && this.run.condition.blockedAt()(at.x, at.y); k++) at = { x: (at.x + focus.x) / 2, y: (at.y + focus.y) / 2 };
+      const img = this.run.add
+        .image(at.x, at.y, p.texture.key, p.frame.name)
         .setOrigin(p.originX, p.originY)
         .setScale(p.scaleX, p.scaleY)
+        .setFlipX(focus.x < at.x)
         .setTint(color)
         .setBlendMode(Phaser.BlendModes.ADD)
         .setAlpha(0)
         .setDepth(5);
-      this.run.tweens.add({ targets: c, alpha: 0.75, duration: 120 });
-      clones.push(c);
+      // 번쩍이며 나타난다
+      const flash = this.run.add.circle(at.x, at.y - 6, 4, 0xffffff, 0.9).setDepth(6).setBlendMode(Phaser.BlendModes.ADD);
+      this.run.tweens.add({ targets: flash, scale: 3, alpha: 0, duration: 200, onComplete: () => flash.destroy() });
+      this.run.tweens.add({ targets: img, alpha: 0.8, duration: 100 });
+      clones.push(img);
     }
     sfx('awaken');
     for (let k = 0; k < q.strikes; k++) {
-      this.run.time.delayedCall((0.12 + k * q.gapSec) * 1000, () => this.geminiStrike(w, q, st, clones, k === q.strikes - 1));
+      this.run.time.delayedCall((0.14 + k * q.gapSec) * 1000, () => this.geminiStrike(w, q, st, clones, focus, k === q.strikes - 1, space));
     }
-    this.run.time.delayedCall((0.12 + q.strikes * q.gapSec + 0.25) * 1000, () => {
-      for (const c of clones) this.run.tweens.add({ targets: c, alpha: 0, duration: 200, onComplete: () => c.destroy() });
+    this.run.time.delayedCall((0.14 + q.strikes * q.gapSec + 0.3) * 1000, () => {
+      for (const img of clones) this.run.tweens.add({ targets: img, alpha: 0, duration: 200, onComplete: () => img.destroy() });
     });
   }
 
-  /** 한 번 베기: 본체와 분신이 각자 가장 가까운 적(없으면 조준 방향) 쪽으로 */
-  private geminiStrike(w: WeaponDef, q: Gemini, st: WeaponStats, clones: Phaser.GameObjects.Image[], last: boolean): void {
+  /** 한 번 베기: 본체와 분신이 함께 노린 적 쪽으로 (협공). 공간격 차례면 마지막 베기에 세 줄기 공간 가르기 */
+  private geminiStrike(w: WeaponDef, q: Gemini, st: WeaponStats, clones: Phaser.GameObjects.Image[], focus0: Vec2, last: boolean, space: boolean): void {
     const p = this.run.player;
     const bodies: Vec2[] = [{ x: p.x, y: p.y }, ...clones.filter((c) => c.active).map((c) => ({ x: c.x, y: c.y }))];
+    // 노린 적이 쓰러졌으면 그 자리에서 가장 가까운 적
+    const focus = this.nearest(focus0) ?? focus0;
     const arc = w.pattern.kind === 'arc' ? w.pattern : { arcDeg: 150, radius: 56 };
     const radius = arc.radius * q.radiusMul * (1 + this.run.itemRt.sums.area);
     const fx = this.run.ctx.data.weapons.meleeFx;
-    const tags: readonly TagId[] = last ? [...w.tags, 'space'] : w.tags;
-    const base = st.damage * q.damageMul;
+    const useSpace = last && space;
+    const tags: readonly TagId[] = useSpace ? [...w.tags, 'space'] : w.tags;
+    const base = st.damage * q.damageMul * (last ? q.lastMul : 1);
     let riftDone = false;
     bodies.forEach((b, i) => {
-      const target = this.nearest(b);
-      const ang = target ? Math.atan2(target.y - b.y, target.x - b.x) : Math.atan2(this.run.aimDir.y, this.run.aimDir.x);
+      const ang = Math.atan2(focus.y - b.y, focus.x - b.x);
       const dir = { x: Math.cos(ang), y: Math.sin(ang) };
       const clone = i > 0 ? clones[i - 1] : null;
-      // 분신은 베는 쪽으로 몸을 내밀었다 돌아온다
+      // 분신은 적 쪽으로 파고들었다 돌아온다
       if (clone) {
         clone.setFlipX(dir.x < 0);
-        this.run.tweens.add({ targets: clone, x: clone.x + dir.x * 6, y: clone.y + dir.y * 6, duration: 70, yoyo: true });
+        this.run.tweens.add({ targets: clone, x: clone.x + dir.x * 10, y: clone.y + dir.y * 10, duration: 70, yoyo: true });
       }
-      if (!last) {
+      if (!useSpace) {
         const enemies = this.run.enemies.filter((e) => !e.dead && inArc(b, ang, arc.arcDeg, radius, e.sprite, e.radius));
-        tintedFx(this.run, this.run.combat.tierFx(fx.slashTiers, w, true), b.x + dir.x * radius * 0.5, b.y + dir.y * radius * 0.5, hexColor(q.color), { w: radius * 1.5, rotation: ang, depth: 7 });
+        tintedFx(this.run, this.run.combat.tierFx(fx.slashTiers, w, true), b.x + dir.x * radius * 0.5, b.y + dir.y * radius * 0.5, hexColor(q.color), { w: radius * (last ? 1.9 : 1.5), rotation: ang, depth: 7 });
         for (const e of enemies) this.run.damage.hit(e, this.run.combat.critRoll(base, st.critChance, e.sprite), tags);
         return;
       }
-      // 마지막: 벤 선을 따라 공간이 갈라진다 (선 위 적에게 공간격)
+      // 공간격: 각자 적을 꿰뚫는 선을 따라 공간이 갈라진다 (세 줄기가 적에게서 엇갈린다)
       const len = q.spaceLength * (1 + this.run.itemRt.sums.area);
-      const a = { x: b.x - dir.x * len * 0.2, y: b.y - dir.y * len * 0.2 };
+      const a = { x: b.x - dir.x * 10, y: b.y - dir.y * 10 };
       const end = { x: b.x + dir.x * len, y: b.y + dir.y * len };
       const enemies = this.run.enemies.filter((e) => !e.dead);
-      const hits = lineHits(a, dir, len * 1.2, q.spaceWidth / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
+      const hits = lineHits(a, dir, len + 10, q.spaceWidth / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
       this.spaceSlash(q, a, end, !riftDone);
       riftDone = true;
       for (const h of hits) {
@@ -122,7 +144,7 @@ export class WeaponSkills {
       }
     });
     sfx(last ? 'crit' : 'swing');
-    shake(this.run, last ? 'medium' : 'light');
+    shake(this.run, useSpace ? 'medium' : 'light');
   }
 
   /** 공간 베기 연출: 절단 그림 3단계 + (rift면) 화면 전체가 선을 따라 갈라졌다가 봉합 */
@@ -158,22 +180,27 @@ export class WeaponSkills {
   // ---------- 정화의 불길 ----------
 
   private purifyingFlame(w: WeaponDef, q: Flame, st: WeaponStats): void {
-    const volleys = Math.max(1, Math.round(q.durationSec / q.volleySec));
-    const step = (Math.PI * 2) / q.beams;
-    const start = this.run.rng.range(0, step);
-    sfx('shotLaser');
-    for (let v = 0; v < volleys; v++) {
-      this.run.time.delayedCall(v * q.volleySec * 1000, () => {
+    const shots = Math.max(1, Math.round(q.durationSec / q.laserEverySec));
+    const flameEvery = Math.max(1, Math.round(q.volleySec / q.laserEverySec));
+    // 나란한 길 순서: 가운데부터 좌우로 번갈아 (0, +1, -1, +2, -2 …)
+    const lanes = Array.from({ length: q.lanes }, (_, i) => (i % 2 ? 1 : -1) * Math.ceil(i / 2));
+    for (let n = 0; n < shots; n++) {
+      this.run.time.delayedCall(n * q.laserEverySec * 1000, () => {
         if (this.run.session.outcome) return;
         const p = { x: this.run.player.x, y: this.run.player.y };
-        // 번갈아 반 칸 돌린다: 이번 줄은 지난 줄 사이를 채운다
-        const off = start + (v % 2) * step * 0.5;
-        for (let i = 0; i < q.beams; i++) this.run.combat.weaponLaser(w, st.damage * q.beamDamageMul, st.critChance, off + i * step, q.beamLength, q.beamWidth);
-        this.flames(w, q, st, p);
-        shake(this.run, 'light');
-        if (v % 2 === 0) sfx('shotLaser');
+        // 조준한 적 쪽 (매 발 다시), 약간 흔들린다
+        const t = this.run.aimTarget;
+        const base = t ? Math.atan2(t.y - p.y, t.x - p.x) : Math.atan2(this.run.aimDir.y, this.run.aimDir.x);
+        const ang = base + this.run.rng.range(-1, 1) * ((q.jitterDeg * Math.PI) / 180);
+        // 옆으로 비켜선 길: 레이저 그림 굵기(판정 폭 ×2.5)만큼씩 떨어져 옆면이 맞닿는다
+        const side = lanes[n % lanes.length]! * q.beamWidth * 2.5;
+        const from = { x: p.x - Math.sin(ang) * side, y: p.y + Math.cos(ang) * side };
+        this.run.combat.weaponLaser(w, st.damage * q.beamDamageMul, st.critChance, ang, q.beamLength, q.beamWidth, undefined, from);
+        if (n % 2 === 0) sfx('shotLaser');
+        if (n % flameEvery === 0) this.flames(w, q, st, p);
       });
     }
+    shake(this.run, 'light');
   }
 
   /** 사방으로 퍼지는 불길: 반지름 안 적에게 피해 + 화상 */

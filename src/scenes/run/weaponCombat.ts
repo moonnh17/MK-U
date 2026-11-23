@@ -447,8 +447,8 @@ export class WeaponCombat {
   }
 
   /** 지팡이 고유 효과: 조준 방향 직선 레이저 (관통, 치명 판정) */
-  weaponLaser(w: WeaponDef, base: number, crit: number, aimAngle: number, length: number, width: number, beamKey?: string): void {
-    const origin = { x: this.run.player.x, y: this.run.player.y };
+  weaponLaser(w: WeaponDef, base: number, crit: number, aimAngle: number, length: number, width: number, beamKey?: string, from?: Vec2): void {
+    const origin = from ?? { x: this.run.player.x, y: this.run.player.y };
     const dir = { x: Math.cos(aimAngle), y: Math.sin(aimAngle) };
     // 벽에서 끊기고, 스넬의 법칙이 있으면 반사된다
     const path = this.run.special.laserPath(origin, dir, length * (1 + this.run.itemRt.sums.area));
