@@ -855,3 +855,4 @@
 - 2026-11-24: 각인 확장: imprint.awakened(descKey, values)를 스킬이 각성했고 1번 칸일 때만 켠다(ActiveImprint.awakened). 점화 소폭발 → 불씨 1개, 작열은 불길 장판 위에서 ×1.5, 서리는 쇄빙 파열이 냉기 피해라 그대로 1중첩, 한파는 눈보라 안 적에게도, 대전은 뇌운이 떠 있는 동안 이동 충전 ×1.5, 정화는 발동 때 원소 구슬 1발. 집행 의지체가 따라 쓰는 스킬은 각성하지 않은 것으로 친다.
 - 2026-11-24: 신규 아이템 6종(확정안 표, 화산 용광로의 잔불은 전설·원소 나침반 이름 그대로 — 사용자 확인 전 기본값). 새 효과 종류 elementDamage·burnDamage·fireKillZone·slowDuration·slowPower·chainRange·cycleWindow. 화상은 지속시간이 없어서 열매의 '화상 지속 +20%'는 '화상 틱 피해 +20%'로 바꿨다. 도감 분류는 임시로 새 묶음 '원소의 유물'. 그림은 투명 배경판(scripts/art-src/items-hf).
 - 2026-11-24: 각성 FX: 픽셀 이펙트 awk-* 7종(팔레트 변형 포함 10시트)을 pixelfx로 렌더(scripts/art-src/pixelfx), 힉스필드 5×2 시트 3장(눈보라·뇌운/낙뢰·수렴/합일)은 build-mage-art.cjs AWAKEN_SHEETS가 줄마다 잘라 애니메이션으로. 스킬 시전 순서: 재사용 대기를 먼저 걸고 afterCast(일주 환급이 줄일 수 있게).
+- 2026-11-24: 사용자 확정: 화산 용광로의 잔불은 전설, 원소 나침반(레어)은 이름 그대로.
