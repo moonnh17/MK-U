@@ -166,7 +166,7 @@ export class MageRuntime {
         if (enemy.dead) return;
         const shot = findSkill(this.run.ctx.data.skills, 'executionWill').sprites.willHit;
         if (shot) playFx(this.run, shot, enemy.sprite.x, enemy.sprite.y, { w: Math.max(12, enemy.radius * 2) });
-        this.run.combat.hit(enemy, base * ratio, tags, 'executionWill');
+        this.run.damage.hit(enemy, base * ratio, tags, 'executionWill');
       });
     }
     if (killed || enemy.dead) return;

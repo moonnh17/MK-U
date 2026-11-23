@@ -55,6 +55,7 @@ import { BulletRuntime } from './run/bullets';
 import { RoomRuntime } from './run/roomRuntime';
 import { EnemyLife } from './run/enemyLife';
 import { PlayerLife } from './run/playerLife';
+import { DamageRuntime } from './run/damage';
 
 /** 전투 씬: 스테이지 하나(방·복도·적·무기·스킬). 스테이지를 넘기면 다음 스테이지 데이터로 재시작한다. */
 export type { RunSceneData } from './run/shared';
@@ -69,6 +70,7 @@ export class RunScene extends Phaser.Scene {
   playerLife!: PlayerLife;
   stageFx!: StageFx;
   combat!: WeaponCombat;
+  damage!: DamageRuntime;
   special!: SpecialWeapons;
   progression!: Progression;
   encounters!: Encounters;
@@ -165,6 +167,7 @@ export class RunScene extends Phaser.Scene {
     this.encounters = new Encounters(this);
     this.progression = new Progression(this);
     this.combat = new WeaponCombat(this);
+    this.damage = new DamageRuntime(this);
     this.stageFx = new StageFx(this);
     this.condition = new PlayerCondition(this);
     this.roomProps = new RoomProps(this);
@@ -279,7 +282,7 @@ export class RunScene extends Phaser.Scene {
     };
     this.physics.add.collider(this.bullets, this.roomProps.propGroup, (b, s) => propHit(b, s, (x) => x.getData('base') as number));
     this.physics.add.collider(this.enemyBullets, this.roomProps.propGroup, (b, s) => propHit(b, s, (x) => x.getData('damage') as number));
-    this.physics.add.overlap(this.bullets, this.enemyGroup, (b, e) => this.combat.onBulletHit(b as Phaser.Physics.Arcade.Image, e as Phaser.Physics.Arcade.Image));
+    this.physics.add.overlap(this.bullets, this.enemyGroup, (b, e) => this.damage.onBulletHit(b as Phaser.Physics.Arcade.Image, e as Phaser.Physics.Arcade.Image));
     this.physics.add.overlap(this.player, this.enemyBullets, (_p, b) => this.bulletRt.onEnemyBulletHit(b as Phaser.Physics.Arcade.Image));
     this.physics.add.overlap(this.player, this.enemyGroup, (_p, e) =>
       this.playerLife.onContact((e as Phaser.GameObjects.GameObject).getData('enemy') as Enemy),

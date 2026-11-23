@@ -230,7 +230,7 @@ export class PlayerCondition {
       const dy = e.sprite.y - at.y;
       const d = Math.hypot(dx, dy);
       if (d > s.landRadius + e.radius) continue;
-      run.combat.hit(e, s.landDamage, s.tags, 'dodge');
+      run.damage.hit(e, s.landDamage, s.tags, 'dodge');
       // 보스·고정 적은 knockback이 알아서 무시한다
       if (!e.dead && d > 0) e.knockback({ x: dx / d, y: dy / d }, s.landKnockbackPx, 0.12);
     }

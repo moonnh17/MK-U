@@ -83,7 +83,7 @@ export class EnemyLife {
         if (c.fx.shards) playFx(this.run, c.fx.shards, x, y, { w: c.burstRadius * 2.6 });
       } else this.run.fxAt(this.run.add.circle(x, y, c.burstRadius, hexColor(d.ui.corruptionColor), 0.4).setDepth(6));
       for (const o of [...this.run.enemies]) {
-        if (Math.hypot(o.sprite.x - x, o.sprite.y - y) <= c.burstRadius + o.radius) this.run.combat.hit(o, c.burstDamage, c.burstTags);
+        if (Math.hypot(o.sprite.x - x, o.sprite.y - y) <= c.burstRadius + o.radius) this.run.damage.hit(o, c.burstDamage, c.burstTags);
       }
       const b = c.bullets;
       if (b) for (let k = 0; k < b.count; k++) this.run.combat.fireBullet({ x, y }, (k / b.count) * Math.PI * 2, b.speed, b.range, b.damage, c.burstTags, 'magiCorruption', { pierce: 0, crit: 0, sprite: b.sprite });
@@ -152,14 +152,14 @@ export class EnemyLife {
       if (!e.bleed || e.dead) continue;
       const out = tickBleed(e.bleed, dt, rule);
       e.bleed = out.state;
-      if (out.damage > 0) this.run.combat.applyDamage(e, corruptedDamage(out.damage, e.corruption));
+      if (out.damage > 0) this.run.damage.applyDamage(e, corruptedDamage(out.damage, e.corruption));
     }
     const burnRule = this.run.tagRule<BurnRule>('burn');
     for (const e of [...this.run.enemies]) {
       if (!e.burn || e.dead) continue;
       const out = tickBurn(e.burn, dt, burnRule);
       e.burn = out.state;
-      if (out.damage > 0) this.run.combat.applyDamage(e, corruptedDamage(out.damage, e.corruption));
+      if (out.damage > 0) this.run.damage.applyDamage(e, corruptedDamage(out.damage, e.corruption));
     }
   }
 

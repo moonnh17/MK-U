@@ -60,11 +60,11 @@ export class SkillRuntime {
       aimDir: () => this.run.aimDir,
       enemies: () => this.run.enemies.filter((e) => !e.dead),
       area: (r) => this.area(r),
-      hit: (e, base, tags) => this.run.combat.hit(e, base, tags, source),
+      hit: (e, base, tags) => this.run.damage.hit(e, base, tags, source),
       hitTrue: (e, amount, space) => {
         if (e.dead) return false;
         const dmg = space ? spaceDamage(e.rank, e.maxHp, amount, this.run.tagRule<SpaceRule>('space')) : amount;
-        return this.run.combat.applyDamage(e, dmg, source);
+        return this.run.damage.applyDamage(e, dmg, source);
       },
       hurtSelf: (amount) => {
         this.run.playerLife.hurtPlayer(amount);

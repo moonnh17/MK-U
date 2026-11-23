@@ -148,7 +148,7 @@ export class SpecialWeapons {
   }
 
   private hit(e: Enemy, base: number, crit: number, def: WeaponDef): void {
-    this.run.combat.hit(e, this.run.combat.critRoll(base, crit, e.sprite), def.tags);
+    this.run.damage.hit(e, this.run.combat.critRoll(base, crit, e.sprite), def.tags);
   }
 
   // ---------- 매 프레임 ----------
