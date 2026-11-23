@@ -652,144 +652,151 @@ export class Enemy {
   private onEvent(e: AiEvent, host: EnemyHost, dir: Vec2, dist: number, link: boolean, chained = false): void {
     const a = this.attacks.find((x) => x.id === e.attackId);
     if (!a) return;
-    if (e.type === 'windup') {
-      this.aim = dir;
-      this.clearTelegraph();
-      if (a.chain && !chained) this.chainLeft = host.rng.int(a.chain[0], a.chain[1]) - 1;
-      const g = this.scene.add.graphics().setDepth(2);
-      if (a.kind === 'fan') {
-        const half = (a.spreadDeg! * Math.PI) / 360;
-        const base = Math.atan2(dir.y, dir.x);
-        g.lineStyle(1, TELEGRAPH_COLOR, 0.5);
-        for (const s of [-half, 0, half]) g.lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + Math.cos(base + s) * 40, this.sprite.y + Math.sin(base + s) * 40);
-      } else if (a.kind === 'rope') {
-        g.lineStyle(1, TELEGRAPH_COLOR, 0.8).lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + dir.x * a.range!, this.sprite.y + dir.y * a.range!);
-      } else if (a.kind === 'snipe' || a.kind === 'spikes' || a.kind === 'roots') {
-        // snipe 조준선은 update에서 그린다 / spikes·roots는 본체 준비 자세가 예고, 가시마다 바닥 예고가 따로 뜬다
-      } else if (a.kind === 'burst') {
-        g.lineStyle(1, TELEGRAPH_COLOR, 0.7).lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + dir.x * dist, this.sprite.y + dir.y * dist);
-        if (link) host.linkWindup(this, a.id);
-      } else if (a.kind === 'puddle') {
-        this.slamAt = host.playerPos();
-        g.lineStyle(1, hexColor(this.def.color), 0.9).strokeCircle(this.slamAt.x, this.slamAt.y, a.radius!);
-        g.fillStyle(hexColor(this.def.color), 0.15).fillCircle(this.slamAt.x, this.slamAt.y, a.radius!);
-      } else if (a.kind === 'lunge') {
-        const len = a.speed! * a.actSec;
-        g.lineStyle(this.radius * 2, TELEGRAPH_COLOR, 0.25);
-        g.lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + dir.x * len, this.sprite.y + dir.y * len);
-      } else {
-        const reach = Math.min(dist, a.reach!);
-        this.slamAt = { x: this.sprite.x + dir.x * reach, y: this.sprite.y + dir.y * reach };
-        g.lineStyle(1, TELEGRAPH_COLOR, 0.9);
-        g.strokeCircle(this.slamAt.x, this.slamAt.y, a.radius!);
-        g.fillStyle(TELEGRAPH_COLOR, 0.2);
-        g.fillCircle(this.slamAt.x, this.slamAt.y, a.radius!);
-      }
-      this.telegraph = g;
-    } else if (e.type === 'end') {
+    if (e.type === 'windup') this.telegraphAttack(a, host, dir, dist, link, chained);
+    else if (e.type === 'end') {
       // 밧줄이 빗나갔으면 거둔다
       if (a.kind === 'rope') this.clearTelegraph();
-    } else if (e.type === 'strike') {
-      this.clearTelegraph();
-      this.actHit = false;
-      if (a.kind === 'lunge') bus.emit('sfx', { id: 'dash' });
-      if (a.kind === 'burst') {
-        this.shotsFired = 0;
-        this.shotTimer = 0;
-        this.fireShot(a, host);
-      } else if (a.kind === 'puddle') {
-        host.addHazard(new Zone(this.scene, this.slamAt, a.radius!, a.liveSec!, a.damage, a.tickSec!, hexColor(this.def.color), a.mentalDamage ?? 0));
-      } else if (a.kind === 'fan') {
-        // 부채꼴 탄막: 예고 때 정한 방향으로 (일반 탄: 굴절·탄 베기 가능). bursts면 간격을 두고 돌아가며 여러 번 (군집 폐포)
-        const base = Math.atan2(this.aim.y, this.aim.x);
-        const spread = (a.spreadDeg! * Math.PI) / 180;
-        const n = a.shots!;
-        const from = { x: this.sprite.x, y: this.sprite.y };
-        for (let b = 0; b < (a.bursts ?? 1); b++)
-          this.later(b * (a.burstGapSec ?? 0), () => this.fan(host, from, burstAngle(base, b, ((a.burstTurnDeg ?? 0) * Math.PI) / 180), n, spread, a.speed!, a.range!, a.damage, a.shot, a.shotTint));
-      } else if (a.kind === 'spikes') {
-        // 플레이어 자리부터 차례로 가시 예고 (두 번째부터는 둘레 scatter 안). 쓰러지면 남은 가시는 나오지 않는다
-        // perpOffsets: 지금 플레이어 자리를 고정하고 조준에 수직으로 벌린 자리들 (군락체 응시맥동)
-        const lock = host.playerPos();
-        const nx = -this.aim.y, ny = this.aim.x;
-        for (let i = 0; i < a.strikes!; i++) {
-          this.later(i * (a.strikeGapSec ?? 0), () => {
-            const off = a.perpOffsets?.[i];
-            const p = off === undefined ? host.playerPos() : lock;
-            const r = off !== undefined || i === 0 ? 0 : host.rng.range(0, a.scatter ?? 0);
-            const ang = host.rng.range(0, Math.PI * 2);
-            const at = { x: p.x + Math.cos(ang) * r + nx * (off ?? 0), y: p.y + Math.sin(ang) * r + ny * (off ?? 0) };
-            host.addHazard(new DelayedBlast(this.scene, at, a.radius!, a.warnSec!, a.damage * this.damageMul, hexColor(this.def.color), { warn: a.warnArt, hit: a.hitArt }));
-          });
-        }
-      } else if (a.kind === 'roots') {
-        // 몸에서 뻗는 뿌리 줄기: 예고 뒤 솟는다. 줄기마다 방향이 번갈아 벌어진다
-        const from = { x: this.sprite.x, y: this.sprite.y };
-        for (let i = 0; i < a.strikes!; i++) {
-          this.later(i * (a.strikeGapSec ?? 0), () => {
-            const p = host.playerPos();
-            const base = Math.atan2(p.y - from.y, p.x - from.x);
-            host.addHazard(
-              new Beams(this.scene, {
-                center: () => from,
-                count: 1,
-                length: a.range!,
-                width: a.width!,
-                spin: 0,
-                startAngle: rootAngle(base, i, ((a.turnDeg ?? 0) * Math.PI) / 180),
-                telegraphSec: a.warnSec!,
-                liveSec: a.actSec,
-                damage: a.damage * this.damageMul,
-                tickSec: a.actSec + 1,
-                color: hexColor(this.def.color),
-                art: a.hitArt,
-                warnArt: a.warnArt,
-              }),
-            );
-          });
-        }
-        // 뿌리가 솟은 뒤 같은 방향으로 포자 탄막 (군락체 관맥포격)
-        const v = a.volley;
-        if (v) {
-          const base = Math.atan2(this.aim.y, this.aim.x) + ((v.burstStartDeg ?? 0) * Math.PI) / 180;
-          for (let b = 0; b < v.bursts; b++)
-            this.later(a.warnSec! + v.afterSec + b * v.burstGapSec, () =>
-              this.fan(host, from, burstAngle(base, b, (v.burstTurnDeg * Math.PI) / 180), v.shots, (v.spreadDeg * Math.PI) / 180, v.speed, v.range, v.damage, v.shot),
-            );
-        }
-      } else if (a.kind === 'rope') {
-        this.ropeLen = 0;
-        this.ropeHit = false;
-      } else if (a.kind === 'snipe') {
-        // 고정된 방향으로 직선 레이저 (대형 레이저: 굴절 불가), 한 번만 맞힌다
-        const from = { x: this.sprite.x, y: this.sprite.y };
-        host.addHazard(
-          new Beams(this.scene, {
-            center: () => from,
-            count: 1,
-            length: a.range!,
-            width: a.width!,
-            spin: 0,
-            startAngle: Math.atan2(this.aim.y, this.aim.x),
-            telegraphSec: 0,
-            liveSec: a.actSec,
-            damage: a.damage * this.damageMul,
-            mental: a.damage * this.damageMul * (this.def.mentalRatio ?? 0),
-            tickSec: a.actSec + 1,
-            color: hexColor(this.def.color),
-          }),
-        );
-        if (a.fx) this.attackFx(a.fx, from.x, from.y, { w: a.range!, h: a.width! * 3, rotation: Math.atan2(this.aim.y, this.aim.x), originX: 0 });
+    } else if (e.type === 'strike') this.strikeAttack(a, host);
+  }
+
+  /** 공격 예고: 조준을 고정하고 종류별 예고선·범위를 그린다 */
+  private telegraphAttack(a: EnemyAttackDef, host: EnemyHost, dir: Vec2, dist: number, link: boolean, chained: boolean): void {
+    this.aim = dir;
+    this.clearTelegraph();
+    if (a.chain && !chained) this.chainLeft = host.rng.int(a.chain[0], a.chain[1]) - 1;
+    const g = this.scene.add.graphics().setDepth(2);
+    if (a.kind === 'fan') {
+      const half = (a.spreadDeg! * Math.PI) / 360;
+      const base = Math.atan2(dir.y, dir.x);
+      g.lineStyle(1, TELEGRAPH_COLOR, 0.5);
+      for (const s of [-half, 0, half]) g.lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + Math.cos(base + s) * 40, this.sprite.y + Math.sin(base + s) * 40);
+    } else if (a.kind === 'rope') {
+      g.lineStyle(1, TELEGRAPH_COLOR, 0.8).lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + dir.x * a.range!, this.sprite.y + dir.y * a.range!);
+    } else if (a.kind === 'snipe' || a.kind === 'spikes' || a.kind === 'roots') {
+      // snipe 조준선은 update에서 그린다 / spikes·roots는 본체 준비 자세가 예고, 가시마다 바닥 예고가 따로 뜬다
+    } else if (a.kind === 'burst') {
+      g.lineStyle(1, TELEGRAPH_COLOR, 0.7).lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + dir.x * dist, this.sprite.y + dir.y * dist);
+      if (link) host.linkWindup(this, a.id);
+    } else if (a.kind === 'puddle') {
+      this.slamAt = host.playerPos();
+      g.lineStyle(1, hexColor(this.def.color), 0.9).strokeCircle(this.slamAt.x, this.slamAt.y, a.radius!);
+      g.fillStyle(hexColor(this.def.color), 0.15).fillCircle(this.slamAt.x, this.slamAt.y, a.radius!);
+    } else if (a.kind === 'lunge') {
+      const len = a.speed! * a.actSec;
+      g.lineStyle(this.radius * 2, TELEGRAPH_COLOR, 0.25);
+      g.lineBetween(this.sprite.x, this.sprite.y, this.sprite.x + dir.x * len, this.sprite.y + dir.y * len);
+    } else {
+      const reach = Math.min(dist, a.reach!);
+      this.slamAt = { x: this.sprite.x + dir.x * reach, y: this.sprite.y + dir.y * reach };
+      g.lineStyle(1, TELEGRAPH_COLOR, 0.9);
+      g.strokeCircle(this.slamAt.x, this.slamAt.y, a.radius!);
+      g.fillStyle(TELEGRAPH_COLOR, 0.2);
+      g.fillCircle(this.slamAt.x, this.slamAt.y, a.radius!);
+    }
+    this.telegraph = g;
+  }
+
+  /** 공격 발동: 예고 때 정한 방향·자리로 종류별 판정(탄·위험 지대·직접 피해)을 낸다 */
+  private strikeAttack(a: EnemyAttackDef, host: EnemyHost): void {
+    this.clearTelegraph();
+    this.actHit = false;
+    if (a.kind === 'lunge') bus.emit('sfx', { id: 'dash' });
+    if (a.kind === 'burst') {
+      this.shotsFired = 0;
+      this.shotTimer = 0;
+      this.fireShot(a, host);
+    } else if (a.kind === 'puddle') {
+      host.addHazard(new Zone(this.scene, this.slamAt, a.radius!, a.liveSec!, a.damage, a.tickSec!, hexColor(this.def.color), a.mentalDamage ?? 0));
+    } else if (a.kind === 'fan') {
+      // 부채꼴 탄막: 예고 때 정한 방향으로 (일반 탄: 굴절·탄 베기 가능). bursts면 간격을 두고 돌아가며 여러 번 (군집 폐포)
+      const base = Math.atan2(this.aim.y, this.aim.x);
+      const spread = (a.spreadDeg! * Math.PI) / 180;
+      const n = a.shots!;
+      const from = { x: this.sprite.x, y: this.sprite.y };
+      for (let b = 0; b < (a.bursts ?? 1); b++)
+        this.later(b * (a.burstGapSec ?? 0), () => this.fan(host, from, burstAngle(base, b, ((a.burstTurnDeg ?? 0) * Math.PI) / 180), n, spread, a.speed!, a.range!, a.damage, a.shot, a.shotTint));
+    } else if (a.kind === 'spikes') {
+      // 플레이어 자리부터 차례로 가시 예고 (두 번째부터는 둘레 scatter 안). 쓰러지면 남은 가시는 나오지 않는다
+      // perpOffsets: 지금 플레이어 자리를 고정하고 조준에 수직으로 벌린 자리들 (군락체 응시맥동)
+      const lock = host.playerPos();
+      const nx = -this.aim.y, ny = this.aim.x;
+      for (let i = 0; i < a.strikes!; i++) {
+        this.later(i * (a.strikeGapSec ?? 0), () => {
+          const off = a.perpOffsets?.[i];
+          const p = off === undefined ? host.playerPos() : lock;
+          const r = off !== undefined || i === 0 ? 0 : host.rng.range(0, a.scatter ?? 0);
+          const ang = host.rng.range(0, Math.PI * 2);
+          const at = { x: p.x + Math.cos(ang) * r + nx * (off ?? 0), y: p.y + Math.sin(ang) * r + ny * (off ?? 0) };
+          host.addHazard(new DelayedBlast(this.scene, at, a.radius!, a.warnSec!, a.damage * this.damageMul, hexColor(this.def.color), { warn: a.warnArt, hit: a.hitArt }));
+        });
       }
-      if (a.kind === 'slam') {
-        const p = host.playerPos();
-        if (Math.hypot(p.x - this.slamAt.x, p.y - this.slamAt.y) <= a.radius! + host.playerRadius) host.hurtPlayer(a.damage * this.damageMul, this);
-        // 그림이 따로 없으면 공용 내려찍기 이펙트를 적 색으로
-        if (a.fx) this.attackFx(a.fx, this.slamAt.x, this.slamAt.y, { w: a.radius! * 2.3 });
-        else this.attackFx(getContext().data.juice.fx.hazardBlast, this.slamAt.x, this.slamAt.y, { w: a.radius! * 2.3 }, this.def.color);
-        if (a.ring) {
-          for (let k = 0; k < a.ring.shots; k++) host.fireEnemyBullet(this.slamAt, (k / a.ring.shots) * Math.PI * 2, a.ring.speed, a.ring.range, a.ring.damage * this.damageMul, true);
-        }
+    } else if (a.kind === 'roots') {
+      // 몸에서 뻗는 뿌리 줄기: 예고 뒤 솟는다. 줄기마다 방향이 번갈아 벌어진다
+      const from = { x: this.sprite.x, y: this.sprite.y };
+      for (let i = 0; i < a.strikes!; i++) {
+        this.later(i * (a.strikeGapSec ?? 0), () => {
+          const p = host.playerPos();
+          const base = Math.atan2(p.y - from.y, p.x - from.x);
+          host.addHazard(
+            new Beams(this.scene, {
+              center: () => from,
+              count: 1,
+              length: a.range!,
+              width: a.width!,
+              spin: 0,
+              startAngle: rootAngle(base, i, ((a.turnDeg ?? 0) * Math.PI) / 180),
+              telegraphSec: a.warnSec!,
+              liveSec: a.actSec,
+              damage: a.damage * this.damageMul,
+              tickSec: a.actSec + 1,
+              color: hexColor(this.def.color),
+              art: a.hitArt,
+              warnArt: a.warnArt,
+            }),
+          );
+        });
+      }
+      // 뿌리가 솟은 뒤 같은 방향으로 포자 탄막 (군락체 관맥포격)
+      const v = a.volley;
+      if (v) {
+        const base = Math.atan2(this.aim.y, this.aim.x) + ((v.burstStartDeg ?? 0) * Math.PI) / 180;
+        for (let b = 0; b < v.bursts; b++)
+          this.later(a.warnSec! + v.afterSec + b * v.burstGapSec, () =>
+            this.fan(host, from, burstAngle(base, b, (v.burstTurnDeg * Math.PI) / 180), v.shots, (v.spreadDeg * Math.PI) / 180, v.speed, v.range, v.damage, v.shot),
+          );
+      }
+    } else if (a.kind === 'rope') {
+      this.ropeLen = 0;
+      this.ropeHit = false;
+    } else if (a.kind === 'snipe') {
+      // 고정된 방향으로 직선 레이저 (대형 레이저: 굴절 불가), 한 번만 맞힌다
+      const from = { x: this.sprite.x, y: this.sprite.y };
+      host.addHazard(
+        new Beams(this.scene, {
+          center: () => from,
+          count: 1,
+          length: a.range!,
+          width: a.width!,
+          spin: 0,
+          startAngle: Math.atan2(this.aim.y, this.aim.x),
+          telegraphSec: 0,
+          liveSec: a.actSec,
+          damage: a.damage * this.damageMul,
+          mental: a.damage * this.damageMul * (this.def.mentalRatio ?? 0),
+          tickSec: a.actSec + 1,
+          color: hexColor(this.def.color),
+        }),
+      );
+      if (a.fx) this.attackFx(a.fx, from.x, from.y, { w: a.range!, h: a.width! * 3, rotation: Math.atan2(this.aim.y, this.aim.x), originX: 0 });
+    }
+    if (a.kind === 'slam') {
+      const p = host.playerPos();
+      if (Math.hypot(p.x - this.slamAt.x, p.y - this.slamAt.y) <= a.radius! + host.playerRadius) host.hurtPlayer(a.damage * this.damageMul, this);
+      // 그림이 따로 없으면 공용 내려찍기 이펙트를 적 색으로
+      if (a.fx) this.attackFx(a.fx, this.slamAt.x, this.slamAt.y, { w: a.radius! * 2.3 });
+      else this.attackFx(getContext().data.juice.fx.hazardBlast, this.slamAt.x, this.slamAt.y, { w: a.radius! * 2.3 }, this.def.color);
+      if (a.ring) {
+        for (let k = 0; k < a.ring.shots; k++) host.fireEnemyBullet(this.slamAt, (k / a.ring.shots) * Math.PI * 2, a.ring.speed, a.ring.range, a.ring.damage * this.damageMul, true);
       }
     }
   }
