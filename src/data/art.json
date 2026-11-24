@@ -8252,31 +8252,25 @@
     },
     "summon_imitation_golem": {
       "file": "mku/summon_imitation_golem.png",
-      "frameWidth": 185,
-      "frameHeight": 120,
-      "frames": 7,
+      "frameWidth": 112,
+      "frameHeight": 134,
+      "frames": 9,
       "density": 2,
       "anims": {
         "idle": {
           "from": 0,
-          "to": 1,
-          "fps": 3
+          "to": 0,
+          "fps": 1
         },
         "move": {
-          "from": 2,
-          "to": 3,
-          "fps": 5
+          "from": 1,
+          "to": 4,
+          "fps": 6
         },
         "attack": {
-          "from": 4,
-          "to": 5,
-          "fps": 6,
-          "loop": false
-        },
-        "cast": {
-          "from": 6,
-          "to": 6,
-          "fps": 4,
+          "from": 5,
+          "to": 8,
+          "fps": 10,
           "loop": false
         }
       }

@@ -505,7 +505,7 @@
 | `fx_golem_ruin_beam` | 집행 의지체 (ruinBeam) 외 1곳 | 14×14 | center | #b266ff | mku/fx_golem_ruin_beam.png (1프레임) |
 | `summon_will_construct` | 집행 의지체 (will) 외 1곳 | 18×40 | center | #b266ff | mku/summon_will_construct.png (8프레임) |
 | `summon_magi_soldier` | 집행 의지체 (soldier) | 18×40 | center | #2c1a45 | mku/summon_magi_soldier.png (9프레임) |
-| `summon_imitation_golem` | 집행 의지체 (golem) | 34×60 | center | #6a6a78 | mku/summon_imitation_golem.png (7프레임) |
+| `summon_imitation_golem` | 집행 의지체 (golem) | 34×60 | center | #6a6a78 | mku/summon_imitation_golem.png (9프레임) |
 | `fx_summon_will_hit` | 집행 의지체 (willHit) | 24×24 | center | #b266ff | mku/fx_summon_will_hit.png (2프레임) |
 | `fx_summon_soldier_thrust` | 집행 의지체 (soldierThrust) | 28×28 | center | #b266ff | mku/fx_summon_soldier_thrust.png (4프레임) |
 | `fx_summon_soldier_burst` | 집행 의지체 (soldierBurst) | 32×32 | center | #b266ff | mku/fx_summon_soldier_burst.png (5프레임) |
