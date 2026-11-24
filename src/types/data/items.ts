@@ -22,6 +22,8 @@ export type ItemEffect =
   | { kind: 'slowPower'; value: number; group: 'damagePct' }
   /** 연쇄 번개 연쇄 거리 + */
   | { kind: 'chainRange'; value: number; group: 'damagePct' }
+  /** 스킬 시전 수치 key에 +% (skill이 있으면 그 스킬만): 광선 길이·밀치기·흡인 반경·장판 지속·순간이동 거리·소환체 체력 등 */
+  | { kind: 'skillValueMul'; skill?: string; key: string; value: number; group: 'damagePct' }
   /** 원소 순환 유지 시간 +초 */
   | { kind: 'cycleWindow'; value: number }
   /** 피해 증가. all·melee·ranged·boss(보스에게) */

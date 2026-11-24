@@ -12,7 +12,7 @@ import { playFx } from '../../skills/skillFx';
 import { addElement, attackElement, castBoost, chargeAfterMove, condenseFill, cycleStep, frostHit, imprintMods, unifiedElement, type PureElement } from '../../systems/magiMage';
 import { summonSpirit, type ElementSpirit } from '../../skills/hwigang';
 import { CLOUD_OWNER, fireWardOrb, spawnEmbers } from '../../skills/baekonAwaken';
-import { blizzards } from '../../skills/magiMage';
+import { blizzards, teleportReturnUntil } from '../../skills/magiMage';
 import { findSkill, skillValues } from '../../systems/skills';
 import type { BurnRule, ElementId, SkillDef, TagId } from '../../types/data';
 import type { PlayerMods } from '../../systems/vitals';
@@ -89,7 +89,9 @@ export class MageRuntime {
       this.spirit = null;
       return;
     }
-    const v = this.passiveValues('pureUnfolding', true)!;
+    const base = this.passiveValues('pureUnfolding', true)!;
+    // 정령 강림: 치명 아이템 수치(크레퓌스퀼 등)를 정령 치명에 더한다
+    const v = base.critChance ? { ...base, critChance: base.critChance + this.run.itemRt.total('critChance'), critBonus: (base.critBonus ?? 0) + this.run.itemRt.total('critDamage') } : base;
     if (live && live.el === el) live.setValues(v);
     else this.spirit = summonSpirit(this.run.skillRt.hostFor('pureUnfolding'), findSkill(this.run.ctx.data.skills, 'pureUnfolding'), v, el);
   }
@@ -181,6 +183,13 @@ export class MageRuntime {
     if (b?.chains && out.chains !== undefined) out.chains += b.chains;
     // 각성(뇌운): 충전이 가득일 때 쓰면 낙뢰가 연쇄
     if (im?.effect === 'staticCharge' && this.charge >= 1) out.fullCharge = 1;
+    // 스킬 수치 아이템 (광선 길이·밀치기·흡인 반경·장판 지속·순간이동 거리·소환체)
+    for (const k of Object.keys(out)) {
+      const add = this.run.itemRt.skillValueMul(def.id, k);
+      if (add) out[k]! *= 1 + add;
+    }
+    // 붕괴 응축 각인 확장: 응축 게이지만큼 합체 폭발 범위 +
+    if (im?.effect === 'condense' && im.awakened && def.id === 'magiCondenser' && out.radius !== undefined) out.radius *= 1 + this.condense * im.values.condenseRadius!;
     // 아스트라페: 연쇄 거리 +
     if (out.chainRange !== undefined) out.chainRange *= 1 + this.run.itemRt.total('chainRange');
     if (out.pierce !== undefined) out.pierce += this.extraPierce();
@@ -269,16 +278,7 @@ export class MageRuntime {
   onHit(enemy: Enemy, source: string | null, killed: boolean, base: number, tags: readonly TagId[]): void {
     const im = this.run.skillRt.imprint();
     if (!im) return;
-    if (im.effect === 'followUp' && source === null) {
-      const ratio = im.values.followUp!;
-      if (!enemy.dead) this.echoStrike(enemy, im.values.delaySec!);
-      this.run.time.delayedCall(im.values.delaySec! * 1000, () => {
-        if (enemy.dead) return;
-        const shot = findSkill(this.run.ctx.data.skills, 'executionWill').sprites.willHit;
-        if (shot) playFx(this.run, shot, enemy.sprite.x, enemy.sprite.y, { w: Math.max(12, enemy.radius * 2) });
-        this.run.damage.hit(enemy, base * ratio, tags, 'executionWill');
-      });
-    }
+    if (im.effect === 'followUp' && source === null) this.echoAttack(enemy, base * im.values.followUp!, tags, im.values.delaySec!);
     if (killed || enemy.dead) return;
     const host = this.run.skillRt.hostFor(im.skillId);
     if (im.effect === 'ignite') {
@@ -300,6 +300,29 @@ export class MageRuntime {
     }
   }
 
+  /** 잔영이 적에게 덤벼들어 delaySec 뒤 친다 */
+  private echoAttack(enemy: Enemy, damage: number, tags: readonly TagId[], delaySec: number): void {
+    if (!enemy.dead) this.echoStrike(enemy, delaySec);
+    this.run.time.delayedCall(delaySec * 1000, () => {
+      if (enemy.dead) return;
+      const shot = findSkill(this.run.ctx.data.skills, 'executionWill').sprites.willHit;
+      if (shot) playFx(this.run, shot, enemy.sprite.x, enemy.sprite.y, { w: Math.max(12, enemy.radius * 2) });
+      this.run.damage.hit(enemy, damage, tags, 'executionWill');
+    });
+  }
+
+  /** 에너지 이식 각인 확장: 소환체가 공격하면 잔영도 같은 적을 (기본공격 따라 치기와 같은 비율로) */
+  echoFollow(target: Enemy, base: number): void {
+    const im = this.run.skillRt.imprint();
+    if (im?.effect !== 'followUp' || !im.awakened) return;
+    this.echoAttack(target, base * im.values.followUp!, ['magic', 'ranged'], im.values.delaySec!);
+  }
+
+  /** 왕복 도약 직후인지 (지팡이 공명 각인 확장) */
+  returnedRecently(): boolean {
+    return this.run.time.now < teleportReturnUntil;
+  }
+
   /** 반발: 피격되면 둘레에 파동을 되돌린다 (재사용 대기) */
   onHurt(): void {
     const im = this.run.skillRt.imprint();
@@ -318,6 +341,8 @@ export class MageRuntime {
     }
     const ref = def.sprites.recoil;
     if (ref) playFx(this.run, ref, p.x, p.y, { w: r * 2.2 });
+    // 충격 연쇄 각인 확장: 반발 파동도 적 탄을 지운다
+    if (im.awakened) host.enemyBulletsAt(p, r);
   }
 
   /** 적이 쓰러졌을 때: 점화(화상 걸린 적은 작은 폭발) */

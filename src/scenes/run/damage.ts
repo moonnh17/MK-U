@@ -80,7 +80,7 @@ export class DamageRuntime {
     const im = this.run.skillRt.imprint();
     if (im) {
       if (source) dmg *= elementDamageMul(d.skills.skills.find((s) => s.id === source)?.element, im, this.onFireZone());
-      else dmg *= staffDamageMul(this.run.weaponDef().category, im);
+      else dmg *= staffDamageMul(this.run.weaponDef().category, im, this.run.mage.returnedRecently());
     }
     // 원소 피해 아이템 (불씨나무 열매·고드름·아스트라페·나침반 등)
     const srcElement = this.run.mage.elementOf(source);

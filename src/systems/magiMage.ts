@@ -69,9 +69,15 @@ export function cycleStep(progress: readonly ElementId[], element: ElementId): {
   return p.length >= CYCLE_ORDER.length ? { progress: [], complete: true } : { progress: p, complete: false };
 }
 
-/** 지팡이 공명: 지팡이 계열 무기 피해 배율 */
-export function staffDamageMul(category: string, im: ActiveImprint | null): number {
-  return category === 'staff' && im?.effect === 'staffDamage' ? 1 + (im.values.staffDamage ?? 0) : 1;
+/** 지팡이 공명: 지팡이 계열 무기 피해 배율. 각성(왕복 도약)으로 돌아온 직후면 returnStaff 더 */
+export function staffDamageMul(category: string, im: ActiveImprint | null, returned = false): number {
+  if (category !== 'staff' || im?.effect !== 'staffDamage') return 1;
+  return 1 + (im.values.staffDamage ?? 0) + (im.awakened && returned ? (im.values.returnStaff ?? 0) : 0);
+}
+
+/** 상한이 있는 비례 증가: 1 + min(cap, n × per) (붕괴 응축·교차 폭발·정화 연쇄) */
+export function cappedGrowth(n: number, per: number, cap: number): number {
+  return 1 + Math.min(cap, Math.max(0, n) * per);
 }
 
 // ---------- 백온파 (원소) ----------

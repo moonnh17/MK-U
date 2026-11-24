@@ -50,6 +50,13 @@ const ITEMS = {
   item_cold_of_cold: 'coldOfCold',
   item_astrape: 'astrape',
   item_element_compass: 'elementCompass',
+  item_hollow_magi_pipe: 'hollowMagiPipe',
+  item_resonant_bell: 'resonantBell',
+  item_compressed_magi_crystal: 'compressedMagiCrystal',
+  item_broken_pillar_shard: 'brokenPillarShard',
+  item_shattered_coordinate_slab: 'shatteredCoordinateSlab',
+  item_ancient_weapon_energy_source: 'ancientWeaponEnergySource',
+  item_dube_eye: 'dubeEye',
 };
 
 /**
@@ -84,6 +91,11 @@ function buildAwakenSheet(outDir, key, [file, row, fps, loop, w]) {
 
 /** 집행 의지체 소환체·순수 전개 정령 (scripts/art-src/summons-hf, 오른쪽을 보는 한 장): key: [파일, 화면 키 px, 좌우 뒤집기] */
 const SUMMONS = {
+  // 정령 강림(순수 전개 각성) 상위 정령
+  summon_spirit_fire2: ['spiritFire2', 26],
+  summon_spirit_ice2: ['spiritIce2', 26],
+  summon_spirit_lightning2: ['spiritLightning2', 26],
+  summon_spirit_magi2: ['spiritMagi2', 26],
   summon_spirit_fire: ['spiritFire', 20],
   summon_spirit_ice: ['spiritIce', 20],
   summon_spirit_lightning: ['spiritLightning', 20],

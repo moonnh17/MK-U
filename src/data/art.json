@@ -9186,6 +9186,151 @@
           "loop": false
         }
       }
+    },
+    "fx_hwk_ring": {
+      "file": "mku/fx_hwk_ring.png",
+      "frameWidth": 110,
+      "frameHeight": 100,
+      "frames": 10,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 9,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_hwk_zone": {
+      "file": "mku/fx_hwk_zone.png",
+      "frameWidth": 42,
+      "frameHeight": 44,
+      "frames": 9,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 8,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_hwk_stun": {
+      "file": "mku/fx_hwk_stun.png",
+      "frameWidth": 52,
+      "frameHeight": 64,
+      "frames": 36,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 35,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_hwk_mark": {
+      "file": "mku/fx_hwk_mark.png",
+      "frameWidth": 118,
+      "frameHeight": 96,
+      "frames": 72,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 71,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_hwk_burst": {
+      "file": "mku/fx_hwk_burst.png",
+      "frameWidth": 184,
+      "frameHeight": 148,
+      "frames": 23,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 22,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "item_hollow_magi_pipe": {
+      "file": "mku/item_hollow_magi_pipe.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_resonant_bell": {
+      "file": "mku/item_resonant_bell.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_compressed_magi_crystal": {
+      "file": "mku/item_compressed_magi_crystal.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_broken_pillar_shard": {
+      "file": "mku/item_broken_pillar_shard.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_shattered_coordinate_slab": {
+      "file": "mku/item_shattered_coordinate_slab.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_ancient_weapon_energy_source": {
+      "file": "mku/item_ancient_weapon_energy_source.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_dube_eye": {
+      "file": "mku/item_dube_eye.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "summon_spirit_fire2": {
+      "file": "mku/summon_spirit_fire2.png",
+      "frameWidth": 51,
+      "frameHeight": 52,
+      "frames": 1,
+      "density": 2
+    },
+    "summon_spirit_ice2": {
+      "file": "mku/summon_spirit_ice2.png",
+      "frameWidth": 51,
+      "frameHeight": 52,
+      "frames": 1,
+      "density": 2
+    },
+    "summon_spirit_lightning2": {
+      "file": "mku/summon_spirit_lightning2.png",
+      "frameWidth": 53,
+      "frameHeight": 52,
+      "frames": 1,
+      "density": 2
+    },
+    "summon_spirit_magi2": {
+      "file": "mku/summon_spirit_magi2.png",
+      "frameWidth": 52,
+      "frameHeight": 52,
+      "frames": 1,
+      "density": 2
     }
   }
 }

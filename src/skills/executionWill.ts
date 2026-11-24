@@ -14,7 +14,8 @@ import { shake } from '../entities/juice';
 import { animKey } from '../systems/art';
 import { willCopies } from '../systems/magiMage';
 import type { SpriteRef } from '../types/data';
-import { playFx } from './skillFx';
+import { lineHits } from '../systems/targeting';
+import { playFx, stretchFx } from './skillFx';
 import { nearestEnemy, stepToward, trimOldest, type SkillCast, type SkillHost, type SkillImpl, type SkillObject } from './host';
 import { skillImpl } from './registry';
 
@@ -310,6 +311,8 @@ class MagiSoldier extends Summon {
     this.lunge({ x: e.sprite.x, y: e.sprite.y }, 4, 0.08);
     const fx = this.s.def.sprites.soldierThrust!;
     playFx(this.host.scene, fx, this.at.x + (dx / d) * fx.size * 0.45, this.at.y - 14 + (dy / d) * fx.size * 0.4, { w: fx.size, rotation: Math.atan2(dy, dx) });
+    // 에너지 이식 각인 확장: 잔영도 같은 적을
+    this.host.echoFollow?.(e, v.damage!);
     if (this.host.hit(e, v.damage!, this.s.def.sources.summon!)) return;
     this.host.chill(e, v.slow!, v.slowSec!);
     e.knockback({ x: dx / d, y: dy / d }, v.knockback!, 0.12);
@@ -326,6 +329,9 @@ const GOLEM_RISE_SEC = 0.9;
 class ImitationGolem extends Summon {
   private crushIn: number;
   private shellIn: number;
+  /** 각성(에너지 이식): 파멸 광선·폐허의 군세 */
+  private beamIn = 1.5;
+  private armyIn = 3;
 
   constructor(host: SkillHost, s: SkillCast, ref: SpriteRef, at: Vec2) {
     super(host, s, ref, at, true);
@@ -405,6 +411,43 @@ class ImitationGolem extends Summon {
     if (this.shellIn <= 0) {
       this.shellIn = v.shellEverySec!;
       this.bombard();
+    }
+    if (!this.s.owned.awakened) return;
+    this.beamIn -= dt;
+    if (this.beamIn <= 0 && target) {
+      this.beamIn = v.beamEverySec!;
+      this.ruinBeam(target);
+    }
+    this.armyIn -= dt;
+    if (this.armyIn <= 0) {
+      this.armyIn = v.armyEverySec!;
+      this.ruinArmy();
+    }
+  }
+
+  /** 파멸 광선: 가슴 핵에서 노린 적 쪽으로 곧은 광선 */
+  private ruinBeam(target: Enemy): void {
+    const v = this.s.values;
+    const from = { x: this.at.x, y: this.at.y - this.ref.size * 0.9 };
+    const a = Math.atan2(target.sprite.y - from.y, target.sprite.x - from.x);
+    const dir = { x: Math.cos(a), y: Math.sin(a) };
+    const len = v.beamLength!;
+    this.face(target.sprite.x);
+    this.act1('attack');
+    stretchFx(this.host.scene, this.s.def.sprites.ruinBeam!, from, { x: from.x + dir.x * len, y: from.y + dir.y * len }, v.beamWidth! * 2, 0.35);
+    shake(this.host.scene, 'light');
+    const list = [...this.host.enemies()];
+    for (const i of lineHits(from, dir, len, v.beamWidth! / 2, list.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })))) this.host.hit(list[i]!, v.beamDamage!, this.s.def.sources.summon!);
+    this.host.echoFollow?.(target, v.beamDamage!);
+  }
+
+  /** 폐허의 군세: 둘레에 마기 병정을 부른다 (짧게 산다) */
+  private ruinArmy(): void {
+    const v = this.s.values;
+    const cast = { ...this.s, values: { ...this.s.values, lifeSec: v.armyLifeSec!, hp: 40 } };
+    for (let i = 0; i < v.armyCount!; i++) {
+      const a = (i / v.armyCount!) * Math.PI * 2 + this.host.rng.range(0, 1);
+      this.host.addObject(new MagiSoldier(this.host, cast, this.s.def.sprites.soldier!, { x: this.at.x + Math.cos(a) * 24, y: this.at.y + Math.sin(a) * 14 }, i * 0.1));
     }
   }
 

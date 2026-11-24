@@ -399,6 +399,11 @@ export class ItemRuntime {
     return e && this.hasteLeft > 0 ? e.value : 0;
   }
 
+  /** 스킬 시전 수치 key의 +% 합 (그 스킬 전용 + 모든 스킬) */
+  skillValueMul(skillId: string, key: string): number {
+    return this.each('skillValueMul').reduce((s, { e }) => s + (e.key === key && (!e.skill || e.skill === skillId) ? e.value : 0), 0);
+  }
+
   /** 원소 스킬 피해 보너스 합 (그 원소 + 모든 원소) */
   elementDamage(element: string): number {
     return this.each('elementDamage').reduce((s, { e }) => s + (e.element === element || e.element === 'all' ? e.value : 0), 0);

@@ -24,6 +24,10 @@ export interface SkillHost {
   playerSprite(): Phaser.Physics.Arcade.Sprite;
   /** 마지막 조준 방향 (단위 벡터) */
   aimDir(): Vec2;
+  /** 지금 각인이 이 스킬의 것이고 각성 확장이 켜졌으면 그 각인 (아니면 null) */
+  imprintOf?(skillId: string): { values: Record<string, number> } | null;
+  /** 잔영 동행 각인: 잔영이 이 적을 따라 친다 (에너지 이식 각인 확장) */
+  echoFollow?(target: Enemy, base: number): void;
   /** 모든 스킬이 노릴 적 (변인통제로 묶인 보스). 없으면 null */
   focus?(): Enemy | null;
   /** 순간이동 방향: 마우스 커서 쪽(없으면 이동 방향, 서 있으면 조준 방향) */

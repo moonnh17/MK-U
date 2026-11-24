@@ -132,8 +132,60 @@ export const fireWall: SkillImpl = {
 
 // ---------- 순간이동 ----------
 
+/** 왕복 도약(순간이동 각성): 떠난 자리 표식과 남은 시간 */
+let teleportMark: { at: Vec2; until: number; fx: Phaser.GameObjects.Sprite } | null = null;
+
+/** 왕복 도약 뒤 지팡이 공명이 더 붙는 시각 (MageRuntime이 읽는다) */
+export let teleportReturnUntil = 0;
+
+function clearMark(): void {
+  teleportMark?.fx.destroy();
+  teleportMark = null;
+}
+
+/** 각성: 표식으로 돌아오기 또는 표식 남기기. 처리했으면 true */
+function teleportAwakened(host: SkillHost, s: SkillCast): boolean {
+  const v = s.values;
+  const now = host.scene.time.now;
+  const blast = (at: Vec2) => {
+    const r = host.area(v.blastRadius!);
+    for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= r + e.radius) host.hit(e, v.blastDamage!, ['magic', 'ranged']);
+    playFx(host.scene, s.def.sprites.blast!, at.x, at.y, { w: r * 2.4 }).setBlendMode('ADD');
+  };
+  if (teleportMark && now < teleportMark.until) {
+    // 표식으로 돌아온다 (그 사이 벽·잠긴 방 규칙은 순간이동 그대로)
+    const mark = teleportMark.at;
+    clearMark();
+    const p = host.playerPos();
+    const d = { x: mark.x - p.x, y: mark.y - p.y };
+    const len = Math.hypot(d.x, d.y);
+    const { from, to } = host.teleport(len > 0 ? { x: d.x / len, y: d.y / len } : host.teleportDir(), len, v.stepPx!);
+    blast(from);
+    blast(to);
+    teleportReturnUntil = now + 2000;
+    return true;
+  }
+  clearMark();
+  const { from, to } = host.teleport(host.teleportDir(), v.distance!, v.stepPx!);
+  blast(from);
+  host.burst(to, s.def.color);
+  const fx = host.sprite(from.x, from.y + 4, s.def.sprites.mark!).setDepth(2.6);
+  fx.setDisplaySize(s.def.sprites.mark!.size, (s.def.sprites.mark!.size * fx.height) / Math.max(1, fx.width));
+  loopArt(fx, s.def.sprites.mark!);
+  teleportMark = { at: from, until: now + v.returnSec! * 1000, fx };
+  // 돌아올 수 있게 재사용 대기를 비우고(다음 틱: 시전 뒤에 걸리므로), 표식이 꺼지면 그때 건다
+  host.scene.time.delayedCall(0, () => host.refundCooldown('teleport', 1));
+  host.scene.time.delayedCall(v.returnSec! * 1000, () => {
+    if (teleportMark?.fx !== fx) return;
+    clearMark();
+    host.refundCooldown('teleport', -1);
+  });
+  return true;
+}
+
 export const teleport: SkillImpl = {
   cast(host, s) {
+    if (s.owned.awakened) return teleportAwakened(host, s);
     const { from, to } = host.teleport(host.teleportDir(), s.values.distance!, s.values.stepPx!);
     // 임시 연출: 떠난 자리·도착한 자리에 보라 파동 (pixelfx는 D 단계)
     host.burst(from, s.def.color);
@@ -144,7 +196,7 @@ export const teleport: SkillImpl = {
 
 // ---------- 백온파 공용: 곧게 나는 투사체 ----------
 
-interface MissileSpec {
+export interface MissileSpec {
   owner: string;
   from: Vec2;
   angle: number;
@@ -165,7 +217,7 @@ interface MissileSpec {
 }
 
 /** 조준 방향으로 곧게 날아가 적에 닿으면 onHit, 벽·사거리·관통이 다하면 onEnd */
-class Missile implements SkillObject {
+export class Missile implements SkillObject {
   readonly owner: string;
   readonly createdAt: number;
   private readonly look: ProjectileLook;

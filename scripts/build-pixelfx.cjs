@@ -64,6 +64,12 @@ const FX = {
   fx_awk_orb_lightning: { name: 'awk-orb-lightning', center: true, play: 'loop' },
   fx_awk_ward_burst: { name: 'awk-ward-burst', center: true, play: 'once' },
   fx_awk_cycle_ring: { name: 'awk-cycle-ring', center: true, play: 'once' },
+  // 휘강파 각성: 마기 보라 고리·장판(awk-* 팔레트 변형), 기절 별(status/stunned), 좌표 표식(arcane/rune-circle), 마기 폭발(arcane/mana-burst 앞부분)
+  fx_hwk_ring: { name: 'hwk-ring', center: true, play: 'once' },
+  fx_hwk_zone: { name: 'hwk-zone', center: true, play: 'loop' },
+  fx_hwk_stun: { name: 'hwk-stun', center: true, play: 'loop' },
+  fx_hwk_mark: { name: 'hwk-mark', center: true, play: 'loop' },
+  fx_hwk_burst: { name: 'hwk-burst', center: true, play: 'once', to: 22 },
 };
 
 function buildPixelfx(outDir) {

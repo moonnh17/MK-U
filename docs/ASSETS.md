@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 831개 · 그림 있음 790개
+전체 856개 · 그림 있음 806개
 
 ## player (9)
 
@@ -272,7 +272,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (269)
+## skill (279)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -484,15 +484,21 @@
 | `fx_awk_orb_lightning` | 원소 가호 (orbLightning) | 16×16 | center | #ffd83a | mku/fx_awk_orb_lightning.png (5프레임) |
 | `fx_awk_ward_burst` | 원소 가호 (burst) | 110×110 | center | #ffffff | mku/fx_awk_ward_burst.png (10프레임) |
 | `fx_mage_ward` | 원소 가호 (aura) | 30×30 | center | #ff9a4a | mku/fx_mage_ward.png (72프레임) |
+| `fx_hw_orb` | 마기탄 (big) 외 2곳 | 18×18 | center | #b266ff | mku/fx_hw_orb.png (43프레임) |
+| `fx_hw_blast` | 마기탄 (bigBlast) 외 2곳 | 40×40 | center | #b266ff | mku/fx_hw_blast.png (23프레임) |
 | `fx_summon_will_shot` | 마기탄 (shot) 외 1곳 | 10×10 | center | #e0b3ff | mku/fx_summon_will_shot.png (5프레임) |
+| `fx_hwk_burst` | 마기 분출 (cross) 외 2곳 | 70×70 | center | #b266ff | mku/fx_hwk_burst.png (23프레임) |
 | `fx_hw_beam` | 마기 분출 (beam) 외 1곳 | 12×12 | center | #b266ff | mku/fx_hw_beam.png (7프레임) |
+| `fx_hwk_stun` | 마기 파동 (stun) | 22×22 | center | #ffe36e | mku/fx_hwk_stun.png (36프레임) |
+| `fx_hwk_ring` | 마기 파동 (wallHit) 외 1곳 | 44×44 | center | #b266ff | mku/fx_hwk_ring.png (10프레임) |
 | `fx_hw_wave` | 마기 파동 (wave) | 60×60 | center | #b266ff | mku/fx_hw_wave.png (12프레임) |
 | `skill_hw_condenser` | 마기 응축구 (orb) | 20×20 | center | #b266ff | mku/skill_hw_condenser.png (1프레임) |
-| `fx_hw_orb` | 마기 응축구 (orbGlow) 외 1곳 | 20×20 | center | #b266ff | mku/fx_hw_orb.png (43프레임) |
-| `fx_hw_blast` | 마기 응축구 (blast) 외 1곳 | 80×80 | center | #b266ff | mku/fx_hw_blast.png (23프레임) |
+| `fx_hwk_zone` | 마기 기둥 (zone) | 24×24 | center | #b266ff | mku/fx_hwk_zone.png (9프레임) |
 | `fx_hw_pillar` | 마기 기둥 (pillar) | 40×40 | center | #b266ff | mku/fx_hw_pillar.png (35프레임) |
 | `fx_hw_pillar_column` | 마기 기둥 (column) | 40×40 | center | #b266ff | mku/fx_hw_pillar_column.png (1프레임) |
 | `fx_hw_pillar_crater` | 마기 기둥 (crater) 외 1곳 | 64×64 | center | #b266ff | mku/fx_hw_pillar_crater.png (1프레임) |
+| `fx_hwk_mark` | 순간이동 (mark) | 40×40 | center | #b266ff | mku/fx_hwk_mark.png (72프레임) |
+| `fx_golem_ruin_beam` | 집행 의지체 (ruinBeam) 외 1곳 | 14×14 | center | #b266ff | mku/fx_golem_ruin_beam.png (1프레임) |
 | `summon_will_construct` | 집행 의지체 (will) 외 1곳 | 18×40 | center | #b266ff | mku/summon_will_construct.png (8프레임) |
 | `summon_magi_soldier` | 집행 의지체 (soldier) | 18×40 | center | #2c1a45 | mku/summon_magi_soldier.png (9프레임) |
 | `summon_imitation_golem` | 집행 의지체 (golem) | 34×60 | center | #6a6a78 | mku/summon_imitation_golem.png (9프레임) |
@@ -502,7 +508,11 @@
 | `fx_summon_golem_crush` | 집행 의지체 (golemCrush) | 48×48 | center | #6a6a78 | mku/fx_summon_golem_crush.png (5프레임) |
 | `fx_summon_golem_shell` | 집행 의지체 (golemShell) | 40×40 | center | #b266ff | mku/fx_summon_golem_shell.png (5프레임) |
 | `fx_awk_cycle_ring` | 원소 순환 (ring) | 48×48 | center | #ffd27a | mku/fx_awk_cycle_ring.png (12프레임) |
-| `fx_awk_ring_gold` | 원소 순환 (refund) | 90×90 | center | #ffd27a | mku/fx_awk_ring_gold.png (10프레임) |
+| `fx_awk_ring_gold` | 원소 순환 (refund) 외 1곳 | 90×90 | center | #ffd27a | mku/fx_awk_ring_gold.png (10프레임) |
+| `summon_spirit_fire2` | 순수 전개 (fire2) | 18×26 | center | #ff6a2a | mku/summon_spirit_fire2.png (1프레임) |
+| `summon_spirit_ice2` | 순수 전개 (ice2) | 18×26 | center | #5ad0f0 | mku/summon_spirit_ice2.png (1프레임) |
+| `summon_spirit_lightning2` | 순수 전개 (lightning2) | 18×26 | center | #ffd83a | mku/summon_spirit_lightning2.png (1프레임) |
+| `summon_spirit_magi2` | 순수 전개 (magi2) | 18×26 | center | #b266ff | mku/summon_spirit_magi2.png (1프레임) |
 | `summon_spirit_fire` | 순수 전개 (fire) | 14×20 | center | #ff6a2a | mku/summon_spirit_fire.png (1프레임) |
 | `summon_spirit_ice` | 순수 전개 (ice) | 14×20 | center | #5ad0f0 | mku/summon_spirit_ice.png (1프레임) |
 | `summon_spirit_lightning` | 순수 전개 (lightning) | 14×20 | center | #ffd83a | mku/summon_spirit_lightning.png (1프레임) |
@@ -558,7 +568,7 @@
 | `lab_gemini` | 미모사 제미니 | 14×22 | feet | #7ae0e0 | mku/lab_gemini.png (1프레임) |
 | `lab_window` | 관측창 | 100×12 | feet | #06090c | mku/lab_window.png (1프레임) |
 
-## item (56)
+## item (63)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -606,6 +616,13 @@
 | `item_cold_of_cold` | 냉기의 냉기 | 8×8 | center | #5ad0f0 | mku/item_cold_of_cold.png (1프레임) |
 | `item_astrape` | 아스트라페 | 8×8 | center | #ffd83a | mku/item_astrape.png (1프레임) |
 | `item_element_compass` | 원소 나침반 | 8×8 | center | #c89a5a | mku/item_element_compass.png (1프레임) |
+| `item_hollow_magi_pipe` | 속 빈 마기관 | 8×8 | center | #9a7ad9 | mku/item_hollow_magi_pipe.png (1프레임) |
+| `item_resonant_bell` | 공명하는 종 | 8×8 | center | #c89a5a | mku/item_resonant_bell.png (1프레임) |
+| `item_compressed_magi_crystal` | 압축된 마기 결정 | 8×8 | center | #b266ff | mku/item_compressed_magi_crystal.png (1프레임) |
+| `item_broken_pillar_shard` | 끊어진 기둥 파편 | 8×8 | center | #8a7aa0 | mku/item_broken_pillar_shard.png (1프레임) |
+| `item_shattered_coordinate_slab` | 깨진 좌표 석판 | 8×8 | center | #7a6a9a | mku/item_shattered_coordinate_slab.png (1프레임) |
+| `item_ancient_weapon_energy_source` | 고대병기의 에너지원 | 8×8 | center | #6a6a78 | mku/item_ancient_weapon_energy_source.png (1프레임) |
+| `item_dube_eye` | 두베의 눈 | 8×8 | center | #b266ff | mku/item_dube_eye.png (1프레임) |
 | `item_hela_cell` | 헬라 세포 | 8×8 | center | #5a8ad9 | mku/item_hela_cell.png (1프레임) |
 | `item_forbidden_virus` | 금지된 바이러스 | 8×8 | center | #5a8ad9 | mku/item_forbidden_virus.png (1프레임) |
 | `item_forbidden_gift` | 열어선 안되는 선물 | 8×8 | center | #ffd23f | mku/item_forbidden_gift.png (1프레임) |
@@ -619,7 +636,7 @@
 | `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | mku/item_orion_shield.png (1프레임) |
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | mku/item_hectar_ram.png (1프레임) |
 
-## icon (91)
+## icon (100)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -672,7 +689,7 @@
 | `icon_ult_berserkerRage` | 광전사의 진노 | 16×16 | center | #e07a2a | mku/icon_ult_berserkerRage.png (1프레임) |
 | `icon_ult_divineJudgment` | 심판의 강림 | 16×16 | center | #e8d24a | mku/icon_ult_divineJudgment.png (1프레임) |
 | `icon_ult_elementConcert` | 원소 대합주 | 16×16 | center | #ff6a2a | mku/icon_ult_elementConcert.png (1프레임) |
-| `icon_ult_sadExecution` | 슬픈 처형 | 16×16 | center | #b266ff | mku/icon_ult_sadExecution.png (1프레임) |
+| `icon_ult_sadExecution` | 정화 집행 | 16×16 | center | #b266ff | mku/icon_ult_sadExecution.png (1프레임) |
 | `icon_skill_magiTurretA` | 대형권역사수주포 | 16×16 | center | #4fb3d9 | — |
 | `icon_skill_magiMineA` | 무한연쇄기폭 | 16×16 | center | #d9a03b | — |
 | `icon_skill_antimatterCannonA` | 다연장반입자포 | 16×16 | center | #a05ad9 | — |
@@ -703,12 +720,21 @@
 | `icon_skill_iceOrbA` | 절대영도 | 16×16 | center | #5ad0f0 | — |
 | `icon_skill_chainLightningA` | 뇌운 | 16×16 | center | #ffd83a | — |
 | `icon_skill_elementWardA` | 삼원소 수호 | 16×16 | center | #ff9a4a | — |
+| `icon_skill_magiBoltA` | 탄막 전개 | 16×16 | center | #b266ff | — |
+| `icon_skill_magiBurstA` | 교차 분출 | 16×16 | center | #b266ff | — |
+| `icon_skill_magiWaveA` | 충격 연쇄 | 16×16 | center | #b266ff | — |
+| `icon_skill_magiCondenserA` | 붕괴 응축 | 16×16 | center | #b266ff | — |
+| `icon_skill_magiPillarA` | 연쇄 분출 | 16×16 | center | #b266ff | — |
+| `icon_skill_teleportA` | 왕복 도약 | 16×16 | center | #b266ff | — |
+| `icon_skill_executionWillA` | 에너지 이식 | 16×16 | center | #b266ff | — |
 | `icon_skill_elementCycleA` | 원소 일주 | 16×16 | center | #ff6a2a | — |
+| `icon_skill_pureUnfoldingA` | 정령 강림 | 16×16 | center | #b266ff | — |
 | `icon_ult_thunderboltA` | 케라우노스 | 16×16 | center | #4ab0ff | — |
 | `icon_ult_singularityA` | 특이점 실험 : 역설 | 16×16 | center | #ff3a4a | — |
 | `icon_ult_berserkerRageA` | 라스알게티의 기억 | 16×16 | center | #e07a2a | — |
 | `icon_ult_divineJudgmentA` | 사르비스의 기억 | 16×16 | center | #e8d24a | mku/icon_ult_divineJudgmentA.png (1프레임) |
 | `icon_ult_elementConcertA` | 삼원 합일 | 16×16 | center | #ff6a2a | — |
+| `icon_ult_sadExecutionA` | 정화 연쇄 | 16×16 | center | #b266ff | — |
 | `hud_imprint_frame` | 개전 각인 칸 틀 | 31×31 | center | #7fd8ff | mku/hud_imprint_frame.png (1프레임) |
 | `hud_imprint_frame_gold` | 개전 각인 칸 틀(공명) | 31×31 | center | #ffe27a | mku/hud_imprint_frame_gold.png (1프레임) |
 | `icon_gemini` | 미모사 제미니 (icon) | 16×16 | center | #4ab0ff | mku/icon_gemini.png (1프레임) |
@@ -743,7 +769,7 @@
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
-## fx (158)
+## fx (157)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -796,7 +822,6 @@
 | `fx_golem_warn` | 마기골렘 (blastWarn) | 25×25 | center | #a03ae0 | mku/fx_golem_warn.png (1프레임) |
 | `fx_golem_artillery` | 마기골렘 (blastHit) | 30×30 | center | #a03ae0 | mku/fx_golem_artillery.png (1프레임) |
 | `fx_golem_shock` | 마기골렘 (ringStart) | 45×45 | center | #a03ae0 | mku/fx_golem_shock.png (1프레임) |
-| `fx_golem_ruin_beam` | 마기골렘 (beam) | 60×60 | center | #a03ae0 | mku/fx_golem_ruin_beam.png (1프레임) |
 | `fx_golem_laser_side` | 마기골렘 (ruinBeam.beamSide) | 60×60 | center | #a03ae0 | mku/fx_golem_laser_side.png (1프레임) |
 | `fx_golem_crack` | 마기골렘 (crustCrack.beam) | 60×60 | center | #a03ae0 | mku/fx_golem_crack.png (1프레임) |
 | `fx_golem_summon` | 마기골렘 (ruinLegion.cast) | 35×35 | center | #a03ae0 | mku/fx_golem_summon.png (1프레임) |

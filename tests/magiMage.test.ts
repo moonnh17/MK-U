@@ -4,7 +4,7 @@ import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
 import { skillAllowed } from '../src/systems/advancement';
 import { drawSkillCards } from '../src/systems/cards';
-import { activeImprint, addElement, attackElement, cycleStep, unifiedElement, castBoost, chargeAfterMove, concertFull, condenseFill, elementDamageMul, executable, frostHit, imprintMods, judgeBySlots, slowAmount, staffDamageMul, willCopies } from '../src/systems/magiMage';
+import { activeImprint, addElement, attackElement, cappedGrowth, cycleStep, unifiedElement, castBoost, chargeAfterMove, concertFull, condenseFill, elementDamageMul, executable, frostHit, imprintMods, judgeBySlots, slowAmount, staffDamageMul, willCopies } from '../src/systems/magiMage';
 import { awakeningReady, emptyLoadout, equipSkill, findSkill, setSkillLevel, type SkillLoadout } from '../src/systems/skills';
 import { tickBurn, applyBurn } from '../src/systems/tags';
 import type { BurnRule } from '../src/types/data';
@@ -33,11 +33,6 @@ describe('마기법사 데이터', () => {
       expect(s.imprint, s.id).toBeDefined();
       expect(s.imprint!.levels.length).toBe(S.maxLevel);
     }
-  });
-  it('각성 없는 스킬(순간이동)도 허용되고 각성 대상이 되지 않는다', () => {
-    const lo = loadout([['teleport', 3]]);
-    expect(findSkill(S, 'teleport').awakening).toBeUndefined();
-    expect(awakeningReady(lo, S, gameData.items.items.map((i) => i.id))).toEqual([]);
   });
   it('백온파 각성 8종: 요구 아이템과 Lv3면 각성 대상', () => {
     const need: [string, string][] = [['fireball', 'goldenEmberFruit'], ['fireWall', 'volcanoFurnaceEmber'], ['iceSpear', 'greatWallIcicle'], ['iceOrb', 'coldOfCold'], ['chainLightning', 'astrape'], ['elementWard', 'chantforetSpirit'], ['elementCycle', 'elementCompass']];
@@ -290,5 +285,28 @@ describe('원소 일주 (원소 순환 각성)', () => {
     expect(elementDamageMul('fire', im, true)).toBeCloseTo(1.3);
     expect(elementDamageMul('fire', im, false)).toBeCloseTo(1.2);
     expect(elementDamageMul('fire', { ...im, awakened: false }, true)).toBeCloseTo(1.2);
+  });
+});
+
+describe('휘강파 각성', () => {
+  it('9종 모두 요구 아이템이 있고 Lv3면 각성 대상', () => {
+    const need: [string, string][] = [['magiBolt', 'combatTheory'], ['magiBurst', 'hollowMagiPipe'], ['magiWave', 'resonantBell'], ['magiCondenser', 'compressedMagiCrystal'], ['magiPillar', 'brokenPillarShard'], ['teleport', 'shatteredCoordinateSlab'], ['executionWill', 'ancientWeaponEnergySource'], ['pureUnfolding', 'crepuscule']];
+    for (const [id, item] of need) {
+      expect(findSkill(S, id).awakening?.requiredItem, id).toBe(item);
+      expect(awakeningReady(loadout([[id, 3]]), S, [item]), id).toEqual([id]);
+    }
+    expect(gameData.ultimates.ultimates.find((u) => u.id === 'sadExecution')!.awakening?.requiredItem).toBe('dubeEye');
+  });
+  it('비례 증가는 상한에서 멈춘다 (붕괴 응축·교차 폭발)', () => {
+    expect(cappedGrowth(0, 0.15, 1)).toBe(1);
+    expect(cappedGrowth(4, 0.15, 1)).toBeCloseTo(1.6);
+    expect(cappedGrowth(20, 0.15, 1)).toBe(2);
+  });
+  it('왕복 도약 뒤 지팡이 공명은 각성했을 때만 더 붙는다', () => {
+    const im = { skillId: 'teleport', effect: 'staffDamage' as const, values: { staffDamage: 0.35, returnStaff: 0.3 }, resonance: false, awakened: true };
+    expect(staffDamageMul('staff', im, true)).toBeCloseTo(1.65);
+    expect(staffDamageMul('staff', im, false)).toBeCloseTo(1.35);
+    expect(staffDamageMul('staff', { ...im, awakened: false }, true)).toBeCloseTo(1.35);
+    expect(staffDamageMul('gun', im, true)).toBe(1);
   });
 });

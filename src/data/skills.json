@@ -1732,12 +1732,16 @@
       "imprint": {
         "nameKey": "imprint.magiBolt",
         "descKey": "imprint.magiBolt.desc",
+        "awakened": {"descKey": "imprint.magiBolt.awakened", "values": {"pierceRefund": 0.2, "refundCap": 1}},
         "effect": "overdrive",
         "levels": [{ "overdrive": 0.15 }, { "overdrive": 0.2 }, { "overdrive": 0.25 }],
         "fixed": { "damageTaken": 0.2 }
       },
+      "awakening": {"nameKey": "skill.magiBolt.awakened", "descKey": "skill.magiBolt.awakened.desc", "requiredItem": "combatTheory", "tags": ["magic", "ranged"], "cooldownSec": 2.2, "values": {"bigDamage": 18, "bigSpeed": 280, "bigRange": 240, "bigBlastRadius": 22, "bigBlastDamage": 12}},
       "color": "#b266ff",
       "sprites": {
+        "big": { "spriteKey": "fx_hw_orb", "color": "#b266ff", "size": 18 },
+        "bigBlast": { "spriteKey": "fx_hw_blast", "color": "#b266ff", "size": 40 },
         "shot": { "spriteKey": "fx_summon_will_shot", "color": "#e0b3ff", "size": 10 }
       }
     },
@@ -1759,12 +1763,15 @@
       "imprint": {
         "nameKey": "imprint.magiBurst",
         "descKey": "imprint.magiBurst.desc",
+        "awakened": {"descKey": "imprint.magiBurst.awakened", "values": {"crossPerHit": 0.25, "crossCap": 1}},
         "effect": "pierceUnfold",
         "levels": [{ "pierceUnfold": 0.1 }, { "pierceUnfold": 0.15 }, { "pierceUnfold": 0.2 }],
         "fixed": { "pierce": 1 }
       },
+      "awakening": {"nameKey": "skill.magiBurst.awakened", "descKey": "skill.magiBurst.awakened.desc", "requiredItem": "hollowMagiPipe", "tags": ["magic", "ranged"], "cooldownSec": 5, "values": {"crossAngleDeg": 16, "crossOffset": 16, "crossRadius": 26, "crossDamage": 30}},
       "color": "#b266ff",
       "sprites": {
+        "cross": { "spriteKey": "fx_hwk_burst", "color": "#b266ff", "size": 70 },
         "beam": { "spriteKey": "fx_hw_beam", "color": "#b266ff", "size": 12 }
       }
     },
@@ -1786,12 +1793,16 @@
       "imprint": {
         "nameKey": "imprint.magiWave",
         "descKey": "imprint.magiWave.desc",
+        "awakened": {"descKey": "imprint.magiWave.awakened"},
         "effect": "recoil",
         "levels": [{ "recoil": 8 }, { "recoil": 12 }, { "recoil": 16 }],
         "fixed": { "radius": 48, "knockback": 26, "knockSec": 0.16, "cooldownSec": 1.5 }
       },
+      "awakening": {"nameKey": "skill.magiWave.awakened", "descKey": "skill.magiWave.awakened.desc", "requiredItem": "resonantBell", "tags": ["magic", "ranged"], "cooldownSec": 4, "values": {"wallDamage": 14, "stunSec": 1}},
       "color": "#b266ff",
       "sprites": {
+        "stun": { "spriteKey": "fx_hwk_stun", "color": "#ffe36e", "size": 22 },
+        "wallHit": { "spriteKey": "fx_hwk_ring", "color": "#b266ff", "size": 44 },
         "wave": { "spriteKey": "fx_hw_wave", "color": "#b266ff", "size": 60 },
         "recoil": { "spriteKey": "fx_hw_recoil", "color": "#b266ff", "size": 60 }
       }
@@ -1814,12 +1825,15 @@
       "imprint": {
         "nameKey": "imprint.magiCondenser",
         "descKey": "imprint.magiCondenser.desc",
+        "awakened": {"descKey": "imprint.magiCondenser.awakened", "values": {"condenseRadius": 0.5}},
         "effect": "condense",
         "levels": [{ "condense": 0.3 }, { "condense": 0.45 }, { "condense": 0.6 }],
         "fixed": { "fullSec": 8, "windowSec": 3 }
       },
+      "awakening": {"nameKey": "skill.magiCondenser.awakened", "descKey": "skill.magiCondenser.awakened.desc", "requiredItem": "compressedMagiCrystal", "tags": ["magic", "ranged"], "cooldownSec": 8, "values": {"orbitRadius": 14, "orbitSpin": 6, "perPulled": 0.15, "pulledCap": 1}},
       "color": "#b266ff",
       "sprites": {
+        "merge": { "spriteKey": "fx_hwk_burst", "color": "#b266ff", "size": 120 },
         "orb": { "spriteKey": "skill_hw_condenser", "color": "#b266ff", "size": 20 },
         "orbGlow": { "spriteKey": "fx_hw_orb", "color": "#b266ff", "size": 20 },
         "blast": { "spriteKey": "fx_hw_blast", "color": "#b266ff", "size": 80 }
@@ -1843,12 +1857,15 @@
       "imprint": {
         "nameKey": "imprint.magiPillar",
         "descKey": "imprint.magiPillar.desc",
+        "awakened": {"descKey": "imprint.magiPillar.awakened"},
         "effect": "extreme",
         "levels": [{ "extreme": 0.3 }, { "extreme": 0.45 }, { "extreme": 0.6 }],
         "fixed": { "critChance": 0.15, "damageTaken": 0.2 }
       },
+      "awakening": {"nameKey": "skill.magiPillar.awakened", "descKey": "skill.magiPillar.awakened.desc", "requiredItem": "brokenPillarShard", "tags": ["magic", "ranged", "space"], "cooldownSec": 10, "values": {"chainDist": 46, "chainGapSec": 0.12, "chainDamage": 18, "chainRadius": 18, "zoneSec": 3, "zoneTickSec": 0.5, "zoneDamage": 4, "maxZones": 8}},
       "color": "#b266ff",
       "sprites": {
+        "zone": { "spriteKey": "fx_hwk_zone", "color": "#b266ff", "size": 24 },
         "pillar": { "spriteKey": "fx_hw_pillar", "color": "#b266ff", "size": 40 },
         "column": { "spriteKey": "fx_hw_pillar_column", "color": "#b266ff", "size": 40 },
         "crater": { "spriteKey": "fx_hw_pillar_crater", "color": "#b266ff", "size": 64 }
@@ -1872,11 +1889,16 @@
       "imprint": {
         "nameKey": "imprint.teleport",
         "descKey": "imprint.teleport.desc",
+        "awakened": {"descKey": "imprint.teleport.awakened", "values": {"returnStaff": 0.3, "returnStaffSec": 2}},
         "effect": "staffDamage",
         "levels": [{ "staffDamage": 0.15 }, { "staffDamage": 0.25 }, { "staffDamage": 0.35 }]
       },
+      "awakening": {"nameKey": "skill.teleport.awakened", "descKey": "skill.teleport.awakened.desc", "requiredItem": "shatteredCoordinateSlab", "tags": [], "cooldownSec": 4, "values": {"returnSec": 3, "blastRadius": 30, "blastDamage": 16}},
       "color": "#b266ff",
-      "sprites": {}
+      "sprites": {
+        "mark": { "spriteKey": "fx_hwk_mark", "color": "#b266ff", "size": 40 },
+        "blast": { "spriteKey": "fx_hwk_ring", "color": "#b266ff", "size": 70 }
+      }
     },
     {
       "id": "executionWill",
@@ -1896,12 +1918,15 @@
       "imprint": {
         "nameKey": "imprint.executionWill",
         "descKey": "imprint.executionWill.desc",
+        "awakened": {"descKey": "imprint.executionWill.awakened"},
         "effect": "followUp",
         "levels": [{ "followUp": 0.3 }, { "followUp": 0.45 }, { "followUp": 0.6 }],
         "fixed": { "delaySec": 0.25 }
       },
+      "awakening": {"nameKey": "skill.executionWill.awakened", "descKey": "skill.executionWill.awakened.desc", "requiredItem": "ancientWeaponEnergySource", "tags": ["magic", "ranged"], "cooldownSec": 20, "values": {"beamEverySec": 4, "beamDamage": 30, "beamLength": 200, "beamWidth": 14, "armyEverySec": 6, "armyCount": 2, "armyLifeSec": 6}},
       "color": "#b266ff",
       "sprites": {
+        "ruinBeam": { "spriteKey": "fx_golem_ruin_beam", "color": "#b266ff", "size": 14 },
         "will": { "spriteKey": "summon_will_construct", "color": "#b266ff", "size": 18, "height": 40 },
         "echo": { "spriteKey": "summon_will_construct", "color": "#b266ff", "size": 12, "height": 26 },
         "soldier": { "spriteKey": "summon_magi_soldier", "color": "#2c1a45", "size": 18, "height": 40 },
@@ -1952,8 +1977,14 @@
         { "cooldownSec": 0, "values": { "elementDamage": 0.2, "shots": 2, "spiritDamage": 9, "range": 170, "radius": 20, "burnStacks": 1, "slow": 0.3, "slowSec": 1.2 } },
         { "cooldownSec": 0, "values": { "elementDamage": 0.25, "shots": 3, "spiritDamage": 11, "range": 180, "radius": 22, "burnStacks": 2, "slow": 0.35, "slowSec": 1.2 } }
       ],
+      "awakening": {"nameKey": "skill.pureUnfolding.awakened", "descKey": "skill.pureUnfolding.awakened.desc", "requiredItem": "crepuscule", "tags": [], "cooldownSec": 0, "values": {"extraShots": 1, "critChance": 0.15, "critBonus": 0.5}},
       "color": "#b266ff",
       "sprites": {
+        "fire2": { "spriteKey": "summon_spirit_fire2", "color": "#ff6a2a", "size": 18, "height": 26 },
+        "ice2": { "spriteKey": "summon_spirit_ice2", "color": "#5ad0f0", "size": 18, "height": 26 },
+        "lightning2": { "spriteKey": "summon_spirit_lightning2", "color": "#ffd83a", "size": 18, "height": 26 },
+        "magi2": { "spriteKey": "summon_spirit_magi2", "color": "#b266ff", "size": 18, "height": 26 },
+        "crit": { "spriteKey": "fx_awk_ring_gold", "color": "#ffd27a", "size": 30 },
         "fire": { "spriteKey": "summon_spirit_fire", "color": "#ff6a2a", "size": 14, "height": 20 },
         "ice": { "spriteKey": "summon_spirit_ice", "color": "#5ad0f0", "size": 14, "height": 20 },
         "lightning": { "spriteKey": "summon_spirit_lightning", "color": "#ffd83a", "size": 14, "height": 20 },

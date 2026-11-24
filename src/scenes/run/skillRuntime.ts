@@ -60,6 +60,11 @@ export class SkillRuntime {
       aimDir: () => this.run.aimDir,
       teleportDir: () => this.run.moveAimDir,
       focus: () => this.run.weaponSkills.focusEnemy(),
+      imprintOf: (skillId) => {
+        const im = this.imprint();
+        return im && im.skillId === skillId && im.awakened ? im : null;
+      },
+      echoFollow: (target, base) => this.run.mage.echoFollow(target, base),
       enemies: () => this.run.enemies.filter((e) => !e.dead),
       area: (r) => this.area(r),
       hit: (e, base, tags) => this.run.damage.hit(e, base, tags, source),

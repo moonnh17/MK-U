@@ -326,8 +326,10 @@
       "tags": ["magic", "ranged"],
       "sources": { "beam": ["magic", "ranged"] },
       "values": { "damage": 60, "length": 260, "width": 26, "chargeSec": 0.25, "executeRatio": 0.3 },
+      "awakening": {"requiredItem": "dubeEye", "nameKey": "ultimate.sadExecution.awakened", "shortKey": "ultimate.sadExecution.awakened.short", "descKey": "ultimate.sadExecution.awakened.desc", "tags": ["magic", "ranged"], "values": {"chainRadius": 40, "chainMax": 8, "chainDamage": 20, "widthPerKill": 6, "widthCap": 40, "bossPerKill": 0.15, "bossCapMul": 1}},
       "color": "#b266ff",
       "sprites": {
+        "chain": { "spriteKey": "fx_hwk_burst", "color": "#b266ff", "size": 80 },
         "beam": { "spriteKey": "fx_hw_beam", "color": "#b266ff", "size": 30 }
       }
     }

@@ -10,12 +10,14 @@ import type { Vec2 } from '../core/actions';
 import { bus } from '../core/events';
 import { executeMark } from '../entities/statusLook';
 import { shake } from '../entities/juice';
-import { executable, type PureElement } from '../systems/magiMage';
+import { cappedGrowth, executable, type PureElement } from '../systems/magiMage';
+import { Missile } from './magiMage';
+import { addFireZone, FireZone } from './baekonAwaken';
 import { lineHits } from '../systems/targeting';
 import { inArc } from '../systems/weapons';
 import type { Enemy } from '../entities/enemy';
 import { fxScale, impactFx, loopArt, playFx, ProjectileLook, sparks, stretchFx } from './skillFx';
-import { nearestEnemy, trimOldest, type PassiveImpl, type SkillCast, type SkillHost, type SkillImpl, type SkillObject, type UltimateImpl } from './host';
+import { floatText, nearestEnemy, trimOldest, type PassiveImpl, type UltimateCast, type SkillCast, type SkillHost, type SkillImpl, type SkillObject, type UltimateImpl } from './host';
 
 const RAY_STEP_PX = 4;
 
@@ -36,18 +38,53 @@ export const magiBolt: SkillImpl = {
       host.scene.time.delayedCall(i * v.gapSec! * 1000, () => {
         const d = host.aimDir();
         const a = Math.atan2(d.y, d.x) + host.rng.range(-1, 1) * ((v.spreadDeg! * Math.PI) / 180);
-        host.fireBullet(host.playerPos(), a, v.speed!, v.range!, v.damage!, tags, shot, { pierce: v.pierce ?? 0, hitSize: shot.size / 2 });
+        // 각성(탄막 전개): 마지막 한 발은 대형 관통탄
+        if (s.owned.awakened && i === v.shots! - 1) bigBolt(host, s, a);
+        else host.fireBullet(host.playerPos(), a, v.speed!, v.range!, v.damage!, tags, shot, { pierce: v.pierce ?? 0, hitSize: shot.size / 2 });
       });
     }
     return true;
   },
 };
 
+/** 대형 관통탄: 맞힐 때마다 작은 폭발. 과잉 전개 각인 확장이면 꿰뚫을 때마다 마기탄 재사용 대기 환급(상한) */
+function bigBolt(host: SkillHost, s: SkillCast, angle: number): void {
+  const v = s.values;
+  const tags = s.def.sources.bolt!;
+  const im = host.imprintOf?.('magiBolt');
+  let refunded = 0;
+  host.addObject(
+    new Missile(host, {
+      owner: 'magiBolt.big',
+      from: host.playerPos(),
+      angle,
+      speed: v.bigSpeed!,
+      range: v.bigRange!,
+      sprite: s.def.sprites.big!,
+      scale: 1.3,
+      pierce: 99,
+      onHit: (e) => {
+        const at = { x: e.sprite.x, y: e.sprite.y };
+        host.hit(e, v.bigDamage!, tags);
+        const r = host.area(v.bigBlastRadius!);
+        for (const x of [...host.enemies()]) if (x !== e && Math.hypot(x.sprite.x - at.x, x.sprite.y - at.y) <= r + x.radius) host.hit(x, v.bigBlastDamage!, tags);
+        playFx(host.scene, s.def.sprites.bigBlast!, at.x, at.y, { w: r * 2.2 });
+        if (im && refunded < im.values.refundCap!) {
+          const sec = Math.min(im.values.pierceRefund!, im.values.refundCap! - refunded);
+          refunded += sec;
+          host.refundCooldown('magiBolt', sec / s.def.awakening!.cooldownSec);
+        }
+      },
+    }),
+  );
+}
+
 // ---------- 마기 분출 ----------
 
 export const magiBurst: SkillImpl = {
   cast(host, s) {
     const v = s.values;
+    if (s.owned.awakened) return crossBurst(host, s);
     const p = host.playerPos();
     const dir = host.aimDir();
     const len = rayLength(host, p, dir, v.length!);
@@ -60,6 +97,45 @@ export const magiBurst: SkillImpl = {
     return true;
   },
 };
+
+/**
+ * 교차 분출: 몸 양옆에서 안쪽으로 기운 광선 두 줄이 X자로 엇갈린다. 엇갈린 자리(조준 앞)에서 폭발.
+ * 관통 전개 각인 확장: 엇갈리기 전에 꿰뚫은 적 수만큼 폭발 범위 + (상한)
+ */
+function crossBurst(host: SkillHost, s: SkillCast): boolean {
+  const v = s.values;
+  const p = host.playerPos();
+  const d = host.aimDir();
+  const n = { x: -d.y, y: d.x };
+  const tilt = (v.crossAngleDeg! * Math.PI) / 180;
+  const crossDist = v.crossOffset! / Math.tan(tilt);
+  const cross = { x: p.x + d.x * crossDist, y: p.y + d.y * crossDist };
+  const enemies = [...host.enemies()];
+  const pts = enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius }));
+  const struck = new Set<number>();
+  let before = 0;
+  for (const side of [1, -1]) {
+    const from = { x: p.x + n.x * v.crossOffset! * side, y: p.y + n.y * v.crossOffset! * side };
+    const a = Math.atan2(d.y, d.x) - side * tilt;
+    const dir = { x: Math.cos(a), y: Math.sin(a) };
+    const len = rayLength(host, from, dir, v.length!);
+    for (const i of lineHits(from, dir, len, v.width! / 2, pts)) {
+      if (struck.has(i)) continue;
+      struck.add(i);
+      if (Math.hypot(pts[i]!.x - p.x, pts[i]!.y - p.y) < crossDist) before++;
+      host.hit(enemies[i]!, v.damage!, s.def.sources.beam!);
+    }
+    stretchFx(host.scene, s.def.sprites.beam!, from, { x: from.x + dir.x * len, y: from.y + dir.y * len }, v.width! * 1.6 * fxScale(host, s.owned.level), 0.25);
+  }
+  const im = host.imprintOf?.('magiBurst');
+  const r = host.area(v.crossRadius!) * (im ? cappedGrowth(before, im.values.crossPerHit!, im.values.crossCap!) : 1);
+  host.scene.time.delayedCall(80, () => {
+    for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - cross.x, e.sprite.y - cross.y) <= r + e.radius) host.hit(e, v.crossDamage!, s.def.sources.beam!);
+    playFx(host.scene, s.def.sprites.cross!, cross.x, cross.y, { w: r * 2.6 });
+    shake(host.scene, 'light');
+  });
+  return true;
+}
 
 // ---------- 마기 파동 ----------
 
@@ -77,12 +153,31 @@ export const magiWave: SkillImpl = {
       const dy = e.sprite.y - p.y;
       const n = Math.hypot(dx, dy) || 1;
       e.knockback({ x: dx / n, y: dy / n }, v.knockback!, v.knockSec!);
+      if (s.owned.awakened) wallSlam(host, s, e, { x: dx / n, y: dy / n });
     }
+    // 각성(충격 연쇄): 파동이 닿은 적 탄을 지운다 (보스 레이저·장판은 탄이 아니라 그대로)
+    if (s.owned.awakened) host.enemyBulletsAt({ x: p.x + d.x * r * 0.5, y: p.y + d.y * r * 0.5 }, r * 0.6);
     playFx(host.scene, s.def.sprites.wave!, p.x + d.x * r * 0.35, p.y + d.y * r * 0.35, { w: r * 1.5 * fxScale(host, s.owned.level), rotation: a });
     if (s.owned.level >= host.ctx.data.juice.projectileLook.ringFromLevel) impactFx(host, s.owned.level, p.x + d.x * r * 0.5, p.y + d.y * r * 0.5, s.def.color, r * 0.6);
     return true;
   },
 };
+
+/** 밀려난 적이 밀리는 끝에서 벽·장애물에 막히면 피해 + 짧은 기절(보스는 피해만) */
+function wallSlam(host: SkillHost, s: SkillCast, e: Enemy, dir: Vec2): void {
+  const v = s.values;
+  host.scene.time.delayedCall(v.knockSec! * 900, () => {
+    if (e.dead) return;
+    const ahead = { x: e.sprite.x + dir.x * (e.radius + 4), y: e.sprite.y + dir.y * (e.radius + 4) };
+    if (!host.blocked(ahead.x, ahead.y)) return;
+    playFx(host.scene, s.def.sprites.wallHit!, e.sprite.x, e.sprite.y, { w: e.radius * 4 }).setBlendMode('ADD');
+    if (host.hit(e, v.wallDamage!, s.def.sources.wave!)) return;
+    if (e.rank === 'boss' || e.rank === 'hiddenBoss') return;
+    e.bind(v.stunSec!);
+    const st = playFx(host.scene, s.def.sprites.stun!, e.sprite.x, e.sprite.y - e.radius - 4, { w: Math.max(s.def.sprites.stun!.size, e.radius * 2.2) });
+    host.scene.time.delayedCall(v.stunSec! * 1000, () => st.destroy());
+  });
+}
 
 // ---------- 마기 응축구 ----------
 
@@ -92,6 +187,10 @@ class Condenser implements SkillObject {
   private readonly look: ProjectileLook;
   private life: number;
   private pullIn = 0;
+  /** 각성(붕괴 응축): 서로 도는 두 번째 구체, 끌어당긴 적 */
+  private readonly twin: ProjectileLook | null = null;
+  private readonly pulled = new Set<Enemy>();
+  private spin = 0;
 
   constructor(
     host: SkillHost,
@@ -102,6 +201,7 @@ class Condenser implements SkillObject {
     this.createdAt = host.scene.time.now;
     this.life = s.values.lifeSec!;
     this.look = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orb!, host.ctx.data.juice.projectileLook, { glow: s.def.sprites.orbGlow, spin: true, trail: false, scale: fxScale(host, s.owned.level) });
+    if (s.owned.awakened) this.twin = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orb!, host.ctx.data.juice.projectileLook, { glow: s.def.sprites.orbGlow, spin: true, trail: false, scale: fxScale(host, s.owned.level) });
   }
 
   update(dt: number, host: SkillHost): boolean {
@@ -111,7 +211,14 @@ class Condenser implements SkillObject {
     if (!host.blocked(next.x, next.y)) this.at = next;
     // 터질 때가 다가올수록 부푼다
     const grow = 1 + 0.4 * (1 - Math.max(0, this.life) / v.lifeSec!);
-    this.look.place(this.at.x, this.at.y, dt, grow);
+    if (this.twin) {
+      // 둘이 서로 돌다 끝으로 갈수록 붙는다
+      this.spin += dt * v.orbitSpin!;
+      const rr = v.orbitRadius! * Math.max(0, this.life) / v.lifeSec!;
+      const o = { x: Math.cos(this.spin) * rr, y: Math.sin(this.spin) * rr * 0.6 };
+      this.look.place(this.at.x + o.x, this.at.y + o.y, dt, grow);
+      this.twin.place(this.at.x - o.x, this.at.y - o.y, dt, grow);
+    } else this.look.place(this.at.x, this.at.y, dt, grow);
     this.pullIn -= dt;
     if (this.pullIn <= 0) {
       this.pullIn = v.pullEverySec!;
@@ -122,6 +229,7 @@ class Condenser implements SkillObject {
         const d = Math.hypot(dx, dy);
         if (d > pr + e.radius || d < 2) continue;
         e.knockback({ x: dx / d, y: dy / d }, Math.min(v.pullPx!, d), v.pullEverySec!);
+        this.pulled.add(e);
       }
     }
     if (this.life > 0) return true;
@@ -131,10 +239,16 @@ class Condenser implements SkillObject {
 
   private explode(host: SkillHost): void {
     const v = this.s.values;
-    const r = host.area(v.radius!);
+    // 각성: 끌어당긴 적이 많을수록 범위·피해 + (상한)
+    const k = this.twin ? cappedGrowth(this.pulled.size, v.perPulled!, v.pulledCap!) : 1;
+    const r = host.area(v.radius!) * k;
+    if (this.twin) {
+      playFx(host.scene, this.s.def.sprites.merge!, this.at.x, this.at.y, { w: r * 2.2 }).setBlendMode('ADD');
+      shake(host.scene, 'medium');
+    }
     bus.emit('sfx', { id: 'explosion', size: r });
     host.blastProps(this.at, r, v.damage!);
-    for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - this.at.x, e.sprite.y - this.at.y) <= r + e.radius) host.hit(e, v.damage!, this.s.def.sources.blast!);
+    for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - this.at.x, e.sprite.y - this.at.y) <= r + e.radius) host.hit(e, v.damage! * k, this.s.def.sources.blast!);
     playFx(host.scene, this.s.def.sprites.blast!, this.at.x, this.at.y, { w: r * 2.4 * fxScale(host, this.s.owned.level) });
     impactFx(host, this.s.owned.level, this.at.x, this.at.y, this.s.def.color, r * 1.2, 2);
     shake(host.scene, 'light');
@@ -142,6 +256,7 @@ class Condenser implements SkillObject {
 
   destroy(): void {
     this.look.destroy();
+    this.twin?.destroy();
   }
 }
 
@@ -203,10 +318,26 @@ export const magiPillar: SkillImpl = {
     host.scene.time.delayedCall(v.delaySec! * 1000, () => {
       impactFx(host, s.owned.level, at.x, at.y, s.def.color, r * 1.4, 1.5);
       for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) <= r + e.radius) host.hit(e, v.damage!, s.def.sources.pillar!);
+      if (s.owned.awakened) chainPillars(host, s, at);
     });
     return true;
   },
 };
+
+/** 연쇄 분출: 사방 네 곳에서 차례로 작은 기둥(공간격 그대로) + 자리마다 마기 장판(공간격 없음) */
+function chainPillars(host: SkillHost, s: SkillCast, at: Vec2): void {
+  const v = s.values;
+  const cr = host.area(v.chainRadius!);
+  [[1, 0], [0, 1], [-1, 0], [0, -1]].forEach(([dx, dy], i) => {
+    host.scene.time.delayedCall((i + 1) * v.chainGapSec! * 1000, () => {
+      const p = { x: at.x + dx! * v.chainDist!, y: at.y + dy! * v.chainDist! * 0.7 };
+      if (host.blocked(p.x, p.y)) return;
+      playFx(host.scene, s.def.sprites.pillar!, p.x, p.y + cr * 0.3, { w: cr * 2.4 }).setOrigin(0.5, 1);
+      for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - p.x, e.sprite.y - p.y) <= cr + e.radius) host.hit(e, v.chainDamage!, s.def.sources.pillar!);
+      addFireZone(host, v.maxZones!, (h) => new FireZone(h, s.def.sprites.zone!, p, { sec: v.zoneSec!, tickSec: v.zoneTickSec!, damage: v.zoneDamage!, burnStacks: 0, tags: ['magic', 'ranged'], radius: cr }));
+    });
+  });
+}
 
 // ---------- 순수 전개 (패시브): 판정은 scenes/run/mageRuntime, 여기서는 원소 정령 ----------
 
@@ -239,7 +370,8 @@ export class ElementSpirit implements SkillObject {
     this.t = host.rng.range(0, Math.PI * 2);
     const p = host.playerPos();
     this.at = { x: p.x, y: p.y - 10 };
-    const ref = def.sprites[el]!;
+    // 각성(정령 강림): 상위 정령
+    const ref = (v.extraShots ? def.sprites[`${el}2`] : undefined) ?? def.sprites[el]!;
     this.img = host.sprite(this.at.x, this.at.y, ref).setDepth(5);
     this.img.setDisplaySize((ref.height! * this.img.width) / Math.max(1, this.img.height), ref.height!);
     this.scale = this.img.scaleY;
@@ -275,7 +407,7 @@ export class ElementSpirit implements SkillObject {
       .filter((e) => Math.hypot(e.sprite.x - this.at.x, e.sprite.y - this.at.y) <= this.v.range! + e.radius)
       .sort((a, b) => Math.hypot(a.sprite.x - this.at.x, a.sprite.y - this.at.y) - Math.hypot(b.sprite.x - this.at.x, b.sprite.y - this.at.y));
     if (list.length === 0) return;
-    for (let i = 0; i < this.v.shots!; i++) {
+    for (let i = 0; i < this.v.shots! + (this.v.extraShots ?? 0); i++) {
       const target = list[i % list.length]!;
       host.scene.time.delayedCall(i * 100, () => {
         if (!this.alive || target.dead) return;
@@ -287,9 +419,12 @@ export class ElementSpirit implements SkillObject {
 
   private attack(host: SkillHost, target: Enemy): void {
     const s = this.def.sprites;
-    const v = this.v;
     const tags = this.def.sources.spirit!;
     const from = { ...this.at };
+    // 각성(정령 강림): 치명타면 피해 ×(치명 배율 + 보너스), 원소 효과가 세진다
+    const crit = !!this.v.critChance && host.rng.chance(this.v.critChance);
+    const v = crit ? { ...this.v, spiritDamage: this.v.spiritDamage! * (host.ctx.data.weapons.critMultiplier + (this.v.critBonus ?? 0)), burnStacks: this.v.burnStacks! + 1, slow: Math.min(0.8, this.v.slow! * 1.5), radius: this.v.radius! * 1.5 } : this.v;
+    if (crit) playFx(host.scene, s.crit!, target.sprite.x, target.sprite.y, { w: s.crit!.size }).setBlendMode('ADD');
     // 공격하며 몸을 부풀린다
     host.scene.tweens.add({ targets: this.img, scale: this.scale * 1.25, duration: 90, yoyo: true });
     if (this.el === 'lightning') {
@@ -297,6 +432,14 @@ export class ElementSpirit implements SkillObject {
       stretchFx(host.scene, s.lightningShot!, from, b, s.lightningShot!.size);
       playFx(host.scene, s.lightningHit!, b.x, b.y, { w: s.lightningHit!.size });
       host.hit(target, v.spiritDamage!, tags);
+      // 치명: 번개 연쇄 +1
+      if (crit) {
+        const next = [...host.enemies()].filter((e) => e !== target).sort((a, c) => Math.hypot(a.sprite.x - b.x, a.sprite.y - b.y) - Math.hypot(c.sprite.x - b.x, c.sprite.y - b.y))[0];
+        if (next && Math.hypot(next.sprite.x - b.x, next.sprite.y - b.y) <= v.range! * 0.6) {
+          stretchFx(host.scene, s.lightningShot!, b, { x: next.sprite.x, y: next.sprite.y }, s.lightningShot!.size);
+          host.hit(next, v.spiritDamage!, tags);
+        }
+      }
       return;
     }
     const shot = s[`${this.el}Shot`]!;
@@ -355,16 +498,60 @@ export const sadExecution: UltimateImpl = {
       const hits = lineHits(p, dir, v.length!, v.width! / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
       stretchFx(host.scene, u.def.sprites.beam!, p, end, v.width! * 2, 0.4);
       shake(host.scene, 'heavy');
+      const executed: Vec2[] = [];
+      const bosses: Enemy[] = [];
       for (const i of hits) {
         const e = enemies[i]!;
+        if (e.rank === 'boss' || e.rank === 'hiddenBoss') bosses.push(e);
         if (host.hit(e, v.damage!, u.def.sources.beam!) || e.dead) continue;
         if (!executable(e.rank, e.hp, e.maxHp, v.executeRatio!)) continue;
+        executed.push({ x: e.sprite.x, y: e.sprite.y });
         executeMark(host.scene, e.sprite.x, e.sprite.y);
         host.hitTrue(e, e.hp / Math.max(0.01, e.takenMul) + 1, false);
       }
+      if (u.awakened) purgeChain(host, u, p, end, executed, bosses);
     });
     // 모으는 동안 가는 예고선
     stretchFx(host.scene, u.def.sprites.beam!, p, end, v.width! * 0.4, v.chargeSec!);
     return true;
   },
 };
+
+/**
+ * 정화 연쇄(정화 집행 각성): 처형한 수만큼 광선이 굵어지고, 처형 자리마다 마기 폭발이 이어져 근처 체력 낮은 적도 처형(한 번에 최대 chainMax).
+ * 보스는 처형되지 않고 처형 수마다 광선 피해 × bossPerKill을 더 받는다(상한 bossCapMul).
+ */
+function purgeChain(host: SkillHost, u: UltimateCast, from: Vec2, end: Vec2, executed: Vec2[], bosses: Enemy[]): void {
+  const v = u.values;
+  const queue = [...executed];
+  let count = executed.length;
+  let step = 0;
+  const r = host.area(v.chainRadius!);
+  const next = () => {
+    const at = queue.shift();
+    if (!at || count >= v.chainMax! + executed.length) return finish();
+    step++;
+    playFx(host.scene, u.def.sprites.chain!, at.x, at.y, { w: r * 2.4 }).setBlendMode('ADD');
+    for (const e of [...host.enemies()]) {
+      if (Math.hypot(e.sprite.x - at.x, e.sprite.y - at.y) > r + e.radius) continue;
+      if (host.hit(e, v.chainDamage!, u.def.sources.beam!) || e.dead) continue;
+      if (!executable(e.rank, e.hp, e.maxHp, v.executeRatio!) || count >= v.chainMax! + executed.length) continue;
+      count++;
+      queue.push({ x: e.sprite.x, y: e.sprite.y });
+      executeMark(host.scene, e.sprite.x, e.sprite.y);
+      host.hitTrue(e, e.hp / Math.max(0.01, e.takenMul) + 1, false);
+    }
+    host.scene.time.delayedCall(90, next);
+  };
+  const finish = () => {
+    if (count <= 0) return;
+    // 처형 수만큼 굵어진 광선이 한 번 더 번쩍인다
+    stretchFx(host.scene, u.def.sprites.beam!, from, end, v.width! * 2 + Math.min(v.widthCap!, count * v.widthPerKill!), 0.3);
+    const mul = Math.min(v.bossCapMul!, count * v.bossPerKill!);
+    for (const b of bosses) if (!b.dead) host.hit(b, v.damage! * mul, u.def.sources.beam!);
+    floatText(host, from.x, from.y - 20, host.ctx.t('skillMsg.executeChain', { n: count }), u.def.color);
+    shake(host.scene, 'heavy');
+    void step;
+  };
+  next();
+}
