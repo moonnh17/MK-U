@@ -212,6 +212,8 @@ export interface MissileSpec {
   onHit(e: Enemy): void;
   /** 멈춘 자리 (적·벽·사거리) */
   onEnd?(at: Vec2): void;
+  /** 매 프레임 지금 자리 (불티 같은 꾸밈) */
+  onStep?(at: Vec2): void;
   /** 멈출 때(관통이 다하거나 벽·사거리) 마지막으로 맞힌 적 (맞힌 적이 없으면 부르지 않는다) */
   onLast?(e: Enemy, angle: number): void;
 }
@@ -245,6 +247,7 @@ export class Missile implements SkillObject {
     this.at = { x: this.at.x + this.dir.x * step, y: this.at.y + this.dir.y * step };
     this.flown += step;
     this.look.place(this.at.x, this.at.y, dt);
+    this.spec.onStep?.(this.at);
     const hitR = this.spec.sprite.size / 4;
     for (const e of host.enemies()) {
       if (this.struck.has(e) || Math.hypot(e.sprite.x - this.at.x, e.sprite.y - this.at.y) > e.radius + hitR) continue;

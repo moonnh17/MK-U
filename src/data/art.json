@@ -8252,25 +8252,31 @@
     },
     "summon_imitation_golem": {
       "file": "mku/summon_imitation_golem.png",
-      "frameWidth": 112,
-      "frameHeight": 134,
-      "frames": 9,
+      "frameWidth": 185,
+      "frameHeight": 120,
+      "frames": 7,
       "density": 2,
       "anims": {
         "idle": {
           "from": 0,
-          "to": 0,
-          "fps": 1
+          "to": 1,
+          "fps": 3
         },
         "move": {
-          "from": 1,
-          "to": 4,
-          "fps": 6
+          "from": 2,
+          "to": 3,
+          "fps": 5
         },
         "attack": {
-          "from": 5,
-          "to": 8,
-          "fps": 10,
+          "from": 4,
+          "to": 5,
+          "fps": 6,
+          "loop": false
+        },
+        "cast": {
+          "from": 6,
+          "to": 6,
+          "fps": 4,
           "loop": false
         }
       }
@@ -9331,6 +9337,56 @@
       "frameHeight": 52,
       "frames": 1,
       "density": 2
+    },
+    "fx_hwk_guillotine": {
+      "file": "mku/fx_hwk_guillotine.png",
+      "frameWidth": 140,
+      "frameHeight": 186,
+      "frames": 1,
+      "density": 2
+    },
+    "proj_hwk_lance": {
+      "file": "mku/proj_hwk_lance.png",
+      "frameWidth": 60,
+      "frameHeight": 13,
+      "frames": 1,
+      "density": 2
+    },
+    "proj_hwk_orb_dark": {
+      "file": "mku/proj_hwk_orb_dark.png",
+      "frameWidth": 40,
+      "frameHeight": 39,
+      "frames": 1,
+      "density": 2
+    },
+    "proj_hwk_orb_bright": {
+      "file": "mku/proj_hwk_orb_bright.png",
+      "frameWidth": 40,
+      "frameHeight": 41,
+      "frames": 1,
+      "density": 2
+    },
+    "fx_hwk_portal": {
+      "file": "mku/fx_hwk_portal.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1,
+      "density": 2
+    },
+    "fx_hwk_implosion": {
+      "file": "mku/fx_hwk_implosion.png",
+      "frameWidth": 166,
+      "frameHeight": 180,
+      "frames": 17,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 16,
+          "fps": 18,
+          "loop": false
+        }
+      }
     }
   }
 }

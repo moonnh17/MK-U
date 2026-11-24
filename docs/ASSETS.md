@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 856개 · 그림 있음 806개
+전체 862개 · 그림 있음 812개
 
 ## player (9)
 
@@ -272,7 +272,7 @@
 | `pickup_coin` | 마기 입자 | 4×4 | center | #ffd23f | mku/pickup_coin.png (1프레임) |
 | `pickup_potion` | 회복 물약 | 9×12 | center | #e23a4c | mku/pickup_potion.png (1프레임) |
 
-## skill (279)
+## skill (285)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -484,15 +484,19 @@
 | `fx_awk_orb_lightning` | 원소 가호 (orbLightning) | 16×16 | center | #ffd83a | mku/fx_awk_orb_lightning.png (5프레임) |
 | `fx_awk_ward_burst` | 원소 가호 (burst) | 110×110 | center | #ffffff | mku/fx_awk_ward_burst.png (10프레임) |
 | `fx_mage_ward` | 원소 가호 (aura) | 30×30 | center | #ff9a4a | mku/fx_mage_ward.png (72프레임) |
-| `fx_hw_orb` | 마기탄 (big) 외 2곳 | 18×18 | center | #b266ff | mku/fx_hw_orb.png (43프레임) |
+| `proj_hwk_lance` | 마기탄 (big) | 30×30 | center | #b266ff | mku/proj_hwk_lance.png (1프레임) |
+| `fx_hwk_ring` | 마기탄 (spark) 외 3곳 | 26×26 | center | #e0b3ff | mku/fx_hwk_ring.png (10프레임) |
 | `fx_hw_blast` | 마기탄 (bigBlast) 외 2곳 | 40×40 | center | #b266ff | mku/fx_hw_blast.png (23프레임) |
 | `fx_summon_will_shot` | 마기탄 (shot) 외 1곳 | 10×10 | center | #e0b3ff | mku/fx_summon_will_shot.png (5프레임) |
-| `fx_hwk_burst` | 마기 분출 (cross) 외 2곳 | 70×70 | center | #b266ff | mku/fx_hwk_burst.png (23프레임) |
+| `fx_hwk_portal` | 마기 분출 (portal) | 32×32 | center | #b266ff | mku/fx_hwk_portal.png (1프레임) |
 | `fx_hw_beam` | 마기 분출 (beam) 외 1곳 | 12×12 | center | #b266ff | mku/fx_hw_beam.png (7프레임) |
 | `fx_hwk_stun` | 마기 파동 (stun) | 22×22 | center | #ffe36e | mku/fx_hwk_stun.png (36프레임) |
-| `fx_hwk_ring` | 마기 파동 (wallHit) 외 1곳 | 44×44 | center | #b266ff | mku/fx_hwk_ring.png (10프레임) |
 | `fx_hw_wave` | 마기 파동 (wave) | 60×60 | center | #b266ff | mku/fx_hw_wave.png (12프레임) |
+| `proj_hwk_orb_dark` | 마기 응축구 (orbDark) | 20×20 | center | #7a3fd1 | mku/proj_hwk_orb_dark.png (1프레임) |
+| `proj_hwk_orb_bright` | 마기 응축구 (orbBright) | 20×20 | center | #e0b3ff | mku/proj_hwk_orb_bright.png (1프레임) |
+| `fx_hwk_implosion` | 마기 응축구 (implosion) | 140×140 | center | #b266ff | mku/fx_hwk_implosion.png (17프레임) |
 | `skill_hw_condenser` | 마기 응축구 (orb) | 20×20 | center | #b266ff | mku/skill_hw_condenser.png (1프레임) |
+| `fx_hw_orb` | 마기 응축구 (orbGlow) 외 1곳 | 20×20 | center | #b266ff | mku/fx_hw_orb.png (43프레임) |
 | `fx_hwk_zone` | 마기 기둥 (zone) | 24×24 | center | #b266ff | mku/fx_hwk_zone.png (9프레임) |
 | `fx_hw_pillar` | 마기 기둥 (pillar) | 40×40 | center | #b266ff | mku/fx_hw_pillar.png (35프레임) |
 | `fx_hw_pillar_column` | 마기 기둥 (column) | 40×40 | center | #b266ff | mku/fx_hw_pillar_column.png (1프레임) |
@@ -501,7 +505,7 @@
 | `fx_golem_ruin_beam` | 집행 의지체 (ruinBeam) 외 1곳 | 14×14 | center | #b266ff | mku/fx_golem_ruin_beam.png (1프레임) |
 | `summon_will_construct` | 집행 의지체 (will) 외 1곳 | 18×40 | center | #b266ff | mku/summon_will_construct.png (8프레임) |
 | `summon_magi_soldier` | 집행 의지체 (soldier) | 18×40 | center | #2c1a45 | mku/summon_magi_soldier.png (9프레임) |
-| `summon_imitation_golem` | 집행 의지체 (golem) | 34×60 | center | #6a6a78 | mku/summon_imitation_golem.png (9프레임) |
+| `summon_imitation_golem` | 집행 의지체 (golem) | 34×60 | center | #6a6a78 | mku/summon_imitation_golem.png (7프레임) |
 | `fx_summon_will_hit` | 집행 의지체 (willHit) | 24×24 | center | #b266ff | mku/fx_summon_will_hit.png (2프레임) |
 | `fx_summon_soldier_thrust` | 집행 의지체 (soldierThrust) | 28×28 | center | #b266ff | mku/fx_summon_soldier_thrust.png (4프레임) |
 | `fx_summon_soldier_burst` | 집행 의지체 (soldierBurst) | 32×32 | center | #b266ff | mku/fx_summon_soldier_burst.png (5프레임) |
@@ -555,6 +559,8 @@
 | `fx_mage_meteor` | 원소 대합주 (fire) | 80×80 | center | #ff6a2a | mku/fx_mage_meteor.png (31프레임) |
 | `fx_mage_icicle` | 원소 대합주 (ice) | 44×44 | center | #5ad0f0 | mku/fx_mage_icicle.png (19프레임) |
 | `fx_mage_strike` | 원소 대합주 (lightning) | 70×70 | center | #ffd83a | mku/fx_mage_strike.png (20프레임) |
+| `fx_hwk_burst` | 정화 집행 (chain) | 80×80 | center | #b266ff | mku/fx_hwk_burst.png (23프레임) |
+| `fx_hwk_guillotine` | 정화 집행 (guillotine) | 70×70 | center | #b266ff | mku/fx_hwk_guillotine.png (1프레임) |
 
 ## lab (7)
 
@@ -721,7 +727,7 @@
 | `icon_skill_chainLightningA` | 뇌운 | 16×16 | center | #ffd83a | — |
 | `icon_skill_elementWardA` | 삼원소 수호 | 16×16 | center | #ff9a4a | — |
 | `icon_skill_magiBoltA` | 탄막 전개 | 16×16 | center | #b266ff | — |
-| `icon_skill_magiBurstA` | 교차 분출 | 16×16 | center | #b266ff | — |
+| `icon_skill_magiBurstA` | 마기의 문 | 16×16 | center | #b266ff | — |
 | `icon_skill_magiWaveA` | 충격 연쇄 | 16×16 | center | #b266ff | — |
 | `icon_skill_magiCondenserA` | 붕괴 응축 | 16×16 | center | #b266ff | — |
 | `icon_skill_magiPillarA` | 연쇄 분출 | 16×16 | center | #b266ff | — |

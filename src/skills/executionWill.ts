@@ -433,7 +433,7 @@ class ImitationGolem extends Summon {
     const dir = { x: Math.cos(a), y: Math.sin(a) };
     const len = v.beamLength!;
     this.face(target.sprite.x);
-    this.act1('attack');
+    this.act1('cast');
     stretchFx(this.host.scene, this.s.def.sprites.ruinBeam!, from, { x: from.x + dir.x * len, y: from.y + dir.y * len }, v.beamWidth! * 2, 0.35);
     shake(this.host.scene, 'light');
     const list = [...this.host.enemies()];

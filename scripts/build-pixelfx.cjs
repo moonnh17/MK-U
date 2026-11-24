@@ -70,6 +70,8 @@ const FX = {
   fx_hwk_stun: { name: 'hwk-stun', center: true, play: 'loop' },
   fx_hwk_mark: { name: 'hwk-mark', center: true, play: 'loop' },
   fx_hwk_burst: { name: 'hwk-burst', center: true, play: 'once', to: 22 },
+  // 붕괴 응축 합체: explosions/implosion의 마지막 수축부터 터지는 끝까지
+  fx_hwk_implosion: { name: 'hwk-implosion', center: true, play: 'once', from: 12, to: 28 },
 };
 
 function buildPixelfx(outDir) {

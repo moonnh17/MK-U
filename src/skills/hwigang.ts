@@ -61,14 +61,26 @@ function bigBolt(host: SkillHost, s: SkillCast, angle: number): void {
       speed: v.bigSpeed!,
       range: v.bigRange!,
       sprite: s.def.sprites.big!,
-      scale: 1.3,
+      glow: s.def.sprites.shot,
+      scale: 1.1,
       pierce: 99,
+      // 날아가는 내내 뒤로 보라·흰 불티가 흩날린다
+      onStep: (at) => {
+        if (host.rng.chance(0.6)) sparks(host.scene, at.x, at.y, host.rng.chance(0.5) ? '#ffffff' : s.def.color, host.ctx.data.juice.projectileLook, 0.18);
+      },
       onHit: (e) => {
         const at = { x: e.sprite.x, y: e.sprite.y };
         host.hit(e, v.bigDamage!, tags);
         const r = host.area(v.bigBlastRadius!);
         for (const x of [...host.enemies()]) if (x !== e && Math.hypot(x.sprite.x - at.x, x.sprite.y - at.y) <= r + x.radius) host.hit(x, v.bigBlastDamage!, tags);
         playFx(host.scene, s.def.sprites.bigBlast!, at.x, at.y, { w: r * 2.2 });
+        // 꿰뚫는 자리: 날카로운 X자 섬광 + 고리 + 불티
+        const g = host.scene.add.graphics().setDepth(7).setBlendMode('ADD');
+        g.lineStyle(2, 0xffffff, 1).lineBetween(at.x - 9, at.y - 9, at.x + 9, at.y + 9).lineBetween(at.x - 9, at.y + 9, at.x + 9, at.y - 9);
+        g.lineStyle(4, 0xb266ff, 0.5).lineBetween(at.x - 12, at.y - 12, at.x + 12, at.y + 12).lineBetween(at.x - 12, at.y + 12, at.x + 12, at.y - 12);
+        host.scene.tweens.add({ targets: g, alpha: 0, scale: 1.4, duration: 180, onComplete: () => g.destroy() });
+        playFx(host.scene, s.def.sprites.spark!, at.x, at.y, { w: s.def.sprites.spark!.size }).setBlendMode('ADD');
+        sparks(host.scene, at.x, at.y, s.def.color, host.ctx.data.juice.projectileLook, 1);
         if (im && refunded < im.values.refundCap!) {
           const sec = Math.min(im.values.pierceRefund!, im.values.refundCap! - refunded);
           refunded += sec;
@@ -84,7 +96,7 @@ function bigBolt(host: SkillHost, s: SkillCast, angle: number): void {
 export const magiBurst: SkillImpl = {
   cast(host, s) {
     const v = s.values;
-    if (s.owned.awakened) return crossBurst(host, s);
+    if (s.owned.awakened) return gateBurst(host, s);
     const p = host.playerPos();
     const dir = host.aimDir();
     const len = rayLength(host, p, dir, v.length!);
@@ -99,42 +111,65 @@ export const magiBurst: SkillImpl = {
 };
 
 /**
- * 교차 분출: 몸 양옆에서 안쪽으로 기운 광선 두 줄이 X자로 엇갈린다. 엇갈린 자리(조준 앞)에서 폭발.
- * 관통 전개 각인 확장: 엇갈리기 전에 꿰뚫은 적 수만큼 폭발 범위 + (상한)
+ * 마기의 문(마기 분출 각성): 등 뒤 부채꼴로 마기 포탈이 차례로 열리고, 포탈마다 가까운 적(없으면 조준 방향)으로
+ * 얇은 광선을 shotsPerPortal번 쏜다. 관통 전개 각인 확장이면 포탈 + extraPortals
  */
-function crossBurst(host: SkillHost, s: SkillCast): boolean {
+function gateBurst(host: SkillHost, s: SkillCast): boolean {
   const v = s.values;
-  const p = host.playerPos();
-  const d = host.aimDir();
-  const n = { x: -d.y, y: d.x };
-  const tilt = (v.crossAngleDeg! * Math.PI) / 180;
-  const crossDist = v.crossOffset! / Math.tan(tilt);
-  const cross = { x: p.x + d.x * crossDist, y: p.y + d.y * crossDist };
-  const enemies = [...host.enemies()];
-  const pts = enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius }));
-  const struck = new Set<number>();
-  let before = 0;
-  for (const side of [1, -1]) {
-    const from = { x: p.x + n.x * v.crossOffset! * side, y: p.y + n.y * v.crossOffset! * side };
-    const a = Math.atan2(d.y, d.x) - side * tilt;
-    const dir = { x: Math.cos(a), y: Math.sin(a) };
-    const len = rayLength(host, from, dir, v.length!);
-    for (const i of lineHits(from, dir, len, v.width! / 2, pts)) {
-      if (struck.has(i)) continue;
-      struck.add(i);
-      if (Math.hypot(pts[i]!.x - p.x, pts[i]!.y - p.y) < crossDist) before++;
-      host.hit(enemies[i]!, v.damage!, s.def.sources.beam!);
-    }
-    stretchFx(host.scene, s.def.sprites.beam!, from, { x: from.x + dir.x * len, y: from.y + dir.y * len }, v.width! * 1.6 * fxScale(host, s.owned.level), 0.25);
-  }
   const im = host.imprintOf?.('magiBurst');
-  const r = host.area(v.crossRadius!) * (im ? cappedGrowth(before, im.values.crossPerHit!, im.values.crossCap!) : 1);
-  host.scene.time.delayedCall(80, () => {
-    for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - cross.x, e.sprite.y - cross.y) <= r + e.radius) host.hit(e, v.crossDamage!, s.def.sources.beam!);
-    playFx(host.scene, s.def.sprites.cross!, cross.x, cross.y, { w: r * 2.6 });
-    shake(host.scene, 'light');
-  });
+  const n = v.portals! + (im ? im.values.extraPortals! : 0);
+  const aim = host.aimDir();
+  const back = Math.atan2(-aim.y, -aim.x);
+  const arc = (v.portalArcDeg! * Math.PI) / 180;
+  const ref = s.def.sprites.portal!;
+  for (let i = 0; i < n; i++) {
+    const t = n > 1 ? i / (n - 1) - 0.5 : 0;
+    const a = back + t * arc;
+    const appear = (i % 2 ? n - i : i) * 0.04;
+    host.scene.time.delayedCall(appear * 1000, () => {
+      // 포탈은 플레이어를 따라다닌다 (등 뒤 같은 자리)
+      const spot = () => {
+        const p = host.playerPos();
+        return { x: p.x + Math.cos(a) * v.portalBack!, y: p.y + Math.sin(a) * v.portalBack! * 0.7 - v.portalLift! };
+      };
+      const at0 = spot();
+      const portal = host.sprite(at0.x, at0.y, ref).setDepth(6).setBlendMode('ADD').setScale(0);
+      const full = ref.size / Math.max(1, portal.width);
+      host.scene.tweens.add({ targets: portal, scale: full, duration: v.portalAppearSec! * 1000, ease: 'Back.easeOut' });
+      const follow = () => {
+        if (!portal.active) return;
+        const at = spot();
+        portal.setPosition(at.x, at.y).setRotation(portal.rotation + 0.08);
+      };
+      host.scene.events.on('update', follow);
+      for (let k = 0; k < v.shotsPerPortal!; k++) {
+        host.scene.time.delayedCall((v.portalAppearSec! + k * v.shotGapSec! + i * 0.03) * 1000, () => portalShot(host, s, spot()));
+      }
+      const close = (v.portalAppearSec! + v.shotsPerPortal! * v.shotGapSec! + 0.25) * 1000;
+      host.scene.time.delayedCall(close, () => {
+        host.scene.tweens.add({ targets: portal, scale: 0, alpha: 0, duration: 180, onComplete: () => {
+          host.scene.events.off('update', follow);
+          portal.destroy();
+        } });
+      });
+    });
+  }
   return true;
+}
+
+/** 포탈 하나에서 얇은 광선 한 줄: 가까운 적(없으면 조준 방향) 쪽으로 꿰뚫는다 */
+function portalShot(host: SkillHost, s: SkillCast, from: Vec2): void {
+  const v = s.values;
+  const target = nearestEnemy(host, from, v.beamLength!);
+  const aim = host.aimDir();
+  const a = target ? Math.atan2(target.sprite.y - from.y, target.sprite.x - from.x) + host.rng.range(-0.04, 0.04) : Math.atan2(aim.y, aim.x) + host.rng.range(-0.12, 0.12);
+  const dir = { x: Math.cos(a), y: Math.sin(a) };
+  const len = rayLength(host, from, dir, v.beamLength!);
+  const enemies = [...host.enemies()];
+  for (const i of lineHits(from, dir, len, v.beamWidth! / 2 + 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })))) host.hit(enemies[i]!, v.beamDamage!, s.def.sources.beam!);
+  const end = { x: from.x + dir.x * len, y: from.y + dir.y * len };
+  stretchFx(host.scene, s.def.sprites.beam!, from, end, v.beamWidth! * 2.2, 0.16);
+  sparks(host.scene, end.x, end.y, s.def.color, host.ctx.data.juice.projectileLook, 0.35);
 }
 
 // ---------- 마기 파동 ----------
@@ -184,11 +219,12 @@ function wallSlam(host: SkillHost, s: SkillCast, e: Enemy, dir: Vec2): void {
 class Condenser implements SkillObject {
   readonly owner = 'magiCondenser';
   readonly createdAt: number;
-  private readonly look: ProjectileLook;
+  private look: ProjectileLook;
   private life: number;
   private pullIn = 0;
-  /** 각성(붕괴 응축): 서로 도는 두 번째 구체, 끌어당긴 적 */
+  /** 각성(붕괴 응축): 서로 도는 두 번째 구체, 둘을 잇는 번개, 끌어당긴 적 */
   private readonly twin: ProjectileLook | null = null;
+  private readonly link: Phaser.GameObjects.Graphics | null = null;
   private readonly pulled = new Set<Enemy>();
   private spin = 0;
 
@@ -201,7 +237,13 @@ class Condenser implements SkillObject {
     this.createdAt = host.scene.time.now;
     this.life = s.values.lifeSec!;
     this.look = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orb!, host.ctx.data.juice.projectileLook, { glow: s.def.sprites.orbGlow, spin: true, trail: false, scale: fxScale(host, s.owned.level) });
-    if (s.owned.awakened) this.twin = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orb!, host.ctx.data.juice.projectileLook, { glow: s.def.sprites.orbGlow, spin: true, trail: false, scale: fxScale(host, s.owned.level) });
+    if (s.owned.awakened) {
+      // 각성(붕괴 응축): 어두운 구체·밝은 구체 둘이 서로 돈다
+      this.look.destroy();
+      this.look = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orbDark!, host.ctx.data.juice.projectileLook, { spin: true, trail: true, scale: fxScale(host, s.owned.level) });
+      this.twin = new ProjectileLook(host.scene, at.x, at.y, s.def.sprites.orbBright!, host.ctx.data.juice.projectileLook, { spin: true, trail: true, scale: fxScale(host, s.owned.level) });
+      this.link = host.scene.add.graphics().setDepth(5).setBlendMode('ADD');
+    }
   }
 
   update(dt: number, host: SkillHost): boolean {
@@ -218,6 +260,12 @@ class Condenser implements SkillObject {
       const o = { x: Math.cos(this.spin) * rr, y: Math.sin(this.spin) * rr * 0.6 };
       this.look.place(this.at.x + o.x, this.at.y + o.y, dt, grow);
       this.twin.place(this.at.x - o.x, this.at.y - o.y, dt, grow);
+      // 둘 사이를 잇는 마기 번개 (가까워질수록 밝게)
+      const g = this.link!.clear();
+      const k = 1 - rr / Math.max(1, v.orbitRadius!);
+      const mid = { x: this.at.x + host.rng.range(-3, 3), y: this.at.y + host.rng.range(-3, 3) };
+      g.lineStyle(2 + k * 2, 0xb266ff, 0.4 + 0.5 * k).beginPath().moveTo(this.at.x + o.x, this.at.y + o.y).lineTo(mid.x, mid.y).lineTo(this.at.x - o.x, this.at.y - o.y).strokePath();
+      g.lineStyle(1, 0xffffff, 0.6 + 0.4 * k).lineBetween(this.at.x + o.x, this.at.y + o.y, this.at.x - o.x, this.at.y - o.y);
     } else this.look.place(this.at.x, this.at.y, dt, grow);
     this.pullIn -= dt;
     if (this.pullIn <= 0) {
@@ -243,8 +291,11 @@ class Condenser implements SkillObject {
     const k = this.twin ? cappedGrowth(this.pulled.size, v.perPulled!, v.pulledCap!) : 1;
     const r = host.area(v.radius!) * k;
     if (this.twin) {
-      playFx(host.scene, this.s.def.sprites.merge!, this.at.x, this.at.y, { w: r * 2.2 }).setBlendMode('ADD');
-      shake(host.scene, 'medium');
+      // 하나로 합쳐지며 안으로 무너졌다가 터진다
+      playFx(host.scene, this.s.def.sprites.implosion!, this.at.x, this.at.y, { w: r * 2.8 }).setBlendMode('ADD');
+      host.scene.cameras.main.flash(90, 200, 150, 255);
+      shake(host.scene, 'heavy');
+      host.hitStop?.(0.06);
     }
     bus.emit('sfx', { id: 'explosion', size: r });
     host.blastProps(this.at, r, v.damage!);
@@ -257,6 +308,7 @@ class Condenser implements SkillObject {
   destroy(): void {
     this.look.destroy();
     this.twin?.destroy();
+    this.link?.destroy();
   }
 }
 
@@ -493,7 +545,10 @@ export const sadExecution: UltimateImpl = {
     const p = host.playerPos();
     const dir = host.aimDir();
     const end = { x: p.x + dir.x * v.length!, y: p.y + dir.y * v.length! };
-    host.scene.time.delayedCall(v.chargeSec! * 1000, () => {
+    // 각성: 단두대가 떨어져 내리꽂히는 순간 광선이 터진다
+    const delay = u.awakened ? v.guillotineSec! : v.chargeSec!;
+    if (u.awakened) guillotine(host, u, { x: (p.x + end.x) / 2, y: (p.y + end.y) / 2 }, Math.atan2(dir.y, dir.x), v.length! * 0.6, delay);
+    host.scene.time.delayedCall(delay * 1000, () => {
       const enemies = [...host.enemies()];
       const hits = lineHits(p, dir, v.length!, v.width! / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
       stretchFx(host.scene, u.def.sprites.beam!, p, end, v.width! * 2, 0.4);
@@ -512,7 +567,7 @@ export const sadExecution: UltimateImpl = {
       if (u.awakened) purgeChain(host, u, p, end, executed, bosses);
     });
     // 모으는 동안 가는 예고선
-    stretchFx(host.scene, u.def.sprites.beam!, p, end, v.width! * 0.4, v.chargeSec!);
+    stretchFx(host.scene, u.def.sprites.beam!, p, end, v.width! * 0.4, delay);
     return true;
   },
 };
@@ -526,7 +581,7 @@ function purgeChain(host: SkillHost, u: UltimateCast, from: Vec2, end: Vec2, exe
   const queue = [...executed];
   let count = executed.length;
   let step = 0;
-  const r = host.area(v.chainRadius!);
+  const r = host.area(v.chainRadius!) * (executed.length >= v.tier2At! ? v.tier2RadiusMul! : 1);
   const next = () => {
     const at = queue.shift();
     if (!at || count >= v.chainMax! + executed.length) return finish();
@@ -545,6 +600,28 @@ function purgeChain(host: SkillHost, u: UltimateCast, from: Vec2, end: Vec2, exe
   };
   const finish = () => {
     if (count <= 0) return;
+    // 단계 2: 가장 먼 처형 자리에 두 번째 단두대
+    if (count >= v.tier2At!) {
+      const far = [...executed].sort((a, b) => Math.hypot(b.x - from.x, b.y - from.y) - Math.hypot(a.x - from.x, a.y - from.y))[0] ?? end;
+      guillotine(host, u, far, 0, 40, 0.3);
+      host.scene.time.delayedCall(300, () => {
+        const rr = host.area(v.chainRadius!) * v.tier2RadiusMul!;
+        for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - far.x, e.sprite.y - far.y) <= rr + e.radius) host.hit(e, v.tier2Damage!, u.def.sources.beam!);
+        floatText(host, far.x, far.y - 24, host.ctx.t('skillMsg.executeTier2'), u.def.color);
+      });
+    }
+    // 단계 3: 정화 완료 — 둘레 전체 파동
+    if (count >= v.tier3At!) {
+      host.scene.time.delayedCall(520, () => {
+        const c = host.playerPos();
+        const rr = host.area(v.tier3Radius!);
+        playFx(host.scene, u.def.sprites.wave!, c.x, c.y, { w: rr * 2.2 }).setBlendMode('ADD');
+        host.scene.cameras.main.flash(260, 230, 200, 255);
+        shake(host.scene, 'heavy');
+        for (const e of [...host.enemies()]) if (Math.hypot(e.sprite.x - c.x, e.sprite.y - c.y) <= rr + e.radius) host.hit(e, v.tier3Damage!, u.def.sources.beam!);
+        floatText(host, c.x, c.y - 30, host.ctx.t('skillMsg.executeTier3'), '#ffffff');
+      });
+    }
     // 처형 수만큼 굵어진 광선이 한 번 더 번쩍인다
     stretchFx(host.scene, u.def.sprites.beam!, from, end, v.width! * 2 + Math.min(v.widthCap!, count * v.widthPerKill!), 0.3);
     const mul = Math.min(v.bossCapMul!, count * v.bossPerKill!);
@@ -554,4 +631,30 @@ function purgeChain(host: SkillHost, u: UltimateCast, from: Vec2, end: Vec2, exe
     void step;
   };
   next();
+}
+
+/**
+ * 단두대: 칼날이 위에서 at 위로 떨어져(dropSec) 내리꽂힌다. 칼날은 angle(광선 방향)에 맞춰 눕히고, 떨어지면 번쩍·흔들림·멈칫 후 흩어진다
+ */
+function guillotine(host: SkillHost, u: UltimateCast, at: Vec2, angle: number, width: number, dropSec: number): void {
+  const ref = u.def.sprites.guillotine!;
+  // 칼날이 뒤집히지 않게 방향을 −90°~90°로
+  let a = angle;
+  if (a > Math.PI / 2) a -= Math.PI;
+  if (a < -Math.PI / 2) a += Math.PI;
+  const blade = host.sprite(at.x, at.y - 150, ref).setDepth(8).setOrigin(0.5, 1).setRotation(a).setAlpha(0.2);
+  const w = Math.max(ref.size, width);
+  blade.setDisplaySize(w, (w * blade.height) / Math.max(1, blade.width));
+  // 떨어질 자리에 그림자 선
+  const shadow = host.scene.add.graphics().setDepth(2.6);
+  shadow.fillStyle(0x000000, 0.35).fillEllipse(at.x, at.y, w, 8);
+  host.scene.tweens.add({ targets: blade, y: at.y + 6, alpha: 1, duration: dropSec * 1000, ease: 'Cubic.easeIn', onComplete: () => {
+    shadow.destroy();
+    host.scene.cameras.main.flash(120, 255, 255, 255);
+    shake(host.scene, 'heavy');
+    host.hitStop?.(0.08);
+    sparks(host.scene, at.x, at.y, u.def.color, host.ctx.data.juice.projectileLook, 2.5);
+    sparks(host.scene, at.x, at.y, '#ffffff', host.ctx.data.juice.projectileLook, 1.5);
+    host.scene.tweens.add({ targets: blade, alpha: 0, y: at.y + 14, duration: 420, delay: 160, onComplete: () => blade.destroy() });
+  } });
 }

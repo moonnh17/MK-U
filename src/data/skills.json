@@ -1740,7 +1740,8 @@
       "awakening": {"nameKey": "skill.magiBolt.awakened", "descKey": "skill.magiBolt.awakened.desc", "requiredItem": "combatTheory", "tags": ["magic", "ranged"], "cooldownSec": 2.2, "values": {"bigDamage": 18, "bigSpeed": 280, "bigRange": 240, "bigBlastRadius": 22, "bigBlastDamage": 12}},
       "color": "#b266ff",
       "sprites": {
-        "big": { "spriteKey": "fx_hw_orb", "color": "#b266ff", "size": 18 },
+        "big": { "spriteKey": "proj_hwk_lance", "color": "#b266ff", "size": 30 },
+        "spark": { "spriteKey": "fx_hwk_ring", "color": "#e0b3ff", "size": 26 },
         "bigBlast": { "spriteKey": "fx_hw_blast", "color": "#b266ff", "size": 40 },
         "shot": { "spriteKey": "fx_summon_will_shot", "color": "#e0b3ff", "size": 10 }
       }
@@ -1763,15 +1764,15 @@
       "imprint": {
         "nameKey": "imprint.magiBurst",
         "descKey": "imprint.magiBurst.desc",
-        "awakened": {"descKey": "imprint.magiBurst.awakened", "values": {"crossPerHit": 0.25, "crossCap": 1}},
+        "awakened": {"descKey": "imprint.magiBurst.awakened", "values": {"extraPortals": 2}},
         "effect": "pierceUnfold",
         "levels": [{ "pierceUnfold": 0.1 }, { "pierceUnfold": 0.15 }, { "pierceUnfold": 0.2 }],
         "fixed": { "pierce": 1 }
       },
-      "awakening": {"nameKey": "skill.magiBurst.awakened", "descKey": "skill.magiBurst.awakened.desc", "requiredItem": "hollowMagiPipe", "tags": ["magic", "ranged"], "cooldownSec": 5, "values": {"crossAngleDeg": 16, "crossOffset": 16, "crossRadius": 26, "crossDamage": 30}},
+      "awakening": {"nameKey": "skill.magiBurst.awakened", "descKey": "skill.magiBurst.awakened.desc", "requiredItem": "hollowMagiPipe", "tags": ["magic", "ranged"], "cooldownSec": 5, "values": {"portals": 5, "portalArcDeg": 150, "portalBack": 20, "portalLift": 10, "portalAppearSec": 0.25, "shotsPerPortal": 3, "shotGapSec": 0.09, "beamWidth": 4, "beamDamage": 9, "beamLength": 220}},
       "color": "#b266ff",
       "sprites": {
-        "cross": { "spriteKey": "fx_hwk_burst", "color": "#b266ff", "size": 70 },
+        "portal": { "spriteKey": "fx_hwk_portal", "color": "#b266ff", "size": 32 },
         "beam": { "spriteKey": "fx_hw_beam", "color": "#b266ff", "size": 12 }
       }
     },
@@ -1833,7 +1834,9 @@
       "awakening": {"nameKey": "skill.magiCondenser.awakened", "descKey": "skill.magiCondenser.awakened.desc", "requiredItem": "compressedMagiCrystal", "tags": ["magic", "ranged"], "cooldownSec": 8, "values": {"orbitRadius": 14, "orbitSpin": 6, "perPulled": 0.15, "pulledCap": 1}},
       "color": "#b266ff",
       "sprites": {
-        "merge": { "spriteKey": "fx_hwk_burst", "color": "#b266ff", "size": 120 },
+        "orbDark": { "spriteKey": "proj_hwk_orb_dark", "color": "#7a3fd1", "size": 20 },
+        "orbBright": { "spriteKey": "proj_hwk_orb_bright", "color": "#e0b3ff", "size": 20 },
+        "implosion": { "spriteKey": "fx_hwk_implosion", "color": "#b266ff", "size": 140 },
         "orb": { "spriteKey": "skill_hw_condenser", "color": "#b266ff", "size": 20 },
         "orbGlow": { "spriteKey": "fx_hw_orb", "color": "#b266ff", "size": 20 },
         "blast": { "spriteKey": "fx_hw_blast", "color": "#b266ff", "size": 80 }

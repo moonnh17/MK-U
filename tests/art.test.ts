@@ -148,7 +148,9 @@ describe('전직·보스 단계 모습', () => {
       expect(Object.keys(S[key]?.anims ?? {}).sort(), key).toEqual(['idle', 'move', 'moveBack', 'moveFront']);
     }
     expect(Object.keys(S.summon_will_construct?.anims ?? {}).sort()).toEqual(['cast', 'idle', 'move']);
-    for (const key of ['summon_magi_soldier', 'summon_imitation_golem']) expect(Object.keys(S[key]?.anims ?? {}).sort(), key).toEqual(['attack', 'idle', 'move']);
+    expect(Object.keys(S.summon_magi_soldier?.anims ?? {}).sort()).toEqual(['attack', 'idle', 'move']);
+    // 모조 마기골렘: 원본 마기골렘 시트를 줄여 쓴다(파멸 광선용 시전 칸 포함)
+    expect(Object.keys(S.summon_imitation_golem?.anims ?? {}).sort()).toEqual(['attack', 'cast', 'idle', 'move']);
     for (const key of ['summon_spirit_fire', 'summon_spirit_ice', 'summon_spirit_lightning', 'summon_spirit_magi']) expect(S[key]?.frames, key).toBe(1);
     expect(S.player_magiMage!.frameHeight).toBe(S.player_warrior!.frameHeight);
     for (const key of ['will_shot', 'will_hit', 'soldier_thrust', 'soldier_burst', 'golem_crush', 'golem_shell']) expect(S[`fx_summon_${key}`]?.anims?.play, key).toBeDefined();

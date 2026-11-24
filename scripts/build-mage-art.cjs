@@ -110,7 +110,6 @@ const SUMMONS = {
 const SUMMON_ANIMS = {
   summon_will_construct: { h: 40, flip: true, anims: { idle: ['willFloat', 6, true], move: ['willFloat', 8, true], cast: ['willCast', 12, false] } },
   summon_magi_soldier: { h: 40, anims: { idle: ['soldier', 1, true], move: ['soldierWalk', 8, true], attack: ['soldierThrust', 16, false] } },
-  summon_imitation_golem: { h: 60, anims: { idle: ['golem2', 1, true], move: ['golemWalk', 6, true], attack: ['golemSlam', 10, false] } },
 };
 
 /** 띠를 칸으로: 빈 세로줄로 4덩어리가 나오면 그것, 아니면 네 등분 */
@@ -186,6 +185,72 @@ function buildSummonSheet(outDir, key, spec) {
   return { file: `mku/${key}.png`, frameWidth: fw, frameHeight: fh, frames: frames.length, density: DENSITY, anims };
 }
 
+/** 휘강파 각성 그림 (scripts/art-src/hwk-hf, 힉스필드 투명): key: [파일, 화면 폭 px, 알파 기준] */
+const HWK = {
+  fx_hwk_guillotine: ['guillotine', 70, 0.35],
+  proj_hwk_lance: ['lance', 30, 0.35],
+  proj_hwk_orb_dark: ['orbDark', 20, 0.3],
+  proj_hwk_orb_bright: ['orbBright', 20, 0.3],
+  fx_hwk_portal: ['portal', 32, 0.3],
+};
+
+/**
+ * 모조 마기골렘: 원본 마기골렘 보스 시트(public/assets/mku/enemy_magi_golem.png)를 줄여 쓴다. 적 테두리(빨강)를 지우고,
+ * 조금 어둡게 + 금(어두운 선과 보라 틈빛) + 떨어져 나간 조각(머리 귀퉁이·어깨)으로 부서진 모조품처럼.
+ * 칸: 0·1 서기, 2·3 걷기, 4 준비, 6 내려찍기, 8 시전 → idle·move·attack·cast
+ */
+function buildBrokenGolem(outDir, key, h) {
+  const src = k.read(path.join(REPO, 'public/assets/mku/enemy_magi_golem.png'));
+  const FW = 262, FH = 170;
+  const pick = [0, 1, 2, 3, 4, 6, 8];
+  const scale = (h * DENSITY) / FH;
+  const fw = Math.round(FW * scale), fh = h * DENSITY;
+  const sheet = k.blank(fw * pick.length, fh);
+  // 금·떨어진 조각 자리 (원본 칸 좌표)
+  const holes = [[[140, 0], [170, 0], [170, 26]], [[48, 20], [80, 20], [48, 54]], [[188, 108], [218, 108], [218, 142]], [[66, 150], [88, 170], [60, 170]]];
+  const cracks = [[[112, 52], [126, 70], [116, 86], [132, 104], [124, 120]], [[80, 112], [96, 130], [86, 152]], [[166, 34], [182, 52], [172, 70], [186, 86]], [[118, 6], [126, 18], [120, 30]]];
+  const inTri = (x, y, t) => {
+    const s = (a, b, c) => (a[0] - c[0]) * (b[1] - c[1]) - (b[0] - c[0]) * (a[1] - c[1]);
+    const p = [x, y], d1 = s(p, t[0], t[1]), d2 = s(p, t[1], t[2]), d3 = s(p, t[2], t[0]);
+    return !((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0));
+  };
+  pick.forEach((f, i) => {
+    const c = k.crop(src, f * FW, 0, FW, FH);
+    for (let y = 0; y < FH; y++) for (let x = 0; x < FW; x++) {
+      const o = (y * FW + x) * 4;
+      if (c.px[o + 3] < 16) continue;
+      const [r, g, b] = [c.px[o], c.px[o + 1], c.px[o + 2]];
+      // 적 테두리(빨강) → 어두운 돌색
+      if (r > 140 && g < 90 && b < 90) {
+        c.px[o] = 34; c.px[o + 1] = 28; c.px[o + 2] = 40;
+        continue;
+      }
+      // 조금 어둡고 빛바래게
+      const gray = (r + g + b) / 3;
+      c.px[o] = Math.round((r * 0.75 + gray * 0.25) * 0.85);
+      c.px[o + 1] = Math.round((g * 0.75 + gray * 0.25) * 0.85);
+      c.px[o + 2] = Math.round((b * 0.75 + gray * 0.25) * 0.85);
+      if (holes.some((t) => inTri(x, y, t))) c.px[o + 3] = 0;
+    }
+    // 금: 어두운 2px 선 + 옆에 보라 틈빛
+    for (const line of cracks) for (let j = 0; j < line.length - 1; j++) {
+      const [a, b] = [line[j], line[j + 1]];
+      const n = Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]));
+      for (let t = 0; t <= n; t++) {
+        const x = Math.round(a[0] + ((b[0] - a[0]) * t) / n), y = Math.round(a[1] + ((b[1] - a[1]) * t) / n);
+        for (const [dx, col] of [[0, [16, 10, 22]], [1, [16, 10, 22]], [2, [190, 120, 255]]]) {
+          const o = (y * FW + x + dx) * 4;
+          if (c.px[o + 3] < 16) continue;
+          c.px[o] = col[0]; c.px[o + 1] = col[1]; c.px[o + 2] = col[2];
+        }
+      }
+    }
+    k.paste(sheet, k.resize(c, fw, fh, 0.5), i * fw, 0);
+  });
+  k.write(path.join(outDir, `${key}.png`), sheet);
+  return { file: `mku/${key}.png`, frameWidth: fw, frameHeight: fh, frames: pick.length, density: DENSITY, anims: { idle: { from: 0, to: 1, fps: 3 }, move: { from: 2, to: 3, fps: 5 }, attack: { from: 4, to: 5, fps: 6, loop: false }, cast: { from: 6, to: 6, fps: 4, loop: false } } };
+}
+
 /** 마기 기둥: 솟는 기둥(세로)과 바닥 균열(가로). key: [파일, 화면 폭 px] */
 const PILLAR = { fx_hw_pillar_column: ['pillar', 40], fx_hw_pillar_crater: ['crater', 64] };
 
@@ -242,6 +307,14 @@ function buildMageArt(outDir) {
   }
   for (const [key, spec] of Object.entries(SUMMON_ANIMS)) out[key] = buildSummonSheet(outDir, key, spec);
   for (const [key, spec] of Object.entries(AWAKEN_SHEETS)) out[key] = buildAwakenSheet(outDir, key, spec);
+  out.summon_imitation_golem = buildBrokenGolem(outDir, 'summon_imitation_golem', 60);
+  for (const [key, [f, w, cut]] of Object.entries(HWK)) {
+    const im = trimmed(path.join(SRC, 'hwk-hf', `${f}.png`));
+    const fw = w * DENSITY;
+    const fh = Math.max(1, Math.round((fw * im.h) / im.w));
+    k.write(path.join(outDir, `${key}.png`), k.resize(im, fw, fh, cut));
+    out[key] = { file: `mku/${key}.png`, frameWidth: fw, frameHeight: fh, frames: 1, density: DENSITY };
+  }
   for (const [key, [f, w]] of Object.entries(PILLAR)) {
     const im = trimmed(path.join(SRC, 'summons-hf', `${f}.png`));
     const fw = w * DENSITY;
