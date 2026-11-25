@@ -6,7 +6,7 @@ import { lowSanityBonus } from '../../systems/sanity';
 import { damageKind } from '../../systems/juice';
 import { calcDamage, spaceDamage } from '../../systems/damage';
 import type { RangeBonus, TagBonus } from '../../systems/damage';
-import { elementDamageMul, staffDamageMul } from '../../systems/magiMage';
+import { elementDamageMul, fullBurnSkillMul, staffDamageMul } from '../../systems/magiMage';
 import { itemDamageMultiplier } from '../../systems/items';
 import { chainTargets } from '../../systems/targeting';
 import { corruptedDamage, skillChance } from '../../systems/acro';
@@ -76,11 +76,12 @@ export class DamageRuntime {
     let dmg = calcDamage({ baseDamage: base + (this.run.skillRt.playerMods().flatDamage ?? 0), tags }, this.tagBonus(), d.tags, this.rangeBonus());
     // 신앙 강화: 성기사 계열(성기사 스킬·궁극기) 피해
     if (source && this.schoolOf(source) === 'paladin') dmg *= 1 + (masteryTotals(this.run.session.player.loadout, d.skills).paladinDamage ?? 0);
-    // 개전 각인: 작열(화염 원소 직접 피해), 지팡이 공명(지팡이 무기)
+    // 개전 각인: 작열(화염 원소 직접 피해), 지팡이 공명(지팡이 무기), 점화(화상 꽉 찬 적에게 스킬 피해)
     const im = this.run.skillRt.imprint();
     if (im) {
       if (source) dmg *= elementDamageMul(d.skills.skills.find((s) => s.id === source)?.element, im, this.onFireZone());
       else dmg *= staffDamageMul(this.run.weaponDef().category, im, this.run.mage.returnedRecently());
+      dmg *= fullBurnSkillMul(!!source, this.run.mage.burnFull(enemy), im);
     }
     // 원소 피해 아이템 (불씨나무 열매·고드름·아스트라페·나침반 등)
     const srcElement = this.run.mage.elementOf(source);

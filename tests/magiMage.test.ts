@@ -4,7 +4,7 @@ import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
 import { skillAllowed } from '../src/systems/advancement';
 import { drawSkillCards } from '../src/systems/cards';
-import { activeImprint, addElement, attackElement, cappedGrowth, cycleStep, unifiedElement, castBoost, chargeAfterMove, concertFull, condenseFill, elementDamageMul, executable, frostHit, imprintMods, judgeBySlots, slowAmount, staffDamageMul, willCopies } from '../src/systems/magiMage';
+import { activeImprint, addElement, attackElement, cappedGrowth, cycleStep, unifiedElement, castBoost, chargeAfterMove, concertFull, condenseFill, elementDamageMul, executable, fullBurnSkillMul, frostHit, imprintMods, judgeBySlots, slowAmount, staffDamageMul, willCopies } from '../src/systems/magiMage';
 import { awakeningReady, emptyLoadout, equipSkill, findSkill, setSkillLevel, type SkillLoadout } from '../src/systems/skills';
 import { tickBurn, applyBurn } from '../src/systems/tags';
 import type { BurnRule } from '../src/types/data';
@@ -308,5 +308,15 @@ describe('휘강파 각성', () => {
     expect(staffDamageMul('staff', im, false)).toBeCloseTo(1.35);
     expect(staffDamageMul('staff', { ...im, awakened: false }, true)).toBeCloseTo(1.35);
     expect(staffDamageMul('gun', im, true)).toBe(1);
+  });
+});
+
+describe('점화 각인: 화상 꽉 찬 적에게 스킬 피해', () => {
+  const im = { skillId: 'fireball', effect: 'ignite', values: { fullBurnSkill: 0.3 } } as unknown as Parameters<typeof fullBurnSkillMul>[2];
+  it('스킬 + 최대 중첩일 때만 +30%', () => {
+    expect(fullBurnSkillMul(true, true, im)).toBeCloseTo(1.3);
+    expect(fullBurnSkillMul(false, true, im)).toBe(1);
+    expect(fullBurnSkillMul(true, false, im)).toBe(1);
+    expect(fullBurnSkillMul(true, true, null)).toBe(1);
   });
 });

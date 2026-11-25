@@ -274,6 +274,13 @@ export class MageRuntime {
     return school && im?.effect === 'extreme' ? { chance: im.values.critChance!, bonus: im.values.extreme! } : null;
   }
 
+  /** 화상이 최대 중첩인지 */
+  burnFull(enemy: Enemy): boolean {
+    const rule = this.run.tagRule<BurnRule>('burn');
+    const cap = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss' ? (rule.bossMaxStacks ?? rule.maxStacks) : rule.maxStacks;
+    return !!enemy.burn && enemy.burn.stacks >= cap;
+  }
+
   /** 피해를 준 뒤: 점화(모든 피해에 확률 화상), 서리(냉기 피해 중첩 → 빙결), 잔영 동행(무기 공격을 늦게 따라 친다) */
   onHit(enemy: Enemy, source: string | null, killed: boolean, base: number, tags: readonly TagId[]): void {
     const im = this.run.skillRt.imprint();
@@ -281,17 +288,7 @@ export class MageRuntime {
     if (im.effect === 'followUp' && source === null) this.echoAttack(enemy, base * im.values.followUp!, tags, im.values.delaySec!);
     if (killed || enemy.dead) return;
     const host = this.run.skillRt.hostFor(im.skillId);
-    if (im.effect === 'ignite') {
-      // 화상이 꽉 찬 적: 불 피해를 한 번 더 (지속 피해처럼 각인 효과를 다시 부르지 않는다)
-      const rule = this.run.tagRule<BurnRule>('burn');
-      const cap = enemy.rank === 'boss' || enemy.rank === 'hiddenBoss' ? rule.bossMaxStacks : rule.maxStacks;
-      if (enemy.burn && enemy.burn.stacks >= cap) {
-        const fire = findSkill(this.run.ctx.data.skills, im.skillId);
-        if (fire.sprites.blast) playFx(this.run, fire.sprites.blast, enemy.sprite.x, enemy.sprite.y, { w: Math.max(16, enemy.radius * 2.2) });
-        if (this.run.damage.applyDamage(enemy, base * im.values.fullBurn!, im.skillId, { tags: fire.sources.blast ?? fire.tags, crit: false, space: false })) return;
-      }
-      if (this.run.rng.chance(im.values.ignite!)) host.burn(enemy, im.values.stacks!);
-    }
+    if (im.effect === 'ignite' && this.run.rng.chance(im.values.ignite!)) host.burn(enemy, im.values.stacks!);
     if (im.effect === 'frost' && this.elementOf(source) === 'ice') {
       const r = frostHit(enemy.frost, im.values.need!, im.values.stackSec!);
       enemy.frost = r.state;

@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 862개 · 그림 있음 812개
+전체 863개 · 그림 있음 813개
 
 ## player (9)
 
@@ -489,7 +489,7 @@
 | `fx_hw_blast` | 마기탄 (bigBlast) 외 2곳 | 40×40 | center | #b266ff | mku/fx_hw_blast.png (23프레임) |
 | `fx_summon_will_shot` | 마기탄 (shot) 외 1곳 | 10×10 | center | #e0b3ff | mku/fx_summon_will_shot.png (5프레임) |
 | `fx_hwk_portal` | 마기 분출 (portal) | 32×32 | center | #b266ff | mku/fx_hwk_portal.png (1프레임) |
-| `fx_hw_beam` | 마기 분출 (beam) 외 1곳 | 12×12 | center | #b266ff | mku/fx_hw_beam.png (7프레임) |
+| `fx_hw_beam` | 마기 분출 (beam) 외 2곳 | 12×12 | center | #b266ff | mku/fx_hw_beam.png (7프레임) |
 | `fx_hwk_stun` | 마기 파동 (stun) | 22×22 | center | #ffe36e | mku/fx_hwk_stun.png (36프레임) |
 | `fx_hw_wave` | 마기 파동 (wave) | 60×60 | center | #b266ff | mku/fx_hw_wave.png (12프레임) |
 | `proj_hwk_orb_dark` | 마기 응축구 (orbDark) | 20×20 | center | #7a3fd1 | mku/proj_hwk_orb_dark.png (1프레임) |
@@ -523,6 +523,7 @@
 | `summon_spirit_magi` | 순수 전개 (magi) | 14×20 | center | #b266ff | mku/summon_spirit_magi.png (1프레임) |
 | `fx_first_law_core` | 열역학 제1법칙 (particle) | 8×8 | center | #ff9a3c | mku/fx_first_law_core.png (9프레임) |
 | `fx_first_law_blast` | 열역학 제1법칙 (blast) | 40×40 | center | #ff9a3c | mku/fx_first_law_blast.png (23프레임) |
+| `fx_hwk_burst` | 기본적 마기 운용 (blast) 외 1곳 | 80×80 | center | #9a8aff | mku/fx_hwk_burst.png (23프레임) |
 | `fx_bolt_strike` | 벼락 (skyBolt) | 60×60 | center | #9ac8ff | mku/fx_bolt_strike.png (34프레임) |
 | `ult_cut1` | 벼락 (cut1) | 20×20 | center | #6a9cff | mku/ult_cut1.png (1프레임) |
 | `ult_cut2` | 벼락 (cut2) | 20×20 | center | #6a9cff | mku/ult_cut2.png (1프레임) |
@@ -559,7 +560,6 @@
 | `fx_mage_meteor` | 원소 대합주 (fire) | 80×80 | center | #ff6a2a | mku/fx_mage_meteor.png (31프레임) |
 | `fx_mage_icicle` | 원소 대합주 (ice) | 44×44 | center | #5ad0f0 | mku/fx_mage_icicle.png (19프레임) |
 | `fx_mage_strike` | 원소 대합주 (lightning) | 70×70 | center | #ffd83a | mku/fx_mage_strike.png (20프레임) |
-| `fx_hwk_burst` | 정화 집행 (chain) | 80×80 | center | #b266ff | mku/fx_hwk_burst.png (23프레임) |
 | `fx_hwk_guillotine` | 정화 집행 (guillotine) | 70×70 | center | #b266ff | mku/fx_hwk_guillotine.png (1프레임) |
 
 ## lab (7)
@@ -642,7 +642,7 @@
 | `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | mku/item_orion_shield.png (1프레임) |
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | mku/item_hectar_ram.png (1프레임) |
 
-## icon (100)
+## icon (101)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -689,6 +689,7 @@
 | `icon_skill_elementCycle` | 원소 순환 | 16×16 | center | #ff6a2a | mku/icon_skill_elementCycle.png (1프레임) |
 | `icon_skill_pureUnfolding` | 순수 전개 | 16×16 | center | #b266ff | mku/icon_skill_pureUnfolding.png (1프레임) |
 | `icon_ult_firstLaw` | 열역학 제1법칙 | 16×16 | center | #ff9a3c | mku/icon_ult_firstLaw.png (1프레임) |
+| `icon_ult_magiOperation` | 기본적 마기 운용 | 16×16 | center | #9a8aff | mku/icon_ult_magiOperation.png (1프레임) |
 | `icon_ult_thunderbolt` | 벼락 | 16×16 | center | #4ab0ff | mku/icon_ult_thunderbolt.png (1프레임) |
 | `icon_ult_singularity` | 특이점 실험 | 16×16 | center | #ff3a4a | mku/icon_ult_singularity.png (1프레임) |
 | `icon_ult_sweep` | 휩쓸기 | 16×16 | center | #c9ae79 | mku/icon_ult_sweep.png (1프레임) |

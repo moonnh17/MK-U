@@ -9381,6 +9381,12 @@
           "loop": false
         }
       }
+    },
+    "icon_ult_magiOperation": {
+      "file": "mku/icon_ult_magiOperation.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
     }
   }
 }

@@ -90,7 +90,7 @@ export interface JuiceData {
     /** 화상·출혈: 적 물듦 색(보스는 안 물듦), 문양·입자 색(1 밝은색 2 중간 3 어두운 4 가장 밝은 점), 입자 간격·수명·이동(음수면 위로) */
     burn: StatusLookDef; bleed: StatusLookDef;
     /** 문양: 머리 위 간격, 둘 다 걸리면 좌우로 벌리는 간격, 중첩이 차기 직전 최대 배율, 최대 중첩일 때 맥박 폭·입자 배수 */
-    markGapPx: number; markSideGapPx: number; markMaxScale: number; markFullPulse: number; markFullParticleMul: number;
+    markGapPx: number; markSideGapPx: number; markPipGapPx: number; markFullPulse: number; markFullParticleMul: number;
     petrifyTint: string; petrifyColors: string[]; petrifyCrackSec: number; shatterShards: number; shatterSpeed: [number, number]; shatterLifeSec: number;
     executeColor: string; executeSec: number; executeSize: number;
     /** 냉기(마기법사 백온파): 빙결·둔화 물듦 색, 적 이동 감속 상한(시선·둔화·한파 합) */

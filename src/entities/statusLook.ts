@@ -25,6 +25,27 @@ const MARKS: Record<StatusKind, { small: string[]; full: string[] }> = {
   },
 };
 
+/** 3×5 숫자 (중첩 수 표시) */
+const DIGITS = ['111101101101111', '010110010010111', '111001111100111', '111001111001111', '101101111001001', '111100111001111', '111100111101111', '111001010010010', '111101111101111', '111101111001111'];
+
+/** 중첩 수 글자: 검은 테두리 1px를 두른 숫자 */
+function numberTexture(scene: Phaser.Scene, kind: StatusKind, n: number, color: string): string {
+  const key = `status_${kind}_n${n}`;
+  if (scene.textures.exists(key)) return key;
+  const ds = String(n).split('').map(Number);
+  const w = ds.length * 4 - 1;
+  const g = scene.make.graphics({}, false);
+  const dots: [number, number][] = [];
+  ds.forEach((d, i) => [...DIGITS[d]!].forEach((c, j) => c === '1' && dots.push([1 + i * 4 + (j % 3), 1 + Math.floor(j / 3)])));
+  g.fillStyle(0x000000, 1);
+  for (const [x, y] of dots) g.fillRect(x - 1, y - 1, 3, 3);
+  g.fillStyle(hexColor(color), 1);
+  for (const [x, y] of dots) g.fillRect(x, y, 1, 1);
+  g.generateTexture(key, w + 2, 7);
+  g.destroy();
+  return key;
+}
+
 function markTexture(scene: Phaser.Scene, kind: StatusKind, size: 'small' | 'full'): string {
   const key = `status_${kind}_${size}`;
   if (scene.textures.exists(key)) return key;
@@ -38,19 +59,24 @@ function markTexture(scene: Phaser.Scene, kind: StatusKind, size: 'small' | 'ful
 }
 
 /**
- * 화상·출혈 겉모습: 머리 위 문양(중첩이 쌓일수록 커지고 최대 중첩이면 화려한 문양으로 바뀌어 맥박친다)과 입자
- * (불티는 위로, 핏방울은 아래로). 물듦은 enemy.restoreTint가 맡는다.
+ * 화상·출혈 겉모습: 머리 위 문양 + 중첩 수 + 칸 게이지(최대 중첩만큼 칸, 찬 만큼 밝게). 최대 중첩이면 문양이 화려하게 바뀌어 맥박치고
+ * 게이지가 번쩍인다. 입자는 불티는 위로, 핏방울은 아래로. 물듦은 enemy.restoreTint가 맡는다.
  */
 export class StatusLook {
   private readonly mark: Phaser.GameObjects.Image;
+  private readonly count: Phaser.GameObjects.Image;
+  private readonly pips: Phaser.GameObjects.Graphics;
   private particleIn = 0;
   private full = false;
+  private shown = -1;
 
   constructor(
     private readonly scene: Phaser.Scene,
     private readonly kind: StatusKind,
   ) {
     this.mark = scene.add.image(0, 0, markTexture(scene, kind, 'small')).setDepth(6);
+    this.count = scene.add.image(0, 0, numberTexture(scene, kind, 1, getContext().data.juice.status[kind].colors[0]!)).setDepth(6).setOrigin(0, 0.5);
+    this.pips = scene.add.graphics().setDepth(6);
   }
 
   update(dt: number, x: number, headY: number, stacks: number, maxStacks: number): void {
@@ -61,14 +87,24 @@ export class StatusLook {
       this.full = full;
       this.mark.setTexture(markTexture(this.scene, this.kind, full ? 'full' : 'small'));
     }
-    const smallW = MARKS[this.kind].small[0]!.length;
-    const t = maxStacks > 1 ? Math.min(1, (stacks - 1) / (maxStacks - 1)) : 1;
-    const pulse = full ? 1 + st.markFullPulse * Math.sin(this.scene.time.now / 90) : 1;
-    // 같은 화면 폭으로 이어지게: 최대 중첩 문양은 작은 문양의 최대 크기에 맞춘다
-    const w = smallW * (1 + (st.markMaxScale - 1) * t) * pulse;
-    this.mark.setScale(w / this.mark.width);
-    const bob = Math.sin(this.scene.time.now / 120) * 0.6;
-    this.mark.setPosition(x, headY - st.markGapPx - (this.mark.displayHeight - this.mark.height) / 2 + bob);
+    const n = Math.min(stacks, maxStacks);
+    if (n !== this.shown) {
+      this.shown = n;
+      this.count.setTexture(numberTexture(this.scene, this.kind, n, full ? def.colors[3]! : def.colors[0]!));
+    }
+    this.mark.setScale(full ? 1 + st.markFullPulse * Math.sin(this.scene.time.now / 90) : 1);
+    // 문양 + 숫자를 한 줄로 가운데 맞춤, 그 아래 칸 게이지
+    const pipsW = maxStacks * 2 - 1;
+    const rowW = this.mark.width + 1 + this.count.width;
+    const left = x - rowW / 2;
+    const bottom = headY - st.markGapPx;
+    const iconY = bottom - st.markPipGapPx - this.mark.height / 2;
+    this.mark.setPosition(left + this.mark.width / 2, iconY);
+    this.count.setPosition(left + this.mark.width + 1, iconY + 1);
+    const blink = full && Math.sin(this.scene.time.now / 70) > 0;
+    const px = Math.round(x - pipsW / 2);
+    this.pips.clear().fillStyle(0x000000, 0.7).fillRect(px - 1, bottom - 1, pipsW + 2, 4);
+    for (let i = 0; i < maxStacks; i++) this.pips.fillStyle(i < n ? hexColor(blink ? def.colors[3]! : def.colors[1]!) : 0x3a3a3a, 1).fillRect(px + i * 2, bottom, 1, 2);
     this.particleIn -= dt;
     if (this.particleIn > 0) return;
     this.particleIn = def.particleEverySec / (full ? st.markFullParticleMul : 1);
@@ -80,6 +116,8 @@ export class StatusLook {
 
   destroy(): void {
     this.mark.destroy();
+    this.count.destroy();
+    this.pips.destroy();
   }
 }
 

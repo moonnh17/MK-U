@@ -16,6 +16,20 @@
       }
     },
     {
+      "id": "magiOperation",
+      "nameKey": "ultimate.magiOperation",
+      "shortKey": "ultimate.magiOperation.short",
+      "descKey": "ultimate.magiOperation.desc",
+      "tags": ["magic", "ranged"],
+      "sources": { "beam": ["magic", "ranged"], "blast": ["magic", "ranged"] },
+      "values": { "range": 200, "maxTargets": 3, "beamDamage": 25, "beamWidth": 5, "beamGapSec": 0.08, "blastDelaySec": 0.15, "radius": 40, "blastDamage": 35 },
+      "color": "#9a8aff",
+      "sprites": {
+        "beam": { "spriteKey": "fx_hw_beam", "color": "#9a8aff", "size": 30 },
+        "blast": { "spriteKey": "fx_hwk_burst", "color": "#9a8aff", "size": 80 }
+      }
+    },
+    {
       "id": "thunderbolt",
       "nameKey": "ultimate.thunderbolt",
       "shortKey": "ultimate.thunderbolt.short",

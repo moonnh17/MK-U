@@ -10,7 +10,7 @@ const k = require('./pngkit.cjs');
 const REPO = path.resolve(__dirname, '..');
 const SRC = path.join(REPO, 'scripts/art-src');
 const ICON = 64, DENSITY = 2;
-const ULTS = new Set(['elementConcert', 'sadExecution']);
+const ULTS = new Set(['elementConcert', 'sadExecution', 'magiOperation']);
 /** key: [mage-proj 파일, 화면 폭 px] */
 const PROJ = {
   skill_mage_fireball: ['fireball', 28],

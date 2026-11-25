@@ -55,6 +55,11 @@ export function elementDamageMul(element: ElementId | undefined, im: ActiveImpri
   return 1 + (im.values.fireDamage ?? 0) * k;
 }
 
+/** 점화: 화상이 꽉 찬 적에게 주는 스킬 피해 배율 (기본 공격은 그대로) */
+export function fullBurnSkillMul(isSkill: boolean, burnFull: boolean, im: ActiveImprint | null): number {
+  return isSkill && burnFull && im?.effect === 'ignite' ? 1 + (im.values.fullBurnSkill ?? 0) : 1;
+}
+
 /** 원소 일주 순서: 화염 → 냉기 → 번개 → (화염) */
 const CYCLE_ORDER: readonly ElementId[] = ['fire', 'ice', 'lightning'];
 

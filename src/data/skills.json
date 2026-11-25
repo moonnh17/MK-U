@@ -1540,7 +1540,7 @@
         "awakened": {"descKey": "imprint.fireball.awakened"},
         "effect": "ignite",
         "levels": [{ "ignite": 0.08 }, { "ignite": 0.12 }, { "ignite": 0.16 }],
-        "fixed": { "stacks": 1, "blastDamage": 6, "blastRadius": 24, "fullBurn": 0.5 }
+        "fixed": { "stacks": 1, "blastDamage": 6, "blastRadius": 24, "fullBurnSkill": 0.3 }
       },
       "awakening": {"nameKey": "skill.fireball.awakened", "descKey": "skill.fireball.awakened.desc", "requiredItem": "goldenEmberFruit", "tags": ["magic", "ranged"], "cooldownSec": 3.5, "values": {"embers": 3, "emberDamage": 8, "emberRange": 90, "emberSpeed": 180, "emberBlastRadius": 22, "emberBlastDamage": 14, "maxEmbers": 12}},
       "color": "#ff6a2a",

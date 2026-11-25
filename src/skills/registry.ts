@@ -8,6 +8,7 @@ import { sweep } from './sweep';
 import { combatDrone } from './combatDrone';
 import { experimentalWeapon } from './experimentalWeapon';
 import { firstLaw } from './firstLaw';
+import { magiOperation } from './magiOperation';
 import type { PassiveImpl, SkillImpl, UltimateImpl } from './host';
 import { magiCorruption } from './magiCorruption';
 import { chainLightning, elementConcert, elementCycle, elementWard, fireball, fireWall, iceOrb, iceSpear, teleport } from './magiMage';
@@ -71,6 +72,7 @@ const PASSIVES: Readonly<Record<string, PassiveImpl>> = {
 
 const ULTIMATES: Readonly<Record<string, UltimateImpl>> = {
   firstLaw,
+  magiOperation,
   thunderbolt,
   singularity,
   sweep,
