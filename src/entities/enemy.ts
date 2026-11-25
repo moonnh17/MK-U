@@ -256,7 +256,7 @@ export class Enemy {
   set burn(s: BurnState | null) {
     const was = !!this.burnState;
     this.burnState = s;
-    if (!!s !== was) this.setLook('burn', !!s);
+    if (!!s !== was) this.restoreTint();
   }
 
   /** 걸려 있는 출혈 (끝나면 null) */
@@ -267,16 +267,9 @@ export class Enemy {
   set bleed(s: BleedState | null) {
     const was = !!this.bleedState;
     this.bleedState = s;
-    if (!!s !== was) this.setLook('bleed', !!s);
+    if (!!s !== was) this.restoreTint();
   }
 
-  private setLook(kind: StatusKind, on: boolean): void {
-    if (this.dead) return;
-    this.looks[kind]?.destroy();
-    delete this.looks[kind];
-    if (on) this.looks[kind] = new StatusLook(this.scene, kind);
-    this.restoreTint();
-  }
 
   /** 굳어 가는 시선의 감속을 바꾼다 (색은 감속이 생기고 없어질 때만 바꾼다) */
   setGaze(sec: number, slow: number): void {
@@ -364,19 +357,45 @@ export class Enemy {
     return this.rank === 'boss' || this.rank === 'hiddenBoss';
   }
 
-  /** 머리 위 문양: 둘 다 걸리면 좌우로 나눠 띄운다 */
-  private updateStatusLooks(dt: number): void {
-    const { burn, bleed } = this.looks;
-    if (!burn && !bleed) return;
+  /** 지금 걸린 상태이상과 머리 위 숫자(중첩 수 또는 남은 초, 올림), 최대 중첩 여부. 이 순서로 왼쪽부터 놓는다 */
+  private activeStatuses(): [StatusKind, number, boolean][] {
     const d = getContext().data;
-    const headY = this.sprite.y - this.radius - (this.icon ? 8 : 2);
-    const side = burn && bleed ? d.juice.status.markSideGapPx : 0;
-    const tag = (id: StatusKind) => d.tags.tags.find((x) => x.id === id)!.rule as { maxStacks: number; bossMaxStacks?: number };
-    if (bleed && this.bleedState) bleed.update(dt, this.sprite.x - side, headY, this.bleedState.stacks, tag('bleed').maxStacks);
-    if (burn && this.burnState) {
-      const r = tag('burn');
-      burn.update(dt, this.sprite.x + side, headY, this.burnState.stacks, this.isBossRank ? (r.bossMaxStacks ?? r.maxStacks) : r.maxStacks);
+    const cap = (id: 'burn' | 'bleed') => {
+      const r = d.tags.tags.find((x) => x.id === id)!.rule as { maxStacks: number; bossMaxStacks?: number };
+      return this.isBossRank ? (r.bossMaxStacks ?? r.maxStacks) : r.maxStacks;
+    };
+    const sec = (s: number) => Math.max(1, Math.ceil(s));
+    const out: [StatusKind, number, boolean][] = [];
+    if (this.bleedState) out.push(['bleed', this.bleedState.stacks, this.bleedState.stacks >= cap('bleed')]);
+    if (this.burnState) out.push(['burn', this.burnState.stacks, this.burnState.stacks >= cap('burn')]);
+    if (this.frost) out.push(['frost', this.frost.stacks, false]);
+    if (this.freezeLeft > 0) out.push(['freeze', sec(this.freezeLeft), false]);
+    else if (this.chillSec > 0) out.push(['chill', sec(this.chillSec), false]);
+    if (this.stunLeft > 0) out.push(['stun', sec(this.stunLeft), false]);
+    if (this.petrifyLeft > 0) out.push(['petrify', sec(this.petrifyLeft), false]);
+    if (this.boundLeft > 0) out.push(['bind', sec(this.boundLeft), false]);
+    if (this.corruption) out.push(['corruption', sec(this.corruption.leftSec), false]);
+    return out;
+  }
+
+  /** 머리 위 문양: 걸린 것을 한 줄로 가운데 맞춰 띄운다 (없어진 것은 치운다) */
+  private updateStatusLooks(dt: number): void {
+    const list = this.activeStatuses();
+    for (const k of Object.keys(this.looks) as StatusKind[]) {
+      if (list.some(([kind]) => kind === k)) continue;
+      this.looks[k]!.destroy();
+      delete this.looks[k];
     }
+    if (list.length === 0) return;
+    const st = getContext().data.juice.status;
+    const looks = list.map(([k]) => (this.looks[k] ??= new StatusLook(this.scene, k)));
+    const total = looks.reduce((w, l) => w + l.width, 0) + st.markRowGapPx * (looks.length - 1);
+    let left = Math.round(this.sprite.x - total / 2);
+    const bottom = this.sprite.y - this.radius - (this.icon ? 8 : 2) - st.markGapPx;
+    looks.forEach((l, i) => {
+      l.update(dt, left, bottom, list[i]![1], list[i]![2]);
+      left += l.width + st.markRowGapPx;
+    });
   }
 
   update(dt: number, host: EnemyHost): void {
