@@ -111,7 +111,7 @@ export interface GameEvents {
 
   /** 디버그 패널 */
   debugSetSkill: { skillId: string; level: number; awakened: boolean };
-  debugOpenCards: { kind: CardOfferKind };
+  debugOpenCards: { kind: CardOfferKind | 'evolution' };
   debugFillUltimate: Record<string, never>;
   debugSpawn: { enemyId: string; count: number; elite?: string | null };
   debugBarrage: Record<string, never>;

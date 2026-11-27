@@ -42,7 +42,7 @@ export function codexSections(d: GameData, tab: CodexTab): CodexSection[] {
     // 소환으로만 나오는 개체(분신)와 보스가 없는 방의 임시 표적은 뺀다
     const bossIds = new Set([...d.bosses.bosses, ...d.bosses.hiddenBosses].map((b) => b.id));
     const normal = (ch: number) =>
-      d.enemies.enemies.filter((e) => e.chapter === ch && !bossIds.has(e.id) && !e.summon && e.rank !== 'boss' && e.rank !== 'hiddenBoss').map((e): CodexEntry => ({ kind: 'enemy', id: e.id, record: 'enemies' }));
+      d.enemies.enemies.filter((e) => e.chapter === ch && !bossIds.has(e.id) && !e.summon && !e.variant && e.rank !== 'boss' && e.rank !== 'hiddenBoss').map((e): CodexEntry => ({ kind: 'enemy', id: e.id, record: 'enemies' }));
     const chapters = [...new Set(d.enemies.enemies.map((e) => e.chapter))].sort();
     return [
       ...chapters.map((ch) => ({ titleKey: `codex.section.chapter${ch}`, entries: normal(ch) })),

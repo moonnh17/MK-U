@@ -419,6 +419,10 @@ body {
 }
 
 /* 개전 각인 문구 (마기법사) */
+.cw-reward {
+  margin-top: 6px;
+  color: #ffd86a;
+}
 .cw-imprint,
 .cx-imprint,
 .iw-imprint {

@@ -42,7 +42,8 @@ export function bindRunEvents(run: RunScene): (() => void)[] {
       // 오버플로우는 1-1부터 따라가 그 스테이지의 장·보스 칸을 맞춘다. 본편은 마지막 장까지만
       if (p.overflow) {
         const at = overflowStageAt(run.ctx.config.seed, chapter, stage, run.ctx.data);
-        p.overflow = at.state;
+        // 보스 칸 기록만 맞추고 고른 진화·받을 상자는 그대로
+        p.overflow = { ...p.overflow, onceBosses: at.state.onceBosses, lastBoss: at.state.lastBoss };
         run.scene.restart({ stage: at.stage, player: p, offers: [] } satisfies RunSceneData);
         return;
       }

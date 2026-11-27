@@ -145,13 +145,14 @@
 | `fx_colony_root_warn` | 마기 군락체 (fx) | 40×40 | center | #b05aff | mku/fx_colony_root_warn.png (2프레임) |
 | `fx_colony_root_hit` | 마기 군락체 (fx) | 40×40 | center | #b05aff | mku/fx_colony_root_hit.png (2프레임) |
 
-## enemy (16)
+## enemy (17)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
-| `enemy_tomakki` | 토마끼 | 8×8 | feet | #8fd16a | mku/enemy_tomakki.png (4프레임) |
+| `enemy_tomakki` | 토마끼 외 1곳 | 8×8 | feet | #8fd16a | mku/enemy_tomakki.png (4프레임) |
 | `enemy_gaedeulgae` | 개들개 | 11×11 | feet | #c9a24a | mku/enemy_gaedeulgae.png (5프레임) |
 | `enemy_akgwi` | 악귀 | 15×15 | feet | #b0383a | mku/enemy_akgwi.png (6프레임) |
+| `enemy_fusion_akgwi` | 소형 융합악귀 외 1곳 | 39×39 | feet | #c04070 | mku/enemy_fusion_akgwi.png (4프레임) |
 | `enemy_ghost_shooter` | 유령 사수 | 14×14 | feet | #c0303a | mku/enemy_ghost_shooter.png (6프레임) |
 | `enemy_hectar_trooper` | 헥타르 전투원 | 12×12 | feet | #3a7bff | mku/enemy_hectar_trooper.png (6프레임) |
 | `enemy_magi_beetle` | 마기갑충 | 15×15 | feet | #5a8a3a | mku/enemy_magi_beetle.png (10프레임) |
@@ -166,11 +167,10 @@
 | `enemy_cluster_alveoli` | 군집 폐포 | 16×16 | feet | #8a3ad0 | mku/enemy_cluster_alveoli.png (16프레임) |
 | `enemy_magi_colony_fusion` | 마기 군락체 | 26×26 | feet | #8a3ad0 | mku/enemy_magi_colony_fusion.png (20프레임) |
 
-## boss (29)
+## boss (28)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
-| `enemy_fusion_akgwi` | 융합악귀 | 39×39 | feet | #7a1f3a | mku/enemy_fusion_akgwi.png (4프레임) |
 | `enemy_electric_ring` | 전기환띠 | 42×42 | feet | #3a9ad9 | mku/enemy_electric_ring.png (6프레임) |
 | `enemy_training_dummy` | 보스 자리(임시 표적) | 24×24 | feet | #8a5ad9 | mku/enemy_training_dummy.png (1프레임) |
 | `enemy_ancestor_echo` | 선조의 잔상 | 42×42 | feet | #b0583a | mku/enemy_ancestor_echo.png (16프레임) |

@@ -35,6 +35,7 @@ export function buildHosts(run: RunScene): void {
     rng: run.rng,
     pullPlayer: (to, speed) => run.playerLife.pullPlayer(to, speed),
     pathDir: (from, radius) => run.roomRt.enemyPathDir(from, radius),
+    bulletRoom: (n) => run.evo.bulletRoom(n),
   };
   run.bossHost = {
     ...run.enemyHost,

@@ -18,6 +18,8 @@ export interface CardView {
   desc: string;
   /** 개전 각인 문구 (마기법사 스킬) */
   imprint?: string;
+  /** 오버플로우 진화 카드의 플레이어 보상 */
+  reward?: string;
   badges: TagBadge[];
   /** 테두리 강조 색 */
   accent: string;
@@ -49,6 +51,28 @@ export function describeCard(card: AnyCard, player: PlayerState, ctx: GameContex
       accent: adv.color,
       school: '',
       icon: ult ? { color: adv.color, key: artKeys.ultimateIcon(ult.id), artOnly: true } : undefined,
+    };
+  }
+  if (card.kind === 'evolution') {
+    // 오버플로우 적 진화: 진화 등급 색, 적 진화 효과 + 플레이어 보상
+    const E = d.overflow.evolution;
+    const grade = d.groupMultipliers.grades.find((g) => g.id === card.grade);
+    const unique = E.uniques.find((u) => u.id === card.evoId);
+    const st = player.overflow?.evolution;
+    const n = st?.stacks[card.evoId] ?? 0;
+    const target = E.evolutions.find((e) => e.id === card.evoId)?.target;
+    const enemy = unique ? d.enemies.enemies.find((x) => x.id === unique.enemy) : undefined;
+    return {
+      kindLabel: t(target === 'boss' ? 'card.evolution.boss' : unique ? 'card.evolution.unique' : 'card.evolution', { grade: grade ? t(grade.nameKey) : '' }),
+      name: t(`evo.${card.evoId}.name`),
+      subName: '',
+      levelText: unique ? t('card.evolution.once') : card.evoId === E.overloadCard.id ? t('card.evolution.stack', { n: st?.overloadStacks ?? 0 }) : t('card.evolution.level', { from: n, to: n + 1, max: E.maxStacks }),
+      desc: t(`evo.${card.evoId}.desc`),
+      reward: t('card.evolution.reward', { reward: t(`evoReward.${card.rewardId}`) }),
+      badges: [],
+      accent: grade?.color ?? '#ffffff',
+      school: '',
+      icon: enemy ? { color: enemy.color, key: enemy.spriteKey } : undefined,
     };
   }
   if (card.kind === 'item') {

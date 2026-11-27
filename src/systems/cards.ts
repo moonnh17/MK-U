@@ -1,6 +1,7 @@
 /**
  * 카드 보상 (순수 함수): 스케줄, 카드 풀, 뽑기, 적용, 전직 판정용 계열 집계.
  */
+import type { EvolutionCard } from './evolution';
 import type { Rng } from '../core/rng';
 import type { CardOfferKind, CardsData, MapgenData, SchoolId, SkillsData } from '../types/data';
 import type { StageRef } from './run';
@@ -19,7 +20,8 @@ export type Card = { kind: SkillCardKind; skillId: string };
 export type ItemChoiceCard = { kind: 'item'; itemId: string };
 /** 학파 선택 카드(전직 동점) */
 export type SchoolChoiceCard = { kind: 'school'; school: SchoolId };
-export type AnyCard = Card | ItemChoiceCard | SchoolChoiceCard;
+/** 오버플로우 적 진화 카드 */
+export type AnyCard = Card | ItemChoiceCard | SchoolChoiceCard | EvolutionCard;
 
 // ---------- 스케줄 ----------
 

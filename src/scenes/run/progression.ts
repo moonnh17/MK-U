@@ -15,6 +15,7 @@ import { awakenSkill, awakeningReady, equipSkill, findSkill, skillValues } from 
 import { roomCenter } from '../../systems/worldLayout';
 import type { GeminiEventId, SchoolId } from '../../types/data';
 import { contentChapter, stageBossId } from '../../systems/overflow';
+import { rollEvolutionCards } from '../../systems/evolution';
 import type { RunScene } from '../RunScene';
 import { SKILL_ACTIONS, sfx, type Offer } from './shared';
 
@@ -87,6 +88,16 @@ export class Progression {
       this.currentCards = cards;
       this.run.setModal('cards');
       bus.emit('cardsShow', { titleKey: 'card.title.school', cards, reroll: null });
+      return;
+    }
+    if (next.kind === 'evolution') {
+      // 오버플로우 적 진화: 리롤 없음
+      const st = p.overflow?.evolution;
+      const cards = st ? rollEvolutionCards(rng, st, d.overflow.evolution) : [];
+      if (cards.length === 0) return this.openNextCards();
+      this.currentCards = cards;
+      this.run.setModal('cards');
+      bus.emit('cardsShow', { titleKey: 'card.title.evolution', cards, reroll: null });
       return;
     }
     const cards: AnyCard[] = next.kind === 'skill' ? this.drawSkills(rng) : this.drawItems(rng);
@@ -167,7 +178,7 @@ export class Progression {
   rerollCards(): void {
     const p = this.run.session.player;
     const cost = this.run.ctx.data.cards.rerollCost;
-    if (this.run.modal !== 'cards' || this.rerolled || !this.currentOffer || this.currentOffer.kind === 'school' || p.coins < cost) return;
+    if (this.run.modal !== 'cards' || this.rerolled || !this.currentOffer || this.currentOffer.kind === 'school' || this.currentOffer.kind === 'evolution' || p.coins < cost) return;
     p.coins -= cost;
     this.rerolled = true;
     this.showCards();
@@ -180,6 +191,10 @@ export class Progression {
     if (card.kind === 'item') {
       this.run.loot.giveItem(card.itemId);
       this.checkAwakenings(() => this.openNextCards());
+      return;
+    }
+    if (card.kind === 'evolution') {
+      this.run.evo.pick(card, () => this.openNextCards());
       return;
     }
     if (card.kind === 'school') {

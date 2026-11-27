@@ -98,12 +98,16 @@ export class RoomRuntime {
     for (const door of doors) door.setLocked(locked);
   }
 
-  spawnWave(roomId: number, wave: Wave, index: number): void {
+  spawnWave(roomId: number, planned: Wave, index: number): void {
     const { map } = this.run.session;
     const rng = Rng.derive(this.run.ctx.config.seed, `spawn-${map.chapter}-${map.stage}-${roomId}-${index}`);
     // 전투 칸 웨이브의 일반 적 일부를 엘리트로 (보스방 제외)
     const node = map.rooms[roomId]!;
     const d = this.run.ctx.data;
+    // 오버플로우 진화: 군체 증식·유니크 변형 (전투 칸·습격만)
+    const fights = node.kind === 'combatRoom' || this.run.encounters.raidRooms.has(roomId);
+    const wave = fights ? this.run.evo.expandWave(Rng.derive(this.run.ctx.config.seed, `evo-wave-${map.chapter}-${map.stage}-${roomId}-${index}`), planned) : planned;
+    if (wave.length > planned.length) this.run.rooms.get(roomId)?.addAlive(wave.length - planned.length);
     const elites =
       node.kind === 'combatRoom' || this.run.encounters.raidRooms.has(roomId)
         ? assignElites(
@@ -131,7 +135,7 @@ export class RoomRuntime {
   }
 
   /** extraEliteId: 두 번째 엘리트 (중형 첨탑 강적) */
-  spawnEnemy(id: string, roomId: number, rng: Rng, countForRoom: boolean, eliteId: string | null = null, extraEliteId: string | null = null): void {
+  spawnEnemy(id: string, roomId: number, rng: Rng, countForRoom: boolean, eliteId: string | null = null, extraEliteId: string | null = null): Enemy {
     const d = this.run.ctx.data;
     const node = this.run.session.map.rooms[roomId]!;
     const def = d.enemies.enemies.find((e) => e.id === id)!;
@@ -141,6 +145,7 @@ export class RoomRuntime {
     const icon = [elite, extra].filter((x) => x !== null).map((x) => this.run.ctx.t(x!.iconKey)).join('');
     const enemy = new Enemy(this.run, def, pos.x, pos.y, d.waves.spawnWarnSec, elite, d.elites, icon, extra);
     if (!def.summon) this.run.discover('enemies', def.id);
+    if (def.artScale) enemy.setExtraScale(def.artScale);
     // 몬스터는 고정 스탯, 히든보스만 장에 따라 (1장 기준 ×1·×2·×3)
     const { stage } = this.run.session;
     if (def.rank === 'hiddenBoss') enemy.scaleHp(hiddenBossScale(hiddenTableChapter(stage, d), d.enemies.hiddenBossScale));
@@ -148,6 +153,8 @@ export class RoomRuntime {
     const ovf = this.overflowScale(def.id, def.rank, def.chapter);
     if (ovf.hp !== 1 || ovf.damage !== 1) enemy.applyOverflowScale(ovf.hp, def.ai === 'boss' ? 1 : ovf.damage);
     if (def.id === stageBossId(stage, d) && this.bossNameKey(def.id)) enemy.nameKey = this.bossNameKey(def.id)!;
+    // 오버플로우 적 진화 (보스는 보스 진화, 피해는 보스 컨트롤러로)
+    const evoDamage = this.run.evo.onSpawn(enemy);
     enemy.jitterFirstAttack(rng);
     this.run.enemyGroup.add(enemy.sprite);
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
@@ -157,9 +164,11 @@ export class RoomRuntime {
       // 히든보스: 어느 챕터든 같은 패턴, 체력·피해만 챕터 배율
       const hidden = d.bosses.hiddenBosses.find((b) => b.id === def.id);
       const core = hidden ?? d.bosses.bosses.find((b) => b.id === def.id);
-      const mul = (hidden ? hiddenChapterMul(d.bosses, hiddenTableChapter(stage, d)) : 1) * ovf.damage;
+      // 히든보스 장 배율은 체력·피해 둘 다, 오버플로우 장 배율·보스 진화는 피해 몫만 (체력은 앞에서 이미)
+      const chapterMul = hidden ? hiddenChapterMul(d.bosses, hiddenTableChapter(stage, d)) : 1;
+      const mul = chapterMul * ovf.damage * evoDamage;
       if (hidden) {
-        enemy.setMaxHp(enemy.maxHp * mul);
+        enemy.setMaxHp(enemy.maxHp * chapterMul);
         enemy.damageMul = mul;
       }
       if (core) {
@@ -174,6 +183,7 @@ export class RoomRuntime {
         this.run.darknessBoss = enemy;
       }
     }
+    return enemy;
   }
 
   /** 오버플로우 장 배율 (본편·1~3장은 1) */
@@ -225,6 +235,10 @@ export class RoomRuntime {
     const enemy = new Enemy(this.run, def, at.x, at.y, 0, null, d.elites);
     if (maxHp !== undefined) enemy.setMaxHp(maxHp);
     enemy.noReward = true;
+    // 오버플로우: 보스가 부른 졸개도 장 배율·공용 진화를 받는다
+    const ovf = this.overflowScale(def.id, def.rank, def.chapter);
+    if (ovf.hp !== 1 || ovf.damage !== 1) enemy.applyOverflowScale(ovf.hp, ovf.damage);
+    this.run.evo.onSpawn(enemy);
     this.run.enemyGroup.add(enemy.sprite);
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
     this.run.enemies.push(enemy);

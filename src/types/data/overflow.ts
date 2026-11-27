@@ -1,4 +1,5 @@
 /** 오버플로우 모드 (무한 모드) 데이터 */
+import type { GradeId } from './common';
 
 /** 4장부터 무작위로 뽑는 장 하나 */
 export interface OverflowThemeDef {
@@ -53,4 +54,83 @@ export interface OverflowData {
   themeTintAlpha: number;
   /** 디버그 스테이지 이동 목록에 더 보일 장 수 */
   debugExtraChapters: number;
+  evolution: EvolutionData;
+}
+
+/** 진화 효과 수치 (중첩 n마다: 배율 항목은 (1+값)^n, 나머지는 값 × n) */
+export interface EvolutionEffects {
+  hpMul?: number;
+  moveMul?: number;
+  damageMul?: number;
+  attackSpeedMul?: number;
+  /** 방 적 수 배율 (군체 증식) */
+  countMul?: number;
+  defense?: number;
+  knockbackRes?: number;
+  /** regenEverySec마다 최대 체력 비율 */
+  regenPct?: number;
+  explodeDamage?: number;
+  splitChance?: number;
+  /** 주변 적 사망 시 공격·이동 강화 */
+  predatorMul?: number;
+  /** 치명상을 버티고 남는 체력 비율 */
+  immortalHp?: number;
+  /** 과부하 중 공격력·공격속도 증가 */
+  overloadMul?: number;
+  /** 변이 융합: 다른 공용 진화 중첩을 (1 + fusionPerStack × 이 값 × 중첩)배로 */
+  fusion?: number;
+  adaptPerHit?: number;
+  adaptMax?: number;
+}
+
+export type EvolutionTarget = 'common' | 'boss';
+
+export interface EvolutionDef {
+  id: string;
+  /** common: 일반 적·엘리트 / boss: 보스·히든보스 */
+  target: EvolutionTarget;
+  grade: Exclude<GradeId, 'mythic' | 'unique'>;
+  effects: EvolutionEffects;
+  explode?: { radius: number; warnSec: number; color: string };
+  split?: { count: number; hpMul: number; scale: number };
+  predator?: { radius: number; sec: number; color: string };
+  overload?: { cycleSec: number; activeSec: number; color: string };
+}
+
+/** 유니크 진화: 고르면 그 변형 적이 모든 맵에 추가된다 */
+export interface EvolutionUniqueDef {
+  id: string;
+  enemy: string;
+  /** 바탕 종 */
+  base: string;
+}
+
+export type EvolutionRewardDef =
+  | { id: string; kind: 'coins'; amount: number }
+  | { id: string; kind: 'heal'; amount: number }
+  | { id: string; kind: 'skillLevelUp'; amount: number }
+  | { id: string; kind: 'skillCard'; amount: number }
+  | { id: string; kind: 'crystals'; amount: number }
+  | { id: string; kind: 'weaponChest'; tier: string }
+  | { id: string; kind: 'itemChest'; weights: Partial<Record<GradeId, number>> }
+  | { id: string; kind: 'item'; weights: Partial<Record<GradeId, number>> };
+
+export interface EvolutionData {
+  gradeWeights: Record<'common' | 'rare' | 'legendary' | 'unique', number>;
+  cardCount: number;
+  maxStacks: number;
+  /** 공용 진화를 받지 않는 적 */
+  commonExempt: string[];
+  fusionPerStack: number;
+  caps: { defense: number; regenPerSec: number; knockbackRes: number; splitChance: number; splitAlive: number; evoBlasts: number; evoBullets: number };
+  evolutions: EvolutionDef[];
+  regenEverySec: number;
+  uniques: EvolutionUniqueDef[];
+  /** 전투 칸 웨이브마다 고른 유니크 변형이 한 마리 더해질 확률 */
+  uniqueSpawnChance: number;
+  /** 소진 대비: 공용·보스 진화가 모두 최대면 무한히 쌓는 카드 (일반 적 대상) */
+  overloadCard: { id: string; effects: EvolutionEffects };
+  rewards: Record<'common' | 'rare' | 'legendary' | 'unique', EvolutionRewardDef[]>;
+  /** 다음 스테이지 시작방에 떨어뜨리는 상자 간격 */
+  dropOffsetPx: number;
 }

@@ -35,6 +35,10 @@ export interface EnemyDef extends SpriteRef {
   coins: IntRange;
   /** 공격 (목록 순서대로 우선). 없으면 추격·접촉만 */
   attacks?: EnemyAttackDef[];
+  /** 오버플로우 유니크 진화 변형: 도감·챕터 로스터에 따로 들지 않는다 (바탕 종 칸을 쓴다) */
+  variant?: boolean;
+  /** 그림·판정을 함께 키우는 배율 (그림 크기는 그림 밀도로 정해져 size만으로는 안 바뀐다) */
+  artScale?: number;
   /** 보스가 부르는 적(분신). 챕터 로스터·웨이브에 들지 않는다 */
   summon?: boolean;
   /** 변이가 붙어도 변이 공격(도약 등)을 쓰지 않는다 */
@@ -46,6 +50,8 @@ export interface EnemyDef extends SpriteRef {
   mentalRatio?: number;
   /** 집정관: 같은 방에서 죽은 적의 최대 체력을 흡수해 단계가 오른다 */
   absorb?: ArchonAbsorbDef;
+  /** 죽을 때 예고 원 뒤 대폭발 (오버플로우 토마끼 유니크, 플레이어에게만) */
+  deathBlast?: { radius: number; warnSec: number; damage: number; color: string };
 }
 
 /** 집정관 흡수 단계. stages[i]: i+1단계가 되는 누적 흡수량과 그 단계의 배율 */
@@ -80,7 +86,7 @@ export interface EnemyAttackDef {
   reach?: number;
   /** puddle: 장판 틱마다 주는 정신 피해 */
   mentalDamage?: number;
-  /** slam: 내리칠 때 사방으로 퍼지는 충격 탄 */
+  /** slam: 내리칠 때 / lunge: 내려앉을 때 사방으로 퍼지는 충격 탄 */
   ring?: { shots: number; speed: number; range: number; damage: number };
   /** 탄 그림과 물들일 색 (없으면 기본 적 탄) */
   shot?: SpriteRef;

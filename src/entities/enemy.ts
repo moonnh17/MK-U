@@ -16,6 +16,7 @@ import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank, SpriteR
 import { Beams, DelayedBlast, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
 import { animateArt, fitArt } from './art';
 import { getContext } from '../core/context';
+import { adaptStep, defenseMul, NO_EVOLUTION, overloadActive, type EvolvedStats } from '../systems/evolution';
 import { tintedFx } from '../skills/skillFx';
 
 /** 적이 전투 씬에 바라는 것 (원거리 탄·장판·전술 연계·밧줄) */
@@ -24,6 +25,8 @@ export interface EnemyHost extends HazardHost {
   /** sprite·tint: 전용 탄 그림 (유령 사수 붉은 화살) */
   fireEnemyBullet(from: Vec2, angle: number, speed: number, range: number, damage: number, refractable: boolean, mental?: number, sprite?: SpriteRef, tint?: string): void;
   addHazard(h: Hazard): void;
+  /** 진화 탄 상한: n발을 더 쏴도 되는가 (없으면 늘 된다) */
+  bulletRoom?(n: number): boolean;
   /** 전술 연계: 이 적이 조준을 시작했다 (같은 방의 동료도 함께 조준) */
   linkWindup(e: Enemy, attackId: string): void;
   /** 집행자 밧줄: 플레이어를 to까지 speed로 끌어당긴다. 걸리는 시간(초) */
@@ -107,7 +110,25 @@ export class Enemy {
   private stoneFx: ReturnType<NonNullable<Phaser.GameObjects.Sprite['preFX']>['addColorMatrix']> | null = null;
   /** 걸려 있는 마기 변질 */
   corruption: CorruptionState | null = null;
-  readonly mods: EliteMods;
+  /** 엘리트 배율 + 진화 (진화는 baseMods에서 다시 계산한다) */
+  mods: EliteMods;
+  private readonly baseMods: EliteMods;
+  /** 오버플로우 적 진화 (소환 때 정해짐) */
+  evo: EvolvedStats = NO_EVOLUTION;
+  /** 진화 피해 배율을 damageMul에 넣을지 (보스는 보스 컨트롤러가 따로) */
+  private evoDamage = 1;
+  /** 분열로 생긴 개체: 다시 나뉘지 않고 보상·첨탑 기여 없음 */
+  splitChild = false;
+  /** 극한 적응으로 쌓인 방어 */
+  private adaptDef = 0;
+  private immortalUsed = false;
+  private evoClock = 0;
+  private overloadOn = false;
+  /** 포식 본능 남은 시간 */
+  private predatorLeft = 0;
+  private evoAura: Phaser.GameObjects.Arc | null = null;
+  /** 집정관 흡수 단계 피해 배율 */
+  private absorbDamageMul = 1;
   private readonly attacks: EnemyAttackDef[];
   private ai: AiState;
   private aim: Vec2 = { x: 1, y: 0 };
@@ -166,6 +187,7 @@ export class Enemy {
     this.elites = [elite, extraElite].filter((x): x is EliteDef => x !== null);
     this.nameKey = def.nameKey;
     this.mods = eliteMods(this.elites, elitesData);
+    this.baseMods = this.mods;
     this.maxHp = def.maxHp * this.mods.hpMul;
     this.hp = this.maxHp;
     this.warn = warnSec;
@@ -214,6 +236,75 @@ export class Enemy {
     this.setMaxHp(this.maxHp * hp);
     this.ovfDamageMul = damage;
     this.damageMul *= damage;
+  }
+
+  /** 오버플로우 적 진화 — 소환 직후에만. 지금 체력 비율을 지킨 채 최대 체력을 다시 잡는다 */
+  applyEvolution(s: EvolvedStats, withDamage: boolean): void {
+    this.evo = s;
+    this.evoDamage = withDamage ? s.damageMul : 1;
+    const max = this.maxHp * s.hpMul;
+    this.hp = rescaleHp(this.hp, this.maxHp, max);
+    this.maxHp = max;
+    this.hpScale *= s.hpMul;
+    this.refreshEvo();
+  }
+
+  /** 기본 배율 × 진화 × 지금 걸린 진화 버프(과부하·포식) */
+  private refreshEvo(): void {
+    const s = this.evo;
+    const b = this.baseMods;
+    const pred = this.predatorLeft > 0 && s.predator ? 1 + s.predator.mul : 1;
+    const over = this.overloadOn && s.overload ? 1 + s.overload.mul : 1;
+    this.mods = {
+      ...b,
+      moveSpeedMul: b.moveSpeedMul * s.moveMul * pred,
+      attackSpeedMul: b.attackSpeedMul * s.attackSpeedMul * over,
+      damageTakenMul: b.damageTakenMul * defenseMul(s.defense + this.adaptDef, getContext().data.overflow.evolution.caps.defense),
+    };
+    // 보스는 패턴 피해를 보스 컨트롤러가 정한다
+    if (this.def.ai !== 'boss') this.damageMul = this.absorbDamageMul * this.ovfDamageMul * this.evoDamage * pred * over;
+  }
+
+  /** 진화 시간 효과: 재생·과부하·포식 (보스 포함 모든 적, 매 프레임) */
+  tickEvolution(dt: number): void {
+    if (this.dead || this.evo === NO_EVOLUTION) return;
+    const s = this.evo;
+    if (s.regenPerSec > 0 && this.hp < this.maxHp) this.hp = Math.min(this.maxHp, this.hp + this.maxHp * s.regenPerSec * dt);
+    let changed = false;
+    if (s.overload) {
+      this.evoClock += dt;
+      const on = overloadActive(this.evoClock, s.overload);
+      // 켜지기 1초 전부터 옅은 예고 오라
+      const soon = overloadActive(this.evoClock + 1, s.overload);
+      if (on !== this.overloadOn) {
+        this.overloadOn = on;
+        changed = true;
+      }
+      if (soon || on) {
+        this.evoAura ??= this.scene.add.circle(this.sprite.x, this.sprite.y, this.radius + 4, hexColor(s.overload.color), 0).setDepth(2);
+        this.evoAura.setStrokeStyle(on ? 2 : 1, hexColor(s.overload.color), on ? 0.9 : 0.4).setPosition(this.sprite.x, this.sprite.y);
+      } else if (this.evoAura) {
+        this.evoAura.destroy();
+        this.evoAura = null;
+      }
+    }
+    if (this.predatorLeft > 0) {
+      this.predatorLeft -= dt;
+      if (this.predatorLeft <= 0) changed = true;
+    }
+    if (changed) this.refreshEvo();
+  }
+
+  /** 포식 본능: 주변 적이 죽었다 */
+  feed(): void {
+    if (!this.evo.predator || this.dead) return;
+    const was = this.predatorLeft > 0;
+    this.predatorLeft = this.evo.predator.sec;
+    if (!was) {
+      this.refreshEvo();
+      this.sprite.setTintFill(hexColor(this.evo.predator.color));
+      this.scene.time.delayedCall(120, () => this.restoreTint());
+    }
   }
 
   /** 챕터 체력 배율 — 소환 직후에만 */
@@ -665,7 +756,8 @@ export class Enemy {
     const max = this.def.maxHp * this.hpScale * this.mods.hpMul * m.hpMul;
     this.hp = rescaleHp(this.hp, this.maxHp, max);
     this.maxHp = max;
-    this.damageMul = m.damageMul * this.ovfDamageMul;
+    this.absorbDamageMul = m.damageMul;
+    this.refreshEvo();
     this.absorbStage = stage;
     this.halo?.destroy();
     this.halo = m.haloRadius > 0 ? this.scene.add.circle(this.sprite.x, this.sprite.y, m.haloRadius, hexColor(def.haloColor), 0.25).setStrokeStyle(1, hexColor(def.haloColor), 0.9).setDepth(2) : null;
@@ -751,6 +843,14 @@ export class Enemy {
     this.clearTelegraph();
     this.actHit = false;
     if (a.kind === 'lunge') bus.emit('sfx', { id: 'dash' });
+    // 뛰어서 내려앉을 때 사방 탄막 (오버플로우 거대 토마끼). 진화 탄 상한을 넘으면 쏘지 않는다
+    const ring = a.kind === 'lunge' ? a.ring : undefined;
+    if (ring)
+      this.later(a.actSec, () => {
+        if (host.bulletRoom && !host.bulletRoom(ring.shots)) return;
+        const at = { x: this.sprite.x, y: this.sprite.y };
+        for (let k = 0; k < ring.shots; k++) host.fireEnemyBullet(at, (k / ring.shots) * Math.PI * 2, ring.speed, ring.range, ring.damage * this.damageMul, true);
+      });
     if (a.kind === 'burst') {
       this.shotsFired = 0;
       this.shotTimer = 0;
@@ -909,8 +1009,9 @@ export class Enemy {
 
   knockback(dir: Vec2, distance: number, sec: number): void {
     if (this.dead || this.knockbackImmune || this.petrified || sec <= 0) return;
+    const d = distance * (1 - this.evo.knockbackRes);
     this.kbLeft = sec;
-    this.kbVel = { x: (dir.x * distance) / sec, y: (dir.y * distance) / sec };
+    this.kbVel = { x: (dir.x * d) / sec, y: (dir.y * d) / sec };
   }
 
   /** 소환 연출 한 프레임 (끝나면 원래 크기·투명도로 돌리고 원을 치운다) */
@@ -989,8 +1090,26 @@ export class Enemy {
     this.hp -= amount;
     this.sprite.setTintFill(0xffffff);
     this.sprite.scene.time.delayedCall(50, () => this.restoreTint());
+    // 불멸 기관: 한 번 치명상을 버틴다
+    if (this.hp <= 0 && this.evo.immortalHp > 0 && !this.immortalUsed) {
+      this.immortalUsed = true;
+      this.hp = this.maxHp * Math.min(1, this.evo.immortalHp);
+      this.sprite.setTintFill(0xffd84a);
+      this.sprite.scene.time.delayedCall(160, () => this.restoreTint());
+      return false;
+    }
+    // 극한 적응: 맞을수록 방어가 쌓인다
+    if (this.hp > 0 && this.evo.adapt) {
+      const next = adaptStep(this.adaptDef, this.evo);
+      if (next !== this.adaptDef) {
+        this.adaptDef = next;
+        this.refreshEvo();
+      }
+    }
     if (this.hp <= 0) {
       this.dead = true;
+      this.evoAura?.destroy();
+      this.evoAura = null;
       this.clearLooks();
       return true;
     }
@@ -1002,6 +1121,7 @@ export class Enemy {
     this.clearTelegraph();
     this.clearSpawn();
     this.halo?.destroy();
+    this.evoAura?.destroy();
     this.icon?.destroy();
     this.clearLooks();
     for (const r of this.rim) r.img.destroy();

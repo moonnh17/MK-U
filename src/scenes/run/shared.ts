@@ -32,7 +32,7 @@ export interface Prop {
 }
 
 export interface Offer {
-  kind: CardOfferKind | 'school';
+  kind: CardOfferKind | 'school' | 'evolution';
   boss: boolean;
   /** 마기수집첨탑 보상 */
   spire?: boolean;

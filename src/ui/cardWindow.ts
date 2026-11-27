@@ -91,6 +91,12 @@ export class CardWindow {
         im.textContent = v.imprint;
         desc.append(im);
       }
+      if (v.reward) {
+        const rw = document.createElement('div');
+        rw.className = 'cw-reward';
+        rw.textContent = v.reward;
+        desc.append(rw);
+      }
       if (mobile) {
         // 모바일 가로 화면은 높이가 낮아 한 장을 두 줄로: [이름·레벨] [종류·계열·배지 / 설명]
         const left = document.createElement('div');

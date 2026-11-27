@@ -26,6 +26,8 @@ export class Chest {
     readonly fixedItem: string | undefined,
     /** 다가가면 머리 위에 띄우는 상자 이름 */
     readonly nameKey: string,
+    /** 신화 판정 없음 (오버플로우 진화 카드 보상) */
+    readonly noMythic = false,
   ) {
     this.sprite = scene.add.image(x, y, ref.spriteKey).setDepth(2);
     fitArt(getContext().data, this.sprite, ref.size, ref.height ?? ref.size);

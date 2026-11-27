@@ -181,10 +181,10 @@ export class LootInteract {
     });
   }
 
-  rollWeaponItem(weights: Partial<Record<GradeId, number>>, label: string, exclude: readonly string[] = []): WeaponItem {
+  rollWeaponItem(weights: Partial<Record<GradeId, number>>, label: string, exclude: readonly string[] = [], noMythic = false): WeaponItem {
     const d = this.run.ctx.data;
     const rng = Rng.derive(this.run.ctx.config.seed, `${label}-${this.run.session.stage.chapter}-${this.run.session.stage.stage}-${this.lootSeq++}`);
-    const grade = rollGrade(rng, weights, d.loot.mythicChance);
+    const grade = rollGrade(rng, weights, noMythic ? 0 : d.loot.mythicChance);
     return rollWeapon(rng, grade, d.weapons.weapons, d.weapons.options, d.groupMultipliers, d.loot.uniqueWeaponFallback, exclude);
   }
 
@@ -298,7 +298,7 @@ export class LootInteract {
     chest.open();
     if (chest.kind === 'weapon') {
       // 히든보스 전용 무기는 정해진 유니크 (무작위 옵션 없음)
-      const item = chest.fixedItem ? plainWeapon(this.run.weaponDefOf(chest.fixedItem)) : this.rollWeaponItem(chest.weights, 'chest', chest.weights === this.run.ctx.data.loot.startChest ? this.run.ctx.data.loot.startChestExclude : []);
+      const item = chest.fixedItem ? plainWeapon(this.run.weaponDefOf(chest.fixedItem)) : this.rollWeaponItem(chest.weights, 'chest', chest.weights === this.run.ctx.data.loot.startChest ? this.run.ctx.data.loot.startChestExclude : [], chest.noMythic);
       this.dropWeapon(item, chest.x, chest.y + 14);
       return;
     }
@@ -309,7 +309,7 @@ export class LootInteract {
       const { stage } = this.run.session;
       const rng = Rng.derive(this.run.ctx.config.seed, `item-${stage.chapter}-${stage.stage}-${this.lootSeq++}`);
       const weights = effectiveWeights(chest.weights, p.lootShift);
-      id = rollItem(rng, weights, d.loot.mythicChance, d.items, new Set(p.itemsObtained)) ?? undefined;
+      id = rollItem(rng, weights, chest.noMythic ? 0 : d.loot.mythicChance, d.items, new Set(p.itemsObtained)) ?? undefined;
     }
     if (id) {
       this.giveItem(id);
@@ -342,10 +342,10 @@ export class LootInteract {
   }
 
   /** ref·nameKey가 없으면 시작 무기 상자 / 아이템 상자 모습 */
-  addChest(kind: ChestKind, x: number, y: number, weights: Partial<Record<GradeId, number>>, opts: { fixedItem?: string; ref?: SpriteRef; nameKey?: string } = {}): void {
+  addChest(kind: ChestKind, x: number, y: number, weights: Partial<Record<GradeId, number>>, opts: { fixedItem?: string; ref?: SpriteRef; nameKey?: string; noMythic?: boolean } = {}): void {
     const c = this.run.ctx.data.loot.chest;
     const ref = opts.ref ?? (kind === 'weapon' ? c.weapon : c.item);
-    this.chests.push(new Chest(this.run, kind, ref, x, y, weights, opts.fixedItem, opts.nameKey ?? (kind === 'weapon' ? 'chest.weapon' : 'chest.item')));
+    this.chests.push(new Chest(this.run, kind, ref, x, y, weights, opts.fixedItem, opts.nameKey ?? (kind === 'weapon' ? 'chest.weapon' : 'chest.item'), opts.noMythic));
   }
 
   /** 보스·히든보스 무기 상자 */

@@ -6,6 +6,7 @@ import { Rng } from '../core/rng';
 import type { GameData } from '../data/index';
 import type { OverflowData } from '../types/data';
 import type { StageRef, StageTheme } from './run';
+import { newEvolutionState, type EvolutionState } from './evolution';
 
 type Data = Pick<GameData, 'overflow' | 'bosses' | 'enemies' | 'mapgen'>;
 
@@ -15,10 +16,16 @@ export interface OverflowState {
   onceBosses: string[];
   /** 직전 보스 칸 (풀 추첨에서 연속 금지) */
   lastBoss: string | null;
+  /** 적 진화 (스테이지 클리어 때 고른 것, 다음 스테이지부터 적용) */
+  evolution: EvolutionState;
+  /** 진화 카드 보상: 다음 스테이지 시작방에 떨어뜨릴 상자 */
+  pendingDrops: PendingDrop[];
 }
 
+export type PendingDrop = { kind: 'weapon'; tier: string } | { kind: 'item'; weights: Partial<Record<string, number>> };
+
 export function newOverflowState(): OverflowState {
-  return { onceBosses: [], lastBoss: null };
+  return { onceBosses: [], lastBoss: null, evolution: newEvolutionState(), pendingDrops: [] };
 }
 
 export function firstOverflowStage(): StageRef {
@@ -81,7 +88,7 @@ export function advanceOverflow(seed: number, cur: StageRef, state: OverflowStat
   if (!d.mapgen.bossStages.includes(stage)) return { next, state };
   const boss = bossForStage(seed, chapter, stage, theme, state, d);
   const once = d.overflow.fixedBosses.some((f) => f.once && f.boss === boss);
-  return { next: { ...next, boss }, state: { onceBosses: once ? [...state.onceBosses, boss] : state.onceBosses, lastBoss: boss } };
+  return { next: { ...next, boss }, state: { ...state, onceBosses: once ? [...state.onceBosses, boss] : state.onceBosses, lastBoss: boss } };
 }
 
 /** 아직 전투가 없는 보스는 임시 보스로 */
@@ -138,4 +145,9 @@ export function overflowStageAt(seed: number, chapter: number, stage: number, d:
     state = r.state;
   }
   return { stage: s, state };
+}
+
+/** 스테이지 끝 카드 순서: 기존 보상(스킬/아이템 교차) 뒤에 오버플로우면 적 진화 카드 (대체가 아니라 추가) */
+export function stageEndOfferKinds<K extends string>(afterStage: K, overflow: boolean): (K | 'evolution')[] {
+  return overflow ? [afterStage, 'evolution'] : [afterStage];
 }

@@ -21,13 +21,15 @@ export interface RunRecord {
   shards: number;
   /** 이번 런에 처음 본 컷씬 id */
   newCutscenes: string[];
+  /** 오버플로우 진화 카드 보상으로 얻은 결정 (결산에 더한다) */
+  bonusCrystals: number;
 }
 
 export function newRunRecord(): RunRecord {
-  return { kills: 0, eliteKills: 0, bossKills: [], hiddenBossKills: [], spires: 0, stagesCleared: 0, playSec: 0, shards: 0, newCutscenes: [] };
+  return { kills: 0, eliteKills: 0, bossKills: [], hiddenBossKills: [], spires: 0, stagesCleared: 0, playSec: 0, shards: 0, newCutscenes: [], bonusCrystals: 0 };
 }
 
-export type CrystalKey = 'stages' | 'midBoss' | 'chapterBoss' | 'elites' | 'spires' | 'hiddenBosses';
+export type CrystalKey = 'stages' | 'midBoss' | 'chapterBoss' | 'elites' | 'spires' | 'hiddenBosses' | 'evolution';
 
 export interface CrystalLine {
   key: CrystalKey;
@@ -64,6 +66,8 @@ export function crystalBreakdown(r: RunRecord, runClear: boolean, rules: Crystal
     { key: 'spires', count: r.spires, amount: r.spires * rules.perSpire },
     { key: 'hiddenBosses', count: r.hiddenBossKills.length, amount: r.hiddenBossKills.length * rules.perHiddenBoss },
   ];
+  // 오버플로우 진화 카드 보상 (있을 때만 한 줄)
+  if (r.bonusCrystals > 0) lines.push({ key: 'evolution', count: 1, amount: r.bonusCrystals });
   const subtotal = lines.reduce((s, l) => s + l.amount, 0);
   const total = runClear ? Math.round(subtotal * rules.clearMultiplier) : subtotal;
   return { lines, subtotal, bonus: total - subtotal, total };

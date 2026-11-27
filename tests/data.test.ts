@@ -18,7 +18,7 @@ describe('데이터 검증', () => {
   });
 
   it('챕터1 일반 적 5종이 있다 (유령 사수는 정예)', () => {
-    const ids = gameData.enemies.enemies.filter((e) => e.chapter === 1 && e.rank === 'normal' && !e.summon).map((e) => e.id);
+    const ids = gameData.enemies.enemies.filter((e) => e.chapter === 1 && e.rank === 'normal' && !e.summon && !e.variant).map((e) => e.id);
     expect(ids.sort()).toEqual(['akgwi', 'clusterAlveoli', 'gaedeulgae', 'tomakki', 'vesselTree']);
   });
 

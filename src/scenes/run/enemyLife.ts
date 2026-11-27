@@ -61,10 +61,12 @@ export class EnemyLife {
       if (chestRng.chance(d.waves.champions.weaponChestChance)) this.run.loot.addCombatChest(x, y, 'champion');
     }
     // 첨탑: 원 안에서 잡으면 충전 (결과는 다음 프레임에 처리)
-    const sp = roomId === undefined ? undefined : this.run.encounters.spires.find((x) => x.roomId === roomId);
+    const sp = roomId === undefined || e.splitChild ? undefined : this.run.encounters.spires.find((x) => x.roomId === roomId);
     if (sp) {
       for (const ev of sp.state.onKill(e.rank, inSpireCircle(x - sp.x, y - sp.y, sp.radius, e.radius))) this.run.encounters.spireEvents.push({ sp, e: ev });
     }
+    // 오버플로우 진화: 폭발·분열·포식 (분열체는 방 적 수에 먼저 더한다)
+    this.run.evo.onKilled(e, x, y, roomId);
     this.removeEnemy(e);
     if (roomId !== undefined) this.run.rooms.get(roomId)?.enemyKilled();
     for (const o of [...this.run.skillRt.skillObjects]) o.onKill?.(this.run.host, e);

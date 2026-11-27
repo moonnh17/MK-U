@@ -121,4 +121,40 @@ export function validateOverflow(v: V): void {
   checkPositive(errors, 'overflow.scale.growthPerChapter.damage', O.scale.growthPerChapter.damage, true);
   if (!(O.themeTintAlpha >= 0 && O.themeTintAlpha <= 1)) errors.push('overflow.themeTintAlpha: 0~1');
   if (!HEX_COLOR.test(O.portalColor)) errors.push('overflow.portalColor: #RRGGBB');
+  // 적 진화
+  const E = O.evolution;
+  const enemyIds = new Set(v.enemyIds);
+  checkUnique(errors, 'overflow.evolution', [...E.evolutions.map((e) => e.id), ...E.uniques.map((u) => u.id), E.overloadCard.id]);
+  for (const g of ['common', 'rare', 'legendary', 'unique'] as const) {
+    checkPositive(errors, `overflow.evolution.gradeWeights.${g}`, E.gradeWeights[g]);
+    if (E.rewards[g].length === 0) errors.push(`overflow.evolution.rewards.${g}: 비어 있음`);
+  }
+  for (const e of [...E.evolutions, ...E.uniques, E.overloadCard]) {
+    needText(`overflow.evolution.${e.id}`, `evo.${e.id}.name`);
+    needText(`overflow.evolution.${e.id}`, `evo.${e.id}.desc`);
+  }
+  for (const e of E.evolutions) {
+    if (e.effects.explodeDamage && !e.explode) errors.push(`overflow.evolution.${e.id}: explode 정의 없음`);
+    if (e.effects.splitChance && !e.split) errors.push(`overflow.evolution.${e.id}: split 정의 없음`);
+    if (e.effects.predatorMul && !e.predator) errors.push(`overflow.evolution.${e.id}: predator 정의 없음`);
+    if (e.effects.overloadMul && !e.overload) errors.push(`overflow.evolution.${e.id}: overload 정의 없음`);
+  }
+  for (const u of E.uniques) {
+    if (!enemyIds.has(u.enemy)) errors.push(`overflow.evolution.uniques.${u.id}: 모르는 적 '${u.enemy}'`);
+    if (!enemyIds.has(u.base)) errors.push(`overflow.evolution.uniques.${u.id}: 모르는 적 '${u.base}'`);
+  }
+  for (const id of E.commonExempt) if (!enemyIds.has(id)) errors.push(`overflow.evolution.commonExempt: 모르는 적 '${id}'`);
+  const rewardIds: string[] = [];
+  for (const list of Object.values(E.rewards)) {
+    for (const r of list) {
+      rewardIds.push(r.id);
+      needText(`overflow.evolution.rewards.${r.id}`, `evoReward.${r.id}`);
+      if ('weights' in r && (r.weights.mythic ?? 0) > 0) errors.push(`overflow.evolution.rewards.${r.id}: 카드 보상에 신화 없음`);
+      if (r.kind === 'weaponChest' && !(r.tier in d.loot.weaponChestTiers)) errors.push(`overflow.evolution.rewards.${r.id}: 모르는 상자 '${r.tier}'`);
+    }
+  }
+  checkUnique(errors, 'overflow.evolution.rewards', rewardIds);
+  if (!(E.maxStacks >= 1) || !(E.cardCount >= 1)) errors.push('overflow.evolution: maxStacks·cardCount 1 이상');
+  if (!(E.uniqueSpawnChance >= 0 && E.uniqueSpawnChance <= 1)) errors.push('overflow.evolution.uniqueSpawnChance: 0~1');
+  for (const [k, n] of Object.entries(E.caps)) checkPositive(errors, `overflow.evolution.caps.${k}`, n);
 }

@@ -26,7 +26,8 @@ import { DISABLED_ACTIONS } from '../core/features';
 import { Rng } from '../core/rng';
 import { hexColor } from '../core/scale';
 import { newPlayerState, type RunSession } from '../core/session';
-import { advanceOverflow } from '../systems/overflow';
+import { advanceOverflow, stageEndOfferKinds } from '../systems/overflow';
+import { EvolutionRuntime } from './run/evolutionRuntime';
 import { BossController } from '../bosses/bossController';
 import type { BossHost } from '../bosses/host';
 import { Door } from '../entities/door';
@@ -70,6 +71,7 @@ export class RunScene extends Phaser.Scene {
   bulletRt!: BulletRuntime;
   roomRt!: RoomRuntime;
   enemyLife!: EnemyLife;
+  evo!: EvolutionRuntime;
   playerLife!: PlayerLife;
   stageFx!: StageFx;
   combat!: WeaponCombat;
@@ -187,6 +189,7 @@ export class RunScene extends Phaser.Scene {
     this.bulletRt = new BulletRuntime(this);
     this.roomRt = new RoomRuntime(this);
     this.enemyLife = new EnemyLife(this);
+    this.evo = new EvolutionRuntime(this);
     this.playerLife = new PlayerLife(this);
     this.resetFields();
 
@@ -268,6 +271,8 @@ export class RunScene extends Phaser.Scene {
     if (stage.chapter === 1 && stage.stage === 1 && this.ctx.config.testWeapons) this.world.placeTestWeapons();
     // 런 시작: 무기 대신 무기 상자
     if (newRun) this.loot.addChest('weapon', start.x, start.y + d.mapgen.startChestOffsetPx, d.loot.startChest);
+    // 오버플로우: 지난 스테이지 진화 카드 보상 상자
+    this.evo.dropPending(start);
 
     this.physics.add.collider(this.player, this.walls);
     this.physics.add.collider(this.player, this.doorGroup);
@@ -519,6 +524,7 @@ export class RunScene extends Phaser.Scene {
     this.roomRt.updateRooms(dt);
     this.encounters.updateSpires(dt);
 
+    this.evo.update(dt);
     for (const e of this.enemies) {
       // 집정관: 플레이어가 그 방을 나가면 흡수 초기화
       if (e.def.absorb && this.enemyRoom.get(e) !== this.session.currentRoomId) e.resetAbsorb();
@@ -823,8 +829,10 @@ export class RunScene extends Phaser.Scene {
       // 포탈에 빨려 들어가 이동 화면에서 스테이지 끝 카드를 고른 뒤 다음 스테이지로
       this.dropSuit();
       this.stageFx.warpOut(() =>
-        this.progression.queueOffers([{ kind: afterStage, boss: false }], () => {
-          const data: RunSceneData = { stage: adv.next, player: p, offers: [], warpIn: true, itemGets: this.loot.itemGets };
+        // 오버플로우: 기존 보상 뒤에 적 진화 카드 (보상은 기존 보상에 더해진다)
+        this.progression.queueOffers(stageEndOfferKinds(afterStage, !!p.overflow).map((kind) => ({ kind, boss: false })), () => {
+          // 카드를 고르는 동안 플레이어 상태가 새 객체로 바뀌므로 지금 것을 넘긴다
+          const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [], warpIn: true, itemGets: this.loot.itemGets };
           this.scene.restart(data);
         }),
       );

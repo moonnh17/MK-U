@@ -64,6 +64,7 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
     row(
       button(t('debug.skillCard'), () => bus.emit('debugOpenCards', { kind: 'skill' })),
       button(t('debug.itemCard'), () => bus.emit('debugOpenCards', { kind: 'item' })),
+      button(t('debug.evolutionCard'), () => bus.emit('debugOpenCards', { kind: 'evolution' })),
       button(t('debug.fillUltimate'), () => bus.emit('debugFillUltimate', {})),
     ),
   );
