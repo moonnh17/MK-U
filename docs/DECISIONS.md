@@ -867,3 +867,19 @@
 - 마기법사 시작 무기는 나무 지팡이(woodenStaff).
 - 점화 각인: 화상 꽉 찬 적에게 스킬 피해 +30%(fullBurnSkill, 기본 공격 제외). 예전 '꽉 찬 적 불 피해 추가'는 없앴다.
 - 상태이상 머리 위 표시: 문양 + 오른쪽 아래 작은 숫자(×0.6), 게이지 없음. 화상·출혈·서리는 중첩 수, 둔화·빙결·기절(노출)·석화·묶기·부식은 남은 초(올림). 빙결 중엔 둔화를 숨긴다. 여러 개면 출혈·화상·서리·빙결/둔화·기절·석화·묶기·부식 순으로 한 줄, 사이 2px. 최대 중첩이면 문양 맥박 + 숫자 흰색.
+
+## 오버플로우 A — 모드 뼈대 (2026-11-27)
+
+- 사용자 결정: 4-2는 그 장(뽑힌 맵)의 X-2 보스. 보스는 공용 진화 대신 보스 전용 진화(B에서). 슬롯 셔플 중 개전 각인도 칸과 함께 옮김. 일반 카드의 '스탯 소폭'은 무기 상자·아이템 상자 드롭 같은 보상으로. 진입은 실험장 시뮬레이션 포털 옆 오버플로우 포털, 본편 클리어 후 개방. 나머지는 계획의 제안대로.
+- 데이터 `src/data/overflow.json`(타입 `types/data/overflow.ts`, 검증 `validateOverflow`). 순수 함수 `systems/overflow.ts`: advanceOverflow·pickTheme·bossForStage·stageBossId·overflowEnemyScale·overflowBossScale·overflowStageAt.
+- 모드 표시는 `PlayerState.overflow`(OverflowState | null). 본편 런은 null이라 기존 동작 그대로. 새 런은 `RunSceneData.overflow`.
+- `StageRef`에 `theme?`(뽑힌 장: id·기준 장·웨이브 장·틴트)와 `boss?`(보스 칸 id)를 붙였다. 표 조회(엘리트·조우·상자·첨탑·정예·음악·타일·방 색)는 `contentChapter(stage)`, 웨이브는 `waveChaptersOf(stage)`. 시드 라벨은 실제 장 번호 그대로라 장마다 다른 맵.
+- 장 풀(임시): 1·2·3장 + 전용 임시 맵 2종(ovfRuinLab = 2장 표·1+2장 웨이브·보라 틴트, ovfDeepLab = 3장 표·2+3장 웨이브·청록 틴트). 틴트는 방 바닥 위 불투명도 0.22 사각형. 직전 장 테마는 다음 장 후보에서 뺀다.
+- 테마는 `ovf-theme-<장>` 시드로 장 첫 스테이지에서 뽑고 그 장 안에서는 유지. 보스 풀 추첨은 `ovf-boss-<장>-<스테이지>`, 직전 보스 칸(OverflowState.lastBoss)은 제외.
+- 고정 보스 칸은 데이터 순서대로 첫 일치: 4-2 '@theme' → 4-5 hectarMimosa → 7-5 acroMimosa(once) → 3의 배수 장 X-5 magiKaiser. 한 번만 보스는 OverflowState.onceBosses에 기록.
+- 아직 전투가 없는 보스는 placeholderBosses로 대신 스폰(hectarMimosa → 헥타르 수석 연구원, acroMimosa → 식광). 이름은 bossNameKeys로 칸 이름을 띄운다(Enemy.nameKey).
+- 장 배율(임시): 4장부터 일반 적·정예는 자기 장 → 3장 수준(체력 1장 ×3.6·2장 ×1.8, 피해 1장 ×1.78·2장 ×1.37, 본편 구운 배율의 비) × (1 + 0.15·(장−3)) 체력, (1 + 0.08·(장−3)) 피해. 보스는 같은 칸의 3장 보스 체력(식광·마기카이저)과 피해 단계(bossDamageTier)에 맞춘 뒤 같은 성장. 히든보스는 3장 배율 + 성장. 보스 피해는 BossController 배율에 곱한다.
+- 집정관 흡수 단계가 damageMul을 다시 잡을 때도 오버플로우 피해 배율을 곱한다(Enemy.ovfDamageMul).
+- 저장: `storyCleared`(3-5 클리어 시 true), `overflowBest`(사망 시 더 깊으면 갱신). 버전은 그대로(없으면 기본값).
+- 디버그 스테이지 이동 목록은 장 +9(overflow.debugExtraChapters). 오버플로우 런이면 `overflowStageAt`으로 1-1부터 따라가 같은 테마·보스·상태로 이동, 본편 런에서 4장 이후는 무시.
+- `?debug=1`이면 본편을 안 깨도 오버플로우 포털이 열린다.
