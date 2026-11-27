@@ -12,7 +12,7 @@ import { aimLocked, burstAngle, chainWindup, forceWindup, initialAi, keepDistanc
 import type { BleedState, BurnState } from '../systems/tags';
 import { slowAmount, type FrostState } from '../systems/magiMage';
 import { petrifyCrack, shatter, StatusLook, type StatusKind } from './statusLook';
-import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank, SpriteRef } from '../types/data';
+import type { EliteDef, ElitesData, EnemyAttackDef, EnemyDef, EnemyRank, SpriteRef, TagId } from '../types/data';
 import { Beams, DelayedBlast, SectorBlast, Zone, type Hazard, type HazardHost } from './hazard';
 import { animateArt, fitArt } from './art';
 import { getContext } from '../core/context';
@@ -338,6 +338,10 @@ export class Enemy {
 
   /** 보스가 스스로 거는 받는 피해 배율 (헥타르 미모사 역장·관측 결과) */
   guardMul = 1;
+  /** 태그별 받는 피해 배율 (오버플로우 마기카이저 학습) */
+  tagTaken: Partial<Record<TagId, number>> | null = null;
+  /** 맞았을 때 반응 (학습 변형) */
+  onTagHit: ((tags: readonly TagId[]) => void) | null = null;
 
   /** 받는 피해 배율 (거대 엘리트·기절) */
   get takenMul(): number {

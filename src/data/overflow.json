@@ -82,9 +82,7 @@
       "boss": "magiKaiser"
     }
   ],
-  "placeholderBosses": {
-    "acroMimosa": "eclipse"
-  },
+  "placeholderBosses": {},
   "bossNameKeys": {
     "hectarMimosa": "enemy.hectarMimosa",
     "acroMimosa": "enemy.acroMimosa"
@@ -115,10 +113,12 @@
       "magiGolem": 1.7,
       "eclipse": 1.9,
       "magiKaiser": 2.35,
-      "hectarMimosa": 2.35
+      "hectarMimosa": 2.35,
+      "acroMimosa": 2.35
     },
     "bossHpBonus": {
-      "hectarMimosa": 1.5
+      "hectarMimosa": 1.5,
+      "acroMimosa": 1.9
     }
   },
   "portalColor": "#ff4a6a",
@@ -665,6 +665,16 @@
         "durationSec": 2.6,
         "wide": true,
         "warnSec": 1.6
+      },
+      {
+        "id": "sample",
+        "phases": [
+          2,
+          3
+        ],
+        "weight": 2.5,
+        "cooldownSec": 9,
+        "durationSec": 2.6
       }
     ],
     "tamper": {
@@ -779,6 +789,246 @@
       "empPx": 70,
       "warpPx": 40,
       "runePx": 44
+    },
+    "sample": {
+      "count": {
+        "2": 3,
+        "3": 4
+      },
+      "warnSec": 1.2,
+      "lingerSec": 2.2,
+      "radius": 15,
+      "damage": 10,
+      "flightPx": 46,
+      "iconPx": 14,
+      "color": "#6fe0ff"
     }
+  },
+  "acro": {
+    "enemyId": "acroMimosa",
+    "phases": [
+      0.66,
+      0.33
+    ],
+    "firstDelaySec": 0.9,
+    "gapSec": {
+      "1": 1.0,
+      "2": 0.8,
+      "3": 0.45
+    },
+    "transitionSec": 1.6,
+    "color": "#ff2a3a",
+    "intro": {
+      "riftSec": 1.0,
+      "appearSec": 0.5,
+      "bandSec": 2.6,
+      "riftPx": 70
+    },
+    "blink": {
+      "vanishSec": 0.22,
+      "appearSec": 0.22,
+      "minDistPx": 46,
+      "maxDistPx": 120,
+      "edgePx": 22
+    },
+    "patterns": [
+      {
+        "id": "cut",
+        "phases": [
+          1,
+          2
+        ],
+        "weight": 3,
+        "cooldownSec": 2.5,
+        "durationSec": 1.6
+      },
+      {
+        "id": "shards",
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "weight": 2,
+        "cooldownSec": 3.5,
+        "durationSec": 2.0
+      },
+      {
+        "id": "brand",
+        "phases": [
+          1,
+          2,
+          3
+        ],
+        "weight": 2.2,
+        "cooldownSec": 6.5,
+        "durationSec": 1.9
+      },
+      {
+        "id": "rewind",
+        "phases": [
+          2,
+          3
+        ],
+        "weight": 1.6,
+        "cooldownSec": 8,
+        "durationSec": 3.0
+      },
+      {
+        "id": "summon",
+        "phases": [
+          1,
+          2
+        ],
+        "weight": 2.4,
+        "cooldownSec": 22,
+        "durationSec": 40
+      },
+      {
+        "id": "crossCut",
+        "phases": [
+          3
+        ],
+        "weight": 3,
+        "cooldownSec": 2.2,
+        "durationSec": 1.7
+      },
+      {
+        "id": "riftChain",
+        "phases": [
+          3
+        ],
+        "weight": 2.2,
+        "cooldownSec": 4.5,
+        "durationSec": 2.6
+      }
+    ],
+    "cut": {
+      "linesByPhase": {
+        "1": 2,
+        "2": 3,
+        "3": 5
+      },
+      "warnSec": 0.85,
+      "widthPx": 9,
+      "damage": 40,
+      "lengthPx": 640,
+      "stepSec": 0.12
+    },
+    "shards": {
+      "countByPhase": {
+        "1": 14,
+        "2": 18,
+        "3": 24
+      },
+      "waves": 2,
+      "waveGapSec": 0.45,
+      "speed": 115,
+      "range": 270,
+      "damage": 24,
+      "gapDeg": 38
+    },
+    "brand": {
+      "countByPhase": {
+        "1": 2,
+        "2": 3,
+        "3": 4
+      },
+      "warnSec": 1.15,
+      "stepSec": 0.22,
+      "radius": 15,
+      "damage": 20,
+      "spreadPx": 70
+    },
+    "rewind": {
+      "count": 16,
+      "speed": 120,
+      "range": 230,
+      "freezeSec": 0.7,
+      "returnSpeed": 150,
+      "damage": 22
+    },
+    "summon": {
+      "normalsByPhase": {
+        "1": 5,
+        "2": 7
+      },
+      "bossHpMul": 0.3,
+      "bossDamageMul": 0.7,
+      "timeoutSec": 36,
+      "hopSec": 0.8,
+      "themeChapters": [
+        1,
+        2,
+        3
+      ],
+      "excludeBosses": [
+        "magiKaiser"
+      ],
+      "overlayAlpha": 0.92,
+      "guardMul": 0.15,
+      "attackGapSec": 2.4,
+      "spreadPx": 60
+    },
+    "clash": {
+      "hops": 12,
+      "startGapSec": 0.62,
+      "endGapSec": 0.11,
+      "hitstopSec": 0.05,
+      "zoomTo": 0.55,
+      "flashAlpha": 0.5,
+      "holdSec": 0.7,
+      "breakSec": 1.1
+    },
+    "redSpace": {
+      "floorKey": "acro_red_floor",
+      "floorTint": "#8a6466",
+      "voidColor": "#090003",
+      "edgeColor": "#ff2a3a",
+      "rubble": 16,
+      "rubbleColor": "#2a0a0e",
+      "voidPad": 900
+    },
+    "crossCut": {
+      "lines": 6,
+      "warnSec": 0.7,
+      "widthPx": 9,
+      "damage": 46,
+      "lengthPx": 640
+    },
+    "riftChain": {
+      "blinks": 4,
+      "gapSec": 0.42,
+      "ringR": 70,
+      "ringSec": 0.45,
+      "ringThickness": 8,
+      "damage": 34,
+      "gapDeg": 70
+    },
+    "art": {
+      "blink": "fx_royal_blink_flash",
+      "blinkRing": "fx_royal_blink_ring",
+      "slash": "fx_royal_strike_swipe",
+      "shard": "fx_kz_shard",
+      "mark": "fx_royal_mark",
+      "burst": "fx_kz_emp",
+      "portal": "fx_hwk_portal",
+      "implode": "fx_kz_implode",
+      "blinkPx": 40,
+      "slashPx": 60,
+      "markPx": 34,
+      "burstPx": 64,
+      "portalPx": 56
+    }
+  },
+  "kaiserLearning": {
+    "bossId": "magiKaiser",
+    "minHits": 150,
+    "color": "#ff2a2a",
+    "variants": [
+      { "id": "reflect", "tags": ["ranged"], "nameKey": "kaiser.learn.reflect", "takenMul": { "ranged": 0.75 }, "reflect": { "chance": 0.12, "speed": 150, "range": 260, "damage": 22 } },
+      { "id": "shock", "tags": ["melee"], "nameKey": "kaiser.learn.shock", "takenMul": { "melee": 0.75 }, "shock": { "cooldownSec": 1.4, "radius": 46, "thickness": 10, "damage": 24, "pushPx": 140 } },
+      { "id": "absorb", "tags": ["magic", "tech"], "nameKey": "kaiser.learn.absorb", "takenMul": { "magic": 0.78, "tech": 0.78 }, "absorb": { "hits": 14, "count": 16, "speed": 110, "range": 240, "damage": 20 } }
+    ]
   }
 }

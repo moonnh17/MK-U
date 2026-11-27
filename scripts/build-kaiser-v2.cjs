@@ -58,9 +58,10 @@ const SHEETS = {
 
 const cache = new Map();
 /** 원본 한 장 → 칸 4개 {img, bx,by,bw,bh(칸 안 그림 상자), cw,ch} 와 그 장의 바닥선 */
-function cells(file) {
-  if (cache.has(file)) return cache.get(file);
-  const im = k.read(path.join(SRC, `${file}.png`));
+function cells(file, src = SRC) {
+  const ck = `${src}/${file}`;
+  if (cache.has(ck)) return cache.get(ck);
+  const im = k.read(path.join(src, `${file}.png`));
   const hw = Math.floor(im.w / 2), hh = Math.floor(im.h / 2);
   const list = [[0, 0], [hw, 0], [0, hh], [hw, hh]].map(([x, y]) => {
     const q = k.crop(im, x, y, hw, hh);
@@ -76,7 +77,7 @@ function cells(file) {
   });
   const base = Math.max(...list.map((c) => c.b.y + c.b.h));
   const out = { list, base };
-  cache.set(file, out);
+  cache.set(ck, out);
   return out;
 }
 
@@ -94,13 +95,14 @@ function outline(c) {
   return c;
 }
 
-function buildSheet(key, anims, fit) {
-  const idle = cells(anims.idle[0]).list[anims.idle[1][0]].b;
+/** 시트 한 장. src: 원본 폴더 (다른 보스도 같은 방식으로 쓴다), 동작 값 [그림, 칸들, fps, 반복, 거꾸로] */
+function buildSheet(key, anims, fit, src = SRC, withOutline = true) {
+  const idle = cells(anims.idle[0], src).list[anims.idle[1][0]].b;
   const s = (fit * DENSITY) / Math.max(idle.w, idle.h);
   // 프레임마다 칸 가운데·바닥선 기준 상대 위치 (줄인 뒤 px)
   const items = [];
   for (const [name, [file, idx, fps, loop]] of Object.entries(anims)) {
-    const { list, base } = cells(file);
+    const { list, base } = cells(file, src);
     for (const i of idx) {
       const c = list[i];
       const r = k.resize(k.crop(c.img, c.b.x, c.b.y, c.b.w, c.b.h), Math.max(1, Math.round(c.b.w * s)), Math.max(1, Math.round(c.b.h * s)), 0.5);
@@ -116,7 +118,7 @@ function buildSheet(key, anims, fit) {
   const frames = items.map((it) => {
     const c = k.blank(fw, fh);
     k.paste(c, it.r, Math.round(fw / 2 + it.dx), Math.round(up + it.dy));
-    return outline(c);
+    return withOutline ? outline(c) : c;
   });
   const animOut = {};
   let at = 0;
@@ -140,7 +142,7 @@ function buildKaiserV2() {
   return out;
 }
 
-module.exports = { buildKaiserV2 };
+module.exports = { buildKaiserV2, buildSheet };
 
 if (require.main === module) {
   const artPath = path.join(REPO, 'src/data/art.json');

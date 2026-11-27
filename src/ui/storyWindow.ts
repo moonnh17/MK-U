@@ -74,16 +74,17 @@ export class StoryWindow {
       if (b === skip) this.close();
       else this.advance();
     });
-    bus.on('storyShow', ({ lines }) => this.show(lines));
+    bus.on('storyShow', ({ lines, figure }) => this.show(lines, figure));
   }
 
-  private show(lines: StoryLine[]): void {
+  private show(lines: StoryLine[], figure?: string): void {
     if (lines.length === 0) {
       bus.emit('storyDone', {});
       return;
     }
     // 전신 그림이 없으면 상반신 초상화
-    if (!applyArtIcon(this.figure, this.ctx, artKeys.geminiFull)) applyArtIcon(this.figure, this.ctx, artKeys.geminiPortrait, this.ctx.data.gemini.color);
+    // 대화마다 그림이 따로 있으면 그것 (아크로 미모사 정체 공개)
+    if (!(figure && applyArtIcon(this.figure, this.ctx, figure)) && !applyArtIcon(this.figure, this.ctx, artKeys.geminiFull)) applyArtIcon(this.figure, this.ctx, artKeys.geminiPortrait, this.ctx.data.gemini.color);
     this.lines = lines;
     this.open = true;
     this.root.style.display = 'block';

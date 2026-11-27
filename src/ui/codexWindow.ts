@@ -676,7 +676,8 @@ export class CodexWindow {
     const d = this.ctx.data;
     const def = d.items.items.find((x) => x.id === id)!;
     const grade = d.groupMultipliers.grades.find((g) => g.id === def.grade);
-    this.chip(chips, grade ? t(grade.nameKey) : def.grade, grade?.color);
+    if (def.pool === 'debuff') this.chip(chips, t(d.items.debuff.nameKey), d.items.debuff.color);
+    else this.chip(chips, grade ? t(grade.nameKey) : def.grade, grade?.color);
     const bossName = (bid?: string) => t(d.enemies.enemies.find((x) => x.id === bid)?.nameKey ?? '');
     const source =
       def.pool === 'boss'

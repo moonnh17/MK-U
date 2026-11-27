@@ -1653,6 +1653,7 @@ for (const key of ['fx_kaiser_sweep', 'fx_kaiser_sweep_warn', 'fx_kaiser_lock', 
   if (fs.existsSync(hfDir)) fs.rmSync(hfDir, { recursive: true });
   Object.assign(sprites, require('./build-kaiser-hf.cjs').buildKaiserHf({ sprites }));
   Object.assign(sprites, require('./build-kaiser-v2.cjs').buildKaiserV2());
+  Object.assign(sprites, require('./build-acro-art.cjs').buildAcroArt());
 }
 const json = { basePath: 'assets/', sprites };
 fs.writeFileSync(artPath, JSON.stringify(json, null, 2) + '\n');

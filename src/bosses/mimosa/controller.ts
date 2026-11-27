@@ -34,6 +34,7 @@ import {
 import type { BossCore, MimosaData, MimosaPatternDef } from '../../types/data';
 import type { BossHost } from '../host';
 import { CoverLaser, GridStrike, ScanSweep, type GridArt } from './hazards';
+import { MarkHazard } from './acroHazards';
 import { loopArt, playFx } from '../../skills/skillFx';
 import type { SpriteRef } from '../../types/data';
 
@@ -70,6 +71,10 @@ export interface MimosaHooks {
   band(): void;
   /** 등장 동안 카메라가 볼 곳 (null이면 원래대로) */
   focus(at: { x: number; y: number } | null): void;
+  /** 헥타르 디버프 아이템 하나 (한도면 null) */
+  debuff(): string | null;
+  /** 이 디버프 아이템의 아이콘 키 (날아가는 샘플 그림) */
+  debuffIcons(): string[];
   activeSlots: number;
 }
 
@@ -503,6 +508,8 @@ export class MimosaController implements BossControl {
         return this.laser(p);
       case 'purge':
         return this.purge(p);
+      case 'sample':
+        return this.sample(p);
     }
   }
 
@@ -704,6 +711,43 @@ export class MimosaController implements BossControl {
     this.playPose('command');
     this.hooks.say(['mimosa.line.purge'], 'ominous');
     host.addHazard(new GridStrike(this.scene, this.grid, danger, Math.max(G.purgeWarnSec, p.warnSec ?? 0), this.dmg(G.purgeDamage), hexColor(G.color), safe, G.purgeHighlightSec, this.gridArt(), (n) => this.pick(n)));
+    return new Seq(p.durationSec);
+  }
+
+  /** 실험 샘플 투여: 샘플이 날아와 웅덩이로 고인다. 밟거나 맞으면 헥타르 디버프 아이템 (한 패턴에 한 번) */
+  private sample(p: MimosaPatternDef): Run {
+    const S = this.M.sample;
+    const host = this.host!;
+    const n = S.count[String(this.phase)] ?? 3;
+    const icons = this.hooks.debuffIcons();
+    this.playPose('swing');
+    this.hooks.say([host.rng.pick(['mimosa.line.sample1', 'mimosa.line.sample2', 'mimosa.line.sample3'])], 'calm');
+    let given = false;
+    const pl = host.playerPos();
+    const v = host.playerVel();
+    const pad = S.radius + 4;
+    for (let i = 0; i < n; i++) {
+      // 첫 샘플은 플레이어가 갈 자리, 나머지는 방 곳곳
+      const raw = i === 0 ? { x: pl.x + v.x * S.warnSec * 0.6, y: pl.y + v.y * S.warnSec * 0.6 } : { x: host.rng.range(this.arena.x + pad, this.arena.x + this.arena.w - pad), y: host.rng.range(this.arena.y + pad + 30, this.arena.y + this.arena.h - pad) };
+      const at = { x: Math.max(this.arena.x + pad, Math.min(this.arena.x + this.arena.w - pad, raw.x)), y: Math.max(this.arena.y + pad, Math.min(this.arena.y + this.arena.h - pad, raw.y)) };
+      host.addHazard(
+        new MarkHazard(
+          this.scene,
+          at,
+          S.radius,
+          S.warnSec + i * 0.12,
+          S.lingerSec,
+          this.dmg(S.damage),
+          hexColor(S.color),
+          () => {
+            if (given) return;
+            given = true;
+            if (this.hooks.debuff()) this.hooks.say([host.rng.pick(['mimosa.line.sampleHit1', 'mimosa.line.sampleHit2', 'mimosa.line.sampleHit3'])], 'calm');
+          },
+          { flyFrom: { x: this.home.x, y: this.home.y - 6 }, flyKey: icons.length > 0 ? host.rng.pick(icons) : undefined, flyPx: S.iconPx, flightPx: S.flightPx, burst: this.ref(this.M.art.slam), burstPx: S.radius * 2.6 },
+        ),
+      );
+    }
     return new Seq(p.durationSec);
   }
 

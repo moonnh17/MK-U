@@ -2162,6 +2162,22 @@ body {
   width: 100%;
   height: 100%;
 }
+/* 디버프 아이템: 검붉은 칸이 천천히 맥박친다 */
+.iw-itemcell.debuff {
+  background: #1a0508;
+  animation: iw-debuff 1.6s ease-in-out infinite;
+}
+@keyframes iw-debuff {
+  50% { box-shadow: 0 0 6px #c0283c; }
+}
+.iw-detail .iw-drop {
+  align-self: flex-start;
+  margin-top: 6px;
+}
+.iw-drop.armed {
+  background: #7a1a22;
+  border-color: #ff6a6a;
+}
 #inventory-window .iw-detail {
   min-height: 92px;
   padding: 8px;

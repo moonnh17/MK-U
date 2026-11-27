@@ -1,5 +1,5 @@
 /** 오버플로우 모드 (무한 모드) 데이터 */
-import type { GradeId } from './common';
+import type { GradeId, TagId } from './common';
 
 /** 4장부터 무작위로 뽑는 장 하나 */
 export interface OverflowThemeDef {
@@ -58,10 +58,12 @@ export interface OverflowData {
   debugExtraChapters: number;
   evolution: EvolutionData;
   mimosa: MimosaData;
+  acro: AcroData;
+  kaiserLearning: KaiserLearningData;
 }
 
 export interface MimosaPatternDef {
-  id: 'drones' | 'gridDrop' | 'field' | 'scan' | 'call' | 'gridShift' | 'pulse' | 'satellite' | 'laser' | 'purge';
+  id: 'drones' | 'gridDrop' | 'field' | 'scan' | 'call' | 'gridShift' | 'pulse' | 'satellite' | 'laser' | 'purge' | 'sample';
   phases: number[];
   weight: number;
   cooldownSec: number;
@@ -104,6 +106,8 @@ export interface MimosaData {
   death: { cracks: number; sec: number; color: string };
   color: string;
   /** 패턴 그림 (art.json 키)과 화면 크기(px) */
+  /** 실험 샘플 투여 (디버프 아이템): 페이즈별 개수, 예고·고임 시간, 반경, 피해, 날아가는 높이, 아이콘 크기 */
+  sample: { count: Record<string, number>; warnSec: number; lingerSec: number; radius: number; damage: number; flightPx: number; iconPx: number; color: string };
   art: {
     drone: string; shot: string; cube: string; slam: string; beam: string; reticle: string; cover: string; dome: string; emp: string; warp: string; rune: string;
     dronePx: number; cubePx: number; slamPx: number; beamGap: number; beamPx: number; reticlePx: number; maxGridFx: number; domePx: number; empPx: number; warpPx: number; runePx: number;
@@ -186,4 +190,82 @@ export interface EvolutionData {
   rewards: Record<'common' | 'rare' | 'legendary' | 'unique', EvolutionRewardDef[]>;
   /** 다음 스테이지 시작방에 떨어뜨리는 상자 간격 */
   dropOffsetPx: number;
+}
+
+export type AcroPatternId = 'cut' | 'shards' | 'brand' | 'rewind' | 'summon' | 'crossCut' | 'riftChain';
+
+export interface AcroPatternDef {
+  id: AcroPatternId;
+  phases: number[];
+  weight: number;
+  cooldownSec: number;
+  durationSec: number;
+}
+
+/** 7-5 아크로 학파 연구원 미모사 (제안, 수치 임시). 시간·공간에 손대는 정체 공개 보스 */
+export interface AcroData {
+  enemyId: string;
+  /** 체력 비율 문턱 (2페이즈·3페이즈) */
+  phases: number[];
+  firstDelaySec: number;
+  gapSec: Record<string, number>;
+  transitionSec: number;
+  color: string;
+  intro: { riftSec: number; appearSec: number; bandSec: number; riftPx: number };
+  /** 순간이동: 사라짐·나타남 시간, 플레이어와의 거리, 방 가장자리 여백 */
+  blink: { vanishSec: number; appearSec: number; minDistPx: number; maxDistPx: number; edgePx: number };
+  patterns: AcroPatternDef[];
+  /** 공간 베기: 플레이어를 지나는 선 n개 */
+  cut: { linesByPhase: Record<string, number>; warnSec: number; widthPx: number; damage: number; lengthPx: number; stepSec: number };
+  shards: { countByPhase: Record<string, number>; waves: number; waveGapSec: number; speed: number; range: number; damage: number; gapDeg: number };
+  /** 각인: 맞으면 디버프 아이템 (아크로) */
+  brand: { countByPhase: Record<string, number>; warnSec: number; stepSec: number; radius: number; damage: number; spreadPx: number };
+  /** 되감기: 퍼진 탄이 멈췄다가 미모사에게 되돌아온다 */
+  rewind: { count: number; speed: number; range: number; freezeSec: number; returnSpeed: number; damage: number };
+  /** 맵 곳곳 소환: 다른 칸으로 함께 넘어가 그 장(테마)의 잡몹과 보스를 부른다 */
+  summon: {
+    normalsByPhase: Record<string, number>;
+    bossHpMul: number;
+    bossDamageMul: number;
+    timeoutSec: number;
+    hopSec: number;
+    themeChapters: number[];
+    excludeBosses: string[];
+    overlayAlpha: number;
+    /** 소환체가 있는 동안 미모사 받는 피해 배율 */
+    guardMul: number;
+    attackGapSec: number;
+    spreadPx: number;
+  };
+  /** 2→3 전환: 맵 곳곳에서 합을 겨룬다 (점점 빨라지고 카메라가 멀어진다) */
+  clash: { hops: number; startGapSec: number; endGapSec: number; hitstopSec: number; zoomTo: number; flashAlpha: number; holdSec: number; breakSec: number };
+  /** 3페이즈 무너진 붉은 공간 */
+  redSpace: { floorKey: string; /** 바닥을 어둡게 (위험 표시가 잘 보이게) */ floorTint: string; voidColor: string; edgeColor: string; rubble: number; rubbleColor: string; voidPad: number };
+  crossCut: { lines: number; warnSec: number; widthPx: number; damage: number; lengthPx: number };
+  riftChain: { blinks: number; gapSec: number; ringR: number; ringSec: number; ringThickness: number; damage: number; gapDeg: number };
+  art: { blink: string; blinkRing: string; slash: string; shard: string; mark: string; burst: string; portal: string; implode: string; blinkPx: number; slashPx: number; markPx: number; burstPx: number; portalPx: number };
+}
+
+/** 오버플로우 마기카이저 학습 변형 (제안, 임시): 많이 쓴 계열의 피해를 덜 받고 맞서는 반응이 붙는다 */
+export interface KaiserVariantDef {
+  id: string;
+  /** 이 태그들을 맞힌 수의 합으로 고른다 */
+  tags: TagId[];
+  nameKey: string;
+  /** 태그별 받는 피해 배율 */
+  takenMul: Partial<Record<TagId, number>>;
+  /** 원거리 반사: 맞을 때 chance로 플레이어에게 탄을 되쏜다 */
+  reflect?: { chance: number; speed: number; range: number; damage: number };
+  /** 충격 갑주: 근접으로 맞으면 (재사용 대기) 둘레에 충격파 고리 + 밀어냄 */
+  shock?: { cooldownSec: number; radius: number; thickness: number; damage: number; pushPx: number };
+  /** 마기 흡수: 마기·기술로 hits번 맞으면 사방으로 흡수한 마기를 방출 */
+  absorb?: { hits: number; count: number; speed: number; range: number; damage: number };
+}
+
+export interface KaiserLearningData {
+  bossId: string;
+  /** 이만큼 맞혀야 변형이 붙는다 */
+  minHits: number;
+  color: string;
+  variants: KaiserVariantDef[];
 }

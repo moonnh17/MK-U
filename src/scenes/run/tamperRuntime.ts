@@ -44,6 +44,8 @@ export class TamperRuntime {
       focus: (at) => {
         run.cameraHold = at;
       },
+      debuff: () => run.loot.giveDebuff('hectar'),
+      debuffIcons: () => run.ctx.data.items.items.filter((x) => x.debuffSet === 'hectar').map((x) => x.spriteKey),
       activeSlots: run.ctx.data.skills.activeSlots,
     };
   }

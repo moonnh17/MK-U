@@ -18,6 +18,7 @@ import { contains, interiorRect, roomAt, roomCenter } from '../../systems/worldL
 import type { Rect } from '../../systems/worldLayout';
 import { contentChapter, hiddenTableChapter, overflowBossScale, overflowEnemyScale, overflowGrowth, stageBossId, waveChaptersOf } from '../../systems/overflow';
 import { MimosaController } from '../../bosses/mimosa/controller';
+import { AcroController } from '../../bosses/mimosa/acroController';
 import type { RunScene } from '../RunScene';
 
 export class RoomRuntime {
@@ -31,11 +32,13 @@ export class RoomRuntime {
       visited.add(rid);
       const state = this.run.rooms.get(rid)!;
       const inner = interiorRect(map.rooms[rid]!, this.run.m, this.run.ctx.data.mapgen.lockInsetPx);
+      // 아크로 미모사가 칸을 넘나드는 동안은 방에 들어서도 웨이브·조우가 시작되지 않는다
+      const frozen = this.run.acro.frozen;
       // 조우 칸: 안쪽에 들어서면 유형이 정해진다
-      if (map.rooms[rid]!.kind === 'encounterRoom' && !this.run.session.encounters.has(rid) && contains(inner, this.run.player.x, this.run.player.y)) {
+      if (!frozen && map.rooms[rid]!.kind === 'encounterRoom' && !this.run.session.encounters.has(rid) && contains(inner, this.run.player.x, this.run.player.y)) {
         this.run.encounters.resolveEncounter(rid);
       }
-      if (this.run.rooms.get(rid)!.phase === 'idle' && contains(inner, this.run.player.x, this.run.player.y)) {
+      if (!frozen && this.run.rooms.get(rid)!.phase === 'idle' && contains(inner, this.run.player.x, this.run.player.y)) {
         // 보스방: 경고 배너를 띄우고 그동안 보스 소환을 미룬다
         const boss = state.kind === 'bossRoom' ? state.waves[0]?.[0] : undefined;
         const bossDef = boss ? this.run.ctx.data.enemies.enemies.find((e) => e.id === boss) : undefined;
@@ -77,11 +80,13 @@ export class RoomRuntime {
         if (this.run.encounters.hiddenBossRooms.has(roomId)) this.run.encounters.hiddenBossReward(roomId);
         // 보스 스테이지: 보스방에서 스킬 카드를 1회 더 고른 뒤 포털이 생긴다(보스방이 출구를 겸함)
         if (node.kind === 'bossRoom') {
+          this.run.loot.clearDebuffs();
           const end = stageEndOffers(this.run.session.stage, this.run.ctx.data.mapgen, this.run.ctx.data.cards);
           const bossId = this.run.rooms.get(roomId)?.waves[0]?.[0];
           // 식광·마기카이저: 처치 후 일반 스토리 대화 (내용이 비어 있으면 건너뜀)
           // 오버플로우는 본편 스토리 대화(식광·엔딩)를 건너뛴다
-          const story = this.run.session.player.overflow ? (_e: string, _a: string | undefined, then: () => void) => then() : this.run.progression.playStory.bind(this.run.progression);
+          // (아크로 미모사는 전용 대화가 있다)
+          const story = this.run.session.player.overflow && bossId !== this.run.ctx.data.overflow.acro.enemyId ? (_e: string, _a: string | undefined, then: () => void) => then() : this.run.progression.playStory.bind(this.run.progression);
           story('bossKill', bossId, () =>
             this.run.progression.queueOffers(
               end.bossRoom.map((kind) => ({ kind, boss: true })),
@@ -175,9 +180,14 @@ export class RoomRuntime {
       // 헥타르 미모사: 전용 조종기 (등장 연출도 스스로)
       if (def.id === d.overflow.mimosa.enemyId) {
         this.run.bossControllers.set(enemy, new MimosaController(enemy, d.overflow.mimosa, this.currentArena(), this.run.tamper.hooks(), this.run, mul));
+      } else if (def.id === d.overflow.acro.enemyId) {
+        // 아크로 미모사: 전용 조종기 (정체 공개 대화·등장 연출도 스스로)
+        this.run.bossControllers.set(enemy, new AcroController(enemy, d.overflow.acro, interiorRect(this.run.session.map.rooms[roomId]!, this.run.m), this.run.acro.hooks(), this.run, mul));
       } else if (core) {
         this.run.bossControllers.set(enemy, new BossController(enemy, core, mul));
         if (!this.run.stageFx.intro) this.run.stageFx.startBossIntro(enemy);
+        // 오버플로우 마기카이저: 이 런의 공격 계열을 학습한 변형 (제안)
+        if (def.id === d.overflow.kaiserLearning.bossId) this.run.kaiserLearn.apply(enemy, mul);
       }
       // 식광: 일식 어둠
       const dk = core?.darkness;
@@ -191,7 +201,7 @@ export class RoomRuntime {
   }
 
   /** 오버플로우 장 배율 (본편·1~3장은 1) */
-  private overflowScale(id: string, rank: string, chapter: number): { hp: number; damage: number } {
+  overflowScale(id: string, rank: string, chapter: number): { hp: number; damage: number } {
     const d = this.run.ctx.data;
     const { stage, player } = this.run.session;
     if (!player.overflow) return { hp: 1, damage: 1 };
@@ -207,10 +217,11 @@ export class RoomRuntime {
     return this.run.ctx.data.overflow.bossNameKeys[stage.boss];
   }
 
-  /** 지금 챕터 웨이브에 나오는 일반 적 (중복 없이) */
-  chapterRoster(): string[] {
+  /** 지금 챕터(또는 chapters) 웨이브에 나오는 일반 적 (중복 없이) */
+  chapterRoster(chapters?: number[]): string[] {
     const d = this.run.ctx.data;
-    const ids = new Set(d.waves.waves.filter((w) => waveChaptersOf(this.run.session.stage).includes(w.chapter)).flatMap((w) => w.spawns.map((s) => s.enemy)));
+    const chs = chapters ?? waveChaptersOf(this.run.session.stage);
+    const ids = new Set(d.waves.waves.filter((w) => chs.includes(w.chapter)).flatMap((w) => w.spawns.map((s) => s.enemy)));
     return [...ids].filter((id) => d.enemies.enemies.find((e) => e.id === id)?.rank === 'normal');
   }
 
@@ -246,6 +257,17 @@ export class RoomRuntime {
     this.run.enemyGroup.add(enemy.sprite);
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
     this.run.enemies.push(enemy);
+    return enemy;
+  }
+
+  /** 아크로 미모사가 부르는 보스 (약화판): 보스 패턴 그대로, 보상·처치 연출·방 웨이브 수 없음 */
+  spawnBossMinion(id: string, at: Vec2, hpMul: number, damageMul: number): Enemy {
+    const d = this.run.ctx.data;
+    const enemy = this.spawnMinion(id, at);
+    enemy.setMaxHp(Math.max(1, Math.round(enemy.maxHp * hpMul)));
+    const core = d.bosses.bosses.find((b) => b.id === id);
+    const ovf = this.overflowScale(id, enemy.rank, enemy.def.chapter);
+    if (core) this.run.bossControllers.set(enemy, new BossController(enemy, core, ovf.damage * damageMul));
     return enemy;
   }
 

@@ -35,7 +35,7 @@ export function validateEnemies(v: V): void {
     if (!Number.isInteger(e.chapter) || e.chapter < 1 || e.chapter > d.mapgen.chapters) errors.push(`${w}: chapter 범위 밖`);
     if (!['normal', 'elite', 'champion', 'boss', 'hiddenBoss'].includes(e.rank)) errors.push(`${w}: rank 잘못됨`);
     if (!['chase', 'idle', 'boss'].includes(e.ai)) errors.push(`${w}: 알 수 없는 ai '${e.ai}'`);
-    if (e.ai === 'boss' && e.id !== d.overflow.mimosa.enemyId && ![...d.bosses.bosses, ...d.bosses.hiddenBosses].some((b) => b.id === e.id)) errors.push(`${w}: 보스 ai인데 bosses.json에 패턴이 없음`);
+    if (e.ai === 'boss' && e.id !== d.overflow.mimosa.enemyId && e.id !== d.overflow.acro.enemyId && ![...d.bosses.bosses, ...d.bosses.hiddenBosses].some((b) => b.id === e.id)) errors.push(`${w}: 보스 ai인데 bosses.json에 패턴이 없음`);
     checkPositive(errors, `${w}.maxHp`, e.maxHp);
     checkPositive(errors, `${w}.moveSpeed`, e.moveSpeed, true);
     checkPositive(errors, `${w}.contactDamage`, e.contactDamage, true);

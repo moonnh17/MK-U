@@ -6,13 +6,14 @@ import { CardStand, Chest, MerchantStand, type ChestKind } from '../../entities/
 import { FloorWeapon } from '../../entities/pickup';
 import { fitArt } from '../../entities/art';
 import { describeCard } from '../../ui/cardView';
+import { itemDescText } from '../../ui/itemCard';
 import { artKeys } from '../../systems/art';
 import { cardStillValid, type Card } from '../../systems/cards';
-import { chapterWeights, combinableItems, combineCandidates, combineGrade, effectiveWeights, readySet, readyWeaponSet, rollItem, transferWeight } from '../../systems/items';
+import { chapterWeights, combinableItems, combineCandidates, combineGrade, discardItem, effectiveWeights, pickDebuff, readySet, readyWeaponSet, rollItem, stripDebuffs, transferWeight } from '../../systems/items';
 import { canBuy, cardStock, rollChestTier, rollGrade, rollWeapon } from '../../systems/loot';
 import { heal } from '../../systems/vitals';
 import { dropWeaponAt, pickUpWeapon, plainWeapon, type WeaponItem } from '../../systems/weapons';
-import type { GradeId, SpriteRef } from '../../types/data';
+import type { DebuffSet, GradeId, SpriteRef } from '../../types/data';
 import { contentChapter } from '../../systems/overflow';
 import type { RunScene } from '../RunScene';
 import { sfx, type ItemGet, type Prop, type Vending } from './shared';
@@ -138,6 +139,38 @@ export class LootInteract {
     this.run.combat.fireCooldown = 0;
     this.run.combat.resetCharge();
     bus.emit('toast', { text: this.run.ctx.t('inventory.dropped', { weapon: this.weaponName(r.dropped) }) });
+    bus.emit('inventoryChanged', {});
+  }
+
+  /** 미모사 패턴에 맞음: 그 미모사의 디버프 하나 (한도면 아무것도 안 함). 준 아이템 id */
+  giveDebuff(set: DebuffSet): string | null {
+    const { stage } = this.run.session;
+    const rng = Rng.derive(this.run.ctx.config.seed, `debuff-${stage.chapter}-${stage.stage}-${this.lootSeq++}`);
+    const id = pickDebuff(rng, this.run.ctx.data.items, set, this.run.session.player.items);
+    if (!id) return null;
+    this.giveItem(id);
+    sfx('warning');
+    return id;
+  }
+
+  /** 인벤토리에서 아이템 버리기: 사라진다 (얻은 기록·각성은 그대로) */
+  discardItem(id: string): void {
+    const p = this.run.session.player;
+    if (!p.items.includes(id)) return;
+    p.items = discardItem(p.items, id);
+    this.run.itemRt.refresh();
+    bus.emit('toast', { text: this.run.ctx.t('inventory.discarded', { item: this.run.ctx.t(this.run.ctx.data.items.items.find((x) => x.id === id)!.nameKey) }) });
+    bus.emit('inventoryChanged', {});
+  }
+
+  /** 보스 처치: 디버프 아이템이 모두 사라진다 */
+  clearDebuffs(): void {
+    const p = this.run.session.player;
+    const next = stripDebuffs(p.items, this.run.ctx.data.items);
+    if (next.length === p.items.length) return;
+    p.items = next;
+    this.run.itemRt.refresh();
+    bus.emit('toast', { text: this.run.ctx.t('inventory.debuffCleared') });
     bus.emit('inventoryChanged', {});
   }
 
@@ -322,7 +355,19 @@ export class LootInteract {
     const d = this.run.ctx.data;
     const p = this.run.session.player;
     const def = d.items.items.find((x) => x.id === id);
-    if (!def || p.itemsObtained.includes(id)) return;
+    if (!def) return;
+    // 디버프: 버리거나 보스를 잡으면 사라지고 다시 받을 수 있다 (얻은 기록에 넣지 않음)
+    if (def.pool === 'debuff') {
+      if (p.items.includes(id)) return;
+      p.items = [...p.items, id];
+      this.run.discover('items', id);
+      // 싸우는 중에 받으므로 게임을 멈추는 획득 카드 대신 알림만
+      bus.emit('toast', { text: this.run.ctx.t('inventory.debuffGot', { item: this.run.ctx.t(def.nameKey), desc: itemDescText(def, d.groupMultipliers, this.run.ctx.t) }) });
+      this.run.itemRt.refresh();
+      bus.emit('inventoryChanged', {});
+      return;
+    }
+    if (p.itemsObtained.includes(id)) return;
     p.items = [...p.items, id];
     p.itemsObtained = [...p.itemsObtained, id];
     this.run.discover('items', id);

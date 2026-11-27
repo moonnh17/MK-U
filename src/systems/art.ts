@@ -177,6 +177,7 @@ export function collectAssets(d: GameData): AssetRef[] {
   add('icon', { spriteKey: artKeys.geminiIcon, color: d.gemini.color, size: ICON_SIZE }, 'gemini.name', '#icon');
   add('icon', { spriteKey: artKeys.geminiPortrait, color: d.gemini.color, size: PORTRAIT_SIZE.w, height: PORTRAIT_SIZE.h }, 'gemini.name', '#portrait');
   add('icon', { spriteKey: artKeys.geminiFull, color: d.gemini.color, size: 277, height: 406 }, 'gemini.name', '#full');
+  for (const s of d.gemini.stories) if (s.figure) add('icon', { spriteKey: s.figure, color: d.gemini.color, size: 277, height: 406 }, s.nameKey, '#full');
   // 방 타일 (한 타일 크기, 반복해서 깐다)
   const ts = d.mapgen.tileSize;
   for (let c = 1; c <= d.mapgen.chapters; c++) {
@@ -195,6 +196,10 @@ export function collectAssets(d: GameData): AssetRef[] {
   // 오버플로우 헥타르 미모사 패턴 그림 (overflow.mimosa.art의 그림 키)
   const ma = d.overflow.mimosa.art;
   for (const [name, key] of Object.entries(ma)) if (typeof key === 'string') add('projectile', { spriteKey: key, color: d.overflow.mimosa.color, size: 16 }, 'enemy.hectarMimosa', `#${name}`);
+  // 아크로 미모사 패턴 그림과 3페이즈 붉은 공간 바닥
+  const aa = d.overflow.acro.art;
+  for (const [name, key] of Object.entries(aa)) if (typeof key === 'string') add('projectile', { spriteKey: key, color: d.overflow.acro.color, size: 16 }, 'enemy.acroMimosa', `#${name}`);
+  add('tile', { spriteKey: d.overflow.acro.redSpace.floorKey, color: d.overflow.acro.redSpace.voidColor, size: ts }, 'enemy.acroMimosa', '#redSpace');
   add('prop', d.mapgen.vending, 'asset.vending');
   add('prop', d.mapgen.roomProps.crate, 'asset.crate');
   add('prop', d.mapgen.roomProps.barrel, 'asset.barrel');

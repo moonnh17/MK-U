@@ -15,6 +15,7 @@ export function bindRunEvents(run: RunScene): (() => void)[] {
     bus.on('combinerClose', () => run.loot.closeCombiner()),
     bus.on('inventoryEquip', ({ skillId, target }) => run.progression.equip(skillId, target)),
     bus.on('inventoryDropWeapon', ({ slot }) => run.loot.dropFromSlot(slot)),
+    bus.on('inventoryDiscardItem', ({ id }) => run.loot.discardItem(id)),
     bus.on('inventoryOpenRequest', () => run.progression.openInventory()),
     bus.on('inventoryCloseRequest', () => run.progression.closeInventory()),
     bus.on('debugSetSkill', (e) => run.debugTools.debugSetSkill(e.skillId, e.level, e.awakened)),

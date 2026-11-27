@@ -134,7 +134,7 @@ describe('현재의 기억 — 제미니 칸', () => {
   it('스토리 대화 + 복선(기록) 미니 대사, 내용 있는 것만 준비됨', () => {
     const slots = geminiSlots(G, T);
     expect(slots.map((s) => s.id)).toEqual([
-      'gemini.firstRun', 'gemini.ending', 'gemini.killFusionAkgwi', 'gemini.killElectricRing', 'gemini.killMagiGolem', 'gemini.killEclipse',
+      'gemini.firstRun', 'gemini.ending', 'gemini.acroMimosaMeet', 'gemini.acroMimosaKill', 'gemini.killFusionAkgwi', 'gemini.killElectricRing', 'gemini.killMagiGolem', 'gemini.killEclipse',
       'gemini.metExecutor', 'gemini.metHectarChief', 'gemini.metMagiKaiser', 'gemini.chapterEnd2', 'gemini.hiddenBoss',
     ]);
     expect(slots.filter((s) => !s.ready).map((s) => s.id)).toEqual(['gemini.chapterEnd2', 'gemini.hiddenBoss']);

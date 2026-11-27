@@ -42,7 +42,7 @@ export class EnemyLife {
     this.run.juice.death(e.sprite, e.def.color, big);
     sfx(big ? 'killBig' : 'kill');
     if (big) this.run.hitStop.request(e.rank === 'boss' || e.rank === 'hiddenBoss' ? d.juice.hitStop.bossKill : d.juice.hitStop.eliteKill);
-    if (this.run.bossControllers.has(e)) this.run.stageFx.startBossKill({ x, y });
+    if (this.run.bossControllers.has(e) && !e.noReward) this.run.stageFx.startBossKill({ x, y });
     this.recordKill(e);
     // 집정관: 같은 방에서 죽은 적의 에너지를 흡수한다 (그 적의 에너지 구슬은 떨어지지 않음)
     const absorbed = this.archonAbsorb(e, roomId);

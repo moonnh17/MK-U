@@ -266,7 +266,7 @@ export class Progression {
     if (registerGemini(this.run.ctx.save.data, `gemini.${story.id}`, story.lines)) this.run.ctx.save.write();
     this.storyThen = then;
     this.run.setModal('story');
-    bus.emit('storyShow', { lines: storyLines(story.lines, d.text, d.text['gemini.speaker'] ?? '') });
+    bus.emit('storyShow', { lines: storyLines(story.lines, d.text, d.text['gemini.speaker'] ?? ''), figure: story.figure });
   }
 
   finishStory(): void {

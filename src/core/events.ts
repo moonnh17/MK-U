@@ -59,7 +59,7 @@ export interface GameEvents {
   /** 컷인·설명창을 다 넘겼다 */
   cutsceneDone: Record<string, never>;
   /** 미모사 제미니 일반 스토리 대화 (게임을 멈춘다). lines: 차례로 넘길 화자·문장 */
-  storyShow: { lines: StoryLine[] };
+  storyShow: { lines: StoryLine[]; figure?: string };
   storyDone: Record<string, never>;
   /** 미모사 제미니 미니 대사 한 문장을 띄우거나(null이면) 숨긴다 */
   geminiMini: { line: { text: string; mood: 'calm' | 'ominous' } | null };
@@ -103,6 +103,7 @@ export interface GameEvents {
   saveChanged: Record<string, never>;
   /** 인벤토리 아이템 탭: 그 슬롯의 무기를 발밑에 버린다 */
   inventoryDropWeapon: { slot: 0 | 1 };
+  inventoryDiscardItem: { id: string };
   /** 인벤토리 열기 요청(보관 알림의 버튼) / 닫기 요청(닫기 버튼) */
   inventoryOpenRequest: Record<string, never>;
   inventoryCloseRequest: Record<string, never>;

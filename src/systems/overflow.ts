@@ -20,6 +20,8 @@ export interface OverflowState {
   evolution: EvolutionState;
   /** 진화 카드 보상: 다음 스테이지 시작방에 떨어뜨릴 상자 */
   pendingDrops: PendingDrop[];
+  /** 이 런에서 맞힌 공격의 태그 수 (마기카이저 학습) */
+  tagUse?: Partial<Record<string, number>>;
 }
 
 export type PendingDrop = { kind: 'weapon'; tier: string } | { kind: 'item'; weights: Partial<Record<string, number>> };

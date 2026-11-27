@@ -71,7 +71,8 @@ export function codexSections(d: GameData, tab: CodexTab): CodexSection[] {
   const items = d.items.items;
   return [
     ...GRADES.map((g) => ({ titleKey: `codex.section.items.${g}`, grade: g, entries: items.filter((x) => x.pool === 'normal' && x.grade === g).map((x): CodexEntry => ({ kind: 'item', id: x.id, record: 'items' })) })),
-    { titleKey: 'codex.section.items.special', entries: items.filter((x) => x.pool !== 'normal').map((x): CodexEntry => ({ kind: 'item', id: x.id, record: 'items' })) },
+    { titleKey: 'codex.section.items.special', entries: items.filter((x) => x.pool !== 'normal' && x.pool !== 'debuff').map((x): CodexEntry => ({ kind: 'item', id: x.id, record: 'items' })) },
+    { titleKey: 'codex.section.items.debuff', entries: items.filter((x) => x.pool === 'debuff').map((x): CodexEntry => ({ kind: 'item', id: x.id, record: 'items' })) },
   ].filter((s) => s.entries.length > 0);
 }
 

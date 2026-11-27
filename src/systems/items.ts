@@ -4,7 +4,7 @@
  * - 같은 아이템은 한 런에 한 번만(합성으로 사라진 재료도 다시 나오지 않음).
  */
 import type { Rng } from '../core/rng';
-import type { GradeId, GroupMultipliersData, ItemDef, ItemEffect, ItemsData, SchoolId } from '../types/data';
+import type { DebuffSet, GradeId, GroupMultipliersData, ItemDef, ItemEffect, ItemsData, SchoolId } from '../types/data';
 import { rollGrade } from './loot';
 
 export interface ItemContext {
@@ -313,4 +313,30 @@ export function combinableItems(owned: readonly string[], data: ItemsData, obtai
     return !!to && combineCandidates(to, data, obtained).length > 0;
   });
   return ok.filter((id) => ok.filter((o) => gradeOf(o) === gradeOf(id)).length >= 2);
+}
+
+// ---------- 디버프 아이템·버리기 ----------
+
+export function isDebuff(data: ItemsData, id: string): boolean {
+  return data.items.find((x) => x.id === id)?.pool === 'debuff';
+}
+
+/** 미모사가 줄 디버프: 그 미모사의 것 중 아직 없는 것 하나. 그 미모사 디버프가 한도만큼 있으면 null */
+export function pickDebuff(rng: Rng, data: ItemsData, set: DebuffSet, held: readonly string[]): string | null {
+  const mine = data.items.filter((x) => x.debuffSet === set);
+  const have = mine.filter((x) => held.includes(x.id)).length;
+  if (have >= data.debuff.maxHeld[set]) return null;
+  const free = mine.filter((x) => !held.includes(x.id));
+  return free.length > 0 ? rng.pick(free).id : null;
+}
+
+/** 보스 처치: 디버프만 사라진다 */
+export function stripDebuffs(items: readonly string[], data: ItemsData): string[] {
+  return items.filter((id) => !isDebuff(data, id));
+}
+
+/** 인벤토리에서 버리기: 그 아이템 하나만 뺀다 (얻은 기록·각성은 그대로) */
+export function discardItem(items: readonly string[], id: string): string[] {
+  const i = items.indexOf(id);
+  return i < 0 ? [...items] : [...items.slice(0, i), ...items.slice(i + 1)];
 }

@@ -140,10 +140,10 @@ describe('오버플로우 보스 칸', () => {
     for (const x of play(2, 40)) if (![2, 5].includes(x.stage.stage)) expect(x.stage.boss).toBeUndefined();
   });
 
-  it('스폰할 보스 id: 본편은 장·스테이지 표, 오버플로우는 칸 → 임시 보스로 대신', () => {
+  it('스폰할 보스 id: 본편은 장·스테이지 표, 오버플로우는 칸 (아크로 미모사도 이제 본 전투)', () => {
     expect(stageBossId({ chapter: 2, stage: 2 }, d)).toBe('hectarChief');
     expect(stageBossId({ chapter: 4, stage: 5, boss: 'hectarMimosa' }, d)).toBe('hectarMimosa');
-    expect(stageBossId({ chapter: 7, stage: 5, boss: 'acroMimosa' }, d)).toBe(O.placeholderBosses.acroMimosa);
+    expect(stageBossId({ chapter: 7, stage: 5, boss: 'acroMimosa' }, d)).toBe('acroMimosa');
     expect(resolveBossId('magiKaiser', d)).toBe('magiKaiser');
     for (const id of Object.values(O.placeholderBosses)) expect(d.enemies.enemies.some((e) => e.id === id)).toBe(true);
   });

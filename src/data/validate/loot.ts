@@ -97,10 +97,11 @@ export function validateItems(v: V): void {
     if (x.abilityDescKey) needText(w, x.abilityDescKey);
     if (x.abilityNameKey) needText(w, x.abilityNameKey);
     if (!gradeIds.has(x.grade)) errors.push(`${w}: 알 수 없는 등급`);
-    if (!['normal', 'boss', 'hiddenBoss', 'set'].includes(x.pool)) errors.push(`${w}: pool 잘못됨`);
+    if (!['normal', 'boss', 'hiddenBoss', 'set', 'debuff'].includes(x.pool)) errors.push(`${w}: pool 잘못됨`);
     for (const t of x.tags) if (!tagIds.has(t)) errors.push(`${w}: 알 수 없는 태그 '${t}'`);
     if (x.pool === 'boss' && !d.bosses.bosses.some((b) => b.id === x.bossId)) errors.push(`${w}: bossId '${String(x.bossId)}' 보스 없음`);
     if (x.pool === 'hiddenBoss' && !d.bosses.hiddenBosses.some((b) => b.id === x.bossId)) errors.push(`${w}: bossId '${String(x.bossId)}' 히든보스 없음`);
+    if ((x.pool === 'debuff') !== !!x.debuffSet) errors.push(`${w}: 디버프 아이템만 debuffSet이 있어야 함`);
     if (x.effects.length === 0) errors.push(`${w}: 효과 없음`);
     for (const e of [...x.effects, ...(x.variants ?? []).flatMap((v) => v.effects)]) {
       if ((e.kind === 'autoCast' || e.kind === 'skillDamage') && !d.skills.skills.some((s) => s.id === e.skillId)) errors.push(`${w}: 없는 스킬 '${e.skillId}'`);

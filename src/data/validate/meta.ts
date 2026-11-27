@@ -98,8 +98,16 @@ export function validateOverflow(v: V): void {
     if (t.tint !== undefined && !HEX_COLOR.test(t.tint)) errors.push(`overflow.themes.${t.id}.tint: #RRGGBB`);
   }
   const bossIds = new Set(d.bosses.bosses.map((b) => b.id));
-  // 헥타르 미모사는 bosses.json 대신 overflow.mimosa로 싸운다
-  const known = (id: string) => bossIds.has(id) || O.placeholderBosses[id] !== undefined || id === O.mimosa.enemyId;
+  // 헥타르·아크로 미모사는 bosses.json 대신 overflow.mimosa / overflow.acro로 싸운다
+  const known = (id: string) => bossIds.has(id) || O.placeholderBosses[id] !== undefined || id === O.mimosa.enemyId || id === O.acro.enemyId;
+  // 아크로 미모사
+  const A = O.acro;
+  if (!d.enemies.enemies.some((e) => e.id === A.enemyId)) errors.push(`overflow.acro.enemyId: 없는 적 '${A.enemyId}'`);
+  for (const p of A.patterns) if (p.phases.length === 0 || p.durationSec <= 0) errors.push(`overflow.acro.patterns.${p.id}: phases·durationSec`);
+  for (let ph = 1; ph <= A.phases.length + 1; ph++) if (!A.patterns.some((p) => p.phases.includes(ph))) errors.push(`overflow.acro: ${ph}페이즈 패턴 없음`);
+  for (const id of A.summon.excludeBosses) if (!bossIds.has(id)) errors.push(`overflow.acro.summon.excludeBosses: 모르는 보스 '${id}'`);
+  for (const c of A.summon.themeChapters) if (!d.bosses.bosses.some((b) => b.chapter === c && !A.summon.excludeBosses.includes(b.id))) errors.push(`overflow.acro.summon.themeChapters: ${c}장에 부를 보스 없음`);
+  if (!(A.clash.hops >= 2 && A.clash.endGapSec > 0 && A.clash.endGapSec <= A.clash.startGapSec)) errors.push('overflow.acro.clash: hops 2 이상, 0 < endGapSec ≤ startGapSec');
   for (const [stage, pool] of Object.entries(O.bossPools)) {
     if (!d.mapgen.bossStages.includes(Number(stage))) errors.push(`overflow.bossPools.${stage}: 보스 스테이지가 아님`);
     if (pool.length === 0) errors.push(`overflow.bossPools.${stage}: 비어 있음`);

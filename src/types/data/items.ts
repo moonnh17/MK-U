@@ -136,7 +136,10 @@ export type ItemEffect =
   | { kind: 'lowHpGuard'; threshold: number; reduction: number; durationSec: number; cooldownSec: number }
   | { kind: 'ultimateBurst'; shots: number; damage: number; speed: number; range: number; tags: TagId[] };
 
-export type ItemPool = 'normal' | 'boss' | 'hiddenBoss' | 'set';
+export type ItemPool = 'normal' | 'boss' | 'hiddenBoss' | 'set' | 'debuff';
+
+/** 디버프 아이템을 주는 미모사 (헥타르 4-5 / 아크로 7-5) */
+export type DebuffSet = 'hectar' | 'acro';
 
 export interface ItemDef extends SpriteRef {
   id: string;
@@ -152,8 +155,10 @@ export interface ItemDef extends SpriteRef {
   /** 추가 능력 설명 (도감은 일반 능력 아래 제목과 함께, 카드·가방은 일반 능력 뒤에 이어서) */
   abilityDescKey?: string;
   grade: GradeId;
-  /** normal: 상자·첨탑 / boss: 그 보스 처치로만 / hiddenBoss: 히든보스 처치로만 / set: 세트 합성으로만 */
+  /** normal: 상자·첨탑 / boss: 그 보스 처치로만 / hiddenBoss: 히든보스 처치로만 / set: 세트 합성으로만 / debuff: 미모사 패턴으로만 (버리거나 보스를 잡으면 사라짐) */
   pool: ItemPool;
+  /** pool debuff: 어느 미모사가 주는지 */
+  debuffSet?: DebuffSet;
   tags: TagId[];
   effects: ItemEffect[];
   /** 직업·학파별 추가 효과 (아직 없는 직업은 데이터만) */
@@ -170,6 +175,8 @@ export interface ItemsData {
   raidWeights: Partial<Record<GradeId, number>>;
   /** 획득 1회당 그 등급에서 바로 위 등급으로 옮기는 가중치 (확률 이전) */
   transferPerPickup: number;
+  /** 디버프 아이템: 표시 색·이름, 미모사별 한 번에 가질 수 있는 최대 수 */
+  debuff: { color: string; nameKey: string; maxHeld: Record<DebuffSet, number> };
   /** 세트 합성: 재료 → 결과 */
   sets: { materials: string[]; result: string }[];
   /** 무기 세트: 든 무기 + 아이템 → 그 슬롯의 새 무기 (아이템은 사라진다) */

@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 877개 · 그림 있음 827개
+전체 896개 · 그림 있음 846개
 
 ## player (9)
 
@@ -180,11 +180,12 @@
 | `enemy_cluster_alveoli` | 군집 폐포 | 16×16 | feet | #8a3ad0 | mku/enemy_cluster_alveoli.png (16프레임) |
 | `enemy_magi_colony_fusion` | 마기 군락체 | 26×26 | feet | #8a3ad0 | mku/enemy_magi_colony_fusion.png (20프레임) |
 
-## boss (28)
+## boss (29)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `boss_mimosa` | 헥타르 학파 연구원 미모사 | 30×18 | feet | #7ae0ff | mku/boss_mimosa.png (12프레임) |
+| `enemy_acro_mimosa` | 아크로 미모사 | 18×30 | feet | #ff2a3a | mku/enemy_acro_mimosa.png (28프레임) |
 | `enemy_electric_ring` | 전기환띠 | 42×42 | feet | #3a9ad9 | mku/enemy_electric_ring.png (6프레임) |
 | `enemy_training_dummy` | 보스 자리(임시 표적) | 24×24 | feet | #8a5ad9 | mku/enemy_training_dummy.png (1프레임) |
 | `enemy_ancestor_echo` | 선조의 잔상 | 42×42 | feet | #b0583a | mku/enemy_ancestor_echo.png (16프레임) |
@@ -501,7 +502,7 @@
 | `fx_hwk_ring` | 마기탄 (spark) 외 3곳 | 26×26 | center | #e0b3ff | mku/fx_hwk_ring.png (10프레임) |
 | `fx_hw_blast` | 마기탄 (bigBlast) 외 2곳 | 40×40 | center | #b266ff | mku/fx_hw_blast.png (23프레임) |
 | `fx_summon_will_shot` | 마기탄 (shot) 외 1곳 | 10×10 | center | #e0b3ff | mku/fx_summon_will_shot.png (5프레임) |
-| `fx_hwk_portal` | 마기 분출 (portal) | 32×32 | center | #b266ff | mku/fx_hwk_portal.png (1프레임) |
+| `fx_hwk_portal` | 마기 분출 (portal) 외 1곳 | 32×32 | center | #b266ff | mku/fx_hwk_portal.png (1프레임) |
 | `fx_hw_beam` | 마기 분출 (beam) 외 2곳 | 12×12 | center | #b266ff | mku/fx_hw_beam.png (7프레임) |
 | `fx_hwk_stun` | 마기 파동 (stun) | 22×22 | center | #ffe36e | mku/fx_hwk_stun.png (36프레임) |
 | `fx_hw_wave` | 마기 파동 (wave) | 60×60 | center | #b266ff | mku/fx_hw_wave.png (12프레임) |
@@ -587,7 +588,7 @@
 | `lab_gemini` | 미모사 제미니 | 14×22 | feet | #7ae0e0 | mku/lab_gemini.png (1프레임) |
 | `lab_window` | 관측창 | 100×12 | feet | #06090c | mku/lab_window.png (1프레임) |
 
-## item (63)
+## item (79)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -654,8 +655,24 @@
 | `item_royal_seal` | 특무 인장 | 8×8 | center | #6a4ad9 | mku/item_royal_seal.png (1프레임) |
 | `item_orion_shield` | 오리온의 방패 | 8×8 | center | #d9c25a | mku/item_orion_shield.png (1프레임) |
 | `item_hectar_ram` | 헥타르 RAM | 8×8 | center | #3a9aff | mku/item_hectar_ram.png (1프레임) |
+| `item_debuff_mim_sticky_jelly` | 끈적한 실험 젤리 | 8×8 | center | #6fe0ff | mku/item_debuff_mim_sticky_jelly.png (1프레임) |
+| `item_debuff_mim_draft_patch` | 초안 패치 노트 | 8×8 | center | #9fe8ff | mku/item_debuff_mim_draft_patch.png (1프레임) |
+| `item_debuff_mim_swollen_battery` | 부푼 배터리 | 8×8 | center | #7fd6e8 | mku/item_debuff_mim_swollen_battery.png (1프레임) |
+| `item_debuff_mim_toy_cuffs` | 장난감 수갑 | 8×8 | center | #b8f0ff | mku/item_debuff_mim_toy_cuffs.png (1프레임) |
+| `item_debuff_mim_decaf_coffee` | 디카페인 커피 | 8×8 | center | #c9e4ea | mku/item_debuff_mim_decaf_coffee.png (1프레임) |
+| `item_debuff_mim_observe_sticker` | 관측 스티커 | 8×8 | center | #5ac8f0 | mku/item_debuff_mim_observe_sticker.png (1프레임) |
+| `item_debuff_mim_broken_calc` | 고장 난 계산기 | 8×8 | center | #8ad0e0 | mku/item_debuff_mim_broken_calc.png (1프레임) |
+| `item_debuff_mim_empty_wallet` | 텅 빈 지갑 | 8×8 | center | #a0d8e6 | mku/item_debuff_mim_empty_wallet.png (1프레임) |
+| `item_debuff_acro_crimson_brand` | 붉은 각인 | 8×8 | center | #ff3a4a | mku/item_debuff_acro_crimson_brand.png (1프레임) |
+| `item_debuff_acro_severed_thread` | 끊어진 실 | 8×8 | center | #e0283a | mku/item_debuff_acro_severed_thread.png (1프레임) |
+| `item_debuff_acro_cracked_hourglass` | 금 간 모래시계 | 8×8 | center | #ff5a5a | mku/item_debuff_acro_cracked_hourglass.png (1프레임) |
+| `item_debuff_acro_rusted_key` | 녹슨 열쇠 | 8×8 | center | #c84850 | mku/item_debuff_acro_rusted_key.png (1프레임) |
+| `item_debuff_acro_ash_ribbon` | 잿빛 리본 | 8×8 | center | #b0a0a4 | mku/item_debuff_acro_ash_ribbon.png (1프레임) |
+| `item_debuff_acro_wet_letter` | 젖은 편지 | 8×8 | center | #e86a74 | mku/item_debuff_acro_wet_letter.png (1프레임) |
+| `item_debuff_acro_crimson_eye` | 붉은 눈 | 8×8 | center | #ff1a30 | mku/item_debuff_acro_crimson_eye.png (1프레임) |
+| `item_debuff_acro_broken_mirror` | 깨진 거울 | 8×8 | center | #ff7a86 | mku/item_debuff_acro_broken_mirror.png (1프레임) |
 
-## icon (101)
+## icon (102)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -760,8 +777,9 @@
 | `icon_gemini` | 미모사 제미니 (icon) | 16×16 | center | #4ab0ff | mku/icon_gemini.png (1프레임) |
 | `portrait_gemini` | 미모사 제미니 (portrait) | 48×64 | center | #4ab0ff | mku/portrait_gemini.png (1프레임) |
 | `story_gemini_full` | 미모사 제미니 (full) | 277×406 | center | #4ab0ff | mku/story_gemini_full.png (1프레임) |
+| `story_acro_full` | 붉은 각인 (full) 외 1곳 | 277×406 | center | #4ab0ff | mku/story_acro_full.png (1프레임) |
 
-## tile (23)
+## tile (24)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -788,6 +806,7 @@
 | `tile_floor_c3_v0` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v0.png (1프레임) |
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
+| `acro_red_floor` | 아크로 미모사 (redSpace) | 16×16 | center | #090003 | mku/acro_red_floor.png (1프레임) |
 
 ## fx (158)
 
@@ -879,7 +898,7 @@
 | `fx_kaiser_cluster` | 마기카이저 (redSunspots.blastHit) 외 1곳 | 35×35 | center | #ff2a2a | mku/fx_kaiser_cluster.png (4프레임) |
 | `fx_kaiser_cross_burst` | 마기카이저 (doomCommand.cross) | 45×45 | center | #ff2a2a | mku/fx_kaiser_cross_burst.png (4프레임) |
 | `fx_kz_starfall` | 마기카이저 (doomCommand.net) 외 1곳 | 70×70 | center | #ff2a2a | mku/fx_kz_starfall.png (32프레임) |
-| `fx_kz_emp` | 마기카이저 (unlock) 외 1곳 | 70×70 | center | #ff2a2a | mku/fx_kz_emp.png (31프레임) |
+| `fx_kz_emp` | 마기카이저 (unlock) 외 2곳 | 70×70 | center | #ff2a2a | mku/fx_kz_emp.png (31프레임) |
 | `fx_kz_charge` | 마기카이저 (spinLaser.cast) 외 1곳 | 60×60 | center | #ff2a2a | mku/fx_kz_charge.png (29프레임) |
 | `fx_kaiser_punch` | 마기카이저 (sectorHit) | 50×50 | center | #ff2a2a | mku/fx_kaiser_punch.png (4프레임) |
 | `fx_kaiser_impact` | 마기카이저 (blastHit) | 35×35 | center | #ff2a2a | mku/fx_kaiser_impact.png (4프레임) |
@@ -890,8 +909,8 @@
 | `fx_kaiser_muzzle` | 마기카이저 (lineLaser.cast) | 20×20 | center | #ff2a2a | mku/fx_kaiser_muzzle.png (3프레임) |
 | `fx_kaiser_command` | 마기카이저 (safeHit) | 60×60 | center | #ff2a2a | mku/fx_kaiser_command.png (4프레임) |
 | `fx_kaiser_cross` | 마기카이저 (doomCommand.cast) | 60×60 | center | #ff2a2a | mku/fx_kaiser_cross.png (4프레임) |
-| `fx_kz_shard` | 마기카이저 (crimsonRain.shard) | 12×12 | center | #ff2a2a | mku/fx_kz_shard.png (1프레임) |
-| `fx_kz_implode` | 마기카이저 (doomCommand.implode) | 70×70 | center | #ff2a2a | mku/fx_kz_implode.png (29프레임) |
+| `fx_kz_shard` | 마기카이저 (crimsonRain.shard) 외 1곳 | 12×12 | center | #ff2a2a | mku/fx_kz_shard.png (1프레임) |
+| `fx_kz_implode` | 마기카이저 (doomCommand.implode) 외 1곳 | 70×70 | center | #ff2a2a | mku/fx_kz_implode.png (29프레임) |
 | `fx_kz_death` | 마기카이저 (death) | 55×55 | center | #ff2a2a | mku/fx_kz_death.png (71프레임) |
 | `fx_echo_spirits` | 선조의 잔상 (warCry.spirits) | 45×45 | center | #ff7a3a | mku/fx_echo_spirits.png (4프레임) |
 | `fx_echo_cry_burst` | 선조의 잔상 (warCry.burst) | 45×45 | center | #ff7a3a | mku/fx_echo_cry_burst.png (4프레임) |
@@ -911,8 +930,8 @@
 | `fx_echo_chain` | 선조의 잔상 (deadChain.chain) | 55×55 | center | #ff7a3a | mku/fx_echo_chain.png (4프레임) |
 | `fx_echo_return` | 선조의 잔상 (ancestorsReturn.blastHit) 외 1곳 | 55×55 | center | #ff7a3a | mku/fx_echo_return.png (4프레임) |
 | `fx_royal_silent_shift` | 왕속특무 마기법사 (blinkBarrage.shift) | 40×40 | center | #b05aff | mku/fx_royal_silent_shift.png (4프레임) |
-| `fx_royal_blink_flash` | 왕속특무 마기법사 (blinkBarrage.flash) | 35×35 | center | #b05aff | mku/fx_royal_blink_flash.png (4프레임) |
-| `fx_royal_blink_ring` | 왕속특무 마기법사 (blinkBarrage.ring) | 40×40 | center | #b05aff | mku/fx_royal_blink_ring.png (4프레임) |
+| `fx_royal_blink_flash` | 왕속특무 마기법사 (blinkBarrage.flash) 외 1곳 | 35×35 | center | #b05aff | mku/fx_royal_blink_flash.png (4프레임) |
+| `fx_royal_blink_ring` | 왕속특무 마기법사 (blinkBarrage.ring) 외 1곳 | 40×40 | center | #b05aff | mku/fx_royal_blink_ring.png (4프레임) |
 | `fx_royal_bullet` | 왕속특무 마기법사 (bullet) | 6×6 | center | #b05aff | mku/fx_royal_bullet.png (4프레임) |
 | `fx_royal_laser` | 왕속특무 마기법사 (greatLaser.beam) | 80×80 | center | #b05aff | mku/fx_royal_laser.png (3프레임) |
 | `fx_royal_laser_warn` | 왕속특무 마기법사 (greatLaser.beamWarn) | 80×80 | center | #b05aff | mku/fx_royal_laser_warn.png (4프레임) |
@@ -921,8 +940,8 @@
 | `fx_royal_strike_trail` | 왕속특무 마기법사 (magiStrike.dashTrail) | 50×50 | center | #b05aff | mku/fx_royal_strike_trail.png (4프레임) |
 | `fx_royal_claw` | 왕속특무 마기법사 (magiStrike.claw) | 50×50 | center | #c8102e | mku/fx_royal_claw.png (4프레임) |
 | `fx_royal_finisher` | 왕속특무 마기법사 (magiStrike.finisher) | 50×50 | center | #c8102e | mku/fx_royal_finisher.png (4프레임) |
-| `fx_royal_strike_swipe` | 왕속특무 마기법사 (magiStrike.sectorHit) | 40×40 | center | #b05aff | mku/fx_royal_strike_swipe.png (4프레임) |
-| `fx_royal_mark` | 왕속특무 마기법사 (royalMark.mark) | 25×25 | center | #b05aff | mku/fx_royal_mark.png (4프레임) |
+| `fx_royal_strike_swipe` | 왕속특무 마기법사 (magiStrike.sectorHit) 외 1곳 | 40×40 | center | #b05aff | mku/fx_royal_strike_swipe.png (4프레임) |
+| `fx_royal_mark` | 왕속특무 마기법사 (royalMark.mark) 외 1곳 | 25×25 | center | #b05aff | mku/fx_royal_mark.png (4프레임) |
 | `fx_royal_seeker` | 왕속특무 마기법사 (royalMark.seeker) | 7×7 | center | #b05aff | mku/fx_royal_seeker.png (4프레임) |
 | `fx_royal_pierce` | 왕속특무 마기법사 (piercingLine.pierce) | 60×60 | center | #b05aff | mku/fx_royal_pierce.png (4프레임) |
 | `fx_royal_seal_edict` | 왕속특무 마기법사 (sealEdict.seal) | 45×45 | center | #b05aff | mku/fx_royal_seal_edict.png (4프레임) |

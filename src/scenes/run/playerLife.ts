@@ -23,7 +23,7 @@ export class PlayerLife {
   hurtPlayer(amount: number, attacker: Enemy | null = null, mentalRaw?: number): boolean {
     // 구르기로 피한 공격 (투르비용: 원심 가속)
     if (this.run.condition.dodge.invuln > 0 && amount > 0 && !this.run.session.outcome) this.run.itemRt.onDodgeAvoid();
-    if (this.run.invuln > 0 || this.run.condition.dodge.invuln > 0 || this.run.dying || this.run.ctx.debugFlags.invincible || this.run.session.outcome || this.run.modal) return false;
+    if (this.run.invuln > 0 || this.run.acro.cinematic || this.run.condition.dodge.invuln > 0 || this.run.dying || this.run.ctx.debugFlags.invincible || this.run.session.outcome || this.run.modal) return false;
     // 특무 인장: 피해를 받기 직전 순간이동으로 피한다 (피격 무적과 같은 시간)
     if (this.run.itemRt.tryDodge()) {
       this.run.invuln = this.run.ctx.data.player.hurtInvulnSec;

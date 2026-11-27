@@ -18,7 +18,8 @@
       "3": "boss3"
     },
     "bossTrackById": {
-      "hectarMimosa": "mimosa"
+      "hectarMimosa": "mimosa",
+      "acroMimosa": "mimosa"
     },
     "tracks": {
       "mimosa": {

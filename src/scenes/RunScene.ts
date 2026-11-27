@@ -29,6 +29,8 @@ import { newPlayerState, type RunSession } from '../core/session';
 import { advanceOverflow, stageEndOfferKinds } from '../systems/overflow';
 import { EvolutionRuntime } from './run/evolutionRuntime';
 import { TamperRuntime } from './run/tamperRuntime';
+import { AcroRuntime } from './run/acroRuntime';
+import { KaiserLearn } from './run/kaiserLearn';
 import type { BossControl } from '../bosses/mimosa/controller';
 import { BossController } from '../bosses/bossController';
 import type { BossHost } from '../bosses/host';
@@ -75,6 +77,8 @@ export class RunScene extends Phaser.Scene {
   enemyLife!: EnemyLife;
   evo!: EvolutionRuntime;
   tamper!: TamperRuntime;
+  acro!: AcroRuntime;
+  kaiserLearn!: KaiserLearn;
   playerLife!: PlayerLife;
   stageFx!: StageFx;
   combat!: WeaponCombat;
@@ -194,6 +198,8 @@ export class RunScene extends Phaser.Scene {
     this.enemyLife = new EnemyLife(this);
     this.evo = new EvolutionRuntime(this);
     this.tamper = new TamperRuntime(this);
+    this.acro = new AcroRuntime(this);
+    this.kaiserLearn = new KaiserLearn(this);
     this.playerLife = new PlayerLife(this);
     this.resetFields();
 
@@ -334,6 +340,7 @@ export class RunScene extends Phaser.Scene {
     this.dying = false;
     this.cameraHold = null;
     this.tamper.reset();
+    this.acro.reset();
     this.endingPlayed = false;
     this.doorsByRoom = new Map();
     this.rooms = new Map();
@@ -511,6 +518,8 @@ export class RunScene extends Phaser.Scene {
     if (p.panic && !this.itemRt.first('panicCalm')) frame = { ...frame, move: { x: -frame.move.x, y: -frame.move.y } };
     // 헥타르 미모사 패치 노트: 이동 방향만 바뀐다 (버튼 배치는 그대로)
     frame = { ...frame, move: this.tamper.move(frame.move) };
+    // 아크로 미모사 연출 중: 입력이 막힌다
+    if (this.acro.cinematic) frame = { ...frame, move: { x: 0, y: 0 }, held: new Set(), pressed: new Set() };
     this.itemRt.update(dt);
     this.mage.update(dt);
     // 위압: 이동·회피 불가

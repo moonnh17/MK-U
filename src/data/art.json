@@ -9544,6 +9544,164 @@
       "frameHeight": 98,
       "frames": 1,
       "density": 2
+    },
+    "enemy_acro_mimosa": {
+      "file": "mku/enemy_acro_mimosa.png",
+      "frameWidth": 80,
+      "frameHeight": 76,
+      "frames": 28,
+      "density": 2,
+      "anims": {
+        "idle": {
+          "from": 0,
+          "to": 3,
+          "fps": 5
+        },
+        "vanish": {
+          "from": 4,
+          "to": 7,
+          "fps": 14,
+          "loop": false
+        },
+        "appear": {
+          "from": 8,
+          "to": 11,
+          "fps": 14,
+          "loop": false
+        },
+        "command": {
+          "from": 12,
+          "to": 15,
+          "fps": 7,
+          "loop": false
+        },
+        "slash": {
+          "from": 16,
+          "to": 19,
+          "fps": 10,
+          "loop": false
+        },
+        "clash": {
+          "from": 20,
+          "to": 23,
+          "fps": 12,
+          "loop": false
+        },
+        "rage": {
+          "from": 24,
+          "to": 27,
+          "fps": 8
+        }
+      }
+    },
+    "acro_red_floor": {
+      "file": "mku/acro_red_floor.png",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "frames": 1,
+      "density": 2
+    },
+    "item_debuff_mim_sticky_jelly": {
+      "file": "mku/item_debuff_mim_sticky_jelly.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_mim_draft_patch": {
+      "file": "mku/item_debuff_mim_draft_patch.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_mim_swollen_battery": {
+      "file": "mku/item_debuff_mim_swollen_battery.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_mim_toy_cuffs": {
+      "file": "mku/item_debuff_mim_toy_cuffs.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_mim_decaf_coffee": {
+      "file": "mku/item_debuff_mim_decaf_coffee.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_mim_observe_sticker": {
+      "file": "mku/item_debuff_mim_observe_sticker.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_mim_broken_calc": {
+      "file": "mku/item_debuff_mim_broken_calc.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_mim_empty_wallet": {
+      "file": "mku/item_debuff_mim_empty_wallet.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_acro_crimson_brand": {
+      "file": "mku/item_debuff_acro_crimson_brand.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_acro_severed_thread": {
+      "file": "mku/item_debuff_acro_severed_thread.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_acro_cracked_hourglass": {
+      "file": "mku/item_debuff_acro_cracked_hourglass.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_acro_rusted_key": {
+      "file": "mku/item_debuff_acro_rusted_key.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_acro_ash_ribbon": {
+      "file": "mku/item_debuff_acro_ash_ribbon.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_acro_wet_letter": {
+      "file": "mku/item_debuff_acro_wet_letter.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_acro_crimson_eye": {
+      "file": "mku/item_debuff_acro_crimson_eye.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "item_debuff_acro_broken_mirror": {
+      "file": "mku/item_debuff_acro_broken_mirror.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "frames": 1
+    },
+    "story_acro_full": {
+      "file": "mku/story_acro_full.png",
+      "frameWidth": 551,
+      "frameHeight": 825,
+      "frames": 1
     }
   }
 }

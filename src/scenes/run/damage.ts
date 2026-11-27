@@ -1,4 +1,5 @@
 /** 플레이어 쪽 피해: 탄 명중·도탄, 태그·사거리 보너스를 더한 명중 처리, 피해 적용, 화상 번짐. */
+import { tagTakenMul, tallyTags } from '../../systems/kaiserLearning';
 import Phaser from 'phaser';
 import { hexColor } from '../../core/scale';
 import { Enemy } from '../../entities/enemy';
@@ -120,9 +121,14 @@ export class DamageRuntime {
     if (low) dmg *= 1 + lowSanityBonus(sp.sanity, sp.sanityMax, low.maxDamage);
     const space = tags.includes('space') || hm.space;
     if (space) dmg = spaceDamage(enemy.rank, enemy.maxHp, dmg, this.run.tagRule<SpaceRule>('space'));
+    // 오버플로우: 맞힌 태그 집계 (마기카이저 학습), 학습 변형의 태그별 받는 피해
+    const ovf = this.run.session.player.overflow;
+    if (ovf) ovf.tagUse = tallyTags(ovf.tagUse ?? {}, tags);
+    dmg *= tagTakenMul(enemy.tagTaken, tags);
     const crit = this.run.combat.pendingCrit;
     this.run.combat.pendingCrit = false;
     const killed = this.applyDamage(enemy, corruptedDamage(dmg, enemy.corruption), source, { tags, crit, space });
+    if (!killed) enemy.onTagHit?.(tags);
     this.run.mage.onHit(enemy, source, killed, base, tags);
     // 신성한 이코르: 근접 공격이 맞으면 확률로 출혈
     const mb = this.run.itemRt.first('meleeBleed');

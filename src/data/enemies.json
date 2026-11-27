@@ -101,6 +101,25 @@
       "height": 18
     },
     {
+      "id": "acroMimosa",
+      "nameKey": "enemy.acroMimosa",
+      "variant": true,
+      "chapter": 3,
+      "rank": "boss",
+      "ai": "boss",
+      "rooted": true,
+      "maxHp": 31200,
+      "moveSpeed": 0,
+      "contactDamage": 24,
+      "contactIntervalSec": 1,
+      "energyOrbs": [16, 18],
+      "coins": [20, 24],
+      "spriteKey": "enemy_acro_mimosa",
+      "color": "#ff2a3a",
+      "size": 18,
+      "height": 30
+    },
+    {
       "id": "hectarChiefMinion",
       "nameKey": "enemy.hectarChiefMinion",
       "variant": true,

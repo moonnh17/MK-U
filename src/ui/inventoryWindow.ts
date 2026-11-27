@@ -241,7 +241,8 @@ export class InventoryWindow {
       const grade = d.groupMultipliers.grades.find((g) => g.id === def.grade);
       const cell = document.createElement('button');
       cell.className = 'iw-itemcell';
-      cell.style.borderColor = grade?.color ?? '#ffffff';
+      cell.classList.toggle('debuff', def.pool === 'debuff');
+      cell.style.borderColor = def.pool === 'debuff' ? d.items.debuff.color : (grade?.color ?? '#ffffff');
       cell.title = t(def.nameKey);
       const icon = document.createElement('span');
       applyArtIcon(icon, this.ctx, def.spriteKey, def.color);
@@ -381,9 +382,27 @@ export class InventoryWindow {
       const def = d.items.items.find((x) => x.id === id.slice(5));
       if (!def) return;
       const grade = d.groupMultipliers.grades.find((g) => g.id === def.grade);
-      box.append(this.line('iw-dname', t(def.nameKey), grade?.color), this.line('iw-dmeta', grade ? t(grade.nameKey) : ''), this.line('iw-desc', itemDescText(def, d.groupMultipliers, t)));
+      const debuff = def.pool === 'debuff';
+      const color = debuff ? d.items.debuff.color : grade?.color;
+      box.append(this.line('iw-dname', t(def.nameKey), color), this.line('iw-dmeta', debuff ? t('inventory.debuffNote') : grade ? t(grade.nameKey) : ''), this.line('iw-desc', itemDescText(def, d.groupMultipliers, t)));
       // 플레이버 문구 (도감과 같은 글)
       if (def.flavor) box.append(this.line('iw-desc iw-flavor', t(def.flavor)));
+      // 버리기: 한 번 누르면 확인 문구, 한 번 더 누르면 버린다 (사라짐)
+      const drop = document.createElement('button');
+      drop.className = 'iw-drop';
+      drop.textContent = t('inventory.discard');
+      let armed = false;
+      drop.addEventListener('click', () => {
+        if (!armed) {
+          armed = true;
+          drop.textContent = t('inventory.discardConfirm');
+          drop.classList.add('armed');
+          return;
+        }
+        this.detailId = null;
+        bus.emit('inventoryDiscardItem', { id: def.id });
+      });
+      box.append(drop);
       return;
     }
     if (id === 'ultimate') {
