@@ -40,7 +40,7 @@
         "cut": ["tech", "ranged", "space"],
         "strike": ["tech", "ranged", "space"]
       },
-      "values": { "damage": 60, "length": 480, "width": 10, "telegraphSec": 0.25, "bossMaxHpRatio": 0.1 },
+      "values": { "damage": 60, "length": 480, "width": 10, "telegraphSec": 0.25 },
       "awakening": {
         "requiredItem": "regulusShard",
         "nameKey": "ultimate.thunderbolt.awakened",

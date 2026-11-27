@@ -79,17 +79,13 @@ function cutFx(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: 
   }
 }
 
-/** 절단선: from에서 dir로 length. 보스는 최대 체력 비례 */
+/** 절단선: from에서 dir로 length. 공간격 규칙 그대로 (보스도 같은 규칙: 피해 × 보스 배율) */
 function cut(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: number): void {
   const v = u.values;
   const enemies = [...host.enemies()];
   const hits = lineHits(from, dir, length, v.width! / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
   cutFx(host, u, from, dir, length);
-  for (const i of hits) {
-    const e = enemies[i]!;
-    if (isBoss(e)) host.hitTrue(e, e.maxHp * v.bossMaxHpRatio!, false);
-    else host.hit(e, v.damage!, u.def.sources.cut!);
-  }
+  for (const i of hits) host.hit(enemies[i]!, v.damage!, u.def.sources.cut!);
 }
 
 function area(host: SkillHost, u: UltimateCast, at: Vec2, radius: number, source: string, alpha = 0.4): void {
@@ -160,15 +156,11 @@ function skyBolt(host: SkillHost, u: UltimateCast, target: Vec2, sec: number): v
   } else host.scene.tweens.add({ targets: sp, alpha: 0, duration: sec * 1000, onComplete: () => sp.destroy() });
 }
 
-/** 선 위(폭 width)의 적. 보스는 최대 체력 비례 */
+/** 선 위(폭 width)의 적. 공간격 규칙 그대로 */
 function lineStrike(host: SkillHost, u: UltimateCast, from: Vec2, dir: Vec2, length: number, width: number, source: string): void {
   const enemies = [...host.enemies()];
   const hits = lineHits(from, dir, length, width / 2, enemies.map((e) => ({ x: e.sprite.x, y: e.sprite.y, radius: e.radius })));
-  for (const i of hits) {
-    const e = enemies[i]!;
-    if (isBoss(e)) host.hitTrue(e, e.maxHp * u.values.bossMaxHpRatio!, false);
-    else host.hit(e, u.values.damage!, u.def.sources[source]!);
-  }
+  for (const i of hits) host.hit(enemies[i]!, u.values.damage!, u.def.sources[source]!);
 }
 
 /** 케라우노스: 하늘 벼락 → 화면 전체 사선 균열(확) → 서서히 봉합 */
