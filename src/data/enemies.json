@@ -1,5 +1,6 @@
 {
   "hiddenBossScale": { "1": 1, "2": 2, "3": 3 },
+  "chapterBuff": { "2": { "hp": 1.1, "damage": 1.07 }, "3": { "hp": 1.12, "damage": 1.08 } },
   "codexLore": {
     "common": ["tomakki", "gaedeulgae", "magiBeetle"],
     "mutant": ["vesselTree", "pulseSac", "gazeBell", "clusterAlveoli", "magiColonyFusion"],

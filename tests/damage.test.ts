@@ -29,8 +29,13 @@ describe('calcDamage 태그 배율', () => {
 
 describe('그룹 배율', () => {
   it('등급 배율을 데이터에서 읽는다', () => {
-    expect(gradeMultiplier('common', gameData.groupMultipliers)).toBe(1);
-    expect(gradeMultiplier('rare', gameData.groupMultipliers)).toBe(1.4);
-    expect(gradeMultiplier('mythic', gameData.groupMultipliers)).toBe(3);
+    expect(gradeMultiplier('common', gameData.groupMultipliers)).toBe(0.92);
+    expect(gradeMultiplier('rare', gameData.groupMultipliers)).toBe(1.29);
+    expect(gradeMultiplier('mythic', gameData.groupMultipliers)).toBe(2.76);
+    // 유니크는 전설보다 조금만 강하다
+    const leg = gradeMultiplier('legendary', gameData.groupMultipliers);
+    const uni = gradeMultiplier('unique', gameData.groupMultipliers);
+    expect(uni / leg).toBeGreaterThan(1);
+    expect(uni / leg).toBeLessThan(1.2);
   });
 });

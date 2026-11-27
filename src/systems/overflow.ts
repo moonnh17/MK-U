@@ -22,6 +22,8 @@ export interface OverflowState {
   pendingDrops: PendingDrop[];
   /** 이 런에서 맞힌 공격의 태그 수 (마기카이저 학습) */
   tagUse?: Partial<Record<string, number>>;
+  /** 고른 진화 카드 기록 (화면 오른쪽 위 목록): 진화 id·보상 id */
+  picks?: { evo: string; reward: string }[];
 }
 
 export type PendingDrop = { kind: 'weapon'; tier: string } | { kind: 'item'; weights: Partial<Record<string, number>> };
@@ -49,10 +51,14 @@ export function waveChaptersOf(s: StageRef): readonly number[] {
   return s.theme?.waveChapters ?? [s.chapter];
 }
 
-/** 장 하나의 테마: 직전 장 테마는 빼고 가중치로 */
-export function pickTheme(seed: number, chapter: number, prevId: string | null, data: OverflowData): StageTheme {
-  const pool = data.themes.filter((t) => t.id !== prevId);
-  const t = Rng.derive(seed, `ovf-theme-${chapter}`).weighted((pool.length > 0 ? pool : data.themes).map((x) => ({ item: x, weight: x.weight })));
+/**
+ * 스테이지 하나의 맵(테마): 1~3장 맵 중 하나를 가중치로, 직전 스테이지 맵은 뺀다.
+ * 가중치 0인 테마(아직 만들지 않은 전용 맵 자리)는 나오지 않는다
+ */
+export function pickTheme(seed: number, chapter: number, stage: number, prevId: string | null, data: OverflowData): StageTheme {
+  const live = data.themes.filter((t) => t.weight > 0);
+  const pool = live.filter((t) => t.id !== prevId);
+  const t = Rng.derive(seed, `ovf-theme-${chapter}-${stage}`).weighted((pool.length > 0 ? pool : live).map((x) => ({ item: x, weight: x.weight })));
   return { id: t.id, chapter: t.chapter, waveChapters: [...t.waveChapters], ...(t.tint ? { tint: t.tint } : {}) };
 }
 
@@ -85,7 +91,7 @@ export function advanceOverflow(seed: number, cur: StageRef, state: OverflowStat
   const chapter = cur.stage < per ? cur.chapter : cur.chapter + 1;
   const stage = cur.stage < per ? cur.stage + 1 : 1;
   if (chapter <= d.overflow.fixedChapters) return { next: { chapter, stage }, state };
-  const theme = chapter === cur.chapter && cur.theme ? cur.theme : pickTheme(seed, chapter, cur.theme?.id ?? null, d.overflow);
+  const theme = pickTheme(seed, chapter, stage, cur.theme?.id ?? null, d.overflow);
   const next: StageRef = { chapter, stage, theme };
   if (!d.mapgen.bossStages.includes(stage)) return { next, state };
   const boss = bossForStage(seed, chapter, stage, theme, state, d);

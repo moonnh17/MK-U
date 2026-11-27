@@ -300,6 +300,8 @@ export interface EnemiesData {
   codexLore: CodexLore;
   /** 히든보스(어느 장에서든 나온다) 체력·피해 배율: 장 번호 → 배율. 수치는 1장 기준값. 다른 적은 고정 스탯 */
   hiddenBossScale: Record<string, number>;
+  /** 2~3장 일반 적·정예 보정 (보스 제외): 장 번호 → 체력·피해 배율 */
+  chapterBuff: Record<string, { hp: number; damage: number }>;
   /** 적 투사체 모양 */
   projectile: SpriteRef;
   /** 디버그 '적 탄막': 플레이어 주위에서 플레이어를 향해 일반 탄을 쏜다(벡터굴절역장 확인용) */

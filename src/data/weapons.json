@@ -220,6 +220,7 @@
       "id": "nekkarCleaver", "codexNo": 20, "fxColor": "#e8343a", "nameKey": "weapon.nekkarCleaver", "abilityNameKey": "weapon.ability.nekkarCleaver", "category": "blade", "grade": "unique", "classes": ["slash"], "tags": ["physical", "melee", "bleed"],
       "baseDamage": 5, "fireIntervalSec": 0.2, "energyCost": 0, "pattern": { "kind": "arc", "arcDeg": 100, "radius": 43 },
       "bleed": { "base": 5, "stacks": 1 },
+      "butcher": { "nameKey": "weapon.sig.nekkarCleaver", "minBleed": 10, "range": 110, "cooldownSec": 3, "spinSec": 0.28, "spinRadius": 40, "spinDamageMul": 1.5, "dashSec": 0.12, "behindPx": 18, "damageMul": 3, "perStackMul": 0.6, "color": "#e8343a" },
       "projectileSpeed": 0, "range": 43, "cutsProjectiles": true, "droppable": true,
       "spriteKey": "weapon_nekkar_cleaver", "color": "#a03a3a", "size": 9
     },

@@ -25,6 +25,8 @@ export interface MobileLayoutData {
 }
 
 export interface HudLayoutData {
+  /** 오버플로우 전용: 미니맵 붉은 테두리·표시, 진화·보상 목록, 화면 테두리 글리치 */
+  overflow: { label: string; labelSize: number; color: string; listSize: number; listColor: string; /** 한 줄 글자 수 (넘으면 …) */ lineChars: number; maxLines: number; glitch: { everySec: [number, number]; sec: number; alpha: number; thickness: number; slices: number } };
   margin: number;
   fontSize: number;
   bars: {

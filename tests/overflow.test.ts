@@ -50,23 +50,20 @@ describe('오버플로우 진행', () => {
     }
   });
 
-  it('4장부터 랜덤 장: 한 장 안에서는 같은 테마, 풀에 1~3장과 전용 맵이 섞인다', () => {
+  it('4장부터 스테이지마다 1~3장 맵 중 하나 (전용 맵 자리는 가중치 0이라 안 나온다)', () => {
     const seen = new Set<string>();
     for (let seed = 1; seed <= 40; seed++) {
       const list = play(seed, 50);
-      for (let c = 4; c <= 10; c++) {
-        const ids = new Set([1, 2, 3, 4, 5].map((s) => at(list, c, s).theme!.id));
-        expect(ids.size).toBe(1);
-        seen.add([...ids][0]!);
-      }
+      for (let c = 4; c <= 10; c++) for (let s = 1; s <= 5; s++) seen.add(at(list, c, s).theme!.id);
     }
-    for (const t of O.themes) expect(seen.has(t.id)).toBe(true);
+    expect([...seen].sort()).toEqual(O.themes.filter((t) => t.weight > 0).map((t) => t.id).sort());
+    for (const id of seen) expect(O.themes.find((t) => t.id === id)!.chapter).toBeLessThanOrEqual(3);
   });
 
-  it('같은 테마가 두 장 연속으로 나오지 않는다', () => {
+  it('같은 맵이 두 스테이지 연속으로 나오지 않는다 (장이 바뀔 때도)', () => {
     for (let seed = 1; seed <= 30; seed++) {
-      const list = play(seed, 60);
-      for (let c = 5; c <= 12; c++) expect(at(list, c, 1).theme!.id).not.toBe(at(list, c - 1, 1).theme!.id);
+      const list = play(seed, 60).filter((x) => x.stage.chapter >= 4);
+      for (let i = 1; i < list.length; i++) expect(list[i]!.stage.theme!.id).not.toBe(list[i - 1]!.stage.theme!.id);
     }
   });
 

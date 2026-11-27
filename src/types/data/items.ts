@@ -46,6 +46,8 @@ export type ItemEffect =
   | { kind: 'laserBounce'; bounces: number }
   /** 자연 치유: everySec마다 체력 value 회복 (최대 체력까지) */
   | { kind: 'regen'; value: number; everySec: number }
+  /** everySec마다 에너지 value 회복 (가만히 있어도) */
+  | { kind: 'energyRegen'; value: number; everySec: number }
   /** 차징 시간 감소 (무기 차징·차징 스킬) */
   | { kind: 'chargeTime'; value: number; group: 'damagePct' }
   /** 피해 흡혈: 준 피해의 value만큼 체력 회복 */

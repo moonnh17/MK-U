@@ -4,6 +4,7 @@ import { bus } from '../../core/events';
 import { Rng } from '../../core/rng';
 import { fitArt } from '../../entities/art';
 import { findSkill, setSkillLevel } from '../../systems/skills';
+import { isSkillImplemented } from '../../skills/registry';
 import type { RunScene } from '../RunScene';
 import type { SchoolId } from '../../types/data';
 
@@ -34,6 +35,43 @@ export class RunDebug {
     const job = this.run.ctx.data.jobs.jobs.find((j) => j.id === p.job);
     if (this.run.modal || p.advancement !== null || !job?.advancements.some((a) => a.id === school)) return;
     this.run.progression.advanceTo(school as SchoolId, () => {});
+  }
+
+  /** 모든 아이템 (디버프 제외): 획득 카드·각성 연출 없이 한꺼번에 (줄줄이 뜨는 창에 갇히지 않게) */
+  debugAllItems(): void {
+    const d = this.run.ctx.data;
+    const p = this.run.session.player;
+    const ids = d.items.items.filter((x) => x.pool !== 'debuff').map((x) => x.id);
+    p.items = [...new Set([...p.items, ...ids])];
+    p.itemsObtained = [...new Set([...p.itemsObtained, ...ids])];
+    for (const id of ids) this.run.discover('items', id);
+    this.run.itemRt.refresh();
+    bus.emit('inventoryChanged', {});
+    bus.emit('toast', { text: this.run.ctx.t('debug.allItemsDone', { n: ids.length }) });
+  }
+
+  debugClearItems(): void {
+    this.run.session.player.items = [];
+    this.run.itemRt.refresh();
+    bus.emit('inventoryChanged', {});
+  }
+
+  /** 발동 로직이 있는 모든 스킬을 최고 레벨로 (각성 여부 선택, 연출 없이) */
+  debugAllSkills(awakened: boolean): void {
+    const d = this.run.ctx.data;
+    const p = this.run.session.player;
+    for (const s of d.skills.skills) if (isSkillImplemented(s.id)) p.loadout = setSkillLevel(p.loadout, s, d.skills.maxLevel, awakened && !!s.awakening);
+    this.run.skillRt.refreshSkillView();
+    bus.emit('inventoryChanged', {});
+    bus.emit('toast', { text: this.run.ctx.t('debug.allSkillsDone') });
+  }
+
+  /** 체력·에너지·정신력 가득 */
+  debugHeal(): void {
+    const p = this.run.session.player;
+    p.hp = p.maxHp;
+    p.energy = p.energyMax;
+    p.sanity = p.sanityMax;
   }
 
   debugSetSkill(id: string, level: number, awakened: boolean): void {

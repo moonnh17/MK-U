@@ -13,7 +13,7 @@ const REPO = path.resolve(__dirname, '..');
 const SRC = path.join(REPO, 'scripts/art-src/acro-mimosa');
 const OUT = path.join(REPO, 'public/assets/mku');
 /** 대기 첫 칸 키(게임 px) — 플레이어(26px)보다 조금 큰 사람 크기 */
-const FIT = 34;
+const FIT = 42;
 const ANIMS = {
   idle: ['idle', [0, 1, 2, 3], 5],
   vanish: ['teleport', [0, 1, 2, 3], 14, false],

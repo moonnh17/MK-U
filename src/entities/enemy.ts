@@ -231,10 +231,11 @@ export class Enemy {
   }
 
   /** 오버플로우 장 배율 — 소환 직후에만 (보스 피해는 보스 컨트롤러가 따로 곱한다) */
+  /** 체력·피해 배율을 곱한다 (오버플로우 장 배율, 2~3장 적 보정). 여러 번 부르면 곱해진다 */
   applyOverflowScale(hp: number, damage: number): void {
     this.hpScale *= hp;
     this.setMaxHp(this.maxHp * hp);
-    this.ovfDamageMul = damage;
+    this.ovfDamageMul *= damage;
     this.damageMul *= damage;
   }
 

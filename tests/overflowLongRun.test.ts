@@ -72,11 +72,11 @@ describe('오버플로우 장기 진행 (40장 × 시드 4개)', () => {
     }
   });
 
-  it('4장부터 랜덤 장: 두 장 연속 같은 테마 없음, 장 안에서는 같은 테마', () => {
+  it('4장부터 스테이지마다 1~3장 맵 중 하나, 같은 맵이 연속으로 나오지 않는다', () => {
     for (const { steps } of runs) {
-      const theme = (c: number) => steps.find((x) => x.stage.chapter === c)!.stage.theme?.id;
-      for (let c = 5; c <= CHAPTERS; c++) expect(theme(c), `${c}장`).not.toBe(theme(c - 1));
-      for (const st of steps.filter((x) => x.stage.chapter >= 4)) expect(st.stage.theme?.id).toBe(theme(st.stage.chapter));
+      const late = steps.filter((x) => x.stage.chapter >= 4);
+      for (let i = 1; i < late.length; i++) expect(late[i]!.stage.theme!.id).not.toBe(late[i - 1]!.stage.theme!.id);
+      for (const st of late) expect(st.stage.theme!.chapter).toBeLessThanOrEqual(3);
     }
   });
 

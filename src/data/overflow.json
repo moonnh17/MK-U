@@ -32,7 +32,7 @@
         1,
         2
       ],
-      "weight": 1,
+      "weight": 0,
       "dedicated": true,
       "tint": "#5a3a8a"
     },
@@ -43,7 +43,7 @@
         2,
         3
       ],
-      "weight": 1,
+      "weight": 0,
       "dedicated": true,
       "tint": "#2a6a6a"
     }

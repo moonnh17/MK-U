@@ -9300,8 +9300,8 @@
     },
     "boss_mimosa": {
       "file": "mku/boss_mimosa.png",
-      "frameWidth": 108,
-      "frameHeight": 104,
+      "frameWidth": 138,
+      "frameHeight": 132,
       "frames": 12,
       "density": 2,
       "anims": {
@@ -9547,8 +9547,8 @@
     },
     "enemy_acro_mimosa": {
       "file": "mku/enemy_acro_mimosa.png",
-      "frameWidth": 80,
-      "frameHeight": 76,
+      "frameWidth": 98,
+      "frameHeight": 94,
       "frames": 28,
       "density": 2,
       "anims": {

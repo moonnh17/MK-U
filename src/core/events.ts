@@ -79,6 +79,10 @@ export interface GameEvents {
   debugGiveWeapon: { defId: string; grade: GradeId };
   debugCoins: { amount: number };
   debugGiveItem: { itemId: string };
+  debugAllItems: Record<string, never>;
+  debugClearItems: Record<string, never>;
+  debugAllSkills: { awakened: boolean };
+  debugHeal: Record<string, never>;
   /** 아이템을 얻었다 (set: 세트 합성 결과) */
   itemGot: { itemId: string; set: boolean; weapon?: boolean; from?: { key: string; color: string }[] };
   /** 카드 선택창 → 이 카드를 골랐다 */

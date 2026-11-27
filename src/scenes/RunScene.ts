@@ -531,12 +531,19 @@ export class RunScene extends Phaser.Scene {
     }
     this.condition.updateDodge(dt, frame);
     const speed = mods.rooted ? 0 : d.player.moveSpeed * (1 + mods.moveSpeed) * (1 + this.itemRt.moveSpeedBonus()) * (1 + this.combat.chargeMoveBonus()) * (1 + this.special.moveBonus());
+    // 돌진·구르기: 빠르면 한 프레임에 벽을 건너뛸 수 있어서, 다음 자리가 막혀 있으면 그 자리에서 멈춘다
+    const wallAhead = (v: Vec2) => this.condition.blockedAt()(this.player.x + v.x * dt, this.player.y + v.y * dt);
     if (this.dashLeft > 0) {
       // MK 돌진: 입력 대신 돌진 방향으로
       this.dashLeft -= dt;
-      this.player.setVelocity(this.dashVel.x, this.dashVel.y);
+      if (wallAhead(this.dashVel)) {
+        this.dashLeft = 0;
+        this.player.setVelocity(0, 0);
+      } else this.player.setVelocity(this.dashVel.x, this.dashVel.y);
     } else if (this.condition.dodge.left > 0) {
-      this.player.setVelocity(this.condition.dodge.vel.x, this.condition.dodge.vel.y);
+      const v = this.condition.dodge.vel;
+      if (wallAhead(v)) this.player.setVelocity(0, 0);
+      else this.player.setVelocity(v.x, v.y);
     } else {
       this.player.setVelocity(frame.move.x * speed, frame.move.y * speed);
     }

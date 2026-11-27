@@ -9,6 +9,7 @@ import { storedSkills } from '../systems/skills';
 import { gradeEnergyMultiplier } from '../systems/damage';
 import { activeWeapon, otherWeapon, weaponStats } from '../systems/weapons';
 import { Minimap } from './minimap';
+import { OverflowHud } from './overflowHud';
 
 /** 스킬바 칸 순서는 RunSession.skillView와 같다 (액티브 3 + 궁극기 + 패시브) */
 const SKILLBAR: { action: ButtonAction | 'passive'; keyLabel: string }[] = [
@@ -62,6 +63,7 @@ export class Hud {
   private readonly stageText: Phaser.GameObjects.Text;
   private readonly coinText: Phaser.GameObjects.Text;
   readonly minimap: Minimap;
+  private readonly overflowHud: OverflowHud;
   private readonly pcOnly: Phaser.GameObjects.Container;
   private readonly slots: SlotUi[] = [];
   private readonly dodgeLabel: Phaser.GameObjects.Text;
@@ -114,6 +116,7 @@ export class Hud {
     // --- 미니맵 ---
     this.minimap = new Minimap(scene, ctx);
     this.minimap.container.setPosition(W - h.margin - h.minimap.width, h.margin);
+    this.overflowHud = new OverflowHud(scene, ctx);
 
     // --- PC 전용: 스킬바 + 무기 슬롯 ---
     this.pcOnly = scene.add.container(0, 0);
@@ -253,6 +256,8 @@ export class Hud {
 
     this.updateBuffs(s);
     this.minimap.render(s.map, s.visited, s.currentRoomId, this.ctx.debugFlags.revealMap, s.encounters);
+    const mc = this.minimap.container;
+    this.overflowHud.update(s, now, { x: mc.x, y: mc.y, w: this.ctx.data.ui.hud.minimap.width, h: this.ctx.data.ui.hud.minimap.height, visible: mc.visible && this.shown });
     if (this.pcOnly.visible) this.updateSkillbar(s, now);
   }
 

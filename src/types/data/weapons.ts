@@ -121,6 +121,12 @@ export interface WeaponDef extends SpriteRef {
    */
   iaido?: { maxDistance: number; behindPx: number; sec: number; width: number; cutDelaySec: number; color: string };
   /**
+   * 도축 (네카르의 식칼): 출혈 minBleed중첩 이상인 적이 range 안에 있으면 다음 공격 대신 발동 (재사용 cooldownSec).
+   * 칼을 한 바퀴 돌려 둘레 spinRadius를 베고(spinDamageMul), 그 적에게 돌진해 꿰뚫어 뒤로 behindPx까지 지나가며 베어낸다.
+   * 마지막 베기: 피해 × (damageMul + 출혈 중첩 × perStackMul), 그 적의 출혈은 초기화
+   */
+  butcher?: { nameKey: string; minBleed: number; range: number; cooldownSec: number; spinSec: number; spinRadius: number; spinDamageMul: number; dashSec: number; behindPx: number; damageMul: number; perStackMul: number; color: string };
+  /**
    * 되돌아오는 원반 (궤도절삭륜): 충전이 있을 때 던지고, 관통하며 range까지 날아간 뒤 플레이어를 따라 돌아온다.
    * 가는 길·오는 길 모두 피해, 잡으면 충전 하나가 바로 찬다. maxSec이 지나면 사라지고 충전이 돌아온다
    */

@@ -11,7 +11,7 @@ const REPO = path.resolve(__dirname, '..');
 const SRC = path.join(REPO, 'scripts/art-src/mimosa-hf');
 const DENSITY = 2;
 /** 기계 폭(게임 px): 누운 몸이 플레이어 키(약 24px)와 비슷하게 */
-const WIDTH = 52;
+const WIDTH = 66;
 /** 이 알파 아래는 빛 번짐으로 보고 지운다 */
 const GLOW_CUT = 110;
 /** 이름 → [원본, fps, 반복] */

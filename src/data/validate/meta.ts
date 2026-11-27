@@ -89,12 +89,13 @@ export function validateOverflow(v: V): void {
   const fixed = O.fixedChapters;
   if (!(fixed >= 1 && fixed <= d.mapgen.chapters)) errors.push('overflow.fixedChapters: 1~본편 장 수');
   checkUnique(errors, 'overflow.themes', O.themes.map((t) => t.id));
-  if (O.themes.length < 2) errors.push('overflow.themes: 직전 장 제외가 되려면 2개 이상');
+  if (O.themes.filter((t) => t.weight > 0).length < 2) errors.push('overflow.themes: 직전 스테이지 제외가 되려면 가중치가 있는 테마 2개 이상');
   for (const t of O.themes) {
     if (!(t.chapter >= 1 && t.chapter <= fixed)) errors.push(`overflow.themes.${t.id}.chapter: 1~${fixed}`);
     if (t.waveChapters.length === 0) errors.push(`overflow.themes.${t.id}.waveChapters: 비어 있음`);
     for (const c of t.waveChapters) if (!d.waves.waves.some((w) => w.chapter === c)) errors.push(`overflow.themes.${t.id}: ${c}장 웨이브 없음`);
-    checkPositive(errors, `overflow.themes.${t.id}.weight`, t.weight);
+    // 0이면 풀에서 빠진다 (아직 만들지 않은 전용 맵 자리)
+    checkPositive(errors, `overflow.themes.${t.id}.weight`, t.weight, true);
     if (t.tint !== undefined && !HEX_COLOR.test(t.tint)) errors.push(`overflow.themes.${t.id}.tint: #RRGGBB`);
   }
   const bossIds = new Set(d.bosses.bosses.map((b) => b.id));

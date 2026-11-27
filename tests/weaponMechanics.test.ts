@@ -50,10 +50,10 @@ describe('야시장 복제총·체납자의 의수', () => {
 });
 
 describe('등급 이동', () => {
-  it('고대병기의 코어·식광의 핵은 전설로 옮겨도 실제 피해·에너지가 그대로', () => {
+  it('고대병기의 코어·식광의 핵: 전설 등급, 무기 전체 하향(전설 ×1.75) 뒤 실제 피해·에너지', () => {
     const g = gameData.groupMultipliers.grades;
     const mul = (id: string) => g.find((x) => x.id === id)!;
-    for (const [id, dmg, en] of [['ancientCore', 35, 7.5], ['eclipseCore', 50, 7.5]] as const) {
+    for (const [id, dmg, en] of [['ancientCore', 32.2, 7.5], ['eclipseCore', 46.1, 7.5]] as const) {
       const w = W(id);
       expect(w.grade).toBe('legendary');
       expect(w.baseDamage * mul('legendary').damageMultiplier).toBeCloseTo(dmg, 1);

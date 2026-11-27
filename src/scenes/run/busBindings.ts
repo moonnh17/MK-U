@@ -68,6 +68,10 @@ export function bindRunEvents(run: RunScene): (() => void)[] {
       run.loot.giveItem(itemId);
       run.progression.checkAwakenings();
     }),
+    bus.on('debugAllItems', () => run.debugTools.debugAllItems()),
+    bus.on('debugClearItems', () => run.debugTools.debugClearItems()),
+    bus.on('debugAllSkills', ({ awakened }) => run.debugTools.debugAllSkills(awakened)),
+    bus.on('debugHeal', () => run.debugTools.debugHeal()),
     bus.on('debugCoins', ({ amount }) => {
       run.session.player.coins += amount;
     }),

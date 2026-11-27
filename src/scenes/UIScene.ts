@@ -7,7 +7,7 @@ import { getContext, type GameContext } from '../core/context';
 import { debugClearRoom, toggleDebugFlag } from '../core/debug';
 import { bus } from '../core/events';
 import { DebugPanel } from '../ui/debugPanel';
-import { buildDebugSkills } from '../ui/debugSkills';
+import { buildDebugTabs } from '../ui/debugSkills';
 import { Hud } from '../ui/hud';
 import { MimosaOverlay } from '../ui/mimosaOverlay';
 import { TouchSkills } from '../ui/touchSkills';
@@ -57,6 +57,7 @@ export class UIScene extends Phaser.Scene {
     this.debugPanel = new DebugPanel(
       document.body,
       {
+        title: this.ctx.t('debug.panelTitle'),
         revealMap: this.ctx.t('debug.revealMap'),
         invincible: this.ctx.t('debug.invincible'),
         clearRoom: this.ctx.t('debug.clearRoom'),
@@ -66,7 +67,7 @@ export class UIScene extends Phaser.Scene {
         clearRoom: () => debugClearRoom(this.ctx),
       },
     );
-    this.debugPanel.addSection(this.ctx.t('debug.skills'), buildDebugSkills(this.ctx));
+    for (const tab of buildDebugTabs(this.ctx)) this.debugPanel.addTab(tab);
     this.debugPanel.setVisible(this.ctx.debug);
     this.touchSkillLabels = ['1', '2', '3', this.ctx.t('mobile.ultimate')];
     this.touchSkills = new TouchSkills(this.ctx.touch, ui, this.touchSkillLabels);
@@ -130,18 +131,18 @@ export class UIScene extends Phaser.Scene {
       this.debugPanel.setToggle('revealMap', this.ctx.debugFlags.revealMap);
       this.debugPanel.setToggle('invincible', this.ctx.debugFlags.invincible);
       const t = this.ctx.t;
-      this.debugPanel.setInfo(
-        [
-          `${t('debug.fps')} ${Math.round(this.game.loop.actualFps)}`,
-          `${t('debug.seed')} ${this.ctx.config.seed}`,
-          `${t('debug.room')} ${s?.currentRoomId ?? '-'}`,
-          `${t('debug.enemies')} ${s?.enemiesAlive ?? 0}`,
-          `${t('debug.energy')} ${Math.floor(s?.player.energy ?? 0)}`,
-          `${t('debug.uiMode')} ${this.ctx.uiMode}`,
-          t('debug.schoolPicks', { hectar: s?.player.schoolPicks.hectar ?? 0, acro: s?.player.schoolPicks.acro ?? 0 }),
-          t('debug.items', { list: s?.player.items.length ? s.player.items.map((id) => t(`item.${id}`)).join(', ') : t('debug.itemsNone') }),
-        ].join('  '),
-      );
+      // 상태 표 (아이템은 개수만: 목록은 인벤토리에서)
+      this.debugPanel.setInfo([
+        [t('debug.fps'), String(Math.round(this.game.loop.actualFps))],
+        [t('debug.seed'), String(this.ctx.config.seed)],
+        [t('debug.stage'), s ? `${s.stage.chapter}-${s.stage.stage}` : '-'],
+        [t('debug.room'), String(s?.currentRoomId ?? '-')],
+        [t('debug.enemies'), String(s?.enemiesAlive ?? 0)],
+        [t('debug.energy'), String(Math.floor(s?.player.energy ?? 0))],
+        [t('debug.uiMode'), this.ctx.uiMode],
+        [t('debug.picks'), `${s?.player.schoolPicks.hectar ?? 0} / ${s?.player.schoolPicks.acro ?? 0}`],
+        [t('debug.itemCount'), String(s?.player.items.length ?? 0)],
+      ]);
     }
   }
 

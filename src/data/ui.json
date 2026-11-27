@@ -6,6 +6,7 @@
   "renderScaleMaxMobile": 3,
   "backgroundColor": "#0b0f14",
   "hud": {
+    "overflow": { "label": "OVERFLOW", "labelSize": 7, "color": "#ff3a4a", "listSize": 6, "listColor": "#ffc8cc", "lineChars": 11, "maxLines": 5, "glitch": { "everySec": [7, 14], "sec": 0.45, "alpha": 0.7, "thickness": 3, "slices": 10 } },
     "margin": 6,
     "fontSize": 10,
     "bars": {

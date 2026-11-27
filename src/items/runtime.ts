@@ -426,7 +426,7 @@ export class ItemRuntime {
     this.updateCore(dt);
     // 주기 발동
     for (const { id, e } of this.effects) {
-      if (e.kind !== 'autoCast' && e.kind !== 'tempRoar' && e.kind !== 'gravityShot' && e.kind !== 'shieldThrow' && e.kind !== 'regen') continue;
+      if (e.kind !== 'autoCast' && e.kind !== 'tempRoar' && e.kind !== 'gravityShot' && e.kind !== 'shieldThrow' && e.kind !== 'regen' && e.kind !== 'energyRegen') continue;
       const s = this.state(id);
       s.timer += dt;
       if (s.timer < e.everySec) continue;
@@ -440,6 +440,9 @@ export class ItemRuntime {
         const pl = this.host.player();
         this.overheal(pl.hp + e.value - pl.maxHp);
         pl.hp = Math.min(pl.maxHp, pl.hp + e.value);
+      } else if (e.kind === 'energyRegen') {
+        const pl = this.host.player();
+        pl.energy = Math.min(pl.energyMax, pl.energy + e.value);
       } else if (!this.gravityShot(e)) {
         continue;
       }
@@ -659,6 +662,11 @@ export class ItemRuntime {
       const s = this.state(id);
       const base = { id: `item.${id}`, label: t(`item.${id}.buff`), color: color(id) };
       out.push(this.shieldsOut > 0 ? base : { ...base, cdSec: Math.max(0, e.everySec - s.timer), cdTotalSec: e.everySec });
+    }
+    // 카이사르의 왕관: 처치로 쌓인 피해 증가 (피격 시 절반)
+    for (const { id } of this.each('killStacks')) {
+      const n = Math.round(this.state(id).stacks * 100);
+      if (n > 0) out.push({ id: `item.${id}`, label: this.host.ctx.t(`item.${id}.buff`).replace('{n}', String(n)), color: color(id) });
     }
     for (const { id } of this.each('overhealShield')) {
       if (this.overShield >= 1) out.push({ id: `item.${id}`, label: t(`item.${id}.buff`), color: color(id), count: Math.floor(this.overShield) });

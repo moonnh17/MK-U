@@ -1,11 +1,12 @@
 /**
- * 디버그 패널의 '스킬·스탯' 구획: 스킬 추가·레벨 설정, 스탯 설정, 카드창 열기, 궁극기 충전, 적 소환.
- * 각성 요구 스탯(20)을 런 중에 맞추기 어려워 테스트용으로 둔다. 요청은 이벤트로 RunScene에 보낸다.
+ * 디버그 패널의 탭들: 전투(적 소환·보스 체력·회복) / 아이템(지급·전부·비우기·무기·입자) / 스킬(적용·전부·카드·전직) /
+ * 진행(스테이지 이동·조우·히든보스) / 저장. 요청은 이벤트로 RunScene에 보낸다.
  */
 import type { GameContext } from '../core/context';
 import { bus } from '../core/events';
 import { isSkillImplemented } from '../skills/registry';
 import type { EncounterKindId, GradeId } from '../types/data';
+import type { DebugTab } from './debugPanel';
 
 function select(options: [string, string][]): HTMLSelectElement {
   const s = document.createElement('select');
@@ -18,26 +19,86 @@ function select(options: [string, string][]): HTMLSelectElement {
   return s;
 }
 
-function button(label: string, onClick: () => void): HTMLButtonElement {
+function button(label: string, onClick: () => void, cls = ''): HTMLButtonElement {
   const b = document.createElement('button');
   b.textContent = label;
+  if (cls) b.className = cls;
   b.addEventListener('click', onClick);
   return b;
 }
 
-function row(...els: HTMLElement[]): HTMLDivElement {
+function num(value: string, width = 44): HTMLInputElement {
+  const el = document.createElement('input');
+  el.type = 'number';
+  el.value = value;
+  el.style.width = `${width}px`;
+  return el;
+}
+
+/** 이름표가 붙은 한 줄 */
+function field(label: string, ...els: HTMLElement[]): HTMLDivElement {
   const r = document.createElement('div');
+  r.className = 'dbg-row';
+  const l = document.createElement('label');
+  l.textContent = label;
+  const box = document.createElement('div');
+  box.append(...els);
+  r.append(l, box);
+  return r;
+}
+
+/** 버튼만 늘어선 줄 */
+function buttons(...els: HTMLElement[]): HTMLDivElement {
+  const r = document.createElement('div');
+  r.className = 'dbg-buttons';
   r.append(...els);
   return r;
 }
 
-export function buildDebugSkills(ctx: GameContext): HTMLElement {
+function page(...rows: HTMLElement[]): HTMLDivElement {
+  const p = document.createElement('div');
+  p.append(...rows);
+  return p;
+}
+
+export function buildDebugTabs(ctx: GameContext): DebugTab[] {
   const t = ctx.t;
   const d = ctx.data;
-  const body = document.createElement('div');
-  body.className = 'dbg-skills';
 
-  // 스킬 (발동 로직이 있는 스킬만)
+  // ---------- 전투 ----------
+  const enemySel = select(d.enemies.enemies.map((e) => [e.id, t(e.nameKey)]));
+  const eliteSel = select([['', t('debug.eliteNone')], ...d.elites.elites.map((e): [string, string] => [e.id, t(e.nameKey)])]);
+  const countInput = num('3', 40);
+  const bossHpInput = num('51');
+  const combat = page(
+    field(t('debug.spawn'), enemySel, eliteSel, countInput, button(t('debug.spawnGo'), () => bus.emit('debugSpawn', { enemyId: enemySel.value, count: Math.max(1, Number(countInput.value) || 1), elite: eliteSel.value === '' ? null : eliteSel.value }), 'go')),
+    field(t('debug.bossHp'), bossHpInput, button(t('debug.apply'), () => bus.emit('debugBossHp', { ratio: Math.max(1, Math.min(100, Number(bossHpInput.value) || 100)) / 100 }), 'go')),
+    buttons(
+      button(t('debug.heal'), () => bus.emit('debugHeal', {}), 'big'),
+      button(t('debug.fillUltimate'), () => bus.emit('debugFillUltimate', {}), 'big'),
+      button(t('debug.barrage'), () => bus.emit('debugBarrage', {})),
+    ),
+  );
+
+  // ---------- 아이템·무기 ----------
+  const itemSel = select(d.items.items.map((x): [string, string] => [x.id, t(x.nameKey)]));
+  const weaponSel = select(d.weapons.weapons.map((w): [string, string] => [w.id, t(w.nameKey)]));
+  const gradeSel = select(d.groupMultipliers.grades.map((g): [string, string] => [g.id, t(g.nameKey)]));
+  const items = page(
+    buttons(
+      button(t('debug.allItems'), () => bus.emit('debugAllItems', {}), 'big'),
+      button(t('debug.clearItems'), () => bus.emit('debugClearItems', {}), 'big warn'),
+    ),
+    field(t('debug.giveItem'), itemSel, button(t('debug.give'), () => bus.emit('debugGiveItem', { itemId: itemSel.value }), 'go')),
+    field(t('debug.giveWeapon'), weaponSel, gradeSel, button(t('debug.give'), () => bus.emit('debugGiveWeapon', { defId: weaponSel.value, grade: gradeSel.value as GradeId }), 'go')),
+    buttons(
+      button(t('debug.coins'), () => bus.emit('debugCoins', { amount: 50 })),
+      button(t('debug.coinsMany'), () => bus.emit('debugCoins', { amount: 1000 })),
+      button(t('debug.itemCard'), () => bus.emit('debugOpenCards', { kind: 'item' })),
+    ),
+  );
+
+  // ---------- 스킬·전직 ----------
   const skills = d.skills.skills.filter((s) => isSkillImplemented(s.id));
   const skillSel = select(skills.map((s) => [s.id, t(s.nameKey)]));
   const levelSel = select([
@@ -48,62 +109,32 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
     ['A', `Lv3 ${t('debug.awakened')}`],
   ]);
   levelSel.value = '1';
-  body.appendChild(
-    row(
+  const hectarInput = num('3', 36);
+  const acroInput = num('2', 36);
+  const schoolSel = select(d.jobs.jobs.filter((j) => j.enabled).flatMap((j) => j.advancements.map((a): [string, string] => [a.id, `${t(j.nameKey)} · ${t(a.nameKey)}`])));
+  const skillPage = page(
+    buttons(
+      button(t('debug.allSkills'), () => bus.emit('debugAllSkills', { awakened: false }), 'big'),
+      button(t('debug.allSkillsAwakened'), () => bus.emit('debugAllSkills', { awakened: true }), 'big'),
+    ),
+    field(
+      t('debug.setSkill'),
       skillSel,
       levelSel,
-      button(t('debug.setSkill'), () => {
+      button(t('debug.apply'), () => {
         const v = levelSel.value;
         bus.emit('debugSetSkill', { skillId: skillSel.value, level: v === 'A' ? d.skills.maxLevel : Number(v), awakened: v === 'A' });
-      }),
+      }, 'go'),
     ),
-  );
-
-  // 카드창·궁극기
-  body.appendChild(
-    row(
+    buttons(
       button(t('debug.skillCard'), () => bus.emit('debugOpenCards', { kind: 'skill' })),
-      button(t('debug.itemCard'), () => bus.emit('debugOpenCards', { kind: 'item' })),
       button(t('debug.evolutionCard'), () => bus.emit('debugOpenCards', { kind: 'evolution' })),
-      button(t('debug.fillUltimate'), () => bus.emit('debugFillUltimate', {})),
     ),
+    field(t('debug.advanceHint'), hectarInput, acroInput, button(t('debug.advance'), () => bus.emit('debugAdvance', { hectar: Number(hectarInput.value) || 0, acro: Number(acroInput.value) || 0 }), 'go')),
+    field(t('debug.advanceTo'), schoolSel, button(t('debug.apply'), () => bus.emit('debugAdvanceTo', { school: schoolSel.value }), 'go')),
   );
 
-  // 적 소환 (현재 방)
-  const enemySel = select(d.enemies.enemies.map((e) => [e.id, t(e.nameKey)]));
-  const eliteSel = select([['', t('debug.eliteNone')], ...d.elites.elites.map((e): [string, string] => [e.id, t(e.nameKey)])]);
-  const countInput = document.createElement('input');
-  countInput.type = 'number';
-  countInput.value = '3';
-  countInput.style.width = '36px';
-  body.appendChild(
-    row(
-      enemySel,
-      eliteSel,
-      countInput,
-      button(t('debug.spawn'), () =>
-        bus.emit('debugSpawn', {
-          enemyId: enemySel.value,
-          count: Math.max(1, Number(countInput.value) || 1),
-          elite: eliteSel.value === '' ? null : eliteSel.value,
-        }),
-      ),
-      button(t('debug.barrage'), () => bus.emit('debugBarrage', {})),
-    ),
-  );
-  const bossHpInput = document.createElement('input');
-  bossHpInput.type = 'number';
-  bossHpInput.value = '51';
-  bossHpInput.style.width = '40px';
-  body.appendChild(
-    row(
-      bossHpInput,
-      button(t('debug.bossHp'), () => bus.emit('debugBossHp', { ratio: Math.max(1, Math.min(100, Number(bossHpInput.value) || 100)) / 100 })),
-    ),
-  );
-  // 다음 조우 칸 유형 강제, 무기 지급, 코인
-  const encSel = select([['', t('debug.encounterRandom')], ...(['treasure', 'merchant', 'skillShop', 'raid', 'magiSpire', 'hiddenBoss'] as const).map((k): [string, string] => [k, t(`encounter.${k}`)])]);
-  // 스테이지 이동 (지금 빌드 그대로)
+  // ---------- 진행 ----------
   const stageSel = select(
     // 오버플로우 런이면 장 너머까지 (본편 런에서 4장 이후는 무시된다)
     Array.from({ length: (d.mapgen.chapters + d.overflow.debugExtraChapters) * d.mapgen.stagesPerChapter }, (_, i): [string, string] => {
@@ -112,32 +143,24 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
       return [`${c}-${s}`, `${c}-${s}`];
     }),
   );
-  body.appendChild(
-    row(
+  const encSel = select([['', t('debug.encounterRandom')], ...(['treasure', 'merchant', 'skillShop', 'raid', 'magiSpire', 'hiddenBoss'] as const).map((k): [string, string] => [k, t(`encounter.${k}`)])]);
+  const hbSel = select(d.bosses.hiddenBosses.map((h): [string, string] => [h.id, t(`enemy.${h.id}`)]));
+  const progress = page(
+    field(
+      t('debug.goStage'),
       stageSel,
-      button(t('debug.goStage'), () => {
+      button(t('debug.go'), () => {
         const [c, s] = stageSel.value.split('-').map(Number);
         bus.emit('debugGoStage', { chapter: c!, stage: s! });
-      }),
+      }, 'go'),
     ),
+    field(t('debug.forceEncounter'), encSel, button(t('debug.apply'), () => bus.emit('debugForceEncounter', { kind: encSel.value === '' ? null : (encSel.value as EncounterKindId) }), 'go')),
+    field(t('debug.hiddenBoss'), hbSel, button(t('debug.apply'), () => bus.emit('debugHiddenBoss', { id: hbSel.value }), 'go')),
   );
-  // 히든보스: 다음 조우 칸을 그 히든보스로
-  const hbSel = select(d.bosses.hiddenBosses.map((h): [string, string] => [h.id, t(`enemy.${h.id}`)]));
-  body.appendChild(row(hbSel, button(t('debug.hiddenBoss'), () => bus.emit('debugHiddenBoss', { id: hbSel.value }))));
-  const itemSel = select(d.items.items.map((x): [string, string] => [x.id, t(x.nameKey)]));
-  body.appendChild(row(itemSel, button(t('debug.giveItem'), () => bus.emit('debugGiveItem', { itemId: itemSel.value }))));
-  const weaponSel = select(d.weapons.weapons.map((w): [string, string] => [w.id, t(w.nameKey)]));
-  const gradeSel = select(d.groupMultipliers.grades.map((g): [string, string] => [g.id, t(g.nameKey)]));
-  body.appendChild(
-    row(
-      encSel,
-      button(t('debug.forceEncounter'), () => bus.emit('debugForceEncounter', { kind: encSel.value === '' ? null : (encSel.value as EncounterKindId) })),
-      button(t('debug.coins'), () => bus.emit('debugCoins', { amount: 50 })),
-    ),
-  );
-  // 영구 저장: 마기력 결정 지급·저장 초기화
-  body.appendChild(
-    row(
+
+  // ---------- 저장 ----------
+  const save = page(
+    buttons(
       button(t('debug.crystals'), () => {
         ctx.save.data.crystals += 100;
         ctx.save.write();
@@ -147,42 +170,15 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
         ctx.save.reset();
         bus.emit('saveChanged', {});
         bus.emit('toast', { text: t('debug.saveReset') });
-      }),
+      }, 'warn'),
     ),
   );
-  body.appendChild(
-    row(
-      weaponSel,
-      gradeSel,
-      button(t('debug.giveWeapon'), () => bus.emit('debugGiveWeapon', { defId: weaponSel.value, grade: gradeSel.value as GradeId })),
-    ),
-  );
-  // 계열 집계를 정하고 바로 전직
-  const pickInput = (v: string) => {
-    const el = document.createElement('input');
-    el.type = 'number';
-    el.value = v;
-    el.style.width = '32px';
-    return el;
-  };
-  const hectarInput = pickInput('3');
-  const acroInput = pickInput('2');
-  const advHint = document.createElement('span');
-  advHint.textContent = t('debug.advanceHint');
-  body.appendChild(
-    row(
-      advHint,
-      hectarInput,
-      acroInput,
-      button(t('debug.advance'), () =>
-        bus.emit('debugAdvance', { hectar: Number(hectarInput.value) || 0, acro: Number(acroInput.value) || 0 }),
-      ),
-    ),
-  );
-  // 학파를 정해 바로 전직 (지금 직업의 학파만 받는다. 마기법사 등 판정 규칙을 건너뛴다)
-  const schoolSel = select(d.jobs.jobs.filter((j) => j.enabled).flatMap((j) => j.advancements.map((a): [string, string] => [a.id, `${t(j.nameKey)} · ${t(a.nameKey)}`])));
-  body.appendChild(row(schoolSel, button(t('debug.advanceTo'), () => bus.emit('debugAdvanceTo', { school: schoolSel.value }))));
-  // 입력칸에서 친 키가 게임 조작(WASD 등)으로 새지 않게
-  body.addEventListener('keydown', (e) => e.stopPropagation());
-  return body;
+
+  return [
+    { id: 'combat', title: t('debug.tab.combat'), body: combat },
+    { id: 'items', title: t('debug.tab.items'), body: items },
+    { id: 'skills', title: t('debug.tab.skills'), body: skillPage },
+    { id: 'progress', title: t('debug.tab.progress'), body: progress },
+    { id: 'save', title: t('debug.tab.save'), body: save },
+  ];
 }

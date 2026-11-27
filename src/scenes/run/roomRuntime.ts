@@ -158,6 +158,7 @@ export class RoomRuntime {
     // 오버플로우 4장부터: 3장 수준 + 장 성장 (보스는 같은 칸 3장 보스 기준, 피해는 보스 컨트롤러로)
     const ovf = this.overflowScale(def.id, def.rank, def.chapter);
     if (ovf.hp !== 1 || ovf.damage !== 1) enemy.applyOverflowScale(ovf.hp, def.ai === 'boss' ? 1 : ovf.damage);
+    this.chapterBuff(enemy);
     if (def.id === stageBossId(stage, d) && this.bossNameKey(def.id)) enemy.nameKey = this.bossNameKey(def.id)!;
     // 오버플로우 적 진화 (보스는 보스 진화, 피해는 보스 컨트롤러로)
     const evoDamage = this.run.evo.onSpawn(enemy);
@@ -198,6 +199,13 @@ export class RoomRuntime {
       }
     }
     return enemy;
+  }
+
+  /** 2~3장 일반 적·정예 보정 (보스·히든보스 제외) */
+  private chapterBuff(enemy: Enemy): void {
+    if (enemy.rank === 'boss' || enemy.rank === 'hiddenBoss') return;
+    const b = this.run.ctx.data.enemies.chapterBuff[String(enemy.def.chapter)];
+    if (b) enemy.applyOverflowScale(b.hp, b.damage);
   }
 
   /** 오버플로우 장 배율 (본편·1~3장은 1) */
@@ -253,6 +261,7 @@ export class RoomRuntime {
     // 오버플로우: 보스가 부른 졸개도 장 배율·공용 진화를 받는다
     const ovf = this.overflowScale(def.id, def.rank, def.chapter);
     if (ovf.hp !== 1 || ovf.damage !== 1) enemy.applyOverflowScale(ovf.hp, ovf.damage);
+    this.chapterBuff(enemy);
     this.run.evo.onSpawn(enemy);
     this.run.enemyGroup.add(enemy.sprite);
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);

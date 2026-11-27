@@ -152,7 +152,7 @@ export class PlayerCondition {
   }
 
   /**
-   * 순간이동(마기법사): 벽·장애물을 넘어 가장 먼 내려설 수 있는 바닥(방 안·복도)으로. 맵 밖·벽 속에는 서지 않는다.
+   * 순간이동(마기법사): 막힘없이 갈 수 있는 바닥(방 안·복도)까지 가장 멀리. 벽·문·소품은 넘지 못한다(벽 너머 방으로 새는 버그).
    * 전투로 잠긴 방 안에서는 그 방 바닥 안에서만 (잠긴 문을 넘어 빠져나가지 않게)
    */
   teleport(dir: Vec2, distance: number, stepPx: number): { from: Vec2; to: Vec2 } {
@@ -165,7 +165,7 @@ export class PlayerCondition {
     const floors = locked
       ? [interiorRect(run.session.map.rooms[rid]!, run.m, half)]
       : [...run.session.map.rooms.map((n) => interiorRect(n, run.m, half)), ...corridors(run.session.map, run.m).map((c) => ({ x: c.floor.x + half, y: c.floor.y + half, w: c.floor.w - half * 2, h: c.floor.h - half * 2 }))];
-    const to = leapTarget(from, dir, distance, stepPx, (x, y) => floors.some((f) => contains(f, x, y)) && !blocked(x, y));
+    const to = blinkTarget(from, dir, distance, stepPx, (x, y) => !floors.some((f) => contains(f, x, y)) || blocked(x, y));
     this.run.player.setPosition(to.x, to.y);
     (this.run.player.body as Phaser.Physics.Arcade.Body).reset(to.x, to.y);
     return { from, to };

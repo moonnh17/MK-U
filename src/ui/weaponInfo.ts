@@ -70,6 +70,7 @@ export function weaponInfoLines(ctx: GameContext, item: WeaponItem): WeaponInfoL
   const sig = def.signature;
   if (def.lunge) out.push({ text: t('weapon.sigDesc.lunge'), sig: true });
   if (def.iaido) out.push({ text: t('weapon.sigDesc.iaido', { d: def.iaido.maxDistance }), sig: true });
+  if (def.butcher) out.push({ text: t('weapon.sigDesc.butcher', { n: def.butcher.minBleed, cd: def.butcher.cooldownSec, dmg: def.butcher.damageMul, per: def.butcher.perStackMul }), sig: true });
   if (def.boomerang) out.push(main(t('weapon.sigDesc.boomerang', { n: def.boomerang.charges })));
   if (def.needle) {
     const n = def.needle;

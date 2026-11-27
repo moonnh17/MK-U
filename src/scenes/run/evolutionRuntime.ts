@@ -99,7 +99,7 @@ export class EvolutionRuntime {
     const p = this.run.session.player;
     if (!p.overflow) return then();
     const E = this.E;
-    p.overflow = { ...p.overflow, evolution: pickEvolution(p.overflow.evolution, card, E) };
+    p.overflow = { ...p.overflow, evolution: pickEvolution(p.overflow.evolution, card, E), picks: [...(p.overflow.picks ?? []), { evo: card.evoId, reward: card.rewardId }] };
     const r = findReward(E, card.rewardId);
     const t = this.run.ctx.t;
     const toast = (text: string) => bus.emit('toast', { text });
