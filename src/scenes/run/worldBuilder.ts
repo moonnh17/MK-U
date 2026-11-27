@@ -13,6 +13,7 @@ import { type RoomNode } from '../../systems/mapgen';
 import { RoomState, wavesForRoom } from '../../systems/roomState';
 import { plainWeapon } from '../../systems/weapons';
 import { contains, corridors, doorRect, interiorRect, roomCenter, roomRect, obstacleRects, wallRects, type Rect } from '../../systems/worldLayout';
+import { contentChapter, stageBossId, waveChaptersOf } from '../../systems/overflow';
 import type { RunScene } from '../RunScene';
 import type { SpriteRef } from '../../types/data';
 
@@ -23,14 +24,14 @@ export class WorldBuilder {
     const d = this.run.ctx.data;
     const { map } = this.run.session;
     // 챕터가 바뀌면 방 색(타일 자리)도 바뀐다
-    const theme = d.ui.chapterRooms[String(this.run.session.stage.chapter)] ?? d.ui.room;
+    const theme = d.ui.chapterRooms[String(contentChapter(this.run.session.stage))] ?? d.ui.room;
     const floor = hexColor(theme.floorColor);
     const wall = hexColor(theme.wallColor);
     const corridorColor = hexColor(theme.corridorColor);
     const doorColor = hexColor(d.mapgen.door.color);
 
     // 타일 그림이 있으면 반복해서 깔고, 없으면 색
-    const chapter = this.run.session.stage.chapter;
+    const chapter = contentChapter(this.run.session.stage);
     const tile = (part: TilePart) => artKeys.tile(part, chapter);
     for (const c of corridors(map, this.run.m)) {
       this.addRect(c.floor, corridorColor, 0, tile('corridor'));
@@ -42,6 +43,12 @@ export class WorldBuilder {
       const dress = Rng.derive(this.run.ctx.config.seed, `dress-${map.chapter}-${map.stage}-${node.id}`);
       const floorN = d.mapgen.dressing.floorVariants[String(chapter)] ?? 0;
       this.addRect(roomRect(node, this.run.m), floor, 0, floorN > 0 ? artKeys.floorVariant(chapter, dress.int(0, floorN - 1)) : tile('floor'));
+      // 오버플로우 테마 틴트 (임시 전용 맵 구분)
+      const tint = this.run.session.stage.theme?.tint;
+      if (tint) {
+        const r = roomRect(node, this.run.m);
+        this.run.add.rectangle(r.x + r.w / 2, r.y + r.h / 2, r.w, r.h, hexColor(tint), d.overflow.themeTintAlpha).setDepth(0.5);
+      }
       for (const w of wallRects(node, this.run.m)) this.run.walls.add(this.addRect(w, wall, 1, tile('wall')));
       // 장애물: 벽처럼 이동과 탄(플레이어·적)을 막는다
       const obs = obstacleRects(node, this.run.m, d.mapgen);
@@ -62,8 +69,9 @@ export class WorldBuilder {
         node.id,
         node.kind,
         d.mapgen.combatWaves,
-        d.bosses.bosses.find((b) => b.chapter === map.chapter && b.stage === map.stage)?.id ?? d.mapgen.bossPlaceholderEnemy,
+        stageBossId(this.run.session.stage, d) ?? d.mapgen.bossPlaceholderEnemy,
         d.waves,
+        waveChaptersOf(this.run.session.stage),
       );
       this.run.rooms.set(node.id, new RoomState(node.kind, waves, d.waves.waveDelaySec));
 

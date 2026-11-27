@@ -13,6 +13,7 @@ import { chapterWeights } from '../../systems/items';
 import { spireEliteCount, spireSize, type SpireEvent } from '../../systems/spire';
 import { planCombatWaves, RoomState } from '../../systems/roomState';
 import { roomCenter } from '../../systems/worldLayout';
+import { contentChapter, waveChaptersOf } from '../../systems/overflow';
 import type { EncounterKindId, HiddenBossDef } from '../../types/data';
 import type { RunScene } from '../RunScene';
 
@@ -41,7 +42,7 @@ export class Encounters {
     const node = map.rooms[roomId]!;
     const rng = Rng.derive(this.run.ctx.config.seed, `encounter-${stage.chapter}-${stage.stage}-${roomId}`);
     const met = this.run.session.player.hiddenBossesMet;
-    const kind = this.forcedEncounter ?? rollEncounter(rng, encounterWeights(d.loot.encounter, stage.chapter), encounterPool(encounterKinds(IMPLEMENTED_ENCOUNTERS, d.bosses.hiddenBosses, met), !!node.peaceful));
+    const kind = this.forcedEncounter ?? rollEncounter(rng, encounterWeights(d.loot.encounter, contentChapter(stage)), encounterPool(encounterKinds(IMPLEMENTED_ENCOUNTERS, d.bosses.hiddenBosses, met), !!node.peaceful));
     this.forcedEncounter = null;
     this.run.session.encounters.set(roomId, kind);
     const c = roomCenter(node, this.run.m);
@@ -52,7 +53,7 @@ export class Encounters {
     bus.emit('toast', { text: this.run.ctx.t(`encounter.${kind}`) });
 
     if (kind === 'treasure') {
-      this.run.loot.addChest('item', c.x, c.y, chapterWeights(d.items.treasureWeights, this.run.session.stage.chapter));
+      this.run.loot.addChest('item', c.x, c.y, chapterWeights(d.items.treasureWeights, contentChapter(this.run.session.stage)));
     } else if (kind === 'merchant') {
       const stock = merchantStock(rng, d.loot, d.weapons.weapons, d.weapons.options, d.groupMultipliers);
       stock.forEach((s, i) => {
@@ -68,7 +69,7 @@ export class Encounters {
     } else if (kind === 'raid') {
       // 전투 칸보다 웨이브·적 수가 많고, 웨이브마다 엘리트 2마리
       const r = d.loot.raid;
-      const waves = planCombatWaves(rng, map.chapter, r.waves, d.waves).map((w) => {
+      const waves = planCombatWaves(rng, waveChaptersOf(stage), r.waves, d.waves).map((w) => {
         const n = Math.round(w.length * r.sizeMul);
         return Array.from({ length: n }, (_, i) => w[i % w.length]!);
       });
@@ -91,7 +92,7 @@ export class Encounters {
     } else if (kind === 'magiSpire') {
       // 첨탑이 방 가운데로 떨어지고 문이 잠긴다
       this.run.roomRt.setRoomLocked(roomId, true);
-      const size = spireSize(rng, stage.chapter, stage.stage, d.loot.spire);
+      const size = spireSize(rng, contentChapter(stage), stage.stage, d.loot.spire);
       const spire = new Spire(this.run, roomId, c.x, c.y, d.loot.spire, size);
       // 중형·대형: 75% 확률로 강적 1마리 (첫 무리와 함께)
       if (size !== 'small' && rng.chance(d.loot.spire.medium.strongChance)) this.spireStrong.add(spire);
@@ -136,8 +137,8 @@ export class Encounters {
     const { map } = this.run.session;
     const seed = this.run.ctx.config.seed;
     const label = `spire-${map.chapter}-${map.stage}-${sp.roomId}-${index}`;
-    const wave = planCombatWaves(Rng.derive(seed, `${label}-wave`), map.chapter, [1, 1], d.waves)[0]!;
-    const normal = eliteCount(Rng.derive(seed, `${label}-elite-count`), map.chapter, map.stage, d.elites);
+    const wave = planCombatWaves(Rng.derive(seed, `${label}-wave`), waveChaptersOf(this.run.session.stage), [1, 1], d.waves)[0]!;
+    const normal = eliteCount(Rng.derive(seed, `${label}-elite-count`), contentChapter(this.run.session.stage), map.stage, d.elites);
     const elites = assignElites(
       Rng.derive(seed, `${label}-elite`),
       wave,
@@ -157,8 +158,8 @@ export class Encounters {
   /** 중형 첨탑 강적: 정예가 나오는 챕터면 그 챕터 정예, 아니면 엘리트 2종이 겹친 지금 챕터 일반 적 */
   spawnSpireStrong(sp: Spire, rng: Rng): void {
     const d = this.run.ctx.data;
-    if (d.waves.champions.stages[String(this.run.session.stage.chapter)]) {
-      const id = rng.pick(championIds(this.run.session.stage.chapter, d.waves.champions));
+    if (d.waves.champions.stages[String(contentChapter(this.run.session.stage))]) {
+      const id = rng.pick(championIds(contentChapter(this.run.session.stage), d.waves.champions));
       this.run.roomRt.spawnEnemy(id, sp.roomId, rng, true);
       this.run.progression.say('championMet', id);
       return;
@@ -200,7 +201,7 @@ export class Encounters {
     const d = this.run.ctx.data;
     const c = roomCenter(this.run.session.map.rooms[roomId]!, this.run.m);
     this.run.loot.addChest('item', c.x - 20, c.y, d.items.raidWeights);
-    this.run.loot.addCombatChest(c.x + 20, c.y, 'raid', chapterWeights(d.loot.raidLegendaryChestChance, this.run.session.stage.chapter));
+    this.run.loot.addCombatChest(c.x + 20, c.y, 'raid', chapterWeights(d.loot.raidLegendaryChestChance, contentChapter(this.run.session.stage)));
     const n = rollCoinDrops(this.run.rng, this.run.rng.int(d.loot.raid.coins[0], d.loot.raid.coins[1]), d.pickups.coin.dropRate);
     for (let i = 0; i < n; i++) {
       const a = this.run.rng.range(0, Math.PI * 2);

@@ -2,6 +2,7 @@ import { sanityMaxFor } from '../systems/sanity';
 import type { GameData } from '../data/index';
 import type { StageMap } from '../systems/mapgen';
 import type { StageRef } from '../systems/run';
+import { newOverflowState, type OverflowState } from '../systems/overflow';
 import { plainWeapon } from '../systems/weapons';
 import { emptyLoadout, type Cooldowns, type SkillLoadout } from '../systems/skills';
 import type { WeaponSlots } from '../systems/weapons';
@@ -57,6 +58,8 @@ export interface PlayerState {
   elementsUsed: ElementId[];
   /** 결산용 런 기록 (스테이지를 넘어가도 유지) */
   record: RunRecord;
+  /** 오버플로우 런이면 그 상태 (본편 런은 null) */
+  overflow: OverflowState | null;
   /** 영구 강화로 더한 기본 체력·보호막 최대치 (스탯은 시작 스탯에 이미 들어 있다) */
   meta: { maxHp: number; sanity: number };
 }
@@ -157,7 +160,7 @@ export interface Settlement {
  * jobId: 실험장에서 고른 직업 (없으면 데이터의 시작 직업)
  * upgrades: 그 직업의 영구 강화 레벨 (실험체의 기억)
  */
-export function newPlayerState(data: GameData, jobId: string = data.jobs.startJob, upgrades?: UpgradeLevels): PlayerState {
+export function newPlayerState(data: GameData, jobId: string = data.jobs.startJob, upgrades?: UpgradeLevels, overflow = false): PlayerState {
   const job = data.jobs.jobs.find((j) => j.id === jobId) ?? data.jobs.jobs.find((j) => j.id === data.jobs.startJob)!;
   const bonus = upgradeBonus(upgrades, data.meta.upgrades);
   return {
@@ -189,6 +192,7 @@ export function newPlayerState(data: GameData, jobId: string = data.jobs.startJo
     geminiSaid: [],
     elementsUsed: [],
     record: newRunRecord(),
+    overflow: overflow ? newOverflowState() : null,
   };
 }
 

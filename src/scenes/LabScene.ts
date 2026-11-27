@@ -9,7 +9,7 @@ import { registerGemini } from '../core/save';
 import { hexColor } from '../core/scale';
 import { animateArt, fitArt, fitBaseCamera } from '../entities/art';
 import { hasLines, storyFor, storyLines } from '../systems/gemini';
-import { jobChoices, nearestInteractable, portalActive } from '../systems/lab';
+import { jobChoices, nearestInteractable, overflowPortalOpen, portalActive } from '../systems/lab';
 import type { LabObjectDef } from '../types/data';
 import type { TouchControlId } from '../ui/mobileLayout';
 
@@ -29,6 +29,7 @@ export class LabScene extends Phaser.Scene {
   private prompt!: Phaser.GameObjects.Text;
   private crystalText!: Phaser.GameObjects.Text;
   private portal!: Phaser.GameObjects.Image;
+  private overflowPortal!: Phaser.GameObjects.Image;
   private near: LabObjectDef | null = null;
   private hintOn = false;
   private waking = false;
@@ -79,6 +80,7 @@ export class LabScene extends Phaser.Scene {
       fitArt(this.ctx.data, img, o.w, o.h);
       if (o.solid) this.walls.add(img);
       if (o.kind === 'portal') this.portal = img;
+      if (o.kind === 'overflowPortal') this.overflowPortal = img.setTint(hexColor(d.overflow.portalColor));
       if (o.kind === 'window') this.drawWindow(o);
       if (o.kind === 'gemini') this.flicker(img);
     }
@@ -171,9 +173,15 @@ export class LabScene extends Phaser.Scene {
 
   private refreshPortal(): void {
     const on = portalActive(this.ctx.data.jobs.jobs, this.job);
-    this.tweens.killTweensOf(this.portal);
-    this.portal.setAlpha(on ? 1 : 0.3).setScale(1);
-    if (on) this.tweens.add({ targets: this.portal, scaleX: 1.12, scaleY: 1.12, duration: this.ctx.data.lab.portalPulseSec * 500, yoyo: true, repeat: -1 });
+    for (const [img, lit] of [[this.portal, on], [this.overflowPortal, on && this.overflowOpen()]] as const) {
+      this.tweens.killTweensOf(img);
+      img.setAlpha(lit ? 1 : 0.3).setScale(1);
+      if (lit) this.tweens.add({ targets: img, scaleX: 1.12, scaleY: 1.12, duration: this.ctx.data.lab.portalPulseSec * 500, yoyo: true, repeat: -1 });
+    }
+  }
+
+  private overflowOpen(): boolean {
+    return overflowPortalOpen(this.ctx.save.data.storyCleared, this.ctx.config.debug);
   }
 
   /** 첫 실행: 캡슐 뚜껑이 열리고 걸어 나온다 (첫 대화는 M6에서 여기에) */
@@ -253,8 +261,11 @@ export class LabScene extends Phaser.Scene {
     if (frame.pressed.has('interact') && this.near) this.interact(this.near);
 
     // 켜진 포털에 들어서면 런 시작
-    const portal = L.objects.find((o) => o.kind === 'portal')!;
-    if (portalActive(this.ctx.data.jobs.jobs, this.job) && Math.abs(p.x - portal.x) < portal.w / 2 && Math.abs(p.y - portal.y) < portal.h / 2) this.enterRun();
+    const inside = (o: LabObjectDef) => Math.abs(p.x - o.x) < o.w / 2 && Math.abs(p.y - o.y) < o.h / 2;
+    if (portalActive(this.ctx.data.jobs.jobs, this.job)) {
+      if (inside(L.objects.find((o) => o.kind === 'portal')!)) this.enterRun(false);
+      else if (this.overflowOpen() && inside(L.objects.find((o) => o.kind === 'overflowPortal')!)) this.enterRun(true);
+    }
   }
 
   private updatePrompt(): void {
@@ -280,8 +291,14 @@ export class LabScene extends Phaser.Scene {
     if (o.kind === 'jobSelect') {
       this.openJobWindow();
     } else if (o.kind === 'portal') {
-      if (portalActive(this.ctx.data.jobs.jobs, this.job)) this.enterRun();
+      if (portalActive(this.ctx.data.jobs.jobs, this.job)) this.enterRun(false);
       else bus.emit('toast', { text: t('lab.pickJobFirst') });
+    } else if (o.kind === 'overflowPortal') {
+      const best = this.ctx.save.data.overflowBest;
+      if (!this.overflowOpen()) bus.emit('toast', { text: t('lab.overflowLocked') });
+      else if (!portalActive(this.ctx.data.jobs.jobs, this.job)) bus.emit('toast', { text: t('lab.pickJobFirst') });
+      else this.enterRun(true);
+      if (best && this.overflowOpen()) bus.emit('toast', { text: t('lab.overflowBest', best) });
     } else if (o.kind === 'archive') {
       this.archiveOpen = true;
       this.player.setVelocity(0, 0);
@@ -340,11 +357,11 @@ export class LabScene extends Phaser.Scene {
     bus.emit('toast', { text: this.ctx.t('lab.jobPicked', { job: this.ctx.t(job.nameKey) }) });
   }
 
-  private enterRun(): void {
+  private enterRun(overflow: boolean): void {
     if (!this.job) return;
     // 두 번째 런부터는 늘 새 시드 (?seed=는 첫 런을 재현할 때만. 같은 시드로 계속 돌면 매 판 같은 아이템·무기가 나온다)
     if (this.runs > 0) this.ctx.config.seed = makeFallbackSeed();
     this.runs++;
-    this.scene.start('Run', { job: this.job });
+    this.scene.start('Run', { job: this.job, overflow });
   }
 }

@@ -2,6 +2,7 @@
 import { bus } from '../../core/events';
 import { Rng } from '../../core/rng';
 import { rollOptions } from '../../systems/loot';
+import { overflowStageAt } from '../../systems/overflow';
 import type { RunScene } from '../RunScene';
 import type { RunSceneData } from './shared';
 
@@ -37,7 +38,16 @@ export function bindRunEvents(run: RunScene): (() => void)[] {
     }),
     bus.on('debugGoStage', ({ chapter, stage }) => {
       if (run.modal || run.session.outcome) return;
-      run.scene.restart({ stage: { chapter, stage }, player: run.session.player, offers: [] } satisfies RunSceneData);
+      const p = run.session.player;
+      // 오버플로우는 1-1부터 따라가 그 스테이지의 장·보스 칸을 맞춘다. 본편은 마지막 장까지만
+      if (p.overflow) {
+        const at = overflowStageAt(run.ctx.config.seed, chapter, stage, run.ctx.data);
+        p.overflow = at.state;
+        run.scene.restart({ stage: at.stage, player: p, offers: [] } satisfies RunSceneData);
+        return;
+      }
+      if (chapter > run.ctx.data.mapgen.chapters) return;
+      run.scene.restart({ stage: { chapter, stage }, player: p, offers: [] } satisfies RunSceneData);
     }),
     bus.on('debugHiddenBoss', ({ id }) => {
       run.encounters.forcedEncounter = 'hiddenBoss';

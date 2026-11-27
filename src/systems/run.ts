@@ -1,9 +1,16 @@
 /** 런 진행 (순수 함수). */
-import type { MapgenData, WavesData } from '../types/data';
+import type { MapgenData, OverflowThemeDef, WavesData } from '../types/data';
+
+/** 오버플로우 4장부터 뽑힌 장 (표 조회 장·웨이브 장) */
+export type StageTheme = Pick<OverflowThemeDef, 'id' | 'chapter' | 'waveChapters' | 'tint'>;
 
 export interface StageRef {
   chapter: number;
   stage: number;
+  /** 오버플로우 4장부터: 뽑힌 장. 없으면 chapter가 곧 표 조회 장 */
+  theme?: StageTheme;
+  /** 오버플로우 4장부터 X-2·X-5: 이 칸의 보스 (임시 보스로 대신 나올 수 있다) */
+  boss?: string;
 }
 
 export type StageAdvance =

@@ -1,0 +1,41 @@
+{
+  "fixedChapters": 3,
+  "themes": [
+    { "id": "ch1", "chapter": 1, "waveChapters": [1], "weight": 1 },
+    { "id": "ch2", "chapter": 2, "waveChapters": [2], "weight": 1 },
+    { "id": "ch3", "chapter": 3, "waveChapters": [3], "weight": 1 },
+    { "id": "ovfRuinLab", "chapter": 2, "waveChapters": [1, 2], "weight": 1, "dedicated": true, "tint": "#5a3a8a" },
+    { "id": "ovfDeepLab", "chapter": 3, "waveChapters": [2, 3], "weight": 1, "dedicated": true, "tint": "#2a6a6a" }
+  ],
+  "bossPools": {
+    "2": ["fusionAkgwi", "hectarChief", "eclipse"],
+    "5": ["electricRing", "magiGolem"]
+  },
+  "fixedBosses": [
+    { "chapter": 4, "stage": 2, "boss": "@theme" },
+    { "chapter": 4, "stage": 5, "boss": "hectarMimosa" },
+    { "chapter": 7, "stage": 5, "boss": "acroMimosa", "once": true },
+    { "everyChapters": 3, "stage": 5, "boss": "magiKaiser" }
+  ],
+  "placeholderBosses": { "hectarMimosa": "hectarChief", "acroMimosa": "eclipse" },
+  "bossNameKeys": { "hectarMimosa": "enemy.hectarMimosa", "acroMimosa": "enemy.acroMimosa" },
+  "scale": {
+    "tierToChapter3": {
+      "1": { "hp": 3.6, "damage": 1.78 },
+      "2": { "hp": 1.8, "damage": 1.37 },
+      "3": { "hp": 1, "damage": 1 }
+    },
+    "growthPerChapter": { "hp": 0.15, "damage": 0.08 },
+    "bossDamageTier": {
+      "fusionAkgwi": 1.1,
+      "electricRing": 1.25,
+      "hectarChief": 1.4,
+      "magiGolem": 1.7,
+      "eclipse": 1.9,
+      "magiKaiser": 2.35
+    }
+  },
+  "portalColor": "#ff4a6a",
+  "themeTintAlpha": 0.22,
+  "debugExtraChapters": 9
+}

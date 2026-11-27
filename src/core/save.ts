@@ -37,10 +37,14 @@ export interface SaveData {
   sfxVolume: number;
   /** 첫 방 조작 안내를 봤는지 */
   tutorialDone: boolean;
+  /** 본편(3-5)을 한 번이라도 클리어했다: 실험장 오버플로우 포털이 열린다 */
+  storyCleared: boolean;
+  /** 오버플로우 최고 도달 스테이지 (본편 기록과 따로) */
+  overflowBest: { chapter: number; stage: number } | null;
 }
 
 export function defaultSave(): SaveData {
-  return { version: SAVE_VERSION, crystals: 0, upgrades: {}, cutscenes: {}, pastShards: 0, firstRunDone: false, gemini: {}, codex: { enemies: [], items: [], weapons: [] }, muted: false, musicVolume: 1, sfxVolume: 1, tutorialDone: false };
+  return { version: SAVE_VERSION, crystals: 0, upgrades: {}, cutscenes: {}, pastShards: 0, firstRunDone: false, gemini: {}, codex: { enemies: [], items: [], weapons: [] }, muted: false, musicVolume: 1, sfxVolume: 1, tutorialDone: false, storyCleared: false, overflowBest: null };
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -92,7 +96,15 @@ export function parseSave(raw: string | null): SaveData {
     musicVolume: clampVolume(o.musicVolume, 1),
     sfxVolume: clampVolume(o.sfxVolume, 1),
     tutorialDone: o.tutorialDone === true,
+    storyCleared: o.storyCleared === true,
+    overflowBest: isObj(o.overflowBest) && nonNeg(o.overflowBest.chapter, 0) > 0 && nonNeg(o.overflowBest.stage, 0) > 0 ? { chapter: nonNeg(o.overflowBest.chapter, 0), stage: nonNeg(o.overflowBest.stage, 0) } : null,
   };
+}
+
+/** 더 깊은 스테이지 (장 → 스테이지 순) */
+export function bestStage(a: { chapter: number; stage: number } | null, b: { chapter: number; stage: number }): { chapter: number; stage: number } {
+  if (!a || b.chapter > a.chapter || (b.chapter === a.chapter && b.stage > a.stage)) return { chapter: b.chapter, stage: b.stage };
+  return a;
 }
 
 /** 컷씬을 처음 봤으면 등록하고 true */

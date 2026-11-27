@@ -8,6 +8,7 @@ import { pickTrack } from '../../systems/music';
 import { shake } from '../../entities/juice';
 import { bossIntroStage, bossIntroTotal, type IntroStage } from '../../systems/juice';
 import { roomCenter } from '../../systems/worldLayout';
+import { contentChapter } from '../../systems/overflow';
 import type { RunScene } from '../RunScene';
 import { sfx } from './shared';
 import { burst, motes, shockRing } from '../../bosses/bossFx';
@@ -64,7 +65,7 @@ export class StageFx {
       const { stage } = this.run.session;
       const hidden = e.rank === 'hiddenBoss';
       const sub = hidden ? this.run.ctx.t('boss.intro.hidden') : this.run.ctx.t('boss.intro.stage', { chapter: stage.chapter, stage: stage.stage });
-      bus.emit('bossIntroBand', { name: this.run.ctx.t(e.def.nameKey), sub });
+      bus.emit('bossIntroBand', { name: this.run.ctx.t(e.nameKey), sub });
     } else if (st === 'return') {
       bus.emit('bossIntroBand', { name: '', sub: '' });
       const tgt = this.run.cameraTarget();
@@ -293,7 +294,7 @@ export class StageFx {
     const room = rid === null ? undefined : this.run.rooms.get(rid);
     const inCombat = room?.kind === 'combatRoom' && room.phase === 'locked';
     const inEncounter = room?.kind === 'encounterRoom' && live.some((e) => this.run.enemyRoom.get(e) === rid);
-    bus.emit('music', { track: pickTrack(this.run.ctx.data.sounds.music, { place: 'run', chapter: this.run.session.stage.chapter, facingBoss, hiddenBoss, inCombat, inEncounter }) });
+    bus.emit('music', { track: pickTrack(this.run.ctx.data.sounds.music, { place: 'run', chapter: contentChapter(this.run.session.stage), facingBoss, hiddenBoss, inCombat, inEncounter }) });
   }
 
   /** 첫 런 시작 방: 조작 안내. 다른 방으로 가면 사라지고 다시 나오지 않는다 */

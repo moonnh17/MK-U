@@ -20,6 +20,7 @@
     { "id": "capsule", "kind": "capsule", "x": 240, "y": 224, "w": 22, "h": 26, "solid": true, "color": "#9ad8e0", "spriteKey": "lab_capsule" },
     { "id": "jobDevice", "kind": "jobSelect", "x": 240, "y": 136, "w": 28, "h": 18, "solid": true, "color": "#e0c060", "spriteKey": "lab_job_device" },
     { "id": "portal", "kind": "portal", "x": 240, "y": 56, "w": 34, "h": 22, "solid": false, "color": "#7a5aff", "spriteKey": "lab_portal" },
+    { "id": "overflowPortal", "kind": "overflowPortal", "x": 196, "y": 56, "w": 34, "h": 22, "solid": false, "color": "#ff4a6a", "spriteKey": "lab_portal" },
     { "id": "codex", "kind": "codex", "x": 70, "y": 140, "w": 20, "h": 24, "solid": true, "color": "#5a9ab0", "spriteKey": "lab_codex" },
     { "id": "archive", "kind": "archive", "x": 410, "y": 140, "w": 24, "h": 26, "solid": true, "color": "#b07ae0", "spriteKey": "lab_archive" },
     { "id": "gemini", "kind": "gemini", "x": 140, "y": 70, "w": 14, "h": 22, "solid": false, "color": "#7ae0e0", "spriteKey": "lab_gemini" },

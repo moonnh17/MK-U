@@ -13,6 +13,7 @@ import { canBuy, cardStock, rollChestTier, rollGrade, rollWeapon } from '../../s
 import { heal } from '../../systems/vitals';
 import { dropWeaponAt, pickUpWeapon, plainWeapon, type WeaponItem } from '../../systems/weapons';
 import type { GradeId, SpriteRef } from '../../types/data';
+import { contentChapter } from '../../systems/overflow';
 import type { RunScene } from '../RunScene';
 import { sfx, type ItemGet, type Prop, type Vending } from './shared';
 
@@ -357,7 +358,7 @@ export class LootInteract {
     const d = this.run.ctx.data.loot;
     const { stage } = this.run.session;
     const rng = Rng.derive(this.run.ctx.config.seed, `${label}-tier-${stage.chapter}-${stage.stage}-${this.lootSeq++}`);
-    const tier = d.weaponChestTiers[rollChestTier(rng, chapterWeights(d.combatChestTiers, stage.chapter), legendaryChance)];
+    const tier = d.weaponChestTiers[rollChestTier(rng, chapterWeights(d.combatChestTiers, contentChapter(stage)), legendaryChance)];
     this.addChest('weapon', x, y, tier.weights, { ref: tier.sprite, nameKey: tier.nameKey });
   }
 

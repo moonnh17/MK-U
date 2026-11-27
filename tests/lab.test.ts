@@ -9,7 +9,7 @@ const obj = (id: string) => L.objects.find((o) => o.id === id)!;
 
 describe('실험장 배치 (기획서 오브젝트 6종 + 캡슐)', () => {
   it('직업 선택 장치·포털·도감 단말·기억조각 보관대·제미니 홀로그램·관측창, 실험체 캡슐', () => {
-    expect(L.objects.map((o) => o.kind).sort()).toEqual(['archive', 'capsule', 'codex', 'gemini', 'jobSelect', 'portal', 'window']);
+    expect(L.objects.map((o) => o.kind).sort()).toEqual(['archive', 'capsule', 'codex', 'gemini', 'jobSelect', 'overflowPortal', 'portal', 'window']);
   });
   it('중앙 동선: 캡슐(아래) → 직업 선택 → 포털(위)이 한 줄', () => {
     expect(obj('capsule').x).toBe(obj('jobDevice').x);

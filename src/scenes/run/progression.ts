@@ -14,6 +14,7 @@ import { chapterWeights, effectiveWeights, itemChoices } from '../../systems/ite
 import { awakenSkill, awakeningReady, equipSkill, findSkill, skillValues } from '../../systems/skills';
 import { roomCenter } from '../../systems/worldLayout';
 import type { GeminiEventId, SchoolId } from '../../types/data';
+import { contentChapter, stageBossId } from '../../systems/overflow';
 import type { RunScene } from '../RunScene';
 import { SKILL_ACTIONS, sfx, type Offer } from './shared';
 
@@ -115,7 +116,7 @@ export class Progression {
   private drawItems(rng: Rng): AnyCard[] {
     const d = this.run.ctx.data;
     const p = this.run.session.player;
-    const weights = effectiveWeights(chapterWeights(d.items.treasureWeights, this.run.session.stage.chapter), p.lootShift);
+    const weights = effectiveWeights(chapterWeights(d.items.treasureWeights, contentChapter(this.run.session.stage)), p.lootShift);
     return itemChoices(rng, weights, d.loot.mythicChance, d.items, new Set(p.itemsObtained), d.cards.cardCount).map((itemId) => ({ kind: 'item', itemId }));
   }
 
@@ -278,7 +279,7 @@ export class Progression {
     const last = stage.stage === d.mapgen.stagesPerChapter && stage.chapter === d.jobs.advanceAfterChapter;
     // 보스 처치: 보스 아이템 상자 1 + 보스 무기 상자 1 확정 (포털 양옆)
     const c = roomCenter(node, this.run.m);
-    const bossId = d.bosses.bosses.find((b) => b.chapter === stage.chapter && b.stage === stage.stage)?.id;
+    const bossId = stageBossId(stage, d);
     // 전용 아이템이 아직 남아 있으면 아이템 상자에서 그 아이템 확정
     const bossItem = d.items.items.find((x) => x.pool === 'boss' && x.bossId === bossId && !this.run.session.player.itemsObtained.includes(x.id));
     // 전용 무기가 있으면 bossWeaponChance(20%)로 그 무기, 아니면 보스 무기 상자 가중치

@@ -6,7 +6,7 @@ import type { Vec2 } from '../core/actions';
 import type { JobDef, LabObjectDef, LabObjectKind } from '../types/data';
 
 /** 조사할 수 있는 오브젝트 (캡슐·관측창은 장식) */
-export const INTERACTIVE_KINDS: ReadonlySet<LabObjectKind> = new Set<LabObjectKind>(['jobSelect', 'portal', 'codex', 'archive', 'gemini']);
+export const INTERACTIVE_KINDS: ReadonlySet<LabObjectKind> = new Set<LabObjectKind>(['jobSelect', 'portal', 'overflowPortal', 'codex', 'archive', 'gemini']);
 
 /** 오브젝트 테두리까지의 거리 (사각형) */
 export function distanceToObject(o: Pick<LabObjectDef, 'x' | 'y' | 'w' | 'h'>, p: Vec2): number {
@@ -41,6 +41,11 @@ export interface JobChoice {
 /** 직업 선택 장치에 보일 직업 (데이터 순서) */
 export function jobChoices(jobs: readonly JobDef[]): JobChoice[] {
   return jobs.map((j) => ({ id: j.id, nameKey: j.nameKey, enabled: j.enabled, advancementKeys: j.advancements.map((a) => a.nameKey) }));
+}
+
+/** 오버플로우 포털: 본편을 한 번 클리어하면 열린다 (디버그는 늘) */
+export function overflowPortalOpen(storyCleared: boolean, debug: boolean): boolean {
+  return storyCleared || debug;
 }
 
 /** 포털은 고를 수 있는 직업을 고른 뒤에만 켜진다 */

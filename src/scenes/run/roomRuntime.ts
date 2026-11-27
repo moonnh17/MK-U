@@ -16,6 +16,7 @@ import { hiddenChapterMul } from '../../systems/hiddenBoss';
 import type { RoomEvent, Wave } from '../../systems/roomState';
 import { contains, interiorRect, roomAt, roomCenter } from '../../systems/worldLayout';
 import type { Rect } from '../../systems/worldLayout';
+import { contentChapter, hiddenTableChapter, overflowBossScale, overflowEnemyScale, overflowGrowth, stageBossId, waveChaptersOf } from '../../systems/overflow';
 import type { RunScene } from '../RunScene';
 
 export class RoomRuntime {
@@ -37,7 +38,7 @@ export class RoomRuntime {
         // 보스방: 경고 배너를 띄우고 그동안 보스 소환을 미룬다
         const boss = state.kind === 'bossRoom' ? state.waves[0]?.[0] : undefined;
         const bossDef = boss ? this.run.ctx.data.enemies.enemies.find((e) => e.id === boss) : undefined;
-        if (bossDef) this.run.stageFx.showBossWarning(this.run.ctx.t(bossDef.nameKey));
+        if (bossDef) this.run.stageFx.showBossWarning(this.run.ctx.t(this.bossNameKey(bossDef.id) ?? bossDef.nameKey));
         this.handleRoomEvents(rid, state.enter(bossDef ? this.run.ctx.data.bosses.bannerSec : 0));
         // 바바리안 데스 휘슬: 전투 칸에 들어갈 때 함성
         if (state.kind === 'combatRoom') this.run.itemRt.triggerRoar();
@@ -78,7 +79,9 @@ export class RoomRuntime {
           const end = stageEndOffers(this.run.session.stage, this.run.ctx.data.mapgen, this.run.ctx.data.cards);
           const bossId = this.run.rooms.get(roomId)?.waves[0]?.[0];
           // 식광·마기카이저: 처치 후 일반 스토리 대화 (내용이 비어 있으면 건너뜀)
-          this.run.progression.playStory('bossKill', bossId, () =>
+          // 오버플로우는 본편 스토리 대화(식광·엔딩)를 건너뛴다
+          const story = this.run.session.player.overflow ? (_e: string, _a: string | undefined, then: () => void) => then() : this.run.progression.playStory.bind(this.run.progression);
+          story('bossKill', bossId, () =>
             this.run.progression.queueOffers(
               end.bossRoom.map((kind) => ({ kind, boss: true })),
               () => this.run.progression.afterBossRoom(node),
@@ -108,7 +111,7 @@ export class RoomRuntime {
             wave,
             this.run.encounters.raidRooms.has(roomId)
               ? d.loot.raid.elitesPerWave
-              : eliteCount(Rng.derive(this.run.ctx.config.seed, `elite-count-${map.chapter}-${map.stage}-${roomId}-${index}`), map.chapter, map.stage, d.elites),
+              : eliteCount(Rng.derive(this.run.ctx.config.seed, `elite-count-${map.chapter}-${map.stage}-${roomId}-${index}`), contentChapter(this.run.session.stage), map.stage, d.elites),
             (id) => d.enemies.enemies.find((e) => e.id === id)!.rank,
             d.elites,
           )
@@ -118,9 +121,9 @@ export class RoomRuntime {
     const total = this.run.rooms.get(roomId)?.waves.length ?? 0;
     const champLabel = `champion-${map.chapter}-${map.stage}-${roomId}`;
     const champs = this.run.encounters.raidRooms.has(roomId)
-      ? (raidChampions(Rng.derive(this.run.ctx.config.seed, champLabel), map.chapter, total, d.waves.champions)[index] ?? [])
+      ? (raidChampions(Rng.derive(this.run.ctx.config.seed, champLabel), contentChapter(this.run.session.stage), total, d.waves.champions)[index] ?? [])
       : node.kind === 'combatRoom'
-        ? [championWaves(Rng.derive(this.run.ctx.config.seed, champLabel), map.chapter, map.stage, total, d.waves.champions)[index] ?? null].filter((x): x is string => x !== null)
+        ? [championWaves(Rng.derive(this.run.ctx.config.seed, champLabel), contentChapter(this.run.session.stage), map.stage, total, d.waves.champions)[index] ?? null].filter((x): x is string => x !== null)
         : [];
     for (const id of champs) this.spawnEnemy(id, roomId, rng, true);
     for (const id of champs) this.run.progression.say('championMet', id);
@@ -139,7 +142,12 @@ export class RoomRuntime {
     const enemy = new Enemy(this.run, def, pos.x, pos.y, d.waves.spawnWarnSec, elite, d.elites, icon, extra);
     if (!def.summon) this.run.discover('enemies', def.id);
     // 몬스터는 고정 스탯, 히든보스만 장에 따라 (1장 기준 ×1·×2·×3)
-    if (def.rank === 'hiddenBoss') enemy.scaleHp(hiddenBossScale(this.run.session.stage.chapter, d.enemies.hiddenBossScale));
+    const { stage } = this.run.session;
+    if (def.rank === 'hiddenBoss') enemy.scaleHp(hiddenBossScale(hiddenTableChapter(stage, d), d.enemies.hiddenBossScale));
+    // 오버플로우 4장부터: 3장 수준 + 장 성장 (보스는 같은 칸 3장 보스 기준, 피해는 보스 컨트롤러로)
+    const ovf = this.overflowScale(def.id, def.rank, def.chapter);
+    if (ovf.hp !== 1 || ovf.damage !== 1) enemy.applyOverflowScale(ovf.hp, def.ai === 'boss' ? 1 : ovf.damage);
+    if (def.id === stageBossId(stage, d) && this.bossNameKey(def.id)) enemy.nameKey = this.bossNameKey(def.id)!;
     enemy.jitterFirstAttack(rng);
     this.run.enemyGroup.add(enemy.sprite);
     if (def.ai === 'idle') (enemy.sprite.body as Phaser.Physics.Arcade.Body).setImmovable(true);
@@ -149,7 +157,7 @@ export class RoomRuntime {
       // 히든보스: 어느 챕터든 같은 패턴, 체력·피해만 챕터 배율
       const hidden = d.bosses.hiddenBosses.find((b) => b.id === def.id);
       const core = hidden ?? d.bosses.bosses.find((b) => b.id === def.id);
-      const mul = hidden ? hiddenChapterMul(d.bosses, this.run.session.stage.chapter) : 1;
+      const mul = (hidden ? hiddenChapterMul(d.bosses, hiddenTableChapter(stage, d)) : 1) * ovf.damage;
       if (hidden) {
         enemy.setMaxHp(enemy.maxHp * mul);
         enemy.damageMul = mul;
@@ -168,10 +176,27 @@ export class RoomRuntime {
     }
   }
 
+  /** 오버플로우 장 배율 (본편·1~3장은 1) */
+  private overflowScale(id: string, rank: string, chapter: number): { hp: number; damage: number } {
+    const d = this.run.ctx.data;
+    const { stage, player } = this.run.session;
+    if (!player.overflow) return { hp: 1, damage: 1 };
+    if (rank === 'hiddenBoss') return overflowGrowth(stage.chapter, d);
+    if (rank === 'boss') return overflowBossScale(stage.chapter, id, stage.stage, d);
+    return overflowEnemyScale(stage.chapter, chapter, d);
+  }
+
+  /** 오버플로우 보스 칸 이름 (임시 보스가 대신 나와도) */
+  bossNameKey(spawnId: string): string | undefined {
+    const { stage } = this.run.session;
+    if (!stage.boss || spawnId !== stageBossId(stage, this.run.ctx.data)) return undefined;
+    return this.run.ctx.data.overflow.bossNameKeys[stage.boss];
+  }
+
   /** 지금 챕터 웨이브에 나오는 일반 적 (중복 없이) */
   chapterRoster(): string[] {
     const d = this.run.ctx.data;
-    const ids = new Set(d.waves.waves.filter((w) => w.chapter === this.run.session.stage.chapter).flatMap((w) => w.spawns.map((s) => s.enemy)));
+    const ids = new Set(d.waves.waves.filter((w) => waveChaptersOf(this.run.session.stage).includes(w.chapter)).flatMap((w) => w.spawns.map((s) => s.enemy)));
     return [...ids].filter((id) => d.enemies.enemies.find((e) => e.id === id)?.rank === 'normal');
   }
 

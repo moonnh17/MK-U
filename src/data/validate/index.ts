@@ -11,7 +11,7 @@ import { validateEnemies, validateBosses, validateElites, validateWaves } from '
 import { validateMapgen, validatePickups, validateRoomShapes, validateCamera } from './world';
 import { validatePlayer, validateSkills, validateUltimates, validateJobs, validateCards } from './skills';
 import { validateUi, validateKeybindings, validateJuice, validateSounds, validateArtData } from './presentation';
-import { validateSettlement, validateLab, validateGemini } from './meta';
+import { validateSettlement, validateLab, validateGemini, validateOverflow } from './meta';
 
 export function validateGameData(d: GameData): Errors {
   const errors: Errors = [];
@@ -45,6 +45,7 @@ export function validateGameData(d: GameData): Errors {
   validateKeybindings(v);
   validateSettlement(v);
   validateLab(v);
+  validateOverflow(v);
   validateRoomShapes(v);
   validateCamera(v);
   validateJuice(v);

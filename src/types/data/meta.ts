@@ -45,7 +45,7 @@ export type UpgradeDef =
  * capsule: 깨어나는 자리 / jobSelect: 직업 선택 장치 / portal: 시뮬레이션 포털 /
  * codex: 도감 단말(준비 중) / archive: 기억조각 보관대 / gemini: 미모사 제미니 홀로그램(준비 중) / window: 관측창(장식)
  */
-export type LabObjectKind = 'capsule' | 'jobSelect' | 'portal' | 'codex' | 'archive' | 'gemini' | 'window';
+export type LabObjectKind = 'capsule' | 'jobSelect' | 'portal' | 'overflowPortal' | 'codex' | 'archive' | 'gemini' | 'window';
 
 export interface LabObjectDef {
   id: string;

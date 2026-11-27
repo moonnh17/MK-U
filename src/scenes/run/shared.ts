@@ -17,6 +17,8 @@ export interface RunSceneData {
   offers?: CardOfferKind[];
   /** 새 런: 실험장에서 고른 직업 */
   job?: string;
+  /** 새 런: 오버플로우 모드 */
+  overflow?: boolean;
   /** 포탈을 타고 왔다 (도착 연출, 이동 화면을 걷는다) */
   warpIn?: boolean;
   /** 이동 화면에서 고른 아이템의 획득 카드 (다음 스테이지에서 보여 준다) */

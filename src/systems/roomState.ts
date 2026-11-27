@@ -86,8 +86,10 @@ export function scaledCount(rng: Rng, n: number, mul: number): number {
 }
 
 /** 전투 칸 웨이브 계획 (시드 재현). 웨이브 수와 구성은 데이터에서 뽑는다. */
-export function planCombatWaves(rng: Rng, chapter: number, waveCount: readonly [number, number], data: WavesData): Wave[] {
-  const pool = data.waves.filter((w) => w.chapter === chapter);
+/** chapter: 웨이브를 가져올 장 (오버플로우 랜덤 장은 여러 장을 섞는다) */
+export function planCombatWaves(rng: Rng, chapter: number | readonly number[], waveCount: readonly [number, number], data: WavesData): Wave[] {
+  const chapters: readonly number[] = typeof chapter === 'number' ? [chapter] : chapter;
+  const pool = data.waves.filter((w) => chapters.includes(w.chapter));
   if (pool.length === 0) throw new Error(`챕터 ${chapter} 웨이브 데이터 없음`);
   const n = rng.int(waveCount[0], waveCount[1]);
   const waves: Wave[] = [];
@@ -117,9 +119,11 @@ export function wavesForRoom(
   combatWaves: readonly [number, number],
   bossPlaceholder: string,
   data: WavesData,
+  /** 웨이브를 가져올 장 (없으면 chapter) */
+  waveChapters: readonly number[] = [chapter],
 ): Wave[] {
   if (kind === 'combatRoom') {
-    return planCombatWaves(Rng.derive(seed, roomWaveSeedLabel(chapter, stage, roomId)), chapter, combatWaves, data);
+    return planCombatWaves(Rng.derive(seed, roomWaveSeedLabel(chapter, stage, roomId)), waveChapters, combatWaves, data);
   }
   if (kind === 'bossRoom') return [[bossPlaceholder]];
   return [];

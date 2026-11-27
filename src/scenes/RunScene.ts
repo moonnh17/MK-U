@@ -26,6 +26,7 @@ import { DISABLED_ACTIONS } from '../core/features';
 import { Rng } from '../core/rng';
 import { hexColor } from '../core/scale';
 import { newPlayerState, type RunSession } from '../core/session';
+import { advanceOverflow } from '../systems/overflow';
 import { BossController } from '../bosses/bossController';
 import type { BossHost } from '../bosses/host';
 import { Door } from '../entities/door';
@@ -198,7 +199,7 @@ export class RunScene extends Phaser.Scene {
       map,
       visited: new Set([map.startId]),
       currentRoomId: map.startId,
-      player: this.initData.player ?? newPlayerState(d, this.initData.job, this.ctx.save.data.upgrades[this.initData.job ?? d.jobs.startJob]),
+      player: this.initData.player ?? newPlayerState(d, this.initData.job, this.ctx.save.data.upgrades[this.initData.job ?? d.jobs.startJob], this.initData.overflow),
       enemiesAlive: 0,
       outcome: null,
       energyEmptyAt: -Infinity,
@@ -413,7 +414,7 @@ export class RunScene extends Phaser.Scene {
     if (this.stageFx.intro) return null;
     for (const [e, c] of this.bossControllers) {
       if (e.dead) continue;
-      return { name: this.ctx.t(e.def.nameKey), hp: e.hp, maxHp: e.maxHp, markers: c.def.enrageAt > 0 ? [c.def.enrageAt] : (c.def.unlocks ?? []), color: e.def.color };
+      return { name: this.ctx.t(e.nameKey), hp: e.hp, maxHp: e.maxHp, markers: c.def.enrageAt > 0 ? [c.def.enrageAt] : (c.def.unlocks ?? []), color: e.def.color };
     }
     return null;
   }
@@ -812,14 +813,18 @@ export class RunScene extends Phaser.Scene {
     this.leaving = true;
     const d = this.ctx.data;
     const { afterStage } = stageEndOffers(this.session.stage, d.mapgen, d.cards);
-    const adv = advanceStage(this.session.stage, d.mapgen, playableChapters(d.waves, d.mapgen));
-    this.session.player.record.stagesCleared++;
+    const p = this.session.player;
+    // 오버플로우: 끝 없이 다음 스테이지 (4장부터 랜덤 장·보스 칸)
+    const ovf = p.overflow ? advanceOverflow(this.ctx.config.seed, this.session.stage, p.overflow, d) : null;
+    const adv = ovf ? ({ type: 'stage', next: ovf.next } as const) : advanceStage(this.session.stage, d.mapgen, playableChapters(d.waves, d.mapgen));
+    if (ovf) p.overflow = ovf.state;
+    p.record.stagesCleared++;
     if (adv.type === 'stage' || adv.type === 'chapter') {
       // 포탈에 빨려 들어가 이동 화면에서 스테이지 끝 카드를 고른 뒤 다음 스테이지로
       this.dropSuit();
       this.stageFx.warpOut(() =>
         this.progression.queueOffers([{ kind: afterStage, boss: false }], () => {
-          const data: RunSceneData = { stage: adv.next, player: this.session.player, offers: [], warpIn: true, itemGets: this.loot.itemGets };
+          const data: RunSceneData = { stage: adv.next, player: p, offers: [], warpIn: true, itemGets: this.loot.itemGets };
           this.scene.restart(data);
         }),
       );

@@ -55,6 +55,10 @@ export class Enemy {
   maxHp: number;
   /** 접촉 피해 배율 (히든보스 챕터 배율·자기 강화) */
   damageMul = 1;
+  /** 오버플로우 장 배율의 피해 몫 (집정관 흡수 단계가 damageMul을 다시 잡을 때 곱한다) */
+  private ovfDamageMul = 1;
+  /** 화면에 보일 이름 (오버플로우 임시 보스는 칸 이름) */
+  nameKey: string;
   /** 소환 직후 공격·접촉 피해가 없는 남은 시간(초) */
   warn: number;
   /** 마지막 접촉 피해 시각(ms) */
@@ -160,6 +164,7 @@ export class Enemy {
     extraElite: EliteDef | null = null,
   ) {
     this.elites = [elite, extraElite].filter((x): x is EliteDef => x !== null);
+    this.nameKey = def.nameKey;
     this.mods = eliteMods(this.elites, elitesData);
     this.maxHp = def.maxHp * this.mods.hpMul;
     this.hp = this.maxHp;
@@ -201,6 +206,14 @@ export class Enemy {
   setMaxHp(v: number): void {
     this.maxHp = v;
     this.hp = v;
+  }
+
+  /** 오버플로우 장 배율 — 소환 직후에만 (보스 피해는 보스 컨트롤러가 따로 곱한다) */
+  applyOverflowScale(hp: number, damage: number): void {
+    this.hpScale *= hp;
+    this.setMaxHp(this.maxHp * hp);
+    this.ovfDamageMul = damage;
+    this.damageMul *= damage;
   }
 
   /** 챕터 체력 배율 — 소환 직후에만 */
@@ -652,7 +665,7 @@ export class Enemy {
     const max = this.def.maxHp * this.hpScale * this.mods.hpMul * m.hpMul;
     this.hp = rescaleHp(this.hp, this.maxHp, max);
     this.maxHp = max;
-    this.damageMul = m.damageMul;
+    this.damageMul = m.damageMul * this.ovfDamageMul;
     this.absorbStage = stage;
     this.halo?.destroy();
     this.halo = m.haloRadius > 0 ? this.scene.add.circle(this.sprite.x, this.sprite.y, m.haloRadius, hexColor(def.haloColor), 0.25).setStrokeStyle(1, hexColor(def.haloColor), 0.9).setDepth(2) : null;

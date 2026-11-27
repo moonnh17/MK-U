@@ -568,7 +568,7 @@
 | --- | --- | --- | --- | --- | --- |
 | `lab_capsule` | 실험체 캡슐 | 22×26 | feet | #9ad8e0 | mku/lab_capsule.png (1프레임) |
 | `lab_job_device` | 직업 선택 장치 | 28×18 | feet | #e0c060 | mku/lab_job_device.png (1프레임) |
-| `lab_portal` | 시뮬레이션 포털 | 34×22 | feet | #7a5aff | mku/lab_portal.png (1프레임) |
+| `lab_portal` | 시뮬레이션 포털 외 1곳 | 34×22 | feet | #7a5aff | mku/lab_portal.png (1프레임) |
 | `lab_codex` | 도감 단말 | 20×24 | feet | #5a9ab0 | mku/lab_codex.png (1프레임) |
 | `lab_archive` | 기억조각 보관대 | 24×26 | feet | #b07ae0 | mku/lab_archive.png (1프레임) |
 | `lab_gemini` | 미모사 제미니 | 14×22 | feet | #7ae0e0 | mku/lab_gemini.png (1프레임) |

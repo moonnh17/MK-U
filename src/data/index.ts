@@ -27,6 +27,7 @@ import type {
   UiData,
   WavesData,
   WeaponsData,
+  OverflowData,
 } from '../types/data';
 import type { KeybindingsData } from '../input/keyboard';
 
@@ -54,6 +55,7 @@ import geminiJson from './gemini.json';
 import artJson from './art.json';
 import juiceJson from './juice.json';
 import soundsJson from './sounds.json';
+import overflowJson from './overflow.json';
 import koJson from './text/ko.json';
 
 export interface GameData {
@@ -81,6 +83,7 @@ export interface GameData {
   art: ArtData;
   juice: JuiceData;
   sounds: SoundsData;
+  overflow: OverflowData;
   text: TextTable;
 }
 
@@ -110,5 +113,6 @@ export const gameData: GameData = {
   art: artJson as unknown as ArtData,
   juice: juiceJson as unknown as JuiceData,
   sounds: soundsJson as unknown as SoundsData,
+  overflow: overflowJson as unknown as OverflowData,
   text: koJson as TextTable,
 };

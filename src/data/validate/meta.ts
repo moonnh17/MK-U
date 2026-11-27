@@ -33,7 +33,7 @@ export function validateLab(v: V): void {
   const { d, errors, needText } = v;
   const lab = d.lab;
   checkUnique(errors, 'lab.objects', lab.objects.map((o) => o.id));
-  for (const kind of ['capsule', 'jobSelect', 'portal', 'codex', 'archive', 'gemini', 'window'] as const) {
+  for (const kind of ['capsule', 'jobSelect', 'portal', 'overflowPortal', 'codex', 'archive', 'gemini', 'window'] as const) {
     if (lab.objects.filter((o) => o.kind === kind).length !== 1) errors.push(`lab.objects: '${kind}'는 하나여야 함`);
     needText('lab.objects', `lab.object.${kind}`);
   }
@@ -80,4 +80,45 @@ export function validateGemini(v: V): void {
     needText(w, m.nameKey);
     for (const c of m.candidates) for (const k of c) needText(w, k);
   }
+}
+
+/** 오버플로우: 테마 장·웨이브, 보스 풀·고정 칸, 임시 보스, 배율 표 */
+export function validateOverflow(v: V): void {
+  const { d, errors, needText } = v;
+  const O = d.overflow;
+  const fixed = O.fixedChapters;
+  if (!(fixed >= 1 && fixed <= d.mapgen.chapters)) errors.push('overflow.fixedChapters: 1~본편 장 수');
+  checkUnique(errors, 'overflow.themes', O.themes.map((t) => t.id));
+  if (O.themes.length < 2) errors.push('overflow.themes: 직전 장 제외가 되려면 2개 이상');
+  for (const t of O.themes) {
+    if (!(t.chapter >= 1 && t.chapter <= fixed)) errors.push(`overflow.themes.${t.id}.chapter: 1~${fixed}`);
+    if (t.waveChapters.length === 0) errors.push(`overflow.themes.${t.id}.waveChapters: 비어 있음`);
+    for (const c of t.waveChapters) if (!d.waves.waves.some((w) => w.chapter === c)) errors.push(`overflow.themes.${t.id}: ${c}장 웨이브 없음`);
+    checkPositive(errors, `overflow.themes.${t.id}.weight`, t.weight);
+    if (t.tint !== undefined && !HEX_COLOR.test(t.tint)) errors.push(`overflow.themes.${t.id}.tint: #RRGGBB`);
+  }
+  const bossIds = new Set(d.bosses.bosses.map((b) => b.id));
+  const known = (id: string) => bossIds.has(id) || O.placeholderBosses[id] !== undefined;
+  for (const [stage, pool] of Object.entries(O.bossPools)) {
+    if (!d.mapgen.bossStages.includes(Number(stage))) errors.push(`overflow.bossPools.${stage}: 보스 스테이지가 아님`);
+    if (pool.length === 0) errors.push(`overflow.bossPools.${stage}: 비어 있음`);
+    for (const id of pool) if (!bossIds.has(id)) errors.push(`overflow.bossPools.${stage}: 모르는 보스 '${id}'`);
+  }
+  for (const s of d.mapgen.bossStages) if (!O.bossPools[String(s)]) errors.push(`overflow.bossPools: ${s} 스테이지 풀 없음`);
+  for (const [i, f] of O.fixedBosses.entries()) {
+    if ((f.chapter === undefined) === (f.everyChapters === undefined)) errors.push(`overflow.fixedBosses[${i}]: chapter와 everyChapters 중 하나만`);
+    if (!d.mapgen.bossStages.includes(f.stage)) errors.push(`overflow.fixedBosses[${i}].stage: 보스 스테이지가 아님`);
+    if (f.boss !== '@theme' && !known(f.boss)) errors.push(`overflow.fixedBosses[${i}]: 모르는 보스 '${f.boss}'`);
+  }
+  for (const [id, to] of Object.entries(O.placeholderBosses)) if (!bossIds.has(to)) errors.push(`overflow.placeholderBosses.${id}: 모르는 보스 '${to}'`);
+  for (const [id, key] of Object.entries(O.bossNameKeys)) {
+    if (!known(id)) errors.push(`overflow.bossNameKeys: 모르는 보스 '${id}'`);
+    needText(`overflow.bossNameKeys.${id}`, key);
+  }
+  for (let c = 1; c <= fixed; c++) if (!O.scale.tierToChapter3[String(c)]) errors.push(`overflow.scale.tierToChapter3: ${c}장 없음`);
+  for (const id of bossIds) if (id !== d.mapgen.bossPlaceholderEnemy && !(O.scale.bossDamageTier[id]! > 0)) errors.push(`overflow.scale.bossDamageTier: '${id}' 없음`);
+  checkPositive(errors, 'overflow.scale.growthPerChapter.hp', O.scale.growthPerChapter.hp, true);
+  checkPositive(errors, 'overflow.scale.growthPerChapter.damage', O.scale.growthPerChapter.damage, true);
+  if (!(O.themeTintAlpha >= 0 && O.themeTintAlpha <= 1)) errors.push('overflow.themeTintAlpha: 0~1');
+  if (!HEX_COLOR.test(O.portalColor)) errors.push('overflow.portalColor: #RRGGBB');
 }

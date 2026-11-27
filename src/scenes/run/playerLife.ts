@@ -12,6 +12,8 @@ import { hiddenBossScale } from '../../systems/champions';
 import { crystalBreakdown } from '../../systems/runRecord';
 import { absorbHit } from '../../systems/shield';
 import { hpStance, takeDamage } from '../../systems/vitals';
+import { hiddenTableChapter } from '../../systems/overflow';
+import { bestStage } from '../../core/save';
 import type { RunScene } from '../RunScene';
 
 export class PlayerLife {
@@ -73,7 +75,7 @@ export class PlayerLife {
   /** 적 피해 배율: 몬스터는 고정 스탯(1), 히든보스와 싸우는 동안만 장 배율 (히든보스 방에는 그 보스와 부른 것만 있다) */
   enemyDamageMul(): number {
     if (!this.run.enemies.some((e) => !e.dead && e.rank === 'hiddenBoss')) return 1;
-    return hiddenBossScale(this.run.session.stage.chapter, this.run.ctx.data.enemies.hiddenBossScale);
+    return hiddenBossScale(hiddenTableChapter(this.run.session.stage, this.run.ctx.data), this.run.ctx.data.enemies.hiddenBossScale);
   }
 
   /** 사망: 연출을 보여 준 뒤 결산으로 */
@@ -113,6 +115,9 @@ export class PlayerLife {
     const runClear = outcome.type === 'chapterClear' && outcome.chapter >= d.mapgen.chapters;
     const crystals = crystalBreakdown(this.run.session.player.record, runClear, d.meta.crystals);
     save.data.crystals += crystals.total;
+    // 본편 클리어 → 오버플로우 포털 개방, 오버플로우는 최고 도달 스테이지만 따로
+    if (runClear) save.data.storyCleared = true;
+    if (this.run.session.player.overflow) save.data.overflowBest = bestStage(save.data.overflowBest, this.run.session.stage);
     save.write();
     this.run.session.settlement = { runClear, crystals, balance: save.data.crystals, shardsOwned: save.data.pastShards };
     this.run.physics.pause();

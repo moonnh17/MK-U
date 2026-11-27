@@ -104,7 +104,8 @@ export function buildDebugSkills(ctx: GameContext): HTMLElement {
   const encSel = select([['', t('debug.encounterRandom')], ...(['treasure', 'merchant', 'skillShop', 'raid', 'magiSpire', 'hiddenBoss'] as const).map((k): [string, string] => [k, t(`encounter.${k}`)])]);
   // 스테이지 이동 (지금 빌드 그대로)
   const stageSel = select(
-    Array.from({ length: d.mapgen.chapters * d.mapgen.stagesPerChapter }, (_, i): [string, string] => {
+    // 오버플로우 런이면 장 너머까지 (본편 런에서 4장 이후는 무시된다)
+    Array.from({ length: (d.mapgen.chapters + d.overflow.debugExtraChapters) * d.mapgen.stagesPerChapter }, (_, i): [string, string] => {
       const c = Math.floor(i / d.mapgen.stagesPerChapter) + 1;
       const s = (i % d.mapgen.stagesPerChapter) + 1;
       return [`${c}-${s}`, `${c}-${s}`];
