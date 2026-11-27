@@ -17,10 +17,8 @@ const OUT = path.join(REPO, 'public/assets/mku');
 const OUTLINE = [255, 36, 36];
 const GLOW_CUT = 110;
 /** 시트 → 바꿀 동작: [원본 그림, 몸 높이 배율] */
-const SHEETS = {
-  enemy_magi_kaiser_phase2: { dashStart: ['p2_dashStart', 0.92], missile: ['p2_missile', 1], cross: ['p2_cross', 1] },
-  enemy_magi_kaiser_phase3: { dashStart: ['p3_dashStart', 0.92], missile: ['p3_missile', 1], cross: ['p3_cross', 1], command: ['p3_command', 1] },
-};
+// 본체 시트는 build-kaiser-v2가 통째로 다시 그린다 (여기서는 이펙트 한 장들만)
+const SHEETS = {};
 
 function quadrants(file) {
   const im = k.read(path.join(SRC, `${file}.png`));

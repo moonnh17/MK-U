@@ -1652,6 +1652,7 @@ for (const key of ['fx_kaiser_sweep', 'fx_kaiser_sweep_warn', 'fx_kaiser_lock', 
   // 새로 만든 시트가 보관본이 되도록 지운 뒤 다시 바꾼다
   if (fs.existsSync(hfDir)) fs.rmSync(hfDir, { recursive: true });
   Object.assign(sprites, require('./build-kaiser-hf.cjs').buildKaiserHf({ sprites }));
+  Object.assign(sprites, require('./build-kaiser-v2.cjs').buildKaiserV2());
 }
 const json = { basePath: 'assets/', sprites };
 fs.writeFileSync(artPath, JSON.stringify(json, null, 2) + '\n');

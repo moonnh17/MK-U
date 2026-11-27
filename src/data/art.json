@@ -619,9 +619,9 @@
     },
     "enemy_magi_kaiser": {
       "file": "mku/enemy_magi_kaiser.png",
-      "frameWidth": 200,
-      "frameHeight": 160,
-      "frames": 10,
+      "frameWidth": 224,
+      "frameHeight": 206,
+      "frames": 8,
       "density": 2,
       "anims": {
         "idle": {
@@ -631,8 +631,8 @@
         },
         "move": {
           "from": 4,
-          "to": 9,
-          "fps": 8
+          "to": 7,
+          "fps": 6
         }
       }
     },
@@ -4352,8 +4352,8 @@
     },
     "enemy_magi_kaiser_phase1": {
       "file": "mku/enemy_magi_kaiser_phase1.png",
-      "frameWidth": 226,
-      "frameHeight": 158,
+      "frameWidth": 202,
+      "frameHeight": 192,
       "frames": 4,
       "density": 2,
       "anims": {
@@ -4366,9 +4366,9 @@
     },
     "enemy_magi_kaiser_phase2": {
       "file": "mku/enemy_magi_kaiser_phase2.png",
-      "frameWidth": 364,
-      "frameHeight": 200,
-      "frames": 47,
+      "frameWidth": 240,
+      "frameHeight": 222,
+      "frames": 36,
       "density": 2,
       "anims": {
         "idle": {
@@ -4378,59 +4378,59 @@
         },
         "move": {
           "from": 4,
-          "to": 9,
-          "fps": 12
+          "to": 7,
+          "fps": 8
         },
         "transition": {
-          "from": 10,
-          "to": 15,
-          "fps": 4,
+          "from": 8,
+          "to": 11,
+          "fps": 2.67,
           "loop": false
         },
         "punchWindup": {
-          "from": 16,
-          "to": 18,
-          "fps": 2.727272727272727,
+          "from": 12,
+          "to": 13,
+          "fps": 1.82,
           "loop": false
         },
         "punchStrike": {
-          "from": 19,
-          "to": 22,
-          "fps": 13.3,
+          "from": 14,
+          "to": 15,
+          "fps": 6.67,
           "loop": false
         },
         "laser": {
-          "from": 23,
-          "to": 27,
-          "fps": 10,
+          "from": 16,
+          "to": 19,
+          "fps": 8,
           "loop": false
         },
         "dashStart": {
-          "from": 28,
-          "to": 31,
+          "from": 20,
+          "to": 23,
           "fps": 3,
           "loop": false
         },
         "dash": {
-          "from": 32,
-          "to": 35,
-          "fps": 12
+          "from": 24,
+          "to": 25,
+          "fps": 10
         },
         "dashEnd": {
-          "from": 36,
-          "to": 38,
-          "fps": 9,
+          "from": 26,
+          "to": 27,
+          "fps": 6,
           "loop": false
         },
         "missile": {
-          "from": 39,
-          "to": 42,
+          "from": 28,
+          "to": 31,
           "fps": 6,
           "loop": false
         },
         "cross": {
-          "from": 43,
-          "to": 46,
+          "from": 32,
+          "to": 35,
           "fps": 8,
           "loop": false
         }
@@ -4438,9 +4438,9 @@
     },
     "enemy_magi_kaiser_phase3": {
       "file": "mku/enemy_magi_kaiser_phase3.png",
-      "frameWidth": 258,
-      "frameHeight": 142,
-      "frames": 51,
+      "frameWidth": 226,
+      "frameHeight": 200,
+      "frames": 40,
       "density": 2,
       "anims": {
         "idle": {
@@ -4450,64 +4450,64 @@
         },
         "move": {
           "from": 4,
-          "to": 9,
-          "fps": 12
+          "to": 7,
+          "fps": 8
         },
         "transition": {
-          "from": 10,
-          "to": 15,
-          "fps": 4.8,
+          "from": 8,
+          "to": 11,
+          "fps": 3.2,
           "loop": false
         },
         "command": {
-          "from": 16,
-          "to": 19,
+          "from": 12,
+          "to": 15,
           "fps": 5
         },
         "punchWindup": {
-          "from": 20,
-          "to": 22,
-          "fps": 2.727272727272727,
+          "from": 16,
+          "to": 17,
+          "fps": 1.82,
           "loop": false
         },
         "punchStrike": {
-          "from": 23,
-          "to": 26,
-          "fps": 13.3,
+          "from": 18,
+          "to": 19,
+          "fps": 6.67,
           "loop": false
         },
         "laser": {
-          "from": 27,
-          "to": 31,
-          "fps": 10,
+          "from": 20,
+          "to": 23,
+          "fps": 8,
           "loop": false
         },
         "dashStart": {
-          "from": 32,
-          "to": 35,
+          "from": 24,
+          "to": 27,
           "fps": 3,
           "loop": false
         },
         "dash": {
-          "from": 36,
-          "to": 39,
-          "fps": 12
+          "from": 28,
+          "to": 29,
+          "fps": 10
         },
         "dashEnd": {
-          "from": 40,
-          "to": 42,
-          "fps": 9,
+          "from": 30,
+          "to": 31,
+          "fps": 6,
           "loop": false
         },
         "missile": {
-          "from": 43,
-          "to": 46,
+          "from": 32,
+          "to": 35,
           "fps": 6,
           "loop": false
         },
         "cross": {
-          "from": 47,
-          "to": 50,
+          "from": 36,
+          "to": 39,
           "fps": 8,
           "loop": false
         }
