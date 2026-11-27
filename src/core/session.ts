@@ -135,6 +135,8 @@ export interface RunSession {
   settlement: Settlement | null;
   /** 지금 싸우는 보스 (보스 체력바, RunScene이 매 프레임 채운다) */
   boss: BossView | null;
+  /** HUD 스테이지 표시를 바꿔 쓴다 (아크로 미모사 전환 연출: 7-50 → 7-∞). null이면 평소대로 */
+  stageLabel: string | null;
 }
 
 /** 보스 체력바 한 줄 */

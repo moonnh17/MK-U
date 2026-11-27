@@ -1,4 +1,5 @@
 {
+  "cinema": { "barPx": 20, "barSec": 0.45, "bigSize": 110, "bigColor": "#ff2a3a", "bigStroke": "#5a0008", "bigStrokePx": 6, "bigGlowPx": 18, "bigFromScale": 2.4 },
   "baseWidth": 480,
   "baseHeight": 270,
   "renderScaleMin": 2,

@@ -7,6 +7,7 @@ import { getContext, type GameContext } from '../core/context';
 import { debugClearRoom, toggleDebugFlag } from '../core/debug';
 import { bus } from '../core/events';
 import { DebugPanel } from '../ui/debugPanel';
+import { CinemaOverlay } from '../ui/cinemaOverlay';
 import { buildDebugTabs } from '../ui/debugSkills';
 import { Hud } from '../ui/hud';
 import { MimosaOverlay } from '../ui/mimosaOverlay';
@@ -20,6 +21,7 @@ export class UIScene extends Phaser.Scene {
   private mimosa!: MimosaOverlay;
   private toastText!: Phaser.GameObjects.Text;
   private bossBar!: BossBar;
+  private cinema!: CinemaOverlay;
   private warp!: Warp;
   private debugPanel!: DebugPanel;
   private touchSkills!: TouchSkills;
@@ -37,6 +39,7 @@ export class UIScene extends Phaser.Scene {
     const H = ui.baseHeight;
     fitBaseCamera(this, W, H, this.ctx.renderScale);
     this.hud = new Hud(this, this.ctx);
+    this.cinema = new CinemaOverlay(this, this.ctx);
     this.bossBar = new BossBar(this, this.ctx);
     this.mimosa = new MimosaOverlay(this, this.ctx, this.hud);
     new CombatBanner(this, this.ctx);

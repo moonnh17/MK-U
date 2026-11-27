@@ -239,7 +239,7 @@ export class Hud {
     const empty = now - s.energyEmptyAt < this.ctx.data.ui.energyEmptyFlashSec * 1000;
     setBar(this.energy, p.energy, p.energyMax, empty ? hexColor(this.ctx.data.ui.hud.bars.hpColor) : this.energy.color);
 
-    this.stageText.setText(this.ctx.t('hud.stage', { chapter: s.stage.chapter, stage: s.stage.stage }));
+    this.stageText.setText(s.stageLabel ?? this.ctx.t('hud.stage', { chapter: s.stage.chapter, stage: s.stage.stage }));
     this.coinText.setText(this.ctx.t('hud.coins', { coins: p.coins }));
 
     const weapons = this.ctx.data.weapons.weapons;

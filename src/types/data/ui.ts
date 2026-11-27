@@ -95,6 +95,8 @@ export interface HudLayoutData {
 }
 
 export interface UiData {
+  /** 시네마틱 덮개: 레터박스 띠 높이·움직이는 시간, 가운데 큰 글자 */
+  cinema: { barPx: number; barSec: number; bigSize: number; bigColor: string; bigStroke: string; bigStrokePx: number; bigGlowPx: number; bigFromScale: number };
   /** 첫 방 조작 안내: 방 가운데 기준 위치, 글자, PC·모바일 문구 키 */
   tutorial: { offsetY: number; fontPx: number; lineGapPx: number; pc: string[]; mobile: string[] };
   baseWidth: number;

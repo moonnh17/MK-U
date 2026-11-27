@@ -239,7 +239,15 @@ export interface AcroData {
     spreadPx: number;
   };
   /** 2→3 전환: 맵 곳곳에서 합을 겨룬다 (점점 빨라지고 카메라가 멀어진다) */
-  clash: { hops: number; startGapSec: number; endGapSec: number; hitstopSec: number; zoomTo: number; flashAlpha: number; holdSec: number; breakSec: number };
+  /**
+   * 2→3 전환 시네마틱: 확대해 보스방에서 introClashes번 → 맵 곳곳에서 hops번(간격 start→end로 줄고, 카메라 introZoom→zoomTo,
+   * 스테이지 표시의 숫자가 labelGrowth^i자리로 늘다 labelDigits자리면 ∞, whiteFrom부터 하얘짐) → 새하얗게 whiteHoldSec → 걷히며 최종전(체력 refillSec에 가득)
+   */
+  clash: {
+    introSec: number; introZoom: number; introClashes: number; introGapSec: number; introGapPx: number; introHitstopSec: number;
+    hops: number; startGapSec: number; endGapSec: number; hopGapPx: number; hitstopSec: number; zoomTo: number; flashAlpha: number; skillEvery: number;
+    labelGrowth: number; labelDigits: number; whiteFrom: number; whiteMax: number; whiteHoldSec: number; revealZoom: number; revealSec: number; refillSec: number;
+  };
   /** 3페이즈 무너진 붉은 공간 */
   redSpace: { floorKey: string; /** 바닥을 어둡게 (위험 표시가 잘 보이게) */ floorTint: string; voidColor: string; edgeColor: string; rubble: number; rubbleColor: string; voidPad: number };
   crossCut: { lines: number; warnSec: number; widthPx: number; damage: number; lengthPx: number };

@@ -51,6 +51,17 @@ export interface AcroHooks {
   redSpace(on: boolean): void;
   /** 설정 '화면 효과 약하게' */
   reduceFx(): boolean;
+  /** 시네마틱 덮개 (레터박스·하얀 막·큰 글자) */
+  cinema(ev: { bars?: boolean; white?: number; ms?: number; big?: string | null }): void;
+  /** HUD 스테이지 표시 바꿔 쓰기 (null이면 평소) */
+  stageLabel(text: string | null): void;
+  /** 지금 스테이지 표시 앞부분 ("7-") */
+  stagePrefix(): string;
+  hitStop(sec: number): void;
+  /** 연출 속 플레이어가 angle 쪽으로 무기를 휘두르거나 쏜다 */
+  playerStrike(angle: number): void;
+  /** 연출 속 플레이어 스킬 모습 (n번째 장착 스킬) */
+  playerSkillFx(n: number): void;
   data: { bosses: BossesData };
 }
 
@@ -95,7 +106,7 @@ class Seq implements Run {
 type Pose = 'idle' | 'vanish' | 'appear' | 'command' | 'slash' | 'clash' | 'rage';
 
 export class AcroController implements BossControl {
-  readonly def: Pick<BossCore, 'id' | 'enrageAt' | 'unlocks'>;
+  def: Pick<BossCore, 'id' | 'enrageAt' | 'unlocks'>;
   private phase = 1;
   private started = false;
   private introLeft = Infinity;
@@ -316,8 +327,8 @@ export class AcroController implements BossControl {
     const host = this.host!;
     this.run?.destroy();
     this.run = null;
-    host.bossPhaseFx(host.t(`boss.unlock.${this.def.id}.${ph - 1}`), this.A.color, this.at());
     if (ph === 2) {
+      host.bossPhaseFx(host.t(`boss.unlock.${this.def.id}.${ph - 1}`), this.A.color, this.at());
       this.transitionLeft = this.A.transitionSec;
       this.enemy.invuln = this.A.transitionSec;
       this.hooks.say(['acro.line.phase2'], 'ominous');
@@ -326,67 +337,149 @@ export class AcroController implements BossControl {
     } else if (ph === 3) this.startClash();
   }
 
-  /** 2→3: 맵 곳곳에서 합을 겨룬다 → 점점 빨라지고 카메라가 멀어진다 → 무너진 붉은 공간 */
+  /**
+   * 2→3 전환 (시네마틱): ① 레터박스가 내려오고 카메라가 둘에게 확 다가가 보스방에서 느리게 합을 겨룬다
+   * ② 맵 곳곳을 넘나들며 합 — 플레이어도 무기를 휘두르거나 쏘고 스킬을 쓴다. 갈수록 빨라지고 카메라가 멀어지며
+   *    왼쪽 스테이지 표시(7-5)의 숫자가 기하급수로 불어나고 화면이 하얘진다 ③ 표시가 ∞가 되고 화면이 새하얗게 →
+   * ④ 하얀 막이 걷히면 무너진 붉은 공간, 미모사 체력이 가득 차며 최종전이 시작된다
+   */
   private startClash(): void {
     const C = this.A.clash;
     const host = this.host!;
     const h = this.hooks;
-    const times = clashTimes(C.hops, C.startGapSec, C.endGapSec);
-    // 화면 효과를 약하게 하면 번쩍임도 약하게
+    const e = this.enemy;
+    const stage = this.stagePrefix();
     const flashK = h.reduceFx() ? 0.3 : 1;
-    const end = times[times.length - 1]! + C.holdSec + C.breakSec;
-    this.enemy.invuln = end + 0.5;
+    const introEnd = C.introSec + C.introClashes * C.introGapSec;
+    const times = clashTimes(C.hops, C.startGapSec, C.endGapSec).map((t) => introEnd + t);
+    const last = times[times.length - 1]!;
+    const whiteAt = last + C.endGapSec;
+    const revealAt = whiteAt + C.whiteHoldSec;
+    const end = revealAt + C.revealSec;
+    e.invuln = end + 0.5;
     h.cinematic(true);
     h.freezeRooms(true);
     h.say(['acro.line.clash'], 'ominous');
     const rooms = h.rooms();
     const flash = this.scene.add.rectangle(0, 0, this.scene.scale.width * 4, this.scene.scale.height * 4, 0xffffff, 0).setScrollFactor(0).setDepth(40).setOrigin(0.5);
-    const s = new Seq(end).onDestroy(() => flash.destroy());
+    const place = (c: Vec2, side: number, gap: number) => {
+      h.movePlayer({ x: c.x - side * gap, y: c.y });
+      (e.sprite.body as Phaser.Physics.Arcade.Body).reset(c.x + side * gap, c.y);
+      e.sprite.setFlipX(side > 0);
+    };
+    /** 한 합: 미모사 합 자세, 플레이어 공격(+스킬), 불꽃, 번쩍임, 멈칫 */
+    const strike = (c: Vec2, side: number, k: number, i: number, skill: boolean, hit: number) => {
+      this.pose('clash');
+      e.sprite.setFlipX(side > 0);
+      h.playerStrike(side > 0 ? 0 : Math.PI);
+      if (skill) h.playerSkillFx(i);
+      this.fx(this.A.art.blink, c.x, c.y, this.A.art.blinkPx * (1 + k)).setBlendMode('ADD');
+      this.fx(this.A.art.slash, c.x, c.y, this.A.art.slashPx * (0.6 + 0.6 * k)).setRotation(host.rng.range(0, Math.PI)).setBlendMode('ADD');
+      flash.setFillStyle(i % 2 ? 0xffffff : this.color, C.flashAlpha * flashK * (0.4 + 0.6 * k));
+      this.scene.tweens.add({ targets: flash, fillAlpha: 0, duration: Math.max(60, (C.startGapSec - (C.startGapSec - C.endGapSec) * k) * 700) });
+      bus.emit('sfx', { id: i % 2 ? 'hitHeavy' : 'swingHeavy' });
+      shake(this.scene, k > 0.6 ? 'medium' : 'light');
+      h.hitStop(hit);
+    };
+    const s = new Seq(end).onDestroy(() => {
+      flash.destroy();
+      h.cinema({ bars: false, white: 0, big: null, ms: 200 });
+    });
+
+    // ① 다가가기: 레터박스, 보스방 가운데에서 마주 서고 확대
+    const c0 = { x: this.arena.x + this.arena.w / 2, y: this.arena.y + this.arena.h * 0.55 };
+    s.at(0, () => {
+      h.cinema({ bars: true, ms: C.introSec * 1000 });
+      place(c0, 1, C.introGapPx * 2);
+      h.focus(c0);
+      h.zoom(C.introZoom, C.introSec * 1000);
+      this.pose('command');
+    });
+    for (let j = 0; j < C.introClashes; j++) {
+      s.at(C.introSec + j * C.introGapSec, () => {
+        const side = j % 2 ? -1 : 1;
+        place(c0, side, C.introGapPx);
+        strike(c0, side, 0.2 + 0.15 * j, j, j === C.introClashes - 1, C.introHitstopSec);
+      });
+    }
+
+    // ② 맵 곳곳에서: 빨라지고, 멀어지고, 숫자가 불어나고, 하얘진다
+    let lastRoom = -1;
     times.forEach((t, i) => {
-      s.at(t - Math.min(0.08, C.endGapSec * 0.5), () => {
-        // 다음 합 자리: 아무 칸이나 (보스방 포함), 둘이 마주 선다
-        const room = host.rng.pick(rooms).id;
+      s.at(t, () => {
+        const pool = rooms.filter((r) => r.id !== lastRoom);
+        const room = host.rng.pick(pool.length > 0 ? pool : rooms).id;
+        lastRoom = room;
         const ar = h.roomArena(room);
         const c = { x: ar.x + ar.w * host.rng.range(0.3, 0.7), y: ar.y + ar.h * host.rng.range(0.35, 0.7) };
         const side = host.rng.chance(0.5) ? 1 : -1;
-        h.movePlayer({ x: c.x - side * 12, y: c.y });
-        (this.enemy.sprite.body as Phaser.Physics.Arcade.Body).reset(c.x + side * 12, c.y);
-        h.focus(c);
-        this.pose('clash');
-        this.enemy.sprite.setFlipX(side > 0);
         const k = (i + 1) / times.length;
-        h.zoom(1 + (C.zoomTo - 1) * k, 80);
-        flash.setFillStyle(i % 2 ? 0xffffff : this.color, C.flashAlpha * flashK * (0.5 + 0.5 * k));
-        this.scene.tweens.add({ targets: flash, fillAlpha: 0, duration: Math.max(60, C.endGapSec * 900) });
-        this.fx(this.A.art.blink, c.x, c.y, this.A.art.blinkPx * (1 + k)).setBlendMode('ADD');
-        bus.emit('sfx', { id: i % 2 ? 'hitHeavy' : 'swingHeavy' });
-        shake(this.scene, k > 0.6 ? 'medium' : 'light');
+        place(c, side, C.hopGapPx);
+        h.focus(c);
+        h.zoom(C.introZoom + (C.zoomTo - C.introZoom) * k, 60);
+        strike(c, side, k, i + C.introClashes, i % C.skillEvery === 0, C.hitstopSec);
+        // 스테이지 표시: 숫자 자리가 기하급수로 늘다가 ∞
+        const len = Math.floor(Math.pow(C.labelGrowth, i + 1));
+        const digits = Array.from({ length: len }, () => String(host.rng.int(0, 9))).join('');
+        h.stageLabel(len >= C.labelDigits ? host.t('boss.stageLabel.infinite').replace('{s}', stage) : `${stage}${host.rng.int(1, 9)}${digits}`);
+        if (k >= C.whiteFrom) h.cinema({ white: ((k - C.whiteFrom) / (1 - C.whiteFrom)) * C.whiteMax, ms: 60 });
       });
     });
-    const last = times[times.length - 1]!;
-    // 마지막 합 → 화면이 붉게 깨지고
-    s.at(last + C.holdSec, () => {
-      flash.setFillStyle(this.color, flashK);
-      this.scene.tweens.add({ targets: flash, fillAlpha: 0, duration: C.breakSec * 1000, ease: 'Sine.easeIn' });
-      shake(this.scene, 'heavy');
+
+    // ③ 새하얗게, ∞ — 그 뒤에서 무대를 바꾼다
+    s.at(whiteAt, () => {
+      h.cinema({ white: 1, ms: 120 });
+      h.cinema({ big: host.t('boss.stageLabel.mark'), ms: 500 });
+      h.stageLabel(host.t('boss.stageLabel.infinite').replace('{s}', stage));
       bus.emit('sfx', { id: 'explosionLarge' });
-      // 무너진 붉은 공간에서 다시 시작
+      shake(this.scene, 'heavy');
+    });
+    s.at(whiteAt + 0.15, () => {
       h.redSpace(true);
       h.movePlayer({ x: this.arena.x + this.arena.w / 2, y: this.arena.y + this.arena.h * 0.78 });
-      (this.enemy.sprite.body as Phaser.Physics.Arcade.Body).reset(this.home.x, this.home.y);
-      this.enemy.sprite.setFlipX(false);
-      h.focus(null);
-      h.zoom(1, C.breakSec * 1000);
+      (e.sprite.body as Phaser.Physics.Arcade.Body).reset(this.home.x, this.home.y);
+      e.sprite.setFlipX(false);
+      h.focus({ x: this.home.x, y: this.home.y + 20 });
+      h.zoom(C.revealZoom, 1);
       this.setIdle();
-      this.fx(this.A.art.implode, this.home.x, this.home.y, this.A.art.burstPx * 1.4).setBlendMode('ADD');
+    });
+
+    // ④ 걷히며 최종전: 체력이 가득 차고, 카메라가 물러나며 레터박스가 걷힌다
+    s.at(revealAt, () => {
+      h.cinema({ white: 0, big: null, ms: C.revealSec * 1000 });
+      this.fx(this.A.art.implode, this.home.x, this.home.y, this.A.art.burstPx * 1.6).setBlendMode('ADD');
+      this.fx(this.A.art.burst, this.home.x, this.home.y + 10, this.A.art.burstPx * 1.8).setBlendMode('ADD');
+      bus.emit('sfx', { id: 'bossPhase' });
+      // 체력 가득 (페이즈 눈금은 이제 없다)
+      this.def = { ...this.def, unlocks: [] };
+      this.scene.tweens.addCounter({
+        from: e.hp,
+        to: e.maxHp,
+        duration: C.refillSec * 1000,
+        ease: 'Cubic.easeOut',
+        onUpdate: (tw) => {
+          if (!e.dead) e.hp = tw.getValue() ?? e.hp;
+        },
+      });
+      host.bossPhaseFx(host.t(`boss.unlock.${this.def.id}.2`), this.A.color, this.at());
+    });
+    s.at(revealAt + C.revealSec * 0.5, () => {
+      h.zoom(1, C.revealSec * 500);
+      h.focus(null);
     });
     s.at(end, () => {
+      h.cinema({ bars: false });
       h.cinematic(false);
       h.freezeRooms(false);
       h.say(['acro.line.phase3'], 'ominous');
       this.idle = this.A.firstDelaySec;
     });
     this.clash = s;
+  }
+
+  /** 스테이지 표시 앞부분 ("7-") */
+  private stagePrefix(): string {
+    return this.hooks.stagePrefix();
   }
 
   // ---------- 패턴 ----------
@@ -629,6 +722,8 @@ export class AcroController implements BossControl {
     this.hooks.freezeRooms(false);
     this.hooks.focus(null);
     this.hooks.zoom(1, 300);
+    this.hooks.stageLabel(null);
+    this.hooks.cinema({ bars: false, white: 0, big: null, ms: 200 });
     if (this.enemy.dead) {
       this.hooks.say(['acro.line.death1', 'acro.line.death2'], 'ominous');
       shake(this.scene, 'heavy');

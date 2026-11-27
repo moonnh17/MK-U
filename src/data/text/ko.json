@@ -1977,5 +1977,7 @@
   "hud.overflow.more": "…외 {n}개",
   "weapon.q.butcher": "도축",
   "weapon.q.butcher.desc": "출혈 10중첩인 적이 가까이 있을 때: 칼을 한 바퀴 돌린 뒤 그런 적들을 하나씩 꿰뚫고 지나가며 베어낸다. 쌓인 출혈만큼 큰 피해를 주고 출혈을 초기화한다 (재사용 {cd}초)",
-  "weapon.q.butcher.none": "출혈 10중첩인 적이 가까이 없다"
+  "weapon.q.butcher.none": "출혈 10중첩인 적이 가까이 없다",
+  "boss.stageLabel.infinite": "{s}∞",
+  "boss.stageLabel.mark": "∞"
 }

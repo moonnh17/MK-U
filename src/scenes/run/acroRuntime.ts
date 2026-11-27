@@ -76,10 +76,46 @@ export class AcroRuntime {
       },
       cinematic: (on) => {
         this.cinematic = on;
+        // 연출이 시작되면 밀린 미니 대사를 비운다 (화면을 가리지 않게)
+        if (on) run.progression.mini.clear();
         if (on) run.player.setVelocity(0, 0);
       },
       redSpace: (on) => (on ? this.buildRed() : this.fadeRed()),
       reduceFx: () => !!run.ctx.save.data.reduceFx,
+      cinema: (ev) => bus.emit('cinema', ev),
+      stageLabel: (text) => {
+        run.session.stageLabel = text;
+      },
+      hitStop: (sec) => run.hitStop.request(sec),
+      stagePrefix: () => run.ctx.t('hud.stage', { chapter: run.session.stage.chapter, stage: '' }),
+      // 연출 속 플레이어 공격: 들고 있는 무기를 실제로 휘두르거나 쏜다 (에너지는 쓰지 않음)
+      playerStrike: (angle) => {
+        const p = run.session.player;
+        const energy = p.energy;
+        run.aimDir = { x: Math.cos(angle), y: Math.sin(angle) };
+        run.combat.fireCooldown = 0;
+        run.combat.attack(angle, 0);
+        p.energy = energy;
+      },
+      // 연출 속 스킬: 장착한 스킬을 차례로 아이콘·이름·고리로 보여 준다 (실제 발동은 하지 않음)
+      playerSkillFx: (n) => {
+        const d = run.ctx.data;
+        const ids = run.session.player.loadout.active.filter((x): x is string => !!x);
+        const id = ids.length > 0 ? ids[n % ids.length]! : null;
+        const def = id ? d.skills.skills.find((s) => s.id === id) : undefined;
+        const color = hexColor(def?.color ?? '#ffffff');
+        const px = run.player.x;
+        const py = run.player.y;
+        const key = id ? artKeys.skillIcon(id) : '';
+        if (key && run.textures.exists(key)) {
+          const img = run.add.image(px, py - 14, key).setDepth(8).setDisplaySize(4, 4);
+          run.tweens.add({ targets: img, displayWidth: 16, displayHeight: 16, y: py - 22, duration: 140, ease: 'Back.easeOut' });
+          run.tweens.add({ targets: img, alpha: 0, delay: 260, duration: 220, onComplete: () => img.destroy() });
+        }
+        const ring = run.add.circle(px, py, 6).setStrokeStyle(2, color, 1).setDepth(7).setBlendMode(Phaser.BlendModes.ADD);
+        run.tweens.add({ targets: ring, scale: 5, alpha: 0, duration: 380, ease: 'Cubic.easeOut', onComplete: () => ring.destroy() });
+        if (def) run.floatLabel({ x: px, y: py - 26 }, run.ctx.t(def.nameKey), def.color);
+      },
       data: run.ctx.data,
     };
   }

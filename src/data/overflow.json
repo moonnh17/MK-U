@@ -118,7 +118,7 @@
     },
     "bossHpBonus": {
       "hectarMimosa": 1.5,
-      "acroMimosa": 1.4
+      "acroMimosa": 0.8
     }
   },
   "portalColor": "#ff4a6a",
@@ -972,14 +972,28 @@
       "spreadPx": 60
     },
     "clash": {
-      "hops": 12,
-      "startGapSec": 0.62,
-      "endGapSec": 0.11,
+      "introSec": 0.6,
+      "introZoom": 1.8,
+      "introClashes": 3,
+      "introGapSec": 0.6,
+      "introGapPx": 12,
+      "introHitstopSec": 0.12,
+      "hops": 16,
+      "startGapSec": 0.42,
+      "endGapSec": 0.045,
+      "hopGapPx": 12,
       "hitstopSec": 0.05,
-      "zoomTo": 0.55,
+      "zoomTo": 0.5,
       "flashAlpha": 0.5,
-      "holdSec": 0.7,
-      "breakSec": 1.1
+      "skillEvery": 2,
+      "labelGrowth": 1.32,
+      "labelDigits": 28,
+      "whiteFrom": 0.45,
+      "whiteMax": 0.85,
+      "whiteHoldSec": 1.2,
+      "revealZoom": 1.4,
+      "revealSec": 1.6,
+      "refillSec": 1.4
     },
     "redSpace": {
       "floorKey": "acro_red_floor",

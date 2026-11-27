@@ -52,6 +52,8 @@ export interface GameEvents {
   bossIntroBand: { name: string; sub: string };
   /** 헥타르 미모사 시스템 변조 표시 (UI) */
   mimosaUi: import('../bosses/mimosa/controller').MimosaUiEvent;
+  /** 시네마틱 덮개: 레터박스(bars), 하얀 막 불투명도(white), 가운데 큰 글자(big, null이면 숨김), 걸리는 시간(ms) */
+  cinema: { bars?: boolean; white?: number; ms?: number; big?: string | null };
   /** 보스 체력바가 보이거나 사라짐 (미니 대사 말풍선 자리) */
   bossBarShown: { shown: boolean };
   /** 컷인 → 설명창 (각성·궁극기 각성·전직) */

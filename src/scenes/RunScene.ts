@@ -222,6 +222,7 @@ export class RunScene extends Phaser.Scene {
       encounters: new Map(),
       settlement: null,
       boss: null,
+      stageLabel: null,
     };
     this.ctx.session = this.session;
     this.rng = Rng.derive(seed, `combat-${stage.chapter}-${stage.stage}`);
