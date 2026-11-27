@@ -150,10 +150,11 @@ export class MarkHazard implements Hazard {
     return this.linger > 0;
   }
 
+  /** 맞았을 때만 디버프 (회피 무적 등으로 막히면 고인 동안 다시 판정) */
   private strike(host: HazardHost): void {
     if (this.hit) return;
+    if (this.damage > 0 && !host.hurtPlayer(this.damage)) return;
     this.hit = true;
-    if (this.damage > 0) host.hurtPlayer(this.damage);
     shake(host.scene, 'light');
     this.onHit();
   }

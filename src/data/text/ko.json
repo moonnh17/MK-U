@@ -1947,5 +1947,6 @@
   "kaiser.learn.shock.line": "근접전만 고집했지? 카이저도 알고 있어.",
   "kaiser.learn.absorb": "학습: 마기 흡수",
   "kaiser.learn.absorb.line": "마기랑 기술… 이번엔 그대로 돌려받을 거야.",
-  "inventory.debuffGot": "디버프: {item} ({desc}) — 인벤토리에서 버릴 수 있습니다"
+  "inventory.debuffGot": "디버프: {item} ({desc}) — 인벤토리에서 버릴 수 있습니다",
+  "gemini.story.linkAcro": "ACRO / OVERRIDE LINK"
 }

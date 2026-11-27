@@ -7,9 +7,9 @@
       "lines": ["gemini.story.firstRun.1", "gemini.story.firstRun.2", "gemini.story.firstRun.3", "gemini.story.firstRun.4", "gemini.story.firstRun.5", "gemini.story.firstRun.6", "gemini.story.firstRun.7", "gemini.story.firstRun.8", "gemini.story.firstRun.9", "gemini.story.firstRun.10", "gemini.story.firstRun.11"] },
     { "id": "ending", "nameKey": "gemini.story.ending.name", "event": "runClear",
       "lines": ["gemini.story.ending.1", "gemini.story.ending.2", "gemini.story.ending.3", "gemini.story.ending.4", "gemini.story.ending.5", "gemini.story.ending.6", "gemini.story.ending.7", "gemini.story.ending.8", "gemini.story.ending.9", "gemini.story.ending.10", "gemini.story.ending.11", "gemini.story.ending.12"] },
-    { "id": "acroMimosaMeet", "nameKey": "gemini.story.acroMimosaMeet.name", "event": "bossMet", "when": "acroMimosa", "figure": "story_acro_full",
+    { "id": "acroMimosaMeet", "nameKey": "gemini.story.acroMimosaMeet.name", "event": "bossMet", "when": "acroMimosa", "figure": "story_acro_full", "link": "gemini.story.linkAcro",
       "lines": ["gemini.story.acroMimosaMeet.1", "gemini.story.acroMimosaMeet.2", "gemini.story.acroMimosaMeet.3", "gemini.story.acroMimosaMeet.4", "gemini.story.acroMimosaMeet.5", "gemini.story.acroMimosaMeet.6"] },
-    { "id": "acroMimosaKill", "nameKey": "gemini.story.acroMimosaKill.name", "event": "bossKill", "when": "acroMimosa", "figure": "story_acro_full",
+    { "id": "acroMimosaKill", "nameKey": "gemini.story.acroMimosaKill.name", "event": "bossKill", "when": "acroMimosa", "figure": "story_acro_full", "link": "gemini.story.linkAcro",
       "lines": ["gemini.story.acroMimosaKill.1", "gemini.story.acroMimosaKill.2", "gemini.story.acroMimosaKill.3", "gemini.story.acroMimosaKill.4", "gemini.story.acroMimosaKill.5"] }
   ],
   "minis": [

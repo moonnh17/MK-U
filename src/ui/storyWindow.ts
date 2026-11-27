@@ -30,6 +30,7 @@ export class StoryWindow {
   private typed = 0;
   private total = 0;
   private timer: number | null = null;
+  private linkText!: Text;
 
   constructor(private readonly ctx: GameContext) {
     const t = ctx.t;
@@ -52,7 +53,8 @@ export class StoryWindow {
     foot.append(el('small', '', t('gemini.story.hint')), btns);
     box.append(tag, this.count, this.text, el('i', 'sw-more'), foot);
     const link = el('div', 'sw-link');
-    link.append(el('i', ''), t('gemini.story.link'));
+    this.linkText = document.createTextNode(t('gemini.story.link'));
+    link.append(el('i', ''), this.linkText);
     this.root.append(link, this.figure, box);
     document.body.appendChild(this.root);
 
@@ -74,10 +76,11 @@ export class StoryWindow {
       if (b === skip) this.close();
       else this.advance();
     });
-    bus.on('storyShow', ({ lines, figure }) => this.show(lines, figure));
+    bus.on('storyShow', ({ lines, figure, link }) => this.show(lines, figure, link));
   }
 
-  private show(lines: StoryLine[], figure?: string): void {
+  private show(lines: StoryLine[], figure?: string, link?: string): void {
+    this.linkText.data = link ?? this.ctx.t('gemini.story.link');
     if (lines.length === 0) {
       bus.emit('storyDone', {});
       return;

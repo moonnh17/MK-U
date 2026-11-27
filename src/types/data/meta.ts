@@ -100,6 +100,8 @@ export interface GeminiStoryDef {
   lines: string[];
   /** 대화창 전신 그림 (art.json 키, 없으면 미모사 제미니 기본 그림) */
   figure?: string;
+  /** 대화창 위 연결 표시 문구 (텍스트 키, 없으면 gemini.story.link) */
+  link?: string;
 }
 
 /**
