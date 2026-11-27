@@ -65,6 +65,13 @@ const FX = {
   fx_awk_ward_burst: { name: 'awk-ward-burst', center: true, play: 'once' },
   fx_awk_cycle_ring: { name: 'awk-cycle-ring', center: true, play: 'once' },
   // 휘강파 각성: 마기 보라 고리·장판(awk-* 팔레트 변형), 기절 별(status/stunned), 좌표 표식(arcane/rune-circle), 마기 폭발(arcane/mana-burst 앞부분)
+  // 오버플로우 4-5 헥타르 미모사: 헥타르 하늘색(#021018 #0a3a5a #1a8ad0 #5ae0ff #fff)으로 칠한 라이브러리 이펙트
+  fx_mim_dome: { name: 'mim-force-field', ground: true, play: 'loop' },
+  fx_mim_emp: { name: 'mim-emp-blast', ground: true, play: 'once', from: 4, to: 34 },
+  fx_mim_warp: { name: 'mim-warp-in', ground: true, play: 'once', from: 3, to: 48 },
+  fx_mim_shot: { name: 'mim-plasma-shot', center: true, play: 'loop' },
+  fx_mim_rune: { name: 'mim-rune-circle', ground: true, play: 'loop' },
+  fx_mim_slam: { name: 'mim-ground-slam', ground: true, play: 'once', to: 22 },
   fx_hwk_ring: { name: 'hwk-ring', center: true, play: 'once' },
   fx_hwk_zone: { name: 'hwk-zone', center: true, play: 'loop' },
   fx_hwk_stun: { name: 'hwk-stun', center: true, play: 'loop' },

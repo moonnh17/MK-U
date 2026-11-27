@@ -3,13 +3,25 @@ import Phaser from 'phaser';
 import { bus } from '../../core/events';
 import { shake } from '../../entities/juice';
 import type { Hazard, HazardHost, Rect } from '../../entities/hazard';
+import { playFx } from '../../skills/skillFx';
+import type { SpriteRef } from '../../types/data';
 import { cellRect, inRect, scanDone, scanHits, scanPos, type Cell, type Grid, type ScanLine } from '../../systems/mimosa';
+
+/** 격자 낙하 그림: 칸 위에서 내려오는 데이터 블록과 떨어질 때의 충격 (그리는 칸은 maxFx개까지) */
+export interface GridArt {
+  cube: SpriteRef;
+  slam: SpriteRef;
+  maxFx: number;
+  cubePx: number;
+  slamPx: number;
+}
 
 /** 격자 칸 낙하: 예고 동안 칸이 차오르고(안전 칸은 마지막에 밝게) 한 번에 떨어진다 */
 export class GridStrike implements Hazard {
   private readonly g: Phaser.GameObjects.Graphics;
   private left: number;
   private flashLeft = 0;
+  private readonly cubes: { sp: Phaser.GameObjects.Sprite; x: number; y: number }[] = [];
 
   constructor(
     scene: Phaser.Scene,
@@ -20,9 +32,22 @@ export class GridStrike implements Hazard {
     private readonly color: number,
     private readonly safe: readonly Cell[] = [],
     private readonly highlightSec = 0,
+    private readonly art?: GridArt,
+    rngPick?: (n: number) => number[],
   ) {
     this.left = warnSec;
     this.g = scene.add.graphics().setDepth(2);
+    if (art) {
+      const idx = rngPick ? rngPick(cells.length).slice(0, art.maxFx) : cells.map((_, i) => i).slice(0, art.maxFx);
+      for (const i of idx) {
+        const r = cellRect(grid, cells[i]!);
+        const x = r.x + r.w / 2;
+        const y = r.y + r.h / 2;
+        const sp = scene.add.sprite(x, y - 40, art.cube.spriteKey).setDepth(5).setAlpha(0).setBlendMode('ADD');
+        sp.setDisplaySize(art.cubePx, (art.cubePx * sp.height) / Math.max(1, sp.width));
+        this.cubes.push({ sp, x, y });
+      }
+    }
   }
 
   update(dt: number, host: HazardHost): boolean {
@@ -34,6 +59,9 @@ export class GridStrike implements Hazard {
     this.left -= dt;
     const k = 1 - Math.max(0, this.left) / this.warnSec;
     this.draw(0.08 + 0.3 * k, this.color);
+    // 데이터 블록: 예고 후반에 칸 위로 내려온다
+    const fall = Math.max(0, Math.min(1, (k - 0.35) / 0.65));
+    for (const c of this.cubes) c.sp.setPosition(c.x, c.y - 40 * (1 - fall * fall)).setAlpha(0.25 + 0.75 * fall);
     if (this.safe.length > 0) {
       // 안전 칸: 늘 보이고, 마지막 highlightSec은 깜빡이며 밝게
       const bright = this.left <= this.highlightSec;
@@ -48,6 +76,9 @@ export class GridStrike implements Hazard {
     if (this.cells.some((c) => inRect(p, cellRect(this.grid, c)))) host.hurtPlayer(this.damage);
     bus.emit('sfx', { id: 'explosionMid' });
     shake(host.scene, this.cells.length > 40 ? 'medium' : 'light');
+    if (this.art) for (const c of this.cubes) playFx(host.scene, this.art.slam, c.x, c.y + 8, { w: this.art.slamPx, depth: 5 }).setOrigin(0.5, 1);
+    for (const c of this.cubes) c.sp.destroy();
+    this.cubes.length = 0;
     this.flashLeft = 0.2;
     return true;
   }
@@ -62,6 +93,7 @@ export class GridStrike implements Hazard {
 
   destroy(): void {
     this.g.destroy();
+    for (const c of this.cubes) c.sp.destroy();
   }
 }
 
@@ -93,6 +125,17 @@ export class ScanSweep implements Hazard {
     this.drawLine(pos, this.line.width, this.color, a);
     if (!warn) this.drawLine(pos + Math.sign(this.line.to - this.line.from) * 14, 4, this.color, 0.25);
     if (warn) return true;
+    // 지나가는 줄에서 튀는 픽셀 불티
+    if (Math.random() < 0.6) {
+      const a = this.arena;
+      const h = this.line.axis === 'h';
+      const along = h ? a.x + Math.random() * a.w : a.y + Math.random() * a.h;
+      if (!this.line.gaps.some(([g0, g1]) => along >= g0 && along <= g1)) {
+        const bit = host.scene.add.rectangle(h ? along : pos, h ? pos : along, 2, 2, 0xffffff).setDepth(5).setBlendMode('ADD');
+        const d = Math.sign(this.line.to - this.line.from) * -8;
+        host.scene.tweens.add({ targets: bit, x: bit.x + (h ? 0 : d), y: bit.y + (h ? d : 0), alpha: 0, duration: 280, onComplete: () => bit.destroy() });
+      }
+    }
     if (!this.hit && scanHits(this.line, m, host.playerPos(), host.playerRadius)) {
       if (host.hurtPlayer(this.damage)) this.hit = true;
     }
@@ -137,10 +180,19 @@ export class CoverLaser implements Hazard {
     private readonly damage: number,
     private readonly color: number,
     private readonly coverColor: number,
+    private readonly art?: { cover: SpriteRef; beam: SpriteRef; beamGap: number },
   ) {
     this.left = chargeSec;
     this.g = scene.add.graphics().setDepth(2.5);
+    if (art) {
+      for (const c of covers) {
+        const sp = scene.add.sprite(c.x + c.w / 2, c.y + c.h, art.cover.spriteKey).setOrigin(0.5, 1).setDepth(3);
+        sp.setDisplaySize(c.w, (c.w * sp.height) / Math.max(1, sp.width));
+        this.coverSprites.push(sp);
+      }
+    }
   }
+  private readonly coverSprites: Phaser.GameObjects.Sprite[] = [];
 
   update(dt: number, host: HazardHost): boolean {
     const a = this.arena;
@@ -159,7 +211,7 @@ export class CoverLaser implements Hazard {
     // 엄폐물(하이라이트)과 그 아래 그림자(안전)
     for (const s of this.shadows) this.g.fillStyle(0xffffff, 0.12 + 0.12 * Math.sin(this.left * 12)).fillRect(s.x, s.y, s.w, s.h);
     for (const c of this.covers) {
-      this.g.fillStyle(this.coverColor, 1).fillRect(c.x, c.y, c.w, c.h);
+      if (this.coverSprites.length === 0) this.g.fillStyle(this.coverColor, 1).fillRect(c.x, c.y, c.w, c.h);
       this.g.lineStyle(2, 0xffffff, 0.5 + 0.5 * Math.sin(this.left * 16)).strokeRect(c.x, c.y, c.w, c.h);
     }
     if (this.left > 0) return true;
@@ -167,6 +219,16 @@ export class CoverLaser implements Hazard {
     if (!this.shadows.some((s) => inRect(p, s, host.playerRadius * 0.5))) host.hurtPlayer(this.damage);
     bus.emit('sfx', { id: 'shotBeamHeavy' });
     shake(host.scene, 'heavy');
+    // 방 전체를 덮는 궤도 광선 기둥 (엄폐물 위 칸은 엄폐물 윗변에서 멈춘다)
+    if (this.art) {
+      for (let x = a.x + this.art.beamGap / 2; x < a.x + a.w; x += this.art.beamGap) {
+        const cov = this.covers.find((c) => x >= c.x && x <= c.x + c.w);
+        const bottom = cov ? cov.y + 4 : a.y + a.h;
+        playFx(host.scene, this.art.beam, x, a.y, { w: this.art.beamGap * 1.4, h: bottom - a.y, depth: 6, fadeSec: 0.45, grow: 1 }).setOrigin(0.5, 0).setBlendMode('ADD');
+      }
+    }
+    for (const sp of this.coverSprites) sp.destroy();
+    this.coverSprites.length = 0;
     // 엄폐물 파괴
     for (const c of this.covers) {
       for (let i = 0; i < 5; i++) {
@@ -180,5 +242,6 @@ export class CoverLaser implements Hazard {
 
   destroy(): void {
     this.g.destroy();
+    for (const sp of this.coverSprites) sp.destroy();
   }
 }

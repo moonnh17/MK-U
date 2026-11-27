@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 864개 · 그림 있음 814개
+전체 876개 · 그림 있음 826개
 
 ## player (9)
 
@@ -72,7 +72,7 @@
 | `weapon_denebola_blade` | 데네볼라의 사복검 | 11×11 | center | #3a7bff | mku/weapon_denebola_blade.png (1프레임) |
 | `weapon_fist` | 주먹 | 6×6 | center | #e8c8a0 | mku/weapon_fist.png (1프레임) |
 
-## projectile (68)
+## projectile (79)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -144,6 +144,17 @@
 | `fx_colony_gaze_hit` | 마기 군락체 (fx) | 28×28 | center | #b05aff | mku/fx_colony_gaze_hit.png (2프레임) |
 | `fx_colony_root_warn` | 마기 군락체 (fx) | 40×40 | center | #b05aff | mku/fx_colony_root_warn.png (2프레임) |
 | `fx_colony_root_hit` | 마기 군락체 (fx) | 40×40 | center | #b05aff | mku/fx_colony_root_hit.png (2프레임) |
+| `fx_mim_drone` | 헥타르 학파 연구원 미모사 (drone) | 16×16 | center | #7ae0ff | mku/fx_mim_drone.png (1프레임) |
+| `fx_mim_shot` | 헥타르 학파 연구원 미모사 (shot) | 16×16 | center | #7ae0ff | mku/fx_mim_shot.png (14프레임) |
+| `fx_mim_cube` | 헥타르 학파 연구원 미모사 (cube) | 16×16 | center | #7ae0ff | mku/fx_mim_cube.png (1프레임) |
+| `fx_mim_slam` | 헥타르 학파 연구원 미모사 (slam) | 16×16 | center | #7ae0ff | mku/fx_mim_slam.png (23프레임) |
+| `fx_mim_beam` | 헥타르 학파 연구원 미모사 (beam) | 16×16 | center | #7ae0ff | mku/fx_mim_beam.png (1프레임) |
+| `fx_mim_reticle` | 헥타르 학파 연구원 미모사 (reticle) | 16×16 | center | #7ae0ff | mku/fx_mim_reticle.png (1프레임) |
+| `fx_mim_cover` | 헥타르 학파 연구원 미모사 (cover) | 16×16 | center | #7ae0ff | mku/fx_mim_cover.png (1프레임) |
+| `fx_mim_dome` | 헥타르 학파 연구원 미모사 (dome) | 16×16 | center | #7ae0ff | mku/fx_mim_dome.png (43프레임) |
+| `fx_mim_emp` | 헥타르 학파 연구원 미모사 (emp) | 16×16 | center | #7ae0ff | mku/fx_mim_emp.png (31프레임) |
+| `fx_mim_warp` | 헥타르 학파 연구원 미모사 (warp) | 16×16 | center | #7ae0ff | mku/fx_mim_warp.png (46프레임) |
+| `fx_mim_rune` | 헥타르 학파 연구원 미모사 (rune) | 16×16 | center | #7ae0ff | mku/fx_mim_rune.png (72프레임) |
 
 ## enemy (19)
 
@@ -153,7 +164,7 @@
 | `enemy_gaedeulgae` | 개들개 | 11×11 | feet | #c9a24a | mku/enemy_gaedeulgae.png (5프레임) |
 | `enemy_akgwi` | 악귀 | 15×15 | feet | #b0383a | mku/enemy_akgwi.png (6프레임) |
 | `enemy_hectar_chief` | 헥타르 수석 연구원 외 1곳 | 36×36 | feet | #3a9aff | mku/enemy_hectar_chief.png (10프레임) |
-| `fx_bit_canister` | 역장 발생기 외 1곳 | 6×6 | feet | #7ae0ff | mku/fx_bit_canister.png (4프레임) |
+| `fx_mim_pylon` | 역장 발생기 | 14×14 | feet | #7ae0ff | mku/fx_mim_pylon.png (1프레임) |
 | `enemy_fusion_akgwi` | 소형 융합악귀 외 1곳 | 39×39 | feet | #c04070 | mku/enemy_fusion_akgwi.png (4프레임) |
 | `enemy_ghost_shooter` | 유령 사수 | 14×14 | feet | #c0303a | mku/enemy_ghost_shooter.png (6프레임) |
 | `enemy_hectar_trooper` | 헥타르 전투원 | 12×12 | feet | #3a7bff | mku/enemy_hectar_trooper.png (6프레임) |
@@ -173,7 +184,7 @@
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
-| `boss_mimosa` | 헥타르 학파 연구원 미모사 | 56×34 | feet | #7ae0ff | mku/boss_mimosa.png (12프레임) |
+| `boss_mimosa` | 헥타르 학파 연구원 미모사 | 30×18 | feet | #7ae0ff | mku/boss_mimosa.png (12프레임) |
 | `enemy_electric_ring` | 전기환띠 | 42×42 | feet | #3a9ad9 | mku/enemy_electric_ring.png (6프레임) |
 | `enemy_training_dummy` | 보스 자리(임시 표적) | 24×24 | feet | #8a5ad9 | mku/enemy_training_dummy.png (1프레임) |
 | `enemy_ancestor_echo` | 선조의 잔상 | 42×42 | feet | #b0583a | mku/enemy_ancestor_echo.png (16프레임) |
@@ -778,7 +789,7 @@
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
-## fx (156)
+## fx (157)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -815,6 +826,7 @@
 | `fx_electric_aura` | 전기환띠 (layer) | 45×45 | center | #3a7aff | mku/fx_electric_aura.png (1프레임) |
 | `fx_chief_muzzle` | 헥타르 수석 연구원 (muzzle) | 20×20 | center | #3a7aff | mku/fx_chief_muzzle.png (4프레임) |
 | `fx_chief_am_burst` | 헥타르 수석 연구원 (antimatter.blastHit) | 30×30 | center | #3a7aff | mku/fx_chief_am_burst.png (4프레임) |
+| `fx_bit_canister` | 헥타르 수석 연구원 (canister) | 6×6 | center | #3a7aff | mku/fx_bit_canister.png (4프레임) |
 | `fx_chief_am_chain` | 헥타르 수석 연구원 (chain) | 70×70 | center | #3a7aff | mku/fx_chief_am_chain.png (4프레임) |
 | `fx_bit_mine` | 헥타르 수석 연구원 (mine) | 7×7 | center | #3a7aff | mku/fx_bit_mine.png (4프레임) |
 | `fx_chief_vector_cage` | 헥타르 수석 연구원 (cage) | 70×70 | center | #3a7aff | mku/fx_chief_vector_cage.png (4프레임) |

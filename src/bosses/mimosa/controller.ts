@@ -33,7 +33,9 @@ import {
 } from '../../systems/mimosa';
 import type { BossCore, MimosaData, MimosaPatternDef } from '../../types/data';
 import type { BossHost } from '../host';
-import { CoverLaser, GridStrike, ScanSweep } from './hazards';
+import { CoverLaser, GridStrike, ScanSweep, type GridArt } from './hazards';
+import { loopArt, playFx } from '../../skills/skillFx';
+import type { SpriteRef } from '../../types/data';
 
 /** 전투 씬의 보스 조종기 공통 모양 (BossController와 미모사) */
 export interface BossControl {
@@ -130,6 +132,8 @@ export class MimosaController implements BossControl {
   private readonly home: { x: number; y: number };
   private readonly floor: Phaser.GameObjects.Graphics;
   private floorT = 0;
+  /** 역장이 있는 동안 미모사를 덮는 돔 */
+  private dome: Phaser.GameObjects.Sprite | null = null;
 
   constructor(
     readonly enemy: Enemy,
@@ -230,6 +234,7 @@ export class MimosaController implements BossControl {
     this.calls = this.calls.filter((c) => !c.dead);
     // 역장·관측 결과: 받는 피해
     e.guardMul = (this.fields.length > 0 ? this.M.field.takenMul : 1) * this.obs.takenMul;
+    this.updateDome();
     if (e.dead) return;
     if (this.introLeft > 0) {
       this.introLeft -= dt;
@@ -305,6 +310,26 @@ export class MimosaController implements BossControl {
 
   private dmg(v: number): number {
     return v * this.damageMul * this.obs.damageMul;
+  }
+
+  private ref(key: string): SpriteRef {
+    return { spriteKey: key, color: this.M.color, size: 8 };
+  }
+
+  /** 이펙트 한 번 (그림 키·화면 폭, 기준점 아래 가운데면 ground) */
+  private fx(key: string, x: number, y: number, w: number, ground = false, depth = 6): Phaser.GameObjects.Sprite {
+    const sp = playFx(this.scene, this.ref(key), x, y, { w, depth });
+    if (ground) sp.setOrigin(0.5, 1);
+    return sp;
+  }
+
+  private gridArt(): GridArt {
+    const A = this.M.art;
+    return { cube: this.ref(A.cube), slam: this.ref(A.slam), maxFx: A.maxGridFx, cubePx: A.cubePx, slamPx: A.slamPx };
+  }
+
+  private pick(n: number): number[] {
+    return this.host!.rng.shuffle(Array.from({ length: n }, (_, i) => i));
   }
 
   // ---------- 페이즈 전환 ----------
@@ -487,9 +512,11 @@ export class MimosaController implements BossControl {
     const host = this.host!;
     const n = D.countByPhase[String(this.phase)] ?? 4;
     const c = this.home;
+    const A = this.M.art;
     const sprites = Array.from({ length: n }, () => {
-      const sp = this.scene.add.sprite(c.x, c.y, D.spriteKey).setDepth(4).setTint(hexColor(this.M.color));
-      sp.setDisplaySize(D.size, D.size);
+      const sp = this.scene.add.sprite(c.x, c.y, A.drone).setDepth(4).setAlpha(0);
+      sp.setDisplaySize(A.dronePx, (A.dronePx * sp.height) / Math.max(1, sp.width));
+      this.scene.tweens.add({ targets: sp, alpha: 1, duration: 300 });
       return sp;
     });
     let ang = 0;
@@ -505,7 +532,9 @@ export class MimosaController implements BossControl {
         bus.emit('sfx', { id: 'shotLaser' });
         sprites.forEach((_sp, i) => {
           const at = pos(i);
-          host.fireEnemyBullet(at, Math.atan2(pl.y - at.y, pl.x - at.x), D.shotSpeed, D.shotRange, this.dmg(D.damage), true);
+          host.fireEnemyBullet(at, Math.atan2(pl.y - at.y, pl.x - at.x), D.shotSpeed, D.shotRange, this.dmg(D.damage), true, this.ref(A.shot));
+          const fl = this.scene.add.circle(at.x, at.y, 3, 0xffffff, 0.9).setDepth(6).setBlendMode('ADD');
+          this.scene.tweens.add({ targets: fl, scale: 2.2, alpha: 0, duration: 140, onComplete: () => fl.destroy() });
         });
       });
     }
@@ -517,7 +546,8 @@ export class MimosaController implements BossControl {
     const G = this.M.grid;
     const host = this.host!;
     this.playPose('command');
-    host.addHazard(new GridStrike(this.scene, this.grid, dropCells(host.rng, this.grid, G.dropRatio), p.warnSec ?? G.dropWarnSec, this.dmg(G.dropDamage), hexColor(G.color)));
+    const cells = dropCells(host.rng, this.grid, G.dropRatio);
+    host.addHazard(new GridStrike(this.scene, this.grid, cells, p.warnSec ?? G.dropWarnSec, this.dmg(G.dropDamage), hexColor(G.color), [], 0, this.gridArt(), (n) => this.pick(n)));
     return new Seq(p.durationSec);
   }
 
@@ -551,6 +581,7 @@ export class MimosaController implements BossControl {
     for (let i = 0; i < 6; i++) this.scene.time.delayedCall(i * 16, () => host.pushPlayer({ x: ((p.x - at.x) / d) * F.pushPx, y: ((p.y - at.y) / d) * F.pushPx }));
     shake(this.scene, 'medium');
     bus.emit('sfx', { id: 'explosionMid' });
+    this.fx(this.M.art.emp, at.x, at.y + 6, this.M.art.empPx, true);
   }
 
   /** 격자 스캔: 1페이즈 느린 한 줄, 2·3페이즈 빠른 가로·세로 교차 */
@@ -574,7 +605,10 @@ export class MimosaController implements BossControl {
     const ids = this.M.call.enemies.slice(0, this.M.call.maxAlive);
     ids.forEach((id, i) => {
       const at = { x: this.arena.x + this.arena.w * ((i + 1) / (ids.length + 1)), y: this.home.y + 70 };
-      this.calls.push(host.spawnMinion(id, at));
+      this.fx(this.M.art.warp, at.x, at.y + 6, this.M.art.warpPx, true);
+      this.scene.time.delayedCall(450, () => {
+        if (!this.enemy.dead) this.calls.push(host.spawnMinion(id, at));
+      });
     });
     bus.emit('sfx', { id: 'warp' });
     return new Seq(p.durationSec);
@@ -589,7 +623,7 @@ export class MimosaController implements BossControl {
     this.playPose('command');
     const s = new Seq(p.durationSec);
     for (let i = 0; i < G.shiftSteps; i++) {
-      s.at(i * (warn + G.shiftGapSec), () => host.addHazard(new GridStrike(this.scene, this.grid, shiftCells(this.grid, start + i, G.shiftBandCols), warn, this.dmg(G.shiftDamage), hexColor(G.color))));
+      s.at(i * (warn + G.shiftGapSec), () => host.addHazard(new GridStrike(this.scene, this.grid, shiftCells(this.grid, start + i, G.shiftBandCols), warn, this.dmg(G.shiftDamage), hexColor(G.color), [], 0, this.gridArt(), (n) => this.pick(n))));
     }
     return s;
   }
@@ -604,6 +638,7 @@ export class MimosaController implements BossControl {
     for (let i = 0; i < P.rings; i++) {
       s.at(i * P.gapSec, () => {
         bus.emit('sfx', { id: 'bossSlam' });
+        this.fx(this.M.art.emp, this.home.x, this.home.y + 16, this.M.art.empPx * 0.8, true);
         host.addHazard(
           new Ring(this.scene, {
             center: { x: this.home.x, y: this.home.y + 10 },
@@ -631,7 +666,21 @@ export class MimosaController implements BossControl {
     const host = this.host!;
     const marks = satelliteMarks(host.rng, this.arena, host.playerPos(), S.count, S.maxCount, S.radius);
     this.playPose('command');
-    marks.forEach((m, i) => host.addHazard(new DelayedBlast(this.scene, m, S.radius, (p.warnSec ?? S.warnSec) + i * S.stepSec, this.dmg(S.damage), hexColor(S.color))));
+    const A = this.M.art;
+    marks.forEach((m, i) => {
+      const delay = (p.warnSec ?? S.warnSec) + i * S.stepSec;
+      host.addHazard(new DelayedBlast(this.scene, m, S.radius, delay, this.dmg(S.damage), hexColor(S.color)));
+      // 조준 표지가 좁혀 들어오고, 떨어지는 순간 궤도 광선
+      const ret = this.scene.add.sprite(m.x, m.y, A.reticle).setDepth(4).setAlpha(0).setBlendMode('ADD');
+      ret.setDisplaySize(A.reticlePx * 1.6, A.reticlePx * 1.6);
+      this.scene.tweens.add({ targets: ret, alpha: 0.9, displayWidth: A.reticlePx, displayHeight: A.reticlePx, angle: 90, duration: delay * 1000, ease: 'Sine.easeIn' });
+      this.scene.time.delayedCall(delay * 1000, () => {
+        ret.destroy();
+        this.fx(A.beam, m.x, m.y + 4, A.beamPx, true).setBlendMode('ADD');
+        this.fx(A.slam, m.x, m.y + 6, A.slamPx * 0.8, true);
+      });
+      this.gfx.push(ret);
+    });
     return new Seq(p.durationSec);
   }
 
@@ -642,7 +691,8 @@ export class MimosaController implements BossControl {
     const covers = coverRects(host.rng, this.arena, L.covers, L.coverW, L.coverH);
     this.playPose('command');
     this.hooks.say(['mimosa.line.laser'], 'ominous');
-    host.addHazard(new CoverLaser(this.scene, this.arena, covers, coverShadows(this.arena, covers), Math.max(L.chargeSec, p.warnSec ?? 0), this.dmg(L.damage), hexColor(L.color), hexColor(L.coverColor)));
+    const A = this.M.art;
+    host.addHazard(new CoverLaser(this.scene, this.arena, covers, coverShadows(this.arena, covers), Math.max(L.chargeSec, p.warnSec ?? 0), this.dmg(L.damage), hexColor(L.color), hexColor(L.coverColor), { cover: this.ref(A.cover), beam: this.ref(A.beam), beamGap: A.beamGap }));
     return new Seq(p.durationSec);
   }
 
@@ -653,11 +703,25 @@ export class MimosaController implements BossControl {
     const { danger, safe } = purgeCells(host.rng, this.grid, G.purgeSafeCells);
     this.playPose('command');
     this.hooks.say(['mimosa.line.purge'], 'ominous');
-    host.addHazard(new GridStrike(this.scene, this.grid, danger, Math.max(G.purgeWarnSec, p.warnSec ?? 0), this.dmg(G.purgeDamage), hexColor(G.color), safe, G.purgeHighlightSec));
+    host.addHazard(new GridStrike(this.scene, this.grid, danger, Math.max(G.purgeWarnSec, p.warnSec ?? 0), this.dmg(G.purgeDamage), hexColor(G.color), safe, G.purgeHighlightSec, this.gridArt(), (n) => this.pick(n)));
     return new Seq(p.durationSec);
   }
 
   // ---------- 그림 ----------
+
+  /** 역장 돔: 발생기가 하나라도 있으면 미모사를 덮는다 */
+  private updateDome(): void {
+    const on = this.fields.length > 0 && !this.enemy.dead;
+    if (on && !this.dome) {
+      const A = this.M.art;
+      this.dome = this.scene.add.sprite(this.home.x, this.home.y + 6, A.dome).setOrigin(0.5, 1).setDepth(4).setAlpha(0.85).setBlendMode('ADD');
+      this.dome.setDisplaySize(A.domePx, (A.domePx * this.dome.height) / Math.max(1, this.dome.width));
+      loopArt(this.dome, this.ref(A.dome));
+    } else if (!on && this.dome) {
+      this.dome.destroy();
+      this.dome = null;
+    }
+  }
 
   private playPose(name: 'idle' | 'swing' | 'command'): void {
     const sp = this.enemy.sprite;
@@ -665,6 +729,7 @@ export class MimosaController implements BossControl {
     if (!sp.scene.anims.exists(key)) return;
     this.enemy.poseHold = name !== 'idle';
     sp.play(key);
+    if (name === 'command') this.fx(this.M.art.rune, this.home.x, this.home.y + 4, this.M.art.runePx, true, 2).setAlpha(0.9);
     this.poseLeft = name === 'idle' ? 0 : 0.9;
   }
 
@@ -706,6 +771,9 @@ export class MimosaController implements BossControl {
     this.calls = [];
     for (const o of this.gfx) o.destroy();
     this.gfx = [];
+    this.dome?.destroy();
+    this.dome = null;
+    if (this.enemy.dead) this.fx(this.M.art.emp, this.enemy.sprite.x, this.enemy.sprite.y + 10, this.M.art.empPx * 1.6, true, 7);
     this.floor.destroy();
   }
 }

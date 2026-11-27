@@ -97,8 +97,8 @@
       "coins": [16, 20],
       "spriteKey": "boss_mimosa",
       "color": "#7ae0ff",
-      "size": 56,
-      "height": 34
+      "size": 30,
+      "height": 18
     },
     {
       "id": "hectarChiefMinion",
@@ -136,10 +136,9 @@
       "contactIntervalSec": 1,
       "energyOrbs": [1, 2],
       "coins": [0, 0],
-      "spriteKey": "fx_bit_canister",
+      "spriteKey": "fx_mim_pylon",
       "color": "#7ae0ff",
-      "size": 6,
-      "artScale": 2.5
+      "size": 14
     },
     {
       "id": "tomakkiGiant",

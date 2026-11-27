@@ -192,6 +192,9 @@ export function collectAssets(d: GameData): AssetRef[] {
     for (let i = 0; i < dr.obstacleKinds; i++) add('prop', { spriteKey: artKeys.obstacle(c, i), color: dr.obstacleBaseColor, size: ts }, 'asset.obstacle', `#${c}장`);
     for (let i = 0; i < dr.decalKinds; i++) add('prop', { spriteKey: artKeys.decal(c, i), color: dr.decalColor, size: ts }, 'asset.decal', `#${c}장`);
   }
+  // 오버플로우 헥타르 미모사 패턴 그림 (overflow.mimosa.art의 그림 키)
+  const ma = d.overflow.mimosa.art;
+  for (const [name, key] of Object.entries(ma)) if (typeof key === 'string') add('projectile', { spriteKey: key, color: d.overflow.mimosa.color, size: 16 }, 'enemy.hectarMimosa', `#${name}`);
   add('prop', d.mapgen.vending, 'asset.vending');
   add('prop', d.mapgen.roomProps.crate, 'asset.crate');
   add('prop', d.mapgen.roomProps.barrel, 'asset.barrel');

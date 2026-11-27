@@ -103,6 +103,11 @@ export interface MimosaData {
   intro: { breakSec: number; portalSec: number; descendSec: number; topOffset: number; bandSec: number; debris: number; color: string; portalKey: string; portalPx: number };
   death: { cracks: number; sec: number; color: string };
   color: string;
+  /** 패턴 그림 (art.json 키)과 화면 크기(px) */
+  art: {
+    drone: string; shot: string; cube: string; slam: string; beam: string; reticle: string; cover: string; dome: string; emp: string; warp: string; rune: string;
+    dronePx: number; cubePx: number; slamPx: number; beamGap: number; beamPx: number; reticlePx: number; maxGridFx: number; domePx: number; empPx: number; warpPx: number; runePx: number;
+  };
 }
 
 /** 진화 효과 수치 (중첩 n마다: 배율 항목은 (1+값)^n, 나머지는 값 × n) */

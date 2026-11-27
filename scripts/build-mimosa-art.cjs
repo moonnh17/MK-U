@@ -10,8 +10,8 @@ const k = require('./pngkit.cjs');
 const REPO = path.resolve(__dirname, '..');
 const SRC = path.join(REPO, 'scripts/art-src/mimosa-hf');
 const DENSITY = 2;
-/** 기계 폭(게임 px) */
-const WIDTH = 104;
+/** 기계 폭(게임 px): 누운 몸이 플레이어 키(약 24px)와 비슷하게 */
+const WIDTH = 52;
 /** 이 알파 아래는 빛 번짐으로 보고 지운다 */
 const GLOW_CUT = 110;
 /** 이름 → [원본, fps, 반복] */
@@ -44,7 +44,27 @@ function baseX(im) {
   return n ? sum / n : im.w / 2;
 }
 
+/** 패턴 그림 (힉스필드 한 장): key: [파일, 화면 폭 px, 알파 기준] */
+const SINGLES = {
+  fx_mim_drone: ['drone', 12, 0.4],
+  fx_mim_pylon: ['pylon', 18, 0.4],
+  fx_mim_cube: ['cube', 22, 0.3],
+  fx_mim_beam: ['beam', 22, 0.3],
+  fx_mim_reticle: ['reticle', 48, 0.35],
+  fx_mim_cover: ['cover', 30, 0.4],
+};
+
 function buildMimosaArt(outDir) {
+  const out = {};
+  for (const [key, [file, w, cut]] of Object.entries(SINGLES)) {
+    const im = k.read(path.join(SRC, `${file}.png`));
+    const b = k.bbox(im, 40);
+    const c = k.crop(im, b.x, b.y, b.w, b.h);
+    const fw = w * DENSITY;
+    const fh = Math.max(1, Math.round((c.h * fw) / c.w));
+    k.write(path.join(outDir, `${key}.png`), k.resize(c, fw, fh, cut));
+    out[key] = { file: `mku/${key}.png`, frameWidth: fw, frameHeight: fh, frames: 1, density: DENSITY };
+  }
   const raw = Object.fromEntries(Object.entries(ANIMS).map(([name, [src]]) => [name, quadrants(k.read(path.join(SRC, `${src}.png`)))]));
   // 배율은 대기 칸 폭(중앙값) 하나로: 팔을 들면 칸이 위로 커진다
   const ws = raw.idle.map((f) => f.w).sort((a, b) => a - b);
@@ -62,7 +82,8 @@ function buildMimosaArt(outDir) {
   const sheet = k.blank(fw * frames.length, fh);
   frames.forEach((f, i) => k.paste(sheet, f, i * fw + Math.round(half - baseX(f)), fh - f.h));
   k.write(path.join(outDir, 'boss_mimosa.png'), sheet);
-  return { boss_mimosa: { file: 'mku/boss_mimosa.png', frameWidth: fw, frameHeight: fh, frames: frames.length, density: DENSITY, anims } };
+  out.boss_mimosa = { file: 'mku/boss_mimosa.png', frameWidth: fw, frameHeight: fh, frames: frames.length, density: DENSITY, anims };
+  return out;
 }
 
 module.exports = { buildMimosaArt };
