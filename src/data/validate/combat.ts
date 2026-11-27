@@ -177,7 +177,8 @@ export function validateWeapons(v: V): void {
       else if (q.kind === 'judgment') {
         checkSprite(errors, `${w}.qSkill.beam`, q.beam);
         checkSprite(errors, `${w}.qSkill.sigil`, q.sigil);
-      } else checkSprite(errors, `${w}.qSkill.shot`, q.shot);
+      } else if (q.kind === 'variableControl') checkSprite(errors, `${w}.qSkill.shot`, q.shot);
+      else if (q.kind === 'butcher' && !(q.minBleed > 0 && q.maxTargets >= 1 && q.dashSec > 0)) errors.push(`${w}.qSkill: 도축 minBleed·maxTargets·dashSec`);
     }
     if (wpn.boomerang) {
       checkSprite(errors, `${w}.boomerang.shot`, wpn.boomerang.shot);

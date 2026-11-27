@@ -25,8 +25,6 @@ export class WeaponCombat {
   /** 유니크 고유 효과: 지금 무기로 한 공격 수 */
   sigItem: WeaponItem | null = null;
   sigCount = 0;
-  /** 도축(네카르의 식칼)을 다시 쓸 수 있는 시각 */
-  butcherAt = 0;
   pendingCrit = false;
   /** 대검 차지 */
   charging = false;
@@ -206,16 +204,6 @@ export class WeaponCombat {
       if (w.iaido) {
         this.run.meleeRt.iaido(w, w.iaido, st, aimAngle, sig, emp);
         return;
-      }
-      // 도축: 출혈이 많이 쌓인 적이 가까이 있으면 이번 공격 대신
-      if (w.butcher && this.run.time.now >= this.butcherAt) {
-        const target = this.run.meleeRt.butcherTarget(w.butcher);
-        if (target) {
-          this.butcherAt = this.run.time.now + w.butcher.cooldownSec * 1000;
-          this.fireCooldown = Math.max(this.fireCooldown, w.butcher.spinSec + w.butcher.dashSec);
-          this.run.meleeRt.butcher(w, w.butcher, st, target, emp);
-          return;
-        }
       }
       if (w.lunge && this.run.meleeRt.lunge(w, w.lunge, aimAngle)) {
         // 돌진이 끝난 자리에서 벤다

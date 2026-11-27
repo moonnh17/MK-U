@@ -5,6 +5,7 @@
  * - 정화의 불길(아비오르의 지팡이): 둘레로 불길을 내뿜으며 조준한 쪽으로 굵은 레이저 연사(나란한 길을 돌아 옆면만 맞닿음).
  * - 판결(칠성신의 법봉): 하늘이 열리며 빛기둥이 내려와 durationSec 동안 그 자리를 태운다.
  * - 변인통제(데네볼라의 사복검, 헥타르만): 적을 묶어 탄막을 퍼붓는다. 보스가 묶인 동안 모든 스킬·조준이 보스로.
+ * - 도축(네카르의 식칼): 출혈이 꽉 찬 적들을 하나씩 꿰뚫어 베어내고 출혈을 터뜨린다.
  */
 import Phaser from 'phaser';
 import type { Vec2 } from '../../core/actions';
@@ -14,6 +15,7 @@ import { shake } from '../../entities/juice';
 import { playFx, tintedFx } from '../../skills/skillFx';
 import { animKey } from '../../systems/art';
 import { lineHits } from '../../systems/targeting';
+import { blinkTarget } from '../../systems/dodge';
 import { inArc, type WeaponStats } from '../../systems/weapons';
 import { signatureFires } from '../../systems/motion';
 import type { TagId, WeaponDef, WeaponQSkill } from '../../types/data';
@@ -25,6 +27,7 @@ type Gemini = Extract<WeaponQSkill, { kind: 'gemini' }>;
 type Flame = Extract<WeaponQSkill, { kind: 'purifyingFlame' }>;
 type Judgment = Extract<WeaponQSkill, { kind: 'judgment' }>;
 type Control = Extract<WeaponQSkill, { kind: 'variableControl' }>;
+type Butcher = Extract<WeaponQSkill, { kind: 'butcher' }>;
 
 export class WeaponSkills {
   /** 무기 id → 남은 재사용 대기(초) */
@@ -82,14 +85,93 @@ export class WeaponSkills {
       this.run.toastThrottled(this.run.ctx.t('weapon.qCooldown', { name: this.run.ctx.t(q.nameKey), s: Math.ceil(left) }));
       return true;
     }
+    // 도축: 출혈이 꽉 찬 적이 없으면 쓰지 않는다 (재사용 대기도 쓰지 않음)
+    const marked = q.kind === 'butcher' ? this.butcherTargets(q) : [];
+    if (q.kind === 'butcher' && marked.length === 0) {
+      this.run.toastThrottled(this.run.ctx.t('weapon.q.butcher.none'));
+      return true;
+    }
     this.cd.set(w.id, q.cooldownSec);
     const st = this.run.weaponStatsOf(this.run.weaponItem());
     this.run.floatLabel({ x: this.run.player.x, y: this.run.player.y }, this.run.ctx.t(q.nameKey), q.color);
     if (q.kind === 'gemini') this.gemini(w, q, st);
     else if (q.kind === 'purifyingFlame') this.purifyingFlame(w, q, st);
     else if (q.kind === 'judgment') this.judgment(w, q, st);
+    else if (q.kind === 'butcher') this.butcher(w, q, st, marked);
     else this.variableControl(w, q, st);
     return true;
+  }
+
+  // ---------- 도축 ----------
+
+  /** range 안에서 출혈이 minBleed중첩 이상인 적들: 플레이어에서 가까운 것부터 이어 가는 차례 (최대 maxTargets) */
+  private butcherTargets(q: Butcher): Enemy[] {
+    const p = this.run.player;
+    const left = this.run.enemies.filter((e) => !e.dead && !e.converted && (e.bleed?.stacks ?? 0) >= q.minBleed && Math.hypot(e.sprite.x - p.x, e.sprite.y - p.y) <= q.range);
+    const out: Enemy[] = [];
+    let at = { x: p.x, y: p.y };
+    while (left.length > 0 && out.length < q.maxTargets) {
+      left.sort((a, b) => Math.hypot(a.sprite.x - at.x, a.sprite.y - at.y) - Math.hypot(b.sprite.x - at.x, b.sprite.y - at.y));
+      const e = left.shift()!;
+      out.push(e);
+      at = { x: e.sprite.x, y: e.sprite.y };
+    }
+    return out;
+  }
+
+  /** 칼을 한 바퀴 → 출혈이 꽉 찬 적들을 하나씩 꿰뚫고 지나가며 베어낸다 (피해는 출혈 중첩에 비례, 출혈 초기화) */
+  private butcher(w: WeaponDef, q: Butcher, st: WeaponStats, targets: Enemy[]): void {
+    const run = this.run;
+    const p = run.player;
+    const color = hexColor(q.color);
+    const fx = run.ctx.data.weapons.meleeFx;
+    const step = q.dashSec + q.gapSec;
+    const total = q.spinSec + targets.length * step;
+    run.combat.startMeleeMotion(w, total, q.color);
+    run.invuln = Math.max(run.invuln, total + 0.15);
+    run.combat.fireCooldown = Math.max(run.combat.fireCooldown, total);
+    // 1) 한 바퀴: 둘레를 네 번 나눠 벤다
+    sfx('swingHeavy');
+    for (let i = 0; i < 4; i++) {
+      run.time.delayedCall((i * q.spinSec * 1000) / 4, () => {
+        const a = (i * Math.PI) / 2;
+        playFx(run, fx.slashBig, p.x + Math.cos(a) * q.spinRadius * 0.4, p.y + Math.sin(a) * q.spinRadius * 0.4, { w: q.spinRadius * 1.6, rotation: a, depth: 7 }).setTint(color);
+      });
+    }
+    for (const e of [...run.enemies]) {
+      if (!e.dead && !e.converted && Math.hypot(e.sprite.x - p.x, e.sprite.y - p.y) <= q.spinRadius + e.radius) run.damage.hit(e, st.damage * q.spinDamageMul, w.tags);
+    }
+    // 2) 하나씩: 꿰뚫는 돌진 → 베어내기
+    targets.forEach((target, i) => {
+      run.time.delayedCall((q.spinSec + i * step) * 1000, () => {
+        if (run.session.outcome || target.dead) return;
+        const from = { x: p.x, y: p.y };
+        const dx = target.sprite.x - from.x;
+        const dy = target.sprite.y - from.y;
+        const dist = Math.hypot(dx, dy) || 1;
+        const dir = { x: dx / dist, y: dy / dist };
+        const stop = blinkTarget(from, dir, dist + q.behindPx, 2, run.condition.blockedAt());
+        const len = Math.hypot(stop.x - from.x, stop.y - from.y);
+        run.dashVel = { x: (dir.x * len) / q.dashSec, y: (dir.y * len) / q.dashSec };
+        run.dashLeft = q.dashSec;
+        sfx('dash');
+        const streak = run.add.graphics().setDepth(7).setBlendMode(Phaser.BlendModes.ADD);
+        streak.lineStyle(4, color, 0.6).lineBetween(from.x, from.y, stop.x, stop.y);
+        streak.lineStyle(1, 0xffffff, 1).lineBetween(from.x, from.y, stop.x, stop.y);
+        run.tweens.add({ targets: streak, alpha: 0, duration: 280, onComplete: () => streak.destroy() });
+        run.time.delayedCall(q.dashSec * 1000, () => {
+          if (target.dead) return;
+          const stacks = target.bleed?.stacks ?? 0;
+          target.bleed = null;
+          run.damage.hit(target, st.damage * (q.damageMul + stacks * q.perStackMul), w.tags);
+          const ang = Math.atan2(dir.y, dir.x);
+          playFx(run, fx.slashBig, target.sprite.x, target.sprite.y, { w: 34, rotation: ang + Math.PI / 2, depth: 7 }).setTint(color);
+          playFx(run, fx.slashBig, target.sprite.x, target.sprite.y, { w: 30, rotation: ang, depth: 7 }).setTint(0xffffff).setBlendMode(Phaser.BlendModes.ADD);
+          run.hitStop.request(run.ctx.data.juice.hitStop.crit);
+          shake(run, i === targets.length - 1 ? 'medium' : 'light');
+        });
+      });
+    });
   }
 
   // ---------- 3식 제미니 ----------

@@ -1949,8 +1949,6 @@
   "kaiser.learn.absorb.line": "마기랑 기술… 이번엔 그대로 돌려받을 거야.",
   "inventory.debuffGot": "디버프: {item} ({desc}) — 인벤토리에서 버릴 수 있습니다",
   "gemini.story.linkAcro": "ACRO / OVERRIDE LINK",
-  "weapon.sig.nekkarCleaver": "도축",
-  "weapon.sigDesc.butcher": "도축: 출혈 {n}중첩 이상인 적이 가까이 있으면 칼을 한 바퀴 돌리고 돌진해 꿰뚫어 베어낸다. 마지막 베기는 피해 ×({dmg} + 출혈 중첩 × {per}), 그 적의 출혈 초기화 (재사용 {cd}초)",
   "item.caesarCrown.buff": "영원한 지배 +{n}%",
   "debug.panelTitle": "디버그 (F1로 닫기)",
   "debug.stage": "스테이지",
@@ -1976,5 +1974,8 @@
   "hud.overflow.evolutions": "적 진화",
   "hud.overflow.rewards": "받은 보상",
   "hud.overflow.none": "없음",
-  "hud.overflow.more": "…외 {n}개"
+  "hud.overflow.more": "…외 {n}개",
+  "weapon.q.butcher": "도축",
+  "weapon.q.butcher.desc": "출혈 10중첩인 적이 가까이 있을 때: 칼을 한 바퀴 돌린 뒤 그런 적들을 하나씩 꿰뚫고 지나가며 베어낸다. 쌓인 출혈만큼 큰 피해를 주고 출혈을 초기화한다 (재사용 {cd}초)",
+  "weapon.q.butcher.none": "출혈 10중첩인 적이 가까이 없다"
 }

@@ -121,12 +121,6 @@ export interface WeaponDef extends SpriteRef {
    */
   iaido?: { maxDistance: number; behindPx: number; sec: number; width: number; cutDelaySec: number; color: string };
   /**
-   * 도축 (네카르의 식칼): 출혈 minBleed중첩 이상인 적이 range 안에 있으면 다음 공격 대신 발동 (재사용 cooldownSec).
-   * 칼을 한 바퀴 돌려 둘레 spinRadius를 베고(spinDamageMul), 그 적에게 돌진해 꿰뚫어 뒤로 behindPx까지 지나가며 베어낸다.
-   * 마지막 베기: 피해 × (damageMul + 출혈 중첩 × perStackMul), 그 적의 출혈은 초기화
-   */
-  butcher?: { nameKey: string; minBleed: number; range: number; cooldownSec: number; spinSec: number; spinRadius: number; spinDamageMul: number; dashSec: number; behindPx: number; damageMul: number; perStackMul: number; color: string };
-  /**
    * 되돌아오는 원반 (궤도절삭륜): 충전이 있을 때 던지고, 관통하며 range까지 날아간 뒤 플레이어를 따라 돌아온다.
    * 가는 길·오는 길 모두 피해, 잡으면 충전 하나가 바로 찬다. maxSec이 지나면 사라지고 충전이 돌아온다
    */
@@ -248,4 +242,9 @@ export type WeaponQSkill =
   | { kind: 'judgment'; nameKey: string; descKey: string; cooldownSec: number; school?: string; range: number; ahead: number; durationSec: number; tickSec: number; radius: number; damageMul: number; color: string; beam: SpriteRef; sigil: SpriteRef }
   /** 변인통제(데네볼라의 사복검, 헥타르만): 가까운 적 targets명(보스 먼저)을 묶고 그동안 묶인 적에게 탄막 난사. 보스가 묶인 동안 모든 스킬·조준이 보스를 노린다 */
   | { kind: 'variableControl'; nameKey: string; descKey: string; cooldownSec: number; school?: string; range: number; targets: number; bindSec: number; bossBindSec: number; barrageEverySec: number; barrageDamageMul: number; barrageSpeed: number; color: string; shot: SpriteRef }
+  /**
+   * 도축(네카르의 식칼): 출혈 minBleed중첩 이상인 적이 range 안에 있을 때만 쓸 수 있다. 칼을 한 바퀴 돌려 둘레를 벤 뒤(spinDamageMul),
+   * 그런 적들을 가까운 차례로 하나씩 꿰뚫어 지나가며 베어낸다: 피해 × (damageMul + 출혈 중첩 × perStackMul), 그 적의 출혈 초기화
+   */
+  | { kind: 'butcher'; nameKey: string; descKey: string; cooldownSec: number; minBleed: number; range: number; maxTargets: number; spinSec: number; spinRadius: number; spinDamageMul: number; dashSec: number; gapSec: number; behindPx: number; damageMul: number; perStackMul: number; color: string }
   | { kind: 'purifyingFlame'; nameKey: string; descKey: string; cooldownSec: number; durationSec: number; volleySec: number; laserEverySec: number; lanes: number; jitterDeg: number; beamLength: number; beamWidth: number; beamDamageMul: number; flameRadius: number; flameDamageMul: number; burnStacks: number; color: string; flame: SpriteRef };
