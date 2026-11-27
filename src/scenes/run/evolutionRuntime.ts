@@ -7,8 +7,8 @@ import { hexColor } from '../../core/scale';
 import { Rng } from '../../core/rng';
 import type { Enemy } from '../../entities/enemy';
 import { DelayedBlast } from '../../entities/hazard';
-import { scaledCount, type Wave } from '../../systems/roomState';
-import { deathBlastKind, evolutionTargetOf, evolvedStats, findReward, pickEvolution, shouldSplit, uniqueSpawns, type EvolutionCard, type EvolvedStats } from '../../systems/evolution';
+import type { Wave } from '../../systems/roomState';
+import { deathBlastKind, evolutionTargetOf, evolvedStats, evolvedWave, findReward, pickEvolution, shouldSplit, uniqueSpawns, type EvolutionCard, type EvolvedStats } from '../../systems/evolution';
 import { rollItem } from '../../systems/items';
 import type { EnemyDef } from '../../types/data';
 import type { RunScene } from '../RunScene';
@@ -50,9 +50,7 @@ export class EvolutionRuntime {
     const st = this.state;
     if (!st) return wave;
     const mul = evolvedStats(st, 'common', this.E).countMul;
-    const n = mul === 1 ? wave.length : scaledCount(rng, wave.length, mul);
-    const out = Array.from({ length: n }, (_, i) => wave[i % wave.length]!);
-    return [...out, ...uniqueSpawns(rng, st, this.E)];
+    return evolvedWave(rng, wave, mul, uniqueSpawns(rng, st, this.E), this.E.caps.maxWave);
   }
 
   update(dt: number): void {

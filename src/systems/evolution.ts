@@ -3,6 +3,7 @@
  * 진화는 스테이지 클리어 때 고르고 다음 스테이지에서 생성되는 적부터 적용한다.
  */
 import type { Rng } from '../core/rng';
+import { scaledCount } from './roomState';
 import type { EnemyRank, EvolutionData, EvolutionDef, EvolutionEffects, EvolutionRewardDef } from '../types/data';
 
 export type EvoGrade = 'common' | 'rare' | 'legendary' | 'unique';
@@ -202,4 +203,14 @@ export function adaptStep(cur: number, stats: EvolvedStats): number {
 export function overloadActive(t: number, o: NonNullable<EvolvedStats['overload']>): boolean {
   const phase = t % o.cycleSec;
   return phase >= o.cycleSec - o.activeSec;
+}
+
+/** 진화가 붙은 웨이브: 군체 증식 배율로 늘리고 유니크 변형을 더하되, 합쳐서 cap을 넘지 않는다 (모바일 부하).
+ * 원래 웨이브 수는 늘 지키고, 유니크는 있으면 하나는 남긴다 */
+export function evolvedWave<T>(rng: Rng, wave: readonly T[], countMul: number, uniques: readonly T[], cap: number): T[] {
+  const n = countMul === 1 ? wave.length : scaledCount(rng, wave.length, countMul);
+  const out = Array.from({ length: n }, (_, i) => wave[i % wave.length]!);
+  const room = Math.max(wave.length, cap);
+  const u = uniques.slice(0, Math.max(Math.min(uniques.length, 1), room - Math.min(out.length, room)));
+  return [...out.slice(0, Math.max(wave.length, room - u.length)), ...u];
 }

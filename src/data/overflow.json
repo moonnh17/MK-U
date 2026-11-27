@@ -118,7 +118,7 @@
     },
     "bossHpBonus": {
       "hectarMimosa": 1.5,
-      "acroMimosa": 1.9
+      "acroMimosa": 1.4
     }
   },
   "portalColor": "#ff4a6a",
@@ -146,7 +146,8 @@
       "splitChance": 0.6,
       "splitAlive": 8,
       "evoBlasts": 6,
-      "evoBullets": 60
+      "evoBullets": 60,
+      "maxWave": 14
     },
     "evolutions": [
       {

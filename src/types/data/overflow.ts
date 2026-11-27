@@ -179,7 +179,8 @@ export interface EvolutionData {
   /** 공용 진화를 받지 않는 적 */
   commonExempt: string[];
   fusionPerStack: number;
-  caps: { defense: number; regenPerSec: number; knockbackRes: number; splitChance: number; splitAlive: number; evoBlasts: number; evoBullets: number };
+  /** maxWave: 군체 증식·유니크를 더한 뒤 한 웨이브 적 수 상한 (모바일 부하) */
+  caps: { defense: number; regenPerSec: number; knockbackRes: number; splitChance: number; splitAlive: number; evoBlasts: number; evoBullets: number; maxWave: number };
   evolutions: EvolutionDef[];
   regenEverySec: number;
   uniques: EvolutionUniqueDef[];
