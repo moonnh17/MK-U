@@ -1,0 +1,77 @@
+{
+  "file": "mku/enemy_magi_kaiser_phase3.png",
+  "frameWidth": 258,
+  "frameHeight": 142,
+  "frames": 50,
+  "density": 2,
+  "anims": {
+    "idle": {
+      "from": 0,
+      "to": 3,
+      "fps": 8
+    },
+    "move": {
+      "from": 4,
+      "to": 9,
+      "fps": 12
+    },
+    "transition": {
+      "from": 10,
+      "to": 15,
+      "fps": 4.8,
+      "loop": false
+    },
+    "command": {
+      "from": 16,
+      "to": 20,
+      "fps": 5
+    },
+    "punchWindup": {
+      "from": 21,
+      "to": 23,
+      "fps": 2.727272727272727,
+      "loop": false
+    },
+    "punchStrike": {
+      "from": 24,
+      "to": 27,
+      "fps": 13.3,
+      "loop": false
+    },
+    "laser": {
+      "from": 28,
+      "to": 32,
+      "fps": 10,
+      "loop": false
+    },
+    "dashStart": {
+      "from": 33,
+      "to": 35,
+      "fps": 3,
+      "loop": false
+    },
+    "dash": {
+      "from": 36,
+      "to": 39,
+      "fps": 12
+    },
+    "dashEnd": {
+      "from": 40,
+      "to": 42,
+      "fps": 9,
+      "loop": false
+    },
+    "missile": {
+      "from": 43,
+      "to": 46,
+      "fps": 6,
+      "loop": false
+    },
+    "cross": {
+      "from": 47,
+      "to": 49,
+      "fps": 8,
+      "loop": false
+    }
+  }
+}

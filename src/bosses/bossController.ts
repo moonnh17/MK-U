@@ -110,6 +110,9 @@ export class BossController {
       setAlpha: (a) => {
         sprite.setAlpha(a);
       },
+      invuln: (sec) => {
+        enemy.invuln = Math.max(enemy.invuln, sec);
+      },
       shape: (sx, sy, lean) => {
         enemy.shape = { sx, sy, lean };
       },
@@ -187,7 +190,8 @@ export class BossController {
     else if (this.restrained) e.sprite.setVelocity(0, 0);
     else this.approach(dist, p);
     this.drawRestraint(host);
-    this.aura?.setPosition(e.sprite.x, e.sprite.y + e.radius * 0.4);
+    // 몸이 사라지면(황제 강림 공중) 기운도 함께
+    this.aura?.setPosition(e.sprite.x, e.sprite.y + e.radius * 0.4).setAlpha(0.75 * e.sprite.alpha);
     this.coreFx?.setPosition(e.sprite.x, e.sprite.y);
     this.buffFx?.setPosition(e.sprite.x, e.sprite.y);
   }

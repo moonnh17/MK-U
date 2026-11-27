@@ -65,6 +65,12 @@ const FX = {
   fx_awk_ward_burst: { name: 'awk-ward-burst', center: true, play: 'once' },
   fx_awk_cycle_ring: { name: 'awk-cycle-ring', center: true, play: 'once' },
   // 휘강파 각성: 마기 보라 고리·장판(awk-* 팔레트 변형), 기절 별(status/stunned), 좌표 표식(arcane/rune-circle), 마기 폭발(arcane/mana-burst 앞부분)
+  // 마기카이저 리메이크: 카이저 진홍(#1a0206 #5a0a14 #c01a2a #ff4a4a #ffe0e0)으로 칠한 라이브러리 이펙트
+  fx_kz_death: { name: 'kz-big-explosion', ground: true, play: 'once', to: 70 },
+  fx_kz_emp: { name: 'kz-emp-blast', ground: true, play: 'once', from: 4, to: 34 },
+  fx_kz_charge: { name: 'kz-spell-charge', center: true, play: 'loop' },
+  fx_kz_implode: { name: 'kz-implosion', center: true, play: 'once', to: 28 },
+  fx_kz_starfall: { name: 'kz-star-fall', ground: true, play: 'once', from: 3, to: 34 },
   // 오버플로우 4-5 헥타르 미모사: 헥타르 하늘색(#021018 #0a3a5a #1a8ad0 #5ae0ff #fff)으로 칠한 라이브러리 이펙트
   fx_mim_dome: { name: 'mim-force-field', ground: true, play: 'loop' },
   fx_mim_emp: { name: 'mim-emp-blast', ground: true, play: 'once', from: 4, to: 34 },

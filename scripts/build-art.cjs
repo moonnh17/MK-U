@@ -1645,6 +1645,14 @@ sprites.icon_ult_divineJudgment = icon('icon_ult_divineJudgment', 'warrior/icon-
 sprites.icon_ult_sweep = icon('icon_ult_sweep', 'warrior-v6/w-slash.png', CARD_ICON, { x: 192 * 2, y: 0, w: 192, h: 192 });
 
 const artPath = path.join(REPO, 'src/data/art.json');
+// 마기카이저 리메이크: 잘리거나 작게 그려진 동작을 힉스필드 프레임으로 바꾸고(build-kaiser-hf), 바꿔서 쓰지 않는 원본 이펙트는 뺀다
+for (const key of ['fx_kaiser_sweep', 'fx_kaiser_sweep_warn', 'fx_kaiser_lock', 'fx_kaiser_death', 'fx_kaiser_unbound', 'fx_kaiser_barrage_net']) delete sprites[key];
+{
+  const hfDir = path.join(__dirname, 'art-src/kaiser-hf/base');
+  // 새로 만든 시트가 보관본이 되도록 지운 뒤 다시 바꾼다
+  if (fs.existsSync(hfDir)) fs.rmSync(hfDir, { recursive: true });
+  Object.assign(sprites, require('./build-kaiser-hf.cjs').buildKaiserHf({ sprites }));
+}
 const json = { basePath: 'assets/', sprites };
 fs.writeFileSync(artPath, JSON.stringify(json, null, 2) + '\n');
 let bytes = 0;

@@ -4,8 +4,10 @@ import type { Vec2 } from '../../core/actions';
 import { playFx } from '../../skills/skillFx';
 import type { SpriteRef } from '../../types/data';
 import type { PatternRun } from '../host';
-import { burst, coil, debris, easeOut, lunge, motes, shockRing } from '../bossFx';
-import { Timed, Channeled, angleTo, Dash, rad, blast, predict, beam, ring, safeBlast, muzzle } from './base';
+import { burst, coil, debris, easeOut, fallSprite, lunge, motes, shockRing } from '../bossFx';
+import { gapBulletAngles } from '../../systems/bossGeometry';
+import type Phaser from 'phaser';
+import { Timed, Channeled, angleTo, Dash, rad, blast, predict, beam, ring, safeBlast, muzzle, clampTo } from './base';
 import type { PatternCtx } from './base';
 import { Heavy } from './magiGolem';
 
@@ -179,6 +181,9 @@ export class DoomCommand extends Timed {
     const a = c.host.arena();
     this.center = { x: a.x + a.w / 2, y: a.y + a.h / 2 };
     const o = () => ({ telegraphSec: c.v('beamTelegraphSec'), liveSec: c.v('beamLiveSec'), width: c.v('beamWidth'), damage: c.v('beamDamage') });
+    // 명령을 내리기 전: 중앙에 기가 빨려 드는 수축 폭발
+    const implode = c.art('implode');
+    if (implode) this.at(c.v('moveSec'), () => playFx(c.host.scene, implode, this.center.x, this.center.y, { w: 120, depth: 6 }));
     this.at(c.v('lineAtSec'), () => beam(c, { ...o(), center: this.center, angle: angleTo(this.center, c.host.playerPos()) }));
     this.at(c.v('lineAtSec') + c.v('beamTelegraphSec'), () => this.flare(1));
     this.at(c.v('crossAtSec'), () => beam(c, { ...o(), center: this.center, count: 4, angle: angleTo(this.center, c.host.playerPos()) + Math.PI / 4 }));
@@ -247,5 +252,123 @@ export class RedEruption extends Timed {
     this.at(c.v('delaySec'), () => {
       if (c.summonId && c.minionCount(c.summonId) < c.v('maxSummon')) c.summon([c.summonId], true);
     });
+  }
+}
+
+/**
+ * 홍옥 유성우(리메이크, 제안): 보스 둘레에서 바깥으로 소용돌이치며 조준 표지가 찍히고 수정 유성이 차례로 떨어진다.
+ * 첫 유성은 플레이어가 갈 자리. 표지마다 예고가 있고 소용돌이 사이는 비어 있다.
+ */
+export class CrimsonRain extends Timed {
+  constructor(c: PatternCtx) {
+    super(c);
+    const p = c.boss.pos();
+    const n = c.v('count');
+    const base = c.host.rng.range(0, Math.PI * 2);
+    const shard = c.art('shard');
+    const hit = c.art('rainHit');
+    const fall = c.v('fallSec');
+    shockRing(c.host.scene, p, c.boss.radius() * 2.2, c.boss.fxColor, 0.35, 3);
+    burst(c.host.scene, c.host.rng, p, c.boss.fxColor, 18, [80, 170], 0.35, { angle: -Math.PI / 2, spread: 1.2 });
+    for (let i = 0; i < n; i++) {
+      const delay = c.v('delaySec') + i * c.v('stepSec');
+      const r = c.boss.radius() + 20 + i * c.v('stepR');
+      const ang = base + i * c.v('turn');
+      const at = i === 0 ? predict(c, delay, 10) : clampTo({ x: p.x + Math.cos(ang) * r, y: p.y + Math.sin(ang) * r * 0.75 }, c, c.v('radius'));
+      blast(c, at, c.v('radius'), delay, c.v('damage'));
+      if (shard) this.at(Math.max(0, delay - fall), () => fallSprite(c.host.scene, shard, at, fall, 24, c.boss.fxColor));
+      if (hit) this.at(delay, () => playFx(c.host.scene, hit, at.x, at.y + 4, { w: c.v('radius') * 3.2, depth: 6 }).setOrigin(0.5, 1));
+    }
+  }
+
+  protected override tick(): void {
+    const c = this.c;
+    c.boss.setVelocity(0, 0);
+    // 하늘을 향해 팔을 든 듯 몸을 편다
+    const k = Math.min(1, this.t / 0.3);
+    c.boss.shape(1 - 0.05 * k, 1 + 0.06 * k, 0);
+  }
+}
+
+/**
+ * 황제 강림(리메이크, 제안): 높이 뛰어올라 사라지고, 그림자가 플레이어를 쫓다가 멈춘 자리에 내려찍는다.
+ * 착지: 큰 폭발(예고 표지) + 틈 있는 충격파 + 틈 있는 사방 탄 + 잔해. 내려앉은 뒤 잠깐 핵 노출.
+ */
+export class EmperorDescent extends Timed {
+  private readonly shadow: Phaser.GameObjects.Ellipse;
+  private spot: Vec2;
+  private readonly from: Vec2;
+  private landed = false;
+
+  constructor(c: PatternCtx) {
+    super(c);
+    const rise = c.v('riseSec');
+    const hunt = c.v('huntSec');
+    const lock = c.v('lockSec');
+    this.from = c.boss.pos();
+    this.spot = { ...this.from };
+    c.boss.invuln?.(rise + hunt + lock);
+    this.shadow = c.host.scene.add.ellipse(this.spot.x, this.spot.y, c.boss.radius() * 2.2, c.boss.radius() * 1.1, 0x000000, 0).setDepth(1.5);
+    // 뛰어오름: 웅크렸다 솟구치며 사라진다
+    this.at(rise * 0.4, () => {
+      shockRing(c.host.scene, this.from, c.boss.radius() * 2, c.boss.fxColor, 0.3, 3);
+      burst(c.host.scene, c.host.rng, this.from, c.boss.fxColor, 16, [90, 180], 0.3, { angle: -Math.PI / 2, spread: 0.8 });
+      debris(c.host.scene, c.host.rng, this.from, [c.art('debris'), c.art('debris2')].filter((x): x is SpriteRef => !!x), 8, [20, 50]);
+      shake(c.host.scene, 'medium');
+    });
+    // 멈춘 자리에 착지 폭발 예고
+    this.at(rise + hunt, () => blast(c, this.spot, c.v('radius'), lock, c.v('damage')));
+    this.at(rise + hunt + lock, () => this.land());
+  }
+
+  private land(): void {
+    const c = this.c;
+    this.landed = true;
+    c.boss.teleport(this.spot.x, this.spot.y);
+    c.boss.setAlpha(1);
+    this.shadow.setVisible(false);
+    shake(c.host.scene, 'heavy');
+    const art = c.art('land');
+    if (art) playFx(c.host.scene, art, this.spot.x, this.spot.y + 8, { w: c.v('radius') * 3.4, depth: 7 }).setOrigin(0.5, 1);
+    shockRing(c.host.scene, this.spot, c.v('radius') * 1.6, c.boss.fxColor, 0.4, 4);
+    debris(c.host.scene, c.host.rng, this.spot, [c.art('debris'), c.art('debris2')].filter((x): x is SpriteRef => !!x), 14, [30, 90]);
+    ring(c, { center: this.spot, fromR: c.boss.radius(), toR: c.v('ringMax'), moveSec: (c.v('ringMax') - c.boss.radius()) / c.v('ringSpeed'), thickness: c.v('thickness'), damage: c.v('damage') * 0.5, gapAngle: angleTo(this.spot, c.host.playerPos()) + Math.PI, gapDeg: c.v('gapDeg'), quake: true });
+    for (const a of gapBulletAngles(c.v('bullets'), c.host.rng.int(0, c.v('bullets') - 1), c.v('bulletGap'))) c.host.fireEnemyBullet(this.spot, a, c.v('bulletSpeed'), c.v('bulletRange'), c.v('bulletDamage'), true, c.art('bullet'));
+    c.expose(c.v('exposeSec'), c.v('exposeMul'));
+  }
+
+  protected override tick(dt: number): void {
+    const c = this.c;
+    c.boss.setVelocity(0, 0);
+    const rise = c.v('riseSec');
+    const hunt = c.v('huntSec');
+    if (this.landed) {
+      const k = Math.min(1, (this.t - rise - hunt - c.v('lockSec')) / 0.25);
+      c.boss.shape(1 + 0.12 * (1 - k), 1 - 0.12 * (1 - k), 0);
+      return;
+    }
+    if (this.t < rise) {
+      // 웅크림 → 솟구침
+      const k = this.t / rise;
+      c.boss.shape(k < 0.4 ? 1 + 0.1 * (k / 0.4) : 0.9, k < 0.4 ? 1 - 0.1 * (k / 0.4) : 1.25, 0);
+      c.boss.setAlpha(k < 0.4 ? 1 : 1 - (k - 0.4) / 0.6);
+      this.shadow.setFillStyle(0x000000, 0.35 * k);
+      return;
+    }
+    c.boss.setAlpha(0);
+    // 그림자가 플레이어를 쫓다가 멈춘다 (멈춘 뒤에는 그 자리 고정)
+    if (this.t < rise + hunt) {
+      const p = c.host.playerPos();
+      const f = Math.min(1, dt * c.v('chaseRate'));
+      this.spot = clampTo({ x: this.spot.x + (p.x - this.spot.x) * f, y: this.spot.y + (p.y - this.spot.y) * f }, c, c.boss.radius());
+    }
+    const pulse = 0.35 + 0.15 * Math.sin(this.t * 14);
+    this.shadow.setPosition(this.spot.x, this.spot.y).setFillStyle(0x000000, pulse).setScale(1 + 0.2 * Math.sin(this.t * 7));
+  }
+
+  override destroy(): void {
+    super.destroy();
+    this.shadow.destroy();
+    this.c.boss.setAlpha(1);
   }
 }

@@ -23,6 +23,8 @@ export interface BossBody {
   setAlpha(a: number): void;
   /** 몸짓: 가로·세로 배율과 기울기(rad, +는 시계 방향). 패턴이 끝나면 컨트롤러가 되돌린다 */
   shape(sx: number, sy: number, lean: number): void;
+  /** sec 동안 피해를 받지 않는다 (공중에 뜬 동안 등) */
+  invuln?(sec: number): void;
   /** 지금 모습 그대로 잔상을 남긴다 (보스 색으로 빛나며 사라짐) */
   ghost(alpha: number, sec: number): void;
   color: number;

@@ -153,8 +153,9 @@ describe('챕터3 보스 (기획서 표)', () => {
     expect(b.enrageAt).toBe(0);
     const at = (u: number) => b.patterns.filter((p) => !p.inherit && (p.unlock ?? 0) === u).map((p) => p.id);
     expect(at(0)).toEqual(['lineLaser', 'groundShock', 'homingMissiles', 'redBarrage', 'geyser']);
-    expect(at(1)).toEqual(['kaiserPunch', 'kaiserDash', 'spinLaser', 'unstableLaser', 'kaiserIntimidate']);
-    expect(at(2)).toEqual(['doomCommand']);
+    // 리메이크(2026-11-27): 2단계 홍옥 유성우, 3단계 황제 강림 추가
+    expect(at(1)).toEqual(['kaiserPunch', 'kaiserDash', 'spinLaser', 'unstableLaser', 'kaiserIntimidate', 'crimsonRain']);
+    expect(at(2)).toEqual(['emperorDescent', 'doomCommand']);
     expect(b.patterns.filter((p) => p.inherit).map((p) => p.id)).toEqual(['redChase', 'redFault', 'redSunspots', 'redEruption']);
     expect(b.inherit).toEqual({ rollSec: 0.75, chance: 0.35, minGapSec: 8 });
   });

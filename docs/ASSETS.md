@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 876개 · 그림 있음 826개
+전체 877개 · 그림 있음 827개
 
 ## player (9)
 
@@ -204,8 +204,8 @@
 | `enemy_eclipse_phase1` | 식광 (1단계) | 42×42 | feet | #c8a8ff | — |
 | `enemy_eclipse_phase2` | 식광 (2단계) | 42×42 | feet | #c8a8ff | mku/enemy_eclipse_phase2.png (24프레임) |
 | `enemy_magi_kaiser_phase1` | 마기카이저 (1단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase1.png (4프레임) |
-| `enemy_magi_kaiser_phase2` | 마기카이저 (2단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase2.png (45프레임) |
-| `enemy_magi_kaiser_phase3` | 마기카이저 (3단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase3.png (50프레임) |
+| `enemy_magi_kaiser_phase2` | 마기카이저 (2단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase2.png (47프레임) |
+| `enemy_magi_kaiser_phase3` | 마기카이저 (3단계) | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser_phase3.png (51프레임) |
 | `enemy_ancestor_echo_phase1` | 선조의 잔상 (1단계) | 42×42 | feet | #b0583a | — |
 | `enemy_ancestor_echo_phase2` | 선조의 잔상 (2단계) | 42×42 | feet | #b0583a | — |
 | `enemy_royal_mage_phase1` | 왕속특무 마기법사 (1단계) | 33×33 | feet | #6a4ad9 | — |
@@ -789,7 +789,7 @@
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
-## fx (157)
+## fx (158)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -878,20 +878,21 @@
 | `fx_bit_rail_slug` | 마기카이저 (redSunspots.shell) | 6×6 | center | #ff2a2a | mku/fx_bit_rail_slug.png (4프레임) |
 | `fx_kaiser_cluster` | 마기카이저 (redSunspots.blastHit) 외 1곳 | 35×35 | center | #ff2a2a | mku/fx_kaiser_cluster.png (4프레임) |
 | `fx_kaiser_cross_burst` | 마기카이저 (doomCommand.cross) | 45×45 | center | #ff2a2a | mku/fx_kaiser_cross_burst.png (4프레임) |
-| `fx_kaiser_barrage_net` | 마기카이저 (doomCommand.net) | 70×70 | center | #ff2a2a | mku/fx_kaiser_barrage_net.png (4프레임) |
-| `fx_kaiser_unbound` | 마기카이저 (unlock) | 70×70 | center | #ff2a2a | mku/fx_kaiser_unbound.png (4프레임) |
-| `fx_kaiser_sweep_warn` | 마기카이저 (spinLaser.cast) | 60×60 | center | #ff2a2a | mku/fx_kaiser_sweep_warn.png (5프레임) |
-| `fx_kaiser_sweep` | 마기카이저 (unstableLaser.cast) | 45×45 | center | #ff2a2a | mku/fx_kaiser_sweep.png (4프레임) |
+| `fx_kz_starfall` | 마기카이저 (doomCommand.net) 외 1곳 | 70×70 | center | #ff2a2a | mku/fx_kz_starfall.png (32프레임) |
+| `fx_kz_emp` | 마기카이저 (unlock) 외 1곳 | 70×70 | center | #ff2a2a | mku/fx_kz_emp.png (31프레임) |
+| `fx_kz_charge` | 마기카이저 (spinLaser.cast) 외 1곳 | 60×60 | center | #ff2a2a | mku/fx_kz_charge.png (29프레임) |
 | `fx_kaiser_punch` | 마기카이저 (sectorHit) | 50×50 | center | #ff2a2a | mku/fx_kaiser_punch.png (4프레임) |
 | `fx_kaiser_impact` | 마기카이저 (blastHit) | 35×35 | center | #ff2a2a | mku/fx_kaiser_impact.png (4프레임) |
-| `fx_kaiser_lock` | 마기카이저 (blastWarn) | 20×20 | center | #ff2a2a | mku/fx_kaiser_lock.png (4프레임) |
+| `fx_kz_lock` | 마기카이저 (blastWarn) | 20×20 | center | #ff2a2a | mku/fx_kz_lock.png (1프레임) |
 | `fx_kaiser_laser_warn` | 마기카이저 (beamWarn) | 60×60 | center | #ff2a2a | mku/fx_kaiser_laser_warn.png (7프레임) |
 | `fx_kaiser_missile` | 마기카이저 (missile) | 8×8 | center | #ff2a2a | mku/fx_kaiser_missile.png (4프레임) |
 | `fx_kaiser_shock` | 마기카이저 (ringStart) | 45×45 | center | #ff2a2a | mku/fx_kaiser_shock.png (2프레임) |
 | `fx_kaiser_muzzle` | 마기카이저 (lineLaser.cast) | 20×20 | center | #ff2a2a | mku/fx_kaiser_muzzle.png (3프레임) |
 | `fx_kaiser_command` | 마기카이저 (safeHit) | 60×60 | center | #ff2a2a | mku/fx_kaiser_command.png (4프레임) |
 | `fx_kaiser_cross` | 마기카이저 (doomCommand.cast) | 60×60 | center | #ff2a2a | mku/fx_kaiser_cross.png (4프레임) |
-| `fx_kaiser_death` | 마기카이저 (death) | 55×55 | center | #ff2a2a | mku/fx_kaiser_death.png (4프레임) |
+| `fx_kz_shard` | 마기카이저 (crimsonRain.shard) | 12×12 | center | #ff2a2a | mku/fx_kz_shard.png (1프레임) |
+| `fx_kz_implode` | 마기카이저 (doomCommand.implode) | 70×70 | center | #ff2a2a | mku/fx_kz_implode.png (29프레임) |
+| `fx_kz_death` | 마기카이저 (death) | 55×55 | center | #ff2a2a | mku/fx_kz_death.png (71프레임) |
 | `fx_echo_spirits` | 선조의 잔상 (warCry.spirits) | 45×45 | center | #ff7a3a | mku/fx_echo_spirits.png (4프레임) |
 | `fx_echo_cry_burst` | 선조의 잔상 (warCry.burst) | 45×45 | center | #ff7a3a | mku/fx_echo_cry_burst.png (4프레임) |
 | `fx_echo_heart` | 선조의 잔상 (warCry.heart) | 25×25 | center | #ff7a3a | mku/fx_echo_heart.png (4프레임) |

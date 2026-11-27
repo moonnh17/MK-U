@@ -11,7 +11,7 @@ import { LightningChase, ShockRipple, SpinBeam, Prison, LockGrid, ShrinkCurrent,
 import { Repulse, DroneFire, Antimatter, RailCross, MineSiege, GapWave, BoltProof, CallTroopers } from './hectarChief';
 import { EarthCrush, Bombard, RuinBeam, RuinLegion, BreakerDash, CrustCrack, CollapseZone, DoomFault } from './magiGolem';
 import { ShadowChase, AimFan, SafeCircle, GravityCollapse } from './eclipse';
-import { HomingMissiles, LineLaser, GroundShock, Geyser, KaiserDash, UnstableLaser, DoomCommand, RedEruption } from './magiKaiser';
+import { HomingMissiles, LineLaser, GroundShock, Geyser, KaiserDash, UnstableLaser, DoomCommand, RedEruption, CrimsonRain, EmperorDescent } from './magiKaiser';
 import { WarCry, WhirlDash, BleedField, GroundBreak, EarthShatter, EchoSlash, DeadChain, TombBreak, AncestorsReturn, BlinkBarrage, GreatLaser, Clones, MagiStrike, RoyalMark, PiercingLine, SealEdict, FinalDecree, HolySwords, MaceSmash, ShieldThrow, Judgment, FallingStar, BeltSanctuary, HunterOath, StarHunt } from './hidden';
 
 export type { BossBody, PatternCtx } from './base';
@@ -75,6 +75,8 @@ const PATTERNS: Readonly<Record<string, (c: PatternCtx) => PatternRun>> = {
   redFault: (c) => new DoomFault(c),
   redSunspots: (c) => new Bombard(c),
   redEruption: (c) => new RedEruption(c),
+  crimsonRain: (c) => new CrimsonRain(c),
+  emperorDescent: (c) => new EmperorDescent(c),
   // 히든보스
   warCry: (c) => new WarCry(c),
   whirlDash: (c) => new WhirlDash(c),

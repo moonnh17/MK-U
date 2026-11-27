@@ -4368,7 +4368,7 @@
       "file": "mku/enemy_magi_kaiser_phase2.png",
       "frameWidth": 364,
       "frameHeight": 200,
-      "frames": 45,
+      "frames": 47,
       "density": 2,
       "anims": {
         "idle": {
@@ -4407,30 +4407,30 @@
         },
         "dashStart": {
           "from": 28,
-          "to": 30,
+          "to": 31,
           "fps": 3,
           "loop": false
         },
         "dash": {
-          "from": 31,
-          "to": 34,
+          "from": 32,
+          "to": 35,
           "fps": 12
         },
         "dashEnd": {
-          "from": 35,
-          "to": 37,
+          "from": 36,
+          "to": 38,
           "fps": 9,
           "loop": false
         },
         "missile": {
-          "from": 38,
-          "to": 41,
+          "from": 39,
+          "to": 42,
           "fps": 6,
           "loop": false
         },
         "cross": {
-          "from": 42,
-          "to": 44,
+          "from": 43,
+          "to": 46,
           "fps": 8,
           "loop": false
         }
@@ -4440,7 +4440,7 @@
       "file": "mku/enemy_magi_kaiser_phase3.png",
       "frameWidth": 258,
       "frameHeight": 142,
-      "frames": 50,
+      "frames": 51,
       "density": 2,
       "anims": {
         "idle": {
@@ -4461,29 +4461,29 @@
         },
         "command": {
           "from": 16,
-          "to": 20,
+          "to": 19,
           "fps": 5
         },
         "punchWindup": {
-          "from": 21,
-          "to": 23,
+          "from": 20,
+          "to": 22,
           "fps": 2.727272727272727,
           "loop": false
         },
         "punchStrike": {
-          "from": 24,
-          "to": 27,
+          "from": 23,
+          "to": 26,
           "fps": 13.3,
           "loop": false
         },
         "laser": {
-          "from": 28,
-          "to": 32,
+          "from": 27,
+          "to": 31,
           "fps": 10,
           "loop": false
         },
         "dashStart": {
-          "from": 33,
+          "from": 32,
           "to": 35,
           "fps": 3,
           "loop": false
@@ -4507,7 +4507,7 @@
         },
         "cross": {
           "from": 47,
-          "to": 49,
+          "to": 50,
           "fps": 8,
           "loop": false
         }
@@ -4952,36 +4952,6 @@
           "from": 0,
           "to": 3,
           "fps": 14,
-          "loop": false
-        }
-      }
-    },
-    "fx_kaiser_barrage_net": {
-      "file": "mku/fx_kaiser_barrage_net.png",
-      "frameWidth": 280,
-      "frameHeight": 280,
-      "frames": 4,
-      "density": 2,
-      "anims": {
-        "play": {
-          "from": 0,
-          "to": 3,
-          "fps": 14,
-          "loop": false
-        }
-      }
-    },
-    "fx_kaiser_unbound": {
-      "file": "mku/fx_kaiser_unbound.png",
-      "frameWidth": 280,
-      "frameHeight": 280,
-      "frames": 4,
-      "density": 2,
-      "anims": {
-        "play": {
-          "from": 0,
-          "to": 3,
-          "fps": 12,
           "loop": false
         }
       }
@@ -6428,21 +6398,6 @@
         }
       }
     },
-    "fx_kaiser_sweep": {
-      "file": "mku/fx_kaiser_sweep.png",
-      "frameWidth": 240,
-      "frameHeight": 240,
-      "frames": 4,
-      "density": 2,
-      "anims": {
-        "play": {
-          "from": 0,
-          "to": 3,
-          "fps": 12,
-          "loop": true
-        }
-      }
-    },
     "fx_kaiser_laser_warn": {
       "file": "mku/fx_kaiser_laser_warn.png",
       "frameWidth": 240,
@@ -6503,36 +6458,6 @@
         }
       }
     },
-    "fx_kaiser_lock": {
-      "file": "mku/fx_kaiser_lock.png",
-      "frameWidth": 80,
-      "frameHeight": 80,
-      "frames": 4,
-      "density": 2,
-      "anims": {
-        "play": {
-          "from": 0,
-          "to": 3,
-          "fps": 12,
-          "loop": true
-        }
-      }
-    },
-    "fx_kaiser_sweep_warn": {
-      "file": "mku/fx_kaiser_sweep_warn.png",
-      "frameWidth": 240,
-      "frameHeight": 240,
-      "frames": 5,
-      "density": 2,
-      "anims": {
-        "play": {
-          "from": 0,
-          "to": 4,
-          "fps": 12,
-          "loop": true
-        }
-      }
-    },
     "fx_kaiser_cross": {
       "file": "mku/fx_kaiser_cross.png",
       "frameWidth": 240,
@@ -6560,21 +6485,6 @@
           "to": 3,
           "fps": 12,
           "loop": false
-        }
-      }
-    },
-    "fx_kaiser_death": {
-      "file": "mku/fx_kaiser_death.png",
-      "frameWidth": 220,
-      "frameHeight": 154,
-      "frames": 4,
-      "density": 2,
-      "anims": {
-        "play": {
-          "from": 0,
-          "to": 3,
-          "fps": 8,
-          "loop": true
         }
       }
     },
@@ -9543,6 +9453,95 @@
       "file": "mku/fx_mim_cover.png",
       "frameWidth": 60,
       "frameHeight": 48,
+      "frames": 1,
+      "density": 2
+    },
+    "fx_kz_death": {
+      "file": "mku/fx_kz_death.png",
+      "frameWidth": 320,
+      "frameHeight": 240,
+      "frames": 71,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 70,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_kz_emp": {
+      "file": "mku/fx_kz_emp.png",
+      "frameWidth": 152,
+      "frameHeight": 84,
+      "frames": 31,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 30,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_kz_charge": {
+      "file": "mku/fx_kz_charge.png",
+      "frameWidth": 104,
+      "frameHeight": 82,
+      "frames": 29,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 28,
+          "fps": 18,
+          "loop": true
+        }
+      }
+    },
+    "fx_kz_implode": {
+      "file": "mku/fx_kz_implode.png",
+      "frameWidth": 172,
+      "frameHeight": 180,
+      "frames": 29,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 28,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_kz_starfall": {
+      "file": "mku/fx_kz_starfall.png",
+      "frameWidth": 194,
+      "frameHeight": 136,
+      "frames": 32,
+      "density": 2,
+      "anims": {
+        "play": {
+          "from": 0,
+          "to": 31,
+          "fps": 18,
+          "loop": false
+        }
+      }
+    },
+    "fx_kz_lock": {
+      "file": "mku/fx_kz_lock.png",
+      "frameWidth": 80,
+      "frameHeight": 80,
+      "frames": 1,
+      "density": 2
+    },
+    "fx_kz_shard": {
+      "file": "mku/fx_kz_shard.png",
+      "frameWidth": 24,
+      "frameHeight": 98,
       "frames": 1,
       "density": 2
     }

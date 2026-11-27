@@ -1425,6 +1425,27 @@
           "unlock": 1
         },
         {
+          "id": "crimsonRain",
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 7,
+          "durationSec": 3.4,
+          "phase": 1,
+          "values": { "count": 12, "countEnraged": 16, "delaySec": 0.9, "stepSec": 0.12, "stepR": 14, "turn": 0.9, "radius": 22, "damage": 44, "fallSec": 0.35 },
+          "unlock": 1
+        },
+        {
+          "id": "emperorDescent",
+          "moves": true,
+          "reach": "ranged",
+          "weight": 2,
+          "cooldownSec": 10,
+          "durationSec": 4.2,
+          "phase": 1,
+          "values": { "riseSec": 0.55, "huntSec": 1.3, "lockSec": 0.7, "chaseRate": 3.2, "radius": 56, "damage": 90, "ringMax": 300, "ringSpeed": 220, "thickness": 10, "gapDeg": 60, "bullets": 16, "bulletGap": 2, "bulletSpeed": 110, "bulletRange": 360, "bulletDamage": 30, "exposeSec": 1.4, "exposeMul": 1.8 },
+          "unlock": 2
+        },
+        {
           "id": "doomCommand",
           "moves": true,
           "reach": "ranged",
@@ -1553,10 +1574,10 @@
         "redSunspots.shell": { "spriteKey": "fx_bit_rail_slug", "color": "#ff2a2a", "size": 6 },
         "redSunspots.blastHit": { "spriteKey": "fx_kaiser_cluster", "color": "#ff2a2a", "size": 35 },
         "doomCommand.cross": { "spriteKey": "fx_kaiser_cross_burst", "color": "#ff2a2a", "size": 45 },
-        "doomCommand.net": { "spriteKey": "fx_kaiser_barrage_net", "color": "#ff2a2a", "size": 70 },
-        "unlock": { "spriteKey": "fx_kaiser_unbound", "color": "#ff2a2a", "size": 70 },
-        "spinLaser.cast": { "spriteKey": "fx_kaiser_sweep_warn", "color": "#ff2a2a", "size": 60 },
-        "unstableLaser.cast": { "spriteKey": "fx_kaiser_sweep", "color": "#ff2a2a", "size": 45 },
+        "doomCommand.net": { "spriteKey": "fx_kz_starfall", "color": "#ff2a2a", "size": 70 },
+        "unlock": { "spriteKey": "fx_kz_emp", "color": "#ff2a2a", "size": 70 },
+        "spinLaser.cast": { "spriteKey": "fx_kz_charge", "color": "#ff2a2a", "size": 60 },
+        "unstableLaser.cast": { "spriteKey": "fx_kz_charge", "color": "#ff2a2a", "size": 45 },
         "sectorHit": {
           "spriteKey": "fx_kaiser_punch",
           "color": "#ff2a2a",
@@ -1568,7 +1589,7 @@
           "size": 35
         },
         "blastWarn": {
-          "spriteKey": "fx_kaiser_lock",
+          "spriteKey": "fx_kz_lock",
           "color": "#ff2a2a",
           "size": 20
         },
@@ -1612,18 +1633,31 @@
           "color": "#ff2a2a",
           "size": 60
         },
+        "crimsonRain.shard": {
+          "spriteKey": "fx_kz_shard",
+          "color": "#ff2a2a",
+          "size": 12
+        },
+        "crimsonRain.rainHit": {
+          "spriteKey": "fx_kz_starfall",
+          "color": "#ff2a2a",
+          "size": 60
+        },
+        "emperorDescent.land": {
+          "spriteKey": "fx_kz_emp",
+          "color": "#ff2a2a",
+          "size": 90
+        },
+        "doomCommand.implode": {
+          "spriteKey": "fx_kz_implode",
+          "color": "#ff2a2a",
+          "size": 70
+        },
         "death": {
-          "spriteKey": "fx_kaiser_death",
+          "spriteKey": "fx_kz_death",
           "color": "#ff2a2a",
           "size": 55
         }
-      },
-      "poseScale": {
-        "enemy_magi_kaiser_phase2.missile": 1.9,
-        "enemy_magi_kaiser_phase2.cross": 1.3,
-        "enemy_magi_kaiser_phase3.missile": 1.8,
-        "enemy_magi_kaiser_phase3.command": 1.9,
-        "enemy_magi_kaiser_phase3.cross": 1.35
       },
       "poses": {
         "transition": "transition",
