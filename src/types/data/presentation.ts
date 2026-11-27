@@ -203,6 +203,8 @@ export interface MusicData {
   runTrack: string;
   /** 챕터 → 보스 곡 id */
   bossTracks: Record<string, string>;
+  /** 보스 id → 그 보스만의 곡 id (챕터 보스 곡보다 먼저) */
+  bossTrackById?: Record<string, string>;
   /** 챕터 → 일반 전투 칸에서 싸우는 동안의 곡 id (없는 챕터는 런 곡) */
   combatTracks: Record<string, string>;
   /** 히든보스와 마주한 동안의 곡 id */

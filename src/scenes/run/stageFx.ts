@@ -290,11 +290,12 @@ export class StageFx {
     const live = this.run.enemies.filter((e) => !e.dead);
     const facingBoss = live.some((e) => e.rank === 'boss' || e.rank === 'hiddenBoss');
     const hiddenBoss = live.some((e) => e.rank === 'hiddenBoss');
+    const bossId = live.find((e) => e.rank === 'boss')?.def.id;
     const rid = this.run.session.currentRoomId;
     const room = rid === null ? undefined : this.run.rooms.get(rid);
     const inCombat = room?.kind === 'combatRoom' && room.phase === 'locked';
     const inEncounter = room?.kind === 'encounterRoom' && live.some((e) => this.run.enemyRoom.get(e) === rid);
-    bus.emit('music', { track: pickTrack(this.run.ctx.data.sounds.music, { place: 'run', chapter: contentChapter(this.run.session.stage), facingBoss, hiddenBoss, inCombat, inEncounter }) });
+    bus.emit('music', { track: pickTrack(this.run.ctx.data.sounds.music, { place: 'run', chapter: contentChapter(this.run.session.stage), facingBoss, hiddenBoss, bossId, inCombat, inEncounter }) });
   }
 
   /** 첫 런 시작 방: 조작 안내. 다른 방으로 가면 사라지고 다시 나오지 않는다 */

@@ -25,6 +25,11 @@ describe('배경 음악', () => {
     expect(pickTrack(M, { place: 'run', chapter: 3, facingBoss: false, inEncounter: true, inCombat: true })).toBe(M.combatTracks['1']);
     expect(pickTrack(M, { place: 'run', chapter: 1, facingBoss: true, hiddenBoss: true, inEncounter: true })).toBe(M.hiddenBossTrack);
   });
+  it('보스 고유 곡이 있으면 챕터 보스 곡보다 먼저 (헥타르 미모사)', () => {
+    expect(M.tracks[pickTrack(M, { place: 'run', chapter: 4, facingBoss: true, bossId: 'hectarMimosa' })]!.file).toBe('mimosa-observation.ogg');
+    expect(pickTrack(M, { place: 'run', chapter: 1, facingBoss: true, bossId: 'nobody' })).toBe(M.bossTracks['1']);
+    expect(pickTrack(M, { place: 'run', chapter: 1, facingBoss: false, bossId: 'hectarMimosa' })).toBe(M.runTrack);
+  });
   it('보스 곡이 없는 챕터면 런 곡', () => {
     expect(pickTrack(M, { place: 'run', chapter: 9, facingBoss: true })).toBe(M.runTrack);
   });

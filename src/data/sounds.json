@@ -17,7 +17,14 @@
       "2": "boss2",
       "3": "boss3"
     },
+    "bossTrackById": {
+      "hectarMimosa": "mimosa"
+    },
     "tracks": {
+      "mimosa": {
+        "file": "mimosa-observation.ogg",
+        "volume": 0.5
+      },
       "combat": {
         "file": "anc-ruins-pulse.mp3",
         "volume": 0.5
