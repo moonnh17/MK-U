@@ -8,7 +8,7 @@
 - 애니메이션(플레이어·적): `"anims": { "idle": { "from", "to", "fps" }, "move": { ... } }`(프레임 번호 0부터). 그림은 오른쪽을 보게 그리고(왼쪽이면 `"facing": "left"`), 움직이는 방향에 따라 좌우로 뒤집는다.
 - item·icon은 게임 화면이 아니라 카드·인벤토리·HUD 아이콘이다. tile은 한 장을 반복해서 깐다(문은 잠겼을 때만 보인다).
 
-전체 863개 · 그림 있음 813개
+전체 864개 · 그림 있음 814개
 
 ## player (9)
 
@@ -145,13 +145,15 @@
 | `fx_colony_root_warn` | 마기 군락체 (fx) | 40×40 | center | #b05aff | mku/fx_colony_root_warn.png (2프레임) |
 | `fx_colony_root_hit` | 마기 군락체 (fx) | 40×40 | center | #b05aff | mku/fx_colony_root_hit.png (2프레임) |
 
-## enemy (17)
+## enemy (19)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
 | `enemy_tomakki` | 토마끼 외 1곳 | 8×8 | feet | #8fd16a | mku/enemy_tomakki.png (4프레임) |
 | `enemy_gaedeulgae` | 개들개 | 11×11 | feet | #c9a24a | mku/enemy_gaedeulgae.png (5프레임) |
 | `enemy_akgwi` | 악귀 | 15×15 | feet | #b0383a | mku/enemy_akgwi.png (6프레임) |
+| `enemy_hectar_chief` | 헥타르 수석 연구원 외 1곳 | 36×36 | feet | #3a9aff | mku/enemy_hectar_chief.png (10프레임) |
+| `fx_bit_canister` | 역장 발생기 외 1곳 | 6×6 | feet | #7ae0ff | mku/fx_bit_canister.png (4프레임) |
 | `enemy_fusion_akgwi` | 소형 융합악귀 외 1곳 | 39×39 | feet | #c04070 | mku/enemy_fusion_akgwi.png (4프레임) |
 | `enemy_ghost_shooter` | 유령 사수 | 14×14 | feet | #c0303a | mku/enemy_ghost_shooter.png (6프레임) |
 | `enemy_hectar_trooper` | 헥타르 전투원 | 12×12 | feet | #3a7bff | mku/enemy_hectar_trooper.png (6프레임) |
@@ -171,12 +173,12 @@
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
+| `boss_mimosa` | 헥타르 학파 연구원 미모사 | 56×34 | feet | #7ae0ff | mku/boss_mimosa.png (12프레임) |
 | `enemy_electric_ring` | 전기환띠 | 42×42 | feet | #3a9ad9 | mku/enemy_electric_ring.png (6프레임) |
 | `enemy_training_dummy` | 보스 자리(임시 표적) | 24×24 | feet | #8a5ad9 | mku/enemy_training_dummy.png (1프레임) |
 | `enemy_ancestor_echo` | 선조의 잔상 | 42×42 | feet | #b0583a | mku/enemy_ancestor_echo.png (16프레임) |
 | `enemy_royal_mage` | 왕속특무 마기법사 외 1곳 | 33×33 | feet | #6a4ad9 | mku/enemy_royal_mage.png (8프레임) |
 | `enemy_orion_crusader` | 오리온의 성전사 | 42×42 | feet | #d9c25a | mku/enemy_orion_crusader.png (16프레임) |
-| `enemy_hectar_chief` | 헥타르 수석 연구원 | 36×36 | feet | #3a9aff | mku/enemy_hectar_chief.png (10프레임) |
 | `enemy_magi_golem` | 마기골렘 | 48×48 | feet | #8a6a4a | mku/enemy_magi_golem.png (10프레임) |
 | `enemy_eclipse` | 식광 | 42×42 | feet | #c8a8ff | mku/enemy_eclipse.png (16프레임) |
 | `enemy_magi_kaiser` | 마기카이저 | 51×51 | feet | #d02828 | mku/enemy_magi_kaiser.png (10프레임) |
@@ -776,7 +778,7 @@
 | `tile_floor_c3_v1` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v1.png (1프레임) |
 | `tile_floor_c3_v2` | 방 바닥 (3장 변형) | 16×16 | center | #1a0c0e | mku/tile_floor_c3_v2.png (1프레임) |
 
-## fx (157)
+## fx (156)
 
 | 키 | 이름 | 권장 크기 | 기준점 | 지금 색 | 그림 |
 | --- | --- | --- | --- | --- | --- |
@@ -813,7 +815,6 @@
 | `fx_electric_aura` | 전기환띠 (layer) | 45×45 | center | #3a7aff | mku/fx_electric_aura.png (1프레임) |
 | `fx_chief_muzzle` | 헥타르 수석 연구원 (muzzle) | 20×20 | center | #3a7aff | mku/fx_chief_muzzle.png (4프레임) |
 | `fx_chief_am_burst` | 헥타르 수석 연구원 (antimatter.blastHit) | 30×30 | center | #3a7aff | mku/fx_chief_am_burst.png (4프레임) |
-| `fx_bit_canister` | 헥타르 수석 연구원 (canister) | 6×6 | center | #3a7aff | mku/fx_bit_canister.png (4프레임) |
 | `fx_chief_am_chain` | 헥타르 수석 연구원 (chain) | 70×70 | center | #3a7aff | mku/fx_chief_am_chain.png (4프레임) |
 | `fx_bit_mine` | 헥타르 수석 연구원 (mine) | 7×7 | center | #3a7aff | mku/fx_bit_mine.png (4프레임) |
 | `fx_chief_vector_cage` | 헥타르 수석 연구원 (cage) | 70×70 | center | #3a7aff | mku/fx_chief_vector_cage.png (4프레임) |

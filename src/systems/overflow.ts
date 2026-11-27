@@ -130,7 +130,7 @@ export function overflowBossScale(chapter: number, bossId: string, stage: number
   const tier = O.scale.bossDamageTier;
   const g = growth(chapter, O);
   return {
-    hp: (own > 0 && ref ? hp(ref) / own : 1) * g.hp,
+    hp: (own > 0 && ref ? hp(ref) / own : 1) * g.hp * (O.scale.bossHpBonus?.[bossId] ?? 1),
     damage: (ref && tier[ref] && tier[bossId] ? tier[ref] / tier[bossId] : 1) * g.damage,
   };
 }

@@ -7,6 +7,7 @@ import { bus } from '../core/events';
 export class PauseWindow {
   private readonly root: HTMLDivElement;
   private readonly sound: HTMLButtonElement;
+  private fx!: HTMLButtonElement;
   private readonly hint: HTMLElement;
   private readonly sliders: (() => void)[] = [];
 
@@ -58,10 +59,18 @@ export class PauseWindow {
     const sfx = slider('pause.sfx', () => ctx.save.data.sfxVolume, (v) => {
       ctx.save.data.sfxVolume = v;
     });
+    // 화면 효과 약하게 (헥타르 미모사 연산 오류 등 점멸·글리치)
+    this.fx = document.createElement('button');
+    this.fx.addEventListener('click', () => {
+      ctx.save.data.reduceFx = !ctx.save.data.reduceFx;
+      ctx.save.write();
+      bus.emit('sfx', { id: 'uiClick' });
+      this.refresh();
+    });
     const hint = document.createElement('small');
     hint.textContent = t('pause.hint');
     this.hint = hint;
-    box.append(title, resume, this.sound, music, sfx, hint);
+    box.append(title, resume, this.sound, music, sfx, this.fx, hint);
     this.root.appendChild(box);
     document.body.appendChild(this.root);
     bus.on('modal', ({ kind }) => {
@@ -73,6 +82,7 @@ export class PauseWindow {
 
   private refresh(): void {
     this.sound.textContent = this.ctx.t(this.ctx.save.data.muted ? 'pause.soundOff' : 'pause.soundOn');
+    this.fx.textContent = this.ctx.t(this.ctx.save.data.reduceFx ? 'pause.fxReduced' : 'pause.fxNormal');
     for (const s of this.sliders) s();
     // 키보드 안내는 PC에서만
     this.hint.style.display = this.ctx.uiMode === 'mobile' ? 'none' : '';

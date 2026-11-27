@@ -98,7 +98,8 @@ export function validateOverflow(v: V): void {
     if (t.tint !== undefined && !HEX_COLOR.test(t.tint)) errors.push(`overflow.themes.${t.id}.tint: #RRGGBB`);
   }
   const bossIds = new Set(d.bosses.bosses.map((b) => b.id));
-  const known = (id: string) => bossIds.has(id) || O.placeholderBosses[id] !== undefined;
+  // 헥타르 미모사는 bosses.json 대신 overflow.mimosa로 싸운다
+  const known = (id: string) => bossIds.has(id) || O.placeholderBosses[id] !== undefined || id === O.mimosa.enemyId;
   for (const [stage, pool] of Object.entries(O.bossPools)) {
     if (!d.mapgen.bossStages.includes(Number(stage))) errors.push(`overflow.bossPools.${stage}: 보스 스테이지가 아님`);
     if (pool.length === 0) errors.push(`overflow.bossPools.${stage}: 비어 있음`);

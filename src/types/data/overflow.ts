@@ -34,6 +34,8 @@ export interface OverflowScaleDef {
   growthPerChapter: { hp: number; damage: number };
   /** 보스 피해 단계 (본편 스테이지 배율, DECISIONS 2026-11-06) */
   bossDamageTier: Record<string, number>;
+  /** 같은 칸 3장 보스에 맞춘 뒤 더 곱하는 체력 (헥타르 미모사: 매우 강하게) */
+  bossHpBonus?: Record<string, number>;
 }
 
 export interface OverflowData {
@@ -55,6 +57,52 @@ export interface OverflowData {
   /** 디버그 스테이지 이동 목록에 더 보일 장 수 */
   debugExtraChapters: number;
   evolution: EvolutionData;
+  mimosa: MimosaData;
+}
+
+export interface MimosaPatternDef {
+  id: 'drones' | 'gridDrop' | 'field' | 'scan' | 'call' | 'gridShift' | 'pulse' | 'satellite' | 'laser' | 'purge';
+  phases: number[];
+  weight: number;
+  cooldownSec: number;
+  durationSec: number;
+  /** 방 전체를 노리는 광범위 공격 (예고 warnSec 1초 이상, 안전 구역 보장) */
+  wide?: boolean;
+  warnSec?: number;
+}
+
+export interface MimosaTamperTiming {
+  quietSec: number;
+  telegraphSec: number;
+  activeSec: number;
+  rollbackSec: number;
+}
+
+/** 4-5 헥타르 학파 연구원 미모사 (제안, 수치 임시) */
+export interface MimosaData {
+  enemyId: string;
+  /** 체력 비율 문턱 (2페이즈·3페이즈) */
+  phases: number[];
+  firstDelaySec: number;
+  gapSec: Record<string, number>;
+  transitionSec: number;
+  grid: { cellPx: number; dropRatio: number; dropWarnSec: number; dropDamage: number; shiftBandCols: number; shiftSteps: number; shiftWarnSec: number; shiftGapSec: number; shiftDamage: number; purgeSafeCells: number; purgeWarnSec: number; purgeHighlightSec: number; purgeDamage: number; color: string; lineAlpha: number };
+  scan: { width: number; speedSlow: number; speedFast: number; gaps: number; gapPx: number; warnSecSlow: number; warnSecFast: number; damage: number; color: string };
+  drones: { countByPhase: Record<string, number>; orbitRadius: number; orbitSec: number; spinPerSec: number; volleys: number; volleyGapSec: number; shotSpeed: number; shotRange: number; damage: number; spriteKey: string; size: number };
+  field: { hp: number; takenMul: number; countByPhase: Record<string, number>; offset: number; ringSpeed: number; ringThickness: number; ringDamage: number; pushPx: number; color: string };
+  pulse: { rings: number; gapSec: number; thickness: number; moveSec: number; toR: number; gapDeg: number; damage: number; warnSec: number; color: string };
+  satellite: { count: number; maxCount: number; radius: number; warnSec: number; stepSec: number; damage: number; color: string };
+  laser: { covers: number; coverW: number; coverH: number; chargeSec: number; damage: number; color: string; coverColor: string };
+  call: { enemies: string[]; maxAlive: number };
+  patterns: MimosaPatternDef[];
+  tamper: { patchNote: MimosaTamperTiming & { rules: ('invertX' | 'invertY' | 'invertXY' | 'gravity')[] }; slotShuffle: MimosaTamperTiming; computeError: MimosaTamperTiming };
+  /** 페이즈 → 변조 사이 간격 [최소, 최대] */
+  tamperEverySec: Record<string, [number, number]>;
+  glitch: { glyphs: string; nameRatio: number; jitterPx: number; jitterPxReduced: number; flickerHz: number; flickerHzReduced: number; alphaMin: number; lines: number };
+  observation: { groups: Record<string, 'hp' | 'attack' | 'speed'>; perStack: { hp: number; attack: number; speed: number }; max: { hp: number; attack: number; speed: number } };
+  intro: { breakSec: number; portalSec: number; descendSec: number; topOffset: number; bandSec: number; debris: number; color: string; portalKey: string; portalPx: number };
+  death: { cracks: number; sec: number; color: string };
+  color: string;
 }
 
 /** 진화 효과 수치 (중첩 n마다: 배율 항목은 (1+값)^n, 나머지는 값 × n) */

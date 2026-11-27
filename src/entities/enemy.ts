@@ -336,9 +336,12 @@ export class Enemy {
     this.stunMul = mul;
   }
 
+  /** 보스가 스스로 거는 받는 피해 배율 (헥타르 미모사 역장·관측 결과) */
+  guardMul = 1;
+
   /** 받는 피해 배율 (거대 엘리트·기절) */
   get takenMul(): number {
-    return this.mods.damageTakenMul * (this.stunLeft > 0 ? this.stunMul : 1);
+    return this.mods.damageTakenMul * (this.stunLeft > 0 ? this.stunMul : 1) * this.guardMul;
   }
 
   /** 전술 연계: 쫓는 중이고 쿨타임이 끝났으면 같은 공격 조준을 바로 시작한다 */

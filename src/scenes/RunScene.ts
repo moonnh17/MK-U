@@ -28,6 +28,8 @@ import { hexColor } from '../core/scale';
 import { newPlayerState, type RunSession } from '../core/session';
 import { advanceOverflow, stageEndOfferKinds } from '../systems/overflow';
 import { EvolutionRuntime } from './run/evolutionRuntime';
+import { TamperRuntime } from './run/tamperRuntime';
+import type { BossControl } from '../bosses/mimosa/controller';
 import { BossController } from '../bosses/bossController';
 import type { BossHost } from '../bosses/host';
 import { Door } from '../entities/door';
@@ -72,6 +74,7 @@ export class RunScene extends Phaser.Scene {
   roomRt!: RoomRuntime;
   enemyLife!: EnemyLife;
   evo!: EvolutionRuntime;
+  tamper!: TamperRuntime;
   playerLife!: PlayerLife;
   stageFx!: StageFx;
   combat!: WeaponCombat;
@@ -133,7 +136,7 @@ export class RunScene extends Phaser.Scene {
   itemRt!: ItemRuntime;
   bossHost!: BossHost;
   /** 보스 적 → 패턴 컨트롤러 */
-  bossControllers = new Map<Enemy, BossController>();
+  bossControllers = new Map<Enemy, BossControl>();
   /** MK 돌진 */
   dashLeft = 0;
   /** 탄을 그리는 층 (테두리 빛) */
@@ -190,6 +193,7 @@ export class RunScene extends Phaser.Scene {
     this.roomRt = new RoomRuntime(this);
     this.enemyLife = new EnemyLife(this);
     this.evo = new EvolutionRuntime(this);
+    this.tamper = new TamperRuntime(this);
     this.playerLife = new PlayerLife(this);
     this.resetFields();
 
@@ -328,6 +332,8 @@ export class RunScene extends Phaser.Scene {
 
   resetFields(): void {
     this.dying = false;
+    this.cameraHold = null;
+    this.tamper.reset();
     this.endingPlayed = false;
     this.doorsByRoom = new Map();
     this.rooms = new Map();
@@ -419,13 +425,17 @@ export class RunScene extends Phaser.Scene {
     if (this.stageFx.intro) return null;
     for (const [e, c] of this.bossControllers) {
       if (e.dead) continue;
-      return { name: this.ctx.t(e.nameKey), hp: e.hp, maxHp: e.maxHp, markers: c.def.enrageAt > 0 ? [c.def.enrageAt] : (c.def.unlocks ?? []), color: e.def.color };
+      return { name: this.tamper.bossName(this.ctx.t(e.nameKey), this.game.loop.delta / 1000), hp: e.hp, maxHp: e.maxHp, markers: c.def.enrageAt > 0 ? [c.def.enrageAt] : (c.def.unlocks ?? []), color: e.def.color };
     }
     return null;
   }
 
   /** 카메라가 평소 볼 곳: 플레이어(조준 적 쪽으로 기울어), 방 안이면 방 경계 안 */
+  /** 연출 동안 카메라가 볼 곳 (헥타르 미모사 등장) */
+  cameraHold: Vec2 | null = null;
+
   cameraTarget(): Vec2 {
+    if (this.cameraHold) return this.cameraHold;
     const rules = this.ctx.data.ui.camera;
     const cam = this.cameras.main;
     const rid = roomAt(this.session.map, this.m, this.player.x, this.player.y);
@@ -499,6 +509,8 @@ export class RunScene extends Phaser.Scene {
     this.condition.updateSanity(dt);
     // 패닉: 방향이 뒤집힌다
     if (p.panic && !this.itemRt.first('panicCalm')) frame = { ...frame, move: { x: -frame.move.x, y: -frame.move.y } };
+    // 헥타르 미모사 패치 노트: 이동 방향만 바뀐다 (버튼 배치는 그대로)
+    frame = { ...frame, move: this.tamper.move(frame.move) };
     this.itemRt.update(dt);
     this.mage.update(dt);
     // 위압: 이동·회피 불가
@@ -577,7 +589,7 @@ export class RunScene extends Phaser.Scene {
     p.cooldowns = tickCooldowns(p.cooldowns, dt * (1 + (mods.cooldownRate ?? 0)));
     p.ultimate.cooldownLeft = Math.max(0, p.ultimate.cooldownLeft - dt);
     SKILL_ACTIONS.forEach((action, i) => {
-      if (frame.pressed.has(action)) this.skillRt.castSlot(i);
+      if (frame.pressed.has(action)) this.skillRt.castSlot(this.tamper.slot(i));
     });
     if (frame.pressed.has('ultimate')) this.skillRt.castUltimate();
     this.skillRt.syncPassive();

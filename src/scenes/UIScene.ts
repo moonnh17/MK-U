@@ -9,6 +9,7 @@ import { bus } from '../core/events';
 import { DebugPanel } from '../ui/debugPanel';
 import { buildDebugSkills } from '../ui/debugSkills';
 import { Hud } from '../ui/hud';
+import { MimosaOverlay } from '../ui/mimosaOverlay';
 import { TouchSkills } from '../ui/touchSkills';
 import { activeWeapon } from '../systems/weapons';
 
@@ -16,6 +17,7 @@ import { activeWeapon } from '../systems/weapons';
 export class UIScene extends Phaser.Scene {
   private ctx!: GameContext;
   private hud!: Hud;
+  private mimosa!: MimosaOverlay;
   private toastText!: Phaser.GameObjects.Text;
   private bossBar!: BossBar;
   private warp!: Warp;
@@ -36,6 +38,7 @@ export class UIScene extends Phaser.Scene {
     fitBaseCamera(this, W, H, this.ctx.renderScale);
     this.hud = new Hud(this, this.ctx);
     this.bossBar = new BossBar(this, this.ctx);
+    this.mimosa = new MimosaOverlay(this, this.ctx, this.hud);
     new CombatBanner(this, this.ctx);
     this.warp = new Warp(this, this.ctx);
 
@@ -76,6 +79,7 @@ export class UIScene extends Phaser.Scene {
         if (action === 'map' && !this.ctx.session?.outcome) this.hud.toggleMinimap();
       }),
       bus.on('toast', ({ text }) => this.showToast(text)),
+      bus.on('mimosaUi', (ev) => this.mimosa.on(ev)),
     );
     const onResize = () => this.relayout();
     window.addEventListener('resize', onResize);
@@ -102,6 +106,7 @@ export class UIScene extends Phaser.Scene {
     this.hud.setShown(s !== null);
     this.bossBar.update(s && !s.outcome ? s.boss : null, Math.min(deltaMs / 1000, 0.05));
     this.warp.update(Math.min(deltaMs / 1000, 0.05));
+    this.mimosa.update(Math.min(deltaMs / 1000, 0.05));
     if (s) {
       this.hud.update(s, this.time.now);
       if (this.ctx.uiMode === 'mobile') {

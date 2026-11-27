@@ -50,6 +50,8 @@ export interface GameEvents {
   banner: { text: string; color: string; size: number; sec: number };
   /** 보스 등장 컷 이름 띠 (name이 빈 문자열이면 걷는다) */
   bossIntroBand: { name: string; sub: string };
+  /** 헥타르 미모사 시스템 변조 표시 (UI) */
+  mimosaUi: import('../bosses/mimosa/controller').MimosaUiEvent;
   /** 보스 체력바가 보이거나 사라짐 (미니 대사 말풍선 자리) */
   bossBarShown: { shown: boolean };
   /** 컷인 → 설명창 (각성·궁극기 각성·전직) */

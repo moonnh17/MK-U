@@ -386,11 +386,13 @@ export class SkillRuntime {
     const ult = this.ultimateDef();
     const im = this.imprint();
     this.run.session.buffs = this.buffViews();
+    // 슬롯 셔플(헥타르 미모사): 칸 j에 원래 칸 perm[j]를 보인다. 각인 표시도 그 스킬을 따라 옮겨 간다
+    const actives = p.loadout.active.map((id) => {
+      const v = slot(id, true);
+      return im && im.skillId === id ? { ...v, imprint: im.resonance ? ('resonance' as const) : ('on' as const) } : v;
+    });
     this.run.session.skillView = [
-      ...p.loadout.active.map((id) => {
-        const v = slot(id, true);
-        return im && im.skillId === id ? { ...v, imprint: im.resonance ? ('resonance' as const) : ('on' as const) } : v;
-      }),
+      ...actives.map((_, j) => actives[this.run.tamper.slot(j)] ?? actives[j]!),
       {
         ...empty,
         skillId: ult.id,

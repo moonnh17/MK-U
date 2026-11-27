@@ -72,6 +72,8 @@ export class Hud {
   private readonly mainCostText: Phaser.GameObjects.Text;
   private readonly subWeaponText: Phaser.GameObjects.Text;
   private minimapVisible = true;
+  /** 헥타르 미모사 연산 오류: 표시만 흔들고 깨뜨린다 (판정과 무관) */
+  private glitch: { on: boolean; reduced: boolean; t: number } = { on: false, reduced: false, t: 0 };
   /** 런 중에만 보인다 (실험장에서는 숨김) */
   private shown = true;
   private mode: UiMode = 'pc';
@@ -167,7 +169,48 @@ export class Hud {
     ]);
   }
 
+  /** 연산 오류 표시 켜기/끄기 */
+  setGlitch(on: boolean, reduced: boolean): void {
+    this.glitch = { on, reduced, t: 0 };
+    if (!on) {
+      for (const c of [this.bars, this.pcOnly, this.minimap.container]) c.setAlpha(1);
+      this.bars.setPosition(this.ctx.data.ui.hud.margin, this.ctx.data.ui.hud.margin);
+      this.pcOnly.setPosition(0, 0);
+    }
+  }
+
+  /** 연산 오류 한 프레임: HUD가 떨리고 미니맵이 깜빡인다 */
+  private updateGlitch(dt: number): void {
+    if (!this.glitch.on) return;
+    const g = this.ctx.data.overflow.mimosa.glitch;
+    this.glitch.t += dt;
+    const hz = this.glitch.reduced ? g.flickerHzReduced : g.flickerHz;
+    const px = this.glitch.reduced ? g.jitterPxReduced : g.jitterPx;
+    const step = Math.floor(this.glitch.t * hz);
+    const r = (k: number) => (((step * 9301 + k * 49297) % 233280) / 233280 - 0.5) * 2;
+    const m = this.ctx.data.ui.hud.margin;
+    this.bars.setPosition(m + r(1) * px, m + r(2) * px);
+    this.pcOnly.setPosition(r(3) * px, r(4) * px);
+    this.minimap.container.setAlpha(step % 3 === 0 ? g.alphaMin : 1);
+  }
+
+  /** 슬롯 셔플: 스킬 칸이 카드처럼 뒤집힌다 / warn: 붉게 떨린다 */
+  flipSkills(kind: 'warn' | 'flip'): void {
+    const n = this.ctx.data.skills.activeSlots;
+    this.slots.slice(0, n).forEach((ui) => {
+      this.scene.tweens.killTweensOf(ui.container);
+      if (kind === 'warn') {
+        ui.bg.setFillStyle(0x802020, 0.8);
+        this.scene.tweens.add({ targets: ui.container, x: ui.x + 1.5, duration: 40, yoyo: true, repeat: 18, onComplete: () => ui.container.setX(ui.x) });
+        this.scene.time.delayedCall(1500, () => ui.bg.setFillStyle(0x000000, 0.5));
+      } else {
+        this.scene.tweens.add({ targets: ui.container, scaleX: 0, duration: 140, yoyo: true, onComplete: () => ui.container.setScale(1) });
+      }
+    });
+  }
+
   update(s: RunSession, now: number): void {
+    this.updateGlitch(1 / 60);
     const dv = s.dodgeView;
     const dsb = this.ctx.data.ui.hud.skillbar;
     this.dodgeLabel.setText(this.ctx.t(dv.nameKey));
@@ -299,7 +342,7 @@ export class Hud {
         ui.cd.fillStyle(hexColor(sb.cooldownColor), sb.cooldownAlpha);
         ui.cd.slice(size / 2, size / 2, size / 2 - 1, start, start + frac * Math.PI * 2, false);
         ui.cd.fillPath();
-        ui.cdText.setText(String(Math.ceil(v.cooldownLeft)));
+        ui.cdText.setText(this.glitch.on && Math.random() < (this.glitch.reduced ? 0.15 : 0.45) ? String(Math.floor(Math.random() * 99)) : String(Math.ceil(v.cooldownLeft)));
       }
       // 추가 스킬이 준비됨: 노란 테두리 조각이 칸 둘레를 돈다 (다시 누르면 쓸 수 있다)
       if (v.followUp) {

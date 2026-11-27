@@ -45,7 +45,8 @@ export function buildHosts(run: RunScene): void {
     fireEnemyBullet: (from, angle, speed, range, damage, refractable, sprite) =>
       run.bulletRt.fireEnemyBullet(from, angle, speed, range, damage * run.playerLife.enemyDamageMul(), refractable, 0, 0, sprite),
     fireEnemyMissile: (from, angle, speed, range, damage, turnRate, sprite) => run.bulletRt.fireEnemyBullet(from, angle, speed, range, damage * run.playerLife.enemyDamageMul(), true, turnRate, 0, sprite),
-    pushPlayer: (v) => {
+    pushPlayer: (raw) => {
+      const v = run.tamper.push(raw);
       const body = run.player.body as Phaser.Physics.Arcade.Body;
       body.velocity.x += v.x;
       body.velocity.y += v.y;

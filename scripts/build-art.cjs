@@ -238,6 +238,8 @@ Object.assign(sprites, require('./build-mage-fx.cjs').buildMageFx(out));
 Object.assign(sprites, require('./build-mage-art.cjs').buildMageArt(out));
 // pixelfx 이펙트: scripts/art-src/pixelfx
 Object.assign(sprites, require('./build-pixelfx.cjs').buildPixelfx(out));
+// 오버플로우 4-5 헥타르 미모사 본체(힉스필드 생성): 원본 scripts/art-src/mimosa-hf
+Object.assign(sprites, require('./build-mimosa-art.cjs').buildMimosaArt(out));
 
 // ---------- 1장 (monsters.png 256 칸, 4열) ----------
 const M = (row) => cells('monsters.png', 256, 256, [row * 4, row * 4 + 1, row * 4 + 2, row * 4 + 3]);

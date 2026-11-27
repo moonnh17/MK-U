@@ -17,6 +17,7 @@ import type { RoomEvent, Wave } from '../../systems/roomState';
 import { contains, interiorRect, roomAt, roomCenter } from '../../systems/worldLayout';
 import type { Rect } from '../../systems/worldLayout';
 import { contentChapter, hiddenTableChapter, overflowBossScale, overflowEnemyScale, overflowGrowth, stageBossId, waveChaptersOf } from '../../systems/overflow';
+import { MimosaController } from '../../bosses/mimosa/controller';
 import type { RunScene } from '../RunScene';
 
 export class RoomRuntime {
@@ -171,7 +172,10 @@ export class RoomRuntime {
         enemy.setMaxHp(enemy.maxHp * chapterMul);
         enemy.damageMul = mul;
       }
-      if (core) {
+      // 헥타르 미모사: 전용 조종기 (등장 연출도 스스로)
+      if (def.id === d.overflow.mimosa.enemyId) {
+        this.run.bossControllers.set(enemy, new MimosaController(enemy, d.overflow.mimosa, this.currentArena(), this.run.tamper.hooks(), this.run, mul));
+      } else if (core) {
         this.run.bossControllers.set(enemy, new BossController(enemy, core, mul));
         if (!this.run.stageFx.intro) this.run.stageFx.startBossIntro(enemy);
       }
