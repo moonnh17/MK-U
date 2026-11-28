@@ -181,7 +181,7 @@ export class LabScene extends Phaser.Scene {
   }
 
   private overflowOpen(): boolean {
-    return overflowPortalOpen(this.ctx.save.data.storyCleared, this.ctx.config.debug);
+    return overflowPortalOpen(this.ctx.save.data.storyCleared, this.ctx.config.debug, this.ctx.data.lab.overflowAlwaysOpen);
   }
 
   /** 첫 실행: 캡슐 뚜껑이 열리고 걸어 나온다 (첫 대화는 M6에서 여기에) */

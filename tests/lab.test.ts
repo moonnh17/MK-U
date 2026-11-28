@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { gameData } from '../src/data/index';
 import { validateGameData } from '../src/data/validate';
-import { distanceToObject, jobChoices, nearestInteractable, portalActive } from '../src/systems/lab';
+import { distanceToObject, jobChoices, nearestInteractable, overflowPortalOpen, portalActive } from '../src/systems/lab';
 
 const L = gameData.lab;
 const J = gameData.jobs.jobs;
@@ -63,5 +63,15 @@ describe('직업 선택·포털', () => {
     expect(portalActive(J, 'magiMage')).toBe(true);
     expect(portalActive(J, 'warrior')).toBe(true);
     expect(portalActive(J, 'magiScholar')).toBe(true);
+  });
+});
+
+describe('오버플로우 포털', () => {
+  it('본편 클리어·디버그면 열리고, 테스트 버전(늘 열림)이면 처음부터 열린다', () => {
+    expect(overflowPortalOpen(false, false, false)).toBe(false);
+    expect(overflowPortalOpen(true, false, false)).toBe(true);
+    expect(overflowPortalOpen(false, true, false)).toBe(true);
+    expect(overflowPortalOpen(false, false, true)).toBe(true);
+    expect(gameData.lab.overflowAlwaysOpen).toBe(true);
   });
 });

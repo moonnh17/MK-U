@@ -1,6 +1,7 @@
 {
   "room": { "x": 24, "y": 22, "w": 432, "h": 228 },
   "wall": 6,
+  "overflowAlwaysOpen": true,
   "colors": {
     "floor": "#16242a",
     "grid": "#23414a",

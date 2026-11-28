@@ -43,9 +43,9 @@ export function jobChoices(jobs: readonly JobDef[]): JobChoice[] {
   return jobs.map((j) => ({ id: j.id, nameKey: j.nameKey, enabled: j.enabled, advancementKeys: j.advancements.map((a) => a.nameKey) }));
 }
 
-/** 오버플로우 포털: 본편을 한 번 클리어하면 열린다 (디버그는 늘) */
-export function overflowPortalOpen(storyCleared: boolean, debug: boolean): boolean {
-  return storyCleared || debug;
+/** 오버플로우 포털: 본편을 한 번 클리어하면 열린다 (디버그·테스트 버전 lab.overflowAlwaysOpen이면 늘) */
+export function overflowPortalOpen(storyCleared: boolean, debug: boolean, alwaysOpen = false): boolean {
+  return alwaysOpen || storyCleared || debug;
 }
 
 /** 포털은 고를 수 있는 직업을 고른 뒤에만 켜진다 */

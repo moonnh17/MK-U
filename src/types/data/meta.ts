@@ -65,6 +65,8 @@ export interface LabData {
   /** 방 안쪽 */
   room: { x: number; y: number; w: number; h: number };
   wall: number;
+  /** 테스트 버전: 본편을 깨지 않아도 오버플로우 포털이 늘 열려 있다 (정식판에서 false) */
+  overflowAlwaysOpen: boolean;
   colors: { floor: string; grid: string; wall: string; light: string; monitor: string; monitorText: string; window: string; emptyCapsule: string };
   gridStep: number;
   /** 벽면 모니터 x (장식) */
